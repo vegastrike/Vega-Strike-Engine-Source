@@ -25,27 +25,27 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <png.h>
 #include "glut_support.h"
-#include "src/vs_logging.h"
-#include "gldrv/gl_globals.h"
+
+#include <png.h>
+
 #include "configuration/configuration.h"
+#include "gldrv/gl_globals.h"
+#include "src/vs_logging.h"
 
 
-#define isspAce(chr)                                                                  \
-    ( (chr == '\t') || (chr == '\n') || (chr == '\v') || (chr == '\f') || (chr == '\r') \
-     || (chr == ' ') )
+#define isspAce(chr) ((chr == '\t') || (chr == '\n') || (chr == '\v') || (chr == '\f') || (chr == '\r') || (chr == ' '))
 
 float colors[] = {1, 1, 1, 1};
 
-//x,y must be -1 to 1, with -1,-1 being the bottom left corner. x,y must be the top left corner to draw
+// x,y must be -1 to 1, with -1,-1 being the bottom left corner. x,y must be the top left corner to draw
 void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha) {
     float cols[4] = {red, green, blue, alpha};
     if (wid < 0 || hei < 0) {
         VS_LOG(error, "Cannot draw color with negative height or width");
         return;
     }
-    //Make sure we don't exceed the program
+    // Make sure we don't exceed the program
     if (x + wid > 1) {
         wid = 1 - x;
     }
@@ -75,22 +75,22 @@ void ShowColor(float x, float y, float wid, float hei, float red, float green, f
 float word_length(const char *str) {
     float length = 0;
     while (*str && *str != '\\' && (!isspAce(*str))) {
-        char mychar = *str++;
-        length += glutStrokeWidth(GLUT_STROKE_ROMAN, mychar);
+        char mychar  = *str++;
+        length      += glutStrokeWidth(GLUT_STROKE_ROMAN, mychar);
     }
-    return length / 2500;
+    return length / 2'500;
 }
 
 void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
-    const float rescale_font = configuration().graphics.gui_font_scale_flt;
-    float font_size_float = rescale_font * 5. / 100;
+    const float rescale_font    = configuration().graphics.gui_font_scale_flt;
+    float       font_size_float = rescale_font * 5. / 100;
 
-    int cur;
-    float font_size = size * rescale_font;
-    float width = 0;
-    float cur_width = 0;
-    float end = 0;
-    font_size /= 10000;
+    int   cur;
+    float font_size  = size * rescale_font;
+    float width      = 0;
+    float cur_width  = 0;
+    float end        = 0;
+    font_size       /= 10'000;
 
     glDisable(GL_TEXTURE_2D);
     glLoadIdentity();
@@ -101,13 +101,13 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
     float page_wid = wid / rescale_font;
     glTranslatef(x, y, 0);
     glScalef(font_size, font_size, 1);
-    end = no_end ? 0 : glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
-    end /= 2500;
-    //if (no_end == 1) { end = 0; }
+    end  = no_end ? 0 : glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
+    end /= 2'500;
+    // if (no_end == 1) { end = 0; }
     int h = 0;
     for (cur = 0; str[cur] != '\0'; cur++) {
-        cur_width = glutStrokeWidth(GLUT_STROKE_ROMAN, str[cur]);
-        cur_width /= 2500;
+        cur_width  = glutStrokeWidth(GLUT_STROKE_ROMAN, str[cur]);
+        cur_width /= 2'500;
         if ((width + end + word_length(str + cur) > page_wid || str[cur] == '\\') && str[cur + 1] != '\0') {
             if (no_end == 0) {
                 width += cur_width;
@@ -139,7 +139,7 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 }
 
 float WidthOfChar(char chr) {
-    float width = glutStrokeWidth(GLUT_STROKE_ROMAN, chr);
-    width /= 2500;
+    float width  = glutStrokeWidth(GLUT_STROKE_ROMAN, chr);
+    width       /= 2'500;
     return width;
 }

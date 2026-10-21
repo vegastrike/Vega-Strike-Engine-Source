@@ -26,26 +26,26 @@
  */
 
 
-#include "src/gfxlib.h"
 #include "gl_globals.h"
+#include "src/gfxlib.h"
+
 static struct _GFXFogState {
-    bool enabled;
-    FOGMODE curmode;
-    float density;
-    float nnear;
-    float ffar;
+    bool     enabled;
+    FOGMODE  curmode;
+    float    density;
+    float    nnear;
+    float    ffar;
     GFXColor c;
-    int index;
+    int      index;
 
     _GFXFogState() : c(0, 0, 0, 0) {
-        index = 0;
-        nnear = 0;
-        ffar = 1;
+        index   = 0;
+        nnear   = 0;
+        ffar    = 1;
         density = 1;
         curmode = FOG_EXP;
     }
-}
-        GFXFogState;
+} GFXFogState;
 
 void GFXFogMode(const FOGMODE fog) {
     if (GFXFogState.curmode != fog || !GFXFogState.enabled) {
@@ -73,7 +73,7 @@ void GFXFogMode(const FOGMODE fog) {
     }
     GFXFogState.curmode = fog;
     GFXFogState.enabled = true;
-    //glHint (GL_FOG_HINT,GL_NICEST );
+    // glHint (GL_FOG_HINT,GL_NICEST );
 }
 
 void GFXFogDensity(const float fogdensity) {
@@ -86,7 +86,7 @@ void GFXFogDensity(const float fogdensity) {
 void GFXFogLimits(const float fognear, const float fogfar) {
     if (GFXFogState.nnear != fognear || GFXFogState.ffar != fogfar) {
         GFXFogState.nnear = fognear;
-        GFXFogState.ffar = fogfar;
+        GFXFogState.ffar  = fogfar;
         glFogf(GL_FOG_START, fognear);
         glFogf(GL_FOG_END, fogfar);
     }
@@ -105,4 +105,3 @@ void GFXFogIndex(const int index) {
         GFXFogState.index = index;
     }
 }
-

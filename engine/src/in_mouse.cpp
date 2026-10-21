@@ -25,16 +25,18 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "src/vegastrike.h"
-#include "src/in_handler.h"
 #include "src/in_mouse.h"
+
 #include <deque>
-#include "root_generic/vs_globals.h"
-#include "src/config_xml.h"
-#include "src/in_joystick.h"
+
 #include "gldrv/winsys.h"
 #include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/in_handler.h"
+#include "src/in_joystick.h"
 #include "src/universe.h"
+#include "src/vegastrike.h"
 
 using std::deque;
 #define NUM_BUTTONS 15
@@ -44,7 +46,7 @@ int getMouseDrawFunc() {
     return NUM_BUTTONS;
 }
 
-KBSTATE MouseState[NUM_BUTTONS + 1] = {RELEASE};
+KBSTATE             MouseState[NUM_BUTTONS + 1] = {RELEASE};
 static MouseHandler mouseBindings[NUM_BUTTONS + 1];
 
 int mousex = 0;
@@ -64,7 +66,12 @@ int getMouseButtonStatus() {
 }
 
 struct MouseEvent {
-    enum EventType { CLICK, DRAG, MOTION } type;
+    enum EventType {
+        CLICK,
+        DRAG,
+        MOTION
+    } type;
+
     int button;
     int state;
     int mod;
@@ -72,8 +79,7 @@ struct MouseEvent {
     int y;
 
     MouseEvent(EventType type, int button, int state, int mod, int x, int y)
-            : type(type), button(button), state(state), mod(mod), x(x), y(y) {
-    }
+        : type(type), button(button), state(state), mod(mod), x(x), y(y) {}
 };
 
 static deque<MouseEvent> eventQueue;
@@ -111,22 +117,21 @@ void DealWithWarp(int x, int y) {
     // the active player's controller, and never while the config overlay is open.
     if (configuration().joystick.warp_mouse && !winsys_config_overlay_active()) {
         if (joystick[MOUSE_JOYSTICK]->player < _Universe->numPlayers()) {
-            if (x < configuration().joystick.warp_mouse_zone
-                    || y < configuration().joystick.warp_mouse_zone
-                    || x > configuration().graphics.resolution_x - configuration().joystick.warp_mouse_zone
-                    || y > configuration().graphics.resolution_y - configuration().joystick.warp_mouse_zone) {
-
-                int delx = -x + configuration().graphics.resolution_x / 2;
-                int dely = -y + configuration().graphics.resolution_y / 2;
-                mousex += delx;
-                mousey += dely;
+            if (x < configuration().joystick.warp_mouse_zone || y < configuration().joystick.warp_mouse_zone ||
+                x > configuration().graphics.resolution_x - configuration().joystick.warp_mouse_zone ||
+                y > configuration().graphics.resolution_y - configuration().joystick.warp_mouse_zone) {
+                int delx  = -x + configuration().graphics.resolution_x / 2;
+                int dely  = -y + configuration().graphics.resolution_y / 2;
+                mousex   += delx;
+                mousey   += dely;
                 deque<MouseEvent>::iterator i;
                 for (i = eventQueue.begin(); i != eventQueue.end(); i++) {
                     i->x += delx;
                     i->y += dely;
                 }
                 if (warpallowage-- >= 0) {
-                    winsys_warp_pointer(configuration().graphics.resolution_x / 2, configuration().graphics.resolution_y / 2);
+                    winsys_warp_pointer(configuration().graphics.resolution_x / 2,
+                                        configuration().graphics.resolution_y / 2);
                 }
             }
         }
@@ -189,8 +194,8 @@ void SetDelta(int dx, int dy) {
 }
 
 void GetMouseDelta(int &dx, int &dy) {
-    dx = delx;
-    dy = dely;
+    dx   = delx;
+    dy   = dely;
     delx = dely = 0;
 }
 
@@ -212,8 +217,7 @@ void mouseMotion(int x, int y) {
     mousey = y;
 }
 
-static void DefaultMouseHandler(KBSTATE, int x, int y, int delx, int dely, int mod) {
-}
+static void DefaultMouseHandler(KBSTATE, int x, int y, int delx, int dely, int mod) {}
 
 void UnbindMouse(int key) {
     mouseBindings[key] = DefaultMouseHandler;
@@ -265,4 +269,3 @@ void ProcessMouse() {
         eventQueue.pop_front();
     }
 }
-

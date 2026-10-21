@@ -25,11 +25,13 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <png.h>
 #include "gui/imgui_support.h"
+
+#include <png.h>
+
 #include "gfx/sprite.h"
 #include "imgui/imgui.h"
-//#include "configuration/configuration.h"
+// #include "configuration/configuration.h"
 
 
 static bool softwarePosition;
@@ -41,8 +43,8 @@ static int mmy = 0;
 // Set the software mouse position
 void SetSoftwareMousePosition(int x, int y) {
     softwarePosition = true;
-    mmx = x;
-    mmy = y;
+    mmx              = x;
+    mmy              = y;
 }
 
 /** Initialises a Frame with proper settings for ImGUI and mouse */
@@ -83,18 +85,17 @@ void DrawMouseCursor(MousePointerStyle pointerStyle) {
         //         normY /= factor;
         //     }
         // } else {
-            ImVec2 mousePos = ImGui::GetMousePos();
-            normX = (2.0f * mousePos.x / ImGui::GetIO().DisplaySize.x) - 1.0f;
-            normY = (1.0f - 2.0f * mousePos.y / ImGui::GetIO().DisplaySize.y);
+        ImVec2 mousePos = ImGui::GetMousePos();
+        normX           = (2.0f * mousePos.x / ImGui::GetIO().DisplaySize.x) - 1.0f;
+        normY           = (1.0f - 2.0f * mousePos.y / ImGui::GetIO().DisplaySize.y);
         // }
 
 
-        // VS_LOG(error, (boost::format("MouseLoc X: %1% | Computed Norm X: %2%") % globalEventManager().mouseLoc().x % normX).str());
-        // A sprite is positioned by its centre, and this cursor's hotspot - the pixel
-        // the arrow points with - is the bottom-left corner of its image. Put the
-        // centre half a sprite up and to the right of the pointer, so that corner
-        // lands on it.
-        float cursor_width = 0.0f;
+        // VS_LOG(error, (boost::format("MouseLoc X: %1% | Computed Norm X: %2%") % globalEventManager().mouseLoc().x %
+        // normX).str()); A sprite is positioned by its centre, and this cursor's hotspot - the pixel the arrow points
+        // with - is the bottom-left corner of its image. Put the centre half a sprite up and to the right of the
+        // pointer, so that corner lands on it.
+        float cursor_width  = 0.0f;
         float cursor_height = 0.0f;
         whichSprite->GetSize(cursor_width, cursor_height);
         whichSprite->SetPosition(normX + (cursor_width * 0.5f), normY + (cursor_height * 0.5f));
@@ -110,4 +111,3 @@ void EndGUIFrame(MousePointerStyle pointerStyle) {
     DrawMouseCursor(pointerStyle);
     GFXHudMode(false);
 }
-

@@ -36,10 +36,9 @@
 
 namespace Audio {
 
-Sound::Sound(const std::string &_name, bool streaming) :
-        name(_name) {
-    flags.loaded = false;
-    flags.loading = false;
+Sound::Sound(const std::string &_name, bool streaming) : name(_name) {
+    flags.loaded    = false;
+    flags.loading   = false;
     flags.streaming = streaming;
 }
 
@@ -78,7 +77,7 @@ void Sound::unload() {
 }
 
 void Sound::onLoaded(bool success) {
-    flags.loaded = success;
+    flags.loaded  = success;
     flags.loading = false;
 }
 
@@ -86,4 +85,4 @@ void Sound::abortLoad() {
     // Do nothing, there's no background load
 }
 
-};
+};  // namespace Audio

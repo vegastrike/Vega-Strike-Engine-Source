@@ -27,14 +27,15 @@
 
 #include <string>
 #include <vector>
-///Stores all the load-time vertex info in the XML struct FIXME light calculations
+/// Stores all the load-time vertex info in the XML struct FIXME light calculations
 #include <expat.h>
 
-using std::vector;
 using std::string;
+using std::vector;
 #include "root_generic/xml_support.h"
 #include "src/hashtable.h"
 using namespace XMLSupport;
+
 struct GFXVertex {
     float x, y, z;
     float i, j, k;
@@ -48,9 +49,10 @@ struct GFXVertex {
         return ret;
     }
 };
+
 struct XML {
     enum Names {
-        //elements
+        // elements
         UNKNOWN,
         MATERIAL,
         AMBIENT,
@@ -75,7 +77,7 @@ struct XML {
         VERTEX,
         LOGO,
         REF,
-        //attributes
+        // attributes
         POWER,
         REFLECT,
         LIGHTINGON,
@@ -106,7 +108,8 @@ struct XML {
         ANIMATEDTEXTURE,
         REVERSE
     };
-    ///Saves which attributes of vertex have been set in XML file
+
+    /// Saves which attributes of vertex have been set in XML file
     enum PointState {
         P_X = 0x1,
         P_Y = 0x2,
@@ -115,115 +118,96 @@ struct XML {
         P_J = 0x10,
         P_K = 0x20
     };
-    ///Saves which attributes of vertex have been set in Polygon for XML file
+
+    /// Saves which attributes of vertex have been set in Polygon for XML file
     enum VertexState {
         V_POINT = 0x1,
-        V_S = 0x2,
-        V_T = 0x4
+        V_S     = 0x2,
+        V_T     = 0x4
     };
-    ///Save if various logo values have been set
+
+    /// Save if various logo values have been set
     enum LogoState {
-        V_TYPE = 0x1,
+        V_TYPE   = 0x1,
         V_ROTATE = 0x2,
-        V_SIZE = 0x4,
+        V_SIZE   = 0x4,
         V_OFFSET = 0x8,
-        V_REF = 0x10
+        V_REF    = 0x10
     };
-    ///To save the constructing of a logo
+
+    /// To save the constructing of a logo
     struct ZeLogo {
-        ///Which type the logo is (0 = faction 1 = squad >2 = internal use
+        /// Which type the logo is (0 = faction 1 = squad >2 = internal use
         unsigned int type;
-        ///how many degrees logo is rotated
+        /// how many degrees logo is rotated
         float rotate;
-        ///Size of the logo
+        /// Size of the logo
         float size;
-        ///offset of polygon of logo
+        /// offset of polygon of logo
         float offset;
-        ///the reference points that the logo is weighted against
+        /// the reference points that the logo is weighted against
         vector<int> refpnt;
-        ///the weight of the points in weighted average of refpnts
+        /// the weight of the points in weighted average of refpnts
         vector<float> refweight;
     };
+
     static const EnumMap::Pair element_names[];
     static const EnumMap::Pair attribute_names[];
-    static const EnumMap element_map;
-    static const EnumMap attribute_map;
-    vector<std::string> meshnames;
-    float unitscale;
-    vector<Names> state_stack;
-    vector<GFXVertex> vertices;
-    GFXVertex vertex;
-    float scale;
+    static const EnumMap       element_map;
+    static const EnumMap       attribute_map;
+    vector<std::string>        meshnames;
+    float                      unitscale;
+    vector<Names>              state_stack;
+    vector<GFXVertex>          vertices;
+    GFXVertex                  vertex;
+    float                      scale;
 };
 
-using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
-using XMLSupport::parse_float;
+using XMLSupport::EnumMap;
 using XMLSupport::parse_bool;
+using XMLSupport::parse_float;
 using XMLSupport::parse_int;
 
-const EnumMap::Pair XML::element_names[] = {
-        EnumMap::Pair("UNKNOWN", XML::UNKNOWN),
-        EnumMap::Pair("Material", XML::MATERIAL),
-        EnumMap::Pair("LOD", XML::LOD),
-        EnumMap::Pair("Ambient", XML::AMBIENT),
-        EnumMap::Pair("Diffuse", XML::DIFFUSE),
-        EnumMap::Pair("Specular", XML::SPECULAR),
-        EnumMap::Pair("Emissive", XML::EMISSIVE),
-        EnumMap::Pair("Mesh", XML::MESH),
-        EnumMap::Pair("Points", XML::POINTS),
-        EnumMap::Pair("Point", XML::POINT),
-        EnumMap::Pair("Location", XML::LOCATION),
-        EnumMap::Pair("Normal", XML::NORMAL),
-        EnumMap::Pair("Polygons", XML::POLYGONS),
-        EnumMap::Pair("Line", XML::LINE),
-        EnumMap::Pair("Tri", XML::TRI),
-        EnumMap::Pair("Quad", XML::QUAD),
-        EnumMap::Pair("Linestrip", XML::LINESTRIP),
-        EnumMap::Pair("Tristrip", XML::TRISTRIP),
-        EnumMap::Pair("Trifan", XML::TRIFAN),
-        EnumMap::Pair("Quadstrip", XML::QUADSTRIP),
-        EnumMap::Pair("Vertex", XML::VERTEX),
-        EnumMap::Pair("Logo", XML::LOGO),
-        EnumMap::Pair("Ref", XML::REF)
-};
+const EnumMap::Pair XML::element_names[] = {EnumMap::Pair("UNKNOWN", XML::UNKNOWN),
+                                            EnumMap::Pair("Material", XML::MATERIAL),
+                                            EnumMap::Pair("LOD", XML::LOD),
+                                            EnumMap::Pair("Ambient", XML::AMBIENT),
+                                            EnumMap::Pair("Diffuse", XML::DIFFUSE),
+                                            EnumMap::Pair("Specular", XML::SPECULAR),
+                                            EnumMap::Pair("Emissive", XML::EMISSIVE),
+                                            EnumMap::Pair("Mesh", XML::MESH),
+                                            EnumMap::Pair("Points", XML::POINTS),
+                                            EnumMap::Pair("Point", XML::POINT),
+                                            EnumMap::Pair("Location", XML::LOCATION),
+                                            EnumMap::Pair("Normal", XML::NORMAL),
+                                            EnumMap::Pair("Polygons", XML::POLYGONS),
+                                            EnumMap::Pair("Line", XML::LINE),
+                                            EnumMap::Pair("Tri", XML::TRI),
+                                            EnumMap::Pair("Quad", XML::QUAD),
+                                            EnumMap::Pair("Linestrip", XML::LINESTRIP),
+                                            EnumMap::Pair("Tristrip", XML::TRISTRIP),
+                                            EnumMap::Pair("Trifan", XML::TRIFAN),
+                                            EnumMap::Pair("Quadstrip", XML::QUADSTRIP),
+                                            EnumMap::Pair("Vertex", XML::VERTEX),
+                                            EnumMap::Pair("Logo", XML::LOGO),
+                                            EnumMap::Pair("Ref", XML::REF)};
 
 const EnumMap::Pair XML::attribute_names[] = {
-        EnumMap::Pair("UNKNOWN", XML::UNKNOWN),
-        EnumMap::Pair("Scale", XML::SCALE),
-        EnumMap::Pair("Blend", XML::BLENDMODE),
-        EnumMap::Pair("texture", XML::TEXTURE),
-        EnumMap::Pair("alphamap", XML::ALPHAMAP),
-        EnumMap::Pair("sharevertex", XML::SHAREVERT),
-        EnumMap::Pair("red", XML::RED),
-        EnumMap::Pair("green", XML::GREEN),
-        EnumMap::Pair("blue", XML::BLUE),
-        EnumMap::Pair("alpha", XML::ALPHA),
-        EnumMap::Pair("power", XML::POWER),
-        EnumMap::Pair("reflect", XML::REFLECT),
-        EnumMap::Pair("x", XML::X),
-        EnumMap::Pair("y", XML::Y),
-        EnumMap::Pair("z", XML::Z),
-        EnumMap::Pair("i", XML::I),
-        EnumMap::Pair("j", XML::J),
-        EnumMap::Pair("k", XML::K),
-        EnumMap::Pair("Shade", XML::FLATSHADE),
-        EnumMap::Pair("point", XML::POINT),
-        EnumMap::Pair("s", XML::S),
-        EnumMap::Pair("t", XML::T),
-        //Logo stuffs
-        EnumMap::Pair("Type", XML::TYPE),
-        EnumMap::Pair("Rotate", XML::ROTATE),
-        EnumMap::Pair("Weight", XML::WEIGHT),
-        EnumMap::Pair("Size", XML::SIZE),
-        EnumMap::Pair("Offset", XML::OFFSET),
-        EnumMap::Pair("meshfile", XML::LODFILE),
-        EnumMap::Pair("Animation", XML::ANIMATEDTEXTURE),
-        EnumMap::Pair("Reverse", XML::REVERSE),
-        EnumMap::Pair("LightingOn", XML::LIGHTINGON),
-        EnumMap::Pair("ForceTexture", XML::FORCETEXTURE)
-};
+        EnumMap::Pair("UNKNOWN", XML::UNKNOWN), EnumMap::Pair("Scale", XML::SCALE),
+        EnumMap::Pair("Blend", XML::BLENDMODE), EnumMap::Pair("texture", XML::TEXTURE),
+        EnumMap::Pair("alphamap", XML::ALPHAMAP), EnumMap::Pair("sharevertex", XML::SHAREVERT),
+        EnumMap::Pair("red", XML::RED), EnumMap::Pair("green", XML::GREEN), EnumMap::Pair("blue", XML::BLUE),
+        EnumMap::Pair("alpha", XML::ALPHA), EnumMap::Pair("power", XML::POWER), EnumMap::Pair("reflect", XML::REFLECT),
+        EnumMap::Pair("x", XML::X), EnumMap::Pair("y", XML::Y), EnumMap::Pair("z", XML::Z), EnumMap::Pair("i", XML::I),
+        EnumMap::Pair("j", XML::J), EnumMap::Pair("k", XML::K), EnumMap::Pair("Shade", XML::FLATSHADE),
+        EnumMap::Pair("point", XML::POINT), EnumMap::Pair("s", XML::S), EnumMap::Pair("t", XML::T),
+        // Logo stuffs
+        EnumMap::Pair("Type", XML::TYPE), EnumMap::Pair("Rotate", XML::ROTATE), EnumMap::Pair("Weight", XML::WEIGHT),
+        EnumMap::Pair("Size", XML::SIZE), EnumMap::Pair("Offset", XML::OFFSET), EnumMap::Pair("meshfile", XML::LODFILE),
+        EnumMap::Pair("Animation", XML::ANIMATEDTEXTURE), EnumMap::Pair("Reverse", XML::REVERSE),
+        EnumMap::Pair("LightingOn", XML::LIGHTINGON), EnumMap::Pair("ForceTexture", XML::FORCETEXTURE)};
 
 const EnumMap XML::element_map(XML::element_names, 23);
 const EnumMap XML::attribute_map(XML::attribute_names, 32);
@@ -236,30 +220,28 @@ enum Names {
     MESHFILE,
     XFILE
 };
+
 const EnumMap::Pair element_names[3] = {
         EnumMap::Pair("UNKNOWN", UNKNOWN),
         EnumMap::Pair("Unit", UNIT),
         EnumMap::Pair("Meshfile", MESHFILE),
 };
 
-const EnumMap::Pair attribute_names[3] = {
-        EnumMap::Pair("UNKNOWN", UNKNOWN),
-        EnumMap::Pair("file", XFILE),
-        EnumMap::Pair("Scale", SCALE)
-};
-const EnumMap element_map(element_names, 3);
-const EnumMap attribute_map(attribute_names, 3);
-}
+const EnumMap::Pair attribute_names[3] = {EnumMap::Pair("UNKNOWN", UNKNOWN), EnumMap::Pair("file", XFILE),
+                                          EnumMap::Pair("Scale", SCALE)};
+const EnumMap       element_map(element_names, 3);
+const EnumMap       attribute_map(attribute_names, 3);
+}  // namespace Unit
 
-int globaltab = 0; //go go kludge master!
-int globalfileout = 0; //go go gadget kludge!
-int globallasttab = 0; //go go uber kludge!
-float globalmassrescale = 1; //go go... ok, at this point, it's obvious I'm not trying
+int   globaltab         = 0;  // go go kludge master!
+int   globalfileout     = 0;  // go go gadget kludge!
+int   globallasttab     = 0;  // go go uber kludge!
+float globalmassrescale = 1;  // go go... ok, at this point, it's obvious I'm not trying
 
 void UnitBeginElement(const string &name, const AttributeList &attributes, XML *xml) {
     AttributeList::const_iterator iter;
-    Unit::Names elem = (Unit::Names) Unit::element_map.lookup(name);
-    Unit::Names top;
+    Unit::Names                   elem = (Unit::Names)Unit::element_map.lookup(name);
+    Unit::Names                   top;
     if (globalfileout) {
         if (globaltab > globallasttab) {
             cout << ">\n";
@@ -274,11 +256,11 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
             if ((*iter).name == "mass" || (*iter).name == "momentofinertia" || name == "Engine" || name == "Maneuver") {
                 if ((XMLSupport::parse_float(((*iter).value)) * globalmassrescale) > 100) {
                     cout << (*iter).name << " = \""
-                            << (unsigned long int) ((XMLSupport::parse_float(((*iter).value)) * globalmassrescale))
-                            << "\" ";
+                         << (unsigned long int)((XMLSupport::parse_float(((*iter).value)) * globalmassrescale))
+                         << "\" ";
                 } else {
-                    cout << (*iter).name << " = \""
-                            << ((XMLSupport::parse_float(((*iter).value)) * globalmassrescale)) << "\" ";
+                    cout << (*iter).name << " = \"" << ((XMLSupport::parse_float(((*iter).value)) * globalmassrescale))
+                         << "\" ";
                 }
             } else {
                 cout << (*iter).name << " = \"" << (*iter).value << "\" ";
@@ -323,8 +305,8 @@ void UnitEndElement(const string &name, XML *xml) {
 
 void beginElement(const string &name, const AttributeList &attributes, XML *xml) {
     AttributeList::const_iterator iter;
-    XML::Names elem = (XML::Names) XML::element_map.lookup(name);
-    XML::Names top;
+    XML::Names                    elem = (XML::Names)XML::element_map.lookup(name);
+    XML::Names                    top;
     if (xml->state_stack.size() > 0) {
         top = *xml->state_stack.rbegin();
     }
@@ -368,7 +350,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML *xml)
         case XML::POINTS:
             break;
         case XML::POINT:
-//assert(top==XML::POINTS);
+            // assert(top==XML::POINTS);
             break;
         case XML::LOCATION:
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -442,7 +424,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML *xml)
 
 void endElement(const string &name, XML *xml) {
     xml->state_stack.pop_back();
-    XML::Names elem = (XML::Names) XML::element_map.lookup(name);
+    XML::Names elem = (XML::Names)XML::element_map.lookup(name);
 
     unsigned int i;
     switch (elem) {
@@ -466,7 +448,7 @@ void endElement(const string &name, XML *xml) {
             break;
         case XML::TRIFAN:
             break;
-        case XML::QUADSTRIP:     //have to fix up nrmlquadstrip so that it 'looks' like a quad list for smooth shading
+        case XML::QUADSTRIP:  // have to fix up nrmlquadstrip so that it 'looks' like a quad list for smooth shading
             break;
         case XML::POLYGONS:
             break;
@@ -491,65 +473,65 @@ void endElement(const string &name, XML *xml) {
 }
 
 void beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-    beginElement(name, AttributeList(atts), (XML *) userData);
+    beginElement(name, AttributeList(atts), (XML *)userData);
 }
 
 void endElement(void *userData, const XML_Char *name) {
-    endElement(name, (XML *) userData);
+    endElement(name, (XML *)userData);
 }
 
 void unitBeginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-    UnitBeginElement(name, AttributeList(atts), (XML *) userData);
+    UnitBeginElement(name, AttributeList(atts), (XML *)userData);
 }
 
 void unitEndElement(void *userData, const XML_Char *name) {
-    UnitEndElement(name, (XML *) userData);
+    UnitEndElement(name, (XML *)userData);
 }
 
 void LoadXML(const char *filename, XML &xml) {
-    const int chunk_size = 16384;
-    FILE *inFile = fopen(filename, "r");
+    const int chunk_size = 16'384;
+    FILE     *inFile     = fopen(filename, "r");
     if (!inFile) {
         fprintf(stderr, "Cannot Open Mesh File %s\n", filename);
         exit(0);
     }
-    xml.scale = 1;
+    xml.scale         = 1;
     XML_Parser parser = XML_ParserCreate(NULL);
     XML_SetUserData(parser, &xml);
     XML_SetElementHandler(parser, &beginElement, &endElement);
     do {
         char buf[chunk_size];
-        int length;
+        int  length;
 
         length = fread(buf, 1, chunk_size, inFile);
         XML_Parse(parser, buf, length, feof(inFile));
     } while (!feof(inFile));
     fclose(inFile);
     XML_ParserFree(parser);
-    //Now, copy everything into the mesh data structures
+    // Now, copy everything into the mesh data structures
 }
 
 void UnitLoadXML(const char *filename, XML &xml) {
-    const int chunk_size = 16384;
-    FILE *inFile = fopen(filename, "r");
+    const int chunk_size = 16'384;
+    FILE     *inFile     = fopen(filename, "r");
     if (!inFile) {
         fprintf(stderr, "Cannot Open Mesh File %s\n", filename);
         exit(0);
     }
-    xml.unitscale = 1;
+    xml.unitscale     = 1;
     XML_Parser parser = XML_ParserCreate(NULL);
     XML_SetUserData(parser, &xml);
     XML_SetElementHandler(parser, &unitBeginElement, &unitEndElement);
     do {
         char buf[chunk_size];
-        int length;
+        int  length;
 
         length = fread(buf, 1, chunk_size, inFile);
         XML_Parse(parser, buf, length, feof(inFile));
     } while (!feof(inFile));
     fclose(inFile);
     XML_ParserFree(parser);
-    //Now, copy everything into the mesh data structures
+    // Now, copy everything into the mesh data structures
 }
 
 int main(int argc, char **argv) {
@@ -559,7 +541,7 @@ int main(int argc, char **argv) {
         return 1;
     }
     if (argc == 4 && !strcmp(argv[2], "MS")) {
-        globalfileout = 1;
+        globalfileout     = 1;
         globalmassrescale = atof(argv[3]);
     }
     UnitLoadXML(argv[1], blah);
@@ -576,4 +558,3 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
-

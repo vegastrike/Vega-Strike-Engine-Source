@@ -29,26 +29,24 @@
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef WIN32
-//this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
-#include <unistd.h>
+// this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can
+// compile without it
+#    include <unistd.h>
 #endif
 
 #include <expat.h>
-#include "root_generic/xml_support.h"
-
-#include "src/vegastrike.h"
-
-#include "mission.h"
-#include "root_generic/easydom.h"
-
-#include "root_generic/vs_globals.h"
-#include "src/config_xml.h"
 
 #include "cmd/unit_generic.h"
+#include "mission.h"
+#include "root_generic/easydom.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
+#include "src/vegastrike.h"
 
 /* *********************************************************** */
 
@@ -90,7 +88,7 @@ void Mission::doModule(missionNode *node, int mode) {
             node->script.classinst_counter = 0;
             debug(10, node, mode, "created classinst 0");
 
-            runtime.modules[name] = node;             //add this module to the list of known modules
+            runtime.modules[name] = node;  // add this module to the list of known modules
         }
         scope_stack.push_back(node);
 
@@ -99,13 +97,13 @@ void Mission::doModule(missionNode *node, int mode) {
         debug(5, node, mode, "added module " + name + " to list of known modules");
     }
     if (mode == SCRIPT_RUN) {
-        //SCRIPT_RUN
+        // SCRIPT_RUN
         runtime.cur_thread->module_stack.push_back(node);
         runtime.cur_thread->classid_stack.push_back(0);
     }
     vector<easyDomNode *>::const_iterator siter;
     for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
-        missionNode *snode = (missionNode *) *siter;
+        missionNode *snode = (missionNode *)*siter;
         if (snode->tag == DTAG_SCRIPT) {
             varInst *vi = doScript(snode, mode);
             deleteVarInst(vi);
@@ -161,7 +159,7 @@ void Mission::addContextStack(missionNode *node) {
 
 scriptContext *Mission::addContext(missionNode *node) {
     scriptContext *context = makeContext(node);
-    contextStack *stack = runtime.cur_thread->exec_stack.back();
+    contextStack  *stack   = runtime.cur_thread->exec_stack.back();
     stack->contexts.push_back(context);
 
     debug(5, node, SCRIPT_RUN, "added context for this node");
@@ -223,11 +221,11 @@ varInst *Mission::doScript(missionNode *node, int mode, varInstMap *varmap) {
     }
     vector<easyDomNode *>::const_iterator siter;
     if (mode == SCRIPT_PARSE && parsemode == PARSE_DECL) {
-        node->script.nr_arguments = 0;
+        node->script.nr_arguments  = 0;
         node->script.argument_node = NULL;
     }
     for (siter = node->subnodes.begin(); siter != node->subnodes.end() && !have_return(mode); siter++) {
-        missionNode *snode = (missionNode *) *siter;
+        missionNode *snode = (missionNode *)*siter;
         if (snode->tag == DTAG_ARGUMENTS) {
             doArguments(snode, mode, varmap);
             if (mode == SCRIPT_PARSE && parsemode == PARSE_DECL) {
@@ -238,7 +236,7 @@ varInst *Mission::doScript(missionNode *node, int mode, varInstMap *varmap) {
             debug(3, node, mode, buffer);
         } else {
             if (mode == SCRIPT_PARSE && parsemode == PARSE_DECL) {
-                //do nothing, break here
+                // do nothing, break here
             } else {
                 checkStatement(snode, mode);
             }
@@ -247,7 +245,7 @@ varInst *Mission::doScript(missionNode *node, int mode, varInstMap *varmap) {
     if (mode == SCRIPT_RUN) {
         removeContext();
         contextStack *cstack = runtime.cur_thread->exec_stack.back();
-        varInst *vi = cstack->return_value;
+        varInst      *vi     = cstack->return_value;
         if (vi != NULL) {
             if (node->script.vartype != vi->type) {
                 fatalError(node, mode, "doScript: return type not set correctly");
@@ -259,7 +257,7 @@ varInst *Mission::doScript(missionNode *node, int mode, varInstMap *varmap) {
         }
         varInst *viret = NULL;
         if (vi) {
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = vi->type;
             assignVariable(viret, vi);
         }
@@ -280,7 +278,7 @@ void Mission::doArguments(missionNode *node, int mode, varInstMap *varmap) {
         if (parsemode == PARSE_DECL) {
             vector<easyDomNode *>::const_iterator siter;
             for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++) {
-                missionNode *snode = (missionNode *) *siter;
+                missionNode *snode = (missionNode *)*siter;
                 if (snode->tag == DTAG_DEFVAR) {
                     doDefVar(snode, mode);
                     nr_arguments++;
@@ -301,7 +299,7 @@ void Mission::doArguments(missionNode *node, int mode, varInstMap *varmap) {
                 assert(0);
             }
             for (int i = 0; i < nr_arguments; i++) {
-                missionNode *defnode = (missionNode *) node->subnodes[i];
+                missionNode *defnode = (missionNode *)node->subnodes[i];
 
                 doDefVar(defnode, mode);
                 varInst *vi = doVariable(defnode, mode);
@@ -314,17 +312,17 @@ void Mission::doArguments(missionNode *node, int mode, varInstMap *varmap) {
                 assignVariable(vi, call_vi);
             }
         } else
-            //no varmap == 0 args
-        if (nr_arguments != 0) {
-            fatalError(node, mode, "doScript expected to be called with arguments");
-            assert(0);
-        }
+            // no varmap == 0 args
+            if (nr_arguments != 0) {
+                fatalError(node, mode, "doScript expected to be called with arguments");
+                assert(0);
+            }
     }
     if (mode == SCRIPT_PARSE) {
         if (parsemode == PARSE_DECL) {
-            missionNode *exec_scope = scope_stack.back();
+            missionNode *exec_scope         = scope_stack.back();
             exec_scope->script.nr_arguments = nr_arguments;
-            node->script.nr_arguments = nr_arguments;
+            node->script.nr_arguments       = nr_arguments;
         }
     }
 }
@@ -338,8 +336,8 @@ void Mission::doReturn(missionNode *node, int mode) {
 
         node->script.exec_node = script;
     }
-    int len = node->subnodes.size();
-    varInst *vi = newVarInst(VI_LOCAL);
+    int      len = node->subnodes.size();
+    varInst *vi  = newVarInst(VI_LOCAL);
 
     missionNode *script = node->script.exec_node;
     if (script->script.vartype == VAR_VOID) {
@@ -348,24 +346,24 @@ void Mission::doReturn(missionNode *node, int mode) {
             assert(0);
         }
     } else {
-        //return something non-void
+        // return something non-void
         if (len != 1) {
             fatalError(node, mode, "return statement needs only one subnode");
             assert(0);
         }
-        missionNode *expr = (missionNode *) node->subnodes[0];
+        missionNode *expr = (missionNode *)node->subnodes[0];
         if (script->script.vartype == VAR_BOOL) {
-            bool res = checkBoolExpr(expr, mode);
+            bool res     = checkBoolExpr(expr, mode);
             vi->bool_val = res;
         } else if (script->script.vartype == VAR_FLOAT) {
-            double res = checkFloatExpr(expr, mode);
+            double res    = checkFloatExpr(expr, mode);
             vi->float_val = res;
         } else if (script->script.vartype == VAR_INT) {
-            int res = checkIntExpr(expr, mode);
+            int res     = checkIntExpr(expr, mode);
             vi->int_val = res;
         } else if (script->script.vartype == VAR_OBJECT) {
             varInst *vi2 = checkObjectExpr(expr, mode);
-            vi->type = VAR_OBJECT;
+            vi->type     = VAR_OBJECT;
             assignVariable(vi, vi2);
         } else {
             fatalError(node, mode, "unkown variable type");
@@ -393,7 +391,7 @@ void Mission::doBlock(missionNode *node, int mode) {
     }
     vector<easyDomNode *>::const_iterator siter;
     for (siter = node->subnodes.begin(); siter != node->subnodes.end() && !have_return(mode); siter++) {
-        missionNode *snode = (missionNode *) *siter;
+        missionNode *snode = (missionNode *)*siter;
         checkStatement(snode, mode);
     }
     if (mode == SCRIPT_RUN) {
@@ -416,9 +414,9 @@ varInst *Mission::doExec(missionNode *node, int mode) {
         }
         node->script.name = name;
 
-        string use_modstr = node->attr_value("module");
-        missionNode *module = NULL;
-        missionNode *script = NULL;
+        string       use_modstr = node->attr_value("module");
+        missionNode *module     = NULL;
+        missionNode *script     = NULL;
         if (!use_modstr.empty()) {
             module = runtime.modules[use_modstr];
         } else {
@@ -433,8 +431,8 @@ varInst *Mission::doExec(missionNode *node, int mode) {
             fatalError(node, mode, "script " + name + " not found in module " + use_modstr);
             assert(0);
         }
-        node->script.exec_node = script;
-        node->script.vartype = script->script.vartype;
+        node->script.exec_node   = script;
+        node->script.vartype     = script->script.vartype;
         node->script.module_node = module;
     }
     missionNode *arg_node = node->script.exec_node->script.argument_node;
@@ -456,27 +454,27 @@ varInst *Mission::doExec(missionNode *node, int mode) {
     if (nr_arguments > 0) {
         varmap = new varInstMap;
         for (int i = 0; i < nr_arguments; i++) {
-            missionNode *defnode = (missionNode *) arg_node->subnodes[i];
-            missionNode *callnode = (missionNode *) node->subnodes[i];
+            missionNode *defnode  = (missionNode *)arg_node->subnodes[i];
+            missionNode *callnode = (missionNode *)node->subnodes[i];
 
             varInst *vi = newVarInst(VI_LOCAL);
-            vi->type = defnode->script.vartype;
+            vi->type    = defnode->script.vartype;
             if (defnode->script.vartype == VAR_FLOAT) {
                 debug(4, node, mode, "doExec checking floatExpr");
-                double res = checkFloatExpr(callnode, mode);
+                double res    = checkFloatExpr(callnode, mode);
                 vi->float_val = res;
             } else if (defnode->script.vartype == VAR_INT) {
                 debug(4, node, mode, "doExec checking intExpr");
-                int res = checkIntExpr(callnode, mode);
+                int res     = checkIntExpr(callnode, mode);
                 vi->int_val = res;
             } else if (defnode->script.vartype == VAR_BOOL) {
                 debug(4, node, mode, "doExec checking boolExpr");
-                bool ok = checkBoolExpr(callnode, mode);
+                bool ok      = checkBoolExpr(callnode, mode);
                 vi->bool_val = ok;
             } else if (defnode->script.vartype == VAR_OBJECT) {
                 debug(3, node, mode, "doExec checking objectExpr");
                 varInst *ovi = checkObjectExpr(callnode, mode);
-                vi->type = VAR_OBJECT;
+                vi->type     = VAR_OBJECT;
                 if (mode == SCRIPT_RUN) {
                     assignVariable(vi, ovi);
                 }
@@ -489,7 +487,7 @@ varInst *Mission::doExec(missionNode *node, int mode) {
         }
     }
     if (mode == SCRIPT_RUN) {
-        //SCRIPT_RUN
+        // SCRIPT_RUN
 
         debug(4, node, mode, "executing " + node->script.name);
 
@@ -514,7 +512,7 @@ varInst *Mission::doExec(missionNode *node, int mode) {
         }
         return vi;
     }
-    //SCRIPT_PARSE
+    // SCRIPT_PARSE
 
     varInst *vi = newVarInst(VI_TEMP);
 
@@ -539,7 +537,7 @@ void Mission::deleteVarInst(varInst *vi, bool del_local) {
     } else if (vi->scopetype == VI_ERROR) {
         debug(2, NULL, 0, "reqested to delete vi_error\n");
     } else if (del_local == false && vi->scopetype == VI_IN_OBJECT) {
-        //debug(2,NULL,0,"reqested to delete vi in object\n");
+        // debug(2,NULL,0,"reqested to delete vi in object\n");
     } else if (vi->scopetype == VI_CONST) {
         debug(12, NULL, 0, "reqested to delete const vi\n");
     } else if (del_local == false && vi->scopetype == VI_LOCAL) {
@@ -582,11 +580,11 @@ unsigned int Mission::createClassInstance(string modulename) {
 
     vsUMap<string, varInst *>::const_iterator iter;
     for (iter = cvmap0->begin(); iter != cvmap0->end(); iter++) {
-        varInst *vi0 = (*iter).second;
-        string vi0_name = (*iter).first;
+        varInst *vi0      = (*iter).second;
+        string   vi0_name = (*iter).first;
 
         varInst *vi = newVarInst(VI_CLASSVAR);
-        vi->type = vi0->type;
+        vi->type    = vi0->type;
         assignVariable(vi, vi0);
 
         (*cvmap)[vi0_name] = vi;
@@ -611,4 +609,3 @@ void Mission::destroyClassInstance(string modulename, unsigned int classid) {
 
     module->script.classvars[classid] = NULL;
 }
-

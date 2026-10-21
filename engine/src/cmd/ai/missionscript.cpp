@@ -30,19 +30,20 @@
  *  AI for mission scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include "script.h"
-#include "navigation.h"
-#include "root_generic/xml_support.h"
-#include "flybywire.h"
+#include "missionscript.h"
+
+#include <stack>
 #include <stdio.h>
 #include <vector>
-#include <stack>
+
+#include "cmd/script/mission.h"
+#include "cmd/unit_generic.h"
+#include "flybywire.h"
+#include "navigation.h"
+#include "root_generic/xml_support.h"
+#include "script.h"
 #include "src/vs_logging.h"
 #include "tactics.h"
-#include "cmd/unit_generic.h"
-
-#include "missionscript.h"
-#include "cmd/script/mission.h"
 
 AImissionScript::AImissionScript(string modname) {
     actionstring = "";
@@ -68,15 +69,13 @@ AImissionScript::~AImissionScript() {
 
 void AImissionScript::Execute() {
     desired_ang_velocity = Vector(0, 0, 0);
-    desired_velocity = Vector(0, 0, 0);
+    desired_velocity     = Vector(0, 0, 0);
 
     mission->setCurrentAIUnit(parent);
     mission->setCurrentAIOrder(this);
     if (first_run) {
-        for (unsigned int i = 0;
-                (i < active_missions.size())
-                        && (!(mission->runScript(modulename, "initai", classid)));
-                i++) {
+        for (unsigned int i = 0; (i < active_missions.size()) && (!(mission->runScript(modulename, "initai", classid)));
+             i++) {
         }
         first_run = false;
     }
@@ -102,108 +101,106 @@ void AImissionScript::Execute() {
     mission->deleteVarInst(done_vi);
 }
 
-AIFlyToWaypoint::AIFlyToWaypoint(const QVector &wp, float velo, bool afburn,
-        float rng) : AImissionScript("ai_flyto_waypoint") {
+AIFlyToWaypoint::AIFlyToWaypoint(const QVector &wp, float velo, bool afburn, float rng)
+    : AImissionScript("ai_flyto_waypoint") {
     waypoint = wp;
-    vel = velo;
-    range = rng;
-    aburn = afburn;
+    vel      = velo;
+    range    = rng;
+    aburn    = afburn;
 
     varInst *vi_wp = mission->lookupClassVariable(modulename, "waypoint", classid);
     mission->call_vector_into_olist(vi_wp, waypoint);
 
-    varInst *vi_range = mission->lookupClassVariable(modulename, "abort_range", classid);
+    varInst *vi_range   = mission->lookupClassVariable(modulename, "abort_range", classid);
     vi_range->float_val = range;
 
-    varInst *vi_vel = mission->lookupClassVariable(modulename, "vel", classid);
+    varInst *vi_vel   = mission->lookupClassVariable(modulename, "vel", classid);
     vi_vel->float_val = vel;
 
-    varInst *vi_aburn = mission->lookupClassVariable(modulename, "afterburner", classid);
+    varInst *vi_aburn  = mission->lookupClassVariable(modulename, "afterburner", classid);
     vi_aburn->bool_val = aburn;
 }
 
-AIFlyToWaypointDefend::AIFlyToWaypointDefend(const QVector &wp, float velo, bool afburn, float rng,
-        float defend_range) : AImissionScript("ai_flyto_waypoint_defend") {
+AIFlyToWaypointDefend::AIFlyToWaypointDefend(const QVector &wp, float velo, bool afburn, float rng, float defend_range)
+    : AImissionScript("ai_flyto_waypoint_defend") {
     waypoint = wp;
-    vel = velo;
-    range = rng;
-    aburn = afburn;
+    vel      = velo;
+    range    = rng;
+    aburn    = afburn;
 
     varInst *vi_wp = mission->lookupClassVariable(modulename, "waypoint", classid);
     mission->call_vector_into_olist(vi_wp, waypoint);
 
-    varInst *vi_range = mission->lookupClassVariable(modulename, "abort_range", classid);
+    varInst *vi_range   = mission->lookupClassVariable(modulename, "abort_range", classid);
     vi_range->float_val = range;
 
-    varInst *vi_defrange = mission->lookupClassVariable(modulename, "defend_range", classid);
+    varInst *vi_defrange   = mission->lookupClassVariable(modulename, "defend_range", classid);
     vi_defrange->float_val = defend_range;
 
-    varInst *vi_vel = mission->lookupClassVariable(modulename, "vel", classid);
+    varInst *vi_vel   = mission->lookupClassVariable(modulename, "vel", classid);
     vi_vel->float_val = vel;
 
-    varInst *vi_aburn = mission->lookupClassVariable(modulename, "afterburner", classid);
+    varInst *vi_aburn  = mission->lookupClassVariable(modulename, "afterburner", classid);
     vi_aburn->bool_val = aburn;
 }
 
-AISuperiority::AISuperiority() : AImissionScript("ai_superiority") {
-}
+AISuperiority::AISuperiority() : AImissionScript("ai_superiority") {}
 
-AIFlyToJumppoint::AIFlyToJumppoint(Unit *jumppoint_unit, float fly_speed, bool aft) : AImissionScript(
-        "ai_flyto_jumppoint") {
-    varInst *vi_speed = mission->lookupClassVariable(modulename, "fly_speed", classid);
+AIFlyToJumppoint::AIFlyToJumppoint(Unit *jumppoint_unit, float fly_speed, bool aft)
+    : AImissionScript("ai_flyto_jumppoint") {
+    varInst *vi_speed   = mission->lookupClassVariable(modulename, "fly_speed", classid);
     vi_speed->float_val = fly_speed;
 
-    varInst *vi_aft = mission->lookupClassVariable(modulename, "afterburner", classid);
+    varInst *vi_aft  = mission->lookupClassVariable(modulename, "afterburner", classid);
     vi_aft->bool_val = aft;
 
-    varInst *vi_unit = mission->lookupClassVariable(modulename, "jumppoint_unit", classid);
+    varInst *vi_unit    = mission->lookupClassVariable(modulename, "jumppoint_unit", classid);
     vi_unit->objectname = "unit";
-    vi_unit->object = jumppoint_unit;
+    vi_unit->object     = jumppoint_unit;
 }
 
-AIPatrol::AIPatrol(int mode, const QVector &area, float range, Unit *around_unit,
-        float patrol_speed) : AImissionScript("ai_patrol") {
+AIPatrol::AIPatrol(int mode, const QVector &area, float range, Unit *around_unit, float patrol_speed)
+    : AImissionScript("ai_patrol") {
     varInst *vi_wp = mission->lookupClassVariable(modulename, "area", classid);
     mission->call_vector_into_olist(vi_wp, area);
 
-    varInst *vi_range = mission->lookupClassVariable(modulename, "range", classid);
+    varInst *vi_range   = mission->lookupClassVariable(modulename, "range", classid);
     vi_range->float_val = range;
 
-    varInst *vi_speed = mission->lookupClassVariable(modulename, "patrol_speed", classid);
+    varInst *vi_speed   = mission->lookupClassVariable(modulename, "patrol_speed", classid);
     vi_speed->float_val = patrol_speed;
 
     varInst *vi_mode = mission->lookupClassVariable(modulename, "patrol_mode", classid);
     vi_mode->int_val = mode;
 
-    varInst *vi_unit = mission->lookupClassVariable(modulename, "around_unit", classid);
+    varInst *vi_unit    = mission->lookupClassVariable(modulename, "around_unit", classid);
     vi_unit->objectname = "unit";
-    vi_unit->object = around_unit;
+    vi_unit->object     = around_unit;
 }
 
-AIPatrolDefend::AIPatrolDefend(int mode, const QVector &area, float range, Unit *around_unit,
-        float patrol_speed) : AImissionScript("ai_patrol_defend") {
+AIPatrolDefend::AIPatrolDefend(int mode, const QVector &area, float range, Unit *around_unit, float patrol_speed)
+    : AImissionScript("ai_patrol_defend") {
     varInst *vi_wp = mission->lookupClassVariable(modulename, "area", classid);
     mission->call_vector_into_olist(vi_wp, area);
 
-    varInst *vi_range = mission->lookupClassVariable(modulename, "range", classid);
+    varInst *vi_range   = mission->lookupClassVariable(modulename, "range", classid);
     vi_range->float_val = range;
 
-    varInst *vi_speed = mission->lookupClassVariable(modulename, "patrol_speed", classid);
+    varInst *vi_speed   = mission->lookupClassVariable(modulename, "patrol_speed", classid);
     vi_speed->float_val = patrol_speed;
 
     varInst *vi_mode = mission->lookupClassVariable(modulename, "patrol_mode", classid);
     vi_mode->int_val = mode;
 
-    varInst *vi_unit = mission->lookupClassVariable(modulename, "around_unit", classid);
+    varInst *vi_unit    = mission->lookupClassVariable(modulename, "around_unit", classid);
     vi_unit->objectname = "unit";
-    vi_unit->object = around_unit;
+    vi_unit->object     = around_unit;
 }
 
 AIOrderList::AIOrderList(olist_t *orderlist) : AImissionScript("ai_orderlist") {
-    varInst *vi_unit = mission->lookupClassVariable(modulename, "my_order_list", classid);
+    varInst *vi_unit    = mission->lookupClassVariable(modulename, "my_order_list", classid);
     vi_unit->objectname = "olist";
-    vi_unit->object = orderlist;
+    vi_unit->object     = orderlist;
 
     my_orderlist = orderlist;
 }
-

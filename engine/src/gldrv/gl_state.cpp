@@ -28,31 +28,28 @@
 #include "gl_globals.h"
 #undef GL_STATE_CPP
 
-#include "src/gfxlib.h"
-#include "src/vegastrike.h"
-#include "root_generic/vs_globals.h"
 #include <stack>
 
 #include "configuration/configuration.h"
+#include "root_generic/vs_globals.h"
+#include "src/gfxlib.h"
+#include "src/vegastrike.h"
 
 #ifndef GL_CONSTANT_ALPHA
-#define GL_CONSTANT_ALPHA 0x8003
+#    define GL_CONSTANT_ALPHA 0x8003
 #endif
 #ifndef GL_ONE_MINUS_CONSTANT_ALPHA
-#define GL_ONE_MINUS_CONSTANT_ALPHA 0x8004
+#    define GL_ONE_MINUS_CONSTANT_ALPHA 0x8004
 #endif
 #ifndef GL_ONE_MINUS_CONSTANT_COLOR
-#define GL_ONE_MINUS_CONSTANT_COLOR 0x8002
+#    define GL_ONE_MINUS_CONSTANT_COLOR 0x8002
 #endif
 #ifndef GL_CONSTANT_COLOR
-#define GL_CONSTANT_COLOR 0x8001
+#    define GL_CONSTANT_COLOR 0x8001
 #endif
 
 GLenum bTex[32] = {
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
 GLenum GetGLTextureTarget(enum TEXTURE_TARGET texture_target) {
@@ -81,7 +78,8 @@ GLenum GetGLTextureTarget(enum TEXTURE_TARGET texture_target) {
     return tt;
 }
 
-int activeTextureStage = -1; //FIXME Shouldn't this be a member of a class?, or at least be an official global variable?
+int activeTextureStage =
+        -1;  // FIXME Shouldn't this be a member of a class?, or at least be an official global variable?
 
 static inline bool _GFXActiveTextureValid() {
     return !(activeTextureStage && (activeTextureStage >= static_cast<int>(gl_options.Multitexture)));
@@ -98,7 +96,7 @@ void /*GFXDRVAPI*/ GFXEnable(const STATE state) {
         case DEPTHTEST:
             glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LEQUAL);
-            //glDepthFunc (GL_ALWAYS);
+            // glDepthFunc (GL_ALWAYS);
             break;
         case DEPTHWRITE:
             glDepthMask(GL_TRUE);
@@ -112,9 +110,9 @@ void /*GFXDRVAPI*/ GFXEnable(const STATE state) {
              *   if (bTex[0]) glDisable(bTex[0]);
              *       glEnable (bTex[0]=GL_TEXTURE_2D);
              *  }*/
-            //NOTE: The above code should be used, but since not all parts of VS use the GFX,
-            //we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
-            //assure correct settings of texture units 1 & 2, used during GUI rendering.
+            // NOTE: The above code should be used, but since not all parts of VS use the GFX,
+            // we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
+            // assure correct settings of texture units 1 & 2, used during GUI rendering.
             GFXActiveTexture(0);
 #ifdef NV_CUBE_MAP
             if (bTex[0] != GL_TEXTURE_CUBE_MAP_EXT) {
@@ -141,10 +139,10 @@ void /*GFXDRVAPI*/ GFXEnable(const STATE state) {
              *  }
              * #endif
              *  }*/
-            //NOTE: The above code should be used, but since not all parts of VS use the GFX,
-            //we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
-            //assure correct settings of texture units 1 & 2, both in the GL and their proxy
-            //states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
+            // NOTE: The above code should be used, but since not all parts of VS use the GFX,
+            // we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
+            // assure correct settings of texture units 1 & 2, both in the GL and their proxy
+            // states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
             if (gl_options.Multitexture) {
                 GFXActiveTexture(1);
                 if (bTex[1] != 0) {
@@ -156,7 +154,7 @@ void /*GFXDRVAPI*/ GFXEnable(const STATE state) {
                 }
                 glEnable(bTex[1] = GL_TEXTURE_CUBE_MAP_EXT);
 #else
-                glEnable( bTex[1] = GL_TEXTURE_2D );
+                glEnable(bTex[1] = GL_TEXTURE_2D);
 #endif
             }
             break;
@@ -179,7 +177,7 @@ void /*GFXDRVAPI*/ GFXEnable(const STATE state) {
 
 void GFXToggleTexture(bool enable, int whichstage, enum TEXTURE_TARGET target) {
     if ((whichstage < static_cast<int>(gl_options.Multitexture)) || (whichstage == 0)) {
-        GLenum tt = GetGLTextureTarget(target);
+        GLenum tt  = GetGLTextureTarget(target);
         GLenum btt = (enable ? tt : 0);
         if (bTex[whichstage] != btt) {
             GFXActiveTexture(whichstage);
@@ -216,10 +214,10 @@ void /*GFXDRVAPI*/ GFXDisable(const STATE state) {
              *       glDisable (bTex[0]);
              *       bTex[0] = 0;
              *  }*/
-            //NOTE: The above code should be used, but since not all parts of VS use the GFX,
-            //we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
-            //assure correct settings of texture units 1 & 2, both in the GL and their proxy
-            //states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
+            // NOTE: The above code should be used, but since not all parts of VS use the GFX,
+            // we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
+            // assure correct settings of texture units 1 & 2, both in the GL and their proxy
+            // states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
             GFXActiveTexture(0);
 #ifdef NV_CUBE_MAP
             glDisable(GL_TEXTURE_CUBE_MAP_EXT);
@@ -239,10 +237,10 @@ void /*GFXDRVAPI*/ GFXDisable(const STATE state) {
              *   glDisable(bTex[1]);
              *   bTex[1] = 0;
              *  }*/
-            //NOTE: The above code should be used, but since not all parts of VS use the GFX,
-            //we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
-            //assure correct settings of texture units 1 & 2, both in the GL and their proxy
-            //states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
+            // NOTE: The above code should be used, but since not all parts of VS use the GFX,
+            // we will use GFXEnable() / GFXDisable() as syncrhonization methods (they will
+            // assure correct settings of texture units 1 & 2, both in the GL and their proxy
+            // states in the GFX. Those two units are used during GUI rendering bypassing the GFX.
             if (gl_options.Multitexture) {
                 GFXActiveTexture(1);
 #ifdef NV_CUBE_MAP
@@ -272,18 +270,18 @@ void /*GFXDRVAPI*/ GFXDisable(const STATE state) {
 }
 
 #ifndef GL_CLAMP_TO_EDGE_EXT
-#define GL_CLAMP_TO_EDGE_EXT 0x812F
+#    define GL_CLAMP_TO_EDGE_EXT 0x812F
 #endif
 #ifndef GL_CLAMP_TO_BORDER_ARB
-#define GL_CLAMP_TO_BORDER_ARB 0x812D
+#    define GL_CLAMP_TO_BORDER_ARB 0x812D
 #endif
 
 void GFXTextureAddressMode(const ADDRESSMODE mode, enum TEXTURE_TARGET target) {
     if (!_GFXActiveTextureValid()) {
         return;
     }
-    GLenum tt = GetGLTextureTarget(target);
-    float BColor[4] = {0, 0, 0, 0};      //set border color to clear... dunno if we wanna change?
+    GLenum tt        = GetGLTextureTarget(target);
+    float  BColor[4] = {0, 0, 0, 0};  // set border color to clear... dunno if we wanna change?
     GLenum wm1, wm2;
     switch (mode) {
         case DEFAULT_ADDRESS_MODE:
@@ -295,14 +293,14 @@ void GFXTextureAddressMode(const ADDRESSMODE mode, enum TEXTURE_TARGET target) {
             wm1 = GL_CLAMP;
             wm2 = GL_CLAMP_TO_BORDER_ARB;
             glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, BColor);
-            //nobreak
+            // nobreak
         case CLAMP:
             wm1 = GL_CLAMP;
             wm2 = GL_CLAMP_TO_EDGE_EXT;
             break;
-        case MIRROR:     //nope not goin here I hope nVidia extension?
+        case MIRROR:  // nope not goin here I hope nVidia extension?
         default:
-            return;              //won't work
+            return;   // won't work
     }
     glTexParameteri(tt, GL_TEXTURE_WRAP_S, wm1);
     if (target != TEXTURE1D) {
@@ -328,8 +326,7 @@ struct BlendMode {
     BlendMode() {
         sfactor = dfactor = ONE;
     }
-}
-        currBlendMode;
+} currBlendMode;
 
 using std::stack;
 stack<BlendMode> blendstack;
@@ -463,13 +460,13 @@ void GFXDepthFunc(enum DEPTHFUNC dfunc) {
     cur_depth_func = dfunc;
 }
 
-static DEPTHFUNC cur_stencil_func = ALWAYS;
-static int cur_stencil_func_ref = 0;
+static DEPTHFUNC    cur_stencil_func      = ALWAYS;
+static int          cur_stencil_func_ref  = 0;
 static unsigned int cur_stencil_func_mask = ~0;
-static unsigned int cur_stencil_mask = ~0;
-static STENCILOP cur_stencil_op_f = KEEP;
-static STENCILOP cur_stencil_op_zf = KEEP;
-static STENCILOP cur_stencil_op_zp = KEEP;
+static unsigned int cur_stencil_mask      = ~0;
+static STENCILOP    cur_stencil_op_f      = KEEP;
+static STENCILOP    cur_stencil_op_zf     = KEEP;
+static STENCILOP    cur_stencil_op_zp     = KEEP;
 
 enum DEPTHFUNC GFXStencilFunc() {
     return cur_stencil_func;
@@ -518,9 +515,9 @@ void GFXStencilFunc(enum DEPTHFUNC sfunc, int ref, unsigned int mask) {
             func = GL_NEVER;
             break;
     }
-    glStencilFunc(func, (GLint) ref, (GLuint) mask);
-    cur_stencil_func = sfunc;
-    cur_stencil_func_ref = ref;
+    glStencilFunc(func, (GLint)ref, (GLuint)mask);
+    cur_stencil_func      = sfunc;
+    cur_stencil_func_ref  = ref;
     cur_stencil_func_mask = mask;
 }
 
@@ -608,7 +605,7 @@ void GFXStencilOp(enum STENCILOP fail, enum STENCILOP zfail, enum STENCILOP zpas
             break;
     }
     glStencilOp(ffunc, zffunc, zpfunc);
-    cur_stencil_op_f = fail;
+    cur_stencil_op_f  = fail;
     cur_stencil_op_zf = zfail;
     cur_stencil_op_zp = zpass;
 }
@@ -618,7 +615,7 @@ unsigned int GFXStencilMask() {
 }
 
 void GFXStencilMask(unsigned int mask) {
-    glStencilMask((GLuint) mask);
+    glStencilMask((GLuint)mask);
     cur_stencil_mask = mask;
 }
 
@@ -627,7 +624,7 @@ void GFXActiveTexture(const int stage) {
         glActiveTextureARB_p(GL_TEXTURE0_ARB + stage);
         activeTextureStage = stage;
     } else {
-        activeTextureStage = stage;         //This ensures consistent behavior - they shouldn't even call us
+        activeTextureStage = stage;  // This ensures consistent behavior - they shouldn't even call us
     }
 }
 
@@ -668,4 +665,3 @@ void GFXAlphaTest(const enum DEPTHFUNC df, const float ref) {
     }
     glAlphaFunc(tmp, ref);
 }
-

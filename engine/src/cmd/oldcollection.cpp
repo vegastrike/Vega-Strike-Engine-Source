@@ -26,12 +26,13 @@
  */
 
 
+#include <assert.h>
 #include <stdlib.h>
 #include <vector>
+
 #include "cmd/collection.h"
-#include <assert.h>
 #ifndef LIST_TESTING
-#include "cmd/unit_generic.h"
+#    include "cmd/unit_generic.h"
 #endif
 
 UnitCollection::UnitListNode::UnitListNode(Unit *unit) : unit(unit), next(NULL) {
@@ -57,7 +58,7 @@ UnitCollection::UnitListNode::~UnitListNode() {
 void UnitCollection::destr() {
     UnitListNode *tmp;
     while (u->next) {
-        tmp = u->next;
+        tmp     = u->next;
         u->next = u->next->next;
         PushUnusedNode(tmp);
     }
@@ -69,7 +70,7 @@ void UnitCollection::destr() {
 void *UnitCollection::PushUnusedNode(UnitListNode *node) {
     static UnitListNode cat(NULL, NULL);
     static UnitListNode dog(NULL, &cat);
-    static bool cachunk = true;
+    static bool         cachunk = true;
     if (cachunk) {
         cachunk = false;
     }
@@ -85,9 +86,8 @@ void *UnitCollection::PushUnusedNode(UnitListNode *node) {
 
 void UnitCollection::FreeUnusedNodes() {
     static std::vector<UnitCollection::UnitListNode *> bakdogpile;
-    std::vector<UnitCollection::UnitListNode *>
-            *dogpile = (std::vector<UnitCollection::UnitListNode *> *) PushUnusedNode(
-            NULL);
+    std::vector<UnitCollection::UnitListNode *>       *dogpile =
+            (std::vector<UnitCollection::UnitListNode *> *)PushUnusedNode(NULL);
     bakdogpile.swap(*dogpile);
     while (!dogpile->empty()) {
         delete dogpile->back();
@@ -107,9 +107,9 @@ void UnitCollection::UnitIterator::moveBefore(UnitCollection &otherList) {
 
 void UnitCollection::prepend(UnitIterator *iter) {
     UnitListNode *n = u;
-    Unit *tmp;
+    Unit         *tmp;
     while ((tmp = iter->current())) {
-        //iter->current checks for killed()
+        // iter->current checks for killed()
         n->next = new UnitListNode(tmp, n->next);
         iter->advance();
     }
@@ -123,7 +123,7 @@ void UnitCollection::append(UnitIterator *iter) {
     Unit *tmp;
     while ((tmp = iter->current())) {
         n->next = new UnitListNode(tmp, n->next);
-        n = n->next;
+        n       = n->next;
         iter->advance();
     }
 }
@@ -155,8 +155,8 @@ void UnitCollection::FastIterator::postinsert(Unit *unit) {
 void UnitCollection::UnitListNode::Remove() {
     if (next->unit) {
         UnitListNode *tmp = next->next;
-        //delete next; //takes care of unref! And causes a shitload of bugs
-        //concurrent lists, man
+        // delete next; //takes care of unref! And causes a shitload of bugs
+        // concurrent lists, man
         PushUnusedNode(next);
         next = tmp;
     } else {
@@ -180,12 +180,12 @@ void UnitCollection::ConstIterator::GetNextValidUnit() {
 
 const UnitCollection &UnitCollection::operator=(const UnitCollection &uc) {
 #ifdef _DEBUG
-    printf( "warning could cause problems with concurrent lists. Make sure no one is traversing gotten list" );
+    printf("warning could cause problems with concurrent lists. Make sure no one is traversing gotten list");
 #endif
     destr();
     init();
-    un_iter ui = createIterator();
-    const UnitListNode *n = uc.u;
+    un_iter             ui = createIterator();
+    const UnitListNode *n  = uc.u;
     while (n) {
         if (n->unit) {
             ui.postinsert(n->unit);
@@ -198,8 +198,8 @@ const UnitCollection &UnitCollection::operator=(const UnitCollection &uc) {
 
 UnitCollection::UnitCollection(const UnitCollection &uc) : u(NULL) {
     init();
-    un_iter ui = createIterator();
-    const UnitListNode *n = uc.u;
+    un_iter             ui = createIterator();
+    const UnitListNode *n  = uc.u;
     while (n) {
         if (n->unit) {
             ui.postinsert(n->unit);
@@ -241,10 +241,9 @@ bool UnitCollection::remove(const Unit *unit) {
 }
 
 void UnitCollection::cleanup() {
-    //NOTE: advance() will be cleaning up the list by itself
+    // NOTE: advance() will be cleaning up the list by itself
     un_iter ui = createIterator();
     while (!ui.isDone()) {
         ui.advance();
     }
 }
-

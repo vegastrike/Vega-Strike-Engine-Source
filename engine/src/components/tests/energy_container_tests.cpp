@@ -25,14 +25,15 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
 #include <map>
+
+#include <gtest/gtest.h>
 // #include <math.h>
 // #include <utility>
 
-#include "components/energy_container.h"
-#include "components/energy_consumer.h"
 #include "cmd/unit_csv_factory.h"
+#include "components/energy_consumer.h"
+#include "components/energy_container.h"
 
 void printContainer(EnergyContainer& container) {
     std::cout << "Max Level: " << container.MaxLevel();
@@ -47,13 +48,11 @@ TEST(EnergyContainer, Sanity) {
 
     printContainer(container);
 
-    EnergyConsumer consumer = EnergyConsumer(&container,
-                                             false,
-                                             1.0);
+    EnergyConsumer consumer = EnergyConsumer(&container, false, 1.0);
 
 
-    int i=0;
-    while(!container.Depleted() && i < 100) {
+    int i = 0;
+    while (!container.Depleted() && i < 100) {
         std::cout << " Can consume: " << consumer.CanConsume() << std::endl;
         consumer.Consume();
         printContainer(container);
@@ -61,22 +60,21 @@ TEST(EnergyContainer, Sanity) {
     }
 
     // Uncomment to see prints
-    //EXPECT_TRUE(consumer.CanConsume());
+    // EXPECT_TRUE(consumer.CanConsume());
 }
 
-const std::string ship_name = "DummyShip";
+const std::string ship_name      = "DummyShip";
 const std::string capacitor_name = "DummyCapacitor";
 
 static const std::string upgrades_suffix_string = "__upgrades";
-static const std::string capacitor_string = "capacitor";
-static const std::string upgrade_string = "upgrade";
+static const std::string capacitor_string       = "capacitor";
+static const std::string upgrade_string         = "upgrade";
 
-static const std::map<std::string,std::string> capacitor_map = {
-    { "Name", capacitor_name},
-    { "Mass", "5.0"},
-    { "Primary_Capacitor", "10.0" },
+static const std::map<std::string, std::string> capacitor_map = {
+        {"Name", capacitor_name},
+        {"Mass", "5.0"},
+        {"Primary_Capacitor", "10.0"},
 };
-
 
 TEST(EnergyContainer, Upgrade) {
     UnitCSVFactory::LoadUnit(ship_name, capacitor_map);
@@ -87,23 +85,23 @@ TEST(EnergyContainer, Upgrade) {
     ship_capacitor.Load(capacitor_string + upgrades_suffix_string);
 
     // Check Values
-    //EXPECT_EQ(ship_capacitor.GetUpgradeName(), capacitor_name);
-    //EXPECT_EQ(ship_capacitor.GetMass(), 5.0);
+    // EXPECT_EQ(ship_capacitor.GetUpgradeName(), capacitor_name);
+    // EXPECT_EQ(ship_capacitor.GetMass(), 5.0);
 
     EXPECT_EQ(ship_capacitor.Level(), 10.0);
 
     // Downgrade
     ship_capacitor.Downgrade();
 
-    //EXPECT_EQ(ship_capacitor.GetUpgradeName(), "");
-    //EXPECT_EQ(ship_capacitor.GetMass(), 0.0);
+    // EXPECT_EQ(ship_capacitor.GetUpgradeName(), "");
+    // EXPECT_EQ(ship_capacitor.GetMass(), 0.0);
 
     EXPECT_EQ(ship_capacitor.Level(), 0.0);
 
     ship_capacitor.Upgrade(capacitor_string + upgrades_suffix_string);
 
-    //EXPECT_EQ(ship_capacitor.GetUpgradeName(), capacitor_name);
-    //EXPECT_EQ(ship_capacitor.GetMass(), 5.0);
+    // EXPECT_EQ(ship_capacitor.GetUpgradeName(), capacitor_name);
+    // EXPECT_EQ(ship_capacitor.GetMass(), 5.0);
 
     EXPECT_EQ(ship_capacitor.Level(), 10.0);
 }

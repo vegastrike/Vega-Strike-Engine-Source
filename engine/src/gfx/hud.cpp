@@ -25,30 +25,29 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "gfx/hud.h"
+
 #include <cmath>
 #include <cstddef>
-#include <vector>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "configuration/configuration.h"
-#include "gfx/hud.h"
-#include "src/config_xml.h"
 #include "gldrv/mouse_cursor.h"
-
-#include "imgui.h"
 #include "gui/guidefs.h"
-
+#include "imgui.h"
+#include "src/config_xml.h"
 
 float getFontHeight() {
     return configuration().graphics.font_point_flt / configuration().graphics.resolution_y;
 }
 
-TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
-    color = static_cast<ImU32>(c);
+TextPlane::TextPlane(const GFXColor& c, const GFXColor& bgcol) {
+    color            = static_cast<ImU32>(c);
     background_color = static_cast<ImU32>(bgcol);
-    myDims.i = 2;
-    myDims.j = -2;
+    myDims.i         = 2;
+    myDims.j         = -2;
     myFontMetrics.Set(.06, .08, 0);
     SetPos(0, 0);
 }
@@ -58,7 +57,6 @@ TextPlane::~TextPlane() = default;
 int TextPlane::Draw(int offset) {
     return Draw(myText, offset, true, false, true);
 }
-
 
 static unsigned char HexToChar(char a) {
     if (a >= '0' && a <= '9') {
@@ -80,11 +78,7 @@ static float TwoCharToFloat(char a, char b) {
 }
 
 static ImU32 MakeColorU32(float r, float g, float b, float a) {
-    return IM_COL32(
-        int(r * 255.0f),
-        int(g * 255.0f),
-        int(b * 255.0f),
-        int(a * 255.0f));
+    return IM_COL32(int(r * 255.0f), int(g * 255.0f), int(b * 255.0f), int(a * 255.0f));
 }
 
 static void FlushBuffer(std::vector<TextSegment>& segments, std::string& buffer, ImU32 currentColor) {
@@ -97,19 +91,18 @@ static void FlushBuffer(std::vector<TextSegment>& segments, std::string& buffer,
     buffer.clear();
 }
 
-
 std::vector<TextLine> TextPlane::ParseText(const std::string& text, ImU32 default_color) {
-    std::vector<TextLine> lines;
+    std::vector<TextLine>    lines;
     std::vector<TextSegment> segments;
 
-    ImU32 current_color = default_color;
+    ImU32       current_color = default_color;
     std::string buffer;
     std::string current_line;
-    size_t lastWordSeparator = 0;
-    size_t lastWordSeparatorInBuffer = 0;
+    size_t      lastWordSeparator         = 0;
+    size_t      lastWordSeparatorInBuffer = 0;
     // we need a slight margin as otherwise some texts won't fit
     float widthInPixels = Coordinates::normToPixelW(myDims.i) * 1.05f;
-    if(widthInPixels < 0) {
+    if (widthInPixels < 0) {
         widthInPixels = INFINITY;
     }
 
@@ -123,7 +116,7 @@ std::vector<TextLine> TextPlane::ParseText(const std::string& text, ImU32 defaul
         }
 
         if (c == ' ') {
-            lastWordSeparator = i;
+            lastWordSeparator         = i;
             lastWordSeparatorInBuffer = buffer.size();
         }
 
@@ -135,50 +128,50 @@ std::vector<TextLine> TextPlane::ParseText(const std::string& text, ImU32 defaul
             float g = TwoCharToFloat(text[i + 3], text[i + 4]);
             float b = TwoCharToFloat(text[i + 5], text[i + 6]);
 
-            if (r == 0 && g == 0 && b == 0)
+            if (r == 0 && g == 0 && b == 0) {
                 current_color = default_color;
-            else
+            } else {
                 current_color = MakeColorU32(r, g, b, 1.0);
+            }
 
-            i += 6;
-            lastWordSeparator = i;
-            lastWordSeparatorInBuffer = 0;
+            i                         += 6;
+            lastWordSeparator          = i;
+            lastWordSeparatorInBuffer  = 0;
             continue;
         }
 
         // Newline - either because of a newline char or because we are out of space
         const float currentSize = ImGui::CalcTextSize(current_line.c_str()).x;
-        if(c=='\n' || currentSize > widthInPixels) {
+        if (c == '\n' || currentSize > widthInPixels) {
             // if line is too wide and word not too long for the line
-            if( currentSize > widthInPixels && lastWordSeparatorInBuffer > 0 ) {
+            if (currentSize > widthInPixels && lastWordSeparatorInBuffer > 0) {
                 // clear the current incomplete word
                 buffer.resize(lastWordSeparatorInBuffer);
                 FlushBuffer(segments, buffer, current_color);
-            } else if (c=='\n') {
+            } else if (c == '\n') {
                 FlushBuffer(segments, buffer, current_color);
             }
             // keep color when we need to break the line becaus of length, otherwise reset
-            if(c=='\n') {
+            if (c == '\n') {
                 current_color = default_color;
             }
 
             TextLine line;
-            line.width = currentSize;
+            line.width    = currentSize;
             line.segments = segments;
             lines.emplace_back(line);
             segments.clear();
             current_line = "";
 
-            if( currentSize > widthInPixels) {
+            if (currentSize > widthInPixels) {
                 // we go one back to the last word separator to preserve the chars
-                if( lastWordSeparatorInBuffer > 0 ) {
+                if (lastWordSeparatorInBuffer > 0) {
                     i = lastWordSeparator;
                 } else {
                     i--;
                 }
-                
             }
-            lastWordSeparator = i;
+            lastWordSeparator         = i;
             lastWordSeparatorInBuffer = 0;
 
             continue;
@@ -219,20 +212,17 @@ bool isTransparent(ImU32 color) {
     DrawSquare(col, this->myDims.i, row - rowheight * .25, row + rowheight * .75);
 }*/
 
-void drawBackground(ImDrawList* draw_list, ImU32 background_color, 
-                    ImVec2 position, ImVec2 size, bool automatte) {
-    //const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
+void drawBackground(ImDrawList* draw_list, ImU32 background_color, ImVec2 position, ImVec2 size, bool automatte) {
+    // const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
 }
 
-void drawBackgroundAroundText(ImDrawList* draw_list, ImU32 background_color, 
-                              ImVec2 position, std::string text, bool automatte) {
-    ImVec2 text_size = ImGui::CalcTextSize(text.c_str());                        
+void drawBackgroundAroundText(ImDrawList* draw_list, ImU32 background_color, ImVec2 position, std::string text,
+                              bool automatte) {
+    ImVec2 text_size = ImGui::CalcTextSize(text.c_str());
     drawBackground(draw_list, background_color, position, text_size, automatte);
 }
 
-
-
-int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool force_highquality, bool automatte) {
+int TextPlane::Draw(const string& newText, int offset, bool start_lower, bool force_highquality, bool automatte) {
     // Anchor: when a per-text resolution is set, map normalized coords against it and
     // shift by the letterbox offset; otherwise use the legacy native-pixel mapping.
     float anchor_x = 0.0f, anchor_y = 0.0f;
@@ -240,64 +230,60 @@ int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool fo
         anchor_x = Coordinates::normToPixelX(myDims.k, m_resW) + m_offX;
         anchor_y = Coordinates::normToPixelY(myFontMetrics.k, m_resH) + m_offY;
     } else {
-        std::pair<int,int> native = CalculateAbsoluteXY(myDims.k, myFontMetrics.k);
-        anchor_x = static_cast<float>(native.first);
-        anchor_y = static_cast<float>(native.second);
+        std::pair<int, int> native = CalculateAbsoluteXY(myDims.k, myFontMetrics.k);
+        anchor_x                   = static_cast<float>(native.first);
+        anchor_y                   = static_cast<float>(native.second);
     }
     ImVec2 position(anchor_x, anchor_y);
 
     std::vector<TextLine> lines = ParseText(newText, color);
-    ImVec2 text_size;
-    ImDrawList* draw_list = ImGui::GetBackgroundDrawList();
-    const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
-    
-    // Move one line up if not start_lower 
-    if(!start_lower) {
+    ImVec2                text_size;
+    ImDrawList*           draw_list = ImGui::GetBackgroundDrawList();
+    const ImVec2          pad(4.0f, 2.0f);  // TODO: make this variable
+
+    // Move one line up if not start_lower
+    if (!start_lower) {
         // Calculate dummy line, otherwise, text might move several lines down
-        text_size = ImGui::CalcTextSize("hello world");
+        text_size   = ImGui::CalcTextSize("hello world");
         position.y -= text_size.y;
     }
 
     // Clipping coords to avoid overrunning text
-    // ImVec4 clipRect(position.x, position.y - 5, position.x + Coordinates::normToPixelW(myDims.i), position.y + Coordinates::normToPixelH(myDims.y) + 10);
-    // debug rectangle for clipping
-    // ImGui::GetForegroundDrawList()->AddRect(ImVec2(clipRect.x, clipRect.y), ImVec2(clipRect.z, clipRect.w), IM_COL32(255, 0, 0, 255));
+    // ImVec4 clipRect(position.x, position.y - 5, position.x + Coordinates::normToPixelW(myDims.i), position.y +
+    // Coordinates::normToPixelH(myDims.y) + 10); debug rectangle for clipping
+    // ImGui::GetForegroundDrawList()->AddRect(ImVec2(clipRect.x, clipRect.y), ImVec2(clipRect.z, clipRect.w),
+    // IM_COL32(255, 0, 0, 255));
 
     for (TextLine& line : lines) {
-        for(TextSegment& segment : line.segments) {
+        for (TextSegment& segment : line.segments) {
             text_size = ImGui::CalcTextSize(segment.text.c_str());
 
             // Background rectangle
-            if(!isTransparent(background_color) && !automatte) {
+            if (!isTransparent(background_color) && !automatte) {
                 // Need these because we pass a reference
                 // Need explicit construction because ImVec2 did not overload arithmetic operators
                 // TODO: add this to imgui
-                
-                const ImVec2 start_position(position.x - pad.x, position.y - pad.y);
-                const ImVec2 end_position(position.x + text_size.x + pad.x, position.y +text_size.y + pad.y);
-                draw_list->AddRectFilled(
-                    start_position,
-                    end_position,
-                    background_color,
-                    0.0f // No rounded borders
-                );
 
+                const ImVec2 start_position(position.x - pad.x, position.y - pad.y);
+                const ImVec2 end_position(position.x + text_size.x + pad.x, position.y + text_size.y + pad.y);
+                draw_list->AddRectFilled(start_position, end_position, background_color,
+                                         0.0f  // No rounded borders
+                );
             }
 
             // FIXME last param should be proper cliprect
             draw_list->AddText(nullptr, 0.0f, position, segment.color, segment.text.c_str(), nullptr, 0.0f, nullptr);
-             
+
             position.x += text_size.x;
         }
 
-        if(line.segments.empty()) {
-           text_size = ImGui::CalcTextSize("hello world"); 
+        if (line.segments.empty()) {
+            text_size = ImGui::CalcTextSize("hello world");
         }
 
         position.y += text_size.y;
-        position.x = anchor_x;
+        position.x  = anchor_x;
     }
 
     return 1;
 }
-

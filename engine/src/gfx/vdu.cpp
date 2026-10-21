@@ -32,57 +32,56 @@
 
 #include "gfx/vdu.h"
 
-#include "src/vega_cast_utils.h"
-#include "cmd/unit_util.h"
-#include "gfx/hud.h"
-#include "root_generic/vs_globals.h"
-#include "gfx/cockpit.h"
-#include "cmd/script/mission.h"
-#include "cmd/script/flightgroup.h"
-#include "cmd/script/msgcenter.h"
-#include "cmd/images.h"
-#include "cmd/planet.h"
-#include "cmd/beam.h"
-#include "root_generic/xml_support.h"
-#include "gfx/animation.h"
-#include "root_generic/galaxy_gen.h"
-#include "src/universe_util.h"
-#include "vegadisk/vsfilesystem.h"
 #include "cmd/ai/communication.h"
-#include "src/universe.h"
-#include "cmd/mount_size.h"
-#include "cmd/weapon_info.h"
-#include "configuration/configuration.h"
-#include "components/ship_functions.h"
+#include "cmd/beam.h"
 #include "cmd/dock_utils.h"
-#include "root_generic/configxml.h"
+#include "cmd/images.h"
+#include "cmd/mount_size.h"
+#include "cmd/planet.h"
+#include "cmd/script/flightgroup.h"
+#include "cmd/script/mission.h"
+#include "cmd/script/msgcenter.h"
+#include "cmd/unit_util.h"
+#include "cmd/weapon_info.h"
+#include "components/ship_functions.h"
+#include "configuration/configuration.h"
+#include "gfx/animation.h"
+#include "gfx/cockpit.h"
+#include "gfx/hud.h"
 #include "gldrv/mouse_cursor.h"
 #include "imgui.h"
+#include "root_generic/configxml.h"
+#include "root_generic/galaxy_gen.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/universe.h"
+#include "src/universe_util.h"
+#include "src/vega_cast_utils.h"
+#include "vegadisk/vsfilesystem.h"
 
-template<typename T>
+template <typename T>
 inline T mymin(T a, T b) {
     return (a < b) ? a : b;
 }
 
-template<typename T>
+template <typename T>
 inline T mymax(T a, T b) {
     return (a > b) ? a : b;
 }
 
 bool VDU::staticable() const {
-    unsigned int thismode = getMode();
-    const bool only_scanner_modes_static = configuration().graphics.only_scanner_modes_static;
-    if (thismode != COMM && thismode != TARGETMANIFEST && thismode != TARGET && thismode != NAV && thismode != VIEW
-            && thismode != WEBCAM && only_scanner_modes_static) {
+    unsigned int thismode                  = getMode();
+    const bool   only_scanner_modes_static = configuration().graphics.only_scanner_modes_static;
+    if (thismode != COMM && thismode != TARGETMANIFEST && thismode != TARGET && thismode != NAV && thismode != VIEW &&
+        thismode != WEBCAM && only_scanner_modes_static) {
         return false;
     }
-    return (posmodes & (posmodes - 1)) != 0;       //check not power of two
+    return (posmodes & (posmodes - 1)) != 0;  // check not power of two
 }
 
-///ALERT to change must change enum in class
-const std::string vdu_modes[] =
-        {"Target", "Nav", "Objectives", "Comm", "Weapon", "Damage", "Shield", "Manifest", "TargetManifest", "View",
-                "Message"};
+/// ALERT to change must change enum in class
+const std::string vdu_modes[] = {"Target", "Nav",      "Objectives",     "Comm", "Weapon", "Damage",
+                                 "Shield", "Manifest", "TargetManifest", "View", "Message"};
 
 string reformatName(string nam) {
     nam = nam.substr(0, nam.find("."));
@@ -95,21 +94,21 @@ string reformatName(string nam) {
 string getUnitNameAndFgNoBase(Unit *target) {
     Flightgroup *fg = target->getFlightgroup();
     if (target->getUnitType() == Vega_UnitType::planet) {
-        string hr = ((Planet *) target)->getHumanReadablePlanetType();
+        string hr = ((Planet *)target)->getHumanReadablePlanetType();
         if (!hr.empty()) {
             return hr + string(":") + reformatName(target->name);
         }
     } else if (target->getUnitType() == Vega_UnitType::unit) {
         if (fg) {
-            int fgsnumber = target->getFgSubnumber();
-            string fgnstring = XMLSupport::tostring(fgsnumber);
+            int        fgsnumber       = target->getFgSubnumber();
+            string     fgnstring       = XMLSupport::tostring(fgsnumber);
             const bool print_fg_sub_id = configuration().graphics.hud.print_fg_sub_id;
-            string fgname;
+            string     fgname;
             if (fg->name != "Base" && fg->name != "Asteroid" && fg->name != "Nebula") {
                 const bool print_ship_type = configuration().graphics.hud.print_ship_type;
                 if (configuration().graphics.hud.print_fg_name) {
-                    fgname += fg->name
-                            + (print_ship_type ? ((print_fg_sub_id && (!fgnstring.empty())) ? " =" : " : ") : "");
+                    fgname += fg->name +
+                              (print_ship_type ? ((print_fg_sub_id && (!fgnstring.empty())) ? " =" : " : ") : "");
                 }
                 if (print_fg_sub_id && ("" != fgnstring)) {
                     fgname += fgnstring + "= ";
@@ -119,7 +118,8 @@ string getUnitNameAndFgNoBase(Unit *target) {
                 }
                 return fgname;
             } else if (fg->name == "Base") {
-                if (configuration().graphics.hud.basename_colon_basename == false || reformatName(target->name) == (reformatName(target->getFullname()))) {
+                if (configuration().graphics.hud.basename_colon_basename == false ||
+                    reformatName(target->name) == (reformatName(target->getFullname()))) {
                     std::string retval(reformatName(target->getFullname()));
                     if (print_fg_sub_id && ("" != fgnstring)) {
                         retval += " : " + fgnstring;
@@ -127,9 +127,8 @@ string getUnitNameAndFgNoBase(Unit *target) {
                     return retval;
                 } else {
                     if (reformatName(target->name) == (reformatName(target->getFullname()))) {
-                        std::string retval(reformatName(
-                                target->name) + " "
-                                + ((print_fg_sub_id && ("" != fgnstring)) ? (": " + fgnstring) : ""));
+                        std::string retval(reformatName(target->name) + " " +
+                                           ((print_fg_sub_id && ("" != fgnstring)) ? (": " + fgnstring) : ""));
                         return retval;
                     } else {
                         std::string retval(reformatName(target->name) + " : " + target->getFullname());
@@ -144,11 +143,11 @@ string getUnitNameAndFgNoBase(Unit *target) {
 
 int vdu_lookup(char *&s) {
 #ifdef _MSC_VER
-#define strcasecmp stricmp
+#    define strcasecmp stricmp
 #endif
-    int retval = 0;
-    char *t = strdup(s);
-    int i;
+    int   retval = 0;
+    char *t      = strdup(s);
+    int   i;
     for (i = 0; t[i] != '\0'; i++) {
         if (isspace(t[i])) {
             s += i + 1;
@@ -169,9 +168,9 @@ int vdu_lookup(char *&s) {
 }
 
 int parse_vdu_type(const char *x) {
-    char *mystr = strdup(x);
-    char *s = mystr;
-    int retval = 0;
+    char *mystr  = strdup(x);
+    char *s      = mystr;
+    int   retval = 0;
     while (s[0] != '\0') {
         retval |= vdu_lookup(s);
     }
@@ -179,24 +178,22 @@ int parse_vdu_type(const char *x) {
     return retval;
 }
 
-VDU::VDU(const char *file, TextPlane *textp, unsigned short modes, short rwws, short clls) : VSSprite(file), tp(textp), posmodes(modes), rows(rwws), cols(clls), scrolloffset(0) {
+VDU::VDU(const char *file, TextPlane *textp, unsigned short modes, short rwws, short clls)
+    : VSSprite(file), tp(textp), posmodes(modes), rows(rwws), cols(clls), scrolloffset(0) {
     thismode.push_back(MSG);
     if (_Universe->numPlayers() > 1) {
         posmodes &= (~VIEW);
     }
-    comm_ani = NULL;
-    viewStyle = CP_TARGET;
+    comm_ani        = NULL;
+    viewStyle       = CP_TARGET;
     got_target_info = true;
     SwitchMode(NULL);
 }
 
 GFXColor getDamageColor(float armor, bool gradient = false) {
-    static GFXColor damaged = vs_config->getColor("default", "hud_target_damaged",
-            GFXColor(1, 0, 0, 1));
-    static GFXColor half_damaged = vs_config->getColor("default", "hud_target_half_damaged",
-            GFXColor(1, 1, 0, 1));
-    static GFXColor full = vs_config->getColor("default", "hud_target_full",
-            GFXColor(1, 1, 1, 1));
+    static GFXColor damaged      = vs_config->getColor("default", "hud_target_damaged", GFXColor(1, 0, 0, 1));
+    static GFXColor half_damaged = vs_config->getColor("default", "hud_target_half_damaged", GFXColor(1, 1, 0, 1));
+    static GFXColor full         = vs_config->getColor("default", "hud_target_full", GFXColor(1, 1, 1, 1));
     if (armor >= .9) {
         return full;
     }
@@ -207,30 +204,18 @@ GFXColor getDamageColor(float armor, bool gradient = false) {
     return colLerp(damaged, half_damaged, avghalf);
 }
 
-static void DrawHUDSprite(VDU *thus,
-        VSSprite *s,
-        float per,
-        float &sx,
-        float &sy,
-        float &w,
-        float &h,
-        float aup,
-        float aright,
-        float aleft,
-        float adown,
-        float hull,
-        bool drawsprite,
-        bool invertsprite) {
+static void DrawHUDSprite(VDU *thus, VSSprite *s, float per, float &sx, float &sy, float &w, float &h, float aup,
+                          float aright, float aleft, float adown, float hull, bool drawsprite, bool invertsprite) {
     const bool HighQTargetVSSprites = configuration().graphics.high_quality_sprites;
-    float nw, nh;
+    float      nw, nh;
     thus->GetPosition(sx, sy);
     thus->GetSize(w, h);
 
-    //Use margins specified from config file
-    const float width_factor = configuration().graphics.reduced_vdus_width_flt;
+    // Use margins specified from config file
+    const float width_factor  = configuration().graphics.reduced_vdus_width_flt;
     const float height_factor = configuration().graphics.reduced_vdus_height_flt;
-    w = w - width_factor;
-    h = h + height_factor;
+    w                         = w - width_factor;
+    h                         = h + height_factor;
 
     h = -fabs(h * per);
     if (!s) {
@@ -249,17 +234,17 @@ static void DrawHUDSprite(VDU *thus,
         s->SetSize(w, invertsprite ? -h : h);
         Texture *spritetex = s->getTexture();
         if (drawsprite && spritetex) {
-            const float middle_point = configuration().graphics.hud.armor_hull_size_flt;
-            const bool top_view = configuration().graphics.hud.top_view;
+            const float middle_point       = configuration().graphics.hud.armor_hull_size_flt;
+            const bool  top_view           = configuration().graphics.hud.top_view;
             const float middle_point_small = 1.0F - middle_point;
-            Vector ll, lr, ur, ul, mll, mlr, mur, mul;
+            Vector      ll, lr, ur, ul, mll, mlr, mur, mul;
             spritetex->MakeActive();
             GFXDisable(CULLFACE);
             s->DrawHere(ll, lr, ur, ul);
-            mll = middle_point * ll + middle_point_small * ur;
-            mlr = middle_point * lr + middle_point_small * ul;
-            mur = middle_point * ur + middle_point_small * ll;
-            mul = middle_point * ul + middle_point_small * lr;
+            mll                 = middle_point * ll + middle_point_small * ur;
+            mlr                 = middle_point * lr + middle_point_small * ul;
+            mur                 = middle_point * ur + middle_point_small * ll;
+            mul                 = middle_point * ul + middle_point_small * lr;
             const GFXColor c[9] = {
                     getDamageColor(top_view ? adown : aleft),
                     getDamageColor(top_view ? adown : aup),
@@ -272,30 +257,190 @@ static void DrawHUDSprite(VDU *thus,
                     getDamageColor(aleft),
             };
             const float verts[20 * (3 + 4 + 2)] = {
-                    ul.x, ul.y, ul.z, c[0].r, c[0].g, c[0].b, c[0].a, 0.0f, 0.0f,
-                    ur.x, ur.y, ur.z, c[1].r, c[1].g, c[1].b, c[1].a, 1.0f, 0.0f,
-                    mur.x, mur.y, mur.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point_small,
-                    mul.x, mul.y, mul.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point_small,
+                    ul.x,
+                    ul.y,
+                    ul.z,
+                    c[0].r,
+                    c[0].g,
+                    c[0].b,
+                    c[0].a,
+                    0.0f,
+                    0.0f,
+                    ur.x,
+                    ur.y,
+                    ur.z,
+                    c[1].r,
+                    c[1].g,
+                    c[1].b,
+                    c[1].a,
+                    1.0f,
+                    0.0f,
+                    mur.x,
+                    mur.y,
+                    mur.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point,
+                    middle_point_small,
+                    mul.x,
+                    mul.y,
+                    mul.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point_small,
+                    middle_point_small,
 
-                    ur.x, ur.y, ur.z, c[3].r, c[3].g, c[3].b, c[3].a, 1.0f, 0.0f,
-                    lr.x, lr.y, lr.z, c[4].r, c[4].g, c[4].b, c[4].a, 1.0f, 1.0f,
-                    mlr.x, mlr.y, mlr.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point,
-                    mur.x, mur.y, mur.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point_small,
+                    ur.x,
+                    ur.y,
+                    ur.z,
+                    c[3].r,
+                    c[3].g,
+                    c[3].b,
+                    c[3].a,
+                    1.0f,
+                    0.0f,
+                    lr.x,
+                    lr.y,
+                    lr.z,
+                    c[4].r,
+                    c[4].g,
+                    c[4].b,
+                    c[4].a,
+                    1.0f,
+                    1.0f,
+                    mlr.x,
+                    mlr.y,
+                    mlr.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point,
+                    middle_point,
+                    mur.x,
+                    mur.y,
+                    mur.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point,
+                    middle_point_small,
 
-                    lr.x, lr.y, lr.z, c[5].r, c[5].g, c[5].b, c[5].a, 1.0f, 1.0f,
-                    ll.x, ll.y, ll.z, c[6].r, c[6].g, c[6].b, c[6].a, 0.0f, 1.0f,
-                    mll.x, mll.y, mll.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point,
-                    mlr.x, mlr.y, mlr.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point,
+                    lr.x,
+                    lr.y,
+                    lr.z,
+                    c[5].r,
+                    c[5].g,
+                    c[5].b,
+                    c[5].a,
+                    1.0f,
+                    1.0f,
+                    ll.x,
+                    ll.y,
+                    ll.z,
+                    c[6].r,
+                    c[6].g,
+                    c[6].b,
+                    c[6].a,
+                    0.0f,
+                    1.0f,
+                    mll.x,
+                    mll.y,
+                    mll.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point_small,
+                    middle_point,
+                    mlr.x,
+                    mlr.y,
+                    mlr.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point,
+                    middle_point,
 
-                    ll.x, ll.y, ll.z, c[7].r, c[7].g, c[7].b, c[7].a, 0.0f, 1.0f,
-                    ul.x, ul.y, ul.z, c[8].r, c[8].g, c[8].b, c[8].a, 0.0f, 0.0f,
-                    mul.x, mul.y, mul.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point_small,
-                    mll.x, mll.y, mll.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point,
+                    ll.x,
+                    ll.y,
+                    ll.z,
+                    c[7].r,
+                    c[7].g,
+                    c[7].b,
+                    c[7].a,
+                    0.0f,
+                    1.0f,
+                    ul.x,
+                    ul.y,
+                    ul.z,
+                    c[8].r,
+                    c[8].g,
+                    c[8].b,
+                    c[8].a,
+                    0.0f,
+                    0.0f,
+                    mul.x,
+                    mul.y,
+                    mul.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point_small,
+                    middle_point_small,
+                    mll.x,
+                    mll.y,
+                    mll.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point_small,
+                    middle_point,
 
-                    mul.x, mul.y, mul.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point_small,
-                    mur.x, mur.y, mur.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point_small,
-                    mlr.x, mlr.y, mlr.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point, middle_point,
-                    mll.x, mll.y, mll.z, c[2].r, c[2].g, c[2].b, c[2].a, middle_point_small, middle_point,
+                    mul.x,
+                    mul.y,
+                    mul.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point_small,
+                    middle_point_small,
+                    mur.x,
+                    mur.y,
+                    mur.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point,
+                    middle_point_small,
+                    mlr.x,
+                    mlr.y,
+                    mlr.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point,
+                    middle_point,
+                    mll.x,
+                    mll.y,
+                    mll.z,
+                    c[2].r,
+                    c[2].g,
+                    c[2].b,
+                    c[2].a,
+                    middle_point_small,
+                    middle_point,
             };
             GFXDraw(GFXQUAD, verts, 20, 3, 4, 2);
             GFXEnable(CULLFACE);
@@ -320,36 +465,23 @@ void VDU::Scroll(int howmuch) {
 
 #define MangleString(a, b) (a)
 
-
-static void DrawShield(float fs,
-        float rs,
-        float ls,
-        float bs,
-        float x,
-        float y,
-        float w,
-        float h,
-        bool invert,
-        GFXColor outershield,
-        GFXColor middleshield,
-        GFXColor innershield) {
-    //FIXME why is this static?
+static void DrawShield(float fs, float rs, float ls, float bs, float x, float y, float w, float h, bool invert,
+                       GFXColor outershield, GFXColor middleshield, GFXColor innershield) {
+    // FIXME why is this static?
 
     if (invert) {
         float tmp = fs;
-        fs = bs;
-        bs = tmp;
+        fs        = bs;
+        bs        = tmp;
     }
-    GFXColor shcolor[4][3] = {
-            {innershield, middleshield, outershield},
-            {innershield, middleshield, outershield},
-            {innershield, middleshield, outershield},
-            {innershield, middleshield, outershield}
-    };
-    float shthresh[3] = {
-        configuration().graphics.hud.shield_vdu_thresh0_flt,
-        configuration().graphics.hud.shield_vdu_thresh1_flt,
-        configuration().graphics.hud.shield_vdu_thresh2_flt,
+    GFXColor shcolor[4][3] = {{innershield, middleshield, outershield},
+                              {innershield, middleshield, outershield},
+                              {innershield, middleshield, outershield},
+                              {innershield, middleshield, outershield}};
+    float    shthresh[3]   = {
+            configuration().graphics.hud.shield_vdu_thresh0_flt,
+            configuration().graphics.hud.shield_vdu_thresh1_flt,
+            configuration().graphics.hud.shield_vdu_thresh2_flt,
     };
 
     float shtrans[3] = {1.0f, 1.0f, 1.0f};
@@ -481,7 +613,7 @@ void VDU::DrawVDUShield(Unit *parent) {
     float x, y, w, h;
     GetPosition(x, y);
     GetSize(w, h);
-    //Use margins specified from config file
+    // Use margins specified from config file
     w = w - configuration().graphics.reduced_vdus_width_flt;
     h = h + configuration().graphics.reduced_vdus_height_flt;
 
@@ -493,22 +625,20 @@ void VDU::DrawVDUShield(Unit *parent) {
     GFXEnable(TEXTURE0);
     GFXColor4f(1, hull_percent, hull_percent, 1);
     const bool invert_friendly_sprite = configuration().graphics.hud.invert_friendly_sprite;
-    DrawHUDSprite(this, parent->getHudImage(), .25, x, y, w, h, hull_percent,
-            hull_percent, hull_percent, hull_percent,
-            hull_percent, true, invert_friendly_sprite);
+    DrawHUDSprite(this, parent->getHudImage(), .25, x, y, w, h, hull_percent, hull_percent, hull_percent, hull_percent,
+                  hull_percent, true, invert_friendly_sprite);
 }
 
 // TODO: make into function
 #define RETURN_STATIC_SPRITE(name)            \
-    do {                                        \
-        static VSSprite s( name ".sprite" );    \
-        static VSSprite sCompat( name ".spr" ); \
-        if ( s.LoadSuccess() )                  \
-            return &s;                          \
-        else                                    \
-            return &sCompat;                    \
-    }                                           \
-    while (0)
+    do {                                      \
+        static VSSprite s(name ".sprite");    \
+        static VSSprite sCompat(name ".spr"); \
+        if (s.LoadSuccess())                  \
+            return &s;                        \
+        else                                  \
+            return &sCompat;                  \
+    } while (0)
 
 VSSprite *getTargetQuadShield() {
     RETURN_STATIC_SPRITE("shield_quad");
@@ -533,7 +663,6 @@ VSSprite *getPlanetImage() {
 VSSprite *getNavImage() {
     RETURN_STATIC_SPRITE("nav-hud");
 }
-
 
 static float OneOfFour(float a, float b, float c, float d) {
     int aa = a != 0 ? 1 : 0;
@@ -578,23 +707,23 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     GFXEnable(TEXTURE0);
     const bool invert_target_sprite = configuration().graphics.hud.invert_target_sprite;
 
-    float armor_up = target->armor.Percent(Armor::front);
-    float armor_down = target->armor.Percent(Armor::back);
-    float armor_left = target->armor.Percent(Armor::right);
+    float armor_up    = target->armor.Percent(Armor::front);
+    float armor_down  = target->armor.Percent(Armor::back);
+    float armor_left  = target->armor.Percent(Armor::right);
     float armor_right = target->armor.Percent(Armor::left);
     if (target->getUnitType() == Vega_UnitType::planet) {
         armor_up = armor_down = armor_left = armor_right = target->hull.Percent();
     }
 
-    VSSprite* vs_sprite;
-    VSSprite* hud_image = target->getHudImage();
+    VSSprite     *vs_sprite;
+    VSSprite     *hud_image = target->getHudImage();
     Vega_UnitType unit_type = target->getUnitType();
     if (hud_image) {
         vs_sprite = hud_image;
     } else if (!target->GetDestinations().empty()) {
         vs_sprite = getJumpImage();
     } else if (unit_type == Vega_UnitType::planet) {
-        const Planet * target_as_planet = vega_dynamic_const_cast_ptr<const Planet>(target);
+        const Planet *target_as_planet = vega_dynamic_const_cast_ptr<const Planet>(target);
         if (target_as_planet->hasLights()) {
             vs_sprite = getSunImage();
         } else if (target_as_planet->is_nav_point()) {
@@ -605,28 +734,16 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     } else {
         vs_sprite = getPlanetImage();
     }
-    DrawHUDSprite(this,
-                  vs_sprite,
-                  .6,
-                  x,
-                  y,
-                  w,
-                  h,
-                  armor_up,
-                  armor_right,
-                  armor_left,
-                  armor_down,
-                  target->hull.Percent(),
-                  true,
-                  invert_target_sprite);
+    DrawHUDSprite(this, vs_sprite, .6, x, y, w, h, armor_up, armor_right, armor_left, armor_down,
+                  target->hull.Percent(), true, invert_target_sprite);
 
     GFXDisable(TEXTURE0);
-    //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
-    double mm = 0;
-    string unitandfg = getUnitNameAndFgNoBase(target);
+    // sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
+    double     mm                      = 0;
+    string     unitandfg               = getUnitNameAndFgNoBase(target);
     const bool out_of_cone_information = configuration().graphics.hud.out_of_cone_distance;
-    bool inrange = parent->InRange(target, mm, out_of_cone_information == false && !UnitUtil::isSignificant(
-            target), false, false);
+    bool inrange = parent->InRange(target, mm, out_of_cone_information == false && !UnitUtil::isSignificant(target),
+                                   false, false);
     if (inrange) {
         static int neut = FactionUtil::GetFactionIndex("neutral");
         static int upgr = FactionUtil::GetFactionIndex("upgrades");
@@ -636,11 +753,11 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
             }
         }
     }
-    unitandfg += std::string("\n");
-    unitandfg += cp->getTargetLabel();
-    const float auto_message_lim = configuration().graphics.auto_message_time_lim_flt;
-    float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;
-    bool draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
+    unitandfg                     += std::string("\n");
+    unitandfg                     += cp->getTargetLabel();
+    const float auto_message_lim   = configuration().graphics.auto_message_time_lim_flt;
+    float       delautotime        = UniverseUtil::GetGameTime() - cp->autoMessageTime;
+    bool        draw_auto_message  = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
 
     // One text flow down the VDU: unit name/faction/label, then the range and any
     // docking text beneath it. No newline-padding to push text to the bottom.
@@ -654,9 +771,9 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
         if (draw_auto_message) {
             display += "\n" + cp->autoMessage;
         }
-        const double actual_range = DistanceTwoTargets(parent, target);
-        display += string("\nRange: ") + PrettyDistanceString(actual_range);
-        const std::string docking = GetDockingText(parent, target, actual_range);
+        const double actual_range  = DistanceTwoTargets(parent, target);
+        display                   += string("\nRange: ") + PrettyDistanceString(actual_range);
+        const std::string docking  = GetDockingText(parent, target, actual_range);
         if (!docking.empty()) {
             display += "\n" + docking;
         }
@@ -667,41 +784,35 @@ void VDU::DrawTarget(GameCockpit *cp, Unit *parent, Unit *target) {
     }
 
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(tp->background_color);
-    bool automatte = (0 == tpbg.a);
+    GFXColor    tpbg(tp->background_color);
+    bool        automatte = (0 == tpbg.a);
     if (automatte) {
-        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        GFXColor temp_background_color(0, 0, 0, background_alpha);
         tp->background_color = static_cast<ImU32>(temp_background_color);
     }
-    tp->Draw(MangleString(display, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
-            0,
-            true,
-            false,
-            automatte);
+    tp->Draw(MangleString(display, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
     tp->background_color = static_cast<ImU32>(tpbg);
     if (inrange) {
         static float ishieldcolor[4] = {.4, .4, 1, 1};
         static float mshieldcolor[4] = {.4, .4, 1, 1};
         static float oshieldcolor[4] = {.4, .4, 1, 1};
-        //code replaced by target shields defined in cockpit.cpt files, preserve for mods
+        // code replaced by target shields defined in cockpit.cpt files, preserve for mods
         const bool builtin_shields = configuration().graphics.vdu_builtin_shields;
         if (builtin_shields) {
-            DrawShield(target->shield.Percent(Shield::front),
-            target->shield.Percent(Shield::right),
-            target->shield.Percent(Shield::left),
-            target->shield.Percent(Shield::back), x, y, w, h, false,
-                    GFXColor(ishieldcolor[0], ishieldcolor[1], ishieldcolor[2], ishieldcolor[3]),
-                    GFXColor(mshieldcolor[0], mshieldcolor[1], mshieldcolor[2], mshieldcolor[3]),
-                    GFXColor(oshieldcolor[0], oshieldcolor[1], oshieldcolor[2], oshieldcolor[3]));
+            DrawShield(target->shield.Percent(Shield::front), target->shield.Percent(Shield::right),
+                       target->shield.Percent(Shield::left), target->shield.Percent(Shield::back), x, y, w, h, false,
+                       GFXColor(ishieldcolor[0], ishieldcolor[1], ishieldcolor[2], ishieldcolor[3]),
+                       GFXColor(mshieldcolor[0], mshieldcolor[1], mshieldcolor[2], mshieldcolor[3]),
+                       GFXColor(oshieldcolor[0], oshieldcolor[1], oshieldcolor[2], oshieldcolor[3]));
         }
-        //this is a possibility to draw target shields but without gauging
-        //the gauging method is implemented in cockpit.cpp
-/*  if (target->isUnit()!=Vega_UnitType::planet) {
- *   GFXEnable (TEXTURE0);
- *   //Dev:GFXColor4f (1,target->GetHullPercent(),target->GetHullPercent(),1);
- *   DrawHUDSprite(this,getTargetQuadShield(),0.9,x,y,w,h,fs,rs,ls,bs,target->GetHullPercent(),true,invert_target_sprite);
- *   GFXDisable (TEXTURE0);
- *  }*/
+        // this is a possibility to draw target shields but without gauging
+        // the gauging method is implemented in cockpit.cpp
+        /*  if (target->isUnit()!=Vega_UnitType::planet) {
+         *   GFXEnable (TEXTURE0);
+         *   //Dev:GFXColor4f (1,target->GetHullPercent(),target->GetHullPercent(),1);
+         *   DrawHUDSprite(this,getTargetQuadShield(),0.9,x,y,w,h,fs,rs,ls,bs,target->GetHullPercent(),true,invert_target_sprite);
+         *   GFXDisable (TEXTURE0);
+         *  }*/
         GFXColor4f(1, 1, 1, 1);
     }
 }
@@ -714,43 +825,41 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
     }
 
     string fullstr;
-    double nowtime = mission->getGametime(); //for message display duration
+    double nowtime = mission->getGametime();  // for message display duration
 
     string targetstr;
-    //int    msglen      = targetstr.size();
-    int rows_needed = 0;  //msglen/(cols>0?cols:1);
-    MessageCenter *mc = mission->msgcenter;
-    int rows_used = rows_needed;
+    // int    msglen      = targetstr.size();
+    int                 rows_needed = 0;  // msglen/(cols>0?cols:1);
+    MessageCenter      *mc          = mission->msgcenter;
+    int                 rows_used   = rows_needed;
     vector<std::string> whoNOT;
     whoNOT.push_back("briefing");
     whoNOT.push_back("news");
     whoNOT.push_back("bar");
 
-    const float oldtime = configuration().graphics.last_message_time_flt;
-    const int num_messages = configuration().graphics.num_messages;
-    const bool showStardate = configuration().graphics.show_stardate;
+    const float oldtime      = configuration().graphics.last_message_time_flt;
+    const int   num_messages = configuration().graphics.num_messages;
+    const bool  showStardate = configuration().graphics.show_stardate;
 
-    vector<std::string> message_people;     //should be "all", parent's name
-    gameMessage lastmsg;
-    int row_lim = ((scrolloffset < 0 || num_messages > rows) ? rows : num_messages);
+    vector<std::string> message_people;  // should be "all", parent's name
+    gameMessage         lastmsg;
+    int                 row_lim = ((scrolloffset < 0 || num_messages > rows) ? rows : num_messages);
 
     for (int i = scrolloffset < 0 ? -scrolloffset - 1 : 0;
-            rows_used < row_lim && mc->last(i, lastmsg, message_people, whoNOT);
-            i++) {
-        char timebuf[100];
+         rows_used < row_lim && mc->last(i, lastmsg, message_people, whoNOT); i++) {
+        char   timebuf[100];
         double sendtime = lastmsg.time;
         if (scrolloffset >= 0 && sendtime < nowtime - oldtime * 4) {
             break;
         }
         if (sendtime <= nowtime && (sendtime > nowtime - oldtime || scrolloffset < 0)) {
             if (showStardate) {
-                string stardate = _Universe->current_stardate
-                        .ConvertFullTrekDate(
-                                sendtime + _Universe->current_stardate.GetElapsedStarTime());
+                string stardate = _Universe->current_stardate.ConvertFullTrekDate(
+                        sendtime + _Universe->current_stardate.GetElapsedStarTime());
                 sprintf(timebuf, "%s", stardate.c_str());
             } else {
-                int sendtime_mins = (int) (sendtime / 60.0);
-                int sendtime_secs = (int) (sendtime - sendtime_mins * 60);
+                int sendtime_mins = (int)(sendtime / 60.0);
+                int sendtime_secs = (int)(sendtime - sendtime_mins * 60);
                 sprintf(timebuf, "%d.%02d", sendtime_mins, sendtime_secs);
             }
 
@@ -760,16 +869,16 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
             } else {
                 mymsg = string(timebuf) + ": " + lastmsg.message;
             }
-            int msglen = mymsg.size();
-            int rows_needed = (int) (msglen / (1.6 * cols));
-            fullstr = mymsg + "\n" + fullstr;
-            //fullstr=fullstr+mymsg+"\n";
+            int msglen      = mymsg.size();
+            int rows_needed = (int)(msglen / (1.6 * cols));
+            fullstr         = mymsg + "\n" + fullstr;
+            // fullstr=fullstr+mymsg+"\n";
 
             rows_used += rows_needed + 1;
         }
     }
     static std::string newline("\n");
-    std::string textMessage = parentcp->textMessage;
+    std::string        textMessage = parentcp->textMessage;
     if (parentcp->editingTextMessage) {
         textMessage = "Chat> " + textMessage;
         if (floor(nowtime / 2) != floor(nowtime) / 2.0) {
@@ -792,7 +901,7 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
         fullstr += newline;
     }
     const std::string message_prefix = configuration().graphics.hud.message_prefix;
-    fullstr = targetstr + fullstr;
+    fullstr                          = targetstr + fullstr;
 
     // The Message VDU's shared text-plane width (set in VDU::Draw from the sprite
     // geometry) is quite narrow, so long messages wrap onto many lines and overlap.
@@ -803,7 +912,7 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
         float cw = 0.0f, ch = 0.0f;
         tp->GetSize(cw, ch);
         // Full screen width == myDims.i = 2.0 (normToPixelW(2.0) == screen width).
-        const float full_screen_width = 2.0f;
+        const float full_screen_width  = 2.0f;
         const float message_wrap_width = full_screen_width * 0.66f;
         if (cw < message_wrap_width) {
             tp->SetSize(message_wrap_width, ch);
@@ -811,23 +920,19 @@ void VDU::DrawMessages(GameCockpit *parentcp, Unit *target) {
     }
 
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(tp->background_color);
-    bool automatte = (0 == tpbg.a);
+    GFXColor    tpbg(tp->background_color);
+    bool        automatte = (0 == tpbg.a);
     if (automatte) {
-        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        GFXColor temp_background_color(0, 0, 0, background_alpha);
         tp->background_color = static_cast<ImU32>(temp_background_color);
     }
-    tp->Draw(message_prefix + MangleString(fullstr,
-                    _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
-            0,
-            true,
-            false,
-            automatte);
+    tp->Draw(message_prefix + MangleString(fullstr, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true,
+             false, automatte);
     tp->background_color = static_cast<ImU32>(tpbg);
 }
 
 void VDU::DrawScanningMessage() {
-    //tp->Draw(MangleString ("Scanning target...",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
+    // tp->Draw(MangleString ("Scanning target...",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 
 bool VDU::SetCommAnimation(Animation *ani, Unit *un, bool force) {
@@ -859,47 +964,43 @@ Unit *VDU::GetCommunicating() {
 }
 
 void VDU::DrawNav(GameCockpit *cp, Unit *you, Unit *targ, const Vector &nav) {
-    //Unit * you = _Universe->AccessCockpit()->GetParent();
-    //Unit * targ = you!=NULL?you->Target():NULL;
-    //const float game_speed = configuration().physics.game_speed;
-    //const bool lie = configuration().physics.game_speed_lying;
+    // Unit * you = _Universe->AccessCockpit()->GetParent();
+    // Unit * targ = you!=NULL?you->Target():NULL;
+    // const float game_speed = configuration().physics.game_speed;
+    // const bool lie = configuration().physics.game_speed_lying;
     string nam = "none";
     if (targ) {
         nam = reformatName(targ->name);
     }
     int faction =
             FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(_Universe->activeStarSystem()->getFileName()));
-    std::string navdata =
-            std::string("#ff0000Sector:\n     #ffff00" + getStarSystemSector(
-                    _Universe->activeStarSystem()->getFileName())
-                    + "\n\n#ff0000System:\n     #ffff00") + _Universe->activeStarSystem()->getName() + " ("
-                    + FactionUtil::GetFactionName(faction)
-                    + ")\n\n#ff0000Target:\n  #ffff00" + (targ ? getUnitNameAndFgNoBase(targ) : std::string("Nothing"))
-                    + "\n\n#ff0000Range: #ffff00"
-                    + PrettyDistanceString(((you && targ) ? DistanceTwoTargets(you, targ) : 0.0));
-    const float auto_message_lim = configuration().graphics.auto_message_time_lim_flt;
-    float delautotime = UniverseUtil::GetGameTime() - cp->autoMessageTime;
-    bool draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
-    std::string msg = cp->autoMessage;
-    std::string::size_type where = msg.find("#");
+    std::string navdata = std::string("#ff0000Sector:\n     #ffff00" +
+                                      getStarSystemSector(_Universe->activeStarSystem()->getFileName()) +
+                                      "\n\n#ff0000System:\n     #ffff00") +
+                          _Universe->activeStarSystem()->getName() + " (" + FactionUtil::GetFactionName(faction) +
+                          ")\n\n#ff0000Target:\n  #ffff00" +
+                          (targ ? getUnitNameAndFgNoBase(targ) : std::string("Nothing")) + "\n\n#ff0000Range: #ffff00" +
+                          PrettyDistanceString(((you && targ) ? DistanceTwoTargets(you, targ) : 0.0));
+    const float            auto_message_lim  = configuration().graphics.auto_message_time_lim_flt;
+    float                  delautotime       = UniverseUtil::GetGameTime() - cp->autoMessageTime;
+    bool                   draw_auto_message = (delautotime < auto_message_lim && cp->autoMessage.length() != 0);
+    std::string            msg               = cp->autoMessage;
+    std::string::size_type where             = msg.find("#");
     while (where != std::string::npos) {
-        msg = msg.substr(0, where) + msg.substr(where + 7);
+        msg   = msg.substr(0, where) + msg.substr(where + 7);
         where = msg.find("#");
     }
-    msg = std::string("\n\n#ffff00     ") + msg;
+    msg                          = std::string("\n\n#ffff00     ") + msg;
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(tp->background_color);
-    bool automatte = (0 == tpbg.a);
+    GFXColor    tpbg(tp->background_color);
+    bool        automatte = (0 == tpbg.a);
     if (automatte) {
-        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        GFXColor temp_background_color(0, 0, 0, background_alpha);
         tp->background_color = static_cast<ImU32>(temp_background_color);
     }
-    tp->Draw(MangleString(navdata + (draw_auto_message ? msg : std::string()), _Universe->AccessCamera()->GetNebula()
-                    != NULL ? .4 : 0),
-            scrolloffset,
-            true,
-            true,
-            automatte);
+    tp->Draw(MangleString(navdata + (draw_auto_message ? msg : std::string()),
+                          _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
+             scrolloffset, true, true, automatte);
     tp->background_color = static_cast<ImU32>(tpbg);
 }
 
@@ -925,68 +1026,62 @@ void VDU::DrawComm() {
         }
         GFXDisable(TEXTURE0);
     } else {
-        const string message_prefix = configuration().graphics.hud.message_prefix;
-        const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-        GFXColor tpbg(tp->background_color);
-        bool automatte = (0 == tpbg.a);
+        const string message_prefix   = configuration().graphics.hud.message_prefix;
+        const float  background_alpha = configuration().graphics.hud.text_background_alpha_flt;
+        GFXColor     tpbg(tp->background_color);
+        bool         automatte = (0 == tpbg.a);
         if (automatte) {
-            GFXColor temp_background_color( 0, 0, 0, background_alpha );
+            GFXColor temp_background_color(0, 0, 0, background_alpha);
             tp->background_color = static_cast<ImU32>(temp_background_color);
         }
-        tp->Draw(message_prefix
-                + MangleString(_Universe->AccessCockpit()->communication_choices.c_str(),
-                        _Universe->AccessCamera()->GetNebula()
-                                != NULL ? .4 : 0), scrolloffset, true, false, automatte);
+        tp->Draw(message_prefix + MangleString(_Universe->AccessCockpit()->communication_choices.c_str(),
+                                               _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
+                 scrolloffset, true, false, automatte);
         tp->background_color = static_cast<ImU32>(tpbg);
     }
 }
 
-std::string PrintCargo(const Cargo& cargo, double &total_mass, 
-                       double& total_volume, double& total_value) {
-    const double mass = cargo.GetMass();
-    const double volume = cargo.GetVolume();
-    const double value = cargo.GetTotalValue();
-    const std::string name = cargo.GetName();
+std::string PrintCargo(const Cargo &cargo, double &total_mass, double &total_volume, double &total_value) {
+    const double      mass   = cargo.GetMass();
+    const double      volume = cargo.GetVolume();
+    const double      value  = cargo.GetTotalValue();
+    const std::string name   = cargo.GetName();
 
-    total_mass += mass;
+    total_mass   += mass;
     total_volume += volume;
-    total_value += value;
+    total_value  += value;
 
-    const std::string line = (boost::format("%.2ft %.2fm³ %s %.2fCr")
-                            % mass
-                            % volume
-                            % name
-                            % value).str();
+    const std::string line = (boost::format("%.2ft %.2fm³ %s %.2fCr") % mass % volume % name % value).str();
     return line;
 }
 
 void VDU::DrawManifest(Unit *parent, Unit *target) {
     std::vector<std::string> lines;
 
-    double total_mass = 0;
+    double total_mass   = 0;
     double total_volume = 0;
-    double total_value = 0;
+    double total_value  = 0;
 
     lines.push_back("Cargo Hold:");
-    for(Cargo& cargo : target->cargo_hold.GetItems()) {
+    for (Cargo &cargo : target->cargo_hold.GetItems()) {
         lines.push_back(PrintCargo(cargo, total_mass, total_volume, total_value));
     }
 
-    if(!target->hidden_hold.Empty()) {
+    if (!target->hidden_hold.Empty()) {
         lines.push_back("Cargo Hold:");
-        for(Cargo& cargo : target->hidden_hold.GetItems()) {
+        for (Cargo &cargo : target->hidden_hold.GetItems()) {
             lines.push_back(PrintCargo(cargo, total_mass, total_volume, total_value));
         }
     }
 
-    lines.push_back("Total: " + std::to_string(total_mass) + "t " + std::to_string(total_volume) + 
-                    "m³ " + std::to_string(total_value) + "Cr");
-    
+    lines.push_back("Total: " + std::to_string(total_mass) + "t " + std::to_string(total_volume) + "m³ " +
+                    std::to_string(total_value) + "Cr");
+
     // Location
-    float rel_x,rel_y, x, y;
-    tp->GetPos(rel_y,rel_x);    // Notice the inconsistent y,x
-    std::pair<int,int> pair = CalculateAbsoluteXY(rel_x,rel_y);
-    ImVec2 position(pair.first, pair.second);
+    float rel_x, rel_y, x, y;
+    tp->GetPos(rel_y, rel_x);  // Notice the inconsistent y,x
+    std::pair<int, int> pair = CalculateAbsoluteXY(rel_x, rel_y);
+    ImVec2              position(pair.first, pair.second);
     x = pair.first;
     y = pair.second;
 
@@ -994,18 +1089,17 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
     float rel_w, rel_h;
     float h, w;
     tp->GetSize(rel_w, rel_h);
-    std::pair<int,int> dim_pair = CalculateAbsoluteXY(rel_w, rel_h);
-    w = dim_pair.first - x;
-    h = dim_pair.second - y;
-    ImVec2 size(w,h);
+    std::pair<int, int> dim_pair = CalculateAbsoluteXY(rel_w, rel_h);
+    w                            = dim_pair.first - x;
+    h                            = dim_pair.second - y;
+    ImVec2 size(w, h);
 
     ImGui::SetCursorPos(position);
-    ImGui::BeginChild("manifest_vdu", size, false, 
-                      ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+    ImGui::BeginChild("manifest_vdu", size, false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
     // Manifest Title
-    const std::string manifest_heading = boost::algorithm::replace_all_copy(
-                configuration().graphics.hud.manifest_heading, "\\n", "\n");
+    const std::string manifest_heading =
+            boost::algorithm::replace_all_copy(configuration().graphics.hud.manifest_heading, "\\n", "\n");
     ImGui::Text("%s", manifest_heading.c_str());
 
     // Underline
@@ -1013,14 +1107,11 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
     ImVec2 min = ImGui::GetItemRectMin();
     ImVec2 max = ImGui::GetItemRectMax();
 
-    auto* draw_list = ImGui::GetWindowDrawList();
-    draw_list->AddLine(
-        ImVec2(min.x, max.y),
-        ImVec2(max.x, max.y),
-        IM_COL32(255, 255, 255, 255), // color
-        1.0f                          // thickness
+    auto *draw_list = ImGui::GetWindowDrawList();
+    draw_list->AddLine(ImVec2(min.x, max.y), ImVec2(max.x, max.y), IM_COL32(255, 255, 255, 255),  // color
+                       1.0f                                                                       // thickness
     );
-    
+
     // Subtitles
     const bool simple_manifest = configuration().graphics.hud.simple_manifest;
     if (target != parent && simple_manifest == false) {
@@ -1029,11 +1120,11 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
         ImGui::Text("Credits: %s", std::to_string(ComponentsManager::credits).c_str());
     }
 
-    int i=std::max(0,scrolloffset);
+    int i          = std::max(0, scrolloffset);
     int lines_size = static_cast<int>(lines.size());
 
     // Now the rest of the lines
-    for(;i<lines_size;i++) {
+    for (; i < lines_size; i++) {
         ImGui::Text("%s", lines[i].c_str());
     }
 
@@ -1041,111 +1132,201 @@ void VDU::DrawManifest(Unit *parent, Unit *target) {
 }
 
 static void DrawGun(Vector pos, float w, float h, MOUNT_SIZE sz) {
-    w = fabs(w);
-    h = fabs(h);
-    float oox = 1. / configuration().graphics.resolution_x;
-    float ooy = 1. / configuration().graphics.resolution_y;
-    pos.j -= h / 3.8;
+    w          = fabs(w);
+    h          = fabs(h);
+    float oox  = 1. / configuration().graphics.resolution_x;
+    float ooy  = 1. / configuration().graphics.resolution_y;
+    pos.j     -= h / 3.8;
     if (sz == MOUNT_SIZE::NOWEAP) {
         GFXPointSize(4);
-        const float verts[3] = {
-                pos.x, pos.y, pos.z
-        };
+        const float verts[3] = {pos.x, pos.y, pos.z};
         GFXDraw(GFXPOINT, verts, 1);
         GFXPointSize(1);
     } else if (sz < MOUNT_SIZE::SPECIAL) {
         if (sz == MOUNT_SIZE::LIGHT) {
             const float verts[10 * 3] = {
-                    pos.i + oox, pos.j, 0,
-                    pos.i + oox, pos.j - h / 15, 0,
-                    pos.i - oox, pos.j, 0,
-                    pos.i - oox, pos.j - h / 15, 0,
-                    pos.i + oox, pos.j - h / 15, 0,
-                    pos.i - oox, pos.j - h / 15, 0,
-                    pos.i, pos.j, 0,
-                    pos.i, pos.j + h / 4, 0,
-                    pos.i, pos.j + h / 4 + ooy * 2, 0,
-                    pos.i, pos.j + h / 4 + ooy * 5, 0,
+                    pos.i + oox,
+                    pos.j,
+                    0,
+                    pos.i + oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i - oox,
+                    pos.j,
+                    0,
+                    pos.i - oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i + oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i - oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i,
+                    pos.j,
+                    0,
+                    pos.i,
+                    pos.j + h / 4,
+                    0,
+                    pos.i,
+                    pos.j + h / 4 + ooy * 2,
+                    0,
+                    pos.i,
+                    pos.j + h / 4 + ooy * 5,
+                    0,
             };
             GFXDraw(GFXLINE, verts, 10);
         } else if (sz == MOUNT_SIZE::MEDIUM) {
             const float verts[12 * 3] = {
-                    pos.i + oox, pos.j, 0,
-                    pos.i + oox, pos.j - h / 15, 0,
-                    pos.i - oox, pos.j, 0,
-                    pos.i - oox, pos.j - h / 15, 0,
-                    pos.i + oox, pos.j - h / 15, 0,
-                    pos.i - oox, pos.j - h / 15, 0,
-                    pos.i, pos.j, 0,
-                    pos.i, pos.j + h / 5, 0,
-                    pos.i, pos.j + h / 5 + ooy * 4, 0,
-                    pos.i, pos.j + h / 5 + ooy * 5, 0,
-                    pos.i + oox, pos.j + h / 5 + ooy * 2, 0,
-                    pos.i - oox, pos.j + h / 5 + ooy * 2, 0,
+                    pos.i + oox,
+                    pos.j,
+                    0,
+                    pos.i + oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i - oox,
+                    pos.j,
+                    0,
+                    pos.i - oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i + oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i - oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i,
+                    pos.j,
+                    0,
+                    pos.i,
+                    pos.j + h / 5,
+                    0,
+                    pos.i,
+                    pos.j + h / 5 + ooy * 4,
+                    0,
+                    pos.i,
+                    pos.j + h / 5 + ooy * 5,
+                    0,
+                    pos.i + oox,
+                    pos.j + h / 5 + ooy * 2,
+                    0,
+                    pos.i - oox,
+                    pos.j + h / 5 + ooy * 2,
+                    0,
             };
             GFXDraw(GFXLINE, verts, 12);
         } else if (sz == MOUNT_SIZE::HEAVY) {
             const float verts[14 * 3] = {
-                    pos.i + oox, pos.j, 0,
-                    pos.i + oox, pos.j - h / 15, 0,
-                    pos.i - oox, pos.j, 0,
-                    pos.i - oox, pos.j - h / 15, 0,
-                    pos.i + oox, pos.j - h / 15, 0,
-                    pos.i - oox, pos.j - h / 15, 0,
-                    pos.i, pos.j, 0,
-                    pos.i, pos.j + h / 5, 0,
-                    pos.i, pos.j + h / 5 + ooy * 4, 0,
-                    pos.i, pos.j + h / 5 + ooy * 5, 0,
-                    pos.i + 2 * oox, pos.j + h / 5 + ooy * 3, 0,
-                    pos.i, pos.j + h / 5 + ooy * 2, 0,
-                    pos.i - 2 * oox, pos.j + h / 5 + ooy * 3, 0,
-                    pos.i, pos.j + h / 5 + ooy * 2, 0,
+                    pos.i + oox,
+                    pos.j,
+                    0,
+                    pos.i + oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i - oox,
+                    pos.j,
+                    0,
+                    pos.i - oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i + oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i - oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i,
+                    pos.j,
+                    0,
+                    pos.i,
+                    pos.j + h / 5,
+                    0,
+                    pos.i,
+                    pos.j + h / 5 + ooy * 4,
+                    0,
+                    pos.i,
+                    pos.j + h / 5 + ooy * 5,
+                    0,
+                    pos.i + 2 * oox,
+                    pos.j + h / 5 + ooy * 3,
+                    0,
+                    pos.i,
+                    pos.j + h / 5 + ooy * 2,
+                    0,
+                    pos.i - 2 * oox,
+                    pos.j + h / 5 + ooy * 3,
+                    0,
+                    pos.i,
+                    pos.j + h / 5 + ooy * 2,
+                    0,
             };
             GFXDraw(GFXLINE, verts, 14);
-        } else { //capship gun
+        } else {  // capship gun
             const float verts[14 * 3] = {
-                    pos.i + oox, pos.j, 0,
-                    pos.i + oox, pos.j - h / 15, 0,
-                    pos.i - oox, pos.j, 0,
-                    pos.i - oox, pos.j - h / 15, 0,
-                    pos.i + oox, pos.j - h / 15, 0,
-                    pos.i - oox, pos.j - h / 15, 0,
-                    pos.i, pos.j, 0,
-                    pos.i, pos.j + h / 6, 0,
-                    pos.i, pos.j + h / 6 + ooy * 6, 0,
-                    pos.i, pos.j + h / 6 + ooy * 7, 0,
-                    pos.i - oox, pos.j + h / 6 + ooy * 2, 0,
-                    pos.i + oox, pos.j + h / 6 + ooy * 2, 0,
-                    pos.i - 2 * oox, pos.j + h / 6 + ooy * 4, 0,
-                    pos.i + 2 * oox, pos.j + h / 6 + ooy * 4, 0,
+                    pos.i + oox,
+                    pos.j,
+                    0,
+                    pos.i + oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i - oox,
+                    pos.j,
+                    0,
+                    pos.i - oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i + oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i - oox,
+                    pos.j - h / 15,
+                    0,
+                    pos.i,
+                    pos.j,
+                    0,
+                    pos.i,
+                    pos.j + h / 6,
+                    0,
+                    pos.i,
+                    pos.j + h / 6 + ooy * 6,
+                    0,
+                    pos.i,
+                    pos.j + h / 6 + ooy * 7,
+                    0,
+                    pos.i - oox,
+                    pos.j + h / 6 + ooy * 2,
+                    0,
+                    pos.i + oox,
+                    pos.j + h / 6 + ooy * 2,
+                    0,
+                    pos.i - 2 * oox,
+                    pos.j + h / 6 + ooy * 4,
+                    0,
+                    pos.i + 2 * oox,
+                    pos.j + h / 6 + ooy * 4,
+                    0,
             };
             GFXDraw(GFXLINE, verts, 14);
         }
     } else if (sz == MOUNT_SIZE::SPECIAL || sz == MOUNT_SIZE::SPECIALMISSILE) {
         GFXPointSize(4);
-        const float verts[3] = {
-                pos.x, pos.y, pos.z
-        };
+        const float verts[3] = {pos.x, pos.y, pos.z};
         GFXDraw(GFXPOINT, verts, 1);
-        GFXPointSize(1);         //classified...  FIXME
+        GFXPointSize(1);  // classified...  FIXME
     } else if (sz < MOUNT_SIZE::HEAVYMISSILE) {
         const float verts[4 * 3] = {
-                pos.i, pos.j - h / 8, 0,
-                pos.i, pos.j + h / 8, 0,
-                pos.i + 2 * oox, pos.j - h / 8 + 2 * ooy, 0,
-                pos.i - 2 * oox, pos.j - h / 8 + 2 * ooy, 0,
+                pos.i,           pos.j - h / 8,           0, pos.i,           pos.j + h / 8,           0,
+                pos.i + 2 * oox, pos.j - h / 8 + 2 * ooy, 0, pos.i - 2 * oox, pos.j - h / 8 + 2 * ooy, 0,
         };
         GFXDraw(GFXLINE, verts, 4);
     } else if (sz <= MOUNT_SIZE::CAPSHIPHEAVYMISSILE) {
         const float verts[8 * 3] = {
-                pos.i, pos.j - h / 6, 0,
-                pos.i, pos.j + h / 6, 0,
-                pos.i + 3 * oox, pos.j - h / 6 + 2 * ooy, 0,
-                pos.i - 3 * oox, pos.j - h / 6 + 2 * ooy, 0,
-                pos.i + oox, pos.j - h / 6, 0,
-                pos.i + oox, pos.j + h / 9, 0,
-                pos.i - oox, pos.j - h / 6, 0,
-                pos.i - oox, pos.j + h / 9, 0,
+                pos.i,           pos.j - h / 6,           0, pos.i,           pos.j + h / 6,           0,
+                pos.i + 3 * oox, pos.j - h / 6 + 2 * ooy, 0, pos.i - 3 * oox, pos.j - h / 6 + 2 * ooy, 0,
+                pos.i + oox,     pos.j - h / 6,           0, pos.i + oox,     pos.j + h / 9,           0,
+                pos.i - oox,     pos.j - h / 6,           0, pos.i - oox,     pos.j + h / 9,           0,
         };
         GFXDraw(GFXLINE, verts, 8);
     }
@@ -1155,20 +1336,17 @@ extern const char *DamagedCategory;
 
 /** This function changes the item listing color according to damage */
 std::string getDamageColor(double percent) {
-    static GFXColor color_undamaged = vs_config->getColor("default", "hud_repair_repaired",
-            GFXColor(1, 1, 1, 1));
-    static GFXColor color_half_damaged = vs_config->getColor("default", "hud_repair_half_damaged",
-            GFXColor(1, 1, 0, 1));
-    static GFXColor color_damaged = vs_config->getColor("default", "hud_repair_damaged",
-            GFXColor(1, 0, 0, 1));
-    static GFXColor color_destroyed = vs_config->getColor("default", "hud_repair_destroyed",
-            GFXColor(.2, .2, .2, 1));
+    static GFXColor color_undamaged = vs_config->getColor("default", "hud_repair_repaired", GFXColor(1, 1, 1, 1));
+    static GFXColor color_half_damaged =
+            vs_config->getColor("default", "hud_repair_half_damaged", GFXColor(1, 1, 0, 1));
+    static GFXColor color_damaged   = vs_config->getColor("default", "hud_repair_damaged", GFXColor(1, 0, 0, 1));
+    static GFXColor color_destroyed = vs_config->getColor("default", "hud_repair_destroyed", GFXColor(.2, .2, .2, 1));
 
     GFXColor color = colLerp(color_damaged, color_half_damaged, percent);
 
-    if(percent < 0.01) {
+    if (percent < 0.01) {
         return colToString(color_destroyed).str;
-    } else if(percent < 1.0) {
+    } else if (percent < 1.0) {
         return colToString(color).str;
     }
 
@@ -1176,38 +1354,32 @@ std::string getDamageColor(double percent) {
     return colToString(color_undamaged).str;
 }
 
-
-
-
 void VDU::DrawDamage(Unit *parent) {
-    //VDUdamage
+    // VDUdamage
     float x, y, w, h;
-    //float th;
-    //char st[1024];
+    // float th;
+    // char st[1024];
     double hull_percent = parent->hull.Percent();
     GFXColor4f(1, hull_percent, hull_percent, 1);
     GFXEnable(TEXTURE0);
     const bool draw_damage_sprite = configuration().graphics.hud.draw_damage_sprite;
     DrawHUDSprite(this, draw_damage_sprite ? parent->getHudImage() : nullptr, .6, x, y, w, h,
-            parent->armor.Percent(Armor::front),
-            parent->armor.Percent(Armor::right),
-            parent->armor.Percent(Armor::left),
-            parent->armor.Percent(Armor::back),
-            hull_percent, true, false);
+                  parent->armor.Percent(Armor::front), parent->armor.Percent(Armor::right),
+                  parent->armor.Percent(Armor::left), parent->armor.Percent(Armor::back), hull_percent, true, false);
     GFXDisable(TEXTURE0);
 
     std::string fullname(getUnitNameAndFgNoBase(parent));
-    //sprintf (st,"%s\nHull: %.3f",blah.c_str(),parent->GetHull());
-    //tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);
+    // sprintf (st,"%s\nHull: %.3f",blah.c_str(),parent->GetHull());
+    // tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);
     char ecmstatus[256];
-    ecmstatus[0] = '\0';
+    ecmstatus[0]         = '\0';
     const bool print_ecm = configuration().graphics.print_ecm_status;
     if (print_ecm) {
         if (UnitUtil::getECM(parent) > 0) {
             GFXColor4f(0, 1, 0, .5);
             strcpy(ecmstatus, "ECM Active");
-            static float s = 0;
-            s += .125 * SIMULATION_ATOM;
+            static float s  = 0;
+            s              += .125 * SIMULATION_ATOM;
             if (s > 1) {
                 s = 0;
             }
@@ -1217,20 +1389,16 @@ void VDU::DrawDamage(Unit *parent) {
     GFXColor4f(1, 1, 1, 1);
 
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(tp->background_color);
-    bool automatte = (0 == tpbg.a);
+    GFXColor    tpbg(tp->background_color);
+    bool        automatte = (0 == tpbg.a);
     if (automatte) {
-        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        GFXColor temp_background_color(0, 0, 0, background_alpha);
         tp->background_color = static_cast<ImU32>(temp_background_color);
     }
 
     std::string retval = parent->GetHudText();
-    tp->Draw(MangleString(retval,
-                    _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
-            scrolloffset,
-            true,
-            false,
-            automatte);
+    tp->Draw(MangleString(retval, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), scrolloffset, true, false,
+             automatte);
     tp->background_color = static_cast<ImU32>(tpbg);
     //*******************************************************
 }
@@ -1242,15 +1410,15 @@ void VDU::SetViewingStyle(VIEWSTYLE vs) {
 void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE viewStyle, Unit *parent, Unit *target) {
     GFXEnable(DEPTHTEST);
     GFXEnable(DEPTHWRITE);
-    VIEWSTYLE which = viewStyle;
-    float tmpaspect = configuration().graphics.aspect_flt;
+    VIEWSTYLE which                       = viewStyle;
+    float     tmpaspect                   = configuration().graphics.aspect_flt;
     (configuration()).graphics.aspect_flt = w / h;
     _Universe->AccessCamera(which)->SetSubwindow(x, y, w, h);
     _Universe->SelectCamera(which);
     VIEWSTYLE tmp = _Universe->AccessCockpit()->GetView();
     _Universe->AccessCockpit()->SetView(viewStyle);
     _Universe->AccessCockpit()->SelectProperCamera();
-    _Universe->AccessCockpit()->SetupViewPort(true);     ///this is the final, smoothly calculated cam
+    _Universe->AccessCockpit()->SetupViewPort(true);  /// this is the final, smoothly calculated cam
     GFXClear(GFXFALSE);
     GFXColor4f(1, 1, 1, 1);
     _Universe->activeStarSystem()->Draw(false);
@@ -1258,17 +1426,17 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
     _Universe->AccessCamera(which)->SetSubwindow(0, 0, 1, 1);
     _Universe->AccessCockpit()->SetView(tmp);
     _Universe->AccessCockpit()->SelectProperCamera();
-    _Universe->AccessCockpit()->SetupViewPort(true);     ///this is the final, smoothly calculated cam
+    _Universe->AccessCockpit()->SetupViewPort(true);  /// this is the final, smoothly calculated cam
     GFXRestoreHudMode();
     GFXBlendMode(ONE, ZERO);
     GFXDisable(TEXTURE1);
     GFXDisable(TEXTURE0);
     GFXDisable(DEPTHTEST);
     GFXDisable(DEPTHWRITE);
-    char buf[1024];
+    char buf[1'024];
     bool inrange = false;
     if (target) {
-        double mm = 0;
+        double      mm = 0;
         std::string blah(getUnitNameAndFgNoBase(target));
         sprintf(buf, "%s\n", blah.c_str());
         const bool out_of_cone_information = configuration().graphics.hud.out_of_cone_distance;
@@ -1276,28 +1444,28 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
                 parent->InRange(target, mm, out_of_cone_information || !UnitUtil::isSignificant(target), false, false);
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(tp->background_color);
-    bool automatte = (0 == tpbg.a);
+    GFXColor    tpbg(tp->background_color);
+    bool        automatte = (0 == tpbg.a);
     if (automatte) {
-        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        GFXColor temp_background_color(0, 0, 0, background_alpha);
         tp->background_color = static_cast<ImU32>(temp_background_color);
     }
     tp->Draw(MangleString(buf, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
     tp->background_color = static_cast<ImU32>(tpbg);
     if (inrange) {
-        int i = 0;
-        char st[1024];
+        int  i = 0;
+        char st[1'024];
         for (i = 0; i < rows - 1 && i < 128; i++) {
             st[i] = '\n';
         }
-        st[i] = '\0';
+        st[i]          = '\0';
         std::string qr = PrettyDistanceString(DistanceTwoTargets(parent, target));
         strcat(st, "Range: ");
         strcat(st, qr.c_str());
-//        GFXColor tpbg = tp->background_color;
-//        bool automatte = (0 == tpbg.a);
+        //        GFXColor tpbg = tp->background_color;
+        //        bool automatte = (0 == tpbg.a);
         if (automatte) {
-            GFXColor temp_background_color( 0, 0, 0, background_alpha );
+            GFXColor temp_background_color(0, 0, 0, background_alpha);
             tp->background_color = static_cast<ImU32>(temp_background_color);
         }
         tp->Draw(MangleString(st, _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
@@ -1314,26 +1482,26 @@ void VDU::DrawStarSystemAgain(float x, float y, float w, float h, VIEWSTYLE view
         }
         GFXColor4f(1, 1, 1, 1);
     } else if (target) {
-//        GFXColor tpbg = tp->background_color;
-//        bool automatte = (0 == tpbg.a);
+        //        GFXColor tpbg = tp->background_color;
+        //        bool automatte = (0 == tpbg.a);
         if (automatte) {
-            GFXColor temp_background_color( 0, 0, 0, background_alpha );
+            GFXColor temp_background_color(0, 0, 0, background_alpha);
             tp->background_color = static_cast<ImU32>(temp_background_color);
         }
-        tp->Draw(MangleString("\n[OutOfRange]",
-                _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true, false, automatte);
+        tp->Draw(MangleString("\n[OutOfRange]", _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), 0, true,
+                 false, automatte);
         tp->background_color = static_cast<ImU32>(tpbg);
     }
     //_Universe->AccessCockpit()->RestoreViewPort();
 }
 
 GFXColor MountColor(Mount *mnt) {
-    static GFXColor col_mount_default = vs_config->getColor("mount_default", GFXColor(0.0, 1.0, 0.2, 1.0));
-    static GFXColor col_mount_not_ready = vs_config->getColor("mount_not_ready", GFXColor(0.0, 1.0, 0.4, 1.0));
+    static GFXColor col_mount_default     = vs_config->getColor("mount_default", GFXColor(0.0, 1.0, 0.2, 1.0));
+    static GFXColor col_mount_not_ready   = vs_config->getColor("mount_not_ready", GFXColor(0.0, 1.0, 0.4, 1.0));
     static GFXColor col_mount_out_of_ammo = vs_config->getColor("mount_out_of_ammo", GFXColor(0.2, 0.2, 0.4, 1.0));
-    static GFXColor col_mount_inactive = vs_config->getColor("mount_inactive", GFXColor(0.7, 0.7, 0.7, 1.0));
-    static GFXColor col_mount_destroyed = vs_config->getColor("mount_destroyed", GFXColor(1.0, 0.0, 0.0, 1.0));
-    static GFXColor col_mount_unchosen = vs_config->getColor("mount_unchosen", GFXColor(0.3, 0.3, 0.3, 1.0));
+    static GFXColor col_mount_inactive    = vs_config->getColor("mount_inactive", GFXColor(0.7, 0.7, 0.7, 1.0));
+    static GFXColor col_mount_destroyed   = vs_config->getColor("mount_destroyed", GFXColor(1.0, 0.0, 0.0, 1.0));
+    static GFXColor col_mount_unchosen    = vs_config->getColor("mount_unchosen", GFXColor(0.3, 0.3, 0.3, 1.0));
 
     GFXColor mountcolor = col_mount_default;
     switch (mnt->ammo != 0 ? mnt->status : 127) {
@@ -1349,7 +1517,7 @@ GFXColor MountColor(Mount *mnt) {
                 if (cref < tref) {
                     mountcolor = colLerp(col_mount_out_of_ammo, col_mount_not_ready, cref / tref);
                 }
-            } else      // damaged
+            } else  // damaged
             {
                 mountcolor = colLerp(col_mount_destroyed, col_mount_default, mnt->functionality);
             }
@@ -1368,29 +1536,30 @@ GFXColor MountColor(Mount *mnt) {
             mountcolor = col_mount_out_of_ammo;
             break;
         default:
-// already set default color before switch; other than that, "default" should not happen with the current code, ever, so maybe we have to do something when it does
+            // already set default color before switch; other than that, "default" should not happen with the current
+            // code, ever, so maybe we have to do something when it does
             break;
     }
     return mountcolor;
 }
 
 void VDU::DrawWeapon(Unit *parent) {
-    const bool draw_weapon_sprite = configuration().graphics.hud.draw_weapon_sprite;
+    const bool        draw_weapon_sprite   = configuration().graphics.hud.draw_weapon_sprite;
     const std::string list_empty_mounts_as = configuration().graphics.hud.mounts_list_empty;
-    const bool do_list_empty_mounts = (list_empty_mounts_as.length() != 0);
+    const bool        do_list_empty_mounts = (list_empty_mounts_as.length() != 0);
 
-//  without fixed font we would need some sneaky tweaking to make it a table, probably with multiple TPs
-    float x, y, w, h;
-    const float percent = .6;
-    string buf("#00ff00WEAPONS\n\n#ffffffGuns:#000000");
-    string mbuf("\n#ffffffMissiles:#000000");
+    //  without fixed font we would need some sneaky tweaking to make it a table, probably with multiple TPs
+    float             x, y, w, h;
+    const float       percent = .6;
+    string            buf("#00ff00WEAPONS\n\n#ffffffGuns:#000000");
+    string            mbuf("\n#ffffffMissiles:#000000");
     string::size_type mlen = mbuf.length();
     GFXEnable(TEXTURE0);
     DrawTargetSpr(draw_weapon_sprite ? parent->getHudImage() : NULL, percent, x, y, w, h);
     GFXDisable(TEXTURE0);
     GFXDisable(LIGHTING);
-    int nummounts = parent->getNumMounts();
-    int numave = 1;
+    int      nummounts = parent->getNumMounts();
+    int      numave    = 1;
     GFXColor average(0, 0, 0, 0);
     for (int i = 0; i < nummounts; i++) {
         GFXColor mntcolor = MountColor(&parent->mounts[i]);
@@ -1408,19 +1577,19 @@ void VDU::DrawWeapon(Unit *parent) {
         average.a += mntcolor.a;
         if (i + 1 < nummounts && parent->mounts[i].bank) {
             // add up numave and average, waiting for the next non-bank mount
-            if (parent->mounts[i].status != Mount::UNCHOSEN) { //skip empty mounts for banks that aren't full
+            if (parent->mounts[i].status != Mount::UNCHOSEN) {  // skip empty mounts for banks that aren't full
                 numave++;
             }
         } else {
             if ((parent->mounts[i].status != Mount::UNCHOSEN) || do_list_empty_mounts) {
                 GFXColor mountcolor(average.r / numave, average.g / numave, average.b / numave, average.a / numave);
-                string baseweaponreport = colToString(mountcolor).str;
+                string   baseweaponreport = colToString(mountcolor).str;
                 if (parent->mounts[i].status == Mount::UNCHOSEN) {
                     baseweaponreport += list_empty_mounts_as;
                 } else {
                     baseweaponreport += parent->mounts[i].type->name;
                 }
-                if (numave != 1) {    //  show banks, if any, here; "#" seems to be a reserved char, see colToString
+                if (numave != 1) {  //  show banks, if any, here; "#" seems to be a reserved char, see colToString
                     baseweaponreport += string(" x") + tostring(numave);
                 }
                 if (parent->mounts[i].ammo >= 0) {
@@ -1433,7 +1602,7 @@ void VDU::DrawWeapon(Unit *parent) {
                     buf += "\n" + baseweaponreport;
                 }
             }
-            numave = 1;
+            numave  = 1;
             average = GFXColor(0, 0, 0, 0);
         }
     }
@@ -1441,10 +1610,10 @@ void VDU::DrawWeapon(Unit *parent) {
         buf += mbuf;
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(tp->background_color);
-    bool automatte = (0 == tpbg.a);
+    GFXColor    tpbg(tp->background_color);
+    bool        automatte = (0 == tpbg.a);
     if (automatte) {
-        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        GFXColor temp_background_color(0, 0, 0, background_alpha);
         tp->background_color = static_cast<ImU32>(temp_background_color);
     }
     tp->Draw(buf, 0, true, false, automatte);
@@ -1468,8 +1637,8 @@ char printHex(unsigned int hex) {
     return hex - 10 + 'A';
 }
 
-static char suc_col_str[8] = "#000000";
-static const char suc_gt_plusone[8] = "#00FF00";
+static char       suc_col_str[8]     = "#000000";
+static const char suc_gt_plusone[8]  = "#00FF00";
 static const char suc_gt_minusone[8] = "#FF0000";
 
 inline const char *GetColorFromSuccess(float suc) {
@@ -1479,17 +1648,17 @@ inline const char *GetColorFromSuccess(float suc) {
     if (suc <= -1) {
         return suc_gt_minusone;
     }
-    suc += 1.;
-    suc *= 128;
-    unsigned int tmp2 = (unsigned int) suc;
-    unsigned int tmp1 = (unsigned int) (255 - suc);
-    suc_col_str[0] = '#';
-    suc_col_str[1] = printHex(tmp1 / 16);
-    suc_col_str[2] = printHex(tmp1 % 16);
-    suc_col_str[3] = printHex(tmp2 / 16);
-    suc_col_str[4] = printHex(tmp2 % 16);
-    suc_col_str[5] = '0';
-    suc_col_str[6] = '0';
+    suc               += 1.;
+    suc               *= 128;
+    unsigned int tmp2  = (unsigned int)suc;
+    unsigned int tmp1  = (unsigned int)(255 - suc);
+    suc_col_str[0]     = '#';
+    suc_col_str[1]     = printHex(tmp1 / 16);
+    suc_col_str[2]     = printHex(tmp1 % 16);
+    suc_col_str[3]     = printHex(tmp2 / 16);
+    suc_col_str[4]     = printHex(tmp2 % 16);
+    suc_col_str[5]     = '0';
+    suc_col_str[6]     = '0';
 
     return suc_col_str;
 }
@@ -1499,11 +1668,11 @@ void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent) {
     std::string rezcompleted("");
     for (unsigned int i = 0; i < active_missions.size(); ++i) {
         if (!active_missions[i]->objectives.empty()) {
-            rez += "#FFFFFF";
-            const bool force_anonymous_missions = configuration().general.force_anonymous_mission_names;
-            const bool completed_objectives_last = configuration().graphics.hud.completed_objectives_last;
+            rez                                  += "#FFFFFF";
+            const bool force_anonymous_missions   = configuration().general.force_anonymous_mission_names;
+            const bool completed_objectives_last  = configuration().graphics.hud.completed_objectives_last;
             if (active_missions[i]->mission_name.empty() || force_anonymous_missions) {
-                rez += "Mission " + XMLSupport::tostring((int) i) + "\n";
+                rez += "Mission " + XMLSupport::tostring((int)i) + "\n";
             } else {
                 rez += active_missions[i]->mission_name + "\n";
             }
@@ -1529,10 +1698,10 @@ void DrawObjectivesTextPlane(TextPlane *tp, int scrolloffset, Unit *parent) {
         }
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(tp->background_color);
-    bool automatte = (0 == tpbg.a);
+    GFXColor    tpbg(tp->background_color);
+    bool        automatte = (0 == tpbg.a);
     if (automatte) {
-        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        GFXColor temp_background_color(0, 0, 0, background_alpha);
         tp->background_color = static_cast<ImU32>(temp_background_color);
     }
     tp->Draw(rez, scrolloffset, false, false, automatte);
@@ -1558,9 +1727,8 @@ bool VDU::SetWebcamAnimation() {
 
 void VDU::DrawWebcam(Unit *parent) {
     using VSFileSystem::JPEGBuffer;
-    tp->Draw(MangleString("No webcam to view",
-            _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), scrolloffset, true);
-
+    tp->Draw(MangleString("No webcam to view", _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0), scrolloffset,
+             true);
 }
 
 void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
@@ -1570,30 +1738,30 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
     GFXEnable(TEXTURE0);
     GFXDisable(TEXTURE1);
     VSSprite::Draw();
-    //glDisable( GL_ALPHA_TEST);
+    // glDisable( GL_ALPHA_TEST);
     if (!parent) {
         return;
     }
-    //configure text plane;
+    // configure text plane;
     float x, y;
     float h, w;
     GetSize(w, h);
 
-    const float width_factor = configuration().graphics.reduced_vdus_width_flt;
+    const float width_factor  = configuration().graphics.reduced_vdus_width_flt;
     const float height_factor = configuration().graphics.reduced_vdus_height_flt;
-    w = w - width_factor;
-    h = h + height_factor;
+    w                         = w - width_factor;
+    h                         = h + height_factor;
 
     GetPosition(x, y);
-    //tp->SetCharSize (fabs(w/cols),fabs(h/rows));
+    // tp->SetCharSize (fabs(w/cols),fabs(h/rows));
     float csx, csy;
     tp->GetCharSize(csx, csy);
-    //This was as below:
-    //cols = abs( (int) ceil( w/csx ) );
-    //rows = abs( (int) ceil( h/csy ) );
-    //I'm changing it to as below, which avoids abs blues with visual studio, and is
-    //also faster, as computing the abs of a float amounts to setting the sign bit;
-    //though I'm less than 100% entirely sure of the correctness of the change... --chuck_starchaser
+    // This was as below:
+    // cols = abs( (int) ceil( w/csx ) );
+    // rows = abs( (int) ceil( h/csy ) );
+    // I'm changing it to as below, which avoids abs blues with visual studio, and is
+    // also faster, as computing the abs of a float amounts to setting the sign bit;
+    // though I'm less than 100% entirely sure of the correctness of the change... --chuck_starchaser
     cols = int(fabs(ceil(w / csx)));
     rows = int(fabs(ceil(h / csy)));
 
@@ -1609,11 +1777,11 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
             communicating.SetUnit(NULL);
         }
     }
-    float delautotime = UniverseUtil::GetGameTime() - parentcp->autoMessageTime;
+    float       delautotime     = UniverseUtil::GetGameTime() - parentcp->autoMessageTime;
     const float auto_switch_lim = configuration().graphics.auto_message_nav_switch_time_lim_flt;
     if ((delautotime < auto_switch_lim) && (parentcp->autoMessage.length() != 0)) {
         if ((thismode.back() != COMM) && ((posmodes & NAV) != 0)) {
-            thismode.back() = NAV;
+            thismode.back()            = NAV;
             parentcp->autoMessageTime -= auto_switch_lim * 1.125;
         }
     }
@@ -1629,9 +1797,9 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
                 DrawScanningMessage();
             }
             /*
-         *  else
-         *       DrawScanner();
-         */
+             *  else
+             *       DrawScanner();
+             */
             break;
         case TARGET:
             if (targ) {
@@ -1649,14 +1817,11 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
         case VIEW:
             GetPosition(x, y);
             GetSize(w, h);
-            DrawStarSystemAgain(.5 * (x - fabs(w / 2) + 1), .5 * ((y - fabs(h / 2)) + 1), fabs(w / 2), fabs(
-                    h / 2), viewStyle, parent, targ);
+            DrawStarSystemAgain(.5 * (x - fabs(w / 2) + 1), .5 * ((y - fabs(h / 2)) + 1), fabs(w / 2), fabs(h / 2),
+                                viewStyle, parent, targ);
             break;
         case NAV:
-            DrawNav(parentcp,
-                    parent,
-                    targ,
-                    parent->ToLocalCoordinates(nav_point - parent->Position().Cast()));
+            DrawNav(parentcp, parent, targ, parent->ToLocalCoordinates(nav_point - parent->Position().Cast()));
             break;
         case MSG:
             DrawMessages(parentcp, targ);
@@ -1677,7 +1842,7 @@ void VDU::Draw(GameCockpit *parentcp, Unit *parent, const GFXColor &color) {
             DrawVDUObjectives(parent);
             break;
         default:
-            break; //FIXME --chuck_starchaser; please verify correctness and/or add a errlog or throw
+            break;  // FIXME --chuck_starchaser; please verify correctness and/or add a errlog or throw
     }
 }
 
@@ -1707,7 +1872,8 @@ void UpdateViewstyle(VIEWSTYLE &vs) {
         case CP_TARGET:
             vs = CP_PANTARGET;
             break;
-        case CP_VIEWTARGET: //FIXME cases not previously handled in switch --added by chuck_starchaser; please verify correctness
+        case CP_VIEWTARGET:  // FIXME cases not previously handled in switch --added by chuck_starchaser; please verify
+                             // correctness
         case CP_PANINSIDE:
         case CP_FIXED:
         case CP_FIXEDPOS:
@@ -1727,7 +1893,7 @@ void VDU::SwitchMode(Unit *parent) {
     if (thismode.back() == VIEW && viewStyle != CP_CHASE && (thismode.back() & posmodes)) {
         UpdateViewstyle(viewStyle);
     } else {
-        viewStyle = CP_TARGET;
+        viewStyle         = CP_TARGET;
         thismode.back() <<= 1;
         while (!(thismode.back() & posmodes)) {
             if (thismode.back() > posmodes) {

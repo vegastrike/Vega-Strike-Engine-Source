@@ -27,6 +27,4 @@
 
 #include <gtest/gtest.h>
 
-
-TEST(Store, Sanity) {
-}
+TEST(Store, Sanity) {}

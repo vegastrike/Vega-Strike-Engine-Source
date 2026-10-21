@@ -29,16 +29,14 @@
 //
 // C++ Implementation: Audio::OpenALRenderableListener
 //
-#include "src/vega_cast_utils.h"
 #include "OpenALRenderableSource.h"
-#include "OpenALSimpleSound.h"
-#include "OpenALHelpers.h"
 
-#include "al.h"
-
-#include "../../Source.h"
 #include "../../Listener.h"
-
+#include "../../Source.h"
+#include "al.h"
+#include "OpenALHelpers.h"
+#include "OpenALSimpleSound.h"
+#include "src/vega_cast_utils.h"
 #include "src/vs_math.h"
 
 namespace Audio {
@@ -52,9 +50,7 @@ static inline void alSource3f(ALuint source, ALenum param, const LVector3 &v) {
 }
 
 OpenALRenderableSource::OpenALRenderableSource(Source *source)
-        : RenderableSource(source),
-        alSource(0),
-        alBuffersAttached(false) {
+    : RenderableSource(source), alSource(0), alBuffersAttached(false) {
     alGenSources(1, &alSource);
 }
 
@@ -101,8 +97,8 @@ Timestamp OpenALRenderableSource::getPlayingTimeImpl() const {
 }
 
 void OpenALRenderableSource::updateImpl(int flags, const Listener &sceneListener) {
-    Source *source = getSource();
-    ALSourceHandle als = getALSource();
+    Source        *source = getSource();
+    ALSourceHandle als    = getALSource();
 
     clearAlError();
 
@@ -136,16 +132,10 @@ void OpenALRenderableSource::updateImpl(int flags, const Listener &sceneListener
             alSource3f(als, AL_VELOCITY, source->getVelocity());
             alSource3f(als, AL_DIRECTION, source->getDirection());
         } else {
-            alSource3f(als, AL_POSITION,
-                    source->getPosition() - sceneListener.getPosition());
+            alSource3f(als, AL_POSITION, source->getPosition() - sceneListener.getPosition());
             alSource3f(als, AL_VELOCITY,
-                    sceneListener.toLocalDirection(
-                            source->getVelocity() - sceneListener.getVelocity()
-                    ));
-            alSource3f(als, AL_DIRECTION,
-                    sceneListener.toLocalDirection(
-                            source->getDirection()
-                    ));
+                       sceneListener.toLocalDirection(source->getVelocity() - sceneListener.getVelocity()));
+            alSource3f(als, AL_DIRECTION, sceneListener.toLocalDirection(source->getDirection()));
         }
     }
 
@@ -164,8 +154,8 @@ void OpenALRenderableSource::attachALBuffers() {
 
         // Attachment to a simple sound, just assign the AL buffer to this AL source
         OpenALSimpleSound *p_simple_sound = vega_dynamic_cast_ptr<OpenALSimpleSound>(sound.get());
-        ALBufferHandle alBuffer = p_simple_sound->getAlBuffer();
-        ALSourceHandle alSource = getALSource();
+        ALBufferHandle     alBuffer       = p_simple_sound->getAlBuffer();
+        ALSourceHandle     alSource       = getALSource();
         alSourcei(alSource, AL_BUFFER, alBuffer);
         alBuffersAttached = true;
 
@@ -191,4 +181,4 @@ void OpenALRenderableSource::seekImpl(Timestamp time) {
     }
 }
 
-};
+};  // namespace Audio

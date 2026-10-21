@@ -33,27 +33,19 @@
 // TODO: this is a use of the code in a different library.
 // I'm unhappy with this, so it needs to change.
 #include "cmd/mount_size.h"
-
 #include "resource/random_utils.h"
 
-
-
-
-DamageableLayer::DamageableLayer(int layer,
-        FacetConfiguration configuration,
-        double health_template,
-        Damage vulnerabilities,
-        bool core_layer, double regeneration):
-        layer(layer),
-        vulnerabilities(vulnerabilities),
-        core_layer(core_layer),
-        number_of_facets(as_integer(configuration)) {
+DamageableLayer::DamageableLayer(int layer, FacetConfiguration configuration, double health_template,
+                                 Damage vulnerabilities, bool core_layer, double regeneration)
+    : layer(layer),
+      vulnerabilities(vulnerabilities),
+      core_layer(core_layer),
+      number_of_facets(as_integer(configuration)) {
     Resource<double> health = Resource<double>(health_template, 0.0, health_template);
     for (int i = 0; i < number_of_facets; i++) {
         facets.push_back(health);
     }
 }
-
 
 DamageableLayer::~DamageableLayer() = default;
 
@@ -82,8 +74,7 @@ void DamageableLayer::DealDamage(const CoreVector &attack_vector, Damage &damage
  * @param vulnerability - adjust for
  */
 // TODO: type is ugly hack
-void DamageableLayer::DealDamageComponent(int impacted_facet_index, int type,
-                                          double &damage, double vulnerability,
+void DamageableLayer::DealDamageComponent(int impacted_facet_index, int type, double &damage, double vulnerability,
                                           InflictedDamage &inflicted_damage) {
     // Here we adjust for specialized weapons such as shield bypassing and shield leeching
     // which only damage the shield.
@@ -105,10 +96,9 @@ void DamageableLayer::DealDamageComponent(int impacted_facet_index, int type,
             inflicted_damage.phase_damage += adjusted_damage;
     }
 
-    inflicted_damage.total_damage += adjusted_damage;
+    inflicted_damage.total_damage                        += adjusted_damage;
     inflicted_damage.inflicted_damage_by_layer.at(layer) += adjusted_damage;
 }
-
 
 int DamageableLayer::GetFacetIndex(const CoreVector &attack_vector) const {
     if (number_of_facets == 0) {
@@ -123,35 +113,34 @@ int DamageableLayer::GetFacetIndex(const CoreVector &attack_vector) const {
     double b = i - k;
 
     switch (number_of_facets) {
-    case(1):
-        return 0;
-    case(2):
-        if (k >= 0) {
+        case (1):
             return 0;
-        } else {
-            return 1;
-        }
-    case(4):
-        if (a >= 0 && b >= 0) {
+        case (2):
+            if (k >= 0) {
+                return 0;
+            } else {
+                return 1;
+            }
+        case (4):
+            if (a >= 0 && b >= 0) {
+                return 0;
+            }
+
+            if (a >= 0 && b < 0) {
+                return 2;
+            }
+
+            if (a < 0 && b >= 0) {
+                return 3;
+            }
+
+            if (a < 0 && b < 0) {
+                return 1;
+            }
+        default:
             return 0;
-        }
-
-        if (a >= 0 && b < 0) {
-            return 2;
-        }
-
-        if (a < 0 && b >= 0) {
-            return 3;
-        }
-
-        if (a < 0 && b < 0) {
-            return 1;
-        }
-    default:
-        return 0;
     }
 }
-
 
 double DamageableLayer::TotalLayerValue() const {
     double total_value = 0.0f;
@@ -186,30 +175,29 @@ double DamageableLayer::AverageMaxLayerValue() const {
 }
 
 double DamageableLayer::Percent() const {
-    if(number_of_facets == 0) {
+    if (number_of_facets == 0) {
         return 0;
     }
 
     double percents = 0;
-    for(const Resource<double>& facet:facets){
+    for (const Resource<double> &facet : facets) {
         percents += facet.Percent();
     }
 
-    return percents/number_of_facets;
+    return percents / number_of_facets;
 }
 
 double DamageableLayer::Percent(int facet) const {
-    if(number_of_facets <= facet || facets.size() <= facet) {
+    if (number_of_facets <= facet || facets.size() <= facet) {
         return 0;
     }
 
-    if(facets[facet].MaxValue() == 0) {
+    if (facets[facet].MaxValue() == 0) {
         return 0;
     }
 
     return facets[facet].Percent();
 }
-
 
 int DamageableLayer::Layer() const {
     return layer;

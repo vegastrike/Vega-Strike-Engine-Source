@@ -27,30 +27,29 @@
 
 #include "mouse_cursor.h"
 
-#include <string>
 #include <iostream>
 #include <memory>
+#include <string>
+
 #include <boost/format.hpp>
 
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 
-#include "vs_logging.h"
 #include "configuration/configuration.h"
+#include "vs_logging.h"
 #include "winsys.h"
 
 // Mouse Cursors
-static SDL_Cursor* arrow_cursor = nullptr;
-static SDL_Cursor* over_arrow_cursor = nullptr;
+static SDL_Cursor* arrow_cursor       = nullptr;
+static SDL_Cursor* over_arrow_cursor  = nullptr;
 static SDL_Cursor* cross_hairs_cursor = nullptr;
-
 
 static SDL_Cursor* initMouseCursor(const std::string& filename, int hot_x = 0, int hot_y = 0) {
     SDL_Surface* surface = IMG_Load(filename.c_str());
     if (!surface) {
         // TODO: figure out error code
-        VS_LOG_FLUSH_EXIT(fatal, 
-                         (boost::format("IMG_Load failed: %1%\n") % SDL_GetError()).str(), -1);
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("IMG_Load failed: %1%\n") % SDL_GetError()).str(), -1);
     }
 
     // Create a color cursor with transparency support
@@ -61,8 +60,8 @@ static SDL_Cursor* initMouseCursor(const std::string& filename, int hot_x = 0, i
 }
 
 void initMouseCursors() {
-    arrow_cursor = initMouseCursor("sprites/mouse.png");
-    over_arrow_cursor = initMouseCursor("sprites/mouseover.png");
+    arrow_cursor       = initMouseCursor("sprites/mouse.png");
+    over_arrow_cursor  = initMouseCursor("sprites/mouseover.png");
     cross_hairs_cursor = initMouseCursor("sprites/crosshairs.png", 64, 64);
 }
 
@@ -81,10 +80,16 @@ void hideCursor() {
 }
 
 void changeCursor(const CursorType type) {
-    switch(type) {
-        case CursorType::arrow: SDL_SetCursor(arrow_cursor); break;
-        case CursorType::over_arrow: SDL_SetCursor(over_arrow_cursor); break;
-        case CursorType::crosshairs: SDL_SetCursor(cross_hairs_cursor); break;
+    switch (type) {
+        case CursorType::arrow:
+            SDL_SetCursor(arrow_cursor);
+            break;
+        case CursorType::over_arrow:
+            SDL_SetCursor(over_arrow_cursor);
+            break;
+        case CursorType::crosshairs:
+            SDL_SetCursor(cross_hairs_cursor);
+            break;
     }
 }
 
@@ -103,7 +108,7 @@ std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y) {
     float fraction_x = relative_x / center_x;
     float fraction_y = relative_y / center_y;
 
-    return std::pair<float,float>(fraction_x, fraction_y);
+    return std::pair<float, float>(fraction_x, fraction_y);
 }
 
 std::pair<int, int> CalculateAbsoluteXY(float fraction_x, float fraction_y) {
@@ -121,7 +126,7 @@ double GetRelativeJoystickCoordinatesForAxis(const double x, const double max_x)
     constexpr double kDeadZone = 0.15;
 
     // Make the range from -1 to 1
-    const double relative_x = (x/max_x-0.5)*2.0;
+    const double relative_x = (x / max_x - 0.5) * 2.0;
 
     // Nullify dead zone
     if (relative_x < kDeadZone && relative_x > -kDeadZone) {
@@ -150,11 +155,9 @@ std::pair<double, double> GetJoystickFromMouse() {
 }
 
 std::pair<int, int> GetMousePosition() {
-    SDL_Window * window = SDL_GL_GetCurrentWindow();
-    float        x;
-    float        y;
+    SDL_Window* window = SDL_GL_GetCurrentWindow();
+    float       x;
+    float       y;
     SDL_GetMouseState(&x, &y);
-    return std::pair<int,int>(static_cast<int>(std::rint(x)),
-                            static_cast<int>(std::rint(y)));
+    return std::pair<int, int>(static_cast<int>(std::rint(x)), static_cast<int>(std::rint(y)));
 }
-

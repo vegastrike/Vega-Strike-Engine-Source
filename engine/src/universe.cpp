@@ -26,82 +26,80 @@
  */
 
 
-#include <stdio.h>
-#include <fcntl.h>
-#include "src/gfxlib.h"
 #include "src/universe.h"
-#include "root_generic/lin_time.h"
-#include "src/in.h"
+
+#include <algorithm>
+#include <fcntl.h>
+#include <stdio.h>
+
+#include "cmd/ai/firekeyboard.h"
+#include "cmd/script/mission.h"
 #include "gfx/aux_texture.h"
-#include "src/profile.h"
 #include "gfx/cockpit.h"
 #include "root_generic/galaxy_xml.h"
-#include <algorithm>
-#include "src/config_xml.h"
+#include "root_generic/lin_time.h"
 #include "root_generic/vs_globals.h"
 #include "src/audiolib.h"
-#include "cmd/script/mission.h"
+#include "src/config_xml.h"
+#include "src/gfxlib.h"
+#include "src/in.h"
 #include "src/in_kb.h"
 #include "src/in_kb_data.h"
-#include "cmd/ai/firekeyboard.h"
 #include "src/in_main.h"
-#if defined (__APPLE__)
-#import <sys/param.h>
+#include "src/profile.h"
+#if defined(__APPLE__)
+#    import <sys/param.h>
 #endif
-#include "vegadisk/savegame.h"
-#include "gfx/screenshot.h"
-#include "src/universe_util.h"
-#include "src/star_system.h"
-#include "src/save_util.h"
-#include "cmd/csv.h"
-#include "cmd/role_bitmask.h"
-#include "root_generic/universe_globals.h"
-#include "src/vs_logging.h"
-
-#include "cmd/weapon_factory.h"
-#include "cmd/unit_csv_factory.h"
-#include "cmd/unit_json_factory.h"
-#include "cmd/unit_optimize_factory.h"
-
 #include <algorithm>
 #include <string>
 #include <vector>
 
+#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_sdl3.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
+#include "cmd/csv.h"
+#include "cmd/role_bitmask.h"
+#include "cmd/unit_csv_factory.h"
+#include "cmd/unit_json_factory.h"
+#include "cmd/unit_optimize_factory.h"
+#include "cmd/weapon_factory.h"
+#include "gfx/screenshot.h"
+#include "gldrv/winsys.h"
+#include "gui/config_screen.h"
+#include "gui/imgui_support.h"
+#include "gui/pause_screen.h"
+#include "imgui/imgui.h"
+#include "in_joystick.h"
+#include "in_mouse.h"
+#include "libraries/gui/gui.h"
 #include "resource/random_utils.h"
 #include "root_generic/options.h"
-
-#include "gui/pause_screen.h"
-#include "gui/imgui_support.h"
-#include "gldrv/winsys.h"
-#include "in_mouse.h"
-#include "in_joystick.h"
-
-#include "imgui/imgui.h"
-#include "libraries/gui/gui.h"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
-#include "gui/config_screen.h"
+#include "root_generic/universe_globals.h"
+#include "src/save_util.h"
+#include "src/star_system.h"
+#include "src/universe_util.h"
+#include "src/vs_logging.h"
+#include "vegadisk/savegame.h"
 
 // Using
 using namespace VSFileSystem;
 using namespace GalaxyXML;
 
+using std::find;
 using std::string;
 using std::vector;
-using std::find;
 
 // externs
-extern void CacheJumpStar(bool);
-extern void SortStarSystems(vector<StarSystem *> &ss, StarSystem *drawn);
-extern void bootstrap_first_loop();
-extern bool RefreshGUI();
-extern int timecount;
+extern void        CacheJumpStar(bool);
+extern void        SortStarSystems(vector<StarSystem *> &ss, StarSystem *drawn);
+extern void        bootstrap_first_loop();
+extern bool        RefreshGUI();
+extern int         timecount;
 extern StarSystem *GetLoadedStarSystem(const char *system);
-extern bool screenshotkey;
-extern int getmicrosleep();
-extern void MakeStarSystem(string file, Galaxy *galaxy, string origin, int forcerandom);
-extern string RemoveDotSystem(const char *input);
+extern bool        screenshotkey;
+extern int         getmicrosleep();
+extern void        MakeStarSystem(string file, Galaxy *galaxy, string origin, int forcerandom);
+extern string      RemoveDotSystem(const char *input);
 extern StarSystem *GetLoadedStarSystem(const char *file);
 
 // Local Variables
@@ -117,8 +115,8 @@ void CalculateCoords(unsigned int i, unsigned int size, float &x, float &y, floa
     if (size <= 3 || i < (size / 2)) {
         y = 0;
         h = 1;
-        w = 1. / ((float) size);
-        x = ((float) i) / size;
+        w = 1. / ((float)size);
+        x = ((float)i) / size;
         if (size > 3) {
             h = .5;
         }
@@ -127,7 +125,7 @@ void CalculateCoords(unsigned int i, unsigned int size, float &x, float &y, floa
         if (i > size / 2) {
             y = .5;
             h = .5;
-            x = ((float) i - (size / 2)) / (size - size / 2);
+            x = ((float)i - (size / 2)) / (size - size / 2);
             w = 1 / (size - size / 2);
         }
     }
@@ -137,7 +135,7 @@ inline void loadsounds(const string &str, const int max, soundArray &snds, bool 
     char addstr[2] = {'\0'};
     snds.allocate(max);
     for (int i = 0; i < max; ++i) {
-        addstr[0] = '1' + i;
+        addstr[0]       = '1' + i;
         string mynewstr = str;
         while (1) {
             std::string::size_type found = mynewstr.find('?');
@@ -154,24 +152,27 @@ inline void loadsounds(const string &str, const int max, soundArray &snds, bool 
 static void UpdateTimeCompressionSounds() {
     static int lasttimecompress = 0;
     if ((timecount != lasttimecompress) && (configuration().cockpit_audio.compress_max > 0)) {
-        static bool inittimecompresssounds = false;
+        static bool       inittimecompresssounds = false;
         static soundArray loop_snds;
         static soundArray burst_snds;
         static soundArray end_snds;
         if (inittimecompresssounds == false) {
-            loadsounds(configuration().cockpit_audio.compress_loop, configuration().cockpit_audio.compress_max, loop_snds, true);
-            loadsounds(configuration().cockpit_audio.compress_stop, configuration().cockpit_audio.compress_max, end_snds);
-            loadsounds(configuration().cockpit_audio.compress_change, configuration().cockpit_audio.compress_max, burst_snds);
+            loadsounds(configuration().cockpit_audio.compress_loop, configuration().cockpit_audio.compress_max,
+                       loop_snds, true);
+            loadsounds(configuration().cockpit_audio.compress_stop, configuration().cockpit_audio.compress_max,
+                       end_snds);
+            loadsounds(configuration().cockpit_audio.compress_change, configuration().cockpit_audio.compress_max,
+                       burst_snds);
             inittimecompresssounds = true;
         }
-        int soundfile = (timecount - 1) / configuration().cockpit_audio.compress_interval;
+        int soundfile     = (timecount - 1) / configuration().cockpit_audio.compress_interval;
         int lastsoundfile = (lasttimecompress - 1) / configuration().cockpit_audio.compress_interval;
         if (timecount > 0 && lasttimecompress >= 0) {
             if ((soundfile + 1) >= configuration().cockpit_audio.compress_max) {
                 burst_snds.ptr[configuration().cockpit_audio.compress_max - 1].playsound();
             } else {
-                if (lasttimecompress > 0 && loop_snds.ptr[lastsoundfile].sound >= 0
-                        && AUDIsPlaying(loop_snds.ptr[lastsoundfile].sound)) {
+                if (lasttimecompress > 0 && loop_snds.ptr[lastsoundfile].sound >= 0 &&
+                    AUDIsPlaying(loop_snds.ptr[lastsoundfile].sound)) {
                     AUDStopPlaying(loop_snds.ptr[lastsoundfile].sound);
                 }
                 loop_snds.ptr[soundfile].playsound();
@@ -195,7 +196,7 @@ static void UpdateTimeCompressionSounds() {
 
 Unit *DockToSavedBases(int playernum, QVector &safevec) {
     string str = configuration().ai.start_docked_to;
-    Unit *plr = _Universe->AccessCockpit(playernum)->GetParent();
+    Unit  *plr = _Universe->AccessCockpit(playernum)->GetParent();
     if (!plr || !plr->getStarSystem()) {
         safevec = QVector(0, 0, 0);
         return NULL;
@@ -204,29 +205,30 @@ Unit *DockToSavedBases(int playernum, QVector &safevec) {
     if (strs.size()) {
         str = strs[0];
     }
-    Unit *closestUnit = NULL;
-    float lastdist = 0;
-    float dist = 0;
-    Unit *un;
+    Unit   *closestUnit = NULL;
+    float   lastdist    = 0;
+    float   dist        = 0;
+    Unit   *un;
     QVector dock_position(plr->curr_physical_state.position);
     for (un_iter iter = plr->getStarSystem()->getUnitList().createIterator(); (un = *iter); ++iter) {
         if (un->name == str || un->getFullname() == str) {
             dist = UnitUtil::getSignificantDistance(plr, un);
             if (closestUnit == NULL || dist < lastdist) {
-                lastdist = dist;
+                lastdist    = dist;
                 closestUnit = un;
             }
         }
     }
     if (closestUnit) {
-        if (UnitUtil::getSignificantDistance(plr, closestUnit) > 0 && closestUnit->getUnitType() != Vega_UnitType::planet) {
+        if (UnitUtil::getSignificantDistance(plr, closestUnit) > 0 &&
+            closestUnit->getUnitType() != Vega_UnitType::planet) {
             dock_position = closestUnit->Position();
         }
         dock_position = UniverseUtil::SafeEntrancePoint(dock_position, plr->rSize());
         plr->SetPosAndCumPos(dock_position);
 
         vector<DockingPorts> dprt = closestUnit->pImage->dockingports;
-        unsigned int i;
+        unsigned int         i;
         for (i = 0;; i++) {
             if (i >= dprt.size()) {
                 safevec = QVector(0, 0, 0);
@@ -257,12 +259,12 @@ void SortStarSystems(std::vector<StarSystem *> &ss, StarSystem *drawn) {
     }
     vector<StarSystem *>::iterator drw = std::find(ss.begin(), ss.end(), drawn);
     if (drw != ss.end()) {
-        StarSystem *tmp = drawn;
-        vector<StarSystem *>::iterator i = ss.begin();
+        StarSystem                    *tmp = drawn;
+        vector<StarSystem *>::iterator i   = ss.begin();
         while (i <= drw) {
             StarSystem *t = *i;
-            *i = tmp;
-            tmp = t;
+            *i            = tmp;
+            tmp           = t;
             i++;
         }
     }
@@ -295,7 +297,7 @@ void InitUnitTables() {
 
     // New Init
     // Try to open units.json
-    VSFileSystem::VSFile jsonFile;
+    VSFileSystem::VSFile  jsonFile;
     VSFileSystem::VSError err = jsonFile.OpenReadOnly("units.json", VSFileSystem::UnitFile);
     if (err <= VSFileSystem::Ok) {
         UnitJSONFactory::ParseJSON(jsonFile);
@@ -321,23 +323,23 @@ void CleanupUnitTables() {
 
 // Constructors and Init
 Universe::Universe(int argc, char **argv, const char *galaxy_str) {
-    //Select drivers
-#if defined (__APPLE__)
-    //get the current working directory so when glut trashes it we can restore.
+    // Select drivers
+#if defined(__APPLE__)
+    // get the current working directory so when glut trashes it we can restore.
     char pwd[MAXPATHLEN];
-    getcwd( pwd, MAXPATHLEN );
+    getcwd(pwd, MAXPATHLEN);
 #endif
     GFXInit(argc, argv);
-#if defined (__APPLE__)
-    //Restore it
-    chdir( pwd );
+#if defined(__APPLE__)
+    // Restore it
+    chdir(pwd);
 #endif
     StartGFX();
     InitInput();
 
     hud_camera = Camera();
 
-    //Hasten splash screen loading, to cover up lengthy universe initialization
+    // Hasten splash screen loading, to cover up lengthy universe initialization
     bootstrap_first_loop();
 
     ROLES::getAllRolePriorities();
@@ -349,14 +351,14 @@ Universe::Universe(int argc, char **argv, const char *galaxy_str) {
         LoadFactionXML("factions.xml");
         firsttime = true;
     }
-    _script_system = NULL;
+    _script_system   = NULL;
     _current_cockpit = 0;
-    _script_system = nullptr;
+    _script_system   = nullptr;
 }
 
 Universe::Universe() {
     _current_cockpit = 0;
-    _script_system = nullptr;
+    _script_system   = nullptr;
 }
 
 Universe::~Universe() {
@@ -369,19 +371,19 @@ Universe::~Universe() {
 StarSystem *Universe::Init(string systemfile, const Vector &centr, const string planetname) {
     static bool js = true;
     if (js) {
-        js = false;
+        js               = false;
         WeaponFactory wf = WeaponFactory(VSFileSystem::weapon_list);
 
         CacheJumpStar(false);
     }
 
     string fullname = systemfile + ".system";
-    return GenerateStarSystem((char *) fullname.c_str(), "", centr);
+    return GenerateStarSystem((char *)fullname.c_str(), "", centr);
 }
 
 // Gameplay Methods
 void Universe::Loop(void main_loop()) {
-     GFXLoop(main_loop);
+    GFXLoop(main_loop);
 }
 
 void Universe::WriteSaveGame(bool auto_save) {
@@ -392,15 +394,10 @@ void Universe::WriteSaveGame(bool auto_save) {
     }
 }
 
-
-static constexpr ImGuiWindowFlags window_flags =
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoBackground |
-        ImGuiWindowFlags_NoDecoration;   // makes it transparent
+static constexpr ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                                                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+                                                 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground |
+                                                 ImGuiWindowFlags_NoDecoration;  // makes it transparent
 
 // Frames to suppress game input after the config overlay closes, so a button or
 // key that is still physically held at the moment of closing (e.g. the click that
@@ -412,7 +409,7 @@ static int s_options_input_suppress = 0;
 
 void Universe::StartDraw() {
     // Handle game pausing -stop the loop and enter a new loop until a key is pressed
-    if(paused) {
+    if (paused) {
         pauseGame();
 
         // We need to call this because the game tracks the actual time between frames.
@@ -427,21 +424,20 @@ void Universe::StartDraw() {
 #endif
     GFXBeginScene();
     // ImGui Init
-    ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
+    ImGui_ApplyPendingFontSize();  // apply a pending font-size change before laying out
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
     // End ImGui Init
-    ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
-    const ImVec2 window_size(configuration().graphics.resolution_x,
-                            configuration().graphics.resolution_y);
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    const ImVec2 window_size(configuration().graphics.resolution_x, configuration().graphics.resolution_y);
     ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
 
     // hide the mouse cursor, we got a cooler one!
     ImGui::SetMouseCursor(ImGuiMouseCursor_None);
 
-    size_t i;
-    StarSystem* lastStarSystem = nullptr;
+    size_t      i;
+    StarSystem *lastStarSystem = nullptr;
     ImGui::Begin("main_window", nullptr, window_flags);
     for (i = 0; i < _cockpits.size(); ++i) {
         SetActiveCockpit(i);
@@ -453,7 +449,7 @@ void Universe::StartDraw() {
         AccessCamera()->SetSubwindow(x, y, w, h);
         if (_cockpits.size() > 1 && AccessCockpit(i)->activeStarSystem != lastStarSystem) {
             _active_star_systems[0]->SwapOut();
-            lastStarSystem = AccessCockpit()->activeStarSystem;
+            lastStarSystem          = AccessCockpit()->activeStarSystem;
             _active_star_systems[0] = lastStarSystem;
             lastStarSystem->SwapIn();
         }
@@ -472,9 +468,8 @@ void Universe::StartDraw() {
         // ImGui End Frame
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double draw_active_star_system_end_time = realTime();
-        VS_LOG(trace,
-               (boost::format("%1%: Time taken by activeStarSystem()->Draw(): %2%") % __FUNCTION__ % (
-                   draw_active_star_system_end_time - update_gfx_end_time)));
+        VS_LOG(trace, (boost::format("%1%: Time taken by activeStarSystem()->Draw(): %2%") % __FUNCTION__ %
+                       (draw_active_star_system_end_time - update_gfx_end_time)));
 #endif
         AccessCamera()->SetSubwindow(0, 0, 1, 1);
     }
@@ -483,27 +478,25 @@ void Universe::StartDraw() {
     UpdateTimeCompressionSounds();
     _Universe->SetActiveCockpit(randomInt(_cockpits.size() - 1, 0));
     if (!optionsActive) {  // config screen open -> freeze the sim, keep rendering
-    for (i = 0; i < star_system.size() && i < configuration().physics.num_running_systems; ++i) {
+        for (i = 0; i < star_system.size() && i < configuration().physics.num_running_systems; ++i) {
 #if defined(LOG_TIME_TAKEN_DETAILS)
-        const double update_star_system_start_time = realTime();
+            const double update_star_system_start_time = realTime();
 #endif
-        star_system[i]->Update((i == 0) ? 1 : configuration().physics.inactive_system_time_flt / i, true);
+            star_system[i]->Update((i == 0) ? 1 : configuration().physics.inactive_system_time_flt / i, true);
 #if defined(LOG_TIME_TAKEN_DETAILS)
-        const double update_star_system_end_time = realTime();
-        VS_LOG(trace,
-               (boost::format("%1%: Time taken by star_system[i]->Update(...): %2%") % __FUNCTION__ % (
-                   update_star_system_end_time - update_star_system_start_time)));
+            const double update_star_system_end_time = realTime();
+            VS_LOG(trace, (boost::format("%1%: Time taken by star_system[i]->Update(...): %2%") % __FUNCTION__ %
+                           (update_star_system_end_time - update_star_system_start_time)));
 #endif
-    }
+        }
 #if defined(LOG_TIME_TAKEN_DETAILS)
-    const double star_system_process_pending_jumps_start_time = realTime();
+        const double star_system_process_pending_jumps_start_time = realTime();
 #endif
-    StarSystem::ProcessPendingJumps();
+        StarSystem::ProcessPendingJumps();
 #if defined(LOG_TIME_TAKEN_DETAILS)
-    const double star_system_process_pending_jumps_end_time = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by StarSystem::ProcessPendingJumps(): %2%") % __FUNCTION__ % (
-               star_system_process_pending_jumps_end_time - star_system_process_pending_jumps_start_time)));
+        const double star_system_process_pending_jumps_end_time = realTime();
+        VS_LOG(trace, (boost::format("%1%: Time taken by StarSystem::ProcessPendingJumps(): %2%") % __FUNCTION__ %
+                       (star_system_process_pending_jumps_end_time - star_system_process_pending_jumps_start_time)));
 #endif
     }
     for (i = 0; i < _cockpits.size(); ++i) {
@@ -512,7 +505,7 @@ void Universe::StartDraw() {
 #endif
         SetActiveCockpit(i);
         pushActiveStarSystem(AccessCockpit(i)->activeStarSystem);
-        
+
         // continue drawing in the main window as events can add to the drawlist
         ImGui::Begin("main_window");
         // Don't process game input while the config overlay is open (the sim is
@@ -522,19 +515,20 @@ void Universe::StartDraw() {
         // bound game command (button-press sound / nav-target change). Also skip a
         // few frames after the overlay closes (s_options_input_suppress) so a
         // button/key held at close settles and doesn't fire on the resume frame.
-        if (s_options_input_suppress > 0) s_options_input_suppress--;
-        if (!optionsActive && s_options_input_suppress == 0) {
-            ProcessInput(i);                       //input neesd to be taken care of;
+        if (s_options_input_suppress > 0) {
+            s_options_input_suppress--;
         }
-                // ImGui End Frame
+        if (!optionsActive && s_options_input_suppress == 0) {
+            ProcessInput(i);  // input neesd to be taken care of;
+        }
+        // ImGui End Frame
         ImGui::End();
 
         popActiveStarSystem();
 #if defined(LOG_TIME_TAKEN_DETAILS)
         const double process_input_end_time = realTime();
-        VS_LOG(trace,
-               (boost::format("%1%: Time taken by ProcessInput(i) and surrounding for loop iteration: %2%") %
-                   __FUNCTION__ % (process_input_end_time - process_input_start_time)));
+        VS_LOG(trace, (boost::format("%1%: Time taken by ProcessInput(i) and surrounding for loop iteration: %2%") %
+                       __FUNCTION__ % (process_input_end_time - process_input_start_time)));
 #endif
     }
     if (screenshotkey) {
@@ -550,30 +544,30 @@ void Universe::StartDraw() {
     ImGui::Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_Window *current_window = SDL_GL_GetCurrentWindow();
     SDL_GL_SwapWindow(current_window);
     // End ImGui
 
     GFXEndScene();
 #if defined(LOG_TIME_TAKEN_DETAILS)
     const double gfx_end_scene_end_time = realTime();
-    VS_LOG(trace,
-           (boost::format("%1%: Time taken by GFXEndScene(): %2%") % __FUNCTION__ % (gfx_end_scene_end_time -
-               gfx_end_scene_start_time)));
+    VS_LOG(trace, (boost::format("%1%: Time taken by GFXEndScene(): %2%") % __FUNCTION__ %
+                   (gfx_end_scene_end_time - gfx_end_scene_start_time)));
 #endif
-    //so we don't starve the audio thread
+    // so we don't starve the audio thread
     micro_sleep(getmicrosleep());
 
-    //remove systems not recently visited?
+    // remove systems not recently visited?
     static int sorttime = 0;
     if (configuration().general.garbage_collect_frequency != 0) {
-        //don't want to delete something when there is something pending to jump therexo
+        // don't want to delete something when there is something pending to jump therexo
         if (PendingJumpsEmpty()) {
             if ((++sorttime) % configuration().general.garbage_collect_frequency == 1) {
                 SortStarSystems(star_system, _active_star_systems.back());
-                if (star_system.size() > configuration().general.num_old_systems && configuration().general.delete_old_systems) {
-                    if (std::find(_active_star_systems.begin(), _active_star_systems.end(),
-                            star_system.back()) == _active_star_systems.end()) {
+                if (star_system.size() > configuration().general.num_old_systems &&
+                    configuration().general.delete_old_systems) {
+                    if (std::find(_active_star_systems.begin(), _active_star_systems.end(), star_system.back()) ==
+                        _active_star_systems.end()) {
                         delete star_system.back();
                         star_system.pop_back();
                     } else {
@@ -607,7 +601,7 @@ void Universe::StartGFX() {
 
 void Universe::Update() {
     for (unsigned int i = 0; i < star_system.size(); ++i) {
-        //Calls the update function for server
+        // Calls the update function for server
         star_system[i]->Update((i == 0) ? 1 : configuration().physics.inactive_system_time_flt / i);
     }
 }
@@ -652,7 +646,7 @@ unsigned int Universe::CurrentCockpit() {
 
 void Universe::SetActiveCockpit(int i) {
 #ifdef VS_DEBUG
-    if ( i < 0 || i >= cockpit.size() ) {
+    if (i < 0 || i >= cockpit.size()) {
         VS_LOG(error, (boost::format("ouch invalid cockpit %1$d") % i));
     }
 #endif
@@ -738,8 +732,7 @@ bool Universe::setScriptSystem(string name) {
 
 // Star System
 StarSystem *Universe::activeStarSystem() {
-    return _active_star_systems.empty() ? NULL
-            : _active_star_systems.back();
+    return _active_star_systems.empty() ? NULL : _active_star_systems.back();
 }
 
 // Missing bool StillExists( StarSystem *ss );
@@ -775,7 +768,7 @@ StarSystem *Universe::GenerateStarSystem(const char *file, const char *jumpback,
 void Universe::LoadStarSystem(StarSystem *s) {
     VS_LOG(info, "Loading a starsystem");
     star_system.push_back(s);
-    SortStarSystems(star_system, s);     //dont' want instadie
+    SortStarSystems(star_system, s);  // dont' want instadie
 }
 
 bool Universe::StillExists(StarSystem *s) {
@@ -783,7 +776,7 @@ bool Universe::StillExists(StarSystem *s) {
 }
 
 void Universe::UnloadStarSystem(StarSystem *s) {
-    //not sure what to do here? serialize?
+    // not sure what to do here? serialize?
 }
 
 void Universe::Generate1(const char *file, const char *jumpback) {
@@ -791,9 +784,9 @@ void Universe::Generate1(const char *file, const char *jumpback) {
     if (configuration().general.while_loading_star_system) {
         ss_generating(true);
     }
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly(file, SystemFile);
-    //If the file is not found we generate a system
+    // If the file is not found we generate a system
     if (err > Ok) {
         MakeStarSystem(file, galaxy.get(), RemoveDotSystem(jumpback), count);
     }
@@ -803,13 +796,13 @@ void Universe::Generate2(StarSystem *ss) {
     static bool firsttime = true;
     LoadStarSystem(ss);
     pushActiveStarSystem(ss);
-    for (unsigned int tume = 0; tume <= configuration().physics.num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1;
-            ++tume) {
+    for (unsigned int tume = 0;
+         tume <= configuration().physics.num_times_to_simulate_new_star_system * SIM_QUEUE_SIZE + 1; ++tume) {
         ss->UpdateUnitsPhysics(true);
     }
-    //notify the director that a new system is loaded (gotta have at least one active star system)
+    // notify the director that a new system is loaded (gotta have at least one active star system)
     StarSystem *old_script_system = _script_system;
-    _script_system = ss;
+    _script_system                = ss;
     VS_LOG(info, (boost::format("Loading Star System %1$s\n") % ss->getFileName().c_str()));
     const vector<std::string> &adjacent = getAdjacentStarSystems(ss->getFileName());
     for (unsigned int i = 0; i < adjacent.size(); i++) {
@@ -819,7 +812,7 @@ void Universe::Generate2(StarSystem *ss) {
     if (!first) {
         mission->DirectorStartStarSystem(ss);
     }
-    first = false;
+    first          = false;
     _script_system = old_script_system;
     popActiveStarSystem();
     if (_active_star_systems.empty()) {

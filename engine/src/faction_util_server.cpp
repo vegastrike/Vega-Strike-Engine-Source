@@ -56,8 +56,7 @@ Texture *FactionUtil::createTexture(const char *tex, bool force) {
     return NULL;
 }
 
-void FactionUtil::LoadFactionPlaylists() {
-}
+void FactionUtil::LoadFactionPlaylists() {}
 
 Texture *FactionUtil::getForceLogo(int faction) {
     return NULL;
@@ -70,4 +69,3 @@ Texture *FactionUtil::getSquadLogo(int faction) {
 int FactionUtil::GetNumAnimation(int faction) {
     return 0;
 }
-

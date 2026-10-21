@@ -26,40 +26,36 @@
  */
 
 #include "player_ship.h"
+
+#include <boost/format.hpp>
+
 #include "components_manager.h"
 #include "configuration/configuration.h"
 #include "vs_logging.h"
 
-#include <boost/format.hpp>
+ShipNotFoundException::ShipNotFoundException(int index)
+    : std::runtime_error((boost::format("GetShipByIndex. Index %1% not found.") % index).str()) {}
 
-ShipNotFoundException::ShipNotFoundException(int index): 
-    std::runtime_error((boost::format("GetShipByIndex. Index %1% not found.") % index).str()) {}
-
-ShipNotFoundException::ShipNotFoundException(const std::string& name):
-    std::runtime_error((boost::format("GetShipByIndex. Index %1% not found.") % name).str()) {}
+ShipNotFoundException::ShipNotFoundException(const std::string& name)
+    : std::runtime_error((boost::format("GetShipByIndex. Index %1% not found.") % name).str()) {}
 
 static const std::string player_fleet_category = "starships/My_Fleet";
 
 // An identifier of the ship in question. This is NOT the index in the player_fleet vector.
 // This identifier is added to the ship's cargo.index field.
-// TODO: this is not elegant. Figure out something better. 
+// TODO: this is not elegant. Figure out something better.
 // Probably make PlayerShip a subclass of Cargo.
-int counter = 1;    // We start counting from 1, as 0 is for non-player ship.
+int counter = 1;  // We start counting from 1, as 0 is for non-player ship.
 
-
-PlayerShip::PlayerShip(bool active,
-                       ComponentsManager* unit,
-                       const Cargo& cargo,
-                       const std::string& system, 
-                       const std::string& base):
-    active(active), unit(unit), cargo(cargo), system(system), base(base) {
+PlayerShip::PlayerShip(bool active, ComponentsManager* unit, const Cargo& cargo, const std::string& system,
+                       const std::string& base)
+    : active(active), unit(unit), cargo(cargo), system(system), base(base) {
     this->cargo.index = counter++;
 }
 
-
 PlayerShip& PlayerShip::GetActiveShip() {
-    for(PlayerShip& ship : player_fleet) {
-        if(ship.active) {
+    for (PlayerShip& ship : player_fleet) {
+        if (ship.active) {
             return ship;
         }
     }
@@ -67,12 +63,12 @@ PlayerShip& PlayerShip::GetActiveShip() {
     throw NoActiveShipNotFoundException();
 }
 
-// Note: this is saved in the savegame file. 
+// Note: this is saved in the savegame file.
 // So it can't be the ship.cargo.index.
 int PlayerShip::GetActiveShipIndex() {
     int i = 0;
-    for(PlayerShip& ship : player_fleet) {
-        if(ship.active) {
+    for (PlayerShip& ship : player_fleet) {
+        if (ship.active) {
             return i;
         }
         i++;
@@ -86,29 +82,29 @@ std::string PlayerShip::GetName() {
     return name;
 }
 
-// TODO: move to python 
+// TODO: move to python
 std::string PlayerShip::GetPurchaseHeader() {
     std::string return_value;
-    if(active) {
+    if (active) {
         return_value = (boost::format("#b#%1% - The ship you are currently flying#-b#n1.5#") % GetName()).str();
     } else {
-        return_value = (boost::format("#b#Currently docked at %1% at the %2% system#-b#n1.5#") % base % system).str();
+        return_value  = (boost::format("#b#Currently docked at %1% at the %2% system#-b#n1.5#") % base % system).str();
         return_value += (boost::format("#b#Transport cost: %1$.2f#-b#n1.5#") % transfer_price).str();
     }
-    
+
     return_value += (boost::format("#b#Purchased for: %1$.2f#-b#n1.5#") % cargo.GetPrice()).str();
     // TODO: this is clearly wrong
     // Sale price should reflect ship condition, age, etc.
     // Sale price should not reflect purchase price - did I buy at a discount or salvage it using a tractor beam
     const float ship_sellback_factor = configuration().economics.ship_sellback_price_flt;
-    const float sellback_price = ship_sellback_factor * cargo.GetPrice();
+    const float sellback_price       = ship_sellback_factor * cargo.GetPrice();
     return_value += (boost::format("#b#Current resale value: %1$.2f#-b#n1.5#") % sellback_price).str();
     return return_value;
 }
 
 PlayerShip& PlayerShip::GetShipByIndex(int index) {
-    for(PlayerShip& ship : player_fleet) {
-        if(ship.cargo.index == index) {
+    for (PlayerShip& ship : player_fleet) {
+        if (ship.cargo.index == index) {
             return ship;
         }
     }
@@ -117,8 +113,8 @@ PlayerShip& PlayerShip::GetShipByIndex(int index) {
 }
 
 PlayerShip& PlayerShip::GetShipByName(const std::string ship_name) {
-    for(PlayerShip& ship : player_fleet) {
-        if(ship_name == ship.cargo.GetName()) {
+    for (PlayerShip& ship : player_fleet) {
+        if (ship_name == ship.cargo.GetName()) {
             return ship;
         }
     }
@@ -126,21 +122,19 @@ PlayerShip& PlayerShip::GetShipByName(const std::string ship_name) {
     throw ShipNotFoundException(ship_name);
 }
 
-bool PlayerShip::IsShipInSameBase(const std::string& destination_system, 
-                                  const std::string& destination_base) {
+bool PlayerShip::IsShipInSameBase(const std::string& destination_system, const std::string& destination_base) {
     return (destination_system == system && destination_base == base);
 }
 
 Cargo PlayerShip::RemoveShip(int index) {
     // Note that index is an internal number stored in cargo and is NOT
     // the index of the ship in the std::vector player_fleet!
-    for(auto it = player_fleet.begin(); it != player_fleet.end(); ++it) {
+    for (auto it = player_fleet.begin(); it != player_fleet.end(); ++it) {
         if (it->cargo.index == index) {
-            VS_LOG(trace, (boost::format("Removing ship %1% out of %2%.\n") % 
-                   std::distance(player_fleet.begin(), it) % 
-                   player_fleet.size()));
+            VS_LOG(trace, (boost::format("Removing ship %1% out of %2%.\n") % std::distance(player_fleet.begin(), it) %
+                           player_fleet.size()));
 
-            Cargo cargo = it->cargo;     // copy before erase
+            Cargo cargo = it->cargo;  // copy before erase
 
             if (it->unit) {
                 delete it->unit;
@@ -156,38 +150,36 @@ Cargo PlayerShip::RemoveShip(int index) {
 }
 
 void PlayerShip::SwitchShips(int index) {
-    for(PlayerShip& ship : player_fleet) {
-        if(ship.cargo.index == index) {
+    for (PlayerShip& ship : player_fleet) {
+        if (ship.cargo.index == index) {
             ship.active = true;
             continue;
         }
 
-        if(ship.active) {
+        if (ship.active) {
             ship.active = false;
         }
     }
 }
 
-void PlayerShip::UpdateLocation(const std::string& system, 
-                                const std::string& base) {
+void PlayerShip::UpdateLocation(const std::string& system, const std::string& base) {
     this->system = system;
-    this->base = base;
+    this->base   = base;
 }
 
 // Right now we feed everything to the function and it's trivial.
 // But we could calculate transport price by parsec, risk per system, etc.
-void PlayerShip::UpdateTransportPrice(const std::string& destination_system, 
-                                     const std::string& destination_base,
-                                     const int jumps) {
-    const float shipping_cost_base = configuration().economics.shipping_price_base_flt;
-    const float shipping_cost_insys = configuration().economics.shipping_price_insys_flt;
+void PlayerShip::UpdateTransportPrice(const std::string& destination_system, const std::string& destination_base,
+                                      const int jumps) {
+    const float shipping_cost_base     = configuration().economics.shipping_price_base_flt;
+    const float shipping_cost_insys    = configuration().economics.shipping_price_insys_flt;
     const float shipping_cost_per_jump = configuration().economics.shipping_price_perjump_flt;
 
-    
-    if(destination_system == system && destination_base == base) {
+
+    if (destination_system == system && destination_base == base) {
         // Ship is in the same base
         transfer_price = 0.0;
-    } else if(destination_system == system) {
+    } else if (destination_system == system) {
         // Ship is in the same system
         transfer_price = shipping_cost_base + shipping_cost_insys;
     } else {
@@ -196,6 +188,4 @@ void PlayerShip::UpdateTransportPrice(const std::string& destination_system,
     }
 }
 
-
 std::vector<PlayerShip> player_fleet;
-

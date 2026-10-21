@@ -27,9 +27,10 @@
 
 
 #include "tactics.h"
+
+#include "cmd/unit_generic.h"
 #include "src/vegastrike.h"
 #include "src/vs_logging.h"
-#include "cmd/unit_generic.h"
 
 void CloakFor::Execute() {
     if (time == 0) {
@@ -53,4 +54,3 @@ CloakFor::~CloakFor() {
         parent->cloak.Deactivate();
     }
 }
-

@@ -27,31 +27,30 @@
 
 #include "components/afterburner.h"
 
-#include "component_utils.h"
 #include "cmd/unit_csv_factory.h"
+#include "component_utils.h"
 #include "configuration/configuration.h"
 
-Afterburner::~Afterburner()
-= default;
+Afterburner::~Afterburner() = default;
 
-Afterburner::Afterburner(EnergyContainer *source) :
-    Component(0.0, 0.0, true, true), EnergyConsumer(source, false), thrust(1,0,1), speed(1,0,1) {
-    type = ComponentType::Afterburner;
+Afterburner::Afterburner(EnergyContainer *source)
+    : Component(0.0, 0.0, true, true), EnergyConsumer(source, false), thrust(1, 0, 1), speed(1, 0, 1) {
+    type         = ComponentType::Afterburner;
     upgrade_name = "Afterburner";
-    installed = true;
+    installed    = true;
 }
-
-
 
 // Component Methods
 void Afterburner::Load(std::string unit_key) {
-    const double game_speed = configuration().physics.game_speed_dbl;
-    const double game_accel = configuration().physics.game_accel_dbl;
+    const double game_speed       = configuration().physics.game_speed_dbl;
+    const double game_accel       = configuration().physics.game_accel_dbl;
     const double game_accel_speed = game_speed * game_accel;
     Component::Load(unit_key);
 
-    thrust = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", std::string("0.0")), game_accel_speed);
-    speed = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", std::string("0.0")), game_speed);
+    thrust = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Accel", std::string("0.0")),
+                              game_accel_speed);
+    speed  = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Afterburner_Speed_Governor", std::string("0.0")),
+                              game_speed);
     double consumption = UnitCSVFactory::GetVariable(unit_key, "Afterburner_Usage_Cost", 1.0);
     SetConsumption(consumption);
 
@@ -59,11 +58,11 @@ void Afterburner::Load(std::string unit_key) {
     operational = (thrust.Percent() + speed.Percent()) / 2;
 }
 
-void Afterburner::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    const double game_speed = configuration().physics.game_speed_dbl;
-    const double game_accel = configuration().physics.game_accel_dbl;
-    const double game_accel_speed = game_speed * game_accel;
-    unit["Afterburner_Accel"] = thrust.Serialize(game_accel_speed);
+void Afterburner::SaveToCSV(std::map<std::string, std::string> &unit) const {
+    const double game_speed            = configuration().physics.game_speed_dbl;
+    const double game_accel            = configuration().physics.game_accel_dbl;
+    const double game_accel_speed      = game_speed * game_accel;
+    unit["Afterburner_Accel"]          = thrust.Serialize(game_accel_speed);
     unit["Afterburner_Speed_Governor"] = speed.Serialize(game_speed);
 }
 
@@ -107,7 +106,6 @@ void Afterburner::Repair() {
     operational.RepairFully();
 }
 
-double Afterburner::Consume()
-{
+double Afterburner::Consume() {
     return EnergyConsumer::Consume();
 }

@@ -26,56 +26,37 @@
  */
 
 #include "cmd/building.h"
+
 #include "cmd/cont_terrain.h"
 #include "cmd/unit_generic.h"
 
-Building::Building(ContinuousTerrain *parent,
-        bool vehicle,
-        const char *filename,
-        bool SubUnit,
-        int faction,
-        const string &modifications,
-        Flightgroup *fg) : Unit(filename, SubUnit, faction, modifications, fg) {
-    this->vehicle = vehicle;
-    continuous = true;
+Building::Building(ContinuousTerrain *parent, bool vehicle, const char *filename, bool SubUnit, int faction,
+                   const string &modifications, Flightgroup *fg)
+    : Unit(filename, SubUnit, faction, modifications, fg) {
+    this->vehicle      = vehicle;
+    continuous         = true;
     this->parent.plane = parent;
 }
 
-Building::Building(Terrain *parent,
-        bool vehicle,
-        const char *filename,
-        bool SubUnit,
-        int faction,
-        const string &modifications,
-        Flightgroup *fg) : Unit(filename, SubUnit, faction, modifications, fg) {
-    this->vehicle = vehicle;
-    continuous = false;
+Building::Building(Terrain *parent, bool vehicle, const char *filename, bool SubUnit, int faction,
+                   const string &modifications, Flightgroup *fg)
+    : Unit(filename, SubUnit, faction, modifications, fg) {
+    this->vehicle        = vehicle;
+    continuous           = false;
     this->parent.terrain = parent;
 }
 
-void Building::UpdatePhysics2(const Transformation &trans,
-        const Transformation &old_physical_state,
-        const Vector &accel,
-        float difficulty,
-        const Matrix &transmat,
-        const Vector &CumulativeVelocity,
-        bool ResolveLast,
-        UnitCollection *uc) {
-    Unit::UpdatePhysics2(trans,
-            old_physical_state,
-            accel,
-            difficulty,
-            transmat,
-            CumulativeVelocity,
-            ResolveLast,
-            uc);
+void Building::UpdatePhysics2(const Transformation &trans, const Transformation &old_physical_state,
+                              const Vector &accel, float difficulty, const Matrix &transmat,
+                              const Vector &CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
+    Unit::UpdatePhysics2(trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc);
     QVector tmp(LocalPosition());
-    Vector p, q, r;
+    Vector  p, q, r;
     GetOrientation(p, q, r);
     if (continuous) {
         tmp = parent.plane->GetGroundPos(tmp, p);
     } else {
-        parent.terrain->GetGroundPos(tmp, p, (float) 0, (float) 0);
+        parent.terrain->GetGroundPos(tmp, p, (float)0, (float)0);
     }
     if (vehicle) {
         Normalize(p);
@@ -90,7 +71,8 @@ void Building::UpdatePhysics2(const Transformation &trans,
         {
             tmp1 = 200 * q.Cross(p);
         }
-        NetLocalTorque += ((tmp1 - tmp1 * (tmp1.Dot(GetAngularVelocity()) / tmp1.Dot(tmp1)))) * 1. / static_cast<float>(GetMass());
+        NetLocalTorque += ((tmp1 - tmp1 * (tmp1.Dot(GetAngularVelocity()) / tmp1.Dot(tmp1)))) * 1. /
+                          static_cast<float>(GetMass());
     }
     SetCurPosition(tmp);
 }

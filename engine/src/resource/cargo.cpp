@@ -27,18 +27,18 @@
 
 
 #include "resource/cargo.h"
-#include "resource/manifest.h"
-#include "resource/random_utils.h"
-#include "json_utils.h"
-#include "configuration/configuration.h"
-#include "src/vega_cast_utils.h"
 
 #include <iostream>
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/classification.hpp>
 
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/format.hpp>
+
+#include "configuration/configuration.h"
+#include "json_utils.h"
+#include "resource/manifest.h"
+#include "resource/random_utils.h"
 #include "src/vega_cast_utils.h"
 
 static const std::string default_product_name("DEFAULT_PRODUCT_NAME");
@@ -52,25 +52,32 @@ static const double minimum_mass_and_volume = 0.01;
 
 // Constructors
 
-Cargo::Cargo(): name(default_product_name) {}
+Cargo::Cargo() : name(default_product_name) {}
 
-
-Cargo::Cargo(std::string name, std::string description, int quantity, double price, 
-             std::string category, double mass, double volume, bool mission, 
-             bool component, bool installed, bool integral, bool weapon, bool passenger, 
-             bool slave, double functionality) :
-             name(name), description(description), quantity(quantity), price(price), 
-             category(category), mass(std::max(minimum_mass_and_volume,mass)), 
-             volume(std::max(minimum_mass_and_volume,volume)), mission(mission),
-             component(component), installed(installed), integral(integral) {
+Cargo::Cargo(std::string name, std::string description, int quantity, double price, std::string category, double mass,
+             double volume, bool mission, bool component, bool installed, bool integral, bool weapon, bool passenger,
+             bool slave, double functionality)
+    : name(name),
+      description(description),
+      quantity(quantity),
+      price(price),
+      category(category),
+      mass(std::max(minimum_mass_and_volume, mass)),
+      volume(std::max(minimum_mass_and_volume, volume)),
+      mission(mission),
+      component(component),
+      installed(installed),
+      integral(integral) {
     this->functionality = functionality;
 }
 
-Cargo::Cargo(std::string name, std::string category, double price, int quantity, 
-          double mass, double volume): name(name), category(category),
-          price(price), quantity(quantity), mass(std::max(minimum_mass_and_volume,mass)), 
-          volume(std::max(minimum_mass_and_volume,volume)) {}
-             
+Cargo::Cargo(std::string name, std::string category, double price, int quantity, double mass, double volume)
+    : name(name),
+      category(category),
+      price(price),
+      quantity(quantity),
+      mass(std::max(minimum_mass_and_volume, mass)),
+      volume(std::max(minimum_mass_and_volume, volume)) {}
 
 /*  0 name
     1 category
@@ -91,97 +98,97 @@ Cargo::Cargo(std::string name, std::string category, double price, int quantity,
 */
 Cargo::Cargo(std::string& cargo_text) {
     std::vector<std::string> cargo_parts;
-    boost::split(cargo_parts,cargo_text,boost::is_any_of(";"));
+    boost::split(cargo_parts, cargo_text, boost::is_any_of(";"));
 
-    for(long unsigned int i=0;i<cargo_parts.size();i++) {
+    for (long unsigned int i = 0; i < cargo_parts.size(); i++) {
         switch (i) {
-        case 0:
-            name = cargo_parts[0];
-            break;
-        case 1:
-            category = cargo_parts[1];
-            break;
-        case 2:
-            price = locale_aware_stod(cargo_parts[2]);
-            break;
-        case 3:
-            quantity = locale_aware_stoi(cargo_parts[3]);
-            break;
-        case 4:
-            mass = std::max(locale_aware_stod(cargo_parts[4]), minimum_mass_and_volume);
-            break;
-        case 5:
-            volume = std::max(locale_aware_stod(cargo_parts[5]), minimum_mass_and_volume);
-            break;
-        case 6:
-            functionality = Resource<double>(locale_aware_stod(cargo_parts[6]), 0.0, 1.0);
-            break;
-        case 7:
-            break; // max_functionality is always 1.0. cargo_parts[6] not used.
-        case 8:
-            description = cargo_parts[8];
-            break;
-        case 9:
-            mission = _parse_bool(cargo_parts[9]);
-            break;
-        case 10:
-            installed = component = _parse_bool(cargo_parts[10]);
-            break;
-        case 11:
-            integral = _parse_bool(cargo_parts[11]);
-            break;
-        case 12:
-            component = _parse_bool(cargo_parts[12]);
-            break;
-        case 13:
-            weapon = _parse_bool(cargo_parts[13]);
-            break;
-        case 14:
-            passenger = _parse_bool(cargo_parts[14]);
-            break;
-        case 15:
-            slave = _parse_bool(cargo_parts[15]);
-            break;
-        default:
-            break;
+            case 0:
+                name = cargo_parts[0];
+                break;
+            case 1:
+                category = cargo_parts[1];
+                break;
+            case 2:
+                price = locale_aware_stod(cargo_parts[2]);
+                break;
+            case 3:
+                quantity = locale_aware_stoi(cargo_parts[3]);
+                break;
+            case 4:
+                mass = std::max(locale_aware_stod(cargo_parts[4]), minimum_mass_and_volume);
+                break;
+            case 5:
+                volume = std::max(locale_aware_stod(cargo_parts[5]), minimum_mass_and_volume);
+                break;
+            case 6:
+                functionality = Resource<double>(locale_aware_stod(cargo_parts[6]), 0.0, 1.0);
+                break;
+            case 7:
+                break;  // max_functionality is always 1.0. cargo_parts[6] not used.
+            case 8:
+                description = cargo_parts[8];
+                break;
+            case 9:
+                mission = _parse_bool(cargo_parts[9]);
+                break;
+            case 10:
+                installed = component = _parse_bool(cargo_parts[10]);
+                break;
+            case 11:
+                integral = _parse_bool(cargo_parts[11]);
+                break;
+            case 12:
+                component = _parse_bool(cargo_parts[12]);
+                break;
+            case 13:
+                weapon = _parse_bool(cargo_parts[13]);
+                break;
+            case 14:
+                passenger = _parse_bool(cargo_parts[14]);
+                break;
+            case 15:
+                slave = _parse_bool(cargo_parts[15]);
+                break;
+            default:
+                break;
         }
     }
 }
 
-Cargo::Cargo(boost::json::object json): 
-    name(JsonGetStringWithDefault(json, "file", "")),
-    description(JsonGetStringWithDefault(json, "description", "")),
-    quantity(1), 
-    price(locale_aware_stoi(JsonGetStringWithDefault(json, "price", "0"))),
-    category(JsonGetStringWithDefault(json, "categoryname", "")),
-    mass(std::max(locale_aware_stod(JsonGetStringWithDefault(json, "mass", "0.0")), minimum_mass_and_volume)),
-    volume(std::max(locale_aware_stod(JsonGetStringWithDefault(json, "volume", "0.1")), minimum_mass_and_volume)),
-    mission(false), 
-    component(GetBool(json, "upgrade", false)),
-    installed(false),
-    integral(false),
-    weapon(GetBool(json, "weapon", false)),
-    functionality(Resource<double>(1.0, 0.0, 1.0)) {
-    if(volume <=0) {
+Cargo::Cargo(boost::json::object json)
+    : name(JsonGetStringWithDefault(json, "file", "")),
+      description(JsonGetStringWithDefault(json, "description", "")),
+      quantity(1),
+      price(locale_aware_stoi(JsonGetStringWithDefault(json, "price", "0"))),
+      category(JsonGetStringWithDefault(json, "categoryname", "")),
+      mass(std::max(locale_aware_stod(JsonGetStringWithDefault(json, "mass", "0.0")), minimum_mass_and_volume)),
+      volume(std::max(locale_aware_stod(JsonGetStringWithDefault(json, "volume", "0.1")), minimum_mass_and_volume)),
+      mission(false),
+      component(GetBool(json, "upgrade", false)),
+      installed(false),
+      integral(false),
+      weapon(GetBool(json, "weapon", false)),
+      functionality(Resource<double>(1.0, 0.0, 1.0)) {
+    if (volume <= 0) {
         volume = 0.1;
     }
 }
 
 // Getters
-std::string Cargo::GetName() const { 
-    return name; 
+std::string Cargo::GetName() const {
+    return name;
 }
 
-std::string Cargo::GetDescription() const { 
-    return description; 
+std::string Cargo::GetDescription() const {
+    return description;
 }
 
-int Cargo::GetQuantity() const { 
-    return quantity.Value(); 
+int Cargo::GetQuantity() const {
+    return quantity.Value();
 }
 
-double Cargo::GetPrice() const { 
-    return price; 
+double Cargo::GetPrice() const {
+    return price;
 }
 
 double Cargo::GetTotalValue() const {
@@ -204,8 +211,8 @@ bool Cargo::IsMissionFlag() const {
     return mission;
 }
 
-bool Cargo::IsComponent() const { 
-    return component; 
+bool Cargo::IsComponent() const {
+    return component;
 }
 
 bool Cargo::IsInstalled() const {
@@ -216,16 +223,16 @@ bool Cargo::IsIntegral() const {
     return integral;
 }
 
-bool Cargo::IsWeapon() const { 
-    return weapon; 
+bool Cargo::IsWeapon() const {
+    return weapon;
 }
 
-bool Cargo::IsPassenger() const { 
-    return passenger; 
+bool Cargo::IsPassenger() const {
+    return passenger;
 }
 
-bool Cargo::IsSlave() const { 
-    return slave; 
+bool Cargo::IsSlave() const {
+    return slave;
 }
 
 double Cargo::GetFunctionality() const {
@@ -245,30 +252,30 @@ std::string Cargo::GetDescriptionPython() const {
 }
 
 // For script_call_unit_generic
-std::string* Cargo::GetNameAddress() { 
-    return &name; 
+std::string* Cargo::GetNameAddress() {
+    return &name;
 }
 
-std::string* Cargo::GetCategoryAddress() { 
-    return &category; 
+std::string* Cargo::GetCategoryAddress() {
+    return &category;
 }
 
 // Setters
 
-void Cargo::SetName(const std::string& name) { 
-    this->name = name; 
+void Cargo::SetName(const std::string& name) {
+    this->name = name;
 }
 
-void Cargo::SetDescription(const std::string& description) { 
-    this->description = description; 
+void Cargo::SetDescription(const std::string& description) {
+    this->description = description;
 }
 
-void Cargo::SetQuantity(const int quantity) { 
-    this->quantity = quantity; 
+void Cargo::SetQuantity(const int quantity) {
+    this->quantity = quantity;
 }
 
-void Cargo::SetPrice(const double price) { 
-    this->price = price; 
+void Cargo::SetPrice(const double price) {
+    this->price = price;
 }
 
 void Cargo::SetCategory(const std::string& category) {
@@ -280,7 +287,7 @@ void Cargo::SetMass(double mass) {
 }
 
 void Cargo::SetVolume(double volume) {
-    this->volume = std::max(minimum_mass_and_volume,volume);
+    this->volume = std::max(minimum_mass_and_volume, volume);
 }
 
 void Cargo::SetMissionFlag(bool flag) {
@@ -314,15 +321,15 @@ void Cargo::Add(int quantity) {
 }
 
 bool Cargo::CanSell(bool ship_damaged) const {
-    if(!component) {
+    if (!component) {
         return true;
     }
 
-    if(integral) {
+    if (integral) {
         return false;
     }
 
-    if(weapon) {
+    if (weapon) {
         return true;
     }
 
@@ -341,26 +348,22 @@ void Cargo::RandomDamage() {
 }
 
 double Cargo::RepairPrice() const {
-    return .5 * price * (1 - functionality.Value()); // TODO: * configuration()->general.difficulty;
+    return .5 * price * (1 - functionality.Value());  // TODO: * configuration()->general.difficulty;
 }
 
 std::string Cargo::Serialize() const {
-    return (boost::format("{%s;%s;%f;%d;%f;%f;%f;%f;%s;%d;%d;%d;%d;%d;%d;%d}")
-        % this->name % this->category % this->price % this->quantity.Value() % this->mass
-        % this->volume % this->functionality.Value() % 1.0 % this->description % this->mission
-        % this->installed % this->integral % this->component % this->weapon % 
-        this->passenger % this->slave
-    ).str();
+    return (boost::format("{%s;%s;%f;%d;%f;%f;%f;%f;%s;%d;%d;%d;%d;%d;%d;%d}") % this->name % this->category %
+            this->price % this->quantity.Value() % this->mass % this->volume % this->functionality.Value() % 1.0 %
+            this->description % this->mission % this->installed % this->integral % this->component % this->weapon %
+            this->passenger % this->slave)
+            .str();
 }
 
 // Operators
-bool Cargo::operator==(const Cargo &other) const {
+bool Cargo::operator==(const Cargo& other) const {
     return name == other.name;
 }
 
-bool Cargo::operator<(const Cargo &other) const {
+bool Cargo::operator<(const Cargo& other) const {
     return (category == other.category) ? (name < other.name) : (category < other.category);
 }
-
-
-

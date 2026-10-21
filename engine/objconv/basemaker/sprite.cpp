@@ -25,52 +25,53 @@
  */
 
 
-#include <stdlib.h>
-#include <iostream>
 #include <assert.h>
+#include <iostream>
 #include <math.h>
 #include <stdio.h>
-#include <sys/stat.h> //for mkdir
+#include <stdlib.h>
+
+#include <sys/stat.h>  //for mkdir
 #include <sys/types.h>
 #ifdef _WIN32
-#include <direct.h>
+#    include <direct.h>
 #else
-#include <unistd.h>
+#    include <unistd.h>
 #endif
 
 #include "gfx/sprite.h"
 #include "objconv/basemaker/base_maker_texture.h"
 
 #ifndef M_PI_2
-# define M_PI_2 (1.57079632679489661923)
+#    define M_PI_2 (1.57079632679489661923)
 #endif
 
 static float *mview = NULL;
-static int bogus_int; //added by chuck_starchaser to squash ignored returns warnings.
+static int    bogus_int;  // added by chuck_starchaser to squash ignored returns warnings.
 
 VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
-    xcenter = 0;
-    ycenter = 0;
-    widtho2 = 0;
+    xcenter  = 0;
+    ycenter  = 0;
+    widtho2  = 0;
     heighto2 = 0;
     rotation = 0;
-    surface = NULL;
+    surface  = NULL;
     maxs = maxt = 0;
-    bogus_int = chdir("sprites");
-    FILE *f = nullptr;
+    bogus_int   = chdir("sprites");
+    FILE *f     = nullptr;
     if (file[0] != '\0') {
         f = fopen(file, "rt");
     }
     if (f) {
-        char texture[64] = {0};
+        char texture[64]  = {0};
         char texturea[64] = {0};
-        bogus_int = fscanf(f, "%63s %63s", texture, texturea);
-        bogus_int = fscanf(f, "%f %f", &widtho2, &heighto2);
-        bogus_int = fscanf(f, "%f %f", &xcenter, &ycenter);
+        bogus_int         = fscanf(f, "%63s %63s", texture, texturea);
+        bogus_int         = fscanf(f, "%f %f", &widtho2, &heighto2);
+        bogus_int         = fscanf(f, "%f %f", &xcenter, &ycenter);
 
-        widtho2 /= 2;
+        widtho2  /= 2;
         heighto2 /= -2;
-        surface = NULL;
+        surface   = NULL;
         if (texturea[0] == '0') {
             surface = new Texture(texture);
         } else {
@@ -80,7 +81,7 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
             delete surface;
             surface = NULL;
         }
-        //Finally close file
+        // Finally close file
         fclose(f);
     } else {
         widtho2 = heighto2 = 0;
@@ -89,8 +90,8 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
     bogus_int = chdir("..");
 }
 
-using std::cout;
 using std::cerr;
+using std::cout;
 using std::endl;
 
 void VSSprite::ReadTexture(FILE *f) {
@@ -117,16 +118,16 @@ void VSSprite::SetST(const float s, const float t) {
 
 void VSSprite::DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
     if (rotation) {
-        const float cw = widtho2 * cos(rotation);
-        const float sw = widtho2 * sin(rotation);
-        const float ch = heighto2 * cos(M_PI_2 + rotation);
-        const float sh = heighto2 * sin(M_PI_2 + rotation);
+        const float cw   = widtho2 * cos(rotation);
+        const float sw   = widtho2 * sin(rotation);
+        const float ch   = heighto2 * cos(M_PI_2 + rotation);
+        const float sh   = heighto2 * sin(M_PI_2 + rotation);
         const float wnew = cw + ch;
         const float hnew = sw + sh;
-        ll = Vector(xcenter - wnew, ycenter + hnew, 0.00f);
-        lr = Vector(xcenter + wnew, ycenter + hnew, 0.00f);
-        ur = Vector(xcenter + wnew, ycenter - hnew, 0.00f);
-        ul = Vector(xcenter - wnew, ycenter - hnew, 0.00f);
+        ll               = Vector(xcenter - wnew, ycenter + hnew, 0.00f);
+        lr               = Vector(xcenter + wnew, ycenter + hnew, 0.00f);
+        ur               = Vector(xcenter + wnew, ycenter - hnew, 0.00f);
+        ul               = Vector(xcenter - wnew, ycenter - hnew, 0.00f);
     } else {
         ll = Vector(xcenter - widtho2, ycenter + heighto2, 0.00f);
         lr = Vector(xcenter + widtho2, ycenter + heighto2, 0.00f);
@@ -137,7 +138,7 @@ void VSSprite::DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
 
 void VSSprite::Draw() {
     if (surface) {
-        //don't do anything if no surface
+        // don't do anything if no surface
         glDisable(GL_CULL_FACE);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_TEXTURE_2D);
@@ -170,7 +171,7 @@ void VSSprite::GetPosition(float &x1, float &y1) {
 }
 
 void VSSprite::SetSize(float x1, float y1) {
-    widtho2 = x1 / 2;
+    widtho2  = x1 / 2;
     heighto2 = y1 / 2;
 }
 

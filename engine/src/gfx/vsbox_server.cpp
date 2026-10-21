@@ -26,12 +26,9 @@
  */
 
 
-#include "vsbox.h"
 #include "root_generic/xml_support.h"
+#include "vsbox.h"
 
-Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), corner_max(corner2) {
-}
+Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), corner_max(corner2) {}
 
-void Box::ProcessDrawQueue(int) {
-}
-
+void Box::ProcessDrawQueue(int) {}

@@ -27,24 +27,26 @@
 
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
-#include <boost/python/class.hpp>
 
 #include <Python.h>
+
 #include <compile.h>
+
+#include <boost/python/class.hpp>
+#include <boost/version.hpp>
 #if ((PY_VERSION_HEX) < 0x030B0000)
-#include <eval.h>
+#    include <eval.h>
 #endif
 #include <stdio.h>
 
+#include "pythonai.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 #include "src/python/python_class.h"
 #include "src/python/python_compile.h"
-#include "src/config_xml.h"
-#include "root_generic/vs_globals.h"
-#include "vegadisk/vsfilesystem.h"
 #include "src/vs_logging.h"
-#include "pythonai.h"
+#include "vegadisk/vsfilesystem.h"
 
 using namespace Orders;
 
@@ -52,13 +54,13 @@ PythonAI *PythonAI::last_ai = NULL;
 
 PythonAI::PythonAI(PyObject *self_, float reaction_time, float aggressivity) : FireAt(reaction_time, aggressivity) {
     self = self_;
-    //boost::python:
-    Py_XINCREF(self);     //by passing this to whoami, we are counting on them to Destruct us
+    // boost::python:
+    Py_XINCREF(self);  // by passing this to whoami, we are counting on them to Destruct us
     last_ai = this;
 }
 
 void PythonAI::Destruct() {
-    Py_XDECREF(self);     //this should destroy SELF
+    Py_XDECREF(self);  // this should destroy SELF
 }
 
 void PythonAI::default_Execute(FireAt &self_) {
@@ -67,7 +69,7 @@ void PythonAI::default_Execute(FireAt &self_) {
 
 PythonAI *PythonAI::LastAI() {
     PythonAI *myai = last_ai;
-    last_ai = NULL;
+    last_ai        = NULL;
     return myai;
 }
 
@@ -81,7 +83,7 @@ void PythonAI::Execute() {
 }
 
 void PythonAI::InitModuleAI() {
-    boost::python::module_builder ai_builder("AI");
+    boost::python::module_builder                  ai_builder("AI");
     boost::python::class_builder<FireAt, PythonAI> BaseClass(ai_builder, "FireAt");
 
     BaseClass.def(boost::python::constructor<float, float>());
@@ -91,4 +93,3 @@ void PythonAI::InitModuleAI() {
 PythonAI::~PythonAI() {
     VS_LOG(warning, (boost::format("Destruct called. If called from C++ this is death %1$x") % this));
 }
-

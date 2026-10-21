@@ -28,37 +28,36 @@
 /*
 template<class KEY, class VALUE, class SIZ> VALUE *Hashtable<KEY, VALUE, SIZ>::Get(const KEY &key)
 {
-	int hashval = hash(key);
-	list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
+    int hashval = hash(key);
+    list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
 
-	for(;iter!=end;iter++)
-		if((*iter).key == key)
-			break;
-	if(iter==end)
-		return NULL;
-	else
-		return (*iter).value;
+    for(;iter!=end;iter++)
+        if((*iter).key == key)
+            break;
+    if(iter==end)
+        return NULL;
+    else
+        return (*iter).value;
 }
 
 template<class KEY, class VALUE, class SIZ> void Hashtable<KEY, VALUE, SIZ>::Put(const KEY &key, VALUE *value)
 {
-	int hashval = hash(key);
-	table[hashval].push_front(HashElement(key, value));
+    int hashval = hash(key);
+    table[hashval].push_front(HashElement(key, value));
 }
 
 template<class KEY, class VALUE, class SIZ> void Hashtable<KEY, VALUE, SIZ>::Delete(const KEY &key)
 {
-	int hashval = hash(key);
-	list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
+    int hashval = hash(key);
+    list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
 
-	for(;iter!=end;iter++)
-		if((*iter).key == key)
-			break;
-	if(iter==end)
-		return NULL;
-	else {
-		table[hashval].erase(iter);
-	}
+    for(;iter!=end;iter++)
+        if((*iter).key == key)
+            break;
+    if(iter==end)
+        return NULL;
+    else {
+        table[hashval].erase(iter);
+    }
 }
 */
-

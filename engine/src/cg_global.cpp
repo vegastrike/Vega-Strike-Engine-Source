@@ -26,51 +26,50 @@
  */
 
 
-#if defined (CG_SUPPORT)
-#define GLH_EXT_SINGLE_FILE 1
-#include "src/cg_global.h"
-#include "root_generic/vs_globals.h"
+#if defined(CG_SUPPORT)
+#    define GLH_EXT_SINGLE_FILE 1
+#    include "src/cg_global.h"
 
-#include <glh/glh_extensions.h>
+#    include <glh/glh_extensions.h>
+
+#    include "root_generic/vs_globals.h"
 // #include <iostream>
-#include <string>
-#include <shared/data_path.h>
+#    include <string>
 
-#include "src/vs_logging.h"
+#    include <shared/data_path.h>
+
+#    include "src/vs_logging.h"
 
 // using std::string;
 
-void CG_Cloak::cgLoadMedia( std::string pathname, std::string filename )
-{
+void CG_Cloak::cgLoadMedia(std::string pathname, std::string filename) {
     data_path media;
-    media.path.push_back( "." );
-    media.path.push_back( pathname );
-    std::string mediafile = media.get_file( filename );
+    media.path.push_back(".");
+    media.path.push_back(pathname);
+    std::string mediafile = media.get_file(filename);
     if (mediafile == "") {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Unable to load %1%, exiting...") % filename));
-        VSExit( 0 );
+        VSExit(0);
     }
-    this->vertexProgram = cgCreateProgramFromFile( this->shaderContext,
-                                                   CG_SOURCE, mediafile.data(),
-                                                   this->vertexProfile, NULL, NULL );
+    this->vertexProgram =
+            cgCreateProgramFromFile(this->shaderContext, CG_SOURCE, mediafile.data(), this->vertexProfile, NULL, NULL);
 
-    cgGLLoadProgram( this->vertexProgram );
+    cgGLLoadProgram(this->vertexProgram);
 
-    this->ModelViewProj    = cgGetNamedParameter( this->vertexProgram, "matModelViewProj" );
-    this->ModelViewIT      = cgGetNamedParameter( this->vertexProgram, "matModelView" );
-    this->ModelView        = cgGetNamedParameter( this->vertexProgram, "matModelView" );
+    this->ModelViewProj = cgGetNamedParameter(this->vertexProgram, "matModelViewProj");
+    this->ModelViewIT   = cgGetNamedParameter(this->vertexProgram, "matModelView");
+    this->ModelView     = cgGetNamedParameter(this->vertexProgram, "matModelView");
 
-    this->MaterialDiffuse  = cgGetNamedParameter( this->vertexProgram, "materialDiffuse" );
-    this->MaterialAmbient  = cgGetNamedParameter( this->vertexProgram, "materialAmbient" );
-    this->MaterialSpecular = cgGetNamedParameter( this->vertexProgram, "materialSpecular" );
-    this->MaterialEmissive = cgGetNamedParameter( this->vertexProgram, "materialEmissive" );
+    this->MaterialDiffuse  = cgGetNamedParameter(this->vertexProgram, "materialDiffuse");
+    this->MaterialAmbient  = cgGetNamedParameter(this->vertexProgram, "materialAmbient");
+    this->MaterialSpecular = cgGetNamedParameter(this->vertexProgram, "materialSpecular");
+    this->MaterialEmissive = cgGetNamedParameter(this->vertexProgram, "materialEmissive");
 
-    this->VecPower = cgGetNamedParameter( this->vertexProgram, "vecPower" );
-    this->VecCenter        = cgGetNamedParameter( this->vertexProgram, "vecCenter" );
-    this->VecBlendParams   = cgGetNamedParameter( this->vertexProgram, "vecBlendParams" );
-    this->VecLightDir      = cgGetNamedParameter( this->vertexProgram, "vecLightDir" );
-    this->VecEye  = cgGetNamedParameter( this->vertexProgram, "vecEye" );
-    this->VecTime = cgGetNamedParameter( this->vertexProgram, "VecTime" );
+    this->VecPower       = cgGetNamedParameter(this->vertexProgram, "vecPower");
+    this->VecCenter      = cgGetNamedParameter(this->vertexProgram, "vecCenter");
+    this->VecBlendParams = cgGetNamedParameter(this->vertexProgram, "vecBlendParams");
+    this->VecLightDir    = cgGetNamedParameter(this->vertexProgram, "vecLightDir");
+    this->VecEye         = cgGetNamedParameter(this->vertexProgram, "vecEye");
+    this->VecTime        = cgGetNamedParameter(this->vertexProgram, "VecTime");
 }
 #endif
-

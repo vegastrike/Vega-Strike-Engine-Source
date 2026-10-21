@@ -28,28 +28,21 @@
 
 #include "SoundBuffer.h"
 
-#include <stdlib.h>
 #include <memory.h>
+#include <stdlib.h>
 #include <utility>
 
 namespace Audio {
 
-SoundBuffer::SoundBuffer()
-        : buffer(0),
-        byteCapacity(0),
-        bytesUsed(0) {
-}
+SoundBuffer::SoundBuffer() : buffer(0), byteCapacity(0), bytesUsed(0) {}
 
-SoundBuffer::SoundBuffer(unsigned int capacity, const Format &format)
-        : buffer(0),
-        byteCapacity(0),
-        bytesUsed(0) {
+SoundBuffer::SoundBuffer(unsigned int capacity, const Format &format) : buffer(0), byteCapacity(0), bytesUsed(0) {
     reserve(capacity, format);
 }
 
 SoundBuffer::SoundBuffer(const SoundBuffer &other) {
     bytesUsed = byteCapacity = other.bytesUsed;
-    buffer = malloc(byteCapacity);
+    buffer                   = malloc(byteCapacity);
     if (buffer == 0) {
         throw OutOfMemoryException();
     }
@@ -59,7 +52,7 @@ SoundBuffer::SoundBuffer(const SoundBuffer &other) {
 
 SoundBuffer &SoundBuffer::operator=(const SoundBuffer &other) {
     bytesUsed = byteCapacity = other.bytesUsed;
-    buffer = realloc(buffer, byteCapacity);
+    buffer                   = realloc(buffer, byteCapacity);
     if (buffer == 0) {
         throw OutOfMemoryException();
     }
@@ -71,7 +64,7 @@ SoundBuffer &SoundBuffer::operator=(const SoundBuffer &other) {
 
 void SoundBuffer::reserve(unsigned int capacity) {
     byteCapacity = capacity;
-    bytesUsed = 0;
+    bytesUsed    = 0;
 
     buffer = realloc(buffer, byteCapacity);
     if (buffer == 0) {
@@ -86,7 +79,7 @@ void SoundBuffer::reserve(unsigned int capacity, const Format &_format) {
 
 void SoundBuffer::reformat(const Format &newFormat) {
     if (newFormat != format) {
-        throw (NotImplementedException("Format conversion"));
+        throw(NotImplementedException("Format conversion"));
     }
 }
 
@@ -116,4 +109,4 @@ void SoundBuffer::optimize() {
     }
 }
 
-};
+};  // namespace Audio

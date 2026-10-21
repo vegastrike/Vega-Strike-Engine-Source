@@ -28,32 +28,31 @@
 
 #include "configuration/configuration.h"
 #ifdef HAVE_AL
-#if defined(__APPLE__) && defined (__MACH__)
-#include <al.h>
-#include <alc.h>
-#define KeyMap AppleKeyMap
-#undef KeyMap
-#else
-#include <AL/al.h>
-#include <AL/alc.h>
-#endif
-#include <stdlib.h>
-#include <stdio.h>
+#    if defined(__APPLE__) && defined(__MACH__)
+#        include <al.h>
+#        include <alc.h>
+#        define KeyMap AppleKeyMap
+#        undef KeyMap
+#    else
+#        include <AL/al.h>
+#        include <AL/alc.h>
+#    endif
+#    include <stdio.h>
+#    include <stdlib.h>
+#    include <vector>
 
-#include <vector>
+#    include "al_globals.h"
+#    include "root_generic/options.h"
+#    include "root_generic/vs_globals.h"
+#    include "src/audiolib.h"
+#    include "src/config_xml.h"
+#    include "src/vs_logging.h"
 
-#include "src/audiolib.h"
-#include "src/config_xml.h"
-#include "root_generic/vs_globals.h"
-#include "al_globals.h"
-#include "root_generic/options.h"
-#include "src/vs_logging.h"
-
-#if 1
-#define AL_GET_PROC(name) ( alGetProcAddress( const_cast< ALubyte* > ( reinterpret_cast< const ALubyte* > (name) ) ) )
-#else
-#define AL_GET_PROC( name ) ( alGetProcAddress( name ) )
-#endif
+#    if 1
+#        define AL_GET_PROC(name) (alGetProcAddress(const_cast<ALubyte *>(reinterpret_cast<const ALubyte *>(name))))
+#    else
+#        define AL_GET_PROC(name) (alGetProcAddress(name))
+#    endif
 
 static void fixup_function_pointers(void) {
     /* UNCOMMENT AS NEEDED
@@ -93,7 +92,8 @@ static void fixup_function_pointers(void) {
      *     alCaptureGetData = (ALsizei (*)( ALvoid*, ALsizei, ALenum, ALuint )) GP("alCaptureGetData_EXT");
      *
      *     talBufferAppendData = (ALuint (*)(ALuint, ALenum, ALvoid *, ALint, ALint)) GP("alBufferAppendData_LOKI");
-     *     talBufferAppendWriteData = (ALuint (*)(ALuint, ALenum, ALvoid *, ALint, ALint, ALenum)) GP("alBufferAppendWriteData_LOKI");
+     *     talBufferAppendWriteData = (ALuint (*)(ALuint, ALenum, ALvoid *, ALint, ALint, ALenum))
+     * GP("alBufferAppendWriteData_LOKI");
      *
      *     talGenStreamingBuffers = (void (*)(ALsizei n, ALuint *bids )) GP("alGenStreamingBuffers_LOKI");
      *     if( talGenStreamingBuffers == NULL ) {
@@ -126,9 +126,9 @@ void AUDChangeVolume(float volume) {
 static double audio_volume_scale() {
     double linuxadjust = 1;
 #ifndef _WIN32
-#ifndef __APPLE__
+#    ifndef __APPLE__
     linuxadjust = 1.0 / 3.0;
-#endif
+#    endif
 #endif
     return configuration().audio.volume_dbl * linuxadjust;
 }
@@ -174,35 +174,35 @@ float AUDGetDoppler() {
 }
 
 #ifdef HAVE_AL
-///I don't think we'll need to switch contexts or devices in vegastrike
+/// I don't think we'll need to switch contexts or devices in vegastrike
 static ALCdevice *dev = NULL;
 
-#ifndef _WIN32
+#    ifndef _WIN32
 static ALvoid *context_id = NULL;
-#else
+#    else
 static ALCcontext *context_id = NULL;
-#endif
+#    endif
 #endif
 
 bool AUDInit() {
 #ifdef HAVE_AL
     // g_game.sound_enabled =
-    usedoppler = configuration().audio.doppler;
-    usepositional = configuration().audio.positional;
-    scalepos = 1.0 / audio_volume_scale();
-    scalevel = configuration().audio.doppler_scale_flt;
+    usedoppler                  = configuration().audio.doppler;
+    usepositional               = configuration().audio.positional;
+    scalepos                    = 1.0 / audio_volume_scale();
+    scalevel                    = configuration().audio.doppler_scale_flt;
     g_game.audio_frequency_mode = configuration().audio.frequency;
-    maxallowedsingle = configuration().audio.max_single_sounds;
+    maxallowedsingle            = configuration().audio.max_single_sounds;
     g_game.max_sound_sources = maxallowedtotal = configuration().audio.max_total_sounds;
     if (!configuration().audio.sound && !configuration().audio.music) {
         return false;
     }
     int attrlist[] = {ALC_FREQUENCY, g_game.audio_frequency_mode, 0};
-#ifdef _WIN32
-    dev = alcOpenDevice(  (ALCchar*)"DirectSound3D" );
-#elif __APPLE__
-    dev = alcOpenDevice( (ALCchar*)"sdl" );
-#endif
+#    ifdef _WIN32
+    dev = alcOpenDevice((ALCchar *)"DirectSound3D");
+#    elif __APPLE__
+    dev = alcOpenDevice((ALCchar *)"sdl");
+#    endif
     if (dev == NULL) {
         // use default device
         dev = alcOpenDevice(NULL);
@@ -215,7 +215,7 @@ bool AUDInit() {
         alcCloseDevice(dev);
         return false;
     }
-    alcMakeContextCurrent((ALCcontext *) context_id);
+    alcMakeContextCurrent((ALCcontext *)context_id);
 
     fixup_function_pointers();
     ALenum alGetEr = 0;
@@ -243,7 +243,7 @@ bool AUDInit() {
 
 void AUDDestroy() {
 #ifdef HAVE_AL
-    //Go through and delete all loaded wavs
+    // Go through and delete all loaded wavs
     unsigned int i;
     for (i = 0; i < sounds.size(); i++) {
         if (sounds[i].buffer != 0) {
@@ -259,11 +259,10 @@ void AUDDestroy() {
     }
     buffers.clear();
     if (context_id) {
-        alcDestroyContext((ALCcontext *) context_id);
+        alcDestroyContext((ALCcontext *)context_id);
     }
     if (dev) {
         alcCloseDevice(dev);
     }
 #endif
 }
-

@@ -26,13 +26,12 @@
  */
 
 #include "repair_bot.h"
+
 #include "cmd/unit_csv_factory.h"
 
-RepairBot::RepairBot() :
-    Component() {
+RepairBot::RepairBot() : Component() {
     type = ComponentType::RepairBot;
 }
-
 
 // Component Methods
 void RepairBot::Load(std::string unit_key) {
@@ -50,12 +49,12 @@ bool RepairBot::CanDowngrade() const {
 }
 
 bool RepairBot::Downgrade() {
-    if(!CanDowngrade()) {
+    if (!CanDowngrade()) {
         return false;
     }
 
     repair_bot = Resource<int>(0, 0, 0);
-    installed = false;
+    installed  = false;
     return true;
 }
 
@@ -64,7 +63,7 @@ bool RepairBot::CanUpgrade(const std::string upgrade_key) const {
 }
 
 bool RepairBot::Upgrade(const std::string upgrade_key) {
-    if(!CanUpgrade(upgrade_key)) {
+    if (!CanUpgrade(upgrade_key)) {
         return false;
     }
 

@@ -27,12 +27,9 @@
 
 #include "dummy_component.h"
 
-
-DummyComponent::DummyComponent() :
-    Component() {
+DummyComponent::DummyComponent() : Component() {
     type = ComponentType::Dummy;
 }
-
 
 // Component Methods
 void DummyComponent::Load(std::string unit_key) {

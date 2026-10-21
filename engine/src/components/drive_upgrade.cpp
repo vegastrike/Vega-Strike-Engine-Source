@@ -27,23 +27,31 @@
 
 #include "components/drive_upgrade.h"
 
-#include "components/drive.h"
-#include "component_utils.h"
 #include "cmd/unit_csv_factory.h"
+#include "component_utils.h"
+#include "components/drive.h"
 
-
-DriveUpgrade::DriveUpgrade(Drive *drive) :
-    Component(),
-    drive(drive),
-    yaw(1.0), pitch(1.0), roll(1.0), lateral(1.0),
-    vertical(1.0), forward(1.0), retro(1.0), afterburn(1.0),
-    speed(1.0), max_yaw_left(1.0),
-    max_yaw_right(1.0), max_pitch_down(1.0), max_pitch_up(1.0),
-    max_roll_left(1.0), max_roll_right(1.0), fuel_consumption(1.0) {
+DriveUpgrade::DriveUpgrade(Drive *drive)
+    : Component(),
+      drive(drive),
+      yaw(1.0),
+      pitch(1.0),
+      roll(1.0),
+      lateral(1.0),
+      vertical(1.0),
+      forward(1.0),
+      retro(1.0),
+      afterburn(1.0),
+      speed(1.0),
+      max_yaw_left(1.0),
+      max_yaw_right(1.0),
+      max_pitch_down(1.0),
+      max_pitch_up(1.0),
+      max_roll_left(1.0),
+      max_roll_right(1.0),
+      fuel_consumption(1.0) {
     type = ComponentType::DriveUpgrade;
 }
-
-
 
 // Component Methods
 void DriveUpgrade::Load(std::string unit_key) {
@@ -53,42 +61,40 @@ void DriveUpgrade::Load(std::string unit_key) {
     fuel_consumption = UnitCSVFactory::GetVariable(unit_key, "Fuel_Consumption", 1.0);
 
     // DriveUpgrade
-    yaw = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 1.0);
+    yaw   = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", 1.0);
     pitch = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", 1.0);
-    roll = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 1.0);
+    roll  = UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", 1.0);
 
     DoubleYawPitchRollParser(unit_key, YPR::Yaw, max_yaw_right, max_yaw_left);
     DoubleYawPitchRollParser(unit_key, YPR::Pitch, max_pitch_up, max_pitch_down);
     DoubleYawPitchRollParser(unit_key, YPR::Roll, max_roll_right, max_roll_left);
 
     forward = UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", 1.0);
-    retro = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 1.0);
+    retro   = UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", 1.0);
     lateral = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 1.0) +
-            UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 1.0));
+                     UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 1.0));
 
     vertical = 0.5 * (UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 1.0) +
-            UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 1.0));
+                      UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 1.0));
 
     speed = UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", 1.0);
 }
 
-
-void DriveUpgrade::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    unit["Yaw_Governor_Right"] = max_yaw_right;
-    unit["Yaw_Governor_Left"] = max_yaw_left;
-    unit["Pitch_Governor_Up"] = max_pitch_up;
+void DriveUpgrade::SaveToCSV(std::map<std::string, std::string> &unit) const {
+    unit["Yaw_Governor_Right"]  = max_yaw_right;
+    unit["Yaw_Governor_Left"]   = max_yaw_left;
+    unit["Pitch_Governor_Up"]   = max_pitch_up;
     unit["Pitch_Governor_Down"] = max_pitch_down;
     unit["Roll_Governor_Right"] = max_roll_right;
-    unit["Roll_Governor_Left"] = max_roll_left;
+    unit["Roll_Governor_Left"]  = max_roll_left;
 
     unit["Forward_Accel"] = forward;
-    unit["Retro_Accel"] = retro;
+    unit["Retro_Accel"]   = retro;
     unit["Left_Accel"] = unit["Right_Accel"] = lateral;
     unit["Bottom_Accel"] = unit["Top_Accel"] = vertical;
 
     unit["Default_Speed_Governor"] = speed;
 }
-
 
 // Can only upgrade/downgrade if Drive is undamaged.
 // Otherwise, there are a lot of edge cases.
@@ -97,7 +103,7 @@ bool DriveUpgrade::CanDowngrade() const {
 }
 
 bool DriveUpgrade::Downgrade() {
-    if(!CanDowngrade()) {
+    if (!CanDowngrade()) {
         return false;
     }
 
@@ -136,7 +142,7 @@ bool DriveUpgrade::CanUpgrade(const std::string upgrade_key) const {
 }
 
 bool DriveUpgrade::Upgrade(const std::string upgrade_key) {
-    if(!CanUpgrade(upgrade_key)) {
+    if (!CanUpgrade(upgrade_key)) {
         return false;
     }
 
@@ -171,5 +177,3 @@ bool DriveUpgrade::Upgrade(const std::string upgrade_key) {
 }
 
 DriveUpgrade::~DriveUpgrade() = default;
-
-

@@ -29,28 +29,28 @@
  *  MessageCenter written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef WIN32
-//this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
-#include <unistd.h>
+// this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can
+// compile without it
+#    include <unistd.h>
 #endif
 
-#include "root_generic/xml_support.h"
-#include "src/vegastrike.h"
+#include <algorithm>
 
 #include "cmd/unit_generic.h"
 #include "mission.h"
-
 #include "msgcenter.h"
-#include <algorithm>
+#include "root_generic/xml_support.h"
+#include "src/vegastrike.h"
 
 void MessageCenter::add(string from, string to, string message, double delay) {
     gameMessage msg;
 
-    msg.from = from;
-    msg.to = to;
+    msg.from    = from;
+    msg.to      = to;
     msg.message = message;
 
     msg.time = mission->getGametime() + delay;
@@ -63,18 +63,15 @@ void MessageCenter::clear(const std::vector<std::string> &who, const std::vector
         messages.clear();
     }
     for (int i = messages.size() - 1; i >= 0; i--) {
-        if (std::find(whoNOT.begin(), whoNOT.end(),
-                messages[i].to.get()) == whoNOT.end()
-                && (who.empty() || std::find(who.begin(), who.end(), messages[i].to.get()) != who.end())) {
+        if (std::find(whoNOT.begin(), whoNOT.end(), messages[i].to.get()) == whoNOT.end() &&
+            (who.empty() || std::find(who.begin(), who.end(), messages[i].to.get()) != who.end())) {
             messages.erase(messages.begin() + i);
         }
     }
 }
 
-bool MessageCenter::last(unsigned int n,
-        gameMessage &m,
-        const std::vector<std::string> &who,
-        const std::vector<std::string> &whoNOT) {
+bool MessageCenter::last(unsigned int n, gameMessage &m, const std::vector<std::string> &who,
+                         const std::vector<std::string> &whoNOT) {
     if (who.empty() && whoNOT.empty()) {
         int size = messages.size();
 
@@ -89,10 +86,9 @@ bool MessageCenter::last(unsigned int n,
         int j = 0;
         int i = 0;
         for (i = messages.size() - 1; i >= 0; i--) {
-            if (std::find(whoNOT.begin(), whoNOT.end(),
-                    messages[i].to.get()) == whoNOT.end()
-                    && (who.empty() || std::find(who.begin(), who.end(), messages[i].to.get()) != who.end())) {
-                if (j == (int) n) {
+            if (std::find(whoNOT.begin(), whoNOT.end(), messages[i].to.get()) == whoNOT.end() &&
+                (who.empty() || std::find(who.begin(), who.end(), messages[i].to.get()) != who.end())) {
+                if (j == (int)n) {
                     break;
                 }
                 j++;
@@ -105,4 +101,3 @@ bool MessageCenter::last(unsigned int n,
         return true;
     }
 }
-

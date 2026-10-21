@@ -25,9 +25,9 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../PrecompiledHeaders/Converter.h"
 #include "../Converter.h"
 #include "../from_BFXM.h"
+#include "../PrecompiledHeaders/Converter.h"
 
 using namespace std;
 using namespace Converter;
@@ -48,11 +48,11 @@ public:
     virtual void help(const std::string &command, ParameterList &params) const {
         if (command == "--dims") {
             cout << "Show mesh's bounding box\n"
-                    << "Usage:\n"
-                    << "\tmesher (--input|-i) (path) (--dims|-d) (format)\n\n"
-                    << "Supported formats:\n"
-                    << "\tBFXM\n"
-                    << endl;
+                 << "Usage:\n"
+                 << "\tmesher (--input|-i) (path) (--dims|-d) (format)\n\n"
+                 << "Supported formats:\n"
+                 << "\tBFXM\n"
+                 << endl;
         } else {
             cerr << "Warning: DimsHandler::help() received an unrecognized command." << endl;
         }

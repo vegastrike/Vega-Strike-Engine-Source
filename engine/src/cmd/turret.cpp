@@ -31,24 +31,24 @@
 #include "cmd/unit_generic.h"
 
 enum class TURRET_SIZE {
-    SMALL = 0x0,
-    MEDIUM = 0x1,
-    LARGE = 0x2,
+    SMALL         = 0x0,
+    MEDIUM        = 0x1,
+    LARGE         = 0x2,
     CAPSHIP_SMALL = 0x4,
     CAPSHIP_LARGE = 0x8
 };
 
 void Tokenize(const string &str, vector<string> &tokens, const string &delimiters = " ") {
-    //Skip delimiters at beginning.
+    // Skip delimiters at beginning.
     string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-    //Find first "non-delimiter".
+    // Find first "non-delimiter".
     string::size_type pos = str.find_first_of(delimiters, lastPos);
     while (string::npos != pos || string::npos != lastPos) {
-        //Found a token, add it to the vector.
+        // Found a token, add it to the vector.
         tokens.push_back(str.substr(lastPos, pos - lastPos));
-        //Skip delimiters.  Note the "not_of"
+        // Skip delimiters.  Note the "not_of"
         lastPos = str.find_first_not_of(delimiters, pos);
-        //Find next "non-delimiter"
+        // Find next "non-delimiter"
         pos = str.find_first_of(delimiters, lastPos);
     }
 }
@@ -72,27 +72,25 @@ std::string CheckBasicSizes(const std::string tokens) {
     return "";
 }
 
-Turret::Turret() {
-
-}
+Turret::Turret() {}
 
 std::map<std::string, std::string> parseTurretSizes() {
     using namespace VSFileSystem;
     std::map<std::string, std::string> t;
-    VSFile f;
-    VSError err = f.OpenReadOnly("units/subunits/size.txt", UnknownFile);
+    VSFile                             f;
+    VSError                            err = f.OpenReadOnly("units/subunits/size.txt", UnknownFile);
     if (err <= Ok) {
-        int siz = f.Size();
-        char *filedata = (char *) malloc(siz + 1);
-        filedata[siz] = 0;
+        int   siz      = f.Size();
+        char *filedata = (char *)malloc(siz + 1);
+        filedata[siz]  = 0;
         while (f.ReadLine(filedata, siz) == Ok) {
-            std::string x(filedata);
+            std::string       x(filedata);
             string::size_type len = x.find(",");
             if (len != std::string::npos) {
                 std::string y = x.substr(len + 1);
-                x = x.substr(0, len);
-                len = y.find(",");
-                y = y.substr(0, len);
+                x             = x.substr(0, len);
+                len           = y.find(",");
+                y             = y.substr(0, len);
                 sscanf(y.c_str(), "%s", filedata);
                 y = filedata;
                 std::string key(x);
@@ -107,8 +105,8 @@ std::map<std::string, std::string> parseTurretSizes() {
 }
 
 std::string getTurretSize(const std::string &size) {
-    static std::map<std::string, std::string> turretmap = parseTurretSizes();
-    std::map<std::string, std::string>::iterator h = turretmap.find(size);
+    static std::map<std::string, std::string>    turretmap = parseTurretSizes();
+    std::map<std::string, std::string>::iterator h         = turretmap.find(size);
     if (h != turretmap.end()) {
         return (*h).second;
     }
@@ -186,4 +184,3 @@ std::string getTurretSize( const std::string &size )
     }
     return "capital";
 }*/
-

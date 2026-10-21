@@ -26,39 +26,41 @@
  */
 
 
-#include <string>
-#include "cmd/unit_generic.h"
-#include "gfx/cockpit.h"
-#include "cmd/planet.h"
-#include "gfx/animation.h"
-#include "src/config_xml.h"
 #include "cmd/unit_util.h"
-#include "src/config_xml.h"
-#include "root_generic/vs_globals.h"
+
+#include <string>
+
 #include "cmd/pilot.h"
+#include "cmd/planet.h"
+#include "cmd/unit_generic.h"
+#include "gfx/animation.h"
+#include "gfx/cockpit.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 #include "src/universe.h"
 
 using std::string;
+
 namespace UnitUtil {
 
 void switchFg(Unit *my_unit, string arg) {
     if (!my_unit) {
         return;
     }
-    string type = my_unit->name;
-    int nr_waves_left = 0;
-    int nr_ships = 1;
-    string order("default");
+    string       type          = my_unit->name;
+    int          nr_waves_left = 0;
+    int          nr_ships      = 1;
+    string       order("default");
     Flightgroup *fg = my_unit->getFlightgroup();
     if (fg) {
-        type = fg->type;
+        type          = fg->type;
         nr_waves_left = fg->nr_waves_left;
-        nr_ships = 1;
+        nr_ships      = 1;
         fg->Decrement(my_unit);
         order = fg->ainame;
     }
-    fg = Flightgroup::newFlightgroup(arg, type, FactionUtil::GetFaction(
-            my_unit->faction), order, nr_ships, nr_waves_left, "", "", mission);
+    fg = Flightgroup::newFlightgroup(arg, type, FactionUtil::GetFaction(my_unit->faction), order, nr_ships,
+                                     nr_waves_left, "", "", mission);
     my_unit->SetFg(fg, fg->nr_ships_left - 1);
 }
 
@@ -67,7 +69,7 @@ int communicateTo(Unit *my_unit, Unit *other_unit, float mood) {
         return 0;
     }
     unsigned char sex = 0;
-    Cockpit *tmp;
+    Cockpit      *tmp;
     if ((tmp = _Universe->isPlayerStarship(my_unit))) {
         if (other_unit) {
             Animation *ani = other_unit->pilot->getCommFace(other_unit, mood, sex);
@@ -86,7 +88,7 @@ bool commAnimation(Unit *my_unit, string anim) {
     Cockpit *tmp;
     if ((tmp = _Universe->isPlayerStarship(my_unit))) {
         static Hashtable<std::string, Animation, 63> AniHashTable;
-        Animation *vid = AniHashTable.Get(anim);
+        Animation                                   *vid = AniHashTable.Get(anim);
         if (NULL == vid) {
             vid = new Animation(anim.c_str());
             AniHashTable.Put(anim, vid);
@@ -97,5 +99,4 @@ bool commAnimation(Unit *my_unit, string anim) {
         return false;
     }
 }
-}
-
+}  // namespace UnitUtil

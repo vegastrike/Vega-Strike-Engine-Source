@@ -26,19 +26,19 @@
  */
 
 #ifndef PYTHON_STUB
-#define PY_SSIZE_T_CLEAN
-#include <boost/python.hpp>
-#include <math.h>
-#include "src/python/python_class.h"
-#include "cmd/briefing.h"
-#include "cmd/script/mission.h"
-#include "root_generic/faction_generic.h"
+#    define PY_SSIZE_T_CLEAN
+#    include <boost/python.hpp>
+
+#    include <math.h>
+
+#    include "cmd/briefing.h"
+#    include "cmd/script/mission.h"
+#    include "root_generic/faction_generic.h"
+#    include "src/python/python_class.h"
 
 namespace BriefingUtil {
 int addShip(string name, string faction, Vector vec) {
-    return mission->briefing->AddStarship(name.c_str(),
-            FactionUtil::GetFactionIndex(faction),
-            vec);
+    return mission->briefing->AddStarship(name.c_str(), FactionUtil::GetFactionIndex(faction), vec);
 }
 
 void removeShip(int whichship) {
@@ -76,7 +76,7 @@ void setCamOrientation(Vector p, Vector q, Vector r) {
 void setCloak(int whichship, float cloak) {
     mission->briefing->SetCloak(whichship, cloak);
 }
-}
+}  // namespace BriefingUtil
 
 BOOST_PYTHON_MODULE(Briefing) {
     boost::python::def("addShip", &BriefingUtil::addShip);
@@ -102,72 +102,27 @@ void InitBriefing2() {
 }
 
 ///////////////////////////////////////////////
-//END C++
+// END C++
 ///////////////////////////////////////////////
-//below replace ~ with enter
+// below replace ~ with enter
 #else
-#define MYPRINT( nam ) print #nam
-#define WRAPPED0( type, name, aff ) def name( self ) : ~MYPRINT( name ) ~return aff
-#define WRAPPED1( type, name, atype, a, aff ) def name( self, a ) : ~MYPRINT( name )  ~return aff
-#define WRAPPED2( type, name, atype, a, btype, b, aff ) def name( self, a, b ) : ~MYPRINT( name ) ~return aff
-#define WRAPPED3( type, name, atype, a, btype, b, ctype, c, aff ) def name( self, a, b, c ) : ~MYPRINT( name ) ~return aff
-#define voidWRAPPED0( name ) def name( self ) : ~MYPRINT( name )
-#define voidWRAPPED1( name, atype, a ) def name( self, a ) : ~MYPRINT( name )
-#define voidWRAPPED2( name, atype, a, btype, b ) def name( self, a, b ) : ~MYPRINT( name )
-#define voidWRAPPED3( name, atype, a, btype, b, ctype, c ) def name( self, a, b, c ) : ~MYPRINT( name )
+#    define MYPRINT(nam)                                            print #nam
+#    define WRAPPED0(type, name, aff)                               def name(self) : ~MYPRINT(name) ~return aff
+#    define WRAPPED1(type, name, atype, a, aff)                     def name(self, a) : ~MYPRINT(name) ~return aff
+#    define WRAPPED2(type, name, atype, a, btype, b, aff)           def name(self, a, b) : ~MYPRINT(name) ~return aff
+#    define WRAPPED3(type, name, atype, a, btype, b, ctype, c, aff) def name(self, a, b, c) : ~MYPRINT(name) ~return aff
+#    define voidWRAPPED0(name)                                      def name(self) : ~MYPRINT(name)
+#    define voidWRAPPED1(name, atype, a)                            def name(self, a) : ~MYPRINT(name)
+#    define voidWRAPPED2(name, atype, a, btype, b)                  def name(self, a, b) : ~MYPRINT(name)
+#    define voidWRAPPED3(name, atype, a, btype, b, ctype, c)        def name(self, a, b, c) : ~MYPRINT(name)
 
-WRAPPED3( int
-          , addShip
-          , string
-          , name
-          , string
-          , faction
-          , Vector
-          , vec
-          , 0 )
-voidWRAPPED1( removeShip
-              , int
-              , ship )
-voidWRAPPED3( enqueueOrder
-              , int
-              , ship
-              , Vector
-              , dest
-              , float
-              , time )
-voidWRAPPED3( replaceOrder
-              , int
-              , ship
-              , Vector
-              , dest
-              , float
-              , time )
-WRAPPED1( Vector
-          , getShipPosition
-          , int
-          , ship
-           , (50, 75, 100) )
-voidWRAPPED2( setShipPosition
-              , int
-              , ship
-              , Vector
-              , vec )
-voidWRAPPED0( terminate )
-voidWRAPPED1( setCamPosition
-              , Vector
-              , pos )
-voidWRAPPED3( setCamOrientation
-              , Vector
-              , p
-              , Vector
-              , q
-              , Vector
-              , r )
-voidWRAPPED2( setCloak
-              , int
-              , ship
-              , float
-              , amount )
+WRAPPED3(int, addShip, string, name, string, faction, Vector, vec, 0)
+voidWRAPPED1(removeShip, int, ship) voidWRAPPED3(enqueueOrder, int, ship, Vector, dest, float, time)
+        voidWRAPPED3(replaceOrder, int, ship, Vector, dest, float, time)
+                WRAPPED1(Vector, getShipPosition, int, ship, (50, 75, 100))
+                        voidWRAPPED2(setShipPosition, int, ship, Vector, vec) voidWRAPPED0(terminate)
+                                voidWRAPPED1(setCamPosition, Vector, pos)
+                                        voidWRAPPED3(setCamOrientation, Vector, p, Vector, q, Vector, r)
+                                                voidWRAPPED2(setCloak, int, ship, float, amount)
 
 #endif
-

@@ -28,33 +28,32 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "components/radar.h"
-#include "configuration/configuration.h"
+
 #include "cmd/unit_csv_factory.h"
 #include "components/component.h"
+#include "configuration/configuration.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-
-CRadar::CRadar():
-        max_range(0),
-        max_cone(-1),
-        lock_cone(0),
-        tracking_cone(0),
-        min_target_size(0),
-        type(RadarType::SPHERE),
-        capabilities(RadarCapabilities::NONE),
-        locked(false),
-        can_lock(false),
-        tracking_active(true) {
+CRadar::CRadar()
+    : max_range(0),
+      max_cone(-1),
+      lock_cone(0),
+      tracking_cone(0),
+      min_target_size(0),
+      type(RadarType::SPHERE),
+      capabilities(RadarCapabilities::NONE),
+      locked(false),
+      can_lock(false),
+      tracking_active(true) {
     long default_max_range = static_cast<long>(configuration().components.computer.default_max_range_dbl);
-    max_range = Resource<long>(default_max_range,0,default_max_range);
-    tracking_cone = configuration().components.computer.default_tracking_cone_dbl;
-    lock_cone = configuration().components.computer.default_lock_cone_dbl;
+    max_range              = Resource<long>(default_max_range, 0, default_max_range);
+    tracking_cone          = configuration().components.computer.default_tracking_cone_dbl;
+    lock_cone              = configuration().components.computer.default_lock_cone_dbl;
 }
 
-CRadar::~CRadar()
-= default;
+CRadar::~CRadar() = default;
 
 // Component Methods
 void CRadar::Load(std::string unit_key) {
@@ -78,41 +77,38 @@ void CRadar::Load(std::string unit_key) {
     if ((iffval.empty()) || (iffval == "FALSE") || (iffval == "0")) {
         capabilities = RadarCapabilities::NONE;
     } else if ((iffval == "TRUE") || (iffval == "1")) {
-        type = RadarType::SPHERE;
+        type         = RadarType::SPHERE;
         capabilities = RadarCapabilities::FRIEND_FOE;
     } else if (iffval == "THREAT") {
-        type = RadarType::SPHERE;
-        capabilities = RadarCapabilities::FRIEND_FOE |
-                RadarCapabilities::THREAT_ASSESSMENT;
+        type         = RadarType::SPHERE;
+        capabilities = RadarCapabilities::FRIEND_FOE | RadarCapabilities::THREAT_ASSESSMENT;
     } else if (iffval == "BUBBLE_THREAT") {
-        type = RadarType::BUBBLE;
-        capabilities = RadarCapabilities::FRIEND_FOE |
-                RadarCapabilities::OBJECT_RECOGNITION |
-                RadarCapabilities::THREAT_ASSESSMENT;
+        type         = RadarType::BUBBLE;
+        capabilities = RadarCapabilities::FRIEND_FOE | RadarCapabilities::OBJECT_RECOGNITION |
+                       RadarCapabilities::THREAT_ASSESSMENT;
     } else if (iffval == "PLANE") {
-        type = RadarType::PLANE;
+        type         = RadarType::PLANE;
         capabilities = RadarCapabilities::FRIEND_FOE;
     } else if (iffval == "PLANE_THREAT") {
-        type = RadarType::PLANE;
-        capabilities = RadarCapabilities::FRIEND_FOE |
-                RadarCapabilities::OBJECT_RECOGNITION |
-                RadarCapabilities::THREAT_ASSESSMENT;
+        type         = RadarType::PLANE;
+        capabilities = RadarCapabilities::FRIEND_FOE | RadarCapabilities::OBJECT_RECOGNITION |
+                       RadarCapabilities::THREAT_ASSESSMENT;
     } else {
         capabilities = locale_aware_stoi(iffval, RadarCapabilities::NONE);
     }
 
-    tracking_active = true;
+    tracking_active                    = true;
     const std::string max_range_string = UnitCSVFactory::GetVariable(unit_key, "Radar_Range", std::string("300000000"));
-    max_range = Resource<long>(max_range_string,1,0);
-    max_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0) * M_PI / 180);
+    max_range                          = Resource<long>(max_range_string, 1, 0);
+    max_cone                           = cos(UnitCSVFactory::GetVariable(unit_key, "Max_Cone", 180.0) * M_PI / 180);
     tracking_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Tracking_Cone", 180.0f) * M_PI / 180);
-    lock_cone = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * M_PI / 180);
-    operational = max_range.Percent();
-    installed = max_range > 0;
+    lock_cone     = cos(UnitCSVFactory::GetVariable(unit_key, "Lock_Cone", 180.0) * M_PI / 180);
+    operational   = max_range.Percent();
+    installed     = max_range > 0;
 }
 
 void CRadar::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    unit["Can_Lock"] = std::to_string(can_lock);
+    unit["Can_Lock"]    = std::to_string(can_lock);
     unit["Radar_Color"] = std::to_string(capabilities);
     unit["Radar_Range"] = max_range.Serialize();
 
@@ -120,8 +116,8 @@ void CRadar::SaveToCSV(std::map<std::string, std::string>& unit) const {
     // Also, can't use Resource because games stores in radian
     // and these can be minus.
     unit["Tracking_Cone"] = std::to_string(acos(tracking_cone) * 180. / M_PI);
-    unit["Max_Cone"] = std::to_string(acos(max_cone) * 180. / M_PI);
-    unit["Lock_Cone"] = std::to_string(acos(lock_cone) * 180. / M_PI);
+    unit["Max_Cone"]      = std::to_string(acos(max_cone) * 180. / M_PI);
+    unit["Lock_Cone"]     = std::to_string(acos(lock_cone) * 180. / M_PI);
 }
 
 bool CRadar::CanDowngrade() const {
@@ -129,18 +125,18 @@ bool CRadar::CanDowngrade() const {
 }
 
 bool CRadar::Downgrade() {
-    if(!CanDowngrade()) {
+    if (!CanDowngrade()) {
         return false;
     }
 
-    max_range = Resource<double>(0,0,0);
-    max_cone = cos(0);
+    max_range     = Resource<double>(0, 0, 0);
+    max_cone      = cos(0);
     tracking_cone = cos(0);
-    lock_cone = cos(0);
-    type = RadarType::SPHERE;
-    capabilities = RadarCapabilities::NONE;
-    locked = false;
-    can_lock = false;
+    lock_cone     = cos(0);
+    type          = RadarType::SPHERE;
+    capabilities  = RadarCapabilities::NONE;
+    locked        = false;
+    can_lock      = false;
 
     installed = false;
     return true;
@@ -151,12 +147,12 @@ bool CRadar::CanUpgrade(const std::string upgrade_key) const {
 }
 
 bool CRadar::Upgrade(const std::string upgrade_key) {
-    if(!CanUpgrade(upgrade_key)) {
+    if (!CanUpgrade(upgrade_key)) {
         return false;
     }
 
     Load(upgrade_key);
-    installed = true;
+    installed   = true;
     operational = 1.0;
     return true;
 }
@@ -196,12 +192,11 @@ void CRadar::Destroy() {
     operational = 0;
 }
 
-
 // Radar Code
 
 // This code replaces and fixes the old code in Armed::LockTarget(bool)
 void CRadar::Lock(bool always_lock) {
-    if(!can_lock && !always_lock) {
+    if (!can_lock && !always_lock) {
         this->locked = false;
         return;
     }
@@ -214,7 +209,7 @@ void CRadar::Unlock() {
 }
 
 void CRadar::ToggleLock(bool always_lock) {
-    if(locked) {
+    if (locked) {
         locked = false;
         return;
     }
@@ -270,7 +265,6 @@ bool CRadar::Tracking() const {
     return tracking_active;
 }
 
-double CRadar::Consume()
-{
+double CRadar::Consume() {
     return EnergyConsumer::Consume();
 }

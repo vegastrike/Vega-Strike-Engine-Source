@@ -27,22 +27,20 @@
 
 #include "resource/manifest.h"
 
-#include <fstream>
-#include <sstream>
 #include <algorithm>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 
-#include <boost/json.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/json.hpp>
 
-#include "root_generic/vega_random.h"
 #include "resource/json_utils.h"
-
+#include "root_generic/vega_random.h"
 
 Manifest::Manifest() {
     _items = std::vector<Cargo>();
 }
-
 
 // Called by MPL if it is empty
 Manifest::Manifest(int dummy) {
@@ -50,27 +48,27 @@ Manifest::Manifest(int dummy) {
 
     // TODO: get this from some configuration maybe?!?
     static std::string json_filenames[] = {
-        "master_part_list.json",
-        "master_ship_list.json",
-        "master_component_list.json",
-        "master_asteroid_list.json",
+            "master_part_list.json",
+            "master_ship_list.json",
+            "master_component_list.json",
+            "master_asteroid_list.json",
     };
 
-    for(const std::string& json_filename : json_filenames) {
+    for (const std::string& json_filename : json_filenames) {
         std::ifstream ifs(json_filename, std::ifstream::in);
 
-        if(ifs.fail()) {
+        if (ifs.fail()) {
             continue;
         }
 
         std::stringstream buffer;
         buffer << ifs.rdbuf();
 
-        const std::string json_text = buffer.str();
+        const std::string  json_text  = buffer.str();
         boost::json::value json_value = boost::json::parse(json_text);
         boost::json::array root_array = json_value.get_array();
 
-        for(boost::json::value& item_value : root_array) {
+        for (boost::json::value& item_value : root_array) {
             try {
                 boost::json::object item = item_value.get_object();
 
@@ -79,7 +77,6 @@ Manifest::Manifest(int dummy) {
             } catch (...) {
                 std::cerr << "Failed to parse " << item_value << std::endl;
             }
-
         }
     }
 }
@@ -95,22 +92,20 @@ Manifest& Manifest::MPL() {
     return mpl;
 }
 
-
-
 Cargo Manifest::GetCargoByName(const std::string name) const {
     const std::string upgrades_suffix = "__upgrades";
-    std::string filename;
+    std::string       filename;
 
     // Check if we need to remove __upgrades suffix
-    if(boost::algorithm::ends_with(name, upgrades_suffix)) {
+    if (boost::algorithm::ends_with(name, upgrades_suffix)) {
         filename = name.substr(0, name.length() - upgrades_suffix.length());
     } else {
         filename = name;
     }
 
 
-    for(const Cargo& c : _items) {
-        if(c.name == filename) {
+    for (const Cargo& c : _items) {
+        if (c.name == filename) {
             return c;
         }
     }
@@ -120,25 +115,23 @@ Cargo Manifest::GetCargoByName(const std::string name) const {
 
 Cargo Manifest::GetRandomCargo(const int quantity) const {
     // TODO: Need to figure a better solution here
-    if(_items.empty()) {
+    if (_items.empty()) {
         return Cargo();
     }
 
     const size_t index = VegaRandom::Instance().RandomSizeTLessThan(_items.size());
-    Cargo c = _items.at(index);
+    Cargo        c     = _items.at(index);
     c.SetQuantity(quantity);
     return c;
 }
-
-
 
 Cargo Manifest::GetRandomCargoFromCategory(std::string category, int quantity) const {
     Manifest manifest = GetCategoryManifest(category);
 
     // If category is empty, return randomly from MPL itself.
-    if(manifest._items.empty()) {
+    if (manifest._items.empty()) {
         manifest = GetMissionManifest();
-        if(manifest._items.empty()) {
+        if (manifest._items.empty()) {
             return GetRandomCargo(quantity);
         }
     }
@@ -150,45 +143,38 @@ Manifest Manifest::GetCategoryManifest(std::string category) const {
     Manifest manifest;
 
     std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items),
-            [category](Cargo c) {
-        return c.GetCategory() == category;
-    });
+                 [category](Cargo c) { return c.GetCategory() == category; });
 
     return manifest;
 }
-
-
 
 Manifest Manifest::GetMissionManifest() const {
     Manifest manifest;
 
     std::copy_if(_items.begin(), _items.end(), back_inserter(manifest._items),
-            [](Cargo c) {
-        return c.IsMissionFlag();
-    });
+                 [](Cargo c) { return c.IsMissionFlag(); });
 
     return manifest;
 }
 
-std::vector<Cargo> Manifest::GetItems() const { 
-    return _items; 
+std::vector<Cargo> Manifest::GetItems() const {
+    return _items;
 }
 
-bool Manifest::Empty() const { 
-    return _items.empty(); 
+bool Manifest::Empty() const {
+    return _items.empty();
 }
 
-size_t Manifest::Size() const { 
-    return _items.size(); 
+size_t Manifest::Size() const {
+    return _items.size();
 }
-
 
 // This is not as efficient as a hashtable
 // TODO: think about this
 int Manifest::GetIndex(const Cargo& cargo) const {
     int index = 0;
-    for(Cargo c : _items) {
-        if(cargo.name == c.name && cargo.category == c.category) {
+    for (Cargo c : _items) {
+        if (cargo.name == c.name && cargo.category == c.category) {
             return index;
         }
 
@@ -198,13 +184,12 @@ int Manifest::GetIndex(const Cargo& cargo) const {
     return -1;
 }
 
-
 int Manifest::GetIndex(const std::string& name, const std::string& category) const {
     int index = 0;
-    for(Cargo c : _items) {
-        if(name == c.name && category == c.category) {
+    for (Cargo c : _items) {
+        if (name == c.name && category == c.category) {
             return index;
-        } else if(name == c.name && category.empty()) {
+        } else if (name == c.name && category.empty()) {
             // If no category is specified, we match by name only
             return index;
         }
@@ -212,14 +197,13 @@ int Manifest::GetIndex(const std::string& name, const std::string& category) con
         index++;
     }
 
-    return -1; // Not found
+    return -1;  // Not found
 }
-
 
 // Consider deleting this. It's almost exactly the same as GetIndex
 bool Manifest::HasCargo(const std::string& name) const {
-    for(const Cargo& c : _items) {
-        if(c.name == name) {
+    for (const Cargo& c : _items) {
+        if (c.name == name) {
             return true;
         }
     }

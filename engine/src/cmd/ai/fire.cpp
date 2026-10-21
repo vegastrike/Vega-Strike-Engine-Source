@@ -27,29 +27,29 @@
 
 
 #include "fire.h"
-#include "flybywire.h"
-#include "navigation.h"
-#include "cmd/planet.h"
-#include "src/config_xml.h"
-#include "root_generic/vs_globals.h"
-#include "src/vs_logging.h"
-#include "cmd/unit_util.h"
-#include "cmd/script/flightgroup.h"
-#include "cmd/role_bitmask.h"
-#include "cmd/ai/communication.h"
-#include "src/universe_util.h"
+
 #include <algorithm>
 
-#include "src/vega_cast_utils.h"
-#include "cmd/unit_find.h"
-#include "root_generic/vega_random.h"
-#include "root_generic/lin_time.h" //DEBUG ONLY
+#include "cmd/ai/communication.h"
 #include "cmd/pilot.h"
-#include "src/universe.h"
+#include "cmd/planet.h"
+#include "cmd/role_bitmask.h"
+#include "cmd/script/flightgroup.h"
+#include "cmd/unit_find.h"
 #include "cmd/unit_util.h"
+#include "flybywire.h"
+#include "navigation.h"
 #include "resource/random_utils.h"
+#include "root_generic/lin_time.h"  //DEBUG ONLY
+#include "root_generic/vega_random.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/universe.h"
+#include "src/universe_util.h"
+#include "src/vega_cast_utils.h"
+#include "src/vs_logging.h"
 
-extern int numprocessed;
+extern int    numprocessed;
 extern double targetpick;
 
 static bool NoDockWithClear() {
@@ -62,12 +62,10 @@ VegaRandom target_rand{};
 Unit *getAtmospheric(Unit *targ) {
     if (targ) {
         Unit *un;
-        for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
-                (un = *i) != NULL;
-                ++i) {
+        for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
             if (un->getUnitType() == Vega_UnitType::planet) {
                 if ((targ->Position() - un->Position()).Magnitude() < targ->rSize() * .5) {
-                    if (!(((Planet *) un)->isAtmospheric())) {
+                    if (!(((Planet *)un)->isAtmospheric())) {
                         return un;
                     }
                 }
@@ -120,18 +118,16 @@ bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix) {
 
     float limitmin = su->limit_min;
     if (limitmin > -.99) {
-        QVector pos = (targ->Position() - su->Position()).Normalize();
-        QVector pnorm = pos.Cast();
-        Vector structurelimits = su->structure_limits;
-        Vector worldlimit = TransformNormal(matrix, structurelimits);
+        QVector pos             = (targ->Position() - su->Position()).Normalize();
+        QVector pnorm           = pos.Cast();
+        Vector  structurelimits = su->structure_limits;
+        Vector  worldlimit      = TransformNormal(matrix, structurelimits);
         if (pnorm.Dot(worldlimit) < limitmin) {
             return false;
         }
     }
     Unit *ssu;
-    for (un_iter i = su->getSubUnits();
-            (ssu = *i) != NULL;
-            ++i) {
+    for (un_iter i = su->getSubUnits(); (ssu = *i) != NULL; ++i) {
         if (!CanFaceTarget(ssu, targ, su->cumulative_transformation_matrix)) {
             return false;
         }
@@ -140,13 +136,14 @@ bool CanFaceTarget(Unit *su, Unit *targ, const Matrix &matrix) {
 }
 
 void FireAt::ReInit(float aggressivitylevel) {
-    lastmissiletime = UniverseUtil::GetGameTime() - 65536.;
+    lastmissiletime    = UniverseUtil::GetGameTime() - 65536.;
     missileprobability = configuration().ai.firing.missile_probability_dbl;
-    delay = 0;
-    agg = aggressivitylevel;
-    distance = 1;
-    //JS --- spreading target switch times
-    lastchangedtarg = 0.0F - target_rand.UniformInclusive(0, 1) * configuration().ai.targeting.min_time_to_switch_targets_flt;
+    delay              = 0;
+    agg                = aggressivitylevel;
+    distance           = 1;
+    // JS --- spreading target switch times
+    lastchangedtarg =
+            0.0F - target_rand.UniformInclusive(0, 1) * configuration().ai.targeting.min_time_to_switch_targets_flt;
     had_target = false;
 }
 
@@ -158,18 +155,17 @@ FireAt::FireAt() : CommunicatingAI(WEAPON, STARGET) {
     ReInit(configuration().ai.firing.aggressivity_flt);
 }
 
-void FireAt::SignalChosenTarget() {
-}
+void FireAt::SignalChosenTarget() {}
 
-//temporary way of choosing
+// temporary way of choosing
 struct TargetAndRange {
     Unit *t;
     float range;
     float relation;
 
     TargetAndRange(Unit *tt, float r, float rel) {
-        t = tt;
-        range = r;
+        t              = tt;
+        range          = r;
         this->relation = rel;
     }
 };
@@ -179,7 +175,7 @@ struct RangeSortedTurrets {
     float gunrange;
 
     RangeSortedTurrets(Unit *t, float r) {
-        tur = t;
+        tur      = t;
         gunrange = r;
     }
 
@@ -189,9 +185,10 @@ struct RangeSortedTurrets {
 };
 
 struct TurretBin {
-    float maxrange;
+    float                      maxrange;
     vector<RangeSortedTurrets> turret;
-    vector<TargetAndRange> listOfTargets[2];     //we have the over (and eq) 16 crowd and the under 16
+    vector<TargetAndRange>     listOfTargets[2];  // we have the over (and eq) 16 crowd and the under 16
+
     TurretBin() {
         maxrange = 0;
     }
@@ -201,17 +198,16 @@ struct TurretBin {
     }
 
     void AssignTargets(const TargetAndRange &finalChoice, const Matrix &pos) {
-        //go through modularly assigning as you go;
-        int count = 0;
+        // go through modularly assigning as you go;
+        int    count      = 0;
         size_t lotsize[2] = {listOfTargets[0].size(), listOfTargets[1].size()};
         for (vector<RangeSortedTurrets>::iterator uniter = turret.begin(); uniter != turret.end(); ++uniter) {
             bool foundfinal = false;
             uniter->tur->Target(NULL);
             uniter->tur->TargetTurret(NULL);
             if (finalChoice.t) {
-                if (finalChoice.range < uniter->gunrange
-                        && ROLES::getPriority(uniter->tur->getAttackPreferenceChar())[finalChoice.t->getUnitRoleChar()]
-                                < 31) {
+                if (finalChoice.range < uniter->gunrange &&
+                    ROLES::getPriority(uniter->tur->getAttackPreferenceChar())[finalChoice.t->getUnitRoleChar()] < 31) {
                     if (CanFaceTarget(uniter->tur, finalChoice.t, pos)) {
                         uniter->tur->Target(finalChoice.t);
                         uniter->tur->TargetTurret(finalChoice.t);
@@ -281,13 +277,13 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
     if (targ->Destroyed()) {
         return -1;
     }
-    *rolepriority =
-            ROLES::getPriority(me->getAttackPreferenceChar())[targ->getUnitRoleChar()];     //number btw 0 and 31 higher better
+    *rolepriority = ROLES::getPriority(
+            me->getAttackPreferenceChar())[targ->getUnitRoleChar()];  // number btw 0 and 31 higher better
     char invrolepriority = 31 - *rolepriority;
     if (invrolepriority <= 0) {
         return -1;
     }
-    if (rangetotarget < 1 && rangetotarget > -1000) {
+    if (rangetotarget < 1 && rangetotarget > -1'000) {
         rangetotarget = 1;
     } else {
         rangetotarget = fabs(rangetotarget);
@@ -297,28 +293,27 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
     }
     if (gunrange <= 0) {
         const float mountless_gunrange = configuration().ai.targeting.mountless_gun_range_flt;
-        gunrange = mountless_gunrange;
-    }     //probably a mountless capship. 50000 is chosen arbitrarily
+        gunrange                       = mountless_gunrange;
+    }  // probably a mountless capship. 50000 is chosen arbitrarily
     float inertial_priority = 0;
     {
         const float mass_inertial_priority_cutoff = configuration().ai.targeting.mass_inertial_priority_cutoff_flt;
         if (me->GetMass() > mass_inertial_priority_cutoff) {
-            const float mass_inertial_priority_scale =
-                    configuration().ai.targeting.mass_inertial_priority_scale_flt;
-            Vector normv(me->GetVelocity());
-            float Speed = me->GetVelocity().Magnitude();
-            normv *= Speed ? 1.0f / Speed : 1.0f;
-            Vector ourToThem = targ->Position() - me->Position();
+            const float mass_inertial_priority_scale = configuration().ai.targeting.mass_inertial_priority_scale_flt;
+            Vector      normv(me->GetVelocity());
+            float       Speed  = me->GetVelocity().Magnitude();
+            normv             *= Speed ? 1.0f / Speed : 1.0f;
+            Vector ourToThem   = targ->Position() - me->Position();
             ourToThem.Normalize();
             inertial_priority =
                     mass_inertial_priority_scale * (.5 + .5 * (normv.Dot(ourToThem))) * me->GetMass() * Speed;
         }
     }
-    const float threat_weight = configuration().ai.targeting.threat_weight_flt;
-    float threat_priority = (me->Threat() == targ) ? threat_weight : 0;
-    threat_priority += (targ->Target() == me) ? threat_weight : 0;
-    float role_priority01 = ((float) *rolepriority) / 31.;
-    float range_priority01 = .5 * gunrange / rangetotarget;     //number between 0 and 1 for most ships 1 is best
+    const float threat_weight    = configuration().ai.targeting.threat_weight_flt;
+    float       threat_priority  = (me->Threat() == targ) ? threat_weight : 0;
+    threat_priority             += (targ->Target() == me) ? threat_weight : 0;
+    float role_priority01        = ((float)*rolepriority) / 31.;
+    float range_priority01       = .5 * gunrange / rangetotarget;  // number between 0 and 1 for most ships 1 is best
     return range_priority01 * role_priority01 + inertial_priority + threat_priority;
 }
 
@@ -327,7 +322,7 @@ float Priority(Unit *me, Unit *targ, float gunrange, float rangetotarget, float 
     return Priority(me, targ, gunrange, rangetotarget, relationship, &rolepriority);
 }
 
-template<class T, size_t n>
+template <class T, size_t n>
 class StaticTuple {
 public:
     T vec[n];
@@ -345,64 +340,59 @@ public:
     }
 };
 
-template<size_t numTuple>
+template <size_t numTuple>
 class ChooseTargetClass {
-    Unit *parent{};
-    Unit *parentparent{};
-    vector<TurretBin> *tbin{};
+    Unit                        *parent{};
+    Unit                        *parentparent{};
+    vector<TurretBin>           *tbin{};
     StaticTuple<float, numTuple> maxinnerrangeless;
     StaticTuple<float, numTuple> maxinnerrangemore;
-    float priority{};
-    char rolepriority{};
-    char maxrolepriority{};
-    bool reachedMore{};
-    bool reachedLess{};
-    FireAt *fireat{};
-    float gunrange{};
-    int numtargets{};
-    int maxtargets{};
+    float                        priority{};
+    char                         rolepriority{};
+    char                         maxrolepriority{};
+    bool                         reachedMore{};
+    bool                         reachedLess{};
+    FireAt                      *fireat{};
+    float                        gunrange{};
+    int                          numtargets{};
+    int                          maxtargets{};
+
 public:
     Unit *mytarg{};
 
-    ChooseTargetClass() {
-    }
+    ChooseTargetClass() {}
 
-    void init(FireAt *fireat,
-            Unit *un,
-            float gunrange,
-            vector<TurretBin> *tbin,
-            const StaticTuple<float, numTuple> &innermaxrange,
-            char maxrolepriority,
-            int maxtargets) {
-        this->fireat = fireat;
-        this->tbin = tbin;
-        this->parent = un;
+    void init(FireAt *fireat, Unit *un, float gunrange, vector<TurretBin> *tbin,
+              const StaticTuple<float, numTuple> &innermaxrange, char maxrolepriority, int maxtargets) {
+        this->fireat       = fireat;
+        this->tbin         = tbin;
+        this->parent       = un;
         this->parentparent = un->owner ? UniverseUtil::getUnitByPtr(un->owner, un, false) : 0;
-        mytarg = NULL;
-        double currad = 0;
+        mytarg             = NULL;
+        double currad      = 0;
         if (!is_null(un->location[Unit::UNIT_ONLY])) {
             currad = un->location[Unit::UNIT_ONLY]->getKey();
         }
         for (size_t i = 0; i < numTuple; ++i) {
-            double tmpless = currad - innermaxrange[i];
-            double tmpmore = currad + innermaxrange[i];
+            double tmpless             = currad - innermaxrange[i];
+            double tmpmore             = currad + innermaxrange[i];
             this->maxinnerrangeless[i] = tmpless;
             this->maxinnerrangemore[i] = tmpmore;
         }
-        this->maxrolepriority = maxrolepriority; //max priority that will allow gun range to be ok
-        reachedMore = false;
-        reachedLess = false;
-        this->priority = -1;
-        this->rolepriority = 31;
-        this->gunrange = gunrange;
-        this->numtargets = 0;
-        this->maxtargets = maxtargets;
+        this->maxrolepriority = maxrolepriority;  // max priority that will allow gun range to be ok
+        reachedMore           = false;
+        reachedLess           = false;
+        this->priority        = -1;
+        this->rolepriority    = 31;
+        this->gunrange        = gunrange;
+        this->numtargets      = 0;
+        this->maxtargets      = maxtargets;
     }
 
     bool acquire(Unit *un, float distance) {
-        double unkey = un->location[Unit::UNIT_ONLY]->getKey();
-        bool lesscheck = unkey < maxinnerrangeless[0];
-        bool morecheck = unkey > maxinnerrangemore[0];
+        double unkey     = un->location[Unit::UNIT_ONLY]->getKey();
+        bool   lesscheck = unkey < maxinnerrangeless[0];
+        bool   morecheck = unkey > maxinnerrangemore[0];
         if (reachedMore == false || reachedLess == false) {
             if (lesscheck || morecheck) {
                 if (lesscheck) {
@@ -418,8 +408,8 @@ public:
                         if (unkey > maxinnerrangeless[i] && unkey < maxinnerrangemore[i]) {
                             maxinnerrangeless[0] = maxinnerrangeless[i];
                             maxinnerrangemore[0] = maxinnerrangemore[i];
-                            reachedLess = false;
-                            reachedMore = false;
+                            reachedLess          = false;
+                            reachedMore          = false;
                         }
                     }
                 }
@@ -431,10 +421,11 @@ public:
     bool ShouldTargetUnit(Unit *un, float distance) {
         if (un->cloak.Visible()) {
             float rangetotarget = distance;
-            float rel0 = parent->getRelation(un);
-            float rel[] = {
-                    rel0         //not initialized until after array
-                    , (parentparent ? parentparent->getRelation(un) : rel0)           //not initialized till after array
+            float rel0          = parent->getRelation(un);
+            float rel[]         = {
+                    rel0                                                   // not initialized until after array
+                    ,
+                    (parentparent ? parentparent->getRelation(un) : rel0)  // not initialized till after array
             };
             float relationship = rel0;
             for (unsigned int i = 1; i < sizeof(rel) / sizeof(*rel); i++) {
@@ -442,19 +433,19 @@ public:
                     relationship = rel[i];
                 }
             }
-            char rp = 31;
+            char  rp  = 31;
             float tmp = Priority(parent, un, gunrange, rangetotarget, relationship, &rp);
             if (tmp > priority) {
-                mytarg = un;
-                priority = tmp;
+                mytarg       = un;
+                priority     = tmp;
                 rolepriority = rp;
             }
             for (vector<TurretBin>::iterator k = tbin->begin(); k != tbin->end(); ++k) {
                 if (rangetotarget > k->maxrange) {
                     break;
                 }
-                const char
-                        tprior = ROLES::getPriority(k->turret[0].tur->getAttackPreferenceChar())[un->getUnitRoleChar()];
+                const char tprior =
+                        ROLES::getPriority(k->turret[0].tur->getAttackPreferenceChar())[un->getUnitRoleChar()];
                 if (relationship < 0) {
                     if (tprior < 16) {
                         k->listOfTargets[0].push_back(TargetAndRange(un, rangetotarget, relationship));
@@ -470,61 +461,67 @@ public:
     }
 };
 
-int numpolled[2] = {0, 0};   //number of units that searched for a target
+int numpolled[2] = {0, 0};                // number of units that searched for a target
 
-int prevpollindex[2] = {10000, 10000};   //previous number of units touched (doesn't need to be precise)
+int prevpollindex[2] = {10'000, 10'000};  // previous number of units touched (doesn't need to be precise)
 
-int pollindex[2] = {1,
-        1};   //current count of number of units touched (doesn't need to be precise)  -- used for "fairness" heuristic
+int pollindex[2] = {
+        1,
+        1};  // current count of number of units touched (doesn't need to be precise)  -- used for "fairness" heuristic
 
 void FireAt::ChooseTargets(int numtargs, bool force) {
     float gun_speed, gun_range, missile_range;
     parent->getAverageGunSpeed(gun_speed, gun_range, missile_range);
-    static float target_timer = UniverseUtil::GetGameTime();    //timer used to determine passage of physics frames
-    const float min_time_to_switch = configuration().ai.targeting.min_time_to_switch_targets_flt;
-    const float min_null_time_to_switch = configuration().ai.targeting.min_null_time_to_switch_targets_flt;
-    const int min_num_pollers = configuration().ai.targeting.min_number_of_pollers_per_frame;
-    //maximum number of vessels allowed to search for a target in a given physics frame
+    static float target_timer = UniverseUtil::GetGameTime();  // timer used to determine passage of physics frames
+    const float  min_time_to_switch      = configuration().ai.targeting.min_time_to_switch_targets_flt;
+    const float  min_null_time_to_switch = configuration().ai.targeting.min_null_time_to_switch_targets_flt;
+    const int    min_num_pollers         = configuration().ai.targeting.min_number_of_pollers_per_frame;
+    // maximum number of vessels allowed to search for a target in a given physics frame
     const int max_num_pollers = configuration().ai.targeting.max_number_of_pollers_per_frame;
-    int num_pollers[2] = {max_num_pollers, max_num_pollers};
+    int       num_pollers[2]  = {max_num_pollers, max_num_pollers};
 
     int next_frame_num_pollers[2] = {max_num_pollers, max_num_pollers};
     if (lastchangedtarg + min_time_to_switch > 0) {
         return;
-    }          //don't switch if switching too soon
+    }  // don't switch if switching too soon
 
     Unit *current_target = parent->Target();
-    int has_target = (current_target == nullptr) ? 0 : 1;
-    //Following code exists to limit the number of craft polling for a target in a given frame - this is an expensive operation, and needs to be spread out, or there will be pauses.
-    if ((UniverseUtil::GetGameTime()) - target_timer >= SIMULATION_ATOM * .99) {
-        //Check if one or more physics frames have passed
-        numpolled[0] = numpolled[1] = 0;         //reset counters
-        prevpollindex[0] = pollindex[0];
-        prevpollindex[1] = pollindex[1];
-        pollindex[has_target] = 0;
-        target_timer = UniverseUtil::GetGameTime();
-        num_pollers[0] = float_to_int(next_frame_num_pollers[0]);
-        num_pollers[1] = float_to_int(next_frame_num_pollers[1]);
+    int   has_target     = (current_target == nullptr) ? 0 : 1;
+    // Following code exists to limit the number of craft polling for a target in a given frame - this is an expensive
+    // operation, and needs to be spread out, or there will be pauses.
+    if ((UniverseUtil::GetGameTime())-target_timer >= SIMULATION_ATOM * .99) {
+        // Check if one or more physics frames have passed
+        numpolled[0] = numpolled[1] = 0;  // reset counters
+        prevpollindex[0]            = pollindex[0];
+        prevpollindex[1]            = pollindex[1];
+        pollindex[has_target]       = 0;
+        target_timer                = UniverseUtil::GetGameTime();
+        num_pollers[0]              = float_to_int(next_frame_num_pollers[0]);
+        num_pollers[1]              = float_to_int(next_frame_num_pollers[1]);
     }
-    pollindex[has_target]++;     //count number of craft touched - will use in the next physics frame to spread out the vessels actually chosen to be processed among all of the vessels being touched
-    if (numpolled[has_target] > num_pollers[has_target]) {      //over quota, wait until next physics frame
+    pollindex[has_target]++;  // count number of craft touched - will use in the next physics frame to spread out the
+                              // vessels actually chosen to be processed among all of the vessels being touched
+    if (numpolled[has_target] > num_pollers[has_target]) {  // over quota, wait until next physics frame
         return;
     }
-    if (!(pollindex[has_target] % ((prevpollindex[has_target] / num_pollers[has_target])
-            + 1))) {      //spread out, in modulo fashion, the possibility of changing one's target. Use previous physics frame count of craft to estimate current number of craft
-        numpolled[has_target]++;          //if a more likely candidate, we're going to search for a target.
+    if (!(pollindex[has_target] %
+          ((prevpollindex[has_target] / num_pollers[has_target]) +
+           1))) {  // spread out, in modulo fashion, the possibility of changing one's target. Use previous physics
+                   // frame count of craft to estimate current number of craft
+        numpolled[has_target]++;  // if a more likely candidate, we're going to search for a target.
     } else {
         return;
-    }          //skipped to achieve better fairness - see comment on modulo distribution above
+    }  // skipped to achieve better fairness - see comment on modulo distribution above
     if (current_target) {
         if (isJumpablePlanet(current_target)) {
             return;
         }
     }
-    const bool was_null = (current_target == nullptr);
-    const Flightgroup *fg = parent->getFlightgroup();
-    lastchangedtarg = 0.0F + static_cast<float>(target_rand.UniformInclusive(0, 1))
-            * min_time_to_switch;     //spread out next valid time to switch targets - helps to ease per-frame loads.
+    const bool         was_null = (current_target == nullptr);
+    const Flightgroup *fg       = parent->getFlightgroup();
+    lastchangedtarg             = 0.0F + static_cast<float>(target_rand.UniformInclusive(0, 1)) *
+                                     min_time_to_switch;  // spread out next valid time to switch targets - helps to
+                                                          // ease per-frame loads.
     if (fg) {
         if (!fg->directive.empty()) {
             if (current_target != nullptr && (*fg->directive.begin()) == toupper(*fg->directive.begin())) {
@@ -532,14 +529,14 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
             }
         }
     }
-    //not   allowed to switch targets
+    // not   allowed to switch targets
     numprocessed++;
     vector<TurretBin> turret_bins;
-    un_iter subunit = parent->getSubUnits();
+    un_iter           subunit = parent->getSubUnits();
     for (Unit *su = nullptr; (su = *subunit) != nullptr; ++subunit) {
-        static unsigned int inert = ROLES::getRole("INERT");
-        static unsigned int point_def = ROLES::getRole("POINTDEF");
-        const bool assign_point_def = configuration().ai.targeting.assign_point_def;
+        static unsigned int inert            = ROLES::getRole("INERT");
+        static unsigned int point_def        = ROLES::getRole("POINTDEF");
+        const bool          assign_point_def = configuration().ai.targeting.assign_point_def;
         if ((su->getAttackPreferenceChar() != point_def) || assign_point_def) {
             if (su->getAttackPreferenceChar() != inert) {
                 AssignTBin(su, turret_bins);
@@ -552,13 +549,18 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
         }
     }
     std::sort(turret_bins.begin(), turret_bins.end());
-    float efrel = 0;
-    float mytargrange = FLT_MAX;
-    const float unitRad = configuration().ai.targeting.search_extra_radius_flt;                 //Maximum target radius that is guaranteed to be detected
+    float       efrel       = 0;
+    float       mytargrange = FLT_MAX;
+    const float unitRad =
+            configuration()
+                    .ai.targeting.search_extra_radius_flt;  // Maximum target radius that is guaranteed to be detected
     const char maxrolepriority = static_cast<char>(configuration().ai.targeting.search_max_role_priority);
-    const int maxtargets = configuration().ai.targeting.search_max_candidates;   //Cutoff candidate count (if that many hostiles found, stop search - performance/quality tradeoff, 0=no cutoff)
-    UnitWithinRangeLocator<ChooseTargetClass<2> > unitLocator(parent->radar.GetMaxRange(), unitRad);
-    StaticTuple<float, 2> maxranges{};
+    const int  maxtargets =
+            configuration()
+                    .ai.targeting.search_max_candidates;  // Cutoff candidate count (if that many hostiles found, stop
+                                                          // search - performance/quality tradeoff, 0=no cutoff)
+    UnitWithinRangeLocator<ChooseTargetClass<2>> unitLocator(parent->radar.GetMaxRange(), unitRad);
+    StaticTuple<float, 2>                        maxranges{};
 
     maxranges[0] = gun_range;
     maxranges[1] = missile_range;
@@ -567,11 +569,12 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     }
     double pretable = queryTime();
     unitLocator.action.init(this, parent, gun_range, &turret_bins, maxranges, maxrolepriority, maxtargets);
-    static int gcounter = 0;
-    const int min_rechoose_interval = configuration().ai.targeting.min_rechoose_interval;
+    static int gcounter              = 0;
+    const int  min_rechoose_interval = configuration().ai.targeting.min_rechoose_interval;
     if (current_target) {
         if (gcounter++ < min_rechoose_interval || VegaRandom::Instance().GenRandUInt32() / 8 < RAND_MAX / 9) {
-            //in this case only look at potentially *interesting* units rather than huge swaths of nearby units...including target, threat, players, and leader's target
+            // in this case only look at potentially *interesting* units rather than huge swaths of nearby
+            // units...including target, threat, players, and leader's target
             unitLocator.action.ShouldTargetUnit(current_target, UnitUtil::getDistance(parent, current_target));
             unsigned int np = _Universe->numPlayers();
             for (unsigned int i = 0; i < np; ++i) {
@@ -592,16 +595,14 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
             gcounter = 0;
         }
     }
-    if (unitLocator.action.mytarg == NULL) {      //decided to rechoose or did not have initial target
-        findObjects(
-                _Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
-                parent->location[Unit::UNIT_ONLY],
-                &unitLocator);
+    if (unitLocator.action.mytarg == NULL) {  // decided to rechoose or did not have initial target
+        findObjects(_Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY], parent->location[Unit::UNIT_ONLY],
+                    &unitLocator);
     }
-    Unit *mytarg = unitLocator.action.mytarg;
-    targetpick += queryTime() - pretable;
+    Unit *mytarg  = unitLocator.action.mytarg;
+    targetpick   += queryTime() - pretable;
     if (mytarg) {
-        efrel = parent->getRelation(mytarg);
+        efrel       = parent->getRelation(mytarg);
         mytargrange = UnitUtil::getDistance(parent, mytarg);
     }
     TargetAndRange my_target(mytarg, mytargrange, efrel);
@@ -616,7 +617,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
                 next_frame_num_pollers[has_target] = max_num_pollers;
             }
         } else {
-            lastchangedtarg += target_rand.UniformInclusive(0, 1) * min_null_time_to_switch;
+            lastchangedtarg                    += target_rand.UniformInclusive(0, 1) * min_null_time_to_switch;
             next_frame_num_pollers[has_target] -= .05;
             if (next_frame_num_pollers[has_target] < min_num_pollers) {
                 next_frame_num_pollers[has_target] = min_num_pollers;
@@ -647,7 +648,7 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
         return false;
 
         static int test = 0;
-        if (test++ % 1000 == 1) {
+        if (test++ % 1'000 == 1) {
             VS_LOG(warning, "lost target");
         }
     }
@@ -661,17 +662,16 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
     }
     const float firewhen = configuration().ai.firing.in_weapon_range_flt;
     const float fireangle_minagg =
-            (float) cos(M_PI * configuration().ai.firing.maximum_firing_angle.minagg
-                    / 180.0);                                                                      //Roughly 10 degrees
+            (float)cos(M_PI * configuration().ai.firing.maximum_firing_angle.minagg / 180.0);  // Roughly 10 degrees
     const float fireangle_maxagg =
-            (float) cos(M_PI * configuration().ai.firing.maximum_firing_angle.maxagg
-                    / 180.0);                                                                      //Roughly 18 degrees
+            (float)cos(M_PI * configuration().ai.firing.maximum_firing_angle.maxagg / 180.0);  // Roughly 18 degrees
     float temp = parent->TrackingGuns(missilelock);
-    bool isjumppoint = targ->getUnitType() == Vega_UnitType::planet && ((Planet *) targ)->GetDestinations().empty() == false;
+    bool  isjumppoint =
+            targ->getUnitType() == Vega_UnitType::planet && ((Planet *)targ)->GetDestinations().empty() == false;
     float fangle = (fireangle_minagg + fireangle_maxagg * agg) / (1.0f + agg);
-    bool retval =
-            ((dist < firewhen)
-                    && ((angle > fangle) || (temp && (angle > temp)) || (missilelock && (angle > 0)))) && !isjumppoint;
+    bool  retval =
+            ((dist < firewhen) && ((angle > fangle) || (temp && (angle > temp)) || (missilelock && (angle > 0)))) &&
+            !isjumppoint;
     if (retval) {
         VS_LOG(trace, (boost::format("%1%: retval = true") % __FUNCTION__));
         if (Cockpit::tooManyAttackers()) {
@@ -680,14 +680,15 @@ bool FireAt::ShouldFire(Unit *targ, bool &missilelock) {
             if (player) {
                 VS_LOG(trace, (boost::format("%1%: player is not null") % __FUNCTION__));
                 const int max_attackers = configuration().ai.max_player_attackers;
-                const int attackers = player->number_of_attackers;
+                const int attackers     = player->number_of_attackers;
                 if (attackers > max_attackers && max_attackers > 0) {
-                    VS_LOG(trace, (boost::format("%1%: attackers > max_attackers && max_attackers > 0") % __FUNCTION__));
-                    const float attacker_switch_time = configuration().ai.attacker_switch_time_flt;
-                    const uint_fast32_t current_time =
-                            fmod(floor(UniverseUtil::GetGameTime() / attacker_switch_time), static_cast<float>(1 << 24));
-                    const uint_fast32_t seed = ((reinterpret_cast<size_t>(parent) & 0xffffffff) ^ current_time);
-                    static VegaRandom decide{seed};
+                    VS_LOG(trace,
+                           (boost::format("%1%: attackers > max_attackers && max_attackers > 0") % __FUNCTION__));
+                    const float         attacker_switch_time = configuration().ai.attacker_switch_time_flt;
+                    const uint_fast32_t current_time = fmod(floor(UniverseUtil::GetGameTime() / attacker_switch_time),
+                                                            static_cast<float>(1 << 24));
+                    const uint_fast32_t seed         = ((reinterpret_cast<size_t>(parent) & 0xffffffff) ^ current_time);
+                    static VegaRandom   decide{seed};
                     if (decide.GenRandInt31() % attackers >= max_attackers) {
                         VS_LOG(trace, (boost::format("%1%: randomly decided to return false") % __FUNCTION__));
                         return false;
@@ -707,7 +708,7 @@ FireAt::~FireAt() {
 
 unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
     unsigned int firebitm = ROLES::EVERYTHING_ELSE;
-    Unit *un = parent->Target();
+    Unit        *un       = parent->Target();
     if (un) {
         firebitm = (1 << un->getUnitRoleChar());
 
@@ -721,16 +722,17 @@ unsigned int FireBitmask(Unit *parent, bool shouldfire, bool firemissile) {
         }
         if (firemissile) {
             firebitm = ROLES::FIRE_MISSILES;
-        }              //stops guns
+        }  // stops guns
     }
     return firebitm;
 }
 
 void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     const float missiledelay = configuration().ai.missile_gun_delay_flt;
-    const bool fire_missile = lockmissile && VegaRandom::Instance().RandomDoubleUpTo(RAND_MAX) <
-                              static_cast<double>(RAND_MAX) * missileprobability * SIMULATION_ATOM;
-    delay += SIMULATION_ATOM; //simulation_atom_var?
+    const bool  fire_missile =
+            lockmissile && VegaRandom::Instance().RandomDoubleUpTo(RAND_MAX) <
+                                   static_cast<double>(RAND_MAX) * missileprobability * SIMULATION_ATOM;
+    delay += SIMULATION_ATOM;  // simulation_atom_var?
     if (shouldfire && delay < parent->pilot->getReactionTime()) {
         return;
     } else if (!shouldfire) {
@@ -748,7 +750,7 @@ bool FireAt::isJumpablePlanet(Unit *targ) {
     bool istargetjumpableplanet = targ->getUnitType() == Vega_UnitType::planet;
     if (istargetjumpableplanet) {
         istargetjumpableplanet =
-                (!((Planet *) targ)->GetDestinations().empty()) && (parent->jump_drive.IsDestinationSet());
+                (!((Planet *)targ)->GetDestinations().empty()) && (parent->jump_drive.IsDestinationSet());
     }
     return istargetjumpableplanet;
 }
@@ -758,7 +760,7 @@ using std::string;
 void FireAt::PossiblySwitchTarget(bool unused) {
     const float targettime = configuration().ai.targeting.time_until_switch_flt;
     if ((targettime <= 0) || (VegaRandom::Instance().UniformInclusive(0, 1) < simulation_atom_var / targettime)) {
-        bool ct = true;
+        bool         ct = true;
         Flightgroup *fg;
         if ((fg = parent->getFlightgroup())) {
             if (fg->directive.find(".") != string::npos) {
@@ -772,26 +774,26 @@ void FireAt::PossiblySwitchTarget(bool unused) {
 }
 
 void FireAt::Execute() {
-    lastchangedtarg -= SIMULATION_ATOM;
-    bool missilelock = false;
-    bool tmp = done;
+    lastchangedtarg  -= SIMULATION_ATOM;
+    bool missilelock  = false;
+    bool tmp          = done;
     Order::Execute();
     done = tmp;
     Unit *targ;
     if (parent->getUnitType() == Vega_UnitType::unit) {
         const double contraband_update_time = configuration().ai.contraband_update_time_dbl;
         if (VegaRandom::Instance().RandomDoubleUpTo(RAND_MAX) <
-                static_cast<double>(RAND_MAX) * SIMULATION_ATOM / contraband_update_time) {
+            static_cast<double>(RAND_MAX) * SIMULATION_ATOM / contraband_update_time) {
             UpdateContrabandSearch();
         }
         const double cont_initiate_time = configuration().ai.comm_initiate_time_dbl;
         if (VegaRandom::Instance().RandomDoubleUpTo(RAND_MAX) <
-                static_cast<double>(RAND_MAX) * (SIMULATION_ATOM / cont_initiate_time)) {
+            static_cast<double>(RAND_MAX) * (SIMULATION_ATOM / cont_initiate_time)) {
             const double contraband_initiate_time = configuration().ai.contraband_initiate_time_dbl;
-            const float comm_to_player = configuration().ai.comm_to_player_percent_flt;
-            const float comm_to_target = configuration().ai.comm_to_target_percent_flt;
-            const float contraband_to_player = configuration().ai.contraband_to_player_percent_flt;
-            const float contraband_to_target = configuration().ai.contraband_to_target_percent_flt;
+            const float  comm_to_player           = configuration().ai.comm_to_player_percent_flt;
+            const float  comm_to_target           = configuration().ai.comm_to_target_percent_flt;
+            const float  contraband_to_player     = configuration().ai.contraband_to_player_percent_flt;
+            const float  contraband_to_target     = configuration().ai.contraband_to_target_percent_flt;
 
             unsigned int modulo = static_cast<unsigned int>(contraband_initiate_time / cont_initiate_time);
             if (modulo < 1U) {
@@ -804,7 +806,7 @@ void FireAt::Execute() {
             }
         }
     }
-    bool shouldfire = false;
+    bool shouldfire             = false;
     bool istargetjumpableplanet = false;
     if ((targ = parent->Target())) {
         istargetjumpableplanet = isJumpablePlanet(targ);
@@ -817,18 +819,17 @@ void FireAt::Execute() {
             }
         } else {
             if (had_target) {
-                had_target = false;
-                lastchangedtarg = -100000;
+                had_target      = false;
+                lastchangedtarg = -100'000;
             }
             ChooseTarget();
         }
     } else if (had_target) {
-        had_target = false;
-        lastchangedtarg = -100000;
+        had_target      = false;
+        lastchangedtarg = -100'000;
     }
     PossiblySwitchTarget(istargetjumpableplanet);
     if ((!istargetjumpableplanet) && parent->getNumMounts() > 0) {
         FireWeapons(shouldfire, missilelock);
     }
 }
-

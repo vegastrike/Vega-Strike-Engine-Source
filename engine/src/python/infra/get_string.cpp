@@ -30,16 +30,19 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
+
 #include <Python.h>
-#include <boost/filesystem.hpp>
 
 #include "get_string.h"
-#include "vegadisk/vsfilesystem.h"
+
+#include <boost/filesystem.hpp>
+
 #include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
 /** Converts PyObject* raw pointer to RAII managed wrapper. */
 boost::python::object WrapObject(PyObject* raw_object, const bool should_borrow) {
-    if(!raw_object) {
+    if (!raw_object) {
         VS_LOG_AND_FLUSH(error, "Error: WrapObject raw_object is null");
         PyErr_Print();
         PyErr_Clear();
@@ -56,24 +59,20 @@ boost::python::object WrapObject(PyObject* raw_object, const bool should_borrow)
     }
 }
 
-boost::python::object GetPyObject(const std::string& function_name,
-                                  const std::string& module_name,
-                                  const std::string& file_name,
-                                  PyObject* raw_args) {
-    boost::python::object module = WrapObject(PyImport_ImportModule(module_name.c_str()), false);
+boost::python::object GetPyObject(const std::string& function_name, const std::string& module_name,
+                                  const std::string& file_name, PyObject* raw_args) {
+    boost::python::object module   = WrapObject(PyImport_ImportModule(module_name.c_str()), false);
     boost::python::object function = WrapObject(PyObject_GetAttrString(module.ptr(), function_name.c_str()), false);
-    boost::python::object args = WrapObject(raw_args, false);
-    boost::python::object result = WrapObject(PyObject_CallObject(function.ptr(), args.ptr()), true);
+    boost::python::object args     = WrapObject(raw_args, false);
+    boost::python::object result   = WrapObject(PyObject_CallObject(function.ptr(), args.ptr()), true);
 
     return result;
 }
 
-std::string GetString(const std::string& function_name,
-                     const std::string& module_name,
-                     const std::string& file_name,
-                     PyObject* raw_args) {
+std::string GetString(const std::string& function_name, const std::string& module_name, const std::string& file_name,
+                      PyObject* raw_args) {
     boost::python::object result = GetPyObject(function_name, module_name, file_name, raw_args);
-    
+
     const char* c_str = PyUnicode_AsUTF8(result.ptr());
     if (!c_str) {
         VS_LOG_AND_FLUSH(error, "Error: Failed to convert Python object to UTF-8 std::string in GetString");
@@ -81,7 +80,7 @@ std::string GetString(const std::string& function_name,
         PyErr_Clear();
         throw std::runtime_error("Error: Failed to convert Python object to UTF-8 std::string in GetString");
     }
-    
+
     return std::string(c_str);
 }
 

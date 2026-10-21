@@ -30,46 +30,45 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+
 #include <algorithm>
 #include <string>
 
-#include "root_generic/vega_random.h"
-#include "src/vega_cast_utils.h"
-#include "cmd/vega_py_run.h"
 #include "cmd/base.h"
-#include "gldrv/winsys.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "root_generic/lin_time.h"
-#include "src/audiolib.h"
+#include "cmd/base_util.h"
+#include "cmd/music.h"
+#include "cmd/planet.h"
+#include "cmd/unit_util.h"
+#include "cmd/vega_py_run.h"
+#include "gfx/ani_texture.h"
 #include "gfx/camera.h"
+#include "gfx/cockpit.h"
 #include "gfx_generic/cockpit_generic.h"
+#include "gldrv/winsys.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/vega_random.h"
+#include "src/audiolib.h"
+#include "src/config_xml.h"
 #include "src/python/init.h"
 #include "src/python/python_compile.h"
-#include "cmd/planet.h"
-#include "cmd/base_util.h"
-#include "src/config_xml.h"
 #include "src/save_util.h"
-#include "cmd/unit_util.h"
-#include "gfx/cockpit.h"
-#include "gfx/ani_texture.h"
-#include "cmd/music.h"
 #include "src/universe_util.h"
+#include "src/vega_cast_utils.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 #ifdef RENDER_FROM_TEXTURE
-#include "gfx/stream_texture.h"
+#    include "gfx/stream_texture.h"
 #endif
-#include "src/main_loop.h"
-#include "src/in_kb.h"
-#include "src/universe.h"
-
-#include "cmd/ai/communication.h"
 #include "audio/SceneManager.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_sdl3.h"
+#include "cmd/ai/communication.h"
 #include "gldrv/mouse_cursor.h"
-
 #include "imgui/imgui.h"
 #include "libraries/gui/gui.h"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_opengl3.h"
+#include "src/in_kb.h"
+#include "src/main_loop.h"
+#include "src/universe.h"
 
 VegaRandom base_interface_random{};
 
@@ -82,9 +81,9 @@ static unsigned int &getMouseButtonMask() {
 }
 
 static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
-    int xrez = configuration().graphics.resolution_x;
-    const int whentodouble = configuration().joystick.double_mouse_position;
-    const float factor = configuration().joystick.double_mouse_factor_flt;
+    int         xrez         = configuration().graphics.resolution_x;
+    const int   whentodouble = configuration().joystick.double_mouse_position;
+    const float factor       = configuration().joystick.double_mouse_factor_flt;
     if (xrez >= whentodouble) {
         x -= configuration().graphics.resolution_x / 2;
         y -= configuration().graphics.resolution_y / 2;
@@ -112,8 +111,8 @@ static void biModifyMouseSensitivity(int &x, int &y, bool invert) {
     }
 }
 
-static bool createdbase = false;
-static int createdmusic = -1;
+static bool createdbase  = false;
+static int  createdmusic = -1;
 
 void ModifyMouseSensitivity(int &x, int &y) {
     // FIXME enabling this breaks mouse over events in the main menu
@@ -121,30 +120,30 @@ void ModifyMouseSensitivity(int &x, int &y) {
 }
 
 #ifdef BASE_MAKER
-#include <stdio.h>
-#ifdef _WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif //tells VCC not to generate min/max macros
-#include <windows.h>
-#endif
+#    include <stdio.h>
+#    ifdef _WIN32
+#        ifndef NOMINMAX
+#            define NOMINMAX
+#        endif  // tells VCC not to generate min/max macros
+#        include <windows.h>
+#    endif
 static char makingstate = 0;
 #endif
-extern const char *mission_key; //defined in main.cpp
-bool BaseInterface::Room::BaseTalk::hastalked = false;
+extern const char *mission_key;  // defined in main.cpp
+bool               BaseInterface::Room::BaseTalk::hastalked = false;
 
 #define NEW_GUI
 
 #ifdef NEW_GUI
-#include "cmd/basecomputer.h"
-#include "../gui/eventmanager.h"
+#    include "../gui/eventmanager.h"
+#    include "cmd/basecomputer.h"
 #endif
 
 using namespace VSFileSystem;
 std::vector<unsigned int> base_keyboard_queue;
 
 
-#define mymin(a, b) ( ( (a) < (b) ) ? (a) : (b) )
+#define mymin(a, b) (((a) < (b)) ? (a) : (b))
 
 // Letterboxed base viewport rect (in configured-resolution space), centered, from
 // graphics.bases.max_width/height. Returns false if no letterbox applies (the base
@@ -155,13 +154,18 @@ static bool base_viewport_rect(int &x, int &y, int &w, int &h) {
     const int sh = configuration().graphics.resolution_y;
     const int mw = configuration().graphics.bases.max_width;
     const int mh = configuration().graphics.bases.max_height;
-    if (mw <= 0 || mh <= 0) return false;
+    if (mw <= 0 || mh <= 0) {
+        return false;
+    }
     int rw = std::min(sw, mw);
     int rh = std::min(sh, mh);
-    if (rw >= sw && rh >= sh) return false;      // base fills the screen
+    if (rw >= sw && rh >= sh) {
+        return false;  // base fills the screen
+    }
     x = (sw - rw) / 2;
     y = (sh - rh) / 2;
-    w = rw; h = rh;
+    w = rw;
+    h = rh;
     return true;
 }
 
@@ -171,8 +175,8 @@ static void SetupViewport() {
         // Map the configured-resolution letterbox onto native (actual) pixels.
         const int sw = configuration().graphics.resolution_x;
         const int sh = configuration().graphics.resolution_y;
-        float sx = sw > 0 ? (float)native_resolution_x / sw : 1.0f;
-        float sy = sh > 0 ? (float)native_resolution_y / sh : 1.0f;
+        float     sx = sw > 0 ? (float)native_resolution_x / sw : 1.0f;
+        float     sy = sh > 0 ? (float)native_resolution_y / sh : 1.0f;
         glViewport((int)(vx * sx), (int)(vy * sy), (int)(vw * sx), (int)(vh * sy));
     } else {
         glViewport(0, 0, native_resolution_x, native_resolution_y);
@@ -188,14 +192,19 @@ static bool mouseToBaseNormalized(int mx, int my, float &nx, float &ny) {
     // is the same space the mouse arrives in (SDL logical points == io.DisplaySize).
     const int sw = configuration().graphics.resolution_x;
     const int sh = configuration().graphics.resolution_y;
-    if (sw <= 0 || sh <= 0) return false;
-    int vx = 0, vy = 0, vw = 0, vh = 0;
+    if (sw <= 0 || sh <= 0) {
+        return false;
+    }
+    int  vx = 0, vy = 0, vw = 0, vh = 0;
     bool letterboxed = base_viewport_rect(vx, vy, vw, vh);
     if (!letterboxed) {
-        vx = 0; vy = 0; vw = sw; vh = sh;
+        vx = 0;
+        vy = 0;
+        vw = sw;
+        vh = sh;
     }
     if (mx < vx || mx >= vx + vw || my < vy || my >= vy + vh) {
-        return false;   // mouse is in the letterbox bars, not over the base
+        return false;  // mouse is in the letterbox bars, not over the base
     }
     // Map into the letterbox window -> [0,1] -> normalized -1..1 (Y-inverted).
     nx = 2.0f * static_cast<float>(mx - vx) / static_cast<float>(vw) - 1.0f;
@@ -209,9 +218,11 @@ static bool mouseToBaseNormalized(int mx, int my, float &nx, float &ny) {
 static void baseLetterboxOffset(int &ox, int &oy) {
     int vx = 0, vy = 0, vw = 0, vh = 0;
     if (base_viewport_rect(vx, vy, vw, vh)) {
-        ox = vx; oy = vy;
+        ox = vx;
+        oy = vy;
     } else {
-        ox = 0; oy = 0;
+        ox = 0;
+        oy = 0;
     }
 }
 
@@ -233,11 +244,11 @@ BaseInterface::Room::~Room() {
 }
 
 BaseInterface::Room::Room() {
-//Do nothing...
+    // Do nothing...
 }
 
 void BaseInterface::Room::BaseObj::Draw(BaseInterface *base) {
-//Do nothing...
+    // Do nothing...
 }
 
 static FILTER BlurBases() {
@@ -245,9 +256,8 @@ static FILTER BlurBases() {
     return blur_bases ? BILINEAR : NEAREST;
 }
 
-BaseInterface::Room::BaseVSSprite::BaseVSSprite(const std::string &spritefile, const std::string &ind) :
-        BaseObj(ind), spr(spritefile.c_str(), BlurBases(), GFXTRUE) {
-}
+BaseInterface::Room::BaseVSSprite::BaseVSSprite(const std::string &spritefile, const std::string &ind)
+    : BaseObj(ind), spr(spritefile.c_str(), BlurBases(), GFXTRUE) {}
 
 BaseInterface::Room::BaseVSSprite::~BaseVSSprite() {
     if (soundsource) {
@@ -256,9 +266,9 @@ BaseInterface::Room::BaseVSSprite::~BaseVSSprite() {
     spr.ClearTimeSource();
 }
 
-BaseInterface::Room::BaseVSMovie::BaseVSMovie(const std::string &moviefile, const std::string &ind) :
-        BaseVSSprite(ind, VSSprite(AnimatedTexture::CreateVideoTexture(moviefile), 0, 0, 2, 2, 0, 0, true)) {
-    playing = false;
+BaseInterface::Room::BaseVSMovie::BaseVSMovie(const std::string &moviefile, const std::string &ind)
+    : BaseVSSprite(ind, VSSprite(AnimatedTexture::CreateVideoTexture(moviefile), 0, 0, 2, 2, 0, 0, true)) {
+    playing    = false;
     soundscene = "video";
     if (g_game.sound_enabled && spr.LoadSuccess()) {
         soundsource = BaseUtil::CreateVideoSoundStream(moviefile, soundscene);
@@ -270,38 +280,38 @@ BaseInterface::Room::BaseVSMovie::BaseVSMovie(const std::string &moviefile, cons
 }
 
 void BaseInterface::Room::BaseVSMovie::SetHidePointer(bool hide) {
-    hidePointer = hide;
+    hidePointer     = hide;
     hidePointerTime = realTime();
 }
 
 void BaseInterface::Room::BaseVSSprite::SetSprite(const std::string &spritefile) {
-    //Destroy SPR
+    // Destroy SPR
     spr.~VSSprite();
-    //Re-create it (in case you don't know the following syntax,
-    //which is a weird but standard syntax,
-    //it initializes spr instead of allocating memory for it)
-    //PS: I hope it doesn't break many compilers ;)
+    // Re-create it (in case you don't know the following syntax,
+    // which is a weird but standard syntax,
+    // it initializes spr instead of allocating memory for it)
+    // PS: I hope it doesn't break many compilers ;)
     //(if it does, spr will have to become a pointer)
-    new(&spr)VSSprite(spritefile.c_str(), BlurBases(), GFXTRUE);
+    new (&spr) VSSprite(spritefile.c_str(), BlurBases(), GFXTRUE);
 }
 
 void BaseInterface::Room::BaseVSMovie::SetMovie(const std::string &moviefile) {
-    //Get sprite position and size so that we can preserve them
+    // Get sprite position and size so that we can preserve them
     float x, y, w, h, rot;
     spr.GetPosition(x, y);
     spr.GetSize(w, h);
     spr.GetRotation(rot);
 
-    //See notes above
+    // See notes above
     spr.~VSSprite();
-    new(&spr)VSSprite(AnimatedTexture::CreateVideoTexture(moviefile), x, y, w, h, 0, 0, true);
+    new (&spr) VSSprite(AnimatedTexture::CreateVideoTexture(moviefile), x, y, w, h, 0, 0, true);
     spr.SetRotation(rot);
 
     if (soundsource) {
         BaseUtil::DestroyVideoSoundStream(soundsource, soundscene);
     }
     soundscene = "video";
-    playing = false;
+    playing    = false;
     if (g_game.sound_enabled) {
         soundsource = BaseUtil::CreateVideoSoundStream(moviefile, soundscene);
         spr.SetTimeSource(soundsource);
@@ -351,7 +361,7 @@ void BaseInterface::Room::BaseVSMovie::Draw(BaseInterface *base) {
             hidePointerTime = time + 1.0;
         } else if (time > hidePointerTime) {
             base->mousePointerStyle = MOUSE_POINTER_NONE;
-            hidePointerTime = -1.0;
+            hidePointerTime         = -1.0;
         }
     }
 
@@ -375,10 +385,10 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
     Unit *un = base->caller.GetUnit();
     if (un) {
         GFXHudMode(GFXFALSE);
-        float tmp = configuration().graphics.fov_flt;
-        const float standard_fov = configuration().graphics.bases.fov_flt;
+        float       tmp                    = configuration().graphics.fov_flt;
+        const float standard_fov           = configuration().graphics.bases.fov_flt;
         (configuration()).graphics.fov_flt = standard_fov;
-        float tmp1 = _Universe->AccessCamera()->GetFov();
+        float tmp1                         = _Universe->AccessCamera()->GetFov();
         _Universe->AccessCamera()->SetFov(standard_fov);
         Vector p, q, r;
         _Universe->AccessCamera()->GetOrientation(p, q, r);
@@ -386,31 +396,25 @@ void BaseInterface::Room::BaseShip::Draw(BaseInterface *base) {
         _Universe->AccessCamera()->setCockpitOffset(0);
         _Universe->AccessCamera()->UpdateGFX();
         QVector pos = _Universe->AccessCamera()->GetPosition();
-        Matrix cam(p.i, p.j, p.k, q.i, q.j, q.k, r.i, r.j, r.k, pos);
-        Matrix final;
-        Matrix newmat = mat;
-        newmat.p.k *= un->rSize();
-        newmat.p += QVector(0, 0, configuration().graphics.znear_dbl);
-        newmat.p.i *= newmat.p.k;
-        newmat.p.j *= newmat.p.k;
+        Matrix  cam(p.i, p.j, p.k, q.i, q.j, q.k, r.i, r.j, r.k, pos);
+        Matrix  final;
+        Matrix  newmat  = mat;
+        newmat.p.k     *= un->rSize();
+        newmat.p       += QVector(0, 0, configuration().graphics.znear_dbl);
+        newmat.p.i     *= newmat.p.k;
+        newmat.p.j     *= newmat.p.k;
         MultMatrix(final, cam, newmat);
         SetupViewport();
-        GFXClear(GFXFALSE);         //clear the zbuf
+        GFXClear(GFXFALSE);  // clear the zbuf
 
         GFXEnable(DEPTHTEST);
         GFXEnable(DEPTHWRITE);
         GFXEnable(LIGHTING);
         int light = 0;
         GFXCreateLight(light,
-                GFXLight(true,
-                        GFXColor(1, 1, 1, 1),
-                        GFXColor(1, 1, 1, 1),
-                        GFXColor(1, 1, 1, 1),
-                        GFXColor(0.1, 0.1, 0.1, 1),
-                        GFXColor(1, 0, 0),
-                        GFXColor(1, 1, 1, 0),
-                        24),
-                true);
+                       GFXLight(true, GFXColor(1, 1, 1, 1), GFXColor(1, 1, 1, 1), GFXColor(1, 1, 1, 1),
+                                GFXColor(0.1, 0.1, 0.1, 1), GFXColor(1, 0, 0), GFXColor(1, 1, 1, 0), 24),
+                       true);
 
         (un)->DrawNow(final, FLT_MAX);
         GFXDeleteLight(light);
@@ -437,7 +441,7 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
         }
     }
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
-    //draw location markers
+    // draw location markers
     //<!-- config options in the "graphics" section -->
     //<var name="base_enable_locationmarkers" value="true"/>
     //<var name="base_locationmarker_sprite" value="base_locationmarker.spr"/>
@@ -450,34 +454,34 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
     //<var name="base_locationmarker_textcolor_g" value="1.0"/>
     //<var name="base_locationmarker_textcolor_b" value="1.0"/>
     //<var name="base_drawlocationborders" value="false"/>
-    const bool enable_markers = configuration().graphics.bases.enable_location_markers;
-    const bool draw_text = configuration().graphics.bases.draw_location_text;
-    const bool draw_always = configuration().graphics.bases.location_marker_draw_always;
+    const bool  enable_markers             = configuration().graphics.bases.enable_location_markers;
+    const bool  draw_text                  = configuration().graphics.bases.draw_location_text;
+    const bool  draw_always                = configuration().graphics.bases.location_marker_draw_always;
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
     if (enable_markers) {
         float x, y, text_wid, text_hei;
-        //get offset from config;
+        // get offset from config;
         const float text_offset_x = configuration().graphics.bases.location_marker_text_offset_x_flt;
         const float text_offset_y = configuration().graphics.bases.location_marker_text_offset_y_flt;
-        const float text_color_r = configuration().graphics.bases.location_marker_text_color_r_flt;
-        const float text_color_g = configuration().graphics.bases.location_marker_text_color_g_flt;
-        const float text_color_b = configuration().graphics.bases.location_marker_text_color_b_flt;
-        for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
+        const float text_color_r  = configuration().graphics.bases.location_marker_text_color_r_flt;
+        const float text_color_g  = configuration().graphics.bases.location_marker_text_color_g_flt;
+        const float text_color_b  = configuration().graphics.bases.location_marker_text_color_b_flt;
+        for (size_t i = 0; i < links.size(); i++) {  // loop through all links and draw a marker for each
             if (links[i]) {
                 if ((links[i]->alpha < 1) || (draw_always)) {
                     if (draw_always) {
                         links[i]->alpha = 1;
-                    }                          //set all alphas to visible
-                    x = (links[i]->x + (links[i]->wid / 2));                         //get the center of the location
-                    y = (links[i]->y + (links[i]->hei / 2));                         //get the center of the location
+                    }  // set all alphas to visible
+                    x = (links[i]->x + (links[i]->wid / 2));  // get the center of the location
+                    y = (links[i]->y + (links[i]->hei / 2));  // get the center of the location
 
                     /* draw marker */
                     const std::string spritefile_marker = configuration().graphics.bases.location_marker_sprite;
                     if (!spritefile_marker.empty() && links[i]->text.find("XXX") != 0) {
                         static VSSprite *spr_marker = new VSSprite(spritefile_marker.c_str());
-                        float wid, hei;
+                        float            wid, hei;
                         spr_marker->GetSize(wid, hei);
-                        //check if the sprite is near a screenedge and correct its position if necessary
+                        // check if the sprite is near a screenedge and correct its position if necessary
                         if ((x + (wid / 2)) >= 1) {
                             x = (1 - (wid / 2));
                         }
@@ -495,99 +499,90 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                         GFXEnable(TEXTURE0);
                         GFXColor4f(1, 1, 1, links[i]->alpha);
                         spr_marker->Draw();
-                    }                     //if spritefile
+                    }  // if spritefile
                     if (draw_text) {
                         GFXDisable(TEXTURE0);
                         TextPlane text_marker;
                         text_marker.SetText(links[i]->text);
-                        text_marker.setResolution(
-                                static_cast<float>(configuration().graphics.bases.max_width),
-                                static_cast<float>(configuration().graphics.bases.max_height));
+                        text_marker.setResolution(static_cast<float>(configuration().graphics.bases.max_width),
+                                                  static_cast<float>(configuration().graphics.bases.max_height));
                         int marker_ox = 0, marker_oy = 0;
                         baseLetterboxOffset(marker_ox, marker_oy);
                         text_marker.setOffset(static_cast<float>(marker_ox), static_cast<float>(marker_oy));
                         text_marker.GetCharSize(text_wid,
-                                text_hei);                           //get average charactersize
-                        float text_pos_x = x + text_offset_x;                                  //align right ...
-                        float text_pos_y = y + text_offset_y + text_hei;                         //...and on top
-                        text_wid = text_wid * links[i]->text.length()
-                                * 0.25;                                 //calc ~width of text (=multiply the average characterwidth with the number of characters)
-                        if ((text_pos_x + text_offset_x + text_wid)
-                                >= 1) {                                   //check right screenborder
-                            text_pos_x =
-                                    (x - fabs(text_offset_x) - text_wid);
-                        }                                   //align left
-                        if ((text_pos_y + text_offset_y)
-                                >= 1) {                                            //check upper screenborder
-                            text_pos_y = (y
-                                    - fabs(text_offset_y));
-                        }                                          //align on bottom
-                        if ((text_pos_y + text_offset_y - text_hei)
-                                <= kYLower) {                             //check lower screenborder
-                            text_pos_y = (y + fabs(text_offset_y)
-                                    + text_hei);
-                        }   //align on top
+                                                text_hei);                // get average charactersize
+                        float text_pos_x = x + text_offset_x;             // align right ...
+                        float text_pos_y = y + text_offset_y + text_hei;  //...and on top
+                        text_wid         = text_wid * links[i]->text.length() *
+                                   0.25;  // calc ~width of text (=multiply the average characterwidth with the number
+                                          // of characters)
+                        if ((text_pos_x + text_offset_x + text_wid) >= 1) {  // check right screenborder
+                            text_pos_x = (x - fabs(text_offset_x) - text_wid);
+                        }  // align left
+                        if ((text_pos_y + text_offset_y) >= 1) {  // check upper screenborder
+                            text_pos_y = (y - fabs(text_offset_y));
+                        }  // align on bottom
+                        if ((text_pos_y + text_offset_y - text_hei) <= kYLower) {  // check lower screenborder
+                            text_pos_y = (y + fabs(text_offset_y) + text_hei);
+                        }  // align on top
                         GFXColor temp_marker_color(text_color_r, text_color_g, text_color_b, links[i]->alpha);
                         text_marker.color = static_cast<ImU32>(temp_marker_color);
                         text_marker.SetPos(text_pos_x, text_pos_y);
                         if (links[i]->pythonfile != "#" && text_marker.GetText().find("XXX") != 0) {
                             GFXColor tmpbg(text_marker.background_color);
-                            bool automatte = (0 == tmpbg.a);
+                            bool     automatte = (0 == tmpbg.a);
                             if (automatte) {
-                                GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
+                                GFXColor temp_background_color(0, 0, 0, base_text_background_alpha);
                                 text_marker.background_color = static_cast<ImU32>(temp_background_color);
                             }
                             text_marker.Draw(text_marker.GetText(), 0, true, false, automatte);
                             text_marker.background_color = static_cast<ImU32>(tmpbg);
                         }
                         GFXEnable(TEXTURE0);
-                    }                     //if draw_text
+                    }  // if draw_text
                 }
             }
         }
-        //if link
-        //for i
-    }     //enable_markers
+        // if link
+        // for i
+    }  // enable_markers
 
-    const bool draw_borders = configuration().graphics.bases.draw_location_borders;
+    const bool draw_borders  = configuration().graphics.bases.draw_location_borders;
     const bool debug_markers = configuration().graphics.bases.enable_debug_markers;
     if (draw_borders || debug_markers) {
         float x, y, text_wid, text_hei;
-        //get offset from config;
+        // get offset from config;
         const float text_offset_x = configuration().graphics.bases.location_marker_text_offset_x_flt;
         const float text_offset_y = configuration().graphics.bases.location_marker_text_offset_y_flt;
-        for (size_t i = 0; i < links.size(); i++) {          //loop through all links and draw a marker for each
+        for (size_t i = 0; i < links.size(); i++) {  // loop through all links and draw a marker for each
             if (links[i]) {
-                //Debug marker
+                // Debug marker
                 if (debug_markers) {
-                    //compute label position
-                    x = (links[i]->x + (links[i]->wid / 2));                         //get the center of the location
-                    y = (links[i]->y + (links[i]->hei / 2));                         //get the center of the location
+                    // compute label position
+                    x = (links[i]->x + (links[i]->wid / 2));  // get the center of the location
+                    y = (links[i]->y + (links[i]->hei / 2));  // get the center of the location
                     TextPlane text_marker;
                     text_marker.SetText(links[i]->index);
-                    text_marker.setResolution(
-                            static_cast<float>(configuration().graphics.bases.max_width),
-                            static_cast<float>(configuration().graphics.bases.max_height));
+                    text_marker.setResolution(static_cast<float>(configuration().graphics.bases.max_width),
+                                              static_cast<float>(configuration().graphics.bases.max_height));
                     int marker_ox = 0, marker_oy = 0;
                     baseLetterboxOffset(marker_ox, marker_oy);
                     text_marker.setOffset(static_cast<float>(marker_ox), static_cast<float>(marker_oy));
-                    text_marker.GetCharSize(text_wid, text_hei);                       //get average charactersize
-                    float text_pos_x = x + text_offset_x;                              //align right ...
-                    float text_pos_y = y + text_offset_y + text_hei;                     //...and on top
-                    text_wid = text_wid * links[i]->text.length()
-                            * 0.25;                             //calc ~width of text (=multiply the average characterwidth with the number of characters)
-                    if ((text_pos_x + text_offset_x + text_wid)
-                            >= 1) {                               //check right screenborder
+                    text_marker.GetCharSize(text_wid, text_hei);        // get average charactersize
+                    float text_pos_x = x + text_offset_x;               // align right ...
+                    float text_pos_y = y + text_offset_y + text_hei;    //...and on top
+                    text_wid =
+                            text_wid * links[i]->text.length() * 0.25;  // calc ~width of text (=multiply the average
+                                                                        // characterwidth with the number of characters)
+                    if ((text_pos_x + text_offset_x + text_wid) >= 1) {  // check right screenborder
                         text_pos_x = (x - fabs(text_offset_x) - text_wid);
-                    }                               //align left
-                    if ((text_pos_y + text_offset_y)
-                            >= 1) {                                        //check upper screenborder
+                    }  // align left
+                    if ((text_pos_y + text_offset_y) >= 1) {  // check upper screenborder
                         text_pos_y = (y - fabs(text_offset_y));
-                    }                                      //align on bottom
-                    if ((text_pos_y + text_offset_y - text_hei)
-                            <= kYLower) {                         //check lower screenborder
+                    }  // align on bottom
+                    if ((text_pos_y + text_offset_y - text_hei) <= kYLower) {  // check lower screenborder
                         text_pos_y = (y + fabs(text_offset_y) + text_hei);
-                    }                               //align on top
+                    }  // align on top
                     if (enable_markers) {
                         text_pos_y += text_hei;
                     }
@@ -597,16 +592,16 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
 
                     GFXDisable(TEXTURE0);
                     GFXColor tmpbg(text_marker.background_color);
-                    bool automatte = (0 == tmpbg.a);
+                    bool     automatte = (0 == tmpbg.a);
                     if (automatte) {
-                        GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
+                        GFXColor temp_background_color(0, 0, 0, base_text_background_alpha);
                         text_marker.background_color = static_cast<ImU32>(temp_background_color);
                     }
                     text_marker.Draw(text_marker.GetText(), 0, true, false, automatte);
                     text_marker.background_color = static_cast<ImU32>(tmpbg);
                     GFXEnable(TEXTURE0);
                 }
-                //link border
+                // link border
                 GFXColor4f(1, 1, 1, 1);
                 Vector c1(links[i]->x, links[i]->y, 0);
                 Vector c3(links[i]->wid + c1.i, links[i]->hei + c1.j, 0);
@@ -614,25 +609,21 @@ void BaseInterface::Room::Draw(BaseInterface *base) const {
                 Vector c4(c3.i, c1.j, 0);
                 GFXDisable(TEXTURE0);
                 const float verts[5 * 3] = {
-                        c1.x, c1.y, c1.z,
-                        c2.x, c2.y, c2.z,
-                        c3.x, c3.y, c3.z,
-                        c4.x, c4.y, c4.z,
-                        c1.x, c1.y, c1.z,
+                        c1.x, c1.y, c1.z, c2.x, c2.y, c2.z, c3.x, c3.y, c3.z, c4.x, c4.y, c4.z, c1.x, c1.y, c1.z,
                 };
                 GFXDraw(GFXLINESTRIP, verts, 5);
                 GFXEnable(TEXTURE0);
             }
         }
-        //if link
-        //for i
-    }     //if draw_borders
+        // if link
+        // for i
+    }  // if draw_borders
 }
 
 static std::vector<BaseInterface::Room::BaseTalk *> active_talks;
 
 BaseInterface::Room::BaseTalk::BaseTalk(const std::string &msg, const std::string &ind, bool only_one)
-        : BaseObj(ind), curchar(0), curtime(0), message(msg) {
+    : BaseObj(ind), curchar(0), curtime(0), message(msg) {
     if (only_one) {
         active_talks.clear();
     }
@@ -640,7 +631,7 @@ BaseInterface::Room::BaseTalk::BaseTalk(const std::string &msg, const std::strin
 }
 
 void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
-    const int base_max_width = configuration().graphics.bases.max_width;
+    const int base_max_width  = configuration().graphics.bases.max_width;
     const int base_max_height = configuration().graphics.bases.max_height;
     if (base_max_width > 0 && base_max_height > 0) {
         text.setResolution(static_cast<float>(base_max_width), static_cast<float>(base_max_height));
@@ -649,10 +640,10 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         text.setOffset(static_cast<float>(ox), static_cast<float>(oy));
     }
     const float base_text_background_alpha = configuration().graphics.bases.text_background_alpha_flt;
-    GFXColor tmpbg(text.background_color);
-    bool automatte = (0 == tmpbg.a);
+    GFXColor    tmpbg(text.background_color);
+    bool        automatte = (0 == tmpbg.a);
     if (automatte) {
-        GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
+        GFXColor temp_background_color(0, 0, 0, base_text_background_alpha);
         text.background_color = static_cast<ImU32>(temp_background_color);
     }
     if (!automatte && text.GetText().empty()) {
@@ -663,16 +654,13 @@ void BaseInterface::Room::BaseText::Draw(BaseInterface *base) {
         GFXColor tmp_color(text.background_color);
         GFXColorf(tmp_color);
         const float verts[4 * 3] = {
-                posx, hei, 0.0f,
-                wid, hei, 0.0f,
-                wid, posy, 0.0f,
-                posx, posy, 0.0f,
+                posx, hei, 0.0f, wid, hei, 0.0f, wid, posy, 0.0f, posx, posy, 0.0f,
         };
         GFXDraw(GFXQUAD, verts, 4);
     } else {
         text.Draw(text.GetText(), 0, true, false, automatte);
     }
-    text.background_color= static_cast<ImU32>(tmpbg);
+    text.background_color = static_cast<ImU32>(tmpbg);
 }
 
 void RunPython(const char *filnam) {
@@ -684,7 +672,7 @@ void RunPython(const char *filnam) {
         if (filnam[0] == '#' && filnam[1] != '\0') {
             ::Python::reseterrors();
             VegaPyRunString(filnam);
-//            ::Python::reseterrors();
+            //            ::Python::reseterrors();
         } else {
             CompileRunPython(filnam);
         }
@@ -697,7 +685,7 @@ void BaseInterface::Room::BasePython::Draw(BaseInterface *base) {
         timeleft = 0;
         VS_LOG(debug, "Running python script...");
         RunPython(this->pythonfile.c_str());
-        return;         //do not do ANYTHING with 'this' after the previous statement...
+        return;  // do not do ANYTHING with 'this' after the previous statement...
     }
 }
 
@@ -712,19 +700,17 @@ void BaseInterface::Room::BasePython::Relink(const std::string &python) {
 }
 
 void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
-    //FIXME: should be called from draw()
+    // FIXME: should be called from draw()
     if (hastalked) {
         return;
     }
-    curtime += GetElapsedTime() / getTimeCompression();
-    const float delay = configuration().graphics.text_delay_flt;
-    if ((std::find(active_talks.begin(), active_talks.end(),
-            this) == active_talks.end())
-            || (curchar >= message.size() && curtime > ((delay * message.size()) + 2))) {
+    curtime           += GetElapsedTime() / getTimeCompression();
+    const float delay  = configuration().graphics.text_delay_flt;
+    if ((std::find(active_talks.begin(), active_talks.end(), this) == active_talks.end()) ||
+        (curchar >= message.size() && curtime > ((delay * message.size()) + 2))) {
         curtime = 0;
-        std::vector<BaseObj *>::iterator ind = std::find(base->rooms[base->curroom]->objs.begin(),
-                base->rooms[base->curroom]->objs.end(),
-                this);
+        std::vector<BaseObj *>::iterator ind =
+                std::find(base->rooms[base->curroom]->objs.begin(), base->rooms[base->curroom]->objs.end(), this);
         if (ind != base->rooms[base->curroom]->objs.end()) {
             *ind = nullptr;
         }
@@ -734,7 +720,7 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
         }
         base->othtext.SetText("");
         delete this;
-        return;         //do not do ANYTHING with 'this' after the previous statement...
+        return;  // do not do ANYTHING with 'this' after the previous statement...
     }
     if (curchar < message.size()) {
         const float inbetween = configuration().graphics.text_speed_flt;
@@ -749,10 +735,8 @@ void BaseInterface::Room::BaseTalk::Draw(BaseInterface *base) {
 int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) const {
     for (size_t i = 0; i < links.size(); i++) {
         if (links[i]) {
-            if (x >= links[i]->x
-                    && x <= (links[i]->x + links[i]->wid)
-                    && y >= links[i]->y
-                    && y <= (links[i]->y + links[i]->hei)) {
+            if (x >= links[i]->x && x <= (links[i]->x + links[i]->wid) && y >= links[i]->y &&
+                y <= (links[i]->y + links[i]->hei)) {
                 return i;
             }
         }
@@ -760,14 +744,10 @@ int BaseInterface::Room::MouseOver(BaseInterface *base, float x, float y) const 
     return -1;
 }
 
-static constexpr ImGuiWindowFlags window_flags =
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoBackground |
-        ImGuiWindowFlags_NoDecoration;   // makes it transparent
+static constexpr ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                                                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+                                                 ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground |
+                                                 ImGuiWindowFlags_NoDecoration;  // makes it transparent
 
 BaseInterface *BaseInterface::CurrentBase = nullptr;
 
@@ -805,7 +785,7 @@ void base_main_loop() {
     }
 
     // ImGui Init
-    ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
+    ImGui_ApplyPendingFontSize();  // apply a pending font-size change before laying out
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
@@ -819,14 +799,15 @@ void base_main_loop() {
         ImGui::SetNextWindowSize(ImVec2((float)vw, (float)vh), ImGuiCond_Always);
     } else {
         ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-        ImGui::SetNextWindowSize(ImVec2((float)configuration().graphics.resolution_x,
-                                       (float)configuration().graphics.resolution_y), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(
+                ImVec2((float)configuration().graphics.resolution_x, (float)configuration().graphics.resolution_y),
+                ImGuiCond_Always);
     }
     ImGui::Begin("main_window", nullptr, window_flags);
 
     // hide the mouse cursor, we got a cooler one!
     ImGui::SetMouseCursor(ImGuiMouseCursor_None);
-    
+
     bool refresh_result = RefreshGUI();
 
     // ImGui End Frame
@@ -843,7 +824,7 @@ void base_main_loop() {
         restore_main_loop();
     } else {
         GFXEndScene();
-        micro_sleep(1000);
+        micro_sleep(1'000);
     }
     BaseComputer::dirty = false;
 }
@@ -860,96 +841,101 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
     } else {
 #ifdef BASE_MAKER
         if (state == WS_MOUSE_UP) {
-            char  input[201];
+            char        input[201];
             std::string input_prompt;
             if (button == WS_RIGHT_BUTTON) {
-                input_prompt = "Please create a file named stdin.txt and type\nin the sprite file that you wish to use.";
+                input_prompt =
+                        "Please create a file named stdin.txt and type\nin the sprite file that you wish to use.";
             } else if (button == WS_MIDDLE_BUTTON) {
                 input_prompt =
-                    "Please create a file named stdin.txt and type\nin the type of room followed by arguments for the room followed by text in quotations:\n1 ROOM# \"TEXT\"\n2 \"TEXT\"\n3 vector<MODES>.size vector<MODES> \"TEXT\"";
+                        "Please create a file named stdin.txt and type\nin the type of room followed by arguments for "
+                        "the room followed by text in quotations:\n1 ROOM# \"TEXT\"\n2 \"TEXT\"\n3 vector<MODES>.size "
+                        "vector<MODES> \"TEXT\"";
             } else {
                 return;
             }
-#ifdef _WIN32
-            int ret = MessageBox( NULL, input_prompt.c_str(), "Input", MB_OKCANCEL );
-#else
-            // 2020-10-29 stephengtuggy: Leaving this here, since it is obviously intended for real-time user interaction when in BASE_MAKER mode
-            printf( "\n%s\n", input_prompt.c_str() );
+#    ifdef _WIN32
+            int ret = MessageBox(NULL, input_prompt.c_str(), "Input", MB_OKCANCEL);
+#    else
+            // 2020-10-29 stephengtuggy: Leaving this here, since it is obviously intended for real-time user
+            // interaction when in BASE_MAKER mode
+            printf("\n%s\n", input_prompt.c_str());
             int ret = 1;
-#endif
+#    endif
             int index;
             int rmtyp;
             if (ret == 1) {
                 if (button == WS_RIGHT_BUTTON) {
-#ifdef _WIN32
-                    FILE *fp = VSFileSystem::vs_open( "stdin.txt", "rt" );
-#else
+#    ifdef _WIN32
+                    FILE *fp = VSFileSystem::vs_open("stdin.txt", "rt");
+#    else
                     FILE *fp = stdin;
-#endif
-                    VSFileSystem::vs_fscanf( fp, "%200s", input );
-#ifdef _WIN32
-                    VSFileSystem::vs_close( fp );
-#endif
+#    endif
+                    VSFileSystem::vs_fscanf(fp, "%200s", input);
+#    ifdef _WIN32
+                    VSFileSystem::vs_close(fp);
+#    endif
                 } else if (button == WS_MIDDLE_BUTTON && makingstate == 0) {
-                    int   i;
-#ifdef _WIN32
-                    FILE *fp = VSFileSystem::vs_open( "stdin.txt", "rt" );
-#else
+                    int i;
+#    ifdef _WIN32
+                    FILE *fp = VSFileSystem::vs_open("stdin.txt", "rt");
+#    else
                     FILE *fp = stdin;
-#endif
-                    VSFileSystem::vs_fscanf( fp, "%d", &rmtyp );
-                    switch (rmtyp)
-                    {
-                    case 1:
-                        links.push_back( new Goto( "linkind", "link" ) );
-                        VSFileSystem::vs_fscanf( fp, "%d", &vega_dynamic_cast_ptr<Goto>(links.back())->index );
-                        break;
-                    case 2:
-                        links.push_back( new Launch( "launchind", "launch" ) );
-                        break;
-                    case 3:
-                        links.push_back( new Comp( "compind", "comp" ) );
-                        VSFileSystem::vs_fscanf( fp, "%d", &index );
-                        for (i = 0; i < index && ( !VSFileSystem::vs_feof( fp ) ); i++) {
-                            VSFileSystem::vs_fscanf( fp, "%d", &ret );
-                            vega_dynamic_cast_ptr<Comp>(links.back())->modes.push_back( static_cast<DisplayMode>(ret) );
-                        }
-                        break;
-                    default:
-#ifdef _WIN32
-                        VSFileSystem::vs_close( fp );
-                        MessageBox( NULL, "warning: invalid basemaker option", "Error", MB_OK );
-#endif
-                        // 2020-10-29 stephengtuggy: Leaving this here, since it is obviously intended for real-time user interaction when in BASE_MAKER mode
-                        printf( "warning: invalid basemaker option: %d", rmtyp );
-                        return;
+#    endif
+                    VSFileSystem::vs_fscanf(fp, "%d", &rmtyp);
+                    switch (rmtyp) {
+                        case 1:
+                            links.push_back(new Goto("linkind", "link"));
+                            VSFileSystem::vs_fscanf(fp, "%d", &vega_dynamic_cast_ptr<Goto>(links.back())->index);
+                            break;
+                        case 2:
+                            links.push_back(new Launch("launchind", "launch"));
+                            break;
+                        case 3:
+                            links.push_back(new Comp("compind", "comp"));
+                            VSFileSystem::vs_fscanf(fp, "%d", &index);
+                            for (i = 0; i < index && (!VSFileSystem::vs_feof(fp)); i++) {
+                                VSFileSystem::vs_fscanf(fp, "%d", &ret);
+                                vega_dynamic_cast_ptr<Comp>(links.back())
+                                        ->modes.push_back(static_cast<DisplayMode>(ret));
+                            }
+                            break;
+                        default:
+#    ifdef _WIN32
+                            VSFileSystem::vs_close(fp);
+                            MessageBox(NULL, "warning: invalid basemaker option", "Error", MB_OK);
+#    endif
+                            // 2020-10-29 stephengtuggy: Leaving this here, since it is obviously intended for real-time
+                            // user interaction when in BASE_MAKER mode
+                            printf("warning: invalid basemaker option: %d", rmtyp);
+                            return;
                     }
-                    VSFileSystem::vs_fscanf( fp, "%200s", input );
+                    VSFileSystem::vs_fscanf(fp, "%200s", input);
                     input[200] = input[199] = '\0';
-                    links.back()->text = string( input );
-#ifdef _WIN32
-                    VSFileSystem::vs_close( fp );
-#endif
+                    links.back()->text      = string(input);
+#    ifdef _WIN32
+                    VSFileSystem::vs_close(fp);
+#    endif
                 }
                 if (button == WS_RIGHT_BUTTON) {
-                    input[200] = input[199] = '\0';
+                    input[200] = input[199]        = '\0';
                     const std::string input_string = input;
-                    const std::string kTex = "tex";
-                    objs.push_back( new BaseVSSprite( input_string, kTex ) );
-                    vega_dynamic_cast_ptr<BaseVSSprite>(objs.back())->texfile = string( input );
-                    vega_dynamic_cast_ptr<BaseVSSprite>(objs.back())->spr.SetPosition( x, y );
+                    const std::string kTex         = "tex";
+                    objs.push_back(new BaseVSSprite(input_string, kTex));
+                    vega_dynamic_cast_ptr<BaseVSSprite>(objs.back())->texfile = string(input);
+                    vega_dynamic_cast_ptr<BaseVSSprite>(objs.back())->spr.SetPosition(x, y);
                 } else if (button == WS_MIDDLE_BUTTON && makingstate == 0) {
                     links.back()->x   = x;
                     links.back()->y   = y;
                     links.back()->wid = 0;
                     links.back()->hei = 0;
-                    makingstate = 1;
+                    makingstate       = 1;
                 } else if (button == WS_MIDDLE_BUTTON && makingstate == 1) {
-                    links.back()->wid = x-links.back()->x;
+                    links.back()->wid = x - links.back()->x;
                     if (links.back()->wid < 0) {
                         links.back()->wid = -links.back()->wid;
                     }
-                    links.back()->hei = y-links.back()->y;
+                    links.back()->hei = y - links.back()->y;
                     if (links.back()->hei < 0) {
                         links.back()->hei = -links.back()->hei;
                     }
@@ -963,9 +949,10 @@ void BaseInterface::Room::Click(BaseInterface *base, float x, float y, int butto
             while (count++ < links.size()) {
                 Link *curlink = links[base->curlinkindex++ % links.size()];
                 if (curlink) {
-                    const std::pair<int,int> pair = CalculateAbsoluteXY(curlink->x + curlink->wid/2, curlink->y + curlink->hei/2);
+                    const std::pair<int, int> pair =
+                            CalculateAbsoluteXY(curlink->x + curlink->wid / 2, curlink->y + curlink->hei / 2);
                     const int x = pair.first;
-                    const int y = pair.second;                    
+                    const int y = pair.second;
                     winsys_warp_pointer(x, y);
                     PassiveMouseOverWin(x, y);
                     break;
@@ -982,13 +969,14 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
     // -1..1 coordinates. A mouse in the letterbox bars is not over the base.
     float x = 0.0f, y = 0.0f;
     if (!mouseToBaseNormalized(xbeforecalc, ybeforecalc, x, y)) {
-        x = 2.0f; y = 2.0f;   // far outside [-1,1] -> MouseOver finds no link
+        x = 2.0f;
+        y = 2.0f;  // far outside [-1,1] -> MouseOver finds no link
     }
 
-    int i = rooms[curroom]->MouseOver(this,
-            x,
-            y); //FIXME Whatever this is, it shouldn't be named just "i"; & possibly should be size_t
-    Room::Link *link = nullptr;
+    int i = rooms[curroom]->MouseOver(
+            this, x,
+            y);  // FIXME Whatever this is, it shouldn't be named just "i"; & possibly should be size_t
+    Room::Link *link    = nullptr;
     Room::Link *hotlink = nullptr;
     if (i >= 0) {
         link = rooms[curroom]->links[i];
@@ -1005,8 +993,8 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
     if (link) {
         link->MouseMove(this, x, y, getMouseButtonMask());
     }
-    lastmouseindex = i;
-    static float overcolor[4] = {1, .666666667, 0, 1};
+    lastmouseindex                = i;
+    static float overcolor[4]     = {1, .666666667, 0, 1};
     static float inactivecolor[4] = {0, 1, 0, 1};
     if (link) {
         curtext.SetText(link->text);
@@ -1015,19 +1003,21 @@ void BaseInterface::MouseOver(int xbeforecalc, int ybeforecalc) {
     }
     if (link && link->pythonfile != "#") {
         const GFXColor temp_link_color(overcolor[0], overcolor[1], overcolor[2], overcolor[3]);
-        curtext.color = static_cast<ImU32>(temp_link_color);
+        curtext.color     = static_cast<ImU32>(temp_link_color);
         mousePointerStyle = MOUSE_POINTER_HOVER;
     } else {
         const GFXColor temp_inactive_color(inactivecolor[0], inactivecolor[1], inactivecolor[2], inactivecolor[3]);
-        curtext.color = static_cast<ImU32>(temp_inactive_color);
+        curtext.color     = static_cast<ImU32>(temp_inactive_color);
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     }
-    const bool draw_always = configuration().graphics.bases.location_marker_draw_always;
+    const bool  draw_always      = configuration().graphics.bases.location_marker_draw_always;
     const float defined_distance = configuration().graphics.bases.location_marker_distance_flt;
     if (!draw_always) {
         for (i = 0; i < static_cast<int>(rooms[curroom]->links.size()); i++) {
-            const float cx = (rooms[curroom]->links[i]->x + (rooms[curroom]->links[i]->wid / 2)); //get the x center of the location
-            const float cy = (rooms[curroom]->links[i]->y + (rooms[curroom]->links[i]->hei / 2)); //get the y center of the location
+            const float cx            = (rooms[curroom]->links[i]->x +
+                              (rooms[curroom]->links[i]->wid / 2));  // get the x center of the location
+            const float cy            = (rooms[curroom]->links[i]->y +
+                              (rooms[curroom]->links[i]->hei / 2));  // get the y center of the location
             const float dist_cur2link = sqrt(std::pow((cx - x), 2) + std::pow((cy - y), 2));
             if (dist_cur2link < defined_distance) {
                 rooms[curroom]->links[i]->alpha = (1 - (dist_cur2link / defined_distance));
@@ -1060,7 +1050,7 @@ void BaseInterface::ClickWin(int button, int state, int x, int y) {
 #else
             UpgradingInfo::
 #endif
-            ProcessMouseClick(button, state, x, y);
+                    ProcessMouseClick(button, state, x, y);
         } else {
             CurrentBase->Click(x, y, button, state);
         }
@@ -1083,7 +1073,7 @@ void BaseInterface::PassiveMouseOverWin(int x, int y) {
 #else
             UpgradingInfo::
 #endif
-            ProcessMousePassive(x, y);
+                    ProcessMousePassive(x, y);
         } else {
             CurrentBase->MouseOver(x, y);
         }
@@ -1102,7 +1092,7 @@ void BaseInterface::ActiveMouseOverWin(int x, int y) {
 #else
             UpgradingInfo::
 #endif
-            ProcessMouseActive(x, y);
+                    ProcessMouseActive(x, y);
         } else {
             CurrentBase->MouseOver(x, y);
         }
@@ -1130,67 +1120,66 @@ void BaseInterface::GotoLink(int linknum) {
     othtext.SetText("");
     if (static_cast<int>(rooms.size()) > linknum && linknum >= 0) {
         curlinkindex = 0;
-        curroom = linknum;
+        curroom      = linknum;
         curtext.SetText(rooms[curroom]->deftext);
         mousePointerStyle = MOUSE_POINTER_NORMAL;
     } else {
 #ifndef BASE_MAKER
-        VS_LOG_AND_FLUSH(fatal,
-                (boost::format("\nWARNING: base room #%d tried to go to an invalid index: #%d") % curroom
-                        % linknum));
+        VS_LOG_AND_FLUSH(fatal, (boost::format("\nWARNING: base room #%d tried to go to an invalid index: #%d") %
+                                 curroom % linknum));
         assert(0);
 #else
         while (rooms.size() <= linknum) {
-            rooms.push_back( new Room() );
+            rooms.push_back(new Room());
             char roomnum[50];
-            sprintf( roomnum, "Room #%d", linknum );
+            sprintf(roomnum, "Room #%d", linknum);
             rooms.back()->deftext = roomnum;
         }
-        GotoLink( linknum );
+        GotoLink(linknum);
 #endif
     }
 }
 
 BaseInterface::~BaseInterface() {
 #ifdef BASE_MAKER
-    FILE *fp = VSFileSystem::vs_open( "bases/NEW_BASE" BASE_EXTENSION, "wt" );
+    FILE *fp = VSFileSystem::vs_open("bases/NEW_BASE" BASE_EXTENSION, "wt");
     if (fp) {
-        EndXML( fp );
-        VSFileSystem::vs_close( fp );
+        EndXML(fp);
+        VSFileSystem::vs_close(fp);
     }
 #endif
     CurrentBase = nullptr;
     restore_main_loop();
-    for (auto & room : rooms) {
+    for (auto &room : rooms) {
         delete room;
     }
 }
 
 void base_main_loop();
-int shiftup(int);
+int  shiftup(int);
 
 static void base_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, int y) {
-    //Set modifiers
-    unsigned int amods = 0;
-    amods |= (mod & (WSK_MOD_LSHIFT | WSK_MOD_RSHIFT)) ? KB_MOD_SHIFT : 0;
-    amods |= (mod & (WSK_MOD_LCTRL | WSK_MOD_RCTRL)) ? KB_MOD_CTRL : 0;
-    amods |= (mod & (WSK_MOD_LALT | WSK_MOD_RALT)) ? KB_MOD_ALT : 0;
+    // Set modifiers
+    unsigned int amods  = 0;
+    amods              |= (mod & (WSK_MOD_LSHIFT | WSK_MOD_RSHIFT)) ? KB_MOD_SHIFT : 0;
+    amods              |= (mod & (WSK_MOD_LCTRL | WSK_MOD_RCTRL)) ? KB_MOD_CTRL : 0;
+    amods              |= (mod & (WSK_MOD_LALT | WSK_MOD_RALT)) ? KB_MOD_ALT : 0;
     setActiveModifiers(amods);
-    unsigned int shiftedch =
-            ((WSK_MOD_LSHIFT == (mod & WSK_MOD_LSHIFT)) || (WSK_MOD_RSHIFT == (mod & WSK_MOD_RSHIFT))) ? shiftup(ch)
-                    : ch;
+    unsigned int shiftedch = ((WSK_MOD_LSHIFT == (mod & WSK_MOD_LSHIFT)) || (WSK_MOD_RSHIFT == (mod & WSK_MOD_RSHIFT)))
+                                     ? shiftup(ch)
+                                     : ch;
     if (BaseInterface::CurrentBase && !BaseInterface::CurrentBase->CallComp) {
-        //Flush buffer
+        // Flush buffer
         if (base_keyboard_queue.size()) {
             BaseInterface::ProcessKeyboardBuffer();
         }
-        //Send directly to base interface handlers
+        // Send directly to base interface handlers
         BaseInterface::CurrentBase->Key(shiftedch, amods, release, x, y);
     } else
-        //Queue keystroke
-    if (!release) {
-        base_keyboard_queue.push_back(shiftedch);
-    }
+        // Queue keystroke
+        if (!release) {
+            base_keyboard_queue.push_back(shiftedch);
+        }
 }
 
 void BaseInterface::InitCallbacks() {
@@ -1198,32 +1187,32 @@ void BaseInterface::InitCallbacks() {
     winsys_set_mouse_func(ClickWin);
     winsys_set_motion_func(ActiveMouseOverWin);
     winsys_set_passive_motion_func(PassiveMouseOverWin);
-    CurrentBase = this;
-    CallComp = false;
+    CurrentBase                       = this;
+    CallComp                          = false;
     const bool simulate_while_at_base = configuration().physics.simulate_while_docked;
     if (!(simulate_while_at_base || _Universe->numPlayers() > 1)) {
         GFXLoop(base_main_loop);
     }
 }
 
-BaseInterface::Room::Talk::Talk(const std::string &ind, const std::string &pythonfile) : BaseInterface::Room::Link(
-    ind, pythonfile), index(-1), curroom{-1} {
+BaseInterface::Room::Talk::Talk(const std::string &ind, const std::string &pythonfile)
+    : BaseInterface::Room::Link(ind, pythonfile), index(-1), curroom{-1} {
 #ifndef BASE_MAKER
-    gameMessage last;
-    int i = 0;
+    gameMessage         last;
+    int                 i = 0;
     vector<std::string> who;
-    string newmsg;
-    string newsound;
+    string              newmsg;
+    string              newsound;
     who.push_back("bar");
     while ((mission->msgcenter->last(i++, last, who))) {
-        newmsg = last.message;
-        newsound = "";
+        newmsg                  = last.message;
+        newsound                = "";
         string::size_type first = newmsg.find_first_of("[");
         {
             string::size_type last = newmsg.find_first_of("]");
             if (first != string::npos && (first + 1) < newmsg.size()) {
                 newsound = newmsg.substr(first + 1, last - first - 1);
-                newmsg = newmsg.substr(0, first);
+                newmsg   = newmsg.substr(0, first);
             }
         }
         this->say.push_back(newmsg);
@@ -1233,10 +1222,10 @@ BaseInterface::Room::Talk::Talk(const std::string &ind, const std::string &pytho
 }
 
 double compute_light_dot(Unit *base, Unit *un) {
-    StarSystem *ss = base->getStarSystem();
-    double ret = -1;
-    Unit *st;
-    Unit *base_owner = nullptr;
+    StarSystem *ss  = base->getStarSystem();
+    double      ret = -1;
+    Unit       *st;
+    Unit       *base_owner = nullptr;
     if (ss) {
         _Universe->pushActiveStarSystem(ss);
         un_iter ui = ss->getUnitList().createIterator();
@@ -1244,18 +1233,18 @@ double compute_light_dot(Unit *base, Unit *un) {
             if (st->isPlanet()) {
                 if (vega_dynamic_cast_ptr<Planet>(st)->hasLights()) {
 #ifdef VS_DEBUG
-                    QVector v1  = ( un->Position()-base->Position() ).Normalize();
-                    QVector v2  = ( st->Position()-base->Position() ).Normalize();
+                    QVector v1 = (un->Position() - base->Position()).Normalize();
+                    QVector v2 = (st->Position() - base->Position()).Normalize();
 
-                    double  dot = v1.Dot( v2 );
+                    double dot = v1.Dot(v2);
                     if (dot > ret) {
                         VS_LOG(debug, (boost::format("dot %1%") % dot));
                         ret = dot;
                     }
 #endif
                 } else {
-                    un_iter ui = vega_dynamic_cast_ptr<Planet>(st)->satellites.createIterator();
-                    Unit *ownz = nullptr;
+                    un_iter ui   = vega_dynamic_cast_ptr<Planet>(st)->satellites.createIterator();
+                    Unit   *ownz = nullptr;
                     for (; (ownz = *ui); ++ui) {
                         if (ownz == base) {
                             base_owner = st;
@@ -1291,23 +1280,23 @@ const char *compute_time_of_day(Unit *base, Unit *un) {
 
 extern void ExecuteDirector();
 
-BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
-        curtext(vs_config->getColor("Base_Text_Color_Foreground", GFXColor(0, 1, 0, 1)),
-                vs_config->getColor("Base_Text_Color_Background", GFXColor(0, 0, 0, 1))),
-        othtext(vs_config->getColor("Fixer_Text_Color_Foreground", GFXColor(1, 1, .5, 1)),
-                vs_config->getColor("FixerTextColor_Background", GFXColor(0, 0, 0, 1))) {
-    CurrentBase = this;
-    CallComp = false;
-    lastmouseindex = 0;
-    enabledj = true;
-    createdbase = true;
-    midloop = false;
+BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un)
+    : curtext(vs_config->getColor("Base_Text_Color_Foreground", GFXColor(0, 1, 0, 1)),
+              vs_config->getColor("Base_Text_Color_Background", GFXColor(0, 0, 0, 1))),
+      othtext(vs_config->getColor("Fixer_Text_Color_Foreground", GFXColor(1, 1, .5, 1)),
+              vs_config->getColor("FixerTextColor_Background", GFXColor(0, 0, 0, 1))) {
+    CurrentBase         = this;
+    CallComp            = false;
+    lastmouseindex      = 0;
+    enabledj            = true;
+    createdbase         = true;
+    midloop             = false;
     terminate_scheduled = false;
-    createdmusic = -1;
-    caller = un;
-    curroom = 0;
-    curlinkindex = 0;
-    this->baseun = base;
+    createdmusic        = -1;
+    caller              = un;
+    curroom             = 0;
+    curlinkindex        = 0;
+    this->baseun        = base;
     float x, y;
     curtext.GetCharSize(x, y);
     curtext.SetCharSize(x * 2, y * 2);
@@ -1331,17 +1320,15 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
         }
     }
     if (!rooms.size()) {
-        VS_LOG(error, (boost::format("ERROR: there are no rooms in basefile \"%1%%2%%3%\" ...\n")
-                % basefile
-                % compute_time_of_day(base, un)
-                % BASE_EXTENSION));
+        VS_LOG(error, (boost::format("ERROR: there are no rooms in basefile \"%1%%2%%3%\" ...\n") % basefile %
+                       compute_time_of_day(base, un) % BASE_EXTENSION));
         rooms.push_back(new Room());
         rooms.back()->deftext = "ERROR: No rooms specified...";
 #ifndef BASE_MAKER
         rooms.back()->objs.push_back(new Room::BaseShip(-1, 0, 0, 0, 0, -1, 0, 1, 0, QVector(0, 0, 2), "default room"));
         BaseUtil::Launch(0, "default room", -1, -1, 1, 2, "ERROR: No rooms specified... - Launch");
         BaseUtil::Comp(0, "default room", 0, -1, 1, 2, "ERROR: No rooms specified... - Computer",
-                "Cargo Upgrade Info ShipDealer News Missions");
+                       "Cargo Upgrade Info ShipDealer News Missions");
 #endif
     }
     GotoLink(0);
@@ -1352,7 +1339,7 @@ BaseInterface::BaseInterface(const char *basefile, Unit *base, Unit *un) :
     }
 }
 
-//Need this for NEW_GUI.  Can't ifdef it out because it needs to link.
+// Need this for NEW_GUI.  Can't ifdef it out because it needs to link.
 void InitCallbacks(void) {
     if (BaseInterface::CurrentBase) {
         BaseInterface::CurrentBase->InitCallbacks();
@@ -1371,12 +1358,13 @@ void CurrentBaseUnitSet(Unit *un) {
         BaseInterface::CurrentBase->caller.SetUnit(un);
     }
 }
-//end NEW_GUI.
+
+// end NEW_GUI.
 
 void BaseInterface::Room::Comp::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
-        Unit *un = base->caller.GetUnit();
+        Unit *un     = base->caller.GetUnit();
         Unit *baseun = base->baseun.GetUnit();
         if (un && baseun) {
             base->CallComp = true;
@@ -1385,8 +1373,8 @@ void BaseInterface::Room::Comp::Click(BaseInterface *base, float x, float y, int
             bc->init();
             bc->run();
 #else
-            UpgradeCompInterface( un, baseun, modes );
-#endif //NEW_GUI
+            UpgradeCompInterface(un, baseun, modes);
+#endif  // NEW_GUI
         }
     }
 }
@@ -1395,8 +1383,8 @@ void BaseInterface::Terminate() {
     if (midloop) {
         terminate_scheduled = true;
     } else {
-        Unit *un = caller.GetUnit();
-        int cpt = _Universe->whichPlayerStarship(un);
+        Unit *un  = caller.GetUnit();
+        int   cpt = _Universe->whichPlayerStarship(un);
         if (un && cpt >= 0) {
             vector<string> vec;
             vec.push_back(string());
@@ -1414,13 +1402,14 @@ void BaseInterface::Room::Launch::Click(BaseInterface *base, float x, float y, i
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
         const bool auto_undock_var = configuration().physics.automatic_undock;
-        bool auto_undock = auto_undock_var;
-        Unit *bas = base->baseun.GetUnit();
-        Unit *playa = base->caller.GetUnit();
+        bool       auto_undock     = auto_undock_var;
+        Unit      *bas             = base->baseun.GetUnit();
+        Unit      *playa           = base->caller.GetUnit();
 
         if (playa && bas) {
-            if (((playa->name == "eject") || (playa->name == "ejecting") || (playa->name == "pilot")
-                    || (playa->name == "Pilot") || (playa->name == "Eject")) && (bas->faction == playa->faction)) {
+            if (((playa->name == "eject") || (playa->name == "ejecting") || (playa->name == "pilot") ||
+                 (playa->name == "Pilot") || (playa->name == "Eject")) &&
+                (bas->faction == playa->faction)) {
                 playa->name = "return_to_cockpit";
             }
         }
@@ -1447,19 +1436,17 @@ float aynrand(const float min, const float max) {
 }
 
 QVector randyVector(const float min, const float max) {
-    return QVector(aynrand(min, max),
-            aynrand(min, max),
-            aynrand(min, max));
+    return QVector(aynrand(min, max), aynrand(min, max), aynrand(min, max));
 }
 
 void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, int button, int state) {
     if (state == WS_MOUSE_UP) {
         Link::Click(base, x, y, button, state);
-        Unit *bas = base->baseun.GetUnit();
+        Unit *bas   = base->baseun.GetUnit();
         Unit *playa = base->caller.GetUnit();
         if (playa && bas) {
             if (playa->name == "return_to_cockpit") {
-                playa->name = "ejecting";
+                playa->name   = "ejecting";
                 Vector tmpvel = bas->Velocity * -1;
                 if (tmpvel.MagnitudeSquared() < .00001) {
                     tmpvel = randyVector(-(bas->rSize()), bas->rSize()).Cast();
@@ -1468,8 +1455,8 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
                     }
                 }
                 tmpvel.Normalize();
-                playa->SetPosAndCumPos(bas->Position() + tmpvel * 1.5 * bas->rSize()
-                        + randyVector(-.5 * bas->rSize(), .5 * bas->rSize()));
+                playa->SetPosAndCumPos(bas->Position() + tmpvel * 1.5 * bas->rSize() +
+                                       randyVector(-.5 * bas->rSize(), .5 * bas->rSize()));
                 playa->SetAngularVelocity(bas->AngularVelocity);
                 playa->SetOwner(bas);
                 const float velmul = configuration().physics.eject_cargo_speed_flt;
@@ -1483,8 +1470,8 @@ void BaseInterface::Room::Eject::Click(BaseInterface *base, float x, float y, in
             }
             PlayDockingSound(5);
             playa->EjectCargo(static_cast<unsigned int>(-1));
-            if ((playa->name == "return_to_cockpit") || (playa->name == "ejecting") || (playa->name == "eject")
-                    || (playa->name == "Eject") || (playa->name == "Pilot") || (playa->name == "pilot")) {
+            if ((playa->name == "return_to_cockpit") || (playa->name == "ejecting") || (playa->name == "eject") ||
+                (playa->name == "Eject") || (playa->name == "Pilot") || (playa->name == "pilot")) {
                 playa->Kill();
             }
         }
@@ -1505,10 +1492,10 @@ void BaseInterface::Room::Talk::Click(BaseInterface *base, float x, float y, int
         if (index >= 0) {
             delete base->rooms[curroom]->objs[index];
             base->rooms[curroom]->objs[index] = nullptr;
-            index = -1;
+            index                             = -1;
             base->othtext.SetText("");
         } else if (say.size()) {
-            curroom = base->curroom;
+            curroom               = base->curroom;
             const size_t sayindex = VegaRandom::Instance().RandomSizeTLessThan(say.size());
             base->rooms[curroom]->objs.push_back(new Room::BaseTalk(say[sayindex], "currentmsg", true));
             if (soundfiles[sayindex].size() > 0) {
@@ -1517,7 +1504,7 @@ void BaseInterface::Room::Talk::Click(BaseInterface *base, float x, float y, int
                     VS_LOG(error, (boost::format("\nCan't find the sound file %1%\n") % soundfiles[sayindex].c_str()));
                 } else {
                     AUDStartPlaying(sound);
-                    AUDDeleteSound(sound);                     //won't actually toast it until it stops
+                    AUDDeleteSound(sound);  // won't actually toast it until it stops
                 }
             }
         } else {
@@ -1537,7 +1524,7 @@ void BaseInterface::Room::Link::Click(BaseInterface *base, float x, float y, int
         }
     }
     if (state == WS_MOUSE_UP) {
-        //For now, the same. Eventually, we'll want click & double-click
+        // For now, the same. Eventually, we'll want click & double-click
         if (eventMask & ClickEvent) {
             static std::string evtype("click");
             BaseUtil::SetMouseEventData(evtype, x, y, buttonmask);
@@ -1554,10 +1541,10 @@ void BaseInterface::Room::Link::Click(BaseInterface *base, float x, float y, int
 }
 
 void BaseInterface::Room::Link::MouseMove(::BaseInterface *base, float x, float y, int buttonmask) {
-    //Compiling Python code each mouse movement == Bad idea!!!
-    //If this support is needed we will need to use Python-C++ inheritance.
-    //Like the Execute() method of AI and Mission classes.
-    //Even better idea: Rewrite the entire BaseInterface python interface.
+    // Compiling Python code each mouse movement == Bad idea!!!
+    // If this support is needed we will need to use Python-C++ inheritance.
+    // Like the Execute() method of AI and Mission classes.
+    // Even better idea: Rewrite the entire BaseInterface python interface.
     if (eventMask & MoveEvent) {
         static std::string evtype("move");
         BaseUtil::SetMouseEventData(evtype, x, y, buttonmask);
@@ -1592,29 +1579,27 @@ struct BaseColor {
 
 static void AnimationDraw() {
 #ifdef RENDER_FROM_TEXTURE
-    static StreamTexture T( 512, 256, NEAREST, NULL );
-    BaseColor( *data )[512] = reinterpret_cast< BaseColor(*)[512] > ( T.Map() );
-    bool counter = false;
-    for (int i = 0; i < 256; ++i)
+    static StreamTexture T(512, 256, NEAREST, NULL);
+    BaseColor(*data)[512] = reinterpret_cast<BaseColor(*)[512]>(T.Map());
+    bool counter          = false;
+    for (int i = 0; i < 256; ++i) {
         for (int j = 0; j < 512; ++j) {
             data[i][j].r = VegaRandom::Instance().RandomUChar();
             data[i][j].g = VegaRandom::Instance().RandomUChar();
             data[i][j].b = VegaRandom::Instance().RandomUChar();
             data[i][j].a = VegaRandom::Instance().RandomUChar();
         }
+    }
     T.UnMap();
     T.MakeActive();
-    GFXTextureEnv( 0, GFXREPLACETEXTURE );
-    GFXEnable( TEXTURE0 );
-    GFXDisable( TEXTURE1 );
-    GFXDisable( CULLFACE );
+    GFXTextureEnv(0, GFXREPLACETEXTURE);
+    GFXEnable(TEXTURE0);
+    GFXDisable(TEXTURE1);
+    GFXDisable(CULLFACE);
     const float verts[4 * (3 + 2)] = {
-        -1, -1, 0, 0, 0,
-         1, -1, 0, 1, 0,
-         1,  1, 0, 1, 1,
-        -1,  1, 0, 0, 1,
+            -1, -1, 0, 0, 0, 1, -1, 0, 1, 0, 1, 1, 0, 1, 1, -1, 1, 0, 0, 1,
     };
-    GFXDraw( GFXQUAD, verts, 4, 3, 0, 2 );
+    GFXDraw(GFXQUAD, verts, 4, 3, 0, 2);
 #endif
 }
 
@@ -1654,9 +1639,9 @@ void BaseInterface::Draw() {
 
     if (curtext.GetText().find("XXX") != 0) {
         GFXColor tmpbg(curtext.background_color);
-        bool automatte = (0 == tmpbg.a);
+        bool     automatte = (0 == tmpbg.a);
         if (automatte) {
-            GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
+            GFXColor temp_background_color(0, 0, 0, base_text_background_alpha);
             curtext.background_color = static_cast<ImU32>(temp_background_color);
         }
         curtext.Draw(curtext.GetText(), 0, true, false, automatte);
@@ -1666,20 +1651,20 @@ void BaseInterface::Draw() {
 
     if (othtext.GetText().length() != 0) {
         GFXColor tmpbg(othtext.background_color);
-        bool automatte = (0 == tmpbg.a);
+        bool     automatte = (0 == tmpbg.a);
         if (automatte) {
-            GFXColor temp_background_color( 0, 0, 0, base_text_background_alpha );
+            GFXColor temp_background_color(0, 0, 0, base_text_background_alpha);
             othtext.background_color = static_cast<ImU32>(temp_background_color);
         }
         othtext.Draw(othtext.GetText(), 0, true, false, automatte);
-        othtext.background_color= static_cast<ImU32>(tmpbg);
+        othtext.background_color = static_cast<ImU32>(tmpbg);
     }
     SetupViewport();
     EndGUIFrame(mousePointerStyle);
 
     glViewport(0, 0, native_resolution_x, native_resolution_y);
 
-    Unit *un = caller.GetUnit();
+    Unit *un   = caller.GetUnit();
     Unit *base = baseun.GetUnit();
     if (un && (!base)) {
         VS_LOG(error, "Error: Base NULL");
@@ -1692,7 +1677,7 @@ void BaseInterface::Draw() {
         Terminate();
     }
 
-    //Commit audio scene status to renderer
+    // Commit audio scene status to renderer
     if (g_game.sound_enabled) {
         Audio::SceneManager::getSingleton()->commit();
     }
@@ -1709,7 +1694,7 @@ void BaseInterface::ProcessKeyboardBuffer() {
     if (CurrentBase) {
         if (!CurrentBase->CallComp) {
             for (std::vector<unsigned int>::iterator it = base_keyboard_queue.begin(); it != base_keyboard_queue.end();
-                    ++it) {
+                 ++it) {
                 CurrentBase->Key(*it, 0, false, 0, 0);
                 CurrentBase->Key(*it, 0, true, 0, 0);
             }

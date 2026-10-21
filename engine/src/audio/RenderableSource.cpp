@@ -31,13 +31,12 @@
 //
 
 #include "RenderableSource.h"
+
 #include "src/vs_logging.h"
 
 namespace Audio {
 
-RenderableSource::RenderableSource(Source *_source) :
-        source(_source) {
-}
+RenderableSource::RenderableSource(Source *_source) : source(_source) {}
 
 RenderableSource::~RenderableSource() {
     // Just in case.
@@ -91,4 +90,4 @@ void RenderableSource::seek(Timestamp time) {
     seekImpl(time);
 }
 
-};
+};  // namespace Audio

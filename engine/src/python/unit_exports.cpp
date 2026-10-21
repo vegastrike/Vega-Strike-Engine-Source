@@ -26,30 +26,29 @@
  */
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
-#if BOOST_VERSION != 102800
+
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102'800
 typedef boost::python::dict BoostPythonDictionary;
 #else
-#include <boost/python/objects.hpp>
+#    include <boost/python/objects.hpp>
 typedef boost::python::dictionary BoostPythonDictionary;
 #endif
 
-#include "src/python/python_class.h"
-
-#include "cmd/container.h"
 #include <string>
-#include "src/python/init.h"
-#include "gfx_generic/vec.h"
-#include "cmd/unit_generic.h"
 
-#include "src/universe_util.h"
-#include "cmd/unit_util.h"
-#include "root_generic/faction_generic.h"
 #include "cmd/ai/fire.h"
-
-#include "src/python/unit_wrapper_class.h"
+#include "cmd/container.h"
+#include "cmd/unit_generic.h"
+#include "cmd/unit_util.h"
+#include "gfx_generic/vec.h"
+#include "root_generic/faction_generic.h"
+#include "src/python/init.h"
+#include "src/python/python_class.h"
 #include "src/python/unit_from_to_python.h"
+#include "src/python/unit_wrapper_class.h"
+#include "src/universe_util.h"
 extern void ExportUnitFIRST(class boost::python::class_builder<class UnitWrapper> &Class);
 extern void ExportUnitSECOND(boost::python::class_builder<UnitWrapper> &Class);
 extern void ExportUnitTHIRD(boost::python::class_builder<UnitWrapper> &Class);
@@ -59,4 +58,3 @@ void ExportUnit(boost::python::class_builder<UnitWrapper> &Class) {
     ExportUnitSECOND(Class);
     ExportUnitTHIRD(Class);
 }
-

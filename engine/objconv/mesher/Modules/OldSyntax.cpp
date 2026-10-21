@@ -25,10 +25,10 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../PrecompiledHeaders/Converter.h"
-#include "../Converter.h"
+#include <cstdlib>  // Needed for atoi
 
-#include <cstdlib> // Needed for atoi 
+#include "../Converter.h"
+#include "../PrecompiledHeaders/Converter.h"
 
 using namespace std;
 using namespace Converter;

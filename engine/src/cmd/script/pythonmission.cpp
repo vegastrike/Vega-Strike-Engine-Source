@@ -27,21 +27,23 @@
 
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
 
 #include <Python.h>
-#include <math.h>
+
 #include "pythonmission.h"
-#include "src/python/python_compile.h"
+
+#include <math.h>
 #include <string>
-#include "src/python/init.h"
 
-#include "src/vs_logging.h"
+#include <boost/version.hpp>
+
 #include "cmd/container.h"
+#include "src/python/init.h"
+#include "src/python/python_compile.h"
+#include "src/vs_logging.h"
 
-PythonMissionBaseClass::PythonMissionBaseClass() {
-}
+PythonMissionBaseClass::PythonMissionBaseClass() {}
 
 void PythonMissionBaseClass::Destructor() {
     delete this;
@@ -56,16 +58,12 @@ PythonMissionBaseClass::~PythonMissionBaseClass() {
     VS_LOG(warning, (boost::format("BASE Destruct called. If called from C++ this is death %x") % this));
 }
 
-void PythonMissionBaseClass::Execute() {
-}
+void PythonMissionBaseClass::Execute() {}
 
-void PythonMissionBaseClass::callFunction(std::string) {
-}
+void PythonMissionBaseClass::callFunction(std::string) {}
 
 std::string PythonMissionBaseClass::Pickle() {
     return std::string();
 }
 
-void PythonMissionBaseClass::UnPickle(std::string s) {
-}
-
+void PythonMissionBaseClass::UnPickle(std::string s) {}

@@ -27,14 +27,15 @@
 
 
 #include "gfx_generic/sphere.h"
+
 #include "gfx/ani_texture.h"
-#include "src/vegastrike.h"
-#include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
-#include "vegadisk/vsfilesystem.h"
 #include "root_generic/xml_support.h"
+#include "src/config_xml.h"
+#include "src/vegastrike.h"
+#include "vegadisk/vsfilesystem.h"
 #ifndef M_PI
-#define M_PI (3.1415926536F)
+#    define M_PI (3.1415926536F)
 #endif
 #include "gfx/camera.h"
 
@@ -42,7 +43,7 @@ using XMLSupport::tostring;
 
 void SphereMesh::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
     static GFXColor spherecol = vs_config->getColor("planet_ambient");
-    GFXColor tmpcol(0, 0, 0, 1);
+    GFXColor        tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     GFXLightContextAmbient(spherecol);
     Mesh::ProcessDrawQueue(whichpass, whichdrawqueue, zsort, sortctr);
@@ -58,7 +59,7 @@ void SphereMesh::SelectCullFace(int whichdrawqueue) {
 
 void CityLights::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
     const GFXColor citycol(1, 1, 1, 1);
-    GFXColor tmpcol(0, 0, 0, 1);
+    GFXColor       tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     GFXLightContextAmbient(citycol);
     Mesh::ProcessDrawQueue(whichpass, whichdrawqueue, zsort, sortctr);

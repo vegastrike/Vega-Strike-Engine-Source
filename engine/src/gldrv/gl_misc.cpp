@@ -30,20 +30,20 @@
 #define GL_MISC_CPP
 #include "gl_globals.h"
 #undef GL_MISC_CPP
-#include "src/vegastrike.h"
-#include "src/gfxlib.h"
-#include "root_generic/vs_globals.h"
-#include "gl_light.h"
-#include "winsys.h"
-#include "root_generic/options.h"
 #include "configuration/configuration.h"
+#include "gl_light.h"
+#include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
+#include "src/gfxlib.h"
+#include "src/vegastrike.h"
+#include "winsys.h"
 
 
 // disable clientside draw for debugging purposes
-//#define NODRAW 1
+// #define NODRAW 1
 
 // cached gl state
-static unsigned int s_array_buffer = 0;
+static unsigned int s_array_buffer         = 0;
 static unsigned int s_element_array_buffer = 0;
 
 bool GFXMultiTexAvailable() {
@@ -52,19 +52,18 @@ bool GFXMultiTexAvailable() {
 
 void GFXCircle(float x, float y, float wid, float hei) {
     float segmag =
-            (Vector(wid * configuration().graphics.resolution_x, 0,
-                    0)
-                    - Vector(static_cast<double>(wid) * configuration().graphics.resolution_x * cos(2.0 * M_PI / 360.0),
-                            static_cast<double>(hei) * configuration().graphics.resolution_y * sin(2.0 * M_PI / 360.0),
-                            0)).Magnitude();
-    int accuracy = (int) (360.0f * configuration().graphics.circle_accuracy_flt * (1.0f < segmag ? 1.0f : segmag));
+            (Vector(wid * configuration().graphics.resolution_x, 0, 0) -
+             Vector(static_cast<double>(wid) * configuration().graphics.resolution_x * cos(2.0 * M_PI / 360.0),
+                    static_cast<double>(hei) * configuration().graphics.resolution_y * sin(2.0 * M_PI / 360.0), 0))
+                    .Magnitude();
+    int accuracy = (int)(360.0f * configuration().graphics.circle_accuracy_flt * (1.0f < segmag ? 1.0f : segmag));
     if (accuracy < 4) {
         accuracy = 4;
     }
     float iaccuracy = 1.0f / accuracy;
 
     std::vector<float> verts(3 * (accuracy + 1));
-    float *v = &verts[0];
+    float             *v = &verts[0];
     for (int i = 0; i <= accuracy; i++) {
         *v++ = x + wid * cos(i * 2 * M_PI * iaccuracy);
         *v++ = y + hei * sin(i * 2 * M_PI * iaccuracy);
@@ -73,8 +72,8 @@ void GFXCircle(float x, float y, float wid, float hei) {
     GFXDraw(GFXLINESTRIP, &verts[0], accuracy + 1);
 }
 
-static void /*GFXDRVAPI*/ GFXDrawSetup(POLYTYPE type, const float data[], int vnum,
-        int vsize, int csize, int tsize0, int tsize1) {
+static void /*GFXDRVAPI*/ GFXDrawSetup(POLYTYPE type, const float data[], int vnum, int vsize, int csize, int tsize0,
+                                       int tsize1) {
     assert(data && vsize);
     int stride = sizeof(float) * (vsize + csize + tsize0 + tsize1);
 
@@ -108,8 +107,8 @@ static void /*GFXDRVAPI*/ GFXDrawSetup(POLYTYPE type, const float data[], int vn
     }
 }
 
-static void /*GFXDRVAPI*/ GFXDrawCleanup(POLYTYPE type, const float data[], int vnum,
-        int vsize, int csize, int tsize0, int tsize1) {
+static void /*GFXDRVAPI*/ GFXDrawCleanup(POLYTYPE type, const float data[], int vnum, int vsize, int csize, int tsize0,
+                                         int tsize1) {
     if (gl_options.Multitexture) {
         if (tsize1) {
             glClientActiveTextureARB_p(GL_TEXTURE1);
@@ -133,8 +132,7 @@ static void /*GFXDRVAPI*/ GFXDrawCleanup(POLYTYPE type, const float data[], int 
     glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void /*GFXDRVAPI*/ GFXDraw(POLYTYPE type, const float data[], int vnum,
-        int vsize, int csize, int tsize0, int tsize1) {
+void /*GFXDRVAPI*/ GFXDraw(POLYTYPE type, const float data[], int vnum, int vsize, int csize, int tsize0, int tsize1) {
 #ifndef NODRAW
     if (vnum <= 0) {
         return;
@@ -148,9 +146,8 @@ void /*GFXDRVAPI*/ GFXDraw(POLYTYPE type, const float data[], int vnum,
 #endif
 }
 
-void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type,
-        const float data[], int vnum, const unsigned char indices[], int nelem,
-        int vsize, int csize, int tsize0, int tsize1) {
+void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type, const float data[], int vnum, const unsigned char indices[],
+                                   int nelem, int vsize, int csize, int tsize0, int tsize1) {
 #ifndef NODRAW
     if (vnum <= 0 || nelem <= 0) {
         return;
@@ -167,9 +164,8 @@ void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type,
 #endif
 }
 
-void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type,
-        const float data[], int vnum, const unsigned short indices[], int nelem,
-        int vsize, int csize, int tsize0, int tsize1) {
+void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type, const float data[], int vnum, const unsigned short indices[],
+                                   int nelem, int vsize, int csize, int tsize0, int tsize1) {
 #ifndef NODRAW
     if (vnum <= 0 || nelem <= 0) {
         return;
@@ -186,9 +182,8 @@ void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type,
 #endif
 }
 
-void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type,
-        const float data[], int vnum, const unsigned int indices[], int nelem,
-        int vsize, int csize, int tsize0, int tsize1) {
+void /*GFXDRVAPI*/ GFXDrawElements(POLYTYPE type, const float data[], int vnum, const unsigned int indices[], int nelem,
+                                   int vsize, int csize, int tsize0, int tsize1) {
 #ifndef NODRAW
     if (vnum <= 0 || nelem <= 0) {
         return;
@@ -224,20 +219,19 @@ void /*GFXDRVAPI*/ GFXBindElementBuffer(unsigned int element_data) {
 }
 
 void /*GFXDRVAPI*/ GFXBeginScene() {
-    GFXLoadIdentity(MODEL);     //bad this should instead load the cached view matrix
+    GFXLoadIdentity(MODEL);  // bad this should instead load the cached view matrix
     light_rekey_frame();
 }
 
 void /*GFXDRVAPI*/ GFXEndScene() {
 #ifdef NODRAW
-    GFXClear( GFXTRUE );
+    GFXClear(GFXTRUE);
 #endif
 }
 
 void /*GFXDRVAPI*/ GFXClear(const GFXBOOL colorbuffer, const GFXBOOL depthbuffer, const GFXBOOL stencilbuffer) {
-    glClear((colorbuffer ? GL_COLOR_BUFFER_BIT : 0)
-            | (depthbuffer ? GL_DEPTH_BUFFER_BIT : 0)
-            | (stencilbuffer ? GL_STENCIL_BUFFER_BIT : 0));
+    glClear((colorbuffer ? GL_COLOR_BUFFER_BIT : 0) | (depthbuffer ? GL_DEPTH_BUFFER_BIT : 0) |
+            (stencilbuffer ? GL_STENCIL_BUFFER_BIT : 0));
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename) {
@@ -245,16 +239,16 @@ GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename) {
 }
 
 static float last_factor = 0;
-static float last_units = 0;
+static float last_units  = 0;
 
 void GFXGetPolygonOffset(float *factor, float *units) {
     *factor = last_factor;
-    *units = last_units;
+    *units  = last_units;
 }
 
 void /*GFXDRVAPI*/ GFXPolygonOffset(float factor, float units) {
     last_factor = factor;
-    last_units = units;
+    last_units  = units;
     if (!factor && !units) {
         glDisable(GL_POLYGON_OFFSET_FILL);
         glDisable(GL_POLYGON_OFFSET_POINT);
@@ -316,7 +310,7 @@ void /*GFXDRVAPI*/ GFXColorf(const GFXColor &col) {
 
 GFXColor GFXColorf() {
     float col[4];
-    glGetFloatv(GL_CURRENT_COLOR, col);     //It's best this way, we don't use it much, anyway.
+    glGetFloatv(GL_CURRENT_COLOR, col);  // It's best this way, we don't use it much, anyway.
     return GFXColor(col[0], col[1], col[2], col[3]);
 }
 
@@ -324,9 +318,9 @@ GFXColor GFXColorf() {
 //HELL slow on the TNT...we can't have it
 void /*GFXDRVAPI*/ GFXBlendColor( const GFXColor &col )
 {
-#ifndef WIN32
+#    ifndef WIN32
     glBlendColor( col.r, col.g, col.b, col.a );
-#endif
+#    endif
 }
 #endif
 
@@ -359,7 +353,8 @@ void GFXDeleteList(int list) {
 void GFXSubwindow(int x, int y, int xsize, int ysize) {
     glViewport(0, 0, native_resolution_x, native_resolution_y);
     glScissor(x, y, xsize, ysize);
-    if (x == 0 && y == 0 && xsize == configuration().graphics.resolution_x && ysize == configuration().graphics.resolution_y) {
+    if (x == 0 && y == 0 && xsize == configuration().graphics.resolution_x &&
+        ysize == configuration().graphics.resolution_y) {
         glDisable(GL_SCISSOR_TEST);
     } else {
         glEnable(GL_SCISSOR_TEST);
@@ -367,15 +362,14 @@ void GFXSubwindow(int x, int y, int xsize, int ysize) {
 }
 
 void GFXSubwindow(float x, float y, float xsize, float ysize) {
-    GFXSubwindow(int(x * configuration().graphics.resolution_x), int(y * configuration().graphics.resolution_y), int(xsize * configuration().graphics.resolution_x),
-            int(ysize * configuration().graphics.resolution_y));
+    GFXSubwindow(int(x * configuration().graphics.resolution_x), int(y * configuration().graphics.resolution_y),
+                 int(xsize * configuration().graphics.resolution_x),
+                 int(ysize * configuration().graphics.resolution_y));
 }
 
 Vector GFXDeviceToEye(int x, int y) {
     float l, r, b, t, n, f;
     GFXGetFrustumVars(true, &l, &r, &b, &t, &n, &f);
     return Vector((l + (r - l) * float(x) / configuration().graphics.resolution_x),
-            (t + (b - t) * float(y) / configuration().graphics.resolution_y),
-            n);
+                  (t + (b - t) * float(y) / configuration().graphics.resolution_y), n);
 }
-

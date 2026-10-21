@@ -26,23 +26,23 @@
  */
 
 
-#include <gtest/gtest.h>
-#include "configuration/game_config.h"
-#include "src/vs_logging.h"
-
-#include <string>
 #include <chrono>
+#include <string>
 
-#include "gfxlib_struct.h"
-#include "src/vega_cast_utils.h"
+#include <gtest/gtest.h>
+
 #include "configuration/configuration.h"
+#include "configuration/game_config.h"
 #include "gfx/quadsquare.h"
+#include "gfxlib_struct.h"
 #include "resource/random_utils.h"
 #include "root_generic/lin_time.h"
+#include "src/vega_cast_utils.h"
+#include "src/vs_logging.h"
 // #include "src/resizable.h"
 #include "gfx_generic/tvector.h"
 
-constexpr int kIterations = 100000;
+constexpr int kIterations = 100'000;
 
 TEST(QVector, Cast_Performance) {
     VS_LOG_AND_FLUSH(important_info, "Starting QVector Cast() performance test");
@@ -56,7 +56,9 @@ TEST(QVector, Cast_Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished QVector Cast() performance test. Took %1% second(s) for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info,
+                     (boost::format("Finished QVector Cast() performance test. Took %1% second(s) for %2% iterations") %
+                      duration % kIterations));
 }
 
 TEST(Vector, Cast_Performance) {
@@ -71,18 +73,20 @@ TEST(Vector, Cast_Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished Vector Cast() performance test. Took %1% second(s) for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info,
+                     (boost::format("Finished Vector Cast() performance test. Took %1% second(s) for %2% iterations") %
+                      duration % kIterations));
 }
 
 class B {
 public:
-    B() = default;
+    B()          = default;
     virtual ~B() = default;
 };
 
 class C : public B {
 public:
-    C() = default;
+    C()           = default;
     ~C() override = default;
 };
 
@@ -94,11 +98,14 @@ TEST(vega_dynamic_cast_ptr, Performance) {
         // ReSharper disable once CppDFAUnusedValue
         // ReSharper disable once CppDeclaratorNeverUsed
         // ReSharper disable once CppDFAUnreadVariable
-        const B * child_class_instance_as_parent_class = vega_dynamic_cast_ptr<B>(&child_class_instance);
+        const B *child_class_instance_as_parent_class = vega_dynamic_cast_ptr<B>(&child_class_instance);
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished vega_dynamic_cast_ptr performance test. Took %1% second(s) for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(
+            important_info,
+            (boost::format("Finished vega_dynamic_cast_ptr performance test. Took %1% second(s) for %2% iterations") %
+             duration % kIterations));
 }
 
 TEST(vega_dynamic_const_cast_ptr, Performance) {
@@ -109,11 +116,15 @@ TEST(vega_dynamic_const_cast_ptr, Performance) {
         // ReSharper disable once CppDFAUnusedValue
         // ReSharper disable once CppDeclaratorNeverUsed
         // ReSharper disable once CppDFAUnreadVariable
-        const B * child_class_instance_as_parent_class = vega_dynamic_const_cast_ptr<const B>(&child_class_instance);
+        const B *child_class_instance_as_parent_class = vega_dynamic_const_cast_ptr<const B>(&child_class_instance);
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished vega_dynamic_const_cast_ptr performance test. Took %1% second(s) for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(
+            important_info,
+            (boost::format(
+                     "Finished vega_dynamic_const_cast_ptr performance test. Took %1% second(s) for %2% iterations") %
+             duration % kIterations));
 }
 
 TEST(configuration, const_Performance) {
@@ -127,12 +138,14 @@ TEST(configuration, const_Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished configuration()...._dbl test. Took %1% second(s) for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info,
+                     (boost::format("Finished configuration()...._dbl test. Took %1% second(s) for %2% iterations") %
+                      duration % kIterations));
 }
 
 TEST(configuration, static_optional_Performance) {
     VS_LOG_AND_FLUSH(important_info, "Starting test of static optional setting variable");
-    const double start_time = realTime();
+    const double                   start_time = realTime();
     static boost::optional<double> setting{};
     for (int i = 0; i < kIterations; ++i) {
         if (setting == boost::none) {
@@ -141,12 +154,15 @@ TEST(configuration, static_optional_Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable. Took %1% second(s) for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(
+            important_info,
+            (boost::format("Finished test of static optional setting variable. Took %1% second(s) for %2% iterations") %
+             duration % kIterations));
 }
 
 TEST(configuration, Performance_of_static_optional_with_get) {
     VS_LOG_AND_FLUSH(important_info, "Starting test of static optional setting variable with .get()");
-    const double start_time = realTime();
+    const double                   start_time = realTime();
     static boost::optional<double> setting{};
     for (int i = 0; i < kIterations; ++i) {
         if (setting == boost::none) {
@@ -156,16 +172,19 @@ TEST(configuration, Performance_of_static_optional_with_get) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable with .get(). Took %1% second(s) for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished test of static optional setting variable with .get(). "
+                                                    "Took %1% second(s) for %2% iterations") %
+                                      duration % kIterations));
 }
 
 TEST(LoadConfig, Sanity) {
     // Test without configuration
-    const bool default_bool = vega_config::GetGameConfig().GetBool("test.boolean_variable", false);
-    const int32_t default_int_32_t = vega_config::GetGameConfig().GetInt32("test.int_variable", 1);
-    const float default_float = vega_config::GetGameConfig().GetFloat("test.float_variable", 7.8F);
-    const std::string default_string = vega_config::GetGameConfig().GetString("test.string_variable", "World");
-    const std::string default_escaped_string = vega_config::GetGameConfig().GetEscapedString("test.default_escaped_string", "#00FF00Hi\\\r\\\nthere!#000000");
+    const bool        default_bool           = vega_config::GetGameConfig().GetBool("test.boolean_variable", false);
+    const int32_t     default_int_32_t       = vega_config::GetGameConfig().GetInt32("test.int_variable", 1);
+    const float       default_float          = vega_config::GetGameConfig().GetFloat("test.float_variable", 7.8F);
+    const std::string default_string         = vega_config::GetGameConfig().GetString("test.string_variable", "World");
+    const std::string default_escaped_string = vega_config::GetGameConfig().GetEscapedString(
+            "test.default_escaped_string", "#00FF00Hi\\\r\\\nthere!#000000");
     EXPECT_FALSE(default_bool);
     EXPECT_EQ(default_int_32_t, 1);
     EXPECT_FLOAT_EQ(default_float, 7.8F);
@@ -177,11 +196,12 @@ TEST(LoadConfig, Sanity) {
     vega_config::GetGameConfig().LoadGameConfig(filename);
 
     // Test again
-    const bool test_bool = vega_config::GetGameConfig().GetBool("test.boolean_variable", false);
-    const int test_int32_t = vega_config::GetGameConfig().GetInt32("test.int_variable", 1);
-    const float test_float = vega_config::GetGameConfig().GetFloat("test.float_variable", 7.8F);
-    const std::string test_string = vega_config::GetGameConfig().GetString("test.string_variable", "World");
-    const std::string escaped_string = vega_config::GetGameConfig().GetEscapedString("test.escaped_string_variable", "#00FF00Hi\\\r\\\nthere!#000000");
+    const bool        test_bool      = vega_config::GetGameConfig().GetBool("test.boolean_variable", false);
+    const int         test_int32_t   = vega_config::GetGameConfig().GetInt32("test.int_variable", 1);
+    const float       test_float     = vega_config::GetGameConfig().GetFloat("test.float_variable", 7.8F);
+    const std::string test_string    = vega_config::GetGameConfig().GetString("test.string_variable", "World");
+    const std::string escaped_string = vega_config::GetGameConfig().GetEscapedString("test.escaped_string_variable",
+                                                                                     "#00FF00Hi\\\r\\\nthere!#000000");
     EXPECT_TRUE(test_bool);
     EXPECT_EQ(test_int32_t, 15) << "Expected 15 but got " << test_int32_t;
     EXPECT_FLOAT_EQ(test_float, 4.2F) << "Expected 4.2 but got " << test_float;
@@ -189,12 +209,16 @@ TEST(LoadConfig, Sanity) {
     EXPECT_EQ(escaped_string, "#FF0000Hello\r\nthere!#000000");
 
     // Test subsection functionality
-    const bool subsection_bool = vega_config::GetGameConfig().GetBool("test.subsection.subsection_boolean_variable", false);
+    const bool subsection_bool =
+            vega_config::GetGameConfig().GetBool("test.subsection.subsection_boolean_variable", false);
     const int32_t subsection_int_32_t =
             vega_config::GetGameConfig().GetInt32("test.subsection.subsection_int_variable", 2);
-    const float subsection_float = vega_config::GetGameConfig().GetFloat("test.subsection.subsection_float_variable", 8.9F);
-    const std::string subsection_string = vega_config::GetGameConfig().GetString("test.subsection.subsection_string_variable", "World");
-    const std::string subsection_escaped_string = vega_config::GetGameConfig().GetEscapedString("test.subsection.subsection_escaped_string_variable", "#00FF00Hi\\\r\\\nthere!#000000");
+    const float subsection_float =
+            vega_config::GetGameConfig().GetFloat("test.subsection.subsection_float_variable", 8.9F);
+    const std::string subsection_string =
+            vega_config::GetGameConfig().GetString("test.subsection.subsection_string_variable", "World");
+    const std::string subsection_escaped_string = vega_config::GetGameConfig().GetEscapedString(
+            "test.subsection.subsection_escaped_string_variable", "#00FF00Hi\\\r\\\nthere!#000000");
     EXPECT_TRUE(subsection_bool);
     EXPECT_EQ(subsection_int_32_t, 15) << "Expected 15 but got " << subsection_int_32_t;
     EXPECT_FLOAT_EQ(subsection_float, 4.2F) << "Expected 4.2 but got " << subsection_float;
@@ -202,11 +226,12 @@ TEST(LoadConfig, Sanity) {
     EXPECT_EQ(subsection_escaped_string, "#FF0000Hello\r\nthere!#000000");
 
     // Another main section
-    const bool test_bool2 = vega_config::GetGameConfig().GetBool("test2.boolean_variable2", true);
-    const int32_t test_int32_t_2 = vega_config::GetGameConfig().GetInt32("test2.int_variable2", 3);
-    const float test_float2 = vega_config::GetGameConfig().GetFloat("test2.float_variable2", 10.0F);
-    const std::string test_string2 = vega_config::GetGameConfig().GetString("test2.string_variable2", "World");
-    const std::string escaped_string2 = vega_config::GetGameConfig().GetEscapedString("test2.escaped_string_variable2", "#00FF00Hi\\\r\\\nthere!#000000");
+    const bool        test_bool2      = vega_config::GetGameConfig().GetBool("test2.boolean_variable2", true);
+    const int32_t     test_int32_t_2  = vega_config::GetGameConfig().GetInt32("test2.int_variable2", 3);
+    const float       test_float2     = vega_config::GetGameConfig().GetFloat("test2.float_variable2", 10.0F);
+    const std::string test_string2    = vega_config::GetGameConfig().GetString("test2.string_variable2", "World");
+    const std::string escaped_string2 = vega_config::GetGameConfig().GetEscapedString("test2.escaped_string_variable2",
+                                                                                      "#00FF00Hi\\\r\\\nthere!#000000");
     EXPECT_TRUE(test_bool2);
     EXPECT_EQ(test_int32_t_2, 15) << "Expected 15 but got " << test_int32_t_2;
     EXPECT_FLOAT_EQ(test_float2, 4.2F) << "Expected 4.2 but got " << test_float2;
@@ -222,25 +247,27 @@ TEST(GameConfig, GetFloat_Performance) {
     }
     const double end_time = realTime();
     const double duration = end_time - start_time;
-    VS_LOG_AND_FLUSH(important_info, (boost::format("Finished GetFloat performance test. Took %1% second(s) for %2% iterations") % duration % kIterations));
+    VS_LOG_AND_FLUSH(important_info,
+                     (boost::format("Finished GetFloat performance test. Took %1% second(s) for %2% iterations") %
+                      duration % kIterations));
 }
 
 TEST(GFXQuadList, GFXVertex) {
     constexpr int kNumberOfVertices = 4;
-    GFXVertex vertices_original[kNumberOfVertices]{};
-    GFXVertex vertices_memcpy[kNumberOfVertices]{};
-    GFXVertex vertices_no_memcpy[kNumberOfVertices]{};
-    GFXVertex vertices_copy_constructor[kNumberOfVertices]{};
+    GFXVertex     vertices_original[kNumberOfVertices]{};
+    GFXVertex     vertices_memcpy[kNumberOfVertices]{};
+    GFXVertex     vertices_no_memcpy[kNumberOfVertices]{};
+    GFXVertex     vertices_copy_constructor[kNumberOfVertices]{};
 
-    for (auto & vertex : vertices_original) {
-        vertex.s = randomDouble();
-        vertex.t = randomDouble();
-        vertex.i = randomDouble();
-        vertex.j = randomDouble();
-        vertex.k = randomDouble();
-        vertex.x = randomDouble();
-        vertex.y = randomDouble();
-        vertex.z = randomDouble();
+    for (auto &vertex : vertices_original) {
+        vertex.s  = randomDouble();
+        vertex.t  = randomDouble();
+        vertex.i  = randomDouble();
+        vertex.j  = randomDouble();
+        vertex.k  = randomDouble();
+        vertex.x  = randomDouble();
+        vertex.y  = randomDouble();
+        vertex.z  = randomDouble();
         vertex.tx = randomDouble();
         vertex.ty = randomDouble();
         vertex.tz = randomDouble();
@@ -248,14 +275,14 @@ TEST(GFXQuadList, GFXVertex) {
     }
 
     for (int i = 0; i < kNumberOfVertices; ++i) {
-        vertices_no_memcpy[i].s = vertices_original[i].s;
-        vertices_no_memcpy[i].t = vertices_original[i].t;
-        vertices_no_memcpy[i].i = vertices_original[i].i;
-        vertices_no_memcpy[i].j = vertices_original[i].j;
-        vertices_no_memcpy[i].k = vertices_original[i].k;
-        vertices_no_memcpy[i].x = vertices_original[i].x;
-        vertices_no_memcpy[i].y = vertices_original[i].y;
-        vertices_no_memcpy[i].z = vertices_original[i].z;
+        vertices_no_memcpy[i].s  = vertices_original[i].s;
+        vertices_no_memcpy[i].t  = vertices_original[i].t;
+        vertices_no_memcpy[i].i  = vertices_original[i].i;
+        vertices_no_memcpy[i].j  = vertices_original[i].j;
+        vertices_no_memcpy[i].k  = vertices_original[i].k;
+        vertices_no_memcpy[i].x  = vertices_original[i].x;
+        vertices_no_memcpy[i].y  = vertices_original[i].y;
+        vertices_no_memcpy[i].z  = vertices_original[i].z;
         vertices_no_memcpy[i].tx = vertices_original[i].tx;
         vertices_no_memcpy[i].ty = vertices_original[i].ty;
         vertices_no_memcpy[i].tz = vertices_original[i].tz;
@@ -309,25 +336,25 @@ TEST(GFXQuadList, GFXVertex) {
 }
 
 TEST(GFXQuadList, GFXColorVertex) {
-    constexpr int kNumberOfVertices = 4;
+    constexpr int  kNumberOfVertices = 4;
     GFXColorVertex vertices_original[kNumberOfVertices]{};
     GFXColorVertex vertices_memcpy[kNumberOfVertices]{};
     GFXColorVertex vertices_no_memcpy[kNumberOfVertices]{};
     GFXColorVertex vertices_copy_constructor[kNumberOfVertices]{};
 
-    for (auto & vertex : vertices_original) {
-        vertex.s = randomDouble();
-        vertex.t = randomDouble();
-        vertex.r = randomDouble();
-        vertex.g = randomDouble();
-        vertex.b = randomDouble();
-        vertex.a = randomDouble();
-        vertex.i = randomDouble();
-        vertex.j = randomDouble();
-        vertex.k = randomDouble();
-        vertex.x = randomDouble();
-        vertex.y = randomDouble();
-        vertex.z = randomDouble();
+    for (auto &vertex : vertices_original) {
+        vertex.s  = randomDouble();
+        vertex.t  = randomDouble();
+        vertex.r  = randomDouble();
+        vertex.g  = randomDouble();
+        vertex.b  = randomDouble();
+        vertex.a  = randomDouble();
+        vertex.i  = randomDouble();
+        vertex.j  = randomDouble();
+        vertex.k  = randomDouble();
+        vertex.x  = randomDouble();
+        vertex.y  = randomDouble();
+        vertex.z  = randomDouble();
         vertex.tx = randomDouble();
         vertex.ty = randomDouble();
         vertex.tz = randomDouble();
@@ -335,18 +362,18 @@ TEST(GFXQuadList, GFXColorVertex) {
     }
 
     for (int i = 0; i < kNumberOfVertices; ++i) {
-        vertices_no_memcpy[i].s = vertices_original[i].s;
-        vertices_no_memcpy[i].t = vertices_original[i].t;
-        vertices_no_memcpy[i].r = vertices_original[i].r;
-        vertices_no_memcpy[i].g = vertices_original[i].g;
-        vertices_no_memcpy[i].b = vertices_original[i].b;
-        vertices_no_memcpy[i].a = vertices_original[i].a;
-        vertices_no_memcpy[i].i = vertices_original[i].i;
-        vertices_no_memcpy[i].j = vertices_original[i].j;
-        vertices_no_memcpy[i].k = vertices_original[i].k;
-        vertices_no_memcpy[i].x = vertices_original[i].x;
-        vertices_no_memcpy[i].y = vertices_original[i].y;
-        vertices_no_memcpy[i].z = vertices_original[i].z;
+        vertices_no_memcpy[i].s  = vertices_original[i].s;
+        vertices_no_memcpy[i].t  = vertices_original[i].t;
+        vertices_no_memcpy[i].r  = vertices_original[i].r;
+        vertices_no_memcpy[i].g  = vertices_original[i].g;
+        vertices_no_memcpy[i].b  = vertices_original[i].b;
+        vertices_no_memcpy[i].a  = vertices_original[i].a;
+        vertices_no_memcpy[i].i  = vertices_original[i].i;
+        vertices_no_memcpy[i].j  = vertices_original[i].j;
+        vertices_no_memcpy[i].k  = vertices_original[i].k;
+        vertices_no_memcpy[i].x  = vertices_original[i].x;
+        vertices_no_memcpy[i].y  = vertices_original[i].y;
+        vertices_no_memcpy[i].z  = vertices_original[i].z;
         vertices_no_memcpy[i].tx = vertices_original[i].tx;
         vertices_no_memcpy[i].ty = vertices_original[i].ty;
         vertices_no_memcpy[i].tz = vertices_original[i].tz;
@@ -413,19 +440,19 @@ TEST(GFXQuadList, GFXColorVertex) {
 }
 
 TEST(GFXColorVertex, SetVtx) {
-    constexpr int kNumberOfVertices = 4;
-    GFXVertex vertices_original[kNumberOfVertices]{};
+    constexpr int  kNumberOfVertices = 4;
+    GFXVertex      vertices_original[kNumberOfVertices]{};
     GFXColorVertex vertices_copied[kNumberOfVertices]{};
 
-    for (auto & vertex : vertices_original) {
-        vertex.s = randomDouble();
-        vertex.t = randomDouble();
-        vertex.i = randomDouble();
-        vertex.j = randomDouble();
-        vertex.k = randomDouble();
-        vertex.x = randomDouble();
-        vertex.y = randomDouble();
-        vertex.z = randomDouble();
+    for (auto &vertex : vertices_original) {
+        vertex.s  = randomDouble();
+        vertex.t  = randomDouble();
+        vertex.i  = randomDouble();
+        vertex.j  = randomDouble();
+        vertex.k  = randomDouble();
+        vertex.x  = randomDouble();
+        vertex.y  = randomDouble();
+        vertex.z  = randomDouble();
         vertex.tx = randomDouble();
         vertex.ty = randomDouble();
         vertex.tz = randomDouble();

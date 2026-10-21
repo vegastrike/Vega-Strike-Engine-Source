@@ -25,25 +25,25 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if _MSC_VER <= 1200
-#define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
-#include <boost/python.hpp>
+#if _MSC_VER <= 1'200
+#    define PY_SSIZE_T_CLEAN
+#    include <boost/python.hpp>
+
+#    include <boost/version.hpp>
 typedef boost::python::dict BoostPythonDictionary;
 
-#include "cmd/container.h"
-#include <string>
-#include "src/python/init.h"
-#include "gfx_generic/vec.h"
-#include "cmd/unit_generic.h"
-#include "src/universe_util.h"
-#include "cmd/unit_util.h"
-#include "root_generic/faction_generic.h"
-#include "cmd/ai/fire.h"
-#include "src/python/python_class.h"
-#include "src/python/unit_wrapper_class.h"
-#include "src/python/unit_from_to_python.h"
+#    include <string>
 
-#include "src/python/define_odd_unit_functions.h"
+#    include "cmd/ai/fire.h"
+#    include "cmd/container.h"
+#    include "cmd/unit_generic.h"
+#    include "cmd/unit_util.h"
+#    include "gfx_generic/vec.h"
+#    include "root_generic/faction_generic.h"
+#    include "src/python/define_odd_unit_functions.h"
+#    include "src/python/init.h"
+#    include "src/python/python_class.h"
+#    include "src/python/unit_from_to_python.h"
+#    include "src/python/unit_wrapper_class.h"
+#    include "src/universe_util.h"
 #endif
-

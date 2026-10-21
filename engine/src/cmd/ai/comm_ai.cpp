@@ -27,33 +27,30 @@
 
 
 #include "comm_ai.h"
-#include "root_generic/faction_generic.h"
-#include "communication.h"
-#include "cmd/collection.h"
-#include "gfx_generic/cockpit_generic.h"
-#include "cmd/images.h"
-#include "root_generic/configxml.h"
-#include "root_generic/vs_globals.h"
-#include "cmd/script/flightgroup.h"
-#include "cmd/unit_util.h"
-#include "root_generic/vega_random.h"
-#include "cmd/unit_find.h"
-#include "cmd/pilot.h"
-#include "src/universe_util.h"
-#include "src/universe.h"
 
-CommunicatingAI::CommunicatingAI(int ttype,
-        int stype,
-        float mood,
-        float anger,
-        float appeas,
-        float moodswingyness,
-        float randomresp) : Order(ttype, stype),
-        anger(anger),
-        appease(appeas),
-        moodswingyness(moodswingyness),
-        randomresponse(randomresp),
-        mood(mood) {
+#include "cmd/collection.h"
+#include "cmd/images.h"
+#include "cmd/pilot.h"
+#include "cmd/script/flightgroup.h"
+#include "cmd/unit_find.h"
+#include "cmd/unit_util.h"
+#include "communication.h"
+#include "gfx_generic/cockpit_generic.h"
+#include "root_generic/configxml.h"
+#include "root_generic/faction_generic.h"
+#include "root_generic/vega_random.h"
+#include "root_generic/vs_globals.h"
+#include "src/universe.h"
+#include "src/universe_util.h"
+
+CommunicatingAI::CommunicatingAI(int ttype, int stype, float mood, float anger, float appeas, float moodswingyness,
+                                 float randomresp)
+    : Order(ttype, stype),
+      anger(anger),
+      appease(appeas),
+      moodswingyness(moodswingyness),
+      randomresponse(randomresp),
+      mood(mood) {
     if (appease > 665 && appease < 667) {
         this->appease = configuration().ai.ease_to_appease_flt;
     }
@@ -69,10 +66,9 @@ CommunicatingAI::CommunicatingAI(int ttype,
 }
 
 bool MatchingMood(const CommunicationMessage &c, float mood, float randomresponse, float relationship) {
-    const FSM::Node *n = (unsigned int) c.curstate
-            < c.fsm->nodes.size() ? (&c.fsm->nodes[c.curstate]) : (&c.fsm->nodes[c.fsm
-            ->getDefaultState(
-                    relationship)]);
+    const FSM::Node                          *n    = (unsigned int)c.curstate < c.fsm->nodes.size()
+                                                             ? (&c.fsm->nodes[c.curstate])
+                                                             : (&c.fsm->nodes[c.fsm->getDefaultState(relationship)]);
     std::vector<unsigned int>::const_iterator iend = n->edges.end();
     for (std::vector<unsigned int>::const_iterator i = n->edges.begin(); i != iend; ++i) {
         if (c.fsm->nodes[*i].messagedelta >= configuration().ai.lowest_positive_comm_choice_flt && relationship >= 0) {
@@ -86,8 +82,8 @@ bool MatchingMood(const CommunicationMessage &c, float mood, float randomrespons
 }
 
 int CommunicatingAI::selectCommunicationMessageMood(CommunicationMessage &c, float mood) {
-    const Unit *target = c.sender.GetUnit();
-    float relationship = 0;
+    const Unit *target       = c.sender.GetUnit();
+    float       relationship = 0;
     if (target) {
         relationship = parent->pilot->GetEffectiveRelationship(parent, target);
         if (target == parent->Target() && relationship > -1.0) {
@@ -95,10 +91,10 @@ int CommunicatingAI::selectCommunicationMessageMood(CommunicationMessage &c, flo
         }
         mood += (1 - randomresponse) * relationship;
     }
-    //breaks stuff
+    // breaks stuff
     if ((c.curstate >= c.fsm->GetUnDockNode()) || !MatchingMood(c, mood, randomresponse, relationship)) {
         c.curstate = c.fsm->getDefaultState(relationship);
-    }          //hijack the current state
+    }  // hijack the current state
     return c.fsm->getCommMessageMood(c.curstate, mood, randomresponse, relationship);
 }
 
@@ -107,7 +103,7 @@ using std::pair;
 void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
     if (numhits == 0) {
         const int snumhits = configuration().ai.contraband_madness;
-        numhits = snumhits;
+        numhits            = snumhits;
     }
     CommunicationMessage hit(un, parent, nullptr, 0);
     hit.SetCurrentState(hit.fsm->GetHitNode(), nullptr, 0);
@@ -117,13 +113,13 @@ void GetMadAt(Unit *un, Unit *parent, int numhits = 0) {
 }
 
 void AllUnitsCloseAndEngage(Unit *un, int faction) {
-    Unit *ally;
+    Unit       *ally;
     const float contraband_assist_range = configuration().physics.contraband_assist_range_flt;
-    float relation = 0;
-    const float minrel = configuration().ai.max_faction_contraband_relation_flt;
-    const float adj = configuration().ai.faction_contraband_relation_adjust_flt;
-    float delta;
-    int cp = _Universe->whichPlayerStarship(un);
+    float       relation                = 0;
+    const float minrel                  = configuration().ai.max_faction_contraband_relation_flt;
+    const float adj                     = configuration().ai.faction_contraband_relation_adjust_flt;
+    float       delta;
+    int         cp = _Universe->whichPlayerStarship(un);
     if (cp != -1) {
         if ((relation = UnitUtil::getRelationFromFaction(un, faction)) > minrel) {
             delta = minrel - relation;
@@ -132,10 +128,8 @@ void AllUnitsCloseAndEngage(Unit *un, int faction) {
         }
         UniverseUtil::adjustRelationModifierInt(cp, faction, delta);
     }
-    for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
-            (ally = *i) != NULL;
-            ++i) {
-        //Vector loc;
+    for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (ally = *i) != NULL; ++i) {
+        // Vector loc;
         if (ally->faction == faction) {
             if ((ally->Position() - un->Position()).Magnitude() < contraband_assist_range) {
                 GetMadAt(un, ally);
@@ -156,9 +150,9 @@ void AllUnitsCloseAndEngage(Unit *un, int faction) {
 }
 
 void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
-    //reports success or failure
-    Unit *un;
-    unsigned char gender;
+    // reports success or failure
+    Unit                     *un;
+    unsigned char             gender;
     std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
     if ((un = contraband_searchee.GetUnit())) {
         CommunicationMessage c(parent, un, comm_face, gender);
@@ -185,7 +179,7 @@ static bool InList(std::string item, Unit *un) {
     if (!un) {
         return false;
     }
-    
+
     return un->cargo_hold.HasCargo(item);
 }
 
@@ -194,17 +188,17 @@ void CommunicatingAI::UpdateContrabandSearch() {
     for (unsigned int rep = 0; rep < contraband_search_batch_update; ++rep) {
         Unit *u = contraband_searchee.GetUnit();
         if (u && (u->faction != parent->faction)) {
-            //don't scan your buddies
-            if (which_cargo_item < (int) u->numCargo()) {
+            // don't scan your buddies
+            if (which_cargo_item < (int)u->numCargo()) {
                 if (u->cargo_hold.GetCargo(which_cargo_item).GetQuantity() > 0) {
-                    int which_carg_item_bak = which_cargo_item;
-                    std::string item = u->GetManifest(which_cargo_item++, parent, SpeedAndCourse);
-                    const bool use_hidden_cargo_space = configuration().physics.use_hidden_cargo_space;
-                    const float speed_course_change = configuration().ai.percentage_speed_change_to_stop_search_flt;
+                    int         which_carg_item_bak    = which_cargo_item;
+                    std::string item                   = u->GetManifest(which_cargo_item++, parent, SpeedAndCourse);
+                    const bool  use_hidden_cargo_space = configuration().physics.use_hidden_cargo_space;
+                    const float speed_course_change    = configuration().ai.percentage_speed_change_to_stop_search_flt;
                     if (u->CourseDeviation(SpeedAndCourse, u->GetVelocity()) > speed_course_change) {
-                        unsigned char gender;
+                        unsigned char             gender;
                         std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
-                        CommunicationMessage c(parent, u, comm_face, gender);
+                        CommunicationMessage      c(parent, u, comm_face, gender);
                         c.SetCurrentState(c.fsm->GetContrabandWobblyNode(), comm_face, gender);
                         Order *o;
                         if ((o = u->getAIState())) {
@@ -213,14 +207,16 @@ void CommunicatingAI::UpdateContrabandSearch() {
                         GetMadAt(u, 1);
                         SpeedAndCourse = u->GetVelocity();
                     }
-                    float HiddenTotal = use_hidden_cargo_space ? (u->hidden_hold.MaxCapacity()) : (0);
+                    float HiddenTotal    = use_hidden_cargo_space ? (u->hidden_hold.MaxCapacity()) : (0);
                     Unit *contrabandlist = FactionUtil::GetContraband(parent->faction);
                     if (InList(item, contrabandlist)) {
-                        //inlist now returns an integer so that we can do this at all...
-                        if (HiddenTotal == 0 || u->hidden_hold.GetCargo(which_carg_item_bak).GetQuantity() > HiddenTotal) {
-                            TerminateContrabandSearch(true);                             //BUCO this is where we want to check against free hidden cargo space.
+                        // inlist now returns an integer so that we can do this at all...
+                        if (HiddenTotal == 0 ||
+                            u->hidden_hold.GetCargo(which_carg_item_bak).GetQuantity() > HiddenTotal) {
+                            TerminateContrabandSearch(
+                                    true);  // BUCO this is where we want to check against free hidden cargo space.
                         } else {
-                            unsigned int max = u->numCargo();
+                            unsigned int max      = u->numCargo();
                             unsigned int quantity = 0;
                             for (unsigned int i = 0; i < max; ++i) {
                                 Cargo cargo_to_inspect = u->hidden_hold.GetCargo(i);
@@ -251,7 +247,7 @@ void CommunicatingAI::Destroy() {
         Unit *target = _Universe->AccessCockpit(i)->GetParent();
         if (target) {
             FSM *fsm = FactionUtil::GetConversation(this->parent->faction, target->faction);
-            if (fsm->StopAllSounds((unsigned char) (parent->pilot->getGender()))) {
+            if (fsm->StopAllSounds((unsigned char)(parent->pilot->getGender()))) {
                 _Universe->AccessCockpit(i)->SetStaticAnimation();
                 _Universe->AccessCockpit(i)->SetStaticAnimation();
             }
@@ -265,8 +261,8 @@ void CommunicatingAI::InitiateContrabandSearch(float playaprob, float targprob) 
     if (u) {
         Unit *un = FactionUtil::GetContraband(parent->faction);
         if (un) {
-            if (un->numCargo() > 0 && UnitUtil::getUnitSystemFile(u) == UnitUtil::getUnitSystemFile(parent)
-                    && !UnitUtil::isDockableUnit(parent)) {
+            if (un->numCargo() > 0 && UnitUtil::getUnitSystemFile(u) == UnitUtil::getUnitSystemFile(parent) &&
+                !UnitUtil::isDockableUnit(parent)) {
                 Unit *v;
                 if ((v = contraband_searchee.GetUnit())) {
                     if (v == u) {
@@ -276,9 +272,9 @@ void CommunicatingAI::InitiateContrabandSearch(float playaprob, float targprob) 
                 }
                 contraband_searchee.SetUnit(u);
                 SpeedAndCourse = u->GetVelocity();
-                unsigned char gender;
+                unsigned char             gender;
                 std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
-                CommunicationMessage c(parent, u, comm_face, gender);
+                CommunicationMessage      c(parent, u, comm_face, gender);
                 c.SetCurrentState(c.fsm->GetContrabandInitiateNode(), comm_face, gender);
                 if (u->getAIState()) {
                     u->getAIState()->Communicate(c);
@@ -294,17 +290,17 @@ void CommunicatingAI::AdjustRelationTo(Unit *un, float factor) {
     float newrel = parent->pilot->adjustSpecificRelationship(parent, un, factor, un->faction);
 
     {
-        int whichCp = _Universe->whichPlayerStarship(parent);
+        int          whichCp = _Universe->whichPlayerStarship(parent);
         Flightgroup *toFg;
-        int toFaction;
-        float oRlyFactor = factor;
+        int          toFaction;
+        float        oRlyFactor = factor;
         if (whichCp != -1) {
-            toFg = un->getFlightgroup();
+            toFg      = un->getFlightgroup();
             toFaction = un->faction;
         } else {
             /* Instead use the Aggressor's cockpit? */
-            whichCp = _Universe->whichPlayerStarship(un);
-            toFg = parent->getFlightgroup();
+            whichCp   = _Universe->whichPlayerStarship(un);
+            toFg      = parent->getFlightgroup();
             toFaction = parent->faction;
         }
         if (whichCp != -1) {
@@ -320,16 +316,16 @@ void CommunicatingAI::AdjustRelationTo(Unit *un, float factor) {
         }
     }
     if (newrel < anger || (parent->Target() == nullptr && newrel + UnitUtil::getFactionRelation(parent, un) < 0)) {
-        if (parent->Target() == nullptr
-                || (parent->getFlightgroup() == nullptr
-                        || parent->getFlightgroup()->directive.find('.') == string::npos)) {
-            parent->Target(un);             //he'll target you--even if he's friendly
-            parent->TargetTurret(un);             //he'll target you--even if he's friendly
+        if (parent->Target() == nullptr ||
+            (parent->getFlightgroup() == nullptr || parent->getFlightgroup()->directive.find('.') == string::npos)) {
+            parent->Target(un);        // he'll target you--even if he's friendly
+            parent->TargetTurret(un);  // he'll target you--even if he's friendly
         } else if (newrel > appease) {
             if (parent->Target() == un) {
-                if (parent->getFlightgroup() == nullptr || parent->getFlightgroup()->directive.find('.') == string::npos) {
+                if (parent->getFlightgroup() == nullptr ||
+                    parent->getFlightgroup()->directive.find('.') == string::npos) {
                     parent->Target(nullptr);
-                    parent->TargetTurret(nullptr);                     //he'll target you--even if he's friendly
+                    parent->TargetTurret(nullptr);  // he'll target you--even if he's friendly
                 }
             }
         }
@@ -337,10 +333,11 @@ void CommunicatingAI::AdjustRelationTo(Unit *un, float factor) {
     mood += factor * moodswingyness;
 }
 
-//modified not to check player when hostiles are around--unless player IS the hostile
+// modified not to check player when hostiles are around--unless player IS the hostile
 Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     if (VegaRandom::Instance().UniformInclusive(0, 1) < playaprob) {
-        Unit *playa = _Universe->AccessCockpit(VegaRandom::Instance().RandomSizeTLessThan(_Universe->numPlayers()))->GetParent();
+        Unit *playa = _Universe->AccessCockpit(VegaRandom::Instance().RandomSizeTLessThan(_Universe->numPlayers()))
+                              ->GetParent();
         if (playa) {
             if ((playa->Position() - parent->Position()).Magnitude() - parent->rSize() - playa->rSize()) {
                 return playa;
@@ -350,26 +347,30 @@ Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
     if (VegaRandom::Instance().UniformInclusive(0, 1) < targprob && parent->Target()) {
         return parent->Target();
     }
-    //FIXME FOR TESTING ONLY
-    //return parent->Target();
-    QVector where = parent->Position() + parent->radar.GetMaxRange() * QVector(VegaRandom::Instance().UniformInclusive(-1, 1),
-            VegaRandom::Instance().UniformInclusive(-1, 1),
-            VegaRandom::Instance().UniformInclusive(-1, 1));
+    // FIXME FOR TESTING ONLY
+    // return parent->Target();
+    QVector where =
+            parent->Position() + parent->radar.GetMaxRange() * QVector(VegaRandom::Instance().UniformInclusive(-1, 1),
+                                                                       VegaRandom::Instance().UniformInclusive(-1, 1),
+                                                                       VegaRandom::Instance().UniformInclusive(-1, 1));
     Collidable wherewrapper(0, 0, where);
 
     NearestUnitLocator unitLocator;
 #ifdef VS_ENABLE_COLLIDE_KEY
-    CollideMap  *cm = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
-    const float unitRad = configuration().graphics.hud.radar_search_extra_radius_flt;
-    CollideMap::iterator iter = cm->lower_bound( wherewrapper );
-    if (iter != cm->end() && (*iter)->radius > 0)
-        if ( (*iter)->ref.unit != parent )
+    CollideMap          *cm      = _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY];
+    const float          unitRad = configuration().graphics.hud.radar_search_extra_radius_flt;
+    CollideMap::iterator iter    = cm->lower_bound(wherewrapper);
+    if (iter != cm->end() && (*iter)->radius > 0) {
+        if ((*iter)->ref.unit != parent) {
             return (*iter)->ref.unit;
-    findObjects( _Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY], iter, &unitLocator );
+        }
+    }
+    findObjects(_Universe->activeStarSystem()->collidemap[Unit::UNIT_ONLY], iter, &unitLocator);
 
     Unit *target = unitLocator.retval.unit;
-    if (target == NULL || target == parent)
+    if (target == NULL || target == parent) {
         target = parent->Target();
+    }
 #else
     Unit *target = parent->Target();
 #endif
@@ -379,20 +380,20 @@ Unit *CommunicatingAI::GetRandomUnit(float playaprob, float targprob) {
 void CommunicatingAI::RandomInitiateCommunication(float playaprob, float targprob) {
     Unit *target = GetRandomUnit(playaprob, targprob);
     if (target != NULL) {
-        if (UnitUtil::getUnitSystemFile(target) == UnitUtil::getUnitSystemFile(parent)
-                && UnitUtil::getFlightgroupName(parent) != "Base" && !isDockedAtAll(target)
-                && UnitUtil::getDistance(parent, target) <= target->radar.GetMaxRange()) {
-            //warning--odd hack they can talk to you if you can sense them--it's like SETI@home
+        if (UnitUtil::getUnitSystemFile(target) == UnitUtil::getUnitSystemFile(parent) &&
+            UnitUtil::getFlightgroupName(parent) != "Base" && !isDockedAtAll(target) &&
+            UnitUtil::getDistance(parent, target) <= target->radar.GetMaxRange()) {
+            // warning--odd hack they can talk to you if you can sense them--it's like SETI@home
             for (std::list<CommunicationMessage *>::iterator i = messagequeue.begin(); i != messagequeue.end(); i++) {
                 Unit *un = (*i)->sender.GetUnit();
                 if (un == target) {
                     return;
                 }
             }
-            //ok we're good to put a default msg in the queue as a fake message;
-            FSM *fsm = FactionUtil::GetConversation(target->faction, this->parent->faction);
-            int state = fsm->getDefaultState(parent->getRelation(target));
-            unsigned char gender;
+            // ok we're good to put a default msg in the queue as a fake message;
+            FSM                      *fsm   = FactionUtil::GetConversation(target->faction, this->parent->faction);
+            int                       state = fsm->getDefaultState(parent->getRelation(target));
+            unsigned char             gender;
             std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
             messagequeue.push_back(new CommunicationMessage(target, this->parent, state, state, comm_face, gender));
         }
@@ -400,29 +401,28 @@ void CommunicatingAI::RandomInitiateCommunication(float playaprob, float targpro
 }
 
 int CommunicatingAI::selectCommunicationMessage(CommunicationMessage &c, Unit *un) {
-    const float moodmul = configuration().ai.mood_affects_response_flt;
-    const float angermul = configuration().ai.anger_affects_response_flt;
+    const float moodmul      = configuration().ai.mood_affects_response_flt;
+    const float angermul     = configuration().ai.anger_affects_response_flt;
     const float staticrelmul = configuration().ai.static_relationship_affects_response_flt;
-    return selectCommunicationMessageMood(c, moodmul * mood + angermul * parent->pilot->getAnger(parent,
-            un) + staticrelmul
-            * UnitUtil::getFactionRelation(parent, un));
+    return selectCommunicationMessageMood(c, moodmul * mood + angermul * parent->pilot->getAnger(parent, un) +
+                                                     staticrelmul * UnitUtil::getFactionRelation(parent, un));
 }
 
 void CommunicatingAI::ProcessCommMessage(CommunicationMessage &c) {
     if (messagequeue.back()->curstate < messagequeue.back()->fsm->GetUnDockNode()) {
         Order::ProcessCommMessage(c);
-        FSM *tmpfsm = c.fsm;
-        Unit *targ = c.sender.GetUnit();
+        FSM  *tmpfsm = c.fsm;
+        Unit *targ   = c.sender.GetUnit();
         if (targ && UnitUtil::getUnitSystemFile(targ) == UnitUtil::getUnitSystemFile(parent) && !isDockedAtAll(targ)) {
-            c.fsm = FactionUtil::GetConversation(parent->faction, targ->faction);
+            c.fsm        = FactionUtil::GetConversation(parent->faction, targ->faction);
             FSM::Node *n = c.getCurrentState();
             if (n) {
                 if (n->edges.size()) {
                     Unit *un = c.sender.GetUnit();
                     if (un) {
-                        int b = selectCommunicationMessage(c, un);
-                        Order *o = un->getAIState();
-                        unsigned char gender;
+                        int                       b = selectCommunicationMessage(c, un);
+                        Order                    *o = un->getAIState();
+                        unsigned char             gender;
                         std::vector<Animation *> *comm_face = parent->pilot->getCommFaces(gender);
                         if (o) {
                             o->Communicate(CommunicationMessage(parent, un, c, b, comm_face, gender));
@@ -435,6 +435,4 @@ void CommunicatingAI::ProcessCommMessage(CommunicationMessage &c) {
     }
 }
 
-CommunicatingAI::~CommunicatingAI() {
-}
-
+CommunicatingAI::~CommunicatingAI() {}

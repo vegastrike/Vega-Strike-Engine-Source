@@ -27,21 +27,21 @@
 
 #include "modaldialog.h"
 
-//Need these until we can read XML window descriptions.
-#include "staticdisplay.h"
-#include "newbutton.h"
-#include "simplepicker.h"
-#include "scroller.h"
+// Need these until we can read XML window descriptions.
 #include "eventmanager.h"
+#include "newbutton.h"
+#include "scroller.h"
+#include "simplepicker.h"
 #include "src/vega_cast_utils.h"
+#include "staticdisplay.h"
 
-//The class that gets called when the window closes.
+// The class that gets called when the window closes.
 void ModalDialog::setCallback(ModalDialogCallback *cb, const std::string &id) {
-    m_callback = cb;
+    m_callback   = cb;
     m_callbackId = id;
 }
 
-//Make everything happen.
+// Make everything happen.
 void ModalDialog::run(void) {
     if (window()) {
         window()->setModal(true);
@@ -51,8 +51,8 @@ void ModalDialog::run(void) {
 
 void ModalDialog::modalFinished() {
     globalEventManager().removeResponder(window());
-    //One of our buttons was clicked.  We're done.
-    m_deleteOnWindowClose = false;     //Prevent deleting until we are done.
+    // One of our buttons was clicked.  We're done.
+    m_deleteOnWindowClose = false;  // Prevent deleting until we are done.
     window()->close();
     if (m_callback) {
         m_callback->modalDialogResult(m_callbackId, m_result, *this);
@@ -60,18 +60,17 @@ void ModalDialog::modalFinished() {
     delete this;
 }
 
-//Process a command from the window.
+// Process a command from the window.
 bool ModalDialog::processWindowCommand(const EventCommandId &command, Control *control) {
     return WindowController::processWindowCommand(command, control);
 }
 
-//CONSTRUCTOR
-ModalDialog::ModalDialog() : m_callbackId(), m_callback(NULL), m_result(0) {
-}
+// CONSTRUCTOR
+ModalDialog::ModalDialog() : m_callbackId(), m_callback(NULL), m_result(0) {}
 
 //////////////  SUPPORT FOR SHOWQUESTION() FUNCTIONS ////////////////////////
 
-//Hack for creating the alert window.
+// Hack for creating the alert window.
 static void CreateControlsForAlertWindow(Window *window) {
     window->setSizeAndCenter(Size(1, .8));
     window->setTexture("basecomputer.png");
@@ -79,7 +78,7 @@ static void CreateControlsForAlertWindow(Window *window) {
     window->setOutlineColor(SaturatedColor(.7, .7, .7));
     window->setOutlineWidth(2.0);
 
-    //Title text display.
+    // Title text display.
     StaticDisplay *title = new StaticDisplay;
     title->setRect(Rect(-.46, -.25, .92, .55));
     title->setMultiLine(true);
@@ -88,10 +87,10 @@ static void CreateControlsForAlertWindow(Window *window) {
     title->setColor(GUI_CLEAR);
     title->setFont(Font(.045, BOLD_STROKE));
     title->setId("Title");
-    //Put it on the window.
+    // Put it on the window.
     window->addControl(title);
 
-    //OK button.
+    // OK button.
     NewButton *ok = new NewButton;
     ok->setRect(Rect(-.11, -.35, .22, .1));
     ok->setLabel("OK");
@@ -102,11 +101,11 @@ static void CreateControlsForAlertWindow(Window *window) {
     ok->setDownTextColor(GUI_OPAQUE_BLACK());
     ok->setHighlightColor(GFXColor(1, 0, 0, .4));
     ok->setFont(Font(.05, BOLD_STROKE));
-    //Put the button on the window.
+    // Put the button on the window.
     window->addControl(ok);
 }
 
-//Hack for creating the Yes/No window.
+// Hack for creating the Yes/No window.
 static void CreateControlsForYesNoWindow(Window *window) {
     window->setSizeAndCenter(Size(1, .8));
     window->setTexture("basecomputer.png");
@@ -114,7 +113,7 @@ static void CreateControlsForYesNoWindow(Window *window) {
     window->setOutlineColor(SaturatedColor(.7, .7, .7));
     window->setOutlineWidth(2.0);
 
-    //Title text display.
+    // Title text display.
     StaticDisplay *title = new StaticDisplay;
     title->setRect(Rect(-.46, -.25, .92, .55));
     title->setMultiLine(true);
@@ -123,10 +122,10 @@ static void CreateControlsForYesNoWindow(Window *window) {
     title->setColor(GUI_CLEAR);
     title->setFont(Font(.045, BOLD_STROKE));
     title->setId("Title");
-    //Put it on the window.
+    // Put it on the window.
     window->addControl(title);
 
-    //Yes button.
+    // Yes button.
     NewButton *yes = new NewButton;
     yes->setRect(Rect(-.27, -.35, .22, .1));
     yes->setLabel("Yes");
@@ -137,10 +136,10 @@ static void CreateControlsForYesNoWindow(Window *window) {
     yes->setDownTextColor(GUI_OPAQUE_BLACK());
     yes->setHighlightColor(GFXColor(1, 0, 0, .4));
     yes->setFont(Font(.05, BOLD_STROKE));
-    //Put the button on the window.
+    // Put the button on the window.
     window->addControl(yes);
 
-    //No button.
+    // No button.
     NewButton *no = new NewButton;
     no->setRect(Rect(.05, -.35, .22, .1));
     no->setLabel("No");
@@ -151,11 +150,11 @@ static void CreateControlsForYesNoWindow(Window *window) {
     no->setDownTextColor(GUI_OPAQUE_BLACK());
     no->setHighlightColor(GFXColor(1, 0, 0, .4));
     no->setFont(Font(.05, BOLD_STROKE));
-    //Put the button on the window.
+    // Put the button on the window.
     window->addControl(no);
 }
 
-//Hack for creating the List Question window.
+// Hack for creating the List Question window.
 void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     window->setSizeAndCenter(Size(1.2, 1.2));
     window->setTexture("basecomputer.png");
@@ -163,7 +162,7 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     window->setOutlineColor(SaturatedColor(.7, .7, .7));
     window->setOutlineWidth(2.0);
 
-    //Title text display.
+    // Title text display.
     StaticDisplay *title = new StaticDisplay;
     title->setRect(Rect(-.57, .42, 1.14, .15));
     title->setMultiLine(true);
@@ -172,10 +171,10 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     title->setColor(GUI_CLEAR);
     title->setFont(Font(.05, BOLD_STROKE));
     title->setId("Title");
-    //Put it on the window.
+    // Put it on the window.
     window->addControl(title);
 
-    //OK button.
+    // OK button.
     NewButton *ok = new NewButton;
     ok->setRect(Rect(-.27, -.57, .22, .1));
     ok->setLabel("OK");
@@ -187,10 +186,10 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     ok->setHighlightColor(GFXColor(0, 0, 1, .4));
     ok->setFont(Font(.05, BOLD_STROKE));
     ok->setId("OK");
-    //Put the button on the window.
+    // Put the button on the window.
     window->addControl(ok);
 
-    //Cancel button.
+    // Cancel button.
     NewButton *cancel = new NewButton;
     cancel->setRect(Rect(.05, -.57, .22, .1));
     cancel->setLabel("Cancel");
@@ -202,10 +201,10 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     cancel->setHighlightColor(GFXColor(0, 0, 1, .4));
     cancel->setFont(Font(.05, BOLD_STROKE));
     cancel->setId("Cancel");
-    //Put the button on the window.
+    // Put the button on the window.
     window->addControl(cancel);
 
-    //Scroller for description.
+    // Scroller for description.
     Scroller *pickScroller = new Scroller;
     pickScroller->setRect(Rect(.52, -.4, .05, .85));
     pickScroller->setColor(SaturatedColor(0, 0, 1, .1));
@@ -214,7 +213,7 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     pickScroller->setTextColor(GUI_OPAQUE_WHITE());
     pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
-    //List picker.
+    // List picker.
     SimplePicker *pick = new SimplePicker;
     pick->setRect(Rect(-.57, -.4, 1.09, .85));
     pick->setColor(SaturatedColor(0, 0, 1, .1));
@@ -227,21 +226,21 @@ void ListQuestionDialog::CreateControlsForListWindow(Window *window) {
     pick->setTextMargins(Size(0.02, 0.01));
     pick->setId("Picker");
     pick->setScroller(pickScroller);
-    //Put the picker on the window.
+    // Put the picker on the window.
     window->addControl(pick);
 
-    window->addControl(pickScroller);         //Want scroller "over" picker.
+    window->addControl(pickScroller);  // Want scroller "over" picker.
 }
 
-//Initialization of our Question Dialog class.
-//Create a window, load controls, and set the title.
+// Initialization of our Question Dialog class.
+// Create a window, load controls, and set the title.
 void QuestionDialog::init(const std::string &title) {
     setWindow(new Window);
     initControls();
 
     StaticDisplay *titleControl = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Title"));
     assert(titleControl != NULL);
-    std::string fixedTitle;
+    std::string            fixedTitle;
     std::string::size_type lastpos = 0, pos;
     for (pos = title.find('\n'); pos != std::string::npos; pos = title.find('\n', lastpos)) {
         fixedTitle.append(title, lastpos, pos - lastpos);
@@ -254,42 +253,42 @@ void QuestionDialog::init(const std::string &title) {
     ModalDialog::init();
 }
 
-//Make everything happen.
+// Make everything happen.
 void QuestionDialog::run(void) {
-    //We need to delete the Window we created until the Window is opened.
+    // We need to delete the Window we created until the Window is opened.
     m_deleteWindow = false;
 
     ModalDialog::run();
 }
 
-//Class that will handle Alert correctly.
+// Class that will handle Alert correctly.
 class AlertDialog : public QuestionDialog {
-//Load the controls for this dialog into the window.
+    // Load the controls for this dialog into the window.
     virtual void initControls(void) {
         CreateControlsForAlertWindow(window());
     }
 };
 
-//Display a modal message to the user.  The message will be shown until the user
-//hits the OK button.
+// Display a modal message to the user.  The message will be shown until the user
+// hits the OK button.
 void showAlert(const std::string &title) {
     AlertDialog *dialog = new AlertDialog;
     dialog->init(title);
     dialog->run();
 }
 
-//Class that will handle Yes/No dialog correctly.
+// Class that will handle Yes/No dialog correctly.
 class YesNoDialog : public QuestionDialog {
-//Load the controls for this dialog into the window.
+    // Load the controls for this dialog into the window.
     virtual void initControls(void) {
         CreateControlsForYesNoWindow(window());
     }
 
-//Process a command event from the window.
+    // Process a command event from the window.
     virtual bool processWindowCommand(const EventCommandId &command, Control *control);
 };
 
-//Process a command from the window.
+// Process a command from the window.
 bool YesNoDialog::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Yes") {
         m_result = YES_ANSWER;
@@ -298,14 +297,14 @@ bool YesNoDialog::processWindowCommand(const EventCommandId &command, Control *c
         m_result = NO_ANSWER;
         modalFinished();
     } else {
-        //We only care about buttons clicked.
+        // We only care about buttons clicked.
         return QuestionDialog::processWindowCommand(command, control);
     }
     return true;
 }
 
-//Display a modal yes/no question.
-//The result is supplied in the callback.
+// Display a modal yes/no question.
+// The result is supplied in the callback.
 void showYesNoQuestion(const std::string &title, ModalDialogCallback *cb, const std::string &id) {
     YesNoDialog *dialog = new YesNoDialog;
     dialog->init(title);
@@ -313,48 +312,46 @@ void showYesNoQuestion(const std::string &title, ModalDialogCallback *cb, const 
     dialog->run();
 }
 
-//Process a command from the window.
+// Process a command from the window.
 bool ListQuestionDialog::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Cancel") {
-        //Just close down, with the result  unknown.
+        // Just close down, with the result  unknown.
         m_result = (-1);
         modalFinished();
         return true;
     } else if (command == "OK") {
-        //The OK button was clicked.
+        // The OK button was clicked.
         Picker *picker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("Picker"));
         assert(picker != NULL);
         m_result = picker->selectedItem();
         if (m_result >= 0) {
-            //We have a selection.  We are done.
+            // We have a selection.  We are done.
             modalFinished();
         } else {
-            //Ignore OK button until we have a selection.
-            //Do nothing here.
+            // Ignore OK button until we have a selection.
+            // Do nothing here.
         }
         return true;
     } else {
-        //We only care about buttons clicked.
+        // We only care about buttons clicked.
         return QuestionDialog::processWindowCommand(command, control);
     }
-    assert(false);     //Should never get here.
+    assert(false);  // Should never get here.
 }
 
 SimplePicker *ListQuestionDialog::getPicker() {
     return vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("Picker"));
 }
 
-//Display a modal list of options.
-//The result is supplied in the callback.
-void showListQuestion(const std::string &title,
-        const std::vector<std::string> &options,
-        ModalDialogCallback *cb,
-        const std::string &id) {
+// Display a modal list of options.
+// The result is supplied in the callback.
+void showListQuestion(const std::string &title, const std::vector<std::string> &options, ModalDialogCallback *cb,
+                      const std::string &id) {
     ListQuestionDialog *dialog = new ListQuestionDialog;
     dialog->init(title);
     dialog->setCallback(cb, id);
 
-    //Fill the picker with the choices supplied by the caller.
+    // Fill the picker with the choices supplied by the caller.
     SimplePicker *picker = dialog->getPicker();
     assert(picker != NULL);
     for (size_t i = 0; i < options.size(); i++) {
@@ -362,4 +359,3 @@ void showListQuestion(const std::string &title,
     }
     dialog->run();
 }
-

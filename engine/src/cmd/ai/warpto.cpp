@@ -28,8 +28,8 @@
 
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
-#include "src/universe_util.h"
 #include "src/config_xml.h"
+#include "src/universe_util.h"
 
 float max_allowable_travel_time() {
     const float mat = configuration().ai.max_allowable_travel_time_flt;
@@ -37,26 +37,26 @@ float max_allowable_travel_time() {
 }
 
 bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
-    //first let us decide whether the target is far enough to warrant using warp
-    //double dist =UnitUtil::getSignificantDistance(parent,target);
-    const float tooclose = configuration().ai.too_close_for_warp_tactic_flt;
+    // first let us decide whether the target is far enough to warrant using warp
+    // double dist =UnitUtil::getSignificantDistance(parent,target);
+    const float tooclose          = configuration().ai.too_close_for_warp_tactic_flt;
     const float tooclosefollowing = configuration().ai.too_close_for_warp_in_formation_flt;
-    float toodamnclose = following ? tooclosefollowing : tooclose;
-    float diff = 1;
+    float       toodamnclose      = following ? tooclosefollowing : tooclose;
+    float       diff              = 1;
     parent->GetVelocityDifficultyMult(diff);
     float timetolive = dist / (diff * parent->drive.speed);
     if (timetolive > (5 * max_allowable_travel_time())) {
         return true;
     } else if (timetolive > (max_allowable_travel_time())) {
-        float mytime = SIMULATION_ATOM * 1.5;
+        float      mytime   = SIMULATION_ATOM * 1.5;
         const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
         if (rampdown == false) {
             const float warprampdowntime = configuration().physics.warp_ramp_down_time_flt;
-            mytime = warprampdowntime;
+            mytime                       = warprampdowntime;
         }
         if (dist - parent->GetWarpVelocity().Magnitude() * mytime < toodamnclose) {
             return false;
-        }              //avoid nasty jitter-jumping behavior should eventually have "running away check"
+        }  // avoid nasty jitter-jumping behavior should eventually have "running away check"
 
         return true;
     }
@@ -64,7 +64,7 @@ bool DistanceWarrantsWarpTo(Unit *parent, float dist, bool following) {
 }
 
 bool DistanceWarrantsTravelTo(Unit *parent, float dist, bool following) {
-    //first let us decide whether the target is far enough to warrant using warp
+    // first let us decide whether the target is far enough to warrant using warp
     float diff = 1;
     parent->GetVelocityDifficultyMult(diff);
     float timetolive = dist / (diff * parent->drive.speed);
@@ -79,24 +79,24 @@ bool TargetWorthPursuing(Unit *parent, Unit *target) {
 }
 
 static void ActuallyWarpTo(Unit *parent, const QVector &tarpos, Vector tarvel, Unit *MatchSpeed = NULL) {
-    Vector vel = parent->GetVelocity();
+    Vector      vel          = parent->GetVelocity();
     const float mindirveldot = configuration().ai.warp_cone_flt;
     const float mintarveldot = configuration().ai.match_velocity_cone_flt;
     tarvel.Normalize();
     vel.Normalize();
     Vector dir = tarpos - parent->Position();
     dir.Normalize();
-    float dirveldot = dir.Dot(parent->cumulative_transformation_matrix.getR());
-    dir *= -1;
-    float chasedot = dir.Dot(tarvel);
+    float dirveldot  = dir.Dot(parent->cumulative_transformation_matrix.getR());
+    dir             *= -1;
+    float chasedot   = dir.Dot(tarvel);
     if (dirveldot > mindirveldot) {
-        const float min_energy_to_enter_warp = configuration().ai.min_energy_to_enter_warp_flt;
+        const float min_energy_to_enter_warp    = configuration().ai.min_energy_to_enter_warp_flt;
         const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
-        if ((parent->ftl_energy.Percent() > min_energy_to_enter_warp)
-                && (parent->GetMaxWarpFieldStrength(1) > min_warpfield_to_enter_warp)) {
+        if ((parent->ftl_energy.Percent() > min_energy_to_enter_warp) &&
+            (parent->GetMaxWarpFieldStrength(1) > min_warpfield_to_enter_warp)) {
             if (!parent->ftl_drive.Enabled()) {
-                parent->ftl_drive.Enable();                 //don't want the AI thrashing
-                parent->graphicOptions.WarpRamping = 1;                 //don't want the AI thrashing
+                parent->ftl_drive.Enable();              // don't want the AI thrashing
+                parent->graphicOptions.WarpRamping = 1;  // don't want the AI thrashing
             }
         }
     } else {
@@ -138,4 +138,3 @@ void WarpToP(Unit *parent, const QVector &target, float radius, bool following) 
         parent->ftl_drive.Disable();
     }
 }
-

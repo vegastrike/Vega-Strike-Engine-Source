@@ -28,15 +28,15 @@
 
 #include <assert.h>
 #include <cstdint>
-#include <stdlib.h>
 #include <stdio.h>
-#include "unit.h"
+#include <stdlib.h>
 #include <time.h>
 
 #include "cmd/collection.h"
 #include "root_generic/vega_random.h"
+#include "unit.h"
 
-#define SIZE 60000
+#define SIZE 60'000
 
 /* to build:
  *       g++  -pipe -O2 -DLIST_TESTING=1 -I. -I..  -o testcol ../collection.cpp ./main.cpp
@@ -66,8 +66,8 @@ int main() {
     Unit *unit;
     srand(time(NULL));
     UnitCollection *c = new UnitCollection;
-    Unit *u[SIZE];
-    time_t seconds;
+    Unit           *u[SIZE];
+    time_t          seconds;
     for (int i = 0; i < SIZE; ++i) {
         u[i] = createUnit();
     }
@@ -78,7 +78,7 @@ int main() {
     seconds = time(NULL) - seconds;
     printf("constructed list of size : %d  in %d seconds using prepend\n", SIZE / 2, seconds);
     printf("Randomly inserting %d \n", SIZE / 2);
-    int ii = SIZE / 2;
+    int ii  = SIZE / 2;
     seconds = time(NULL);
     while (ii < SIZE) {
         for (un_iter iter = c->createIterator(); !iter.isDone() && ii < SIZE; ++iter) {
@@ -102,7 +102,7 @@ int main() {
     printf("randomly killed SIZE/32 to start off with \n");
 
     printf("beginning unitCollection removal/advance operations\n");
-    seconds = time(NULL);
+    seconds    = time(NULL);
     int passes = 0;
     int levels = 0;
     while (!c->empty()) {
@@ -111,9 +111,9 @@ int main() {
 #if !oldtest
     }
 #else
+        UnitCollection::FreeUnusedNodes();
+    }
     UnitCollection::FreeUnusedNodes();
-}
-UnitCollection::FreeUnusedNodes();
 #endif
     seconds = time(NULL) - seconds;
     printf("operations took %d seconds \n", seconds);
@@ -136,4 +136,3 @@ UnitCollection::FreeUnusedNodes();
     printf("completed\n");
     return 0;
 }
-

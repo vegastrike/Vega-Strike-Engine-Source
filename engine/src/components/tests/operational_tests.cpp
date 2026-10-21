@@ -24,19 +24,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <gtest/gtest.h>
 #include <string>
 
-#include "components/hull.h" 
+#include <gtest/gtest.h>
+
 #include "cmd/unit_csv_factory.h"
+#include "components/hull.h"
 
 static const std::string upgrades_suffix_string = "__upgrades";
-const std::string reactor_string = "reactor";
+const std::string        reactor_string         = "reactor";
 
 
-std::map<std::string,std::string> reactor_map = {
-    { "Hull", "69/100"}
-};
+std::map<std::string, std::string> reactor_map = {{"Hull", "69/100"}};
 
 TEST(OperationalTests, DamageSystems) {
     UnitCSVFactory::LoadUnit(reactor_string + upgrades_suffix_string, reactor_map);

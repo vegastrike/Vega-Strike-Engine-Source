@@ -26,12 +26,13 @@
  */
 
 
-#include "src/gfxlib.h"
+#include <stdio.h>
+
 #include "gfx_generic/matrix.h"
 #include "gl_matrix.h"
 #include "root_generic/lin_time.h"
-#include <stdio.h>
-using namespace GFXMatrices;  //causes problems with g_game
+#include "src/gfxlib.h"
+using namespace GFXMatrices;  // causes problems with g_game
 double BoxFrust[6][4];
 double frust[6][4];
 
@@ -56,11 +57,11 @@ CLIPSTATE /*GFXDRVAPI*/ GFXTransformedSpherePartiallyInFrustum(const Vector &Cnt
 }
 
 CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum(double f[6][4], const Vector &Cnt, const float radius) {
-    int p;
-    float d;
+    int       p;
+    float     d;
     CLIPSTATE retval = GFX_TOTALLY_VISIBLE;
     for (p = 0; p < 6; p++) {
-        //does not evaluate for yon
+        // does not evaluate for yon
         d = f[p][0] * Cnt.i + f[p][1] * Cnt.j + f[p][2] * Cnt.k + f[p][3];
         if (d <= -radius) {
             return GFX_NOT_VISIBLE;
@@ -72,16 +73,16 @@ CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum(double f[6][4], const Vector
 }
 
 CLIPSTATE GFXBoxInFrustum(double f[6][4], const Vector &min, const Vector &max) {
-    //Doesn't do a perfect test for NOT_VISIBLE.  Just checks to
-    //see if all box vertices are outside at least one frustum
-    //plane.  Some pathological boxes could return SOME_CLIP even
-    //though they're really fully outside the frustum.  But that
-    //won't hurt us too much if it isn't a common case; the
-    //contents will just be culled/clipped at a later stage in the
-    //pipeline.
+    // Doesn't do a perfect test for NOT_VISIBLE.  Just checks to
+    // see if all box vertices are outside at least one frustum
+    // plane.  Some pathological boxes could return SOME_CLIP even
+    // though they're really fully outside the frustum.  But that
+    // won't hurt us too much if it isn't a common case; the
+    // contents will just be culled/clipped at a later stage in the
+    // pipeline.
 
-    //Check each vertex of the box against the view frustum, and compute
-    //bit codes for whether the point is outside each plane.
+    // Check each vertex of the box against the view frustum, and compute
+    // bit codes for whether the point is outside each plane.
     int OrCodes = 0, AndCodes = ~0;
     for (int i = 0; i < 8; i++) {
         Vector v(min.i, min.j, min.k);
@@ -94,24 +95,24 @@ CLIPSTATE GFXBoxInFrustum(double f[6][4], const Vector &min, const Vector &max) 
         if (i & 4) {
             v.k = (max.k);
         }
-        //Now check against the frustum planes.
+        // Now check against the frustum planes.
         int Code = 0;
-        int Bit = 1;
+        int Bit  = 1;
         for (int j = 0; j < 6; j++, Bit <<= 1) {
             if (v.i * f[j][0] + v.j * f[j][1] + v.k * f[j][2] + f[j][3] < 0) {
-                //The point is outside this plane.
+                // The point is outside this plane.
                 Code |= Bit;
             }
         }
-        OrCodes |= Code;
+        OrCodes  |= Code;
         AndCodes &= Code;
     }
-    //Based on bit-codes, return culling results.
+    // Based on bit-codes, return culling results.
     if (OrCodes == 0) {
-        //The box is completely within the frustum.
+        // The box is completely within the frustum.
         return GFX_TOTALLY_VISIBLE;
     } else if (AndCodes != 0) {
-        //All the points are outside one of the frustum planes.
+        // All the points are outside one of the frustum planes.
         return GFX_NOT_VISIBLE;
     } else {
         return GFX_PARTIALLY_VISIBLE;
@@ -125,26 +126,20 @@ void DrawFrustum(double f[6][4]) {
     GFXDisable(TEXTURE0);
     GFXDisable(TEXTURE1);
     GFXBlendMode(ONE, ONE);
-    const GFXColor cols[6] = {
-            GFXColor(0, 0, 1),
-            GFXColor(0, 1, 0),
-            GFXColor(1, 0, 0),
-            GFXColor(1, 1, 0),
-            GFXColor(1, 0, 1),
-            GFXColor(0, 1, 1)
-    };
+    const GFXColor                       cols[6] = {GFXColor(0, 0, 1), GFXColor(0, 1, 0), GFXColor(1, 0, 0),
+                                                    GFXColor(1, 1, 0), GFXColor(1, 0, 1), GFXColor(0, 1, 1)};
     static VertexBuilder<float, 3, 0, 3> verts;
     verts.clear();
     for (unsigned int i = 0; i < 4; i++) {
         Vector n(f[i][0], f[i][1], f[i][2]);
-        Vector r(9284, -3259, -1249);
+        Vector r(9'284, -3'259, -1'249);
         Vector t = n.Cross(r);
         Vector q = t.Cross(n);
         t.Normalize();
         q.Normalize();
-        t = t * 10000;
-        q = q * 10000;
-        n = n * f[i][3];
+        t        = t * 10'000;
+        q        = q * 10'000;
+        n        = n * f[i][3];
         Vector a = t + n;
         Vector b = q + n;
         Vector c = n - t;
@@ -169,10 +164,10 @@ float /*GFXDRVAPI*/ GFXSphereInFrustum(double f[6][4], const QVector &Cnt, float
      *  DrawFrustum (f);
      *  lasttime = GetElapsedTime();
      *  }*/
-    int p;
+    int    p;
     double d;
     for (p = 0; p < 5; p++) {
-        //does not evaluate for yon
+        // does not evaluate for yon
         d = f[p][0] * Cnt.i + f[p][1] * Cnt.j + f[p][2] * Cnt.k + f[p][3];
         if (d < 0) {
             if (d <= -radius) {
@@ -184,14 +179,14 @@ float /*GFXDRVAPI*/ GFXSphereInFrustum(double f[6][4], const QVector &Cnt, float
 }
 
 void GFXGetFrustumVars(bool retr, float *l, float *r, float *b, float *t, float *n, float *f) {
-    static float nnear, ffar, left, right, bot, top;     //Visual C++ reserves near and far
+    static float nnear, ffar, left, right, bot, top;  // Visual C++ reserves near and far
     if (!retr) {
         nnear = *n;
-        ffar = *f;
-        left = *l;
+        ffar  = *f;
+        left  = *l;
         right = *r;
-        bot = *b;
-        top = *t;
+        bot   = *b;
+        top   = *t;
     } else {
         *l = left;
         *r = right;
@@ -219,21 +214,21 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum() {
 void WackyMultFloatMatrix(double dest[], const float m1[], const Matrix &m2) {
     QVector p(InvTransformNormal(m2, m2.p));
     p = (TransformNormal(m2, -m2.p));
-    //p=m2.p;
-    dest[0] = m1[0] * (double) m2.r[0] + m1[4] * (double) m2.r[1] + m1[8] * (double) m2.r[2];
-    dest[1] = m1[1] * (double) m2.r[0] + m1[5] * (double) m2.r[1] + m1[9] * (double) m2.r[2];
-    dest[2] = m1[2] * (double) m2.r[0] + m1[6] * (double) m2.r[1] + m1[10] * (double) m2.r[2];
-    dest[3] = m1[3] * (double) m2.r[0] + m1[7] * (double) m2.r[1] + m1[11] * (double) m2.r[2];
+    // p=m2.p;
+    dest[0] = m1[0] * (double)m2.r[0] + m1[4] * (double)m2.r[1] + m1[8] * (double)m2.r[2];
+    dest[1] = m1[1] * (double)m2.r[0] + m1[5] * (double)m2.r[1] + m1[9] * (double)m2.r[2];
+    dest[2] = m1[2] * (double)m2.r[0] + m1[6] * (double)m2.r[1] + m1[10] * (double)m2.r[2];
+    dest[3] = m1[3] * (double)m2.r[0] + m1[7] * (double)m2.r[1] + m1[11] * (double)m2.r[2];
 
-    dest[4] = m1[0] * (double) m2.r[3] + m1[4] * (double) m2.r[4] + m1[8] * (double) m2.r[5];
-    dest[5] = m1[1] * (double) m2.r[3] + m1[5] * (double) m2.r[4] + m1[9] * (double) m2.r[5];
-    dest[6] = m1[2] * (double) m2.r[3] + m1[6] * (double) m2.r[4] + m1[10] * (double) m2.r[5];
-    dest[7] = m1[3] * (double) m2.r[3] + m1[7] * (double) m2.r[4] + m1[11] * (double) m2.r[5];
+    dest[4] = m1[0] * (double)m2.r[3] + m1[4] * (double)m2.r[4] + m1[8] * (double)m2.r[5];
+    dest[5] = m1[1] * (double)m2.r[3] + m1[5] * (double)m2.r[4] + m1[9] * (double)m2.r[5];
+    dest[6] = m1[2] * (double)m2.r[3] + m1[6] * (double)m2.r[4] + m1[10] * (double)m2.r[5];
+    dest[7] = m1[3] * (double)m2.r[3] + m1[7] * (double)m2.r[4] + m1[11] * (double)m2.r[5];
 
-    dest[8] = m1[0] * (double) m2.r[6] + m1[4] * (double) m2.r[7] + m1[8] * (double) m2.r[8];
-    dest[9] = m1[1] * (double) m2.r[6] + m1[5] * (double) m2.r[7] + m1[9] * (double) m2.r[8];
-    dest[10] = m1[2] * (double) m2.r[6] + m1[6] * (double) m2.r[7] + m1[10] * (double) m2.r[8];
-    dest[11] = m1[3] * (double) m2.r[6] + m1[7] * (double) m2.r[7] + m1[11] * (double) m2.r[8];
+    dest[8]  = m1[0] * (double)m2.r[6] + m1[4] * (double)m2.r[7] + m1[8] * (double)m2.r[8];
+    dest[9]  = m1[1] * (double)m2.r[6] + m1[5] * (double)m2.r[7] + m1[9] * (double)m2.r[8];
+    dest[10] = m1[2] * (double)m2.r[6] + m1[6] * (double)m2.r[7] + m1[10] * (double)m2.r[8];
+    dest[11] = m1[3] * (double)m2.r[6] + m1[7] * (double)m2.r[7] + m1[11] * (double)m2.r[8];
 
     dest[12] = m1[0] * p.i + m1[4] * p.j + m1[8] * p.k + m1[12];
     dest[13] = m1[1] * p.i + m1[5] * p.j + m1[9] * p.k + m1[13];
@@ -342,13 +337,13 @@ float GFXGetZPerspective(const float z) {
     GFXGetFrustumVars(true, &left, &right, &bottom, &top, &nearval, &farval);
 
     float xs = 2 * nearval / (right - left);
-    float a = (right + left) / (right - left);
+    float a  = (right + left) / (right - left);
 
-    //Compute homogeneus x,w for (1,0,z,0)
+    // Compute homogeneus x,w for (1,0,z,0)
     float hx = xs + z * a;
     float hw = -z;
 
-    //Translate into euclidean coordinates and return euclidean x
+    // Translate into euclidean coordinates and return euclidean x
     return fabs(hx / hw);
 }
 
@@ -433,4 +428,3 @@ frustum[4][2] /= t;
 frustum[4][3] /= t;
 
 #endif
-

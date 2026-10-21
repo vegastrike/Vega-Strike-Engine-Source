@@ -25,9 +25,9 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
 #include "cmd/unit_generic.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vs_globals.h"
 
 VegaConfig *createVegaConfig(const char *file) {
     return new VegaConfig(file);
@@ -37,39 +37,25 @@ class Music;
 class Unit;
 class Animation;
 
-void UpdateAnimatedTexture() {
-}
+void UpdateAnimatedTexture() {}
 
-void TerrainCollide() {
-}
+void TerrainCollide() {}
 
-void UpdateTerrain() {
-}
+void UpdateTerrain() {}
 
-void UpdateCameraSnds() {
-}
+void UpdateCameraSnds() {}
 
-void NebulaUpdate(StarSystem *ss) {
-}
+void NebulaUpdate(StarSystem *ss) {}
 
-void SwitchUnits2(Unit *nw) {
-}
+void SwitchUnits2(Unit *nw) {}
 
-void DoCockpitKeys() {
-}
+void DoCockpitKeys() {}
 
-void bootstrap_draw(const std::string &message, Animation *SplashScreen) {
-}
+void bootstrap_draw(const std::string &message, Animation *SplashScreen) {}
 
-void createObjects(std::vector<std::string> &playersaveunit,
-        std::vector<StarSystem *> &ssys,
-        std::vector<QVector> &savedloc,
-        vector<vector<string> > &savefiles) {
-}
+void createObjects(std::vector<std::string> &playersaveunit, std::vector<StarSystem *> &ssys,
+                   std::vector<QVector> &savedloc, vector<vector<string>> &savefiles) {}
 
-void disableTerrainDraw(ContinuousTerrain *ct) {
-}
+void disableTerrainDraw(ContinuousTerrain *ct) {}
 
-void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
-}
-
+void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {}

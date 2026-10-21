@@ -28,7 +28,5 @@
 #include "unit_factory.h"
 
 #ifndef __UNIT_CPP__
-#define __UNIT_CPP__
+#    define __UNIT_CPP__
 #endif
-
-

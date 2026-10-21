@@ -31,38 +31,34 @@
 //
 
 #include "OpenALSimpleSound.h"
-#include "OpenALHelpers.h"
 
 #include "../../CodecRegistry.h"
 #include "../../Stream.h"
 #include "al.h"
+#include "OpenALHelpers.h"
 
 #ifdef max
-#undef max
+#    undef max
 #endif
 
-#include <utility>
 #include <list>
 #include <string>
+#include <utility>
 
 using namespace Audio::__impl::OpenAL;
 
 namespace Audio {
 
-OpenALSimpleSound::OpenALSimpleSound(const std::string &name, VSFileSystem::VSFileType type) :
-        SimpleSound(name, type, false),
-        bufferHandle(AL_NULL_BUFFER) {
-}
+OpenALSimpleSound::OpenALSimpleSound(const std::string &name, VSFileSystem::VSFileType type)
+    : SimpleSound(name, type, false), bufferHandle(AL_NULL_BUFFER) {}
 
-OpenALSimpleSound::~OpenALSimpleSound() {
-}
+OpenALSimpleSound::~OpenALSimpleSound() {}
 
 void OpenALSimpleSound::loadImpl(bool wait) {
     // just in case
     unloadImpl();
 
     try {
-
         flags.loading = 1;
 
         // load the stream
@@ -76,9 +72,9 @@ void OpenALSimpleSound::loadImpl(bool wait) {
 
         // setup formatted buffer
         // if the format does not match an OpenAL built-in format, we must convert it.
-        Format targetFormat = stream->getFormat();
+        Format targetFormat        = stream->getFormat();
         targetFormat.signedSamples = (targetFormat.bitsPerSample > 8);
-        targetFormat.nativeOrder = 1;
+        targetFormat.nativeOrder   = 1;
         if (targetFormat.bitsPerSample > 8) {
             targetFormat.bitsPerSample = 16;
         } else {
@@ -86,8 +82,7 @@ void OpenALSimpleSound::loadImpl(bool wait) {
         }
 
         // Set capacity to half a second or 16k samples, whatever's bigger
-        size_t bufferCapacity =
-                std::max(16384U, targetFormat.sampleFrequency / 2);
+        size_t bufferCapacity = std::max(16'384U, targetFormat.sampleFrequency / 2);
 
         // Prepare a list of buffers, we'll stack them here and later append them
         std::list<SoundBuffer> buffers;
@@ -136,7 +131,7 @@ void OpenALSimpleSound::loadImpl(bool wait) {
             }
 
             {
-                char *buf = (char *) buffer.getBuffer();
+                char *buf = (char *)buffer.getBuffer();
                 for (std::list<SoundBuffer>::const_iterator it = buffers.begin(); it != buffers.end(); ++it) {
                     memcpy(buf, it->getBuffer(), it->getUsedBytes());
                     buf += it->getUsedBytes();
@@ -161,10 +156,8 @@ void OpenALSimpleSound::loadImpl(bool wait) {
         alGenBuffers(1, &bufferHandle);
         checkAlError();
 
-        alBufferData(bufferHandle,
-                asALFormat(targetFormat),
-                buffer.getBuffer(), buffer.getUsedBytes(),
-                targetFormat.sampleFrequency);
+        alBufferData(bufferHandle, asALFormat(targetFormat), buffer.getBuffer(), buffer.getUsedBytes(),
+                     targetFormat.sampleFrequency);
         checkAlError();
 
         onLoaded(true);
@@ -183,4 +176,4 @@ void OpenALSimpleSound::unloadImpl() {
     bufferHandle = AL_NULL_BUFFER;
 }
 
-};
+};  // namespace Audio

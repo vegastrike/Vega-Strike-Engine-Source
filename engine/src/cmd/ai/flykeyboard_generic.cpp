@@ -26,16 +26,16 @@
  */
 
 
-#include "flykeyboard.h"
 #include "cmd/unit_generic.h"
-#include "src/config_xml.h"
-#include "root_generic/xml_support.h"
-#include "root_generic/vs_globals.h"
+#include "flykeyboard.h"
 #include "root_generic/lin_time.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
 
 float FlyByKeyboard::clamp_axis(float v) {
     const int axis_scale = configuration().physics.slide_start;
-    int as = parent->computer.slide_start;
+    int       as         = parent->computer.slide_start;
     if (as == 0) {
         as = axis_scale;
     }
@@ -53,7 +53,7 @@ float FlyByKeyboard::clamp_axis(float v) {
 
 float FlyByKeyboard::reduce_axis(float v) {
     const int axis_scale = configuration().physics.slide_end;
-    int as = parent->computer.slide_end;
+    int       as         = parent->computer.slide_end;
     if (as == 0) {
         as = axis_scale;
     }
@@ -76,8 +76,7 @@ void FlyByKeyboard::Destroy() {
     Order::Destroy();
 }
 
-FlyByKeyboard::~FlyByKeyboard() {
-}
+FlyByKeyboard::~FlyByKeyboard() {}
 
 void FlyByKeyboard::KeyboardUp(float v) {
     if (v == 0) {
@@ -121,4 +120,3 @@ void FlyByKeyboard::KeyboardRollRight(float v) {
 void FlyByKeyboard::Execute() {
     FlyByKeyboard::Execute(true);
 }
-

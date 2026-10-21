@@ -27,14 +27,15 @@
  */
 
 
-#include "root_generic/lin_time.h" // GetElapsedTime
+#include "sphere_display.h"
+
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
-#include "src/gfxlib.h"
-#include "viewarea.h"
-#include "sphere_display.h"
-#include "src/physics.h"
 #include "root_generic/configxml.h"
+#include "root_generic/lin_time.h"  // GetElapsedTime
+#include "src/gfxlib.h"
+#include "src/physics.h"
+#include "viewarea.h"
 
 #define TRACK_SIZE 2.0
 
@@ -45,24 +46,24 @@ float GetDangerRate(Radar::Sensor::ThreatLevel::Value threat) {
 
     switch (threat) {
         case Sensor::ThreatLevel::High:
-            return 20.0; // Fast pulsation
+            return 20.0;  // Fast pulsation
 
         case Sensor::ThreatLevel::Medium:
-            return 7.5; // Slow pulsation
+            return 7.5;   // Slow pulsation
 
         default:
-            return 0.0; // No pulsation
+            return 0.0;   // No pulsation
     }
 }
 
-} // anonymous namespace
+}  // anonymous namespace
 
 namespace Radar {
 
 struct SphereDisplay::Impl {
     VertexBuilder<float, 3, 0, 3> points;
     VertexBuilder<float, 3, 0, 3> lines;
-    VertexBuilder<> thinlines;
+    VertexBuilder<>               thinlines;
 
     void clear() {
         points.clear();
@@ -71,17 +72,12 @@ struct SphereDisplay::Impl {
     }
 };
 
-SphereDisplay::SphereDisplay()
-        : impl(new SphereDisplay::Impl), innerSphere(0.98), radarTime(0.0) {
-}
+SphereDisplay::SphereDisplay() : impl(new SphereDisplay::Impl), innerSphere(0.98), radarTime(0.0) {}
 
-SphereDisplay::~SphereDisplay() {
-}
+SphereDisplay::~SphereDisplay() {}
 
-void SphereDisplay::Draw(const Sensor &sensor,
-        VSSprite *frontSprite,
-        VSSprite *rearSprite) {
-    assert(frontSprite || rearSprite); // There should be at least one radar display
+void SphereDisplay::Draw(const Sensor &sensor, VSSprite *frontSprite, VSSprite *rearSprite) {
+    assert(frontSprite || rearSprite);  // There should be at least one radar display
 
     radarTime += GetElapsedTime();
 
@@ -132,10 +128,7 @@ void SphereDisplay::Draw(const Sensor &sensor,
     GFXDisable(DEPTHWRITE);
 }
 
-void SphereDisplay::DrawTrack(const Sensor &sensor,
-        const ViewArea &radarView,
-        const Track &track,
-        bool negate_z) {
+void SphereDisplay::DrawTrack(const Sensor &sensor, const ViewArea &radarView, const Track &track, bool negate_z) {
     if (!radarView.IsActive()) {
         return;
     }
@@ -158,7 +151,7 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
     if (sensor.InsideNebula()) {
         Jitter(0.02, 0.04, position);
     } else {
-        const bool isNebula = (track.GetType() == Track::Type::Nebula);
+        const bool isNebula    = (track.GetType() == Track::Type::Nebula);
         const bool isEcmActive = track.HasActiveECM();
         if (isNebula || isEcmActive) {
             float error = 0.02 * TRACK_SIZE;
@@ -171,13 +164,13 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
     // innerSphere to 1.0, depending on the distance to the object. Combined
     // with the OpenGL z-buffering, this will ensure that close tracks are drawn
     // on top of distant tracks.
-    float magnitude = position.Magnitude();
-    float scaleFactor = 0.0; // [0; 1] where 0 = border, 1 = center
-    const float maxRange = sensor.GetMaxRange();
+    float       magnitude   = position.Magnitude();
+    float       scaleFactor = 0.0;  // [0; 1] where 0 = border, 1 = center
+    const float maxRange    = sensor.GetMaxRange();
     if (magnitude <= maxRange) {
         // [innerSphere; 1]
-        scaleFactor = (1.0 - innerSphere) * (maxRange - magnitude) / maxRange;
-        magnitude /= (1.0 - scaleFactor);
+        scaleFactor  = (1.0 - innerSphere) * (maxRange - magnitude) / maxRange;
+        magnitude   /= (1.0 - scaleFactor);
     }
     Vector scaledPosition = Vector(-position.x, position.y, position.z) / magnitude;
 
@@ -206,8 +199,8 @@ void SphereDisplay::DrawTrack(const Sensor &sensor,
 void SphereDisplay::DrawTargetMarker(const Vector &position, const GFXColor &color, float trackSize) {
     // Crosshair
     const float crossSize = 8.0;
-    const float xcross = crossSize / configuration().graphics.resolution_x;
-    const float ycross = crossSize / configuration().graphics.resolution_y;
+    const float xcross    = crossSize / configuration().graphics.resolution_x;
+    const float ycross    = crossSize / configuration().graphics.resolution_y;
 
     // The crosshair wiggles as it moves around. The wiggling is less noticable
     // when the crosshair is drawn with the smooth option.
@@ -226,16 +219,16 @@ void SphereDisplay::DrawBackground(const Sensor &sensor, const ViewArea &radarVi
 
     GFXColor groundColor = radarView.GetColor();
 
-    float velocity = sensor.GetPlayer()->GetWarpVelocity().Magnitude();
-    float logvelocity = 3.0; // std::log10(1000.0);
+    float velocity    = sensor.GetPlayer()->GetWarpVelocity().Magnitude();
+    float logvelocity = 3.0;  // std::log10(1000.0);
     if (velocity > 1000.0) {
         // Max logvelocity is log10(speed_of_light) = 10.46
         logvelocity = std::log10(velocity);
     }
-    const float size = 3.0 * logvelocity; // [9; 31]
+    const float size    = 3.0 * logvelocity;  // [9; 31]
     const float xground = size / configuration().graphics.resolution_x;
     const float yground = size / configuration().graphics.resolution_y;
-    Vector center = radarView.Scale(Vector(0.0, 0.0, 0.0));
+    Vector      center  = radarView.Scale(Vector(0.0, 0.0, 0.0));
 
     impl->thinlines.insert(center.x - 2.0 * xground, center.y, center.z, groundColor);
     impl->thinlines.insert(center.x - xground, center.y, center.z, groundColor);
@@ -247,4 +240,4 @@ void SphereDisplay::DrawBackground(const Sensor &sensor, const ViewArea &radarVi
     impl->thinlines.insert(center.x, center.y + yground, center.z, groundColor);
 }
 
-} // namespace Radar
+}  // namespace Radar

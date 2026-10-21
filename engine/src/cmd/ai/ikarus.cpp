@@ -26,23 +26,25 @@
  */
 
 
-#include "aggressive.h"
-#include "event_xml.h"
-#include "script.h"
+#include "ikarus.h"
+
 #include <list>
 #include <vector>
-#include "root_generic/vs_globals.h"
-#include "src/config_xml.h"
-#include "root_generic/xml_support.h"
+
+#include "aggressive.h"
+#include "cmd/script/flightgroup.h"
+#include "cmd/script/mission.h"
 #include "cmd/unit_generic.h"
 #include "communication.h"
-#include "cmd/script/flightgroup.h"
+#include "event_xml.h"
 #include "flybywire.h"
-#include "hard_coded_scripts.h"
-#include "cmd/script/mission.h"
-#include "src/universe_util.h"
 #include "gfx_generic/cockpit_generic.h"
-#include "ikarus.h"
+#include "hard_coded_scripts.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "script.h"
+#include "src/config_xml.h"
+#include "src/universe_util.h"
 using namespace Orders;
 
 Ikarus::Ikarus() : AggressiveAI("default.agg.xml") {
@@ -52,25 +54,23 @@ Ikarus::Ikarus() : AggressiveAI("default.agg.xml") {
 void Ikarus::ExecuteStrategy(Unit *target) {
     WillFire(target);
     if (queryType(Order::FACING) == NULL) {
-        //we have nothing to do now
+        // we have nothing to do now
         FaceTarget(false);
-        AddReplaceLastOrder(true);         //true stands for override any that are there
+        AddReplaceLastOrder(true);  // true stands for override any that are there
     }
     if (queryType(Order::MOVEMENT) == NULL) {
-        MatchLinearVelocity(true,
-                Vector(0, 0, 10000),
-                false,
-                true);         //all ahead full! (not with afterburners but in local coords)
+        MatchLinearVelocity(true, Vector(0, 0, 10'000), false,
+                            true);  // all ahead full! (not with afterburners but in local coords)
         AddReplaceLastOrder(true);
     }
-    //might want to enqueue both movement and facing at the same time as follows:
+    // might want to enqueue both movement and facing at the same time as follows:
     if (0) {
         ReplaceOrder(new AIScript("++turntowards.xml"));
-    }          //find this list of names in script.cpp
+    }  // find this list of names in script.cpp
 
-    cur_time += simulation_atom_var; //SIMULATION_ATOM;
+    cur_time += simulation_atom_var;  // SIMULATION_ATOM;
     if (cur_time - last_time > 5) {
-        //dosomething
+        // dosomething
 
         last_time = cur_time;
     }
@@ -82,17 +82,17 @@ void Ikarus::WillFire(Unit *target) {
         // this is a function from fire.cpp  you probably want to write a better one
         // Roy Falk - This function was actually in unit_generic and moved to armed
         // The false is coerced into unsigned int for the bitmask.
-        // I suspect that while this compiled, the boolean was not meant to do apply to the first parameter but to the second one -
-        // either beams_target_owner or listen_to_owner
+        // I suspect that while this compiled, the boolean was not meant to do apply to the first parameter but to the
+        // second one - either beams_target_owner or listen_to_owner
         parent->Fire(false);
     }
     if (missilelockp) {
-        parent->Fire(true);         //if missiles locked fire
+        parent->Fire(true);  // if missiles locked fire
         parent->ToggleWeapon(true);
     }
 }
 
-///you should certainly edit this!!
+/// you should certainly edit this!!
 void Ikarus::DecideTarget() {
     Unit *targ = parent->Target();
     if (!targ || /*some other qualifying factor for changing targets*/ 0) {
@@ -106,7 +106,8 @@ void Ikarus::DecideTarget() {
     }
 }
 
-///you can ignore the function below unless it causes problems...this merely makes it so that the AI responds to your commands
+/// you can ignore the function below unless it causes problems...this merely makes it so that the AI responds to your
+/// commands
 void Ikarus::Execute() {
     Flightgroup *fg = parent->getFlightgroup();
     ReCommandWing(fg);
@@ -114,8 +115,8 @@ void Ikarus::Execute() {
     DecideTarget();
     if (!ProcessCurrentFgDirective(fg)) {
         Unit *target = parent->Target();
-        bool isjumpable = target ? ((!target->GetDestinations().empty()) &&
-            parent->jump_drive.IsDestinationSet()) : false;
+        bool  isjumpable =
+                target ? ((!target->GetDestinations().empty()) && parent->jump_drive.IsDestinationSet()) : false;
         if (isjumpable) {
             AfterburnTurnTowards(this, parent);
         } else {
@@ -123,4 +124,3 @@ void Ikarus::Execute() {
         }
     }
 }
-

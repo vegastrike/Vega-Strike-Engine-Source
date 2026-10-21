@@ -31,21 +31,18 @@
 //
 
 #include "OpenALRenderer.h"
-#include "BorrowedOpenALRenderer.h"
-#include "OpenALHelpers.h"
 
-#include "al.h"
-
+#include "../../Listener.h"
 #include "../../Sound.h"
 #include "../../Source.h"
-#include "../../Listener.h"
-
-#include "OpenALSimpleSound.h"
-#include "OpenALStreamingSound.h"
-
+#include "al.h"
+#include "BorrowedOpenALRenderer.h"
+#include "OpenALHelpers.h"
 #include "OpenALRenderableListener.h"
 #include "OpenALRenderableSource.h"
 #include "OpenALRenderableStreamingSource.h"
+#include "OpenALSimpleSound.h"
+#include "OpenALStreamingSound.h"
 
 namespace Audio {
 
@@ -55,24 +52,19 @@ namespace OpenAL {
 
 struct RendererData {
     // The many required indexes
-    ALCdevice *alDevice;
+    ALCdevice  *alDevice;
     ALCcontext *alContext;
 
     class SoundKey {
         VSFileSystem::VSFileType type;
-        size_t nameLen;
-        std::string name;
-    public:
-        SoundKey() :
-                type(VSFileSystem::SoundFile),
-                nameLen(0) {
-        }
+        size_t                   nameLen;
+        std::string              name;
 
-        SoundKey(VSFileSystem::VSFileType _type, const std::string &_name) :
-                type(_type),
-                nameLen(_name.length()),
-                name(_name) {
-        }
+    public:
+        SoundKey() : type(VSFileSystem::SoundFile), nameLen(0) {}
+
+        SoundKey(VSFileSystem::VSFileType _type, const std::string &_name)
+            : type(_type), nameLen(_name.length()), name(_name) {}
 
         bool isNull() const {
             return nameLen == 0;
@@ -80,34 +72,28 @@ struct RendererData {
 
         bool operator<(const SoundKey &other) const {
             return (type < other.type) ||
-                    ((type == other.type) && (
-                            (nameLen < other.nameLen) ||
-                                    ((nameLen == other.nameLen) && (
-                                            name < other.name
-                                    ))
-                    ));
+                   ((type == other.type) &&
+                    ((nameLen < other.nameLen) || ((nameLen == other.nameLen) && (name < other.name))));
         }
 
         bool operator==(const SoundKey &other) const {
-            return (type == other.type) &&
-                    (nameLen == other.nameLen) &&
-                    (name == other.name);
+            return (type == other.type) && (nameLen == other.nameLen) && (name == other.name);
         }
     };
 
-    typedef std::map<SoundKey, SharedPtr<Sound> > SoundMap;
+    typedef std::map<SoundKey, SharedPtr<Sound>> SoundMap;
     typedef std::map<SharedPtr<Sound>, SoundKey> ReverseSoundMap;
 
-    SoundMap loadedSounds;
+    SoundMap        loadedSounds;
     ReverseSoundMap loadedSoundsReverse;
 
     struct {
-        int meterDistance: 1;
-        int dopplerFactor: 1;
+        int meterDistance : 1;
+        int dopplerFactor : 1;
     } dirty;
 
     SharedPtr<Sound> lookupSound(VSFileSystem::VSFileType type, const std::string &name) const {
-        SoundKey key(type, name);
+        SoundKey                 key(type, name);
         SoundMap::const_iterator it = loadedSounds.find(key);
         if (it != loadedSounds.end()) {
             return it->second;
@@ -127,7 +113,7 @@ struct RendererData {
 
     void addSound(VSFileSystem::VSFileType type, const std::string &name, SharedPtr<Sound> sound) {
         SoundKey key(type, name);
-        loadedSounds[key] = sound;
+        loadedSounds[key]          = sound;
         loadedSoundsReverse[sound] = key;
     }
 
@@ -153,21 +139,22 @@ struct RendererData {
         clearAlError();
 
         if (deviceSpecifier == NULL) {
-            #ifdef _WIN32
+#ifdef _WIN32
             deviceSpecifier = "DirectSound3D";
-            #else
-                #if defined(__APPLE__) && defined (__MACH__)
+#else
+#    if defined(__APPLE__) && defined(__MACH__)
             deviceSpecifier = "sdl";
-                #endif
-            #endif
+#    endif
+#endif
         }
 
-        alDevice = alcOpenDevice((ALCstring) (deviceSpecifier));
+        alDevice = alcOpenDevice((ALCstring)(deviceSpecifier));
 
-        if (!alDevice)
+        if (!alDevice) {
             checkAlError();
-        else
+        } else {
             clearAlError();
+        }
     }
 
     void closeDevice() {
@@ -192,16 +179,14 @@ struct RendererData {
 
         clearAlError();
 
-        ALCint params[] = {
-                ALC_FREQUENCY, static_cast<ALCint>(format.sampleFrequency),
-                0
-        };
+        ALCint params[] = {ALC_FREQUENCY, static_cast<ALCint>(format.sampleFrequency), 0};
 
         alContext = alcCreateContext(alDevice, params);
-        if (!alContext)
+        if (!alContext) {
             checkAlError();
-        else
+        } else {
             clearAlError();
+        }
 
         alcMakeContextCurrent(alContext);
         checkAlError();
@@ -230,10 +215,7 @@ struct RendererData {
         }
     }
 
-    RendererData() :
-            alDevice(NULL),
-            alContext(NULL) {
-    }
+    RendererData() : alDevice(NULL), alContext(NULL) {}
 
     ~RendererData() {
         unloadSounds();
@@ -241,22 +223,16 @@ struct RendererData {
         closeDevice();
     }
 };
-};
-};
+};  // namespace OpenAL
+};  // namespace __impl
 
 using namespace __impl::OpenAL;
 
-OpenALRenderer::OpenALRenderer() :
-        data(new RendererData) {
-}
+OpenALRenderer::OpenALRenderer() : data(new RendererData) {}
 
-OpenALRenderer::~OpenALRenderer() {
-}
+OpenALRenderer::~OpenALRenderer() {}
 
-SharedPtr<Sound> OpenALRenderer::getSound(
-        const std::string &name,
-        VSFileSystem::VSFileType type,
-        bool streaming) {
+SharedPtr<Sound> OpenALRenderer::getSound(const std::string &name, VSFileSystem::VSFileType type, bool streaming) {
     checkContext();
     SharedPtr<Sound> sound = data->lookupSound(type, name);
     if (!sound.get() || streaming) {
@@ -264,17 +240,9 @@ SharedPtr<Sound> OpenALRenderer::getSound(
             // Streaming sounds cannot be cached, so if a streaming sound
             // is in the cache, it must be evicted and re-created
             sound.reset();
-            data->addSound(
-                    type,
-                    name,
-                    sound = SharedPtr<Sound>(new OpenALStreamingSound(name, type))
-            );
+            data->addSound(type, name, sound = SharedPtr<Sound>(new OpenALStreamingSound(name, type)));
         } else {
-            data->addSound(
-                    type,
-                    name,
-                    sound = SharedPtr<Sound>(new OpenALSimpleSound(name, type))
-            );
+            data->addSound(type, name, sound = SharedPtr<Sound>(new OpenALSimpleSound(name, type)));
         }
     }
     return sound;
@@ -287,17 +255,13 @@ bool OpenALRenderer::owns(SharedPtr<Sound> sound) {
 void OpenALRenderer::attach(SharedPtr<Source> source) {
     checkContext();
     source->setRenderable(SharedPtr<RenderableSource>(
-                    source->getSound()->isStreaming()
-                            ? (RenderableSource *) new OpenALRenderableStreamingSource(source.get())
-                            : (RenderableSource *) new OpenALRenderableSource(source.get())
-            )
-    );
+            source->getSound()->isStreaming() ? (RenderableSource *)new OpenALRenderableStreamingSource(source.get())
+                                              : (RenderableSource *)new OpenALRenderableSource(source.get())));
 }
 
 void OpenALRenderer::attach(SharedPtr<Listener> listener) {
     checkContext();
-    listener->setRenderable(SharedPtr<RenderableListener>(
-            new OpenALRenderableListener(listener.get())));
+    listener->setRenderable(SharedPtr<RenderableListener>(new OpenALRenderableListener(listener.get())));
 }
 
 void OpenALRenderer::detach(SharedPtr<Source> source) {
@@ -387,8 +351,7 @@ void OpenALRenderer::setupDopplerEffect() {
     checkAlError();
 }
 
-BorrowedOpenALRenderer::BorrowedOpenALRenderer(ALCdevice *device, ALCcontext *context) :
-        OpenALRenderer() {
+BorrowedOpenALRenderer::BorrowedOpenALRenderer(ALCdevice *device, ALCcontext *context) : OpenALRenderer() {
     if (device) {
         data->alDevice = device;
     }
@@ -405,7 +368,7 @@ BorrowedOpenALRenderer::BorrowedOpenALRenderer(ALCdevice *device, ALCcontext *co
 }
 
 BorrowedOpenALRenderer::~BorrowedOpenALRenderer() {
-    data->alDevice = NULL;
+    data->alDevice  = NULL;
     data->alContext = NULL;
 }
 
@@ -418,4 +381,4 @@ void BorrowedOpenALRenderer::checkContext() {
     // No-op... context has been borrowed
 }
 
-};
+};  // namespace Audio

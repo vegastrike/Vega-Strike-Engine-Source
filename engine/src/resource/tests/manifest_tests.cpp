@@ -26,18 +26,34 @@
  */
 
 
-#include <gtest/gtest.h>
-#include <iostream>
-
-#include "resource/manifest.h"
-
 #include <cassert>
 #include <iostream>
+
+#include <gtest/gtest.h>
+
+#include "resource/manifest.h"
 
 extern std::vector<Cargo> init(const std::string& cargo_string);
 
 Manifest createManifest() {
-    std::string cargo_string = "armor06;upgrades/Armor;120685.710938;1;15.000000;0.000000;1.000000;1.000000;;false;true|capacitor08;upgrades/Capacitors/Standard;60342.941406;1;16.000000;16.000000;1.000000;1.000000;;false;true|jump_drive;upgrades/Jump_Drives;7542.944336;1;16.000000;2.000000;1.000000;1.000000;;false;true|mult_overdrive06;upgrades/Overdrive;120685.796875;1;18.000000;18.000000;1.000000;1.000000;;false;true|reactor08;upgrades/Reactors/Standard;60342.917969;1;8.000000;100.000000;1.000000;1.000000;;false;true|add_spec_capacitor02;upgrades/SPEC_Capacitors;16971.439453;1;10.000000;6.000000;1.000000;1.000000;;false;true|hawkeye4;upgrades/Sensors/Confed;150857.171875;1;0.010000;21.000000;1.000000;1.000000;;false;true|quadshield10;upgrades/Shield_Systems/Standard_Quad_Shields;241371.500000;1;10.000000;61.000000;1.000000;1.000000;;false;true|afterburner;upgrades/integral;2000.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|drive;upgrades/integral;6000.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|ftl_drive;upgrades/integral;4500.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|hull;upgrades/integral;12000.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|Slaves;Contraband;100;17;32;23;1;1;slaves to sell;false;false;false;false;false;true;true|Hitchhiker;Passengers;50;27;12;17;1;1;some people;false;false;false;false;false;true;false|passengers;Passengers;500;7;10;27;1;1;some more people;false;false;false;false;false;true;false";
+    std::string cargo_string =
+            "armor06;upgrades/"
+            "Armor;120685.710938;1;15.000000;0.000000;1.000000;1.000000;;false;true|capacitor08;upgrades/Capacitors/"
+            "Standard;60342.941406;1;16.000000;16.000000;1.000000;1.000000;;false;true|jump_drive;upgrades/"
+            "Jump_Drives;7542.944336;1;16.000000;2.000000;1.000000;1.000000;;false;true|mult_overdrive06;upgrades/"
+            "Overdrive;120685.796875;1;18.000000;18.000000;1.000000;1.000000;;false;true|reactor08;upgrades/Reactors/"
+            "Standard;60342.917969;1;8.000000;100.000000;1.000000;1.000000;;false;true|add_spec_capacitor02;upgrades/"
+            "SPEC_Capacitors;16971.439453;1;10.000000;6.000000;1.000000;1.000000;;false;true|hawkeye4;upgrades/Sensors/"
+            "Confed;150857.171875;1;0.010000;21.000000;1.000000;1.000000;;false;true|quadshield10;upgrades/"
+            "Shield_Systems/"
+            "Standard_Quad_Shields;241371.500000;1;10.000000;61.000000;1.000000;1.000000;;false;true|afterburner;"
+            "upgrades/integral;2000.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|drive;upgrades/"
+            "integral;6000.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|ftl_drive;upgrades/"
+            "integral;4500.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|hull;upgrades/"
+            "integral;12000.000000;1;0.100000;0.100000;1.000000;1.000000;;false;true|Slaves;Contraband;100;17;32;23;1;"
+            "1;slaves to sell;false;false;false;false;false;true;true|Hitchhiker;Passengers;50;27;12;17;1;1;some "
+            "people;false;false;false;false;false;true;false|passengers;Passengers;500;7;10;27;1;1;some more "
+            "people;false;false;false;false;false;true;false";
     std::vector<Cargo> ship_manifest = init(cargo_string);
 
     Manifest m;
@@ -71,13 +87,13 @@ TEST(Manifest, EmptyAndSize) {
 }
 
 TEST(Manifest, GetIndex) {
-    Manifest manifest = createManifest();
-    int armor = manifest.GetIndex("armor06");
-    int capacitor = manifest.GetIndex("capacitor08");
-    int typo = manifest.GetIndex("cpacitor08");
+    Manifest manifest  = createManifest();
+    int      armor     = manifest.GetIndex("armor06");
+    int      capacitor = manifest.GetIndex("capacitor08");
+    int      typo      = manifest.GetIndex("cpacitor08");
     ASSERT_EQ(armor, 0);
     ASSERT_EQ(capacitor, 1);
-    ASSERT_EQ(typo, -1); // Not found should return -1 
+    ASSERT_EQ(typo, -1);  // Not found should return -1
 }
 
 TEST(Manifest, HasCargo) {
@@ -88,14 +104,14 @@ TEST(Manifest, HasCargo) {
 
 TEST(Manifest, GetRandomCargo) {
     Manifest manifest = createManifest();
-    Cargo c = manifest.GetRandomCargo();
+    Cargo    c        = manifest.GetRandomCargo();
     // How to test?
 }
 
 TEST(Manifest, GetCategoryManifest) {
-    Manifest manifest = createManifest();
+    Manifest manifest      = createManifest();
     Manifest armorManifest = manifest.GetCategoryManifest("upgrades/Armor");
-    
+
     ASSERT_EQ(armorManifest.Size(), 1);
     Cargo c = armorManifest.GetCargoByName("armor06");
     ASSERT_EQ(c.GetName(), "armor06");
@@ -109,4 +125,3 @@ TEST(Manifest, Singleton) {
     // Manifest& mpl2 = Manifest::MPL();
     // assert(&mpl1 == &mpl2);
 }
-

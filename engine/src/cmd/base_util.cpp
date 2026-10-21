@@ -27,63 +27,64 @@
 
 
 #define PY_SSIZE_T_CLEAN
-//#include <Python.h>
+// #include <Python.h>
 
-#include <boost/version.hpp>
 #include <boost/python.hpp>
 
 #include <Python.h>
 
-#if BOOST_VERSION != 102800
+#include <boost/version.hpp>
+
+#if BOOST_VERSION != 102'800
 typedef boost::python::dict BoostPythonDictionary;
 #else
-#include <boost/python/objects.hpp>
+#    include <boost/python/objects.hpp>
 typedef boost::python::dictionary BoostPythonDictionary;
 #endif
 
-#if BOOST_VERSION != 102800
-#include <boost/python/object.hpp>
-#include <boost/python/dict.hpp>
+#if BOOST_VERSION != 102'800
+#    include <boost/python/dict.hpp>
+#    include <boost/python/object.hpp>
 #else
-#include <boost/python/objects.hpp>
+#    include <boost/python/objects.hpp>
 #endif
 
-#include "src/python/python_class.h"
-#include <string>
-#include <cstdlib>
-#include <cassert>
 #include <algorithm>
-#include "src/vega_cast_utils.h"
-#include "src/audiolib.h"
-#include "cmd/base.h"
-#include "cmd/base_util.h"
-#include "src/universe_util.h"
-#include "cmd/basecomputer.h"
-#include "src/main_loop.h"
-#include "cmd/music.h"
-#include "src/in_kb.h"
+#include <cassert>
+#include <cstdlib>
+#include <string>
 
+#include "audio/Renderer.h"
+#include "audio/Scene.h"
 #include "audio/SceneManager.h"
 #include "audio/Sound.h"
 #include "audio/Source.h"
 #include "audio/SourceListener.h"
-#include "audio/Renderer.h"
-#include "audio/Scene.h"
-
-#include "root_generic/configxml.h"
-#include "src/vs_logging.h"
+#include "cmd/base.h"
+#include "cmd/base_util.h"
+#include "cmd/basecomputer.h"
+#include "cmd/music.h"
 #include "components/player_ship.h"
+#include "root_generic/configxml.h"
+#include "src/audiolib.h"
+#include "src/in_kb.h"
+#include "src/main_loop.h"
+#include "src/python/python_class.h"
+#include "src/universe_util.h"
+#include "src/vega_cast_utils.h"
+#include "src/vs_logging.h"
 
 extern float getFontHeight();
 
-using Audio::Source;
-using Audio::Sound;
-using Audio::SceneManager;
-using Audio::SourceListener;
 using Audio::LVector3;
+using Audio::SceneManager;
+using Audio::Sound;
+using Audio::Source;
+using Audio::SourceListener;
 using Audio::Vector3;
 
 using namespace XMLSupport;
+
 namespace BaseUtil {
 inline BaseInterface::Room *CheckRoom(int room) {
     if (!BaseInterface::CurrentBase) {
@@ -100,34 +101,28 @@ inline BaseInterface::Room *CheckRoom(int room) {
  */
 
 class VideoAudioStreamListener : public SourceListener {
-    int sourceRoom;
+    int         sourceRoom;
     std::string index;
 
 public:
     VideoAudioStreamListener(int sourceRoom, const std::string &index) {
         // Just play events
-        events.attach =
-                events.update = 0;
-        events.play = 1;
+        events.attach = events.update = 0;
+        events.play                   = 1;
 
         this->sourceRoom = sourceRoom;
-        this->index = index;
+        this->index      = index;
     }
 
-    void onPreAttach(Source &source, bool detach) override {
-    };
+    void onPreAttach(Source &source, bool detach) override {};
 
-    void onPostAttach(Source &source, bool detach) override {
-    };
+    void onPostAttach(Source &source, bool detach) override {};
 
-    void onPrePlay(Source &source, bool stop) override {
-    };
+    void onPrePlay(Source &source, bool stop) override {};
 
-    void onPostPlay(Source &source, bool stop) override {
-    };
+    void onPostPlay(Source &source, bool stop) override {};
 
-    void onUpdate(Source &source, int updateFlags) override {
-    };
+    void onUpdate(Source &source, int updateFlags) override {};
 
     void onEndOfStream(Source &source) override {
         // Verify context before switching rooms
@@ -167,35 +162,33 @@ int Room(const std::string &text) {
     return BaseInterface::CurrentBase->rooms.size() - 1;
 }
 
-    void Texture(int room, std::string index, std::string file, float x, float y) {
-        VS_LOG_AND_FLUSH(debug, (boost::format("BaseUtil::Texture called. room: %1%; index: '%2%'; file: '%3%'; x: %4%; y: %5%") % room % index % file % x % y));
-        BaseInterface::Room *newroom = CheckRoom(room);
-        if (!newroom) {
-            return;
-        }
-        newroom->objs.push_back(new BaseInterface::Room::BaseVSSprite(file, index));
-        BaseInterface::Room::BaseVSSprite
-                *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>( newroom->objs.back());
-#ifdef BASE_MAKER
-        p_base_vs_sprite->texfile = file;
-#endif
-        float tx = 0, ty = 0;
-        const bool addspritepos = configuration().graphics.offset_sprites_by_pos;
-        if (addspritepos) {
-            p_base_vs_sprite->spr.GetPosition(tx, ty);
-        }
-        p_base_vs_sprite->spr.SetPosition(x + tx, y + ty);
+void Texture(int room, std::string index, std::string file, float x, float y) {
+    VS_LOG_AND_FLUSH(debug,
+                     (boost::format("BaseUtil::Texture called. room: %1%; index: '%2%'; file: '%3%'; x: %4%; y: %5%") %
+                      room % index % file % x % y));
+    BaseInterface::Room *newroom = CheckRoom(room);
+    if (!newroom) {
+        return;
     }
+    newroom->objs.push_back(new BaseInterface::Room::BaseVSSprite(file, index));
+    BaseInterface::Room::BaseVSSprite *p_base_vs_sprite =
+            vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs.back());
+#ifdef BASE_MAKER
+    p_base_vs_sprite->texfile = file;
+#endif
+    float      tx = 0, ty = 0;
+    const bool addspritepos = configuration().graphics.offset_sprites_by_pos;
+    if (addspritepos) {
+        p_base_vs_sprite->spr.GetPosition(tx, ty);
+    }
+    p_base_vs_sprite->spr.SetPosition(x + tx, y + ty);
+}
 
 SharedPtr<Source> CreateVideoSoundStream(const std::string &afile, const std::string &scene) {
-    SharedPtr<Sound> sound = SceneManager::getSingleton()->getRenderer()->getSound(
-            afile,
-            VSFileSystem::VideoFile,
-            true);
+    SharedPtr<Sound> sound =
+            SceneManager::getSingleton()->getRenderer()->getSound(afile, VSFileSystem::VideoFile, true);
 
-    SharedPtr<Source> source = SceneManager::getSingleton()->createSource(
-            sound,
-            false);
+    SharedPtr<Source> source = SceneManager::getSingleton()->createSource(sound, false);
 
     source->setAttenuated(false);
     source->setRelative(true);
@@ -224,13 +217,13 @@ bool Video(int room, std::string index, std::string vfile, std::string afile, fl
     }
     BaseUtil::Texture(room, index, vfile, x, y);
 
-    BaseInterface::Room::BaseVSSprite
-            *baseSprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>( newroom->objs.back());
+    BaseInterface::Room::BaseVSSprite *baseSprite =
+            vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs.back());
 
     if (!afile.empty()) {
         if (g_game.sound_enabled) {
             try {
-                baseSprite->soundscene = "video";
+                baseSprite->soundscene  = "video";
                 baseSprite->soundsource = CreateVideoSoundStream(afile, baseSprite->soundscene);
                 baseSprite->spr.SetTimeSource(baseSprite->soundsource);
             } catch (const Audio::FileOpenException &e) {
@@ -258,7 +251,7 @@ bool VideoStream(int room, std::string index, std::string streamfile, float x, f
     newobj->SetSize(w, h);
 
 #ifdef BASE_MAKER
-    newobj->texfile = streamfile;   // Is this correct? SGT 2026-05-04
+    newobj->texfile = streamfile;  // Is this correct? SGT 2026-05-04
 #endif
 
     if (newobj->spr.LoadSuccess()) {
@@ -286,8 +279,7 @@ void SetVideoCallback(int room, std::string index, std::string callback) {
                 movie->setCallback(callback);
 
                 if (movie->soundsource) {
-                    SharedPtr<SourceListener> transitionListener(
-                            new VideoAudioStreamListener(room, index));
+                    SharedPtr<SourceListener> transitionListener(new VideoAudioStreamListener(room, index));
 
                     movie->soundsource->setSourceListener(transitionListener);
                 }
@@ -304,8 +296,8 @@ void SetTexture(int room, std::string index, std::string file) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                BaseInterface::Room::BaseVSSprite
-                        *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
+                BaseInterface::Room::BaseVSSprite *p_base_vs_sprite =
+                        vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
                 p_base_vs_sprite->SetSprite(file);
             }
         }
@@ -320,8 +312,8 @@ void SetTextureSize(int room, std::string index, float w, float h) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                BaseInterface::Room::BaseVSSprite
-                        *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
+                BaseInterface::Room::BaseVSSprite *p_base_vs_sprite =
+                        vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
                 p_base_vs_sprite->SetSize(w, h);
             }
         }
@@ -336,8 +328,8 @@ void SetTexturePos(int room, std::string index, float x, float y) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                BaseInterface::Room::BaseVSSprite
-                        *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
+                BaseInterface::Room::BaseVSSprite *p_base_vs_sprite =
+                        vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
                 p_base_vs_sprite->SetPos(x, y);
             }
         }
@@ -352,8 +344,8 @@ void PlayVideo(int room, std::string index) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                BaseInterface::Room::BaseVSSprite
-                        *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
+                BaseInterface::Room::BaseVSSprite *p_base_vs_sprite =
+                        vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
                 SharedPtr<Source> source = p_base_vs_sprite->soundsource;
                 assert(source && source.get() != nullptr);
                 if (source && !source->isPlaying()) {
@@ -372,8 +364,8 @@ void StopVideo(int room, std::string index) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                BaseInterface::Room::BaseVSSprite
-                        *p_base_vs_sprite = vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
+                BaseInterface::Room::BaseVSSprite *p_base_vs_sprite =
+                        vega_dynamic_cast_ptr<BaseInterface::Room::BaseVSSprite>(newroom->objs[i]);
                 SharedPtr<Source> source = p_base_vs_sprite->soundsource;
                 if (source && source->isPlaying()) {
                     source->stopPlaying();
@@ -408,38 +400,26 @@ void RunScript(int room, std::string ind, std::string pythonfile, float time) {
     newroom->objs.push_back(new BaseInterface::Room::BasePython(ind, pythonfile, time));
 }
 
-    void TextBox(int room,
-                std::string ind,
-                std::string text,
-                float x,
-                float y,
-                Vector widheimult,
-                Vector backcol,
-                float backalp,
-                Vector forecol) {
+void TextBox(int room, std::string ind, std::string text, float x, float y, Vector widheimult, Vector backcol,
+             float backalp, Vector forecol) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
     }
     newroom->objs.push_back(new BaseInterface::Room::BaseText(text, x, y, widheimult.i, widheimult.j, widheimult.k,
-            GFXColor(backcol.i, backcol.j, backcol.k, backalp), GFXColor(forecol.i, forecol.j, forecol.k), ind));
+                                                              GFXColor(backcol.i, backcol.j, backcol.k, backalp),
+                                                              GFXColor(forecol.i, forecol.j, forecol.k), ind));
 }
 
-    void TextBox(int room,
-                 std::string ind,
-                 std::string text,
-                 float x,
-                 float y,
-                 Vector widheimult,
-                 GFXColor backcol,
-                 float backalp,
-                 GFXColor forecol) {
+void TextBox(int room, std::string ind, std::string text, float x, float y, Vector widheimult, GFXColor backcol,
+             float backalp, GFXColor forecol) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
     }
     newroom->objs.push_back(new BaseInterface::Room::BaseText(text, x, y, widheimult.i, widheimult.j, widheimult.k,
-            GFXColor(backcol.r, backcol.g, backcol.b, backalp), GFXColor(forecol), ind));
+                                                              GFXColor(backcol.r, backcol.g, backcol.b, backalp),
+                                                              GFXColor(forecol), ind));
 }
 
 void SetTextBoxText(int room, std::string index, std::string text) {
@@ -450,8 +430,8 @@ void SetTextBoxText(int room, std::string index, std::string text) {
     for (size_t i = 0; i < newroom->objs.size(); i++) {
         if (newroom->objs[i]) {
             if (newroom->objs[i]->index == index) {
-                BaseInterface::Room::BaseText
-                        *p_base_text = vega_dynamic_cast_ptr<BaseInterface::Room::BaseText>(newroom->objs[i]);
+                BaseInterface::Room::BaseText *p_base_text =
+                        vega_dynamic_cast_ptr<BaseInterface::Room::BaseText>(newroom->objs[i]);
                 p_base_text->SetText(text);
             }
         }
@@ -466,8 +446,8 @@ void SetLinkArea(int room, std::string index, float x, float y, float wid, float
     for (size_t i = 0; i < newroom->links.size(); i++) {
         if (newroom->links[i]) {
             if (newroom->links[i]->index == index) {
-                newroom->links[i]->x = x;
-                newroom->links[i]->y = y;
+                newroom->links[i]->x   = x;
+                newroom->links[i]->y   = y;
                 newroom->links[i]->wid = wid;
                 newroom->links[i]->hei = hei;
             }
@@ -512,7 +492,7 @@ void SetLinkRoom(int room, std::string index, int to) {
         if (newroom->links[i]) {
             if (newroom->links[i]->index == index) {
                 BaseInterface::Room::Goto *p_goto = vega_dynamic_cast_ptr<BaseInterface::Room::Goto>(newroom->links[i]);
-                p_goto->index = to;
+                p_goto->index                     = to;
             }
         }
     }
@@ -520,7 +500,7 @@ void SetLinkRoom(int room, std::string index, int to) {
 
 void SetLinkEventMask(int room, std::string index, std::string maskdef) {
     size_t i;
-    //c=click, u=up, d=down, e=enter, l=leave, m=move
+    // c=click, u=up, d=down, e=enter, l=leave, m=move
     unsigned int mask = 0;
     for (i = 0; i < maskdef.length(); ++i) {
         switch (maskdef[i]) {
@@ -547,7 +527,7 @@ void SetLinkEventMask(int room, std::string index, std::string maskdef) {
             case 'm':
             case 'M':
                 VS_LOG(warning,
-                        (boost::format("%1$s: WARNING: Ignoring request for movement event mask.\n") % __FILE__));
+                       (boost::format("%1$s: WARNING: Ignoring request for movement event mask.\n") % __FILE__));
                 break;
             default:
                 VS_LOG(error, (boost::format("unknown mask %1$s\n") % maskdef[i]));
@@ -568,23 +548,18 @@ void SetLinkEventMask(int room, std::string index, std::string maskdef) {
     }
 }
 
-static void BaseLink(BaseInterface::Room *room,
-        float x,
-        float y,
-        float wid,
-        float hei,
-        std::string text,
-        bool reverse = false) {
+static void BaseLink(BaseInterface::Room *room, float x, float y, float wid, float hei, std::string text,
+                     bool reverse = false) {
     BaseInterface::Room::Link *lnk;
     if (reverse) {
         lnk = room->links.front();
     } else {
         lnk = room->links.back();
     }
-    lnk->x = x;
-    lnk->y = y;
-    lnk->wid = wid;
-    lnk->hei = hei;
+    lnk->x    = x;
+    lnk->y    = y;
+    lnk->wid  = wid;
+    lnk->hei  = hei;
     lnk->text = text;
 }
 
@@ -592,15 +567,8 @@ void Link(int room, std::string index, float x, float y, float wid, float hei, s
     LinkPython(room, index, "", x, y, wid, hei, text, to);
 }
 
-void LinkPython(int room,
-        std::string index,
-        std::string pythonfile,
-        float x,
-        float y,
-        float wid,
-        float hei,
-        std::string text,
-        int to) {
+void LinkPython(int room, std::string index, std::string pythonfile, float x, float y, float wid, float hei,
+                std::string text, int to) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -614,14 +582,8 @@ void Launch(int room, std::string index, float x, float y, float wid, float hei,
     LaunchPython(room, index, "", x, y, wid, hei, text);
 }
 
-void LaunchPython(int room,
-        std::string index,
-        std::string pythonfile,
-        float x,
-        float y,
-        float wid,
-        float hei,
-        std::string text) {
+void LaunchPython(int room, std::string index, std::string pythonfile, float x, float y, float wid, float hei,
+                  std::string text) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -630,14 +592,8 @@ void LaunchPython(int room,
     BaseLink(newroom, x, y, wid, hei, text);
 }
 
-void EjectPython(int room,
-        std::string index,
-        std::string pythonfile,
-        float x,
-        float y,
-        float wid,
-        float hei,
-        std::string text) {
+void EjectPython(int room, std::string index, std::string pythonfile, float x, float y, float wid, float hei,
+                 std::string text) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -650,15 +606,8 @@ void Comp(int room, std::string index, float x, float y, float wid, float hei, s
     CompPython(room, index, "", x, y, wid, hei, text, modes);
 }
 
-void CompPython(int room,
-        std::string index,
-        std::string pythonfile,
-        float x,
-        float y,
-        float wid,
-        float hei,
-        std::string text,
-        std::string modes) {
+void CompPython(int room, std::string index, std::string pythonfile, float x, float y, float wid, float hei,
+                std::string text, std::string modes) {
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -678,9 +627,9 @@ void CompPython(int room,
             EnumMap::Pair("UNKNOWN", static_cast<int>(DisplayMode::LOADSAVE)),
     };
     static const EnumMap modemap(modelist, sizeof(modelist) / sizeof(*modelist));
-    const char *newmode = modes.c_str();
-    int newlen = modes.size();
-    char *curmode = new char[newlen + 1];
+    const char          *newmode = modes.c_str();
+    int                  newlen  = modes.size();
+    char                *curmode = new char[newlen + 1];
     for (int i = 0; i < newlen;) {
         int j;
         for (j = 0; newmode[i] != ' ' && newmode[i] != '\0'; i++, j++) {
@@ -692,30 +641,23 @@ void CompPython(int room,
         if (j == 0) {
             continue;
         }
-        //in other words, if j is 0 then the 0th index will become null
-        //EnumMap crashes if the string is empty.
-        curmode[j] = '\0';
+        // in other words, if j is 0 then the 0th index will become null
+        // EnumMap crashes if the string is empty.
+        curmode[j]  = '\0';
         int modearg = modemap.lookup(curmode);
         if (modearg < RAW_DISPLAY_MODE(DisplayMode::DISPLAY_MODE_COUNT)) {
             newcomp->modes.push_back(static_cast<DisplayMode>(modearg));
         } else {
             VS_LOG(warning,
-                    (boost::format("WARNING: Unknown computer mode %1$s found in python script...\n") % curmode));
+                   (boost::format("WARNING: Unknown computer mode %1$s found in python script...\n") % curmode));
         }
     }
     delete[] curmode;
 }
 
-void Python(int room,
-        std::string index,
-        float x,
-        float y,
-        float wid,
-        float hei,
-        std::string text,
-        std::string pythonfile,
-        bool front) {
-    //instead of "Talk"/"Say" tags
+void Python(int room, std::string index, float x, float y, float wid, float hei, std::string text,
+            std::string pythonfile, bool front) {
+    // instead of "Talk"/"Say" tags
     BaseInterface::Room *newroom = CheckRoom(room);
     if (!newroom) {
         return;
@@ -739,16 +681,16 @@ void MessageToRoom(int room, std::string text) {
     if (!BaseInterface::CurrentBase) {
         return;
     }
-    BaseInterface::CurrentBase->rooms[room]->objs
-            .push_back(new BaseInterface::Room::BaseTalk(text, "currentmsg", true));
+    BaseInterface::CurrentBase->rooms[room]->objs.push_back(
+            new BaseInterface::Room::BaseTalk(text, "currentmsg", true));
 }
 
 void EnqueueMessageToRoom(int room, std::string text) {
     if (!BaseInterface::CurrentBase) {
         return;
     }
-    BaseInterface::CurrentBase->rooms[room]->objs
-            .push_back(new BaseInterface::Room::BaseTalk(text, "currentmsg", false));
+    BaseInterface::CurrentBase->rooms[room]->objs.push_back(
+            new BaseInterface::Room::BaseTalk(text, "currentmsg", false));
 }
 
 void Message(std::string text) {
@@ -771,7 +713,9 @@ void EraseLink(const int room, std::string index) {
         return;
     }
     const auto first_to_remove = std::stable_partition(new_room->links.begin(), new_room->links.end(),
-            [index](const BaseInterface::Room::Link * link_ptr) { return link_ptr != nullptr && link_ptr->index != index; });
+                                                       [index](const BaseInterface::Room::Link *link_ptr) {
+                                                           return link_ptr != nullptr && link_ptr->index != index;
+                                                       });
     new_room->links.erase(first_to_remove, new_room->links.end());
 }
 
@@ -780,8 +724,9 @@ void EraseObj(const int room, std::string index) {
     if (!new_room) {
         return;
     }
-    const auto first_to_remove = std::stable_partition(new_room->objs.begin(), new_room->objs.end(),
-            [index](const BaseInterface::Room::BaseObj * obj) { return obj != nullptr && obj->index != index; });
+    const auto first_to_remove = std::stable_partition(
+            new_room->objs.begin(), new_room->objs.end(),
+            [index](const BaseInterface::Room::BaseObj *obj) { return obj != nullptr && obj->index != index; });
     new_room->objs.erase(first_to_remove, new_room->objs.end());
 }
 
@@ -812,13 +757,13 @@ int GetNumRoom() {
 
 bool BuyShip(std::string name, bool my_fleet, bool force_base_inventory) {
     Unit *base = BaseInterface::CurrentBase->baseun.GetUnit();
-    Unit *un = BaseInterface::CurrentBase->caller.GetUnit();
+    Unit *un   = BaseInterface::CurrentBase->caller.GetUnit();
 
     try {
         // Get cargo
         Cargo cargo = Manifest::MPL().GetCargoByName(name);
         return ::buyShip(base, un, &cargo, nullptr);
-    } catch(ManifestCargoNotFoundException& e) {
+    } catch (ManifestCargoNotFoundException &e) {
         VS_LOG(error, e.what());
     }
 
@@ -827,9 +772,9 @@ bool BuyShip(std::string name, bool my_fleet, bool force_base_inventory) {
 
 // This function is not used
 bool SellShip(std::string name) {
-    Unit *base = BaseInterface::CurrentBase->baseun.GetUnit();
-    Unit *un = BaseInterface::CurrentBase->caller.GetUnit();
-    PlayerShip& ship = PlayerShip::GetShipByName(name);
+    Unit       *base = BaseInterface::CurrentBase->baseun.GetUnit();
+    Unit       *un   = BaseInterface::CurrentBase->caller.GetUnit();
+    PlayerShip &ship = PlayerShip::GetShipByName(name);
     return ::sellShip(base, un, &(ship.cargo), nullptr);
 }
 
@@ -845,12 +790,12 @@ void SetEventData(BoostPythonDictionary data) {
 void SetMouseEventData(std::string type, float x, float y, int buttonMask) {
     BoostPythonDictionary &data = _GetEventData();
 
-    //Event type
+    // Event type
     data["type"] = type;
 
-    //Mouse data
-    data["mousex"] = x;
-    data["mousey"] = y;
+    // Mouse data
+    data["mousex"]       = x;
+    data["mousey"]       = y;
     data["mousebuttons"] = buttonMask;
 
     SetKeyStatusEventData();
@@ -858,23 +803,23 @@ void SetMouseEventData(std::string type, float x, float y, int buttonMask) {
 
 void SetKeyStatusEventData(unsigned int modmask) {
     BoostPythonDictionary &data = _GetEventData();
-    //Keyboard modifiers (for kb+mouse)
+    // Keyboard modifiers (for kb+mouse)
     if (modmask == UINT_MAX) {
         modmask = pullActiveModifiers();
     }
     data["modifiers"] = modmask;
-    data["alt"] = ((modmask & KB_MOD_ALT) != 0);
-    data["shift"] = ((modmask & KB_MOD_SHIFT) != 0);
-    data["ctrl"] = ((modmask & KB_MOD_CTRL) != 0);
+    data["alt"]       = ((modmask & KB_MOD_ALT) != 0);
+    data["shift"]     = ((modmask & KB_MOD_SHIFT) != 0);
+    data["ctrl"]      = ((modmask & KB_MOD_CTRL) != 0);
 }
 
 void SetKeyEventData(std::string type, unsigned int keycode, unsigned int modmask) {
     BoostPythonDictionary &data = _GetEventData();
 
-    //Event type
+    // Event type
     data["type"] = type;
 
-    //Keycode
+    // Keycode
     data["key"] = keycode;
     if ((keycode > 0x20) && (keycode < 0xff)) {
         data["char"] = string(1, keycode);
@@ -896,7 +841,7 @@ float GetTextHeight(std::string text, Vector widheimult) {
 
 //  Python accessor, not used in cpp
 float GetTextWidth(std::string text, Vector widheimult) {
-    //Unsupported for now
+    // Unsupported for now
     return 0;
 }
 
@@ -914,15 +859,14 @@ void LoadBaseInterfaceAtDock(string name, Unit *dockat, Unit *dockee) {
 
 void refreshBaseComputerUI(const Cargo *carg) {
     if (carg) {
-        //BaseComputer::draw() used dirty to determine what to recalculate.
-        BaseComputer::dirty = 1;               //everything.
+        // BaseComputer::draw() used dirty to determine what to recalculate.
+        BaseComputer::dirty = 1;  // everything.
     } else {
         BaseComputer::dirty = 2;
-    }               //only title.
+    }  // only title.
 }
 
 void ExitGame() {
     CockpitKeys::QuitNow();
 }
-}
-
+}  // namespace BaseUtil

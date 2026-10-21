@@ -51,15 +51,17 @@ string GetUnitDir(string filename) {
     return string("");
 }
 
-char SERVER = 2;
-float simulation_atom_var = (float) 1.0 / 10.0;
-float audio_atom_var = (float) 1.0 / 18.0;
+char  SERVER              = 2;
+float simulation_atom_var = (float)1.0 / 10.0;
+float audio_atom_var      = (float)1.0 / 18.0;
+
 class NetClient {};
+
 NetClient *Network;
 
 int main(int argc, char **argv) {
     InitTime();
-    setNewTime(((double) time(NULL)) - VEGA_EPOCH);
+    setNewTime(((double)time(NULL)) - VEGA_EPOCH);
     AccountServer *Server = new AccountServer;
 
     Server->start();
@@ -67,4 +69,3 @@ int main(int argc, char **argv) {
     delete Server;
     return 0;
 }
-

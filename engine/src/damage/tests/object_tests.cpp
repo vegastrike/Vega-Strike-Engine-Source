@@ -32,13 +32,13 @@
 
 // Demonstrate some basic assertions.
 TEST(DamageableObject, Sanity) {
-    CoreVector core_vector(1, 1, 1); // Left top front
+    CoreVector core_vector(1, 1, 1);  // Left top front
 
     DamageableObject object;
 
-    DamageableLayer hull = DamageableLayer(0, FacetConfiguration::one, 50, Damage(1.0,1.0), true);
-    DamageableLayer armor = DamageableLayer(1, FacetConfiguration::four, 100, Damage(1.0,1.0), false);
-    DamageableLayer shield = DamageableLayer(2, FacetConfiguration::four, 200, Damage(1.0,0.0), false);
+    DamageableLayer hull   = DamageableLayer(0, FacetConfiguration::one, 50, Damage(1.0, 1.0), true);
+    DamageableLayer armor  = DamageableLayer(1, FacetConfiguration::four, 100, Damage(1.0, 1.0), false);
+    DamageableLayer shield = DamageableLayer(2, FacetConfiguration::four, 200, Damage(1.0, 0.0), false);
 
     EXPECT_EQ(hull.Layer(), 0);
     EXPECT_EQ(armor.Layer(), 1);
@@ -50,7 +50,7 @@ TEST(DamageableObject, Sanity) {
 
     Damage damage;
     damage.normal_damage = 10;
-    damage.phase_damage = 0;
+    damage.phase_damage  = 0;
 
     InflictedDamage inflicted_damage = object.DealDamage(core_vector, damage);
     EXPECT_EQ(object.layers[0]->Percent(0), 1.0);

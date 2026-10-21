@@ -27,14 +27,16 @@
  */
 
 
+#include "gfx/radar/radar.h"
+
 #include <cassert>
 #include <stdexcept>
-#include "sensor.h"
-#include "gfx/radar/radar.h"
-#include "null_display.h"
-#include "sphere_display.h"
+
 #include "bubble_display.h"
+#include "null_display.h"
 #include "plane_display.h"
+#include "sensor.h"
+#include "sphere_display.h"
 
 namespace Radar {
 
@@ -58,4 +60,4 @@ std::unique_ptr<Display> Factory(Type::Value type) {
     }
 }
 
-} // namespace Radar
+}  // namespace Radar

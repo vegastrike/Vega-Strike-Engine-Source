@@ -26,18 +26,18 @@
  */
 
 
-#include "gfx_generic/mesh.h"
-#include "root_generic/lin_time.h"
-#include "root_generic/faction_generic.h"
 #include "cmd/unit_generic.h"
 #include "gfx/camera.h"
+#include "gfx_generic/mesh.h"
+#include "root_generic/faction_generic.h"
+#include "root_generic/lin_time.h"
 #include "src/config_xml.h"
 #include "src/universe.h"
 
 struct warptrails {
-    vector<Mesh *> factions;
+    vector<Mesh *>             factions;
     vector<struct WarpTrail *> warps;
-    void Draw();
+    void                       Draw();
 };
 
 warptrails wt;
@@ -45,12 +45,12 @@ warptrails wt;
 Mesh *GetWarpMesh(int faction, warptrails *wt);
 
 struct WarpTrail {
-    QVector start;
+    QVector       start;
     UnitContainer cur;
-    float tim;
+    float         tim;
 
     WarpTrail(Unit *un, QVector beg, float tim) : cur(un) {
-        start = beg;
+        start     = beg;
         this->tim = tim;
     }
 
@@ -80,8 +80,8 @@ struct WarpTrail {
 #else
 
     bool Draw(warptrails *w) {
-        tim -= GetElapsedTime();
-        Unit *un = cur.GetUnit();
+        tim      -= GetElapsedTime();
+        Unit *un  = cur.GetUnit();
         if (!un) {
             return false;
         }
@@ -90,23 +90,23 @@ struct WarpTrail {
             return false;
         }
         QVector end(un->Position());
-        float length = (end - start).Magnitude();
-        float d = (end - _Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
-        Vector p, q, r;
+        float   length = (end - start).Magnitude();
+        float   d      = (end - _Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
+        Vector  p, q, r;
         r = (end - start).Cast();
         r.Normalize();
-        const double stretch = configuration().graphics.warp_trail_stretch_dbl;
-        r *= un->rSize() * stretch;
-        q = Vector(0, 1, 0);
-        p = r.Cross(q);
-        q = p.Cross(r);
+        const double stretch  = configuration().graphics.warp_trail_stretch_dbl;
+        r                    *= un->rSize() * stretch;
+        q                     = Vector(0, 1, 0);
+        p                     = r.Cross(q);
+        q                     = p.Cross(r);
         p.Normalize();
         p *= un->rSize();
         q.Normalize();
         q *= un->rSize();
         Matrix matrix(p, q, r, end);
         m->Draw(length, matrix, d);
-        d = (start - _Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
+        d        = (start - _Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
         matrix.p = start + r;
         m->Draw(length, matrix, d);
         return tim > 0;
@@ -138,8 +138,8 @@ Mesh *GetWarpMesh(int faction, warptrails *w) {
     while (faction >= static_cast<int>(w->factions.size())) {
         w->factions.push_back(NULL);
     }
-    string fac = FactionUtil::GetFaction(faction);
-    fac += "_warp.bfxm";
+    string fac  = FactionUtil::GetFaction(faction);
+    fac        += "_warp.bfxm";
     VSError err;
     if ((err = LookForFile(fac, MeshFile)) > Ok) {
         fac = "neutral_warp.bfxm";
@@ -152,4 +152,3 @@ Mesh *GetWarpMesh(int faction, warptrails *w) {
     }
     return w->factions[faction];
 }
-

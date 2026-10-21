@@ -26,12 +26,13 @@
  */
 
 
+#include <fstream>
+#include <iostream>
+#include <iterator>
+
 #include <gtest/gtest.h>
 
 #include "cmd/unit_csv_factory.h"
-#include <iostream>
-#include <fstream>
-#include <iterator>
 
 TEST(CSV, Sanity) {
     // This may not work for all deployments.

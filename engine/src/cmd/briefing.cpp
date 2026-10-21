@@ -27,23 +27,24 @@
 
 
 #include "briefing.h"
-#include "cmd/unit_generic.h"
-#include "gfx_generic/mesh.h"
+
 #include "cmd/script/mission.h"
+#include "cmd/unit_generic.h"
 #include "gfx/ani_texture.h"
 #include "gfx_generic/matrix.h"
+#include "gfx_generic/mesh.h"
 #include "src/universe.h"
 
 Briefing::Ship::Ship(const char *filename, int faction, const Vector &position) {
     VSCONSTRUCT2('s')
     Unit *tmp = new Unit(filename, true, faction);
-    meshdata = tmp->StealMeshes();
+    meshdata  = tmp->StealMeshes();
     tmp->Kill();
     cloak = 1;
     SetPosition(position);
 }
 
-void Briefing::SetCloak(int w, float c) //FIXME This could use better names than "w" and "c" --chuck starchaser
+void Briefing::SetCloak(int w, float c)  // FIXME This could use better names than "w" and "c" --chuck starchaser
 {
     if (w >= 0 && w < static_cast<int>(starships.size())) {
         starships[w]->cloak = c;
@@ -52,11 +53,11 @@ void Briefing::SetCloak(int w, float c) //FIXME This could use better names than
 
 bool UpdatePosition(Vector &res, Vector cur, Vector fin, float speed) {
     Vector direction(fin - cur);
-    float dirmag = direction.Magnitude();
-    bool ret = true;
+    float  dirmag = direction.Magnitude();
+    bool   ret    = true;
     if (dirmag > 0 && dirmag > speed * simulation_atom_var) {
         direction = direction * (speed * simulation_atom_var / dirmag);
-        ret = false;
+        ret       = false;
     }
     res = direction + cur;
     return ret;
@@ -150,31 +151,31 @@ Briefing::~Briefing() {
 }
 
 void Briefing::RemoveStarship(int which) {
-    if (which < (int) starships.size() && which >= 0) {
+    if (which < (int)starships.size() && which >= 0) {
         starships[which]->Destroy();
     }
 }
 
 void Briefing::EnqueueOrder(int which, const Vector &dest, float time) {
-    if (which < (int) starships.size() && which >= 0) {
+    if (which < (int)starships.size() && which >= 0) {
         starships[which]->EnqueueOrder(dest, time);
     }
 }
 
 void Briefing::OverrideOrder(int which, const Vector &dest, float time) {
-    if (which < (int) starships.size() && which >= 0) {
+    if (which < (int)starships.size() && which >= 0) {
         starships[which]->OverrideOrder(dest, time);
     }
 }
 
 void Briefing::SetPosition(int which, const Vector &Position) {
-    if (which < (int) starships.size() && which >= 0) {
+    if (which < (int)starships.size() && which >= 0) {
         starships[which]->SetPosition(Position);
     }
 }
 
 Vector Briefing::GetPosition(int which) {
-    if (which < (int) starships.size() && which >= 0) {
+    if (which < (int)starships.size() && which >= 0) {
         return starships[which]->Position();
     }
     return Vector(0, 0, 0);
@@ -214,7 +215,6 @@ void Briefing::Ship::OverrideOrder(const Vector &destination, float time) {
 void Briefing::Ship::EnqueueOrder(const Vector &destination, float time) {
     if (time < .00001) {
         time = SIMULATION_ATOM;
-    } // simulation_atom_var?
+    }  // simulation_atom_var?
     orders.push_back(BriefingOrder(destination, (destination - Position()).Magnitude() / time));
 }
-

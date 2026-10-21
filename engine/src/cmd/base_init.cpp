@@ -28,51 +28,53 @@
 
 #define PY_SSIZE_T_CLEAN
 
-#include <boost/version.hpp>
 #include <boost/python.hpp>
-#if BOOST_VERSION != 102800
+
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102'800
 typedef boost::python::dict BoostPythonDictionary;
 #else
-#include <boost/python/objects.hpp>
+#    include <boost/python/objects.hpp>
 typedef boost::python::dictionary BoostPythonDictionary;
 #endif
 #include <math.h>
-#if BOOST_VERSION != 102800
-#include <boost/python/object.hpp>
-#include <boost/python/dict.hpp>
+#if BOOST_VERSION != 102'800
+#    include <boost/python/dict.hpp>
+#    include <boost/python/object.hpp>
 #else
-#include <boost/python/objects.hpp>
+#    include <boost/python/objects.hpp>
 #endif
 
 #include <Python.h>
-#include "src/python/python_class.h"
+
 #include "cmd/base.h"
 #include "cmd/base_util.h"
-#include "vegadisk/vsfilesystem.h"
 #include "root_generic/vega_random.h"
+#include "src/python/python_class.h"
+#include "vegadisk/vsfilesystem.h"
 
 static BoostPythonDictionary GetEventDataPython() {
     return BaseUtil::GetEventData();
 }
 
 static boost::python::tuple GetRandomBarMessage() {
-    gameMessage last;
-    int i = 0;
+    gameMessage         last;
+    int                 i = 0;
     vector<std::string> who;
     vector<std::string> say;
     vector<std::string> sounds;
-    string newmsg;
-    string newsound;
+    string              newmsg;
+    string              newsound;
     who.push_back("bar");
     while ((mission->msgcenter->last(i++, last, who))) {
-        newmsg = last.message;
-        newsound = "";
+        newmsg                       = last.message;
+        newsound                     = "";
         std::string::size_type first = newmsg.find_first_of("[");
         {
             string::size_type last = newmsg.find_first_of("]");
             if (first != string::npos && (first + 1) < newmsg.size()) {
                 newsound = newmsg.substr(first + 1, last - first - 1);
-                newmsg = newmsg.substr(0, first);
+                newmsg   = newmsg.substr(0, first);
             }
         }
         sounds.push_back(newsound);
@@ -118,8 +120,14 @@ BOOST_PYTHON_MODULE(Base) {
     boost::python::def("EraseObj", &BaseUtil::EraseObj);
     boost::python::def("GetRandomBarMessage", &::GetRandomBarMessage);
     boost::python::def("RunScript", &BaseUtil::RunScript);
-    boost::python::def("TextBox", static_cast<void (*)(int, std::string, std::string, float, float, Vector, GFXColor, float, GFXColor)>(&BaseUtil::TextBox));
-    boost::python::def("TextBox", static_cast<void (*)(int, std::string, std::string, float, float, Vector, Vector, float, Vector)>(&BaseUtil::TextBox));
+    boost::python::def(
+            "TextBox",
+            static_cast<void (*)(int, std::string, std::string, float, float, Vector, GFXColor, float, GFXColor)>(
+                    &BaseUtil::TextBox));
+    boost::python::def(
+            "TextBox",
+            static_cast<void (*)(int, std::string, std::string, float, float, Vector, Vector, float, Vector)>(
+                    &BaseUtil::TextBox));
     boost::python::def("SetTextBoxText", &BaseUtil::SetTextBoxText);
     boost::python::def("GlobalKeyPython", &BaseUtil::GlobalKeyPython);
     boost::python::def("SetLinkArea", &BaseUtil::SetLinkArea);
@@ -139,7 +147,6 @@ BOOST_PYTHON_MODULE(Base) {
 
     boost::python::def("LoadBaseInterface", &BaseUtil::LoadBaseInterface);
     boost::python::def("ExitGame", &BaseUtil::ExitGame);
-
 }
 
 void InitBase() {
@@ -151,4 +158,3 @@ void InitBase2() {
     PYTHON_INIT_MODULE(Base);
     Python::reseterrors();
 }
-

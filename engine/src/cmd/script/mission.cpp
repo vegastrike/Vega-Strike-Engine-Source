@@ -33,39 +33,41 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <time.h>
+
 #include <ctype.h>
+#include <errno.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #ifndef WIN32
-//this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
-#include <unistd.h>
+// this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can
+// compile without it
+#    include <unistd.h>
 #endif
 
 #include <assert.h>
-#include "cmd/unit_generic.h"
-#include "mission.h"
-#include "flightgroup.h"
 
+#include "cmd/unit_generic.h"
+#include "flightgroup.h"
+#include "mission.h"
 #include "src/python/python_class.h"
-#include "vegadisk/savegame.h"
 #include "src/universe.h"
-#include "src/vs_logging.h"
 #include "src/vs_exit.h"
+#include "src/vs_logging.h"
+#include "vegadisk/savegame.h"
 
 /* *********************************************************** */
 Mission::~Mission() {
     VS_LOG(info, "Mission Cleanup Not Yet Implemented");
-    //do not delete msgcenter...could be vital
+    // do not delete msgcenter...could be vital
 }
 
-double Mission::gametime = 0.0;
-int Mission::number_of_ships = 0;
-int Mission::number_of_flightgroups = 0;
-int Mission::total_nr_frames = 0;
-vector<Flightgroup *>Mission::flightgroups;
+double                Mission::gametime               = 0.0;
+int                   Mission::number_of_ships        = 0;
+int                   Mission::number_of_flightgroups = 0;
+int                   Mission::total_nr_frames        = 0;
+vector<Flightgroup *> Mission::flightgroups;
 
 Mission::Mission(const char *filename, const std::string &script, bool loadscripts) {
     ConstructMission(filename, script, loadscripts);
@@ -77,19 +79,19 @@ Mission::Mission(const char *filename, bool loadscripts) {
 
 void Mission::ConstructMission(const char *configfile, const std::string &script, bool loadscripts) {
     player_autopilot = global_autopilot = AUTO_NORMAL;
-    player_num = 0;
-    briefing = NULL;
-    director = NULL;
-    runtime.pymissions = NULL;
-    nextpythonmission = NULL;
+    player_num                          = 0;
+    briefing                            = NULL;
+    director                            = NULL;
+    runtime.pymissions                  = NULL;
+    nextpythonmission                   = NULL;
     if (script.length() > 0) {
-        nextpythonmission = new char[script.length() + 2];
+        nextpythonmission                      = new char[script.length() + 2];
         nextpythonmission[script.length() + 1] = 0;
-        nextpythonmission[script.length()] = 0;
+        nextpythonmission[script.length()]     = 0;
         strcpy(nextpythonmission, script.c_str());
     }
     easyDomFactory<missionNode> domf;
-    top = domf.LoadXML(configfile);
+    top                   = domf.LoadXML(configfile);
     static bool dontpanic = false;
     if (top == NULL && !dontpanic) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Panic exit - mission file %1% not found") % configfile));
@@ -101,7 +103,7 @@ void Mission::ConstructMission(const char *configfile, const std::string &script
         return;
     }
 
-    variables = NULL;
+    variables   = NULL;
     origin_node = NULL;
 
 #ifndef VS_MIS_SEL
@@ -121,7 +123,7 @@ Unit *Mission::Objective::getOwner() {
         Unit *ret = Owner.GetUnit();
         if (ret == NULL) {
             objective = "";
-        }              //unit died
+        }  // unit died
         return ret;
     }
     return Owner.GetUnit();
@@ -157,28 +159,28 @@ bool Mission::checkMission(easyDomNode *node, bool loadscripts) {
             doSettings(*siter);
         } else if (((*siter)->Name() == "module")) {
             if (loadscripts) {
-                DirectorStart((missionNode *) *siter);
+                DirectorStart((missionNode *)*siter);
             }
         } else if (((*siter)->Name() == "python") && (!this->nextpythonmission)) {
-            //I need to get rid of an extra whitespace at the end that expat may have added... Python is VERY strict about that... :(
-            string locals = (*siter)->attr_value(textAttr);
-            const char *constdumbstr = locals.c_str();             //get the text XML attribute
-            int i = strlen(constdumbstr);          //constdumbstr is the string I wish to copy... i is its length.
-            char *dumbstr = new char[i + 2];             //allocate 2 extra bytes for a double-null-terminated string.
-            strncpy(dumbstr, constdumbstr, i);             //i copy constdumbstr to dumbstr.
-            dumbstr[i] = '\0';             //I make sure that it has 2 null bytes at the end.
-            dumbstr[i + 1] = '\0';             //I am allowed to use i+1 because I allocated 2 extra bytes
+            // I need to get rid of an extra whitespace at the end that expat may have added... Python is VERY strict
+            // about that... :(
+            string      locals       = (*siter)->attr_value(textAttr);
+            const char *constdumbstr = locals.c_str();  // get the text XML attribute
+            int         i = strlen(constdumbstr);       // constdumbstr is the string I wish to copy... i is its length.
+            char       *dumbstr = new char[i + 2];      // allocate 2 extra bytes for a double-null-terminated string.
+            strncpy(dumbstr, constdumbstr, i);          // i copy constdumbstr to dumbstr.
+            dumbstr[i]     = '\0';                      // I make sure that it has 2 null bytes at the end.
+            dumbstr[i + 1] = '\0';                      // I am allowed to use i+1 because I allocated 2 extra bytes
             for (i -= 1; i >= 0; i--) {
-                //start from the end-1, or i-1 and set i to that value(i-=1)
+                // start from the end-1, or i-1 and set i to that value(i-=1)
                 if (dumbstr[i] == '\t' || dumbstr[i] == ' ' || dumbstr[i] == '\r' || dumbstr[i] == '\n') {
-                    //I check if dumbstr[i] contains whitespace
-                    dumbstr[i] = '\0';                     //if so, I truncate the string
+                    // I check if dumbstr[i] contains whitespace
+                    dumbstr[i] = '\0';      // if so, I truncate the string
                 } else {
-                    dumbstr[i + 1] =
-                            '\n';                     //otherwise I add a new line (python sometimes gets mad...)
-                    dumbstr[i + 2] =
-                            '\0';                     //and add a null byte (If i is at the end of the allocated memory, I will use the extra byte
-                    break;                     //get out of the loop so that it doesn't endlessly delete the newlines that I added.
+                    dumbstr[i + 1] = '\n';  // otherwise I add a new line (python sometimes gets mad...)
+                    dumbstr[i + 2] = '\0';  // and add a null byte (If i is at the end of the allocated memory, I will
+                                            // use the extra byte
+                    break;  // get out of the loop so that it doesn't endlessly delete the newlines that I added.
                 }
             }
             this->nextpythonmission = dumbstr;
@@ -201,8 +203,8 @@ void Mission::wipeDeletedMissions() {
 int Mission::getPlayerMissionNumber() {
     int num = 0;
 
-    vector<Mission *> *active_missions = ::active_missions.Get();
-    vector<Mission *>::iterator pl = active_missions->begin();
+    vector<Mission *>          *active_missions = ::active_missions.Get();
+    vector<Mission *>::iterator pl              = active_missions->begin();
 
     if (pl == active_missions->end()) {
         return -1;
@@ -211,7 +213,7 @@ int Mission::getPlayerMissionNumber() {
     for (; pl != active_missions->end(); ++pl) {
         if ((*pl)->player_num == this->player_num) {
             if (*pl == this) {
-                return (int) num;
+                return (int)num;
             } else {
                 num++;
             }
@@ -223,19 +225,19 @@ int Mission::getPlayerMissionNumber() {
 
 Mission *Mission::getNthPlayerMission(int cp, int missionnum) {
     vector<Mission *> *active_missions = ::active_missions.Get();
-    Mission *activeMis = NULL;
+    Mission           *activeMis       = NULL;
     if (missionnum >= 0) {
-        int num = -1;
-        vector<Mission *>::iterator pl = active_missions->begin();
+        int                         num = -1;
+        vector<Mission *>::iterator pl  = active_missions->begin();
         if (pl == active_missions->end()) {
             return NULL;
         }
         for (; pl != active_missions->end(); ++pl) {
-            if ((*pl)->player_num == (unsigned int) cp) {
+            if ((*pl)->player_num == (unsigned int)cp) {
                 num++;
             }
             if (num == missionnum) {
-                //Found it!
+                // Found it!
                 activeMis = (*pl);
                 break;
             }
@@ -245,7 +247,7 @@ Mission *Mission::getNthPlayerMission(int cp, int missionnum) {
 }
 
 void Mission::terminateMission() {
-    vector<Mission *> *active_missions = ::active_missions.Get();
+    vector<Mission *>          *active_missions = ::active_missions.Get();
     vector<Mission *>::iterator f;
 
     f = std::find(Mission_delqueue.begin(), Mission_delqueue.end(), this);
@@ -268,14 +270,14 @@ void Mission::terminateMission() {
 
     int queuenum = -1;
     if (f != active_missions->end()) {
-        queuenum = getPlayerMissionNumber();          //-1 used as error code, 0 is first player mission
+        queuenum = getPlayerMissionNumber();  //-1 used as error code, 0 is first player mission
 
         active_missions->erase(f);
     }
-    if (this != (*active_missions)[0]) {        //Shouldn't this always be true?
+    if (this != (*active_missions)[0]) {  // Shouldn't this always be true?
         Mission_delqueue.push_back(this);
-    }          //only delete if we arent' the base mission
-    //NETFIXME: This routine does not work properly yet.
+    }  // only delete if we arent' the base mission
+    // NETFIXME: This routine does not work properly yet.
     VS_LOG(info, (boost::format("Terminating mission %1% #%2%") % this->mission_name % queuenum));
     if (queuenum >= 0) {
         // queuenum - 1 since mission #0 is the base mission (main_menu) and is persisted
@@ -283,14 +285,14 @@ void Mission::terminateMission() {
         // meaning the actual active_scripts index is offset by 1.
         unsigned int num = queuenum - 1;
 
-        vector<std::string> *scripts = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData(
-                "active_scripts");
+        vector<std::string> *scripts =
+                &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_scripts");
         VS_LOG(info, (boost::format("Terminating mission #%1% - got %2% scripts") % queuenum % scripts->size()));
         if (num < scripts->size()) {
             scripts->erase(scripts->begin() + num);
         }
-        vector<std::string> *missions = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData(
-                "active_missions");
+        vector<std::string> *missions =
+                &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_missions");
         VS_LOG(info, (boost::format("Terminating mission #%1% - got %2% missions") % queuenum % missions->size()));
         if (num < missions->size()) {
             missions->erase(missions->begin() + num);
@@ -317,7 +319,7 @@ void Mission::doOrigin(easyDomNode *node) {
 void Mission::GetOrigin(QVector &pos, string &planetname) {
     if (origin_node == NULL) {
         pos.i = pos.j = pos.k = 0.0;
-        planetname = string();
+        planetname            = string();
         return;
     }
     bool ok = doPosition(origin_node, &pos.i, NULL);
@@ -363,7 +365,7 @@ void Mission::checkVar(easyDomNode *node) {
         VS_LOG(warning, "not a variable");
         return;
     }
-    string name = node->attr_value("name");
+    string name  = node->attr_value("name");
     string value = node->attr_value("value");
 }
 
@@ -389,17 +391,17 @@ void Mission::checkFlightgroup(easyDomNode *node) {
         VS_LOG(warning, "not a flightgroup");
         return;
     }
-    //nothing yet
-    string texture = node->attr_value("logo");
+    // nothing yet
+    string texture       = node->attr_value("logo");
     string texture_alpha = node->attr_value("logo_alpha");
-    string name = node->attr_value("name");
-    string faction = node->attr_value("faction");
-    string type = node->attr_value("type");
-    string ainame = node->attr_value("ainame");
-    string waves = node->attr_value("waves");
-    string nr_ships = node->attr_value("nr_ships");
-    string terrain_nr = node->attr_value("terrain_nr");
-    string unittype = node->attr_value("unit_type");
+    string name          = node->attr_value("name");
+    string faction       = node->attr_value("faction");
+    string type          = node->attr_value("type");
+    string ainame        = node->attr_value("ainame");
+    string waves         = node->attr_value("waves");
+    string nr_ships      = node->attr_value("nr_ships");
+    string terrain_nr    = node->attr_value("terrain_nr");
+    string unittype      = node->attr_value("unit_type");
     if (name.empty() || faction.empty() || type.empty() || ainame.empty() || waves.empty() || nr_ships.empty()) {
         VS_LOG(warning, "no valid flightgroup decsription");
         return;
@@ -407,13 +409,13 @@ void Mission::checkFlightgroup(easyDomNode *node) {
     if (unittype.empty()) {
         unittype = string("unit");
     }
-    int waves_i = atoi(waves.c_str());
+    int waves_i    = atoi(waves.c_str());
     int nr_ships_i = atoi(nr_ships.c_str());
 
     bool have_pos = false;
 
     double pos[3];
-    float rot[3];
+    float  rot[3];
 
     rot[0] = rot[1] = rot[2] = 0.0;
     CreateFlightgroup cf;
@@ -423,8 +425,8 @@ void Mission::checkFlightgroup(easyDomNode *node) {
         if ((*siter)->Name() == "pos") {
             have_pos = doPosition(*siter, pos, &cf);
         }
-//        else if ( (*siter)->Name() == "rot" )
-//            doRotation( *siter, rot, &cf );  This function isn't implemented yet
+        //        else if ( (*siter)->Name() == "rot" )
+        //            doRotation( *siter, rot, &cf );  This function isn't implemented yet
         else if ((*siter)->Name() == "order") {
             doOrder(*siter, cf.fg);
         }
@@ -449,7 +451,7 @@ void Mission::checkFlightgroup(easyDomNode *node) {
         cf.unittype = CreateFlightgroup::BUILDING;
     }
     cf.nr_ships = nr_ships_i;
-    cf.domnode = (node);       //don't hijack node
+    cf.domnode  = (node);  // don't hijack node
 
     cf.fg->pos.i = pos[0];
     cf.fg->pos.j = pos[1];
@@ -510,15 +512,15 @@ Flightgroup *Mission::findFlightgroup(const string &offset_name, const string &f
 /* *********************************************************** */
 
 void Mission::doOrder(easyDomNode *node, Flightgroup *fg) {
-    //nothing yet
-    string order = node->attr_value("order");
+    // nothing yet
+    string order  = node->attr_value("order");
     string target = node->attr_value("target");
     if (order.empty() || target.empty()) {
         VS_LOG(warning, "you have to give an order and a target");
         return;
     }
-    //the tmptarget is evaluated later
-    //because the target may be a flightgroup that's not yet defined
+    // the tmptarget is evaluated later
+    // because the target may be a flightgroup that's not yet defined
     fg->ordermap[order] = target;
 }
 

@@ -30,18 +30,16 @@
 // C++ Implementation: Audio::SimpleScene
 //
 
-//#include <cassert>
-#include "src/vega_cast_utils.h"
+// #include <cassert>
 #include "SimpleScene.h"
-#include "SimpleSource.h"
 
 #include "SceneManager.h"
+#include "SimpleSource.h"
+#include "src/vega_cast_utils.h"
 
 namespace Audio {
 
-SimpleScene::SimpleScene(const std::string &name) :
-        Scene(name) {
-}
+SimpleScene::SimpleScene(const std::string &name) : Scene(name) {}
 
 SimpleScene::~SimpleScene() {
     SourceSet::iterator it;
@@ -95,4 +93,4 @@ SimpleScene::SourceIterator SimpleScene::getActiveSourcesEnd() {
     return activeSources.end();
 }
 
-};
+};  // namespace Audio

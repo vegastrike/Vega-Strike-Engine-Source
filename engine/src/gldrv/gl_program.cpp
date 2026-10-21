@@ -31,30 +31,30 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "gl_globals.h"
 #include "configuration/configuration.h"
-#include "root_generic/vs_globals.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "src/vegastrike.h"
-#include "src/config_xml.h"
-#include "src/gfxlib.h"
+#include "gl_globals.h"
 #include "root_generic/lin_time.h"
 #include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/gfxlib.h"
+#include "src/vegastrike.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
 using boost::algorithm::icontains;
-using VSFileSystem::UnknownFile;
 using VSFileSystem::Ok;
+using VSFileSystem::UnknownFile;
 
-#if _MSC_VER >= 1300
-#define snprintf _snprintf
+#if _MSC_VER >= 1'300
+#    define snprintf _snprintf
 #endif
 
-typedef std::pair<unsigned int, std::pair<std::string, std::string> > ProgramCacheKey;
-typedef std::map<ProgramCacheKey, int> ProgramCache;
-typedef std::map<int, ProgramCacheKey> ProgramICache;
+typedef std::pair<unsigned int, std::pair<std::string, std::string>> ProgramCacheKey;
+typedef std::map<ProgramCacheKey, int>                               ProgramCache;
+typedef std::map<int, ProgramCacheKey>                               ProgramICache;
 
-static ProgramCache programCache;
+static ProgramCache  programCache;
 static ProgramICache programICache;
 
 static ProgramCache::key_type cacheKey(const std::string &vp, const std::string &fp, const char *defines) {
@@ -65,16 +65,15 @@ static ProgramCache::key_type cacheKey(const std::string &vp, const std::string 
             defhash ^= (defhash * 127) | *(defines++);
         }
     }
-    return std::pair<unsigned int, std::pair<std::string, std::string> >(defhash,
-                                                                         std::pair<std::string, std::string>(vp, fp));
+    return std::pair<unsigned int, std::pair<std::string, std::string>>(defhash,
+                                                                        std::pair<std::string, std::string>(vp, fp));
 }
 
-static bool validateLog(GLuint obj, bool shader,
-                        bool allowSoftwareEmulation = false) {
+static bool validateLog(GLuint obj, bool shader, bool allowSoftwareEmulation = false) {
     // Retrieve compiler log
-    const GLsizei LOGBUF = 1024;
-    GLsizei infologLength = 0;
-    char infoLog[LOGBUF + 1]; // +1 for null terminator
+    const GLsizei LOGBUF        = 1'024;
+    GLsizei       infologLength = 0;
+    char          infoLog[LOGBUF + 1];  // +1 for null terminator
 
     if (shader) {
         glGetShaderInfoLog_p(obj, LOGBUF, &infologLength, infoLog);
@@ -103,14 +102,14 @@ static bool validateLog(GLuint obj, bool shader,
 }
 
 void printLog(GLuint obj, bool shader) {
-    const GLsizei LOGBUF = 1024;
-    GLsizei infologLength = 0;
-    char infoLog[LOGBUF + 1]; // +1 for null terminator
+    const GLsizei LOGBUF        = 1'024;
+    GLsizei       infologLength = 0;
+    char          infoLog[LOGBUF + 1];  // +1 for null terminator
 
     if (shader) {
-        glGetShaderInfoLog_p(obj, 1024, &infologLength, infoLog);
+        glGetShaderInfoLog_p(obj, 1'024, &infologLength, infoLog);
     } else {
-        glGetProgramInfoLog_p(obj, 1024, &infologLength, infoLog);
+        glGetProgramInfoLog_p(obj, 1'024, &infologLength, infoLog);
     }
 
     // make sure infoLog is null-termiated;
@@ -122,19 +121,16 @@ void printLog(GLuint obj, bool shader) {
     }
 }
 
-static VSFileSystem::VSError getProgramSource(const std::string &path,
-                                              std::vector<std::string> &lines,
-                                              std::set<std::string> &processed_includes,
-                                              char *buf,
-                                              size_t buflen) {
+static VSFileSystem::VSError getProgramSource(const std::string &path, std::vector<std::string> &lines,
+                                              std::set<std::string> &processed_includes, char *buf, size_t buflen) {
     std::string dirname = path.substr(0, path.find_last_of('/'));
 
-    VSFileSystem::VSFile f;
+    VSFileSystem::VSFile  f;
     VSFileSystem::VSError err = f.OpenReadOnly(path.c_str(), UnknownFile);
 
-    const char *include_directive = "#include \"";
+    const char  *include_directive     = "#include \"";
     const size_t include_directive_len = 10;
-    size_t lineno = 0;
+    size_t       lineno                = 0;
 
     if (err <= Ok) {
         processed_includes.insert(path);
@@ -145,14 +141,14 @@ static VSFileSystem::VSError getProgramSource(const std::string &path,
                 // Process include directives
                 char *eos = strchr(buf + include_directive_len, '\"');
                 if (eos != NULL) {
-                    *eos = 0;
+                    *eos                    = 0;
                     std::string includepath = dirname + "/" + std::string(buf + include_directive_len);
                     if (processed_includes.count(includepath) == 0) {
                         // Set up line numbers for include file
                         lines.push_back("#line 0\n");
 
-                        VSFileSystem::VSError
-                                ierr = getProgramSource(includepath, lines, processed_includes, buf, buflen);
+                        VSFileSystem::VSError ierr =
+                                getProgramSource(includepath, lines, processed_includes, buf, buflen);
                         if (ierr > Ok) {
                             f.Close();
                             VS_LOG(error, (boost::format("ERROR: included from %1%") % path.c_str()));
@@ -168,9 +164,9 @@ static VSFileSystem::VSError getProgramSource(const std::string &path,
                         lines.push_back("\n");
                     }
                 } else {
-                    VS_LOG(warning, (boost::format("WARNING: broken include directive at file %1%, line %2% - skipping")
-                                     % path.c_str()
-                                     % lineno));
+                    VS_LOG(warning,
+                           (boost::format("WARNING: broken include directive at file %1%, line %2% - skipping") %
+                            path.c_str() % lineno));
                 }
             } else {
                 // Append a line to the list
@@ -186,9 +182,9 @@ static VSFileSystem::VSError getProgramSource(const std::string &path,
 }
 
 static VSFileSystem::VSError getProgramSource(const std::string &path, std::string &source) {
-    std::set<std::string> processed_includes;
+    std::set<std::string>    processed_includes;
     std::vector<std::string> lines;
-    char buf[16384];
+    char                     buf[16'384];
 
     source.clear();
 
@@ -217,14 +213,9 @@ static std::string appendDefines(const std::string &prog, const char *extra_defi
     std::string firstline = prog.substr(0, nlpos);
 
     if (firstline.find("#version") != std::string::npos) {
-        return firstline
-               + "\n" + std::string(extra_defines)
-               + "\n#line 1"
-               + prog.substr(nlpos);
+        return firstline + "\n" + std::string(extra_defines) + "\n#line 1" + prog.substr(nlpos);
     } else {
-        return std::string(extra_defines)
-               + "\n#line 0\n"
-               + prog;
+        return std::string(extra_defines) + "\n#line 0\n" + prog;
     }
 }
 
@@ -233,26 +224,25 @@ static int GFXCreateProgramNoCache(const char *vprogram, const char *fprogram, c
         return 0;
     }
 #ifndef __APPLE__
-    if (glGetProgramInfoLog_p == NULL || glCreateShader_p == NULL || glShaderSource_p == NULL
-            || glCompileShader_p == NULL
-            || glAttachShader_p == NULL || glLinkProgram_p == NULL || glGetShaderiv_p == NULL
-            || glGetProgramiv_p == NULL) {
+    if (glGetProgramInfoLog_p == NULL || glCreateShader_p == NULL || glShaderSource_p == NULL ||
+        glCompileShader_p == NULL || glAttachShader_p == NULL || glLinkProgram_p == NULL || glGetShaderiv_p == NULL ||
+        glGetProgramiv_p == NULL) {
         return 0;
     }
 #else
-#ifdef OSX_LOWER_THAN_10_4
+#    ifdef OSX_LOWER_THAN_10_4
     return 0;
-#endif
+#    endif
 #endif
     GLenum errCode;
     while ((errCode = glGetError()) != GL_NO_ERROR) {
         VS_LOG(error, (boost::format("Error code %1%") % gluErrorString(errCode)));
     }
     VSFileSystem::VSFile vf, ff;
-    std::string vpfilename = std::string("programs/") + vprogram + ".vp";
-    std::string fpfilename = std::string("programs/") + fprogram + ".fp";
+    std::string          vpfilename = std::string("programs/") + vprogram + ".vp";
+    std::string          fpfilename = std::string("programs/") + fprogram + ".fp";
 
-    std::string vertexprg, fragprg;
+    std::string           vertexprg, fragprg;
     VSFileSystem::VSError vperr = getProgramSource(vpfilename, vertexprg);
     VSFileSystem::VSError fperr = getProgramSource(fpfilename, fragprg);
     if ((vperr > Ok) || (fperr > Ok)) {
@@ -267,14 +257,14 @@ static int GFXCreateProgramNoCache(const char *vprogram, const char *fprogram, c
 
     if (extra_defines != NULL) {
         vertexprg = appendDefines(vertexprg, extra_defines);
-        fragprg = appendDefines(fragprg, extra_defines);
+        fragprg   = appendDefines(fragprg, extra_defines);
     }
 
     GLint vproghandle = 0;
     GLint fproghandle = 0;
-    GLint sp = 0;
+    GLint sp          = 0;
     if (vperr <= Ok) {
-        vproghandle = glCreateShader_p(GL_VERTEX_SHADER);
+        vproghandle     = glCreateShader_p(GL_VERTEX_SHADER);
         const char *tmp = vertexprg.c_str();
         glShaderSource_p(vproghandle, 1, &tmp, NULL);
         glCompileShader_p(vproghandle);
@@ -288,15 +278,16 @@ static int GFXCreateProgramNoCache(const char *vprogram, const char *fprogram, c
         } else if (!validateLog(vproghandle, true)) {
             printLog(vproghandle, true);
             VS_LOG(error,
-                   (boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.")
-                    % vprogram));
+                   (boost::format(
+                            "Vertex Program Error: Failed log validation for %1%. Inspect log above for details.") %
+                    vprogram));
             glDeleteShader_p(vproghandle);
             return 0;
         }
         printLog(vproghandle, true);
     }
     if (fperr <= Ok) {
-        fproghandle = glCreateShader_p(GL_FRAGMENT_SHADER);
+        fproghandle     = glCreateShader_p(GL_FRAGMENT_SHADER);
         const char *tmp = fragprg.c_str();
         glShaderSource_p(fproghandle, 1, &tmp, NULL);
         glCompileShader_p(fproghandle);
@@ -312,8 +303,9 @@ static int GFXCreateProgramNoCache(const char *vprogram, const char *fprogram, c
             // FIXME: Should this be fproghandle instead of vproghandle? Same throughout this if block?
             printLog(vproghandle, true);
             VS_LOG(error,
-                   (boost::format("Vertex Program Error: Failed log validation for %1%. Inspect log above for details.")
-                    % vprogram));
+                   (boost::format(
+                            "Vertex Program Error: Failed log validation for %1%. Inspect log above for details.") %
+                    vprogram));
             glDeleteShader_p(vproghandle);
             glDeleteShader_p(fproghandle);
             return 0;
@@ -334,10 +326,9 @@ static int GFXCreateProgramNoCache(const char *vprogram, const char *fprogram, c
         return 0;
     } else if (!validateLog(sp, false)) {
         printLog(sp, false);
-        VS_LOG(error,
-               (boost::format(
-                       "Shader Program Error: Failed log validation for vp:%1% fp:%2%. Inspect log above for details.")
-                % vprogram % fprogram));
+        VS_LOG(error, (boost::format("Shader Program Error: Failed log validation for vp:%1% fp:%2%. Inspect log above "
+                                     "for details.") %
+                       vprogram % fprogram));
         glDeleteShader_p(vproghandle);
         glDeleteShader_p(fproghandle);
         glDeleteProgram_p(sp);
@@ -348,30 +339,30 @@ static int GFXCreateProgramNoCache(const char *vprogram, const char *fprogram, c
     /* only for dev work
      *  glGetProgramiv_p(sp,GL_VALIDATE_STATUS,&successp);
      *  if (successp==0) {
-     *      VS_LOG(error, (boost::format("Shader Program Error: Failed to validate %1% linking to %2%") % vprogram % fprogram));
-     *      return 0;
+     *      VS_LOG(error, (boost::format("Shader Program Error: Failed to validate %1% linking to %2%") % vprogram %
+     * fprogram)); return 0;
      *  }
      */
     while ((errCode = glGetError()) != GL_NO_ERROR) {
         VS_LOG(error, (boost::format("Error code %1%") % gluErrorString(errCode)));
-        sp = 0;         //no proper vertex prog support
+        sp = 0;  // no proper vertex prog support
     }
     return sp;
 }
 
 int GFXCreateProgram(const char *vprogram, const char *fprogram, const char *extra_defines) {
-    ProgramCache::key_type key = cacheKey(vprogram, fprogram, extra_defines);
-    ProgramCache::const_iterator it = programCache.find(key);
+    ProgramCache::key_type       key = cacheKey(vprogram, fprogram, extra_defines);
+    ProgramCache::const_iterator it  = programCache.find(key);
     if (it != programCache.end()) {
         return it->second;
     }
     int rv = programCache[key] = GFXCreateProgramNoCache(vprogram, fprogram, extra_defines);
-    programICache[rv] = key;
+    programICache[rv]          = key;
     return rv;
 }
 
 int GFXCreateProgram(char *vprogram, char *fprogram, char *extra_defines) {
-    return GFXCreateProgram((const char *) vprogram, (const char *) fprogram, (const char *) extra_defines);
+    return GFXCreateProgram((const char *)vprogram, (const char *)fprogram, (const char *)extra_defines);
 }
 
 void GFXDestroyProgram(int program) {
@@ -392,18 +383,18 @@ void GFXDestroyProgram(int program) {
 
 static int programChanged = false;
 static int programVersion = 0;
-static int defaultprog = 0;
-static int lowfiprog = 0;
-static int hifiprog = 0;
+static int defaultprog    = 0;
+static int lowfiprog      = 0;
+static int hifiprog       = 0;
 
 
 // THIS IS STUPID!
 
-#if defined(__APPLE__) && defined (__MACH__)
+#if defined(__APPLE__) && defined(__MACH__)
 std::string hifiProgramName  = "mac";
 std::string lowfiProgramName = "maclite";
 #else
-std::string hifiProgramName = "default";
+std::string hifiProgramName  = "default";
 std::string lowfiProgramName = "lite";
 #endif
 // END STUPID
@@ -412,14 +403,13 @@ std::string lowfiProgramName = "lite";
 int getDefaultProgram() {
     static bool initted = false;
     if (!initted) {
-
 // THIS IS STUPID,  Also why is lofi not configurable ?
-#if defined(__APPLE__) && defined (__MACH__)
+#if defined(__APPLE__) && defined(__MACH__)
         hifiProgramName = configuration().graphics.mac_shader_name;
 #else
         hifiProgramName = configuration().graphics.shader_name;
 #endif
-// END STUPID
+        // END STUPID
 
         if (hifiProgramName.length() == 0) {
             lowfiprog = hifiprog = 0;
@@ -433,9 +423,9 @@ int getDefaultProgram() {
                 hifiprog = GFXCreateProgram(lowfiProgramName.c_str(), lowfiProgramName.c_str(), NULL);
             }
         }
-        defaultprog = hifiprog;
+        defaultprog    = hifiprog;
         programChanged = true;
-        initted = true;
+        initted        = true;
     }
     return defaultprog;
 }
@@ -486,17 +476,17 @@ unsigned int gpdcounter = (1 << 30);
 GameSpeed gameplaydata[NUMFRAMESLOOK] = {JUSTRIGHT};
 
 GameSpeed GFXGetFramerate() {
-    GameSpeed retval = JUSTRIGHT;
-    static double lasttime = queryTime();
-    double thistime = queryTime();
-    double framerate = 1. / (thistime - lasttime);
-    static double toofast = 80;
-    static double tooslow = 29;
-    static unsigned lim = 10;
-    static int penalty = 10;
-    static float lowratio = .125;
-    static float highratio = .75;
-    GameSpeed curframe;
+    GameSpeed       retval    = JUSTRIGHT;
+    static double   lasttime  = queryTime();
+    double          thistime  = queryTime();
+    double          framerate = 1. / (thistime - lasttime);
+    static double   toofast   = 80;
+    static double   tooslow   = 29;
+    static unsigned lim       = 10;
+    static int      penalty   = 10;
+    static float    lowratio  = .125;
+    static float    highratio = .75;
+    GameSpeed       curframe;
     if (framerate > toofast) {
         curframe = TOOFAST;
     } else if (framerate > tooslow) {
@@ -504,17 +494,17 @@ GameSpeed GFXGetFramerate() {
     } else {
         curframe = TOOSLOW;
     }
-    gameplaydata[((unsigned int) gpdcounter++) % NUMFRAMESLOOK] = curframe;
-    unsigned int i = 0;
-    if (!(curframe == JUSTRIGHT
-          || (curframe == TOOFAST && defaultprog == hifiprog) || (curframe == TOOSLOW && defaultprog == 0))) {
+    gameplaydata[((unsigned int)gpdcounter++) % NUMFRAMESLOOK] = curframe;
+    unsigned int i                                             = 0;
+    if (!(curframe == JUSTRIGHT || (curframe == TOOFAST && defaultprog == hifiprog) ||
+          (curframe == TOOSLOW && defaultprog == 0))) {
         for (; i < lim; ++i) {
-            if (curframe != gameplaydata[((unsigned int) (gpdcounter - i)) % NUMFRAMESLOOK]) {
+            if (curframe != gameplaydata[((unsigned int)(gpdcounter - i)) % NUMFRAMESLOOK]) {
                 break;
             }
         }
         if (i == lim) {
-            int correct = 0;
+            int correct   = 0;
             int incorrect = 0;
             for (unsigned int j = 0; j < NUMFRAMESLOOK; ++j) {
                 if (gameplaydata[j] == curframe) {
@@ -527,13 +517,13 @@ GameSpeed GFXGetFramerate() {
                     incorrect += penalty;
                 }
             }
-            double myratio = (double) correct / (double) (correct + incorrect);
+            double myratio = (double)correct / (double)(correct + incorrect);
             if (curframe == TOOFAST && myratio > highratio) {
-                static int toomanyswitches = 3;
-                toomanyswitches -= 1;
+                static int toomanyswitches  = 3;
+                toomanyswitches            -= 1;
                 if (toomanyswitches >= 0) {
                     retval = curframe;
-                }                      //only switch back and forth so many times
+                }  // only switch back and forth so many times
             } else if (myratio > lowratio) {
                 retval = curframe;
             }
@@ -560,7 +550,7 @@ bool GFXShaderReloaded() {
                     } else {
                         defaultprog = 0;
                     }
-                    GFXActivateShader((char *) NULL);
+                    GFXActivateShader((char *)NULL);
                 }
                 break;
             case TOOFAST:
@@ -571,7 +561,7 @@ bool GFXShaderReloaded() {
                     } else {
                         defaultprog = hifiprog;
                     }
-                    GFXActivateShader((char *) NULL);
+                    GFXActivateShader((char *)NULL);
                 }
                 break;
             default:
@@ -593,9 +583,9 @@ int GFXActivateShader(int program) {
     }
     if (program != lastprogram
 #ifndef __APPLE__
-            && glUseProgram_p
+        && glUseProgram_p
 #endif
-            ) {
+    ) {
         glUseProgram_p(program);
         lastprogram = program;
     } else {
@@ -606,7 +596,7 @@ int GFXActivateShader(int program) {
 
 int GFXActivateShader(const char *program) {
     int defaultprogram = getDefaultProgram();
-    int curprogram = defaultprogram;
+    int curprogram     = defaultprogram;
     if (program) {
         curprogram = GFXCreateProgram(program, program, NULL);
     }
@@ -614,15 +604,15 @@ int GFXActivateShader(const char *program) {
 }
 
 void GFXDeactivateShader() {
-    GFXActivateShader((int) 0);
+    GFXActivateShader((int)0);
 }
 
 int GFXShaderConstant(int name, float v1, float v2, float v3, float v4) {
     if (1
 #ifndef __APPLE__
-            && glUniform4f_p
+        && glUniform4f_p
 #endif
-            ) {
+    ) {
         glUniform4f_p(name, v1, v2, v3, v4);
         return 1;
     }
@@ -644,9 +634,9 @@ int GFXShaderConstant(int name, Vector v) {
 int GFXShaderConstant(int name, float v1) {
     if (1
 #ifndef __APPLE__
-            && glUniform1f_p
+        && glUniform1f_p
 #endif
-            ) {
+    ) {
         glUniform1f_p(name, v1);
         return 1;
     }
@@ -656,9 +646,9 @@ int GFXShaderConstant(int name, float v1) {
 int GFXShaderConstantv(int name, unsigned int count, const float *values) {
     if (1
 #ifndef __APPLE__
-            && glUniform1fv_p
+        && glUniform1fv_p
 #endif
-            ) {
+    ) {
         glUniform1fv_p(name, count, values);
         return 1;
     }
@@ -668,9 +658,9 @@ int GFXShaderConstantv(int name, unsigned int count, const float *values) {
 int GFXShaderConstant4v(int name, unsigned int count, const float *values) {
     if (1
 #ifndef __APPLE__
-            && glUniform4fv_p
+        && glUniform4fv_p
 #endif
-            ) {
+    ) {
         glUniform4fv_p(name, count, values);
         return 1;
     }
@@ -680,9 +670,9 @@ int GFXShaderConstant4v(int name, unsigned int count, const float *values) {
 int GFXShaderConstanti(int name, int value) {
     if (1
 #ifndef __APPLE__
-            && glUniform1i_p
+        && glUniform1i_p
 #endif
-            ) {
+    ) {
         glUniform1i_p(name, value);
         return 1;
     }
@@ -692,10 +682,10 @@ int GFXShaderConstanti(int name, int value) {
 int GFXShaderConstantv(int name, unsigned int count, const int *value) {
     if (1
 #ifndef __APPLE__
-            && glUniform1i_p
+        && glUniform1i_p
 #endif
-            ) {
-        glUniform1iv_p(name, count, (GLint *) value);
+    ) {
+        glUniform1iv_p(name, count, (GLint *)value);
         return 1;
     }
     return 0;
@@ -704,13 +694,13 @@ int GFXShaderConstantv(int name, unsigned int count, const int *value) {
 int GFXNamedShaderConstant(int progID, const char *name) {
     if (1
 #ifndef __APPLE__
-            && glGetUniformLocation_p
+        && glGetUniformLocation_p
 #endif
-            ) {
+    ) {
         int varloc = glGetUniformLocation_p(progID, name);
         return varloc;
     }
-    return -1;     //varloc cound be 0
+    return -1;  // varloc cound be 0
 }
 
 int GFXNamedShaderConstant(char *progID, const char *name) {

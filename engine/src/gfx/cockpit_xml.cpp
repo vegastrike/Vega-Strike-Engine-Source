@@ -26,19 +26,20 @@
  */
 
 
-#include "gfx/cockpit.h"
-#include "root_generic/xml_support.h"
-#include "gfx/gauge.h"
 #include <float.h>
+
+#include "gfx/cockpit.h"
+#include "gfx/gauge.h"
 #include "gfx/hud.h"
 #include "gfx_generic/mesh.h"
 #include "root_generic/configxml.h"
+#include "root_generic/xml_support.h"
 
-using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
-using XMLSupport::parse_float;
+using XMLSupport::EnumMap;
 using XMLSupport::parse_bool;
+using XMLSupport::parse_float;
 using XMLSupport::parse_int;
 
 namespace CockpitXML {
@@ -77,27 +78,27 @@ enum Names {
     LEFT,
     RIGHT,
     NETWORK,
-//use the UnitImages<void> enum for the gauge values instead!
-/*    KARMORF,
- *     KARMORB,
- *     KARMORR,
- *     KARMORL,
- *     KFUEL,
- *     KSHIELDF,
- *     KSHIELDR,
- *     KSHIELDL,
- *     KSHIELDB,
- *     KENERGY,
- *     KAUTO,
- *     KEJECT,
- *     KLOCK,
- *     KHULL,
- *     KWARPENERGY,
- *     KKPS,
- *     KSETKPS,
- *     KFPS,
- *         COCKPIT_LAG,
- */
+    // use the UnitImages<void> enum for the gauge values instead!
+    /*    KARMORF,
+     *     KARMORB,
+     *     KARMORR,
+     *     KARMORL,
+     *     KFUEL,
+     *     KSHIELDF,
+     *     KSHIELDR,
+     *     KSHIELDL,
+     *     KSHIELDB,
+     *     KENERGY,
+     *     KAUTO,
+     *     KEJECT,
+     *     KLOCK,
+     *     KHULL,
+     *     KWARPENERGY,
+     *     KKPS,
+     *     KSETKPS,
+     *     KFPS,
+     *         COCKPIT_LAG,
+     */
     G_UP,
     G_DOWN,
     G_LEFT,
@@ -109,76 +110,74 @@ enum Names {
     GAIN
 };
 
-const EnumMap::Pair element_names[] = {
-        EnumMap::Pair("UNKNOWN", UNKNOWN),
-        EnumMap::Pair("Cockpit", COCKPIT),
-        EnumMap::Pair("Radar", RADAR),
-        EnumMap::Pair("RearRadar", REARRADAR),
-        EnumMap::Pair("LeftVDU", LVDU),
-        EnumMap::Pair("VDU", AVDU),
-        EnumMap::Pair("RightVDU", RVDU),
-        EnumMap::Pair("Panel", PANEL),
-        EnumMap::Pair("Crosshairs", CROSSHAIRS),
-        EnumMap::Pair("Event", EVENT),
-        EnumMap::Pair("ArmorF", UnitImages<void>::ARMORF),
-        EnumMap::Pair("ArmorR", UnitImages<void>::ARMORR),
-        EnumMap::Pair("ArmorL", UnitImages<void>::ARMORL),
-        EnumMap::Pair("ArmorB", UnitImages<void>::ARMORB),
-        EnumMap::Pair("ArmorFRT", UnitImages<void>::ARMORF),
-        EnumMap::Pair("ArmorBRT", UnitImages<void>::ARMORR),
-        EnumMap::Pair("ArmorFLT", UnitImages<void>::ARMORL),
-        EnumMap::Pair("ArmorBLT", UnitImages<void>::ARMORB),
-        EnumMap::Pair("ArmorFRB", UnitImages<void>::ARMOR4),
-        EnumMap::Pair("ArmorBRB", UnitImages<void>::ARMOR5),
-        EnumMap::Pair("ArmorFLB", UnitImages<void>::ARMOR6),
-        EnumMap::Pair("ArmorBLB", UnitImages<void>::ARMOR7),
-        EnumMap::Pair("ShieldF", UnitImages<void>::SHIELDF),
-        EnumMap::Pair("ShieldR", UnitImages<void>::SHIELDR),
-        EnumMap::Pair("ShieldL", UnitImages<void>::SHIELDL),
-        EnumMap::Pair("ShieldB", UnitImages<void>::SHIELDB),
-        EnumMap::Pair("ShieldFRT", UnitImages<void>::SHIELDF),
-        EnumMap::Pair("ShieldBRT", UnitImages<void>::SHIELDR),
-        EnumMap::Pair("ShieldFLT", UnitImages<void>::SHIELDL),
-        EnumMap::Pair("ShieldBLT", UnitImages<void>::SHIELDB),
-        EnumMap::Pair("ShieldFRB", UnitImages<void>::SHIELD4),
-        EnumMap::Pair("ShieldBRB", UnitImages<void>::SHIELD5),
-        EnumMap::Pair("ShieldFLB", UnitImages<void>::SHIELD6),
-        EnumMap::Pair("ShieldBLB", UnitImages<void>::SHIELD7),
-        EnumMap::Pair("Fuel", UnitImages<void>::FUEL),
-        EnumMap::Pair("Energy", UnitImages<void>::ENERGY),
-        EnumMap::Pair("Eject", UnitImages<void>::EJECT),
-        EnumMap::Pair("Lock", UnitImages<void>::LOCK),
-        EnumMap::Pair("MissileLock", UnitImages<void>::MISSILELOCK),
-        EnumMap::Pair("Jump", UnitImages<void>::JUMP),
-        EnumMap::Pair("ECM", UnitImages<void>::ECM),
-        EnumMap::Pair("Hull", UnitImages<void>::HULL),
-        EnumMap::Pair("WarpEnergy", UnitImages<void>::WARPENERGY),
-        EnumMap::Pair("Speed", UnitImages<void>::KPS),
-        EnumMap::Pair("SetSpeed", UnitImages<void>::SETKPS),
-        EnumMap::Pair("Auto", UnitImages<void>::AUTOPILOT),
-        EnumMap::Pair("Collision", UnitImages<void>::COLLISION),
-        EnumMap::Pair("FPS", UnitImages<void>::COCKPIT_FPS),
-        EnumMap::Pair("WarpFieldStrength", UnitImages<void>::WARPFIELDSTRENGTH),
-        EnumMap::Pair("MASSEFFECT", UnitImages<void>::MASSEFFECT),
-        EnumMap::Pair("MAUTO", UnitImages<void>::AUTOPILOT_MODAL),
-        EnumMap::Pair("MSPEC", UnitImages<void>::SPEC_MODAL),
-        EnumMap::Pair("MFLIGHTCOMP", UnitImages<void>::FLIGHTCOMPUTER_MODAL),
-        EnumMap::Pair("MTURRET", UnitImages<void>::TURRETCONTROL_MODAL),
-        EnumMap::Pair("MECM", UnitImages<void>::ECM_MODAL),
-        EnumMap::Pair("MCLOAK", UnitImages<void>::CLOAK_MODAL),
-        EnumMap::Pair("MTRAVEL", UnitImages<void>::TRAVELMODE_MODAL),
-        EnumMap::Pair("MRECFIRE", UnitImages<void>::RECIEVINGFIRE_MODAL),
-        EnumMap::Pair("MRECMISSILE", UnitImages<void>::RECEIVINGMISSILES_MODAL),
-        EnumMap::Pair("MRECMLOCK", UnitImages<void>::RECEIVINGMISSILELOCK_MODAL),
-        EnumMap::Pair("MRECTLOCK", UnitImages<void>::RECEIVINGTARGETLOCK_MODAL),
-        EnumMap::Pair("MCOLLISIONWARNING", UnitImages<void>::COLLISIONWARNING_MODAL),
-        EnumMap::Pair("MJUMP", UnitImages<void>::CANJUMP_MODAL),
-        EnumMap::Pair("MDOCK", UnitImages<void>::CANDOCK_MODAL),
-        EnumMap::Pair("TargetShieldF", UnitImages<void>::TARGETSHIELDF),
-        EnumMap::Pair("TargetShieldB", UnitImages<void>::TARGETSHIELDB),
-        EnumMap::Pair("TargetShieldR", UnitImages<void>::TARGETSHIELDR),
-        EnumMap::Pair("TargetShieldL", UnitImages<void>::TARGETSHIELDL)
-};
+const EnumMap::Pair element_names[]   = {EnumMap::Pair("UNKNOWN", UNKNOWN),
+                                         EnumMap::Pair("Cockpit", COCKPIT),
+                                         EnumMap::Pair("Radar", RADAR),
+                                         EnumMap::Pair("RearRadar", REARRADAR),
+                                         EnumMap::Pair("LeftVDU", LVDU),
+                                         EnumMap::Pair("VDU", AVDU),
+                                         EnumMap::Pair("RightVDU", RVDU),
+                                         EnumMap::Pair("Panel", PANEL),
+                                         EnumMap::Pair("Crosshairs", CROSSHAIRS),
+                                         EnumMap::Pair("Event", EVENT),
+                                         EnumMap::Pair("ArmorF", UnitImages<void>::ARMORF),
+                                         EnumMap::Pair("ArmorR", UnitImages<void>::ARMORR),
+                                         EnumMap::Pair("ArmorL", UnitImages<void>::ARMORL),
+                                         EnumMap::Pair("ArmorB", UnitImages<void>::ARMORB),
+                                         EnumMap::Pair("ArmorFRT", UnitImages<void>::ARMORF),
+                                         EnumMap::Pair("ArmorBRT", UnitImages<void>::ARMORR),
+                                         EnumMap::Pair("ArmorFLT", UnitImages<void>::ARMORL),
+                                         EnumMap::Pair("ArmorBLT", UnitImages<void>::ARMORB),
+                                         EnumMap::Pair("ArmorFRB", UnitImages<void>::ARMOR4),
+                                         EnumMap::Pair("ArmorBRB", UnitImages<void>::ARMOR5),
+                                         EnumMap::Pair("ArmorFLB", UnitImages<void>::ARMOR6),
+                                         EnumMap::Pair("ArmorBLB", UnitImages<void>::ARMOR7),
+                                         EnumMap::Pair("ShieldF", UnitImages<void>::SHIELDF),
+                                         EnumMap::Pair("ShieldR", UnitImages<void>::SHIELDR),
+                                         EnumMap::Pair("ShieldL", UnitImages<void>::SHIELDL),
+                                         EnumMap::Pair("ShieldB", UnitImages<void>::SHIELDB),
+                                         EnumMap::Pair("ShieldFRT", UnitImages<void>::SHIELDF),
+                                         EnumMap::Pair("ShieldBRT", UnitImages<void>::SHIELDR),
+                                         EnumMap::Pair("ShieldFLT", UnitImages<void>::SHIELDL),
+                                         EnumMap::Pair("ShieldBLT", UnitImages<void>::SHIELDB),
+                                         EnumMap::Pair("ShieldFRB", UnitImages<void>::SHIELD4),
+                                         EnumMap::Pair("ShieldBRB", UnitImages<void>::SHIELD5),
+                                         EnumMap::Pair("ShieldFLB", UnitImages<void>::SHIELD6),
+                                         EnumMap::Pair("ShieldBLB", UnitImages<void>::SHIELD7),
+                                         EnumMap::Pair("Fuel", UnitImages<void>::FUEL),
+                                         EnumMap::Pair("Energy", UnitImages<void>::ENERGY),
+                                         EnumMap::Pair("Eject", UnitImages<void>::EJECT),
+                                         EnumMap::Pair("Lock", UnitImages<void>::LOCK),
+                                         EnumMap::Pair("MissileLock", UnitImages<void>::MISSILELOCK),
+                                         EnumMap::Pair("Jump", UnitImages<void>::JUMP),
+                                         EnumMap::Pair("ECM", UnitImages<void>::ECM),
+                                         EnumMap::Pair("Hull", UnitImages<void>::HULL),
+                                         EnumMap::Pair("WarpEnergy", UnitImages<void>::WARPENERGY),
+                                         EnumMap::Pair("Speed", UnitImages<void>::KPS),
+                                         EnumMap::Pair("SetSpeed", UnitImages<void>::SETKPS),
+                                         EnumMap::Pair("Auto", UnitImages<void>::AUTOPILOT),
+                                         EnumMap::Pair("Collision", UnitImages<void>::COLLISION),
+                                         EnumMap::Pair("FPS", UnitImages<void>::COCKPIT_FPS),
+                                         EnumMap::Pair("WarpFieldStrength", UnitImages<void>::WARPFIELDSTRENGTH),
+                                         EnumMap::Pair("MASSEFFECT", UnitImages<void>::MASSEFFECT),
+                                         EnumMap::Pair("MAUTO", UnitImages<void>::AUTOPILOT_MODAL),
+                                         EnumMap::Pair("MSPEC", UnitImages<void>::SPEC_MODAL),
+                                         EnumMap::Pair("MFLIGHTCOMP", UnitImages<void>::FLIGHTCOMPUTER_MODAL),
+                                         EnumMap::Pair("MTURRET", UnitImages<void>::TURRETCONTROL_MODAL),
+                                         EnumMap::Pair("MECM", UnitImages<void>::ECM_MODAL),
+                                         EnumMap::Pair("MCLOAK", UnitImages<void>::CLOAK_MODAL),
+                                         EnumMap::Pair("MTRAVEL", UnitImages<void>::TRAVELMODE_MODAL),
+                                         EnumMap::Pair("MRECFIRE", UnitImages<void>::RECIEVINGFIRE_MODAL),
+                                         EnumMap::Pair("MRECMISSILE", UnitImages<void>::RECEIVINGMISSILES_MODAL),
+                                         EnumMap::Pair("MRECMLOCK", UnitImages<void>::RECEIVINGMISSILELOCK_MODAL),
+                                         EnumMap::Pair("MRECTLOCK", UnitImages<void>::RECEIVINGTARGETLOCK_MODAL),
+                                         EnumMap::Pair("MCOLLISIONWARNING", UnitImages<void>::COLLISIONWARNING_MODAL),
+                                         EnumMap::Pair("MJUMP", UnitImages<void>::CANJUMP_MODAL),
+                                         EnumMap::Pair("MDOCK", UnitImages<void>::CANDOCK_MODAL),
+                                         EnumMap::Pair("TargetShieldF", UnitImages<void>::TARGETSHIELDF),
+                                         EnumMap::Pair("TargetShieldB", UnitImages<void>::TARGETSHIELDB),
+                                         EnumMap::Pair("TargetShieldR", UnitImages<void>::TARGETSHIELDR),
+                                         EnumMap::Pair("TargetShieldL", UnitImages<void>::TARGETSHIELDL)};
 const EnumMap::Pair attribute_names[] = {
         EnumMap::Pair("UNKNOWN", UNKNOWN),
         EnumMap::Pair("mesh", MESH),
@@ -264,28 +263,28 @@ const EnumMap::Pair attribute_names[] = {
 
 const EnumMap element_map(element_names, sizeof(element_names) / sizeof(element_names[0]));
 const EnumMap attribute_map(attribute_names, sizeof(attribute_names) / sizeof(attribute_names[0]));
-}
+}  // namespace CockpitXML
 
-using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
+using XMLSupport::EnumMap;
 using namespace CockpitXML;
 
 string getRes(string inp) {
     string::size_type where = inp.rfind(".");
-    int x = configuration().graphics.resolution_x;
+    int               x     = configuration().graphics.resolution_x;
     if (x < 700) {
         x = 640;
     } else if (x < 840) {
         x = 800;
-    } else if (x < 1100) {
-        x = 1024;
-    } else if (x < 1400) {
-        x = 1280;
-    } else if (x < 1700) {
-        x = 1600;
+    } else if (x < 1'100) {
+        x = 1'024;
+    } else if (x < 1'400) {
+        x = 1'280;
+    } else if (x < 1'700) {
+        x = 1'600;
     } else {
-        x = 1600;
+        x = 1'600;
     }
     string rez = XMLSupport::tostring(x);
     if (where == string::npos) {
@@ -296,34 +295,34 @@ string getRes(string inp) {
 }
 
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
-    const bool cockpit_smooth = configuration().graphics.cockpit_smooth_texture;
-    const bool panel_smooth = configuration().graphics.panel_smooth_texture;
-    const bool crosshair_smooth = configuration().graphics.crosshair_smooth_texture;
+    const bool                    cockpit_smooth   = configuration().graphics.cockpit_smooth_texture;
+    const bool                    panel_smooth     = configuration().graphics.panel_smooth_texture;
+    const bool                    crosshair_smooth = configuration().graphics.crosshair_smooth_texture;
     AttributeList::const_iterator iter;
-    Gauge::DIRECTION tmpdir = Gauge::GAUGE_UP;
-    VSSprite **newsprite = NULL;
-    VDU **newvdu = NULL;
-    VSSprite *adjsprite = NULL;
-    std::string gaugename("shieldstat.spr");
-    std::string myfont("9x12.font");
-    Names elem = (Names) element_map.lookup(name);
-    Names attr;
-    unsigned int mymodes = 0;
-    float xsize = -1, ysize = -1, xcent = FLT_MAX, ycent = FLT_MAX;
-    float leftx = -10;
-    float rightx = -10;
-    float topy = -10;
-    float boty = -10;
-    short rows = 13;
-    short cols = 15;
-    unsigned int default_mode = VDU::TARGET;
-    VSSprite *oldpit = NULL;
-    bool replaced[4] = {false, false, false, false};
-    int counter = 0;
-    switch ((int) elem) {
+    Gauge::DIRECTION              tmpdir    = Gauge::GAUGE_UP;
+    VSSprite                    **newsprite = NULL;
+    VDU                         **newvdu    = NULL;
+    VSSprite                     *adjsprite = NULL;
+    std::string                   gaugename("shieldstat.spr");
+    std::string                   myfont("9x12.font");
+    Names                         elem = (Names)element_map.lookup(name);
+    Names                         attr;
+    unsigned int                  mymodes = 0;
+    float                         xsize = -1, ysize = -1, xcent = FLT_MAX, ycent = FLT_MAX;
+    float                         leftx        = -10;
+    float                         rightx       = -10;
+    float                         topy         = -10;
+    float                         boty         = -10;
+    short                         rows         = 13;
+    short                         cols         = 15;
+    unsigned int                  default_mode = VDU::TARGET;
+    VSSprite                     *oldpit       = NULL;
+    bool                          replaced[4]  = {false, false, false, false};
+    int                           counter      = 0;
+    switch ((int)elem) {
         case COCKPIT:
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
-                attr = (Names) attribute_map.lookup((*iter).name);
+                attr = (Names)attribute_map.lookup((*iter).name);
                 switch (attr) {
                     case MYFONT:
                         myfont = (*iter).value;
@@ -348,8 +347,8 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                         break;
                     case XFILE: {
                         std::string tmp = getRes((*iter).value);
-                        oldpit = Pit[0];
-                        Pit[0] = new VSSprite(tmp.c_str(), cockpit_smooth ? BILINEAR : NEAREST);
+                        oldpit          = Pit[0];
+                        Pit[0]          = new VSSprite(tmp.c_str(), cockpit_smooth ? BILINEAR : NEAREST);
                         if (!Pit[0]->LoadSuccess()) {
                             delete Pit[0];
                             Pit[0] = new VSSprite((*iter).value.c_str(), cockpit_smooth ? BILINEAR : NEAREST);
@@ -371,8 +370,8 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                     case BACK:
                     case LEFT:
                     case RIGHT: {
-                        std::string tmp = getRes((*iter).value);
-                        oldpit = Pit[attr - FRONT];
+                        std::string tmp   = getRes((*iter).value);
+                        oldpit            = Pit[attr - FRONT];
                         Pit[attr - FRONT] = new VSSprite(tmp.c_str(), cockpit_smooth ? BILINEAR : NEAREST);
                         if (!Pit[attr - FRONT]->LoadSuccess()) {
                             delete Pit[attr - FRONT];
@@ -453,7 +452,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                     case NETWORK:
                         if (XMLSupport::parse_bool((*iter).value) != false) {
                             return;
-                        }                      //Don't show if not in multiplayer (or single if false)
+                        }  // Don't show if not in multiplayer (or single if false)
 
                         break;
                     case TOPY:
@@ -521,7 +520,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                 }
                 newsprite = &Panel.front();
             } else {
-                if (Panel.empty()) {              /* Create NULL crosshairs */
+                if (Panel.empty()) { /* Create NULL crosshairs */
                     Panel.push_back(NULL);
                 }
                 Panel.push_back(NULL);
@@ -536,30 +535,30 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
             goto loadsprite;
         case LVDU:
             vdu.push_back(NULL);
-            newvdu = &vdu.back();
-            mymodes = VDU::MANIFEST | VDU::WEAPON | VDU::DAMAGE | VDU::OBJECTIVES | VDU::SHIELD;
+            newvdu       = &vdu.back();
+            mymodes      = VDU::MANIFEST | VDU::WEAPON | VDU::DAMAGE | VDU::OBJECTIVES | VDU::SHIELD;
             default_mode = VDU::OBJECTIVES;
 #ifdef NETCOMM_WEBCAM
-            mymodes = mymodes|VDU::WEBCAM;
+            mymodes = mymodes | VDU::WEBCAM;
 #endif
 
             goto loadsprite;
         case RVDU:
             vdu.push_back(NULL);
-            newvdu = &vdu.back();
-            mymodes = VDU::TARGETMANIFEST | VDU::NAV | VDU::TARGET;
+            newvdu       = &vdu.back();
+            mymodes      = VDU::TARGETMANIFEST | VDU::NAV | VDU::TARGET;
             default_mode = VDU::TARGET;
             goto loadsprite;
         case AVDU:
             vdu.push_back(NULL);
-            newvdu = &vdu.back();
+            newvdu  = &vdu.back();
             mymodes = VDU::MSG;
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 switch (attribute_map.lookup((*iter).name)) {
                     case VDUTYPE: {
-                        mymodes = parse_vdu_type((*iter).value.c_str());
+                        mymodes               = parse_vdu_type((*iter).value.c_str());
                         std::string firstmode = (*iter).value.substr(0, (*iter).value.find(" "));
-                        default_mode = parse_vdu_type(firstmode.c_str());
+                        default_mode          = parse_vdu_type(firstmode.c_str());
                         break;
                     }
                     default:
@@ -573,22 +572,21 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                     case NETWORK:
                         if (XMLSupport::parse_bool((*iter).value) != false) {
                             return;
-                        }                      //Don't show if not in multiplayer (or single if false)
+                        }  // Don't show if not in multiplayer (or single if false)
 
                         break;
                     case XFILE:
                         if (newsprite) {
                             std::string tmp = getRes((*iter).value);
-                            bool bil = elem == PANEL ? panel_smooth : crosshair_smooth;
-                            (*newsprite) = new VSSprite(tmp.c_str(), bil ? BILINEAR : NEAREST);
+                            bool        bil = elem == PANEL ? panel_smooth : crosshair_smooth;
+                            (*newsprite)    = new VSSprite(tmp.c_str(), bil ? BILINEAR : NEAREST);
                             if (!(*newsprite)->LoadSuccess()) {
                                 delete (*newsprite);
                                 (*newsprite) = new VSSprite((*iter).value.c_str(), bil ? BILINEAR : NEAREST);
                             }
                             adjsprite = *newsprite;
                         } else if (newvdu) {
-                            VDU *tmp =
-                                    new VDU((*iter).value.c_str(), text, mymodes, rows, cols);
+                            VDU *tmp  = new VDU((*iter).value.c_str(), text, mymodes, rows, cols);
                             (*newvdu) = tmp;
                             adjsprite = *newvdu;
                             if (tmp->getMode() != default_mode) {
@@ -646,14 +644,14 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                     adjsprite->SetSize(fabs(leftx - rightx), fabs(topy - boty));
                 }
             } else if (newsprite == &Panel.back()) {
-                Panel.erase(Panel.end() - 1);             //don't want null panels
+                Panel.erase(Panel.end() - 1);  // don't want null panels
             }
             break;
         case EVENT: {
             std::string soundfile;
-            bool looping = false;
-            float gain = 1.0f;
-            EVENTID event = Cockpit::NUM_EVENTS;
+            bool        looping = false;
+            float       gain    = 1.0f;
+            EVENTID     event   = Cockpit::NUM_EVENTS;
 
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 switch (attribute_map.lookup((*iter).name)) {
@@ -664,7 +662,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
                         looping = XMLSupport::parse_bool((*iter).value);
                         break;
                     case EVENT:
-                        event = (Cockpit::EVENTID) attribute_map.lookup((*iter).value);
+                        event = (Cockpit::EVENTID)attribute_map.lookup((*iter).value);
                         break;
                     case GAIN:
                         gain = XMLSupport::parse_float((*iter).value);
@@ -677,20 +675,17 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
             if (!soundfile.empty() && (event > 0) && (event < Cockpit::NUM_EVENTS)) {
                 SetSoundForEvent(event, SoundContainer(soundfile, looping, gain));
             }
-        }
-            break;
+        } break;
         default:
             break;
     }
 }
 
-void GameCockpit::endElement(const string &name) {
-}
+void GameCockpit::endElement(const string &name) {}
 
 using namespace VSFileSystem;
 
 void GameCockpit::LoadXML(const char *filename) {
-
     VSFile f;
     if (filename[0] != '\0') {
         if (f.OpenReadOnly(filename, CockpitFile)) {
@@ -701,7 +696,7 @@ void GameCockpit::LoadXML(const char *filename) {
 
 void GameCockpit::LoadXML(VSFileSystem::VSFile &f) {
     if (!f.Valid()) {
-        cockpit_offset = 0;
+        cockpit_offset  = 0;
         viewport_offset = 0;
         Panel.push_back(new VSSprite("crosshairs.spr"));
         return;
@@ -732,4 +727,3 @@ void GameCockpit::LoadXML(VSFileSystem::VSFile &f) {
      */
     XML_ParserFree(parser);
 }
-

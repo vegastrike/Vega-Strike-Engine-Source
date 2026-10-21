@@ -26,28 +26,25 @@
  */
 
 #include "ecm.h"
-#include "configuration/configuration.h"
-#include "cmd/unit_csv_factory.h"
-#include "src/vs_logging.h"
-#include "src/vega_cast_utils.h"
 
 #include <boost/format.hpp>
 
+#include "cmd/unit_csv_factory.h"
+#include "configuration/configuration.h"
 #include "root_generic/vega_random.h"
+#include "src/vega_cast_utils.h"
+#include "src/vs_logging.h"
 
-ECM::ECM() :
-    Component(), EnergyConsumer(nullptr, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {
+ECM::ECM() : Component(), EnergyConsumer(nullptr, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {
     type = ComponentType::ECM;
 }
 
-ECM::ECM(EnergyContainer *source):
-    Component(), EnergyConsumer(source, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {
+ECM::ECM(EnergyContainer* source)
+    : Component(), EnergyConsumer(source, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {
     type = ComponentType::ECM;
 }
 
-ECM::~ECM()
-= default;
-
+ECM::~ECM() = default;
 
 // Component Methods
 void ECM::Load(std::string unit_key) {
@@ -69,12 +66,12 @@ bool ECM::CanDowngrade() const {
 }
 
 bool ECM::Downgrade() {
-    if(!CanDowngrade()) {
+    if (!CanDowngrade()) {
         return false;
     }
 
-    ecm = Resource<int>(0, 0, 0);
-    active = false;
+    ecm       = Resource<int>(0, 0, 0);
+    active    = false;
     installed = false;
     return true;
 }
@@ -89,7 +86,7 @@ bool ECM::Upgrade(const std::string upgrade_key) {
 }
 
 void ECM::Damage() {
-    if(ecm) {
+    if (ecm) {
         ecm--;
     }
 }
@@ -100,7 +97,7 @@ void ECM::Repair() {
 
 // Energy Consumer Methods
 double ECM::Consume() {
-    if(!active) {
+    if (!active) {
         return 0.0;
     }
 
@@ -113,24 +110,24 @@ bool ECM::Active() const {
 }
 
 bool ECM::BreakLock(void* missile) const {
-    if(!active) {
+    if (!active) {
         return false;
     }
 
-    //TODO: replace this with something better.
-    // Consider strength of tracking radar.
+    // TODO: replace this with something better.
+    //  Consider strength of tracking radar.
 
     // There are two separate checks for ECM breaking lock here
     // TODO: pick one
-    const double r = VegaRandom::Instance().GenRandReal1();
-    const double ecm_value = static_cast<double>(ecm.Value()) * simulation_atom_var / 32768;
+    const double r         = VegaRandom::Instance().GenRandReal1();
+    const double ecm_value = static_cast<double>(ecm.Value()) * simulation_atom_var / 32'768;
 
     if (r / kVegaUInt32tMaxAsDouble < ecm_value) {
         return true;
     }
 
     // Second check
-    uintmax_t missile_hash = reinterpret_cast<uintmax_t>(missile) / 16383ULL;
+    uintmax_t missile_hash = reinterpret_cast<uintmax_t>(missile) / 16'383ULL;
 
     if (static_cast<int>(missile_hash % configuration().physics.max_ecm) < ecm) {
         return true;
@@ -144,7 +141,8 @@ int ECM::Get() const {
 }
 
 void ECM::Set(int ecm) {
-    this->ecm = Resource<int>(ecm, 0, ecm);;
+    this->ecm = Resource<int>(ecm, 0, ecm);
+    ;
 }
 
 void ECM::Toggle() {
@@ -154,37 +152,40 @@ void ECM::Toggle() {
 void ECM::_upgrade(const std::string key) {
     // Can't use serialize. Only supports double.
     std::vector<std::string> result;
-    const std::string ecm_string = UnitCSVFactory::GetVariable(key, "ecm", std::string());
+    const std::string        ecm_string = UnitCSVFactory::GetVariable(key, "ecm", std::string());
 
-    if(ecm_string.empty()) {
+    if (ecm_string.empty()) {
         return;
     }
 
     boost::split(result, ecm_string, boost::is_any_of("/"));
-    int max_ecm = 0;
+    int max_ecm     = 0;
     int current_ecm = 0;
 
     try {
-        switch(result.size()) {
-        case 1:
-            max_ecm = current_ecm = static_cast<int>(std::rint(locale_aware_stod(result[0])));
-            installed = true;
-            break;
-        case 2:
-            current_ecm = static_cast<int>(std::rint(locale_aware_stod(result[0])));
-            max_ecm = static_cast<int>(std::rint(locale_aware_stod(result[1])));
-            installed = true;
-            break;
-        default:
-            VS_LOG(error, (boost::format("%1%: unexpected number of slash-delimited segments in ecm_string (%2%)") % __FUNCTION__ % result.size()));
-            break;
+        switch (result.size()) {
+            case 1:
+                max_ecm = current_ecm = static_cast<int>(std::rint(locale_aware_stod(result[0])));
+                installed             = true;
+                break;
+            case 2:
+                current_ecm = static_cast<int>(std::rint(locale_aware_stod(result[0])));
+                max_ecm     = static_cast<int>(std::rint(locale_aware_stod(result[1])));
+                installed   = true;
+                break;
+            default:
+                VS_LOG(error, (boost::format("%1%: unexpected number of slash-delimited segments in ecm_string (%2%)") %
+                               __FUNCTION__ % result.size()));
+                break;
         }
     } catch (std::invalid_argument const& ex) {
-        VS_LOG(error, (boost::format("%1%: %2% trying to convert ecm_string '%3%' to int") % __FUNCTION__ % ex.what() % ecm_string));
+        VS_LOG(error, (boost::format("%1%: %2% trying to convert ecm_string '%3%' to int") % __FUNCTION__ % ex.what() %
+                       ecm_string));
     } catch (std::out_of_range const& ex) {
-        VS_LOG(error, (boost::format("%1%: %2% trying to convert ecm_string '%3%' to int") % __FUNCTION__ % ex.what() % ecm_string));
+        VS_LOG(error, (boost::format("%1%: %2% trying to convert ecm_string '%3%' to int") % __FUNCTION__ % ex.what() %
+                       ecm_string));
     }
 
-    ecm = Resource<int>(current_ecm, 0, max_ecm);
+    ecm       = Resource<int>(current_ecm, 0, max_ecm);
     installed = true;
 }

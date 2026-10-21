@@ -26,24 +26,25 @@
  */
 
 #include "scroller.h"
+
 #include "newbutton.h"
 #include "slider.h"
 
-//This object contains several controls as a group.  These child controls
-//should always be in the same places in the list of child controls.
-static const int DOWN_BUTTON_INDEX = 0;
-static const int UP_BUTTON_INDEX = 1;
-static const int SLIDER_INDEX = 2;
+// This object contains several controls as a group.  These child controls
+// should always be in the same places in the list of child controls.
+static const int DOWN_BUTTON_INDEX   = 0;
+static const int UP_BUTTON_INDEX     = 1;
+static const int SLIDER_INDEX        = 2;
 static const int CHILD_CONTROL_COUNT = 3;
 
-//The Scroller class is a Control that offers scroll positioning.
-//It has a drag "thumb", and scroll buttons.
-//This implementation keeps track of the scroll position internally,
-//and uses an integer scroll position.
-//The only "event" it communicates to the outside world is a change
-//of scroll position.
+// The Scroller class is a Control that offers scroll positioning.
+// It has a drag "thumb", and scroll buttons.
+// This implementation keeps track of the scroll position internally,
+// and uses an integer scroll position.
+// The only "event" it communicates to the outside world is a change
+// of scroll position.
 
-//Set the position of this scroller.
+// Set the position of this scroller.
 void Scroller::setScrollPosition(int pos) {
     int newScrollPosition = pos;
     if (pos > m_maxValue) {
@@ -54,32 +55,32 @@ void Scroller::setScrollPosition(int pos) {
     if (m_scrollPosition != newScrollPosition) {
         m_scrollPosition = newScrollPosition;
 
-        Slider *slider = static_cast< Slider * > ( childAt(SLIDER_INDEX));
+        Slider *slider = static_cast<Slider *>(childAt(SLIDER_INDEX));
         slider->setPosition(m_scrollPosition);
 
         sendCommand("Scroller::PositionChanged", this);
     }
 }
 
-//Parameters for the scrolling range:  Max value, visible values, optional min value.
+// Parameters for the scrolling range:  Max value, visible values, optional min value.
 void Scroller::setRangeValues(int max, int visible, int min) {
     const int newMax = guiMax(min, max - visible + 1);
     if (newMax != m_maxValue || min != m_minValue || visible != m_visible) {
-        m_maxValue = newMax;
-        m_minValue = min;
-        m_visible = visible;
+        m_maxValue   = newMax;
+        m_minValue   = min;
+        m_visible    = visible;
         m_needLayout = true;
 
-        Slider *slider = static_cast< Slider * > ( childAt(SLIDER_INDEX));
+        Slider *slider = static_cast<Slider *>(childAt(SLIDER_INDEX));
         slider->setMaxMin(newMax, min);
-        const float thumbLength = (max > min) ? (float) visible / (max - min + 1) : -1.;
-        //Note that impossible thumb lengths turn off the thumb.
+        const float thumbLength = (max > min) ? (float)visible / (max - min + 1) : -1.;
+        // Note that impossible thumb lengths turn off the thumb.
         slider->setThumbLength(thumbLength);
         slider->setPageSize(guiMax(1, visible - 1));
     }
 }
 
-//The outside boundaries of the control.
+// The outside boundaries of the control.
 void Scroller::setRect(const Rect &r) {
     if (m_rect != r) {
         m_needLayout = true;
@@ -87,34 +88,34 @@ void Scroller::setRect(const Rect &r) {
     GroupControl::setRect(r);
 }
 
-//Background color of control.
+// Background color of control.
 void Scroller::setColor(const GFXColor &c) {
     assert(childCount() == CHILD_CONTROL_COUNT);
     childAt(DOWN_BUTTON_INDEX)->setColor(c);
     childAt(UP_BUTTON_INDEX)->setColor(c);
     if (isClear(m_thumbColor)) {
-        //If we don't have an explicit thumb color, calculate it.
-        Slider *slider = static_cast< Slider * > ( childAt(SLIDER_INDEX));
+        // If we don't have an explicit thumb color, calculate it.
+        Slider *slider = static_cast<Slider *>(childAt(SLIDER_INDEX));
         slider->setThumbColorBasedOnColor(c);
     }
     GroupControl::setColor(c);
 }
 
-//The color of the thumb.
+// The color of the thumb.
 void Scroller::setThumbColor(const GFXColor &c, const GFXColor &outline) {
     assert(childCount() == CHILD_CONTROL_COUNT);
-    Slider *slider = static_cast< Slider * > ( childAt(SLIDER_INDEX));
+    Slider *slider = static_cast<Slider *>(childAt(SLIDER_INDEX));
     slider->setThumbColor(c, outline);
 }
 
-//The color of the thumb.
+// The color of the thumb.
 void Scroller::setButtonColor(const GFXColor &c) {
     assert(childCount() == CHILD_CONTROL_COUNT);
     childAt(DOWN_BUTTON_INDEX)->setColor(c);
     childAt(UP_BUTTON_INDEX)->setColor(c);
 }
 
-//This is used as the color of the arrows on the scroller buttons.
+// This is used as the color of the arrows on the scroller buttons.
 void Scroller::setTextColor(const GFXColor &c) {
     assert(childCount() == CHILD_CONTROL_COUNT);
     childAt(DOWN_BUTTON_INDEX)->setTextColor(c);
@@ -123,12 +124,13 @@ void Scroller::setTextColor(const GFXColor &c) {
     GroupControl::setTextColor(c);
 }
 
-//Derived button class that can draw the arrow correctly.
+// Derived button class that can draw the arrow correctly.
 class ScrollerButton : public NewButton {
 public:
-//Draw the button.
+    // Draw the button.
     virtual void draw(void);
-//Which way the arrow points.
+
+    // Which way the arrow points.
     enum ButtonArrow {
         LEFT_ARROW,
         RIGHT_ARROW,
@@ -136,32 +138,32 @@ public:
         DOWN_ARROW
     };
 
-//Set the direction the arrow points.
+    // Set the direction the arrow points.
     void setArrowType(ButtonArrow arrow) {
         m_arrowType = arrow;
     }
-//CONSTRUCTION
-public:
-    ScrollerButton() : m_arrowType(LEFT_ARROW) {
-    }
 
-    virtual ~ScrollerButton(void) {
-    }
-//VARIABLES
+    // CONSTRUCTION
+public:
+    ScrollerButton() : m_arrowType(LEFT_ARROW) {}
+
+    virtual ~ScrollerButton(void) {}
+
+    // VARIABLES
 protected:
-    ButtonArrow m_arrowType;    //Direction the arrow points.
+    ButtonArrow m_arrowType;  // Direction the arrow points.
 };
 
-//Draw the scroller button.
+// Draw the scroller button.
 void ScrollerButton::draw(void) {
-    //Draw the other stuff first, so our stuff goes on top.
-    assert(label().empty());          //We are assuming it won't paint text on itself.
+    // Draw the other stuff first, so our stuff goes on top.
+    assert(label().empty());                // We are assuming it won't paint text on itself.
     NewButton::draw();
-    static const float ARROW_POINT = .012;      //From center to point of arrow.
-    static const float ARROW_WIDTH = .01;       //From center to side points.
-    static const float ARROW_BACK = .01;      //From center back to "bottom" of arrow.
-    Point center = m_rect.center();
-    vector<Point> coords(3);     //3-element vector.
+    static const float ARROW_POINT = .012;  // From center to point of arrow.
+    static const float ARROW_WIDTH = .01;   // From center to side points.
+    static const float ARROW_BACK  = .01;   // From center back to "bottom" of arrow.
+    Point              center      = m_rect.center();
+    vector<Point>      coords(3);           // 3-element vector.
     switch (m_arrowType) {
         case LEFT_ARROW:
             coords[0] = Point(center.x + ARROW_POINT, center.y);
@@ -187,20 +189,20 @@ void ScrollerButton::draw(void) {
     drawFilledPolygon(coords, textColor());
 }
 
-//Calculate the rects for the child controls.
+// Calculate the rects for the child controls.
 void Scroller::calcLayout(void) {
     assert(childCount() == CHILD_CONTROL_COUNT);
 
-    //Make the buttons slightly smaller than the scroller.
+    // Make the buttons slightly smaller than the scroller.
     static const Size BUTTON_INSET = Size(.005, .005);
 
-    //Get pointers to the buttons.
-    ScrollerButton *downButton = static_cast< ScrollerButton * > ( childAt(DOWN_BUTTON_INDEX));
-    ScrollerButton *upButton = static_cast< ScrollerButton * > ( childAt(UP_BUTTON_INDEX));
-    //Make the buttons square, and at the bottom/right of the scroller.
+    // Get pointers to the buttons.
+    ScrollerButton *downButton = static_cast<ScrollerButton *>(childAt(DOWN_BUTTON_INDEX));
+    ScrollerButton *upButton   = static_cast<ScrollerButton *>(childAt(UP_BUTTON_INDEX));
+    // Make the buttons square, and at the bottom/right of the scroller.
     if (m_rect.size.height >= m_rect.size.width) {
-        //This is a vertical scroller.
-        Rect rect = m_rect;
+        // This is a vertical scroller.
+        Rect rect        = m_rect;
         rect.size.height = rect.size.width;
         downButton->setRect(rect.copyAndInset(BUTTON_INSET));
         downButton->setCommand("LineDown");
@@ -211,14 +213,14 @@ void Scroller::calcLayout(void) {
         upButton->setCommand("LineUp");
         upButton->setArrowType(ScrollerButton::UP_ARROW);
 
-        Rect thumbRect = m_rect;
-        thumbRect.origin.y = rect.top();
+        Rect thumbRect         = m_rect;
+        thumbRect.origin.y     = rect.top();
         thumbRect.size.height -= thumbRect.origin.y - m_rect.origin.y;
         childAt(SLIDER_INDEX)->setRect(thumbRect);
     } else {
-        //This is a horizontal scroller.
-        //Need to flip the button commands -- "line up" does lower values.
-        Rect rect = m_rect;
+        // This is a horizontal scroller.
+        // Need to flip the button commands -- "line up" does lower values.
+        Rect rect       = m_rect;
         rect.size.width = rect.size.height;
         downButton->setRect(rect.copyAndInset(BUTTON_INSET));
         downButton->setCommand("LineUp");
@@ -229,20 +231,20 @@ void Scroller::calcLayout(void) {
         upButton->setCommand("LineDown");
         upButton->setArrowType(ScrollerButton::RIGHT_ARROW);
 
-        Rect thumbRect = m_rect;
-        thumbRect.origin.x = rect.right();
+        Rect thumbRect        = m_rect;
+        thumbRect.origin.x    = rect.right();
         thumbRect.size.width -= thumbRect.origin.x - m_rect.origin.x;
         childAt(SLIDER_INDEX)->setRect(thumbRect);
     }
 }
 
-//Create the child controls.
+// Create the child controls.
 void Scroller::createControls(void) {
     //"Scroll Down" button.
     NewButton *down = new ScrollerButton;
     down->setCommand("LineDown");
     down->setColor(color());
-    down->setTextColor(textColor());     //Arrow color.
+    down->setTextColor(textColor());  // Arrow color.
     down->setCommandTarget(this);
     addChild(down);
 
@@ -250,11 +252,11 @@ void Scroller::createControls(void) {
     NewButton *up = new ScrollerButton;
     up->setCommand("LineUp");
     up->setColor(color());
-    up->setTextColor(textColor());     //Arrow color.
+    up->setTextColor(textColor());  // Arrow color.
     up->setCommandTarget(this);
     addChild(up);
 
-    //Slider control.
+    // Slider control.
     Slider *slider = new Slider;
     slider->setColor(GUI_CLEAR);
     slider->setThumbColorBasedOnColor(color());
@@ -262,7 +264,7 @@ void Scroller::createControls(void) {
     addChild(slider);
 }
 
-//Draw the control.
+// Draw the control.
 void Scroller::draw(void) {
     drawBackground();
     if (m_needLayout) {
@@ -271,7 +273,7 @@ void Scroller::draw(void) {
     GroupControl::draw();
 }
 
-//Process a command event.
+// Process a command event.
 bool Scroller::processCommand(const EventCommandId &command, Control *control) {
     if (command == "LineUp") {
         setScrollPosition(scrollPosition() - 1);
@@ -280,22 +282,21 @@ bool Scroller::processCommand(const EventCommandId &command, Control *control) {
         setScrollPosition(scrollPosition() + 1);
         return true;
     } else if (command == "Slider::PositionChanged") {
-        Slider *slider = static_cast< Slider * > ( childAt(SLIDER_INDEX));
+        Slider *slider = static_cast<Slider *>(childAt(SLIDER_INDEX));
         setScrollPosition(slider->position());
         return true;
     }
     return GroupControl::processCommand(command, control);
 }
 
-//CONSTRUCTION
-Scroller::Scroller(void) :
-        m_minValue(0),
-        m_maxValue(10),
-        m_visible(1),
-        m_scrollPosition(m_minValue),
-        m_thumbColor(GUI_CLEAR),
-        m_thumbOutlineColor(GUI_CLEAR),
-        m_needLayout(true) {
+// CONSTRUCTION
+Scroller::Scroller(void)
+    : m_minValue(0),
+      m_maxValue(10),
+      m_visible(1),
+      m_scrollPosition(m_minValue),
+      m_thumbColor(GUI_CLEAR),
+      m_thumbOutlineColor(GUI_CLEAR),
+      m_needLayout(true) {
     createControls();
 }
-

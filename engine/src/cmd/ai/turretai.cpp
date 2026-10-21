@@ -26,27 +26,28 @@
  */
 
 
-#include "src/config_xml.h"
-#include "root_generic/vs_globals.h"
 #include "turretai.h"
-#include "cmd/unit_generic.h"
+
 #include "cmd/role_bitmask.h"
+#include "cmd/unit_generic.h"
 #include "root_generic/vega_random.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 #include "src/universe.h"
 
 using namespace Orders;
 
 TurretAI::TurretAI() : FaceTargetITTS(false) {
-    type |= WEAPON;
-    range = -1;
-    speed = 1;
-    mrange = 1;
-    hadFired = false;
+    type     |= WEAPON;
+    range     = -1;
+    speed     = 1;
+    mrange    = 1;
+    hadFired  = false;
 }
 
 void TurretAI::getAverageGunSpeed(float &speed, float &range, float &mrange) const {
-    speed = this->speed;
-    range = this->range;
+    speed  = this->speed;
+    range  = this->range;
     mrange = this->mrange;
 }
 
@@ -60,15 +61,15 @@ void TurretAI::Execute() {
         float tspeed, trange, tmrange;
         Unit *gun;
         if (parent->getNumMounts() == 0) {
-            speed = 1;
-            range = 1;
-            mrange = 1;                             //not much
+            speed  = 1;
+            range  = 1;
+            mrange = 1;  // not much
         }
         for (un_iter i = parent->getSubUnits(); (gun = *i) != NULL; ++i) {
             (*i)->getAverageGunSpeed(tspeed, trange, tmrange);
             if (trange > range) {
-                speed = tspeed;
-                range = trange;
+                speed  = tspeed;
+                range  = trange;
                 mrange = tmrange;
             }
         }
@@ -78,30 +79,30 @@ void TurretAI::Execute() {
         }
     }
     if (targ) {
-        const float dot_cutoff = configuration().ai.firing.turret_dot_cutoff_flt;
+        const float  dot_cutoff   = configuration().ai.firing.turret_dot_cutoff_flt;
         const double missile_prob = configuration().ai.firing.turret_missile_probability_dbl;
         FaceTargetITTS::Execute();
         if (parent->getNumMounts() > 0) {
             const Vector R(parent->GetTransformation().getR());
-            QVector Pos(targ->Position() - parent->Position());
-            const double mag = Pos.Magnitude();
-            Pos = Pos / mag;
-            const float dot = R.Dot(Pos.Cast());
-            const int neu = FactionUtil::GetNeutralFaction();
-            const int upg = FactionUtil::GetUpgradeFaction();
-            const bool is_player_starship = _Universe->isPlayerStarshipVoid(parent->owner) != nullptr;
+            QVector      Pos(targ->Position() - parent->Position());
+            const double mag               = Pos.Magnitude();
+            Pos                            = Pos / mag;
+            const float dot                = R.Dot(Pos.Cast());
+            const int   neu                = FactionUtil::GetNeutralFaction();
+            const int   upg                = FactionUtil::GetUpgradeFaction();
+            const bool  is_player_starship = _Universe->isPlayerStarshipVoid(parent->owner) != nullptr;
 
-            const bool should_fire =
-                    ((mag - targ->rSize() - parent->rSize() < range
-                            && dot > dot_cutoff)
-                            && (is_player_starship == false || targ->faction == upg
-                                    || targ->getRelation(static_cast<Unit *>(parent->owner))
-                                    < 0 /*now that it is a player, we know it's dereferencable*/
-                                    || targ->Target() == static_cast<Unit *>(parent->owner))
-                            && targ->faction != neu);
+            const bool should_fire = ((mag - targ->rSize() - parent->rSize() < range && dot > dot_cutoff) &&
+                                      (is_player_starship == false || targ->faction == upg ||
+                                       targ->getRelation(static_cast<Unit *>(parent->owner)) <
+                                               0 /*now that it is a player, we know it's dereferencable*/
+                                       || targ->Target() == static_cast<Unit *>(parent->owner)) &&
+                                      targ->faction != neu);
 
             parent->Fire(FireBitmask(parent, should_fire,
-                VegaRandom::Instance().RandomDoubleUpTo(RAND_MAX) < missile_prob * RAND_MAX * SIMULATION_ATOM), true);
+                                     VegaRandom::Instance().RandomDoubleUpTo(RAND_MAX) <
+                                             missile_prob * RAND_MAX * SIMULATION_ATOM),
+                         true);
             if (!should_fire) {
                 parent->UnFire();
             }
@@ -116,4 +117,3 @@ void TurretAI::Execute() {
         hadFired = false;
     }
 }
-

@@ -30,54 +30,51 @@
 
 #include <cmath>
 
-#include "cmd/damageable.h"
-
-#include "cmd/mount_size.h"
-#include "src/universe_util.h"
-#include "cmd/unit_generic.h"
-#include "src/vegastrike.h"
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
-#include "cmd/images.h"
-#include "cmd/collection.h"
-#include "cmd/role_bitmask.h"
 #include "cmd/ai/order.h"
-#include "root_generic/faction_generic.h"
+#include "cmd/collection.h"
+#include "cmd/damageable.h"
+#include "cmd/images.h"
+#include "cmd/mount_size.h"
+#include "cmd/role_bitmask.h"
+#include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
-#include "src/vs_logging.h"
+#include "configuration/game_config.h"
+#include "root_generic/configxml.h"
+#include "root_generic/faction_generic.h"
+#include "root_generic/vs_globals.h"
 #include "src/star_system.h"
 #include "src/universe.h"
-#include "configuration/game_config.h"
+#include "src/universe_util.h"
+#include "src/vegastrike.h"
+#include "src/vs_logging.h"
 
 ////////////////////////////////////////////////////////////////
 /// MissileEffect
 ////////////////////////////////////////////////////////////////
-MissileEffect::MissileEffect(const QVector &pos, float dam, float pdam, float radius, float radmult, void *owner) : pos(
-        pos) {
-    damage = dam;
-    phasedamage = pdam;
-    this->radius = radius;
-    radialmultiplier = radmult;
+MissileEffect::MissileEffect(const QVector &pos, float dam, float pdam, float radius, float radmult, void *owner)
+    : pos(pos) {
+    damage                      = dam;
+    phasedamage                 = pdam;
+    this->radius                = radius;
+    radialmultiplier            = radmult;
     this->ownerDoNotDereference = owner;
 }
 
 void MissileEffect::ApplyDamage(Unit *smaller) {
-    QVector norm = pos - smaller->Position();
-    float smaller_rsize = smaller->rSize();
-    float distance = norm.Magnitude() - smaller_rsize;            // no better check than the bounding sphere for now
-    if (distance
-            < radius) {                                   // "smaller->isUnit() != Vega_UnitType::missile &&" was removed - why disable antimissiles?
+    QVector norm          = pos - smaller->Position();
+    float   smaller_rsize = smaller->rSize();
+    float   distance      = norm.Magnitude() - smaller_rsize;  // no better check than the bounding sphere for now
+    if (distance <
+        radius) {  // "smaller->isUnit() != Vega_UnitType::missile &&" was removed - why disable antimissiles?
         if (distance < 0) {
-            distance =
-                    0.f;
-        }                                     //it's inside the bounding sphere, so we'll not reduce the effect
+            distance = 0.f;
+        }  // it's inside the bounding sphere, so we'll not reduce the effect
         if (radialmultiplier < .001) {
             radialmultiplier = .001;
         }
-        float dist_part = distance / radialmultiplier;              //radialmultiplier is radius of the set damage
+        float dist_part = distance / radialmultiplier;  // radialmultiplier is radius of the set damage
         float damage_mul;
-        if (dist_part
-                > 1.f) {                                  // there can be something else, such as different eye- and ear- candy
+        if (dist_part > 1.f) {  // there can be something else, such as different eye- and ear- candy
             damage_mul = 1 / (dist_part * dist_part);
         } else {
             damage_mul = 2.f - dist_part * dist_part;
@@ -86,10 +83,9 @@ void MissileEffect::ApplyDamage(Unit *smaller) {
          *  contrived formula to create paraboloid falloff rather than quadratic peaking at 2x damage at origin
          *  k = 2-distance^2/radmul^2
          *
-         * if the explosion itself was a weapon, it would have double the base damage, longrange=0.5 (counted at Rm) and more generic form:
-         * Kclose = 1-(1-longrange)*(R/Rm)^2
-         * Kfar   = longrange/(R/Rm)^2
-         * or Kapprox = longrange/(longrange-(R/Rm)^3*(1-longrange)) ; obviously, with more checks preventing /0
+         * if the explosion itself was a weapon, it would have double the base damage, longrange=0.5 (counted at Rm) and
+         * more generic form: Kclose = 1-(1-longrange)*(R/Rm)^2 Kfar   = longrange/(R/Rm)^2 or Kapprox =
+         * longrange/(longrange-(R/Rm)^3*(1-longrange)) ; obviously, with more checks preventing /0
          */
         DoApplyDamage(smaller, smaller, distance, damage_mul);
     }
@@ -105,11 +101,11 @@ float MissileEffect::GetRadius() const {
 
 void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float damage_fraction) {
     // Some sanity
-    if(damage_fraction == 0.0f) {
+    if (damage_fraction == 0.0f) {
         return;
     }
 
-    if(damage == 0.0f && phasedamage == 0.0f) {
+    if (damage == 0.0f && phasedamage == 0.0f) {
         return;
     }
 
@@ -170,59 +166,40 @@ void MissileEffect::DoApplyDamage(Unit *parent, Unit *un, float distance, float 
         }
     }
     if (damage_left > 0) {
-        VS_LOG(info,
-                (boost::format("Missile damaging %1$s/%2$s (dist=%3$.3f r=%4$.3f dmg=%5$.3f)")
-                        % parent->name.get()
-                        % ((un == parent) ? "." : un->name.get())
-                        % distance
-                        % radius
-                        % (damage * damage_fraction * damage_left)));
-        VS_LOG(info,
-                (boost::format("damage=%1% fraction=%2% left=%3%")
-                        % damage % damage_fraction % damage_left));
+        VS_LOG(info, (boost::format("Missile damaging %1$s/%2$s (dist=%3$.3f r=%4$.3f dmg=%5$.3f)") %
+                      parent->name.get() % ((un == parent) ? "." : un->name.get()) % distance % radius %
+                      (damage * damage_fraction * damage_left)));
+        VS_LOG(info, (boost::format("damage=%1% fraction=%2% left=%3%") % damage % damage_fraction % damage_left));
 
-        Damage damage(this->damage * damage_fraction * damage_left,
-                phasedamage * damage_fraction * damage_left);
-        parent->ApplyDamage(pos.Cast(), norm, damage, un, GFXColor(1, 1, 1, 1),
-                ownerDoNotDereference);
+        Damage damage(this->damage * damage_fraction * damage_left, phasedamage * damage_fraction * damage_left);
+        parent->ApplyDamage(pos.Cast(), norm, damage, un, GFXColor(1, 1, 1, 1), ownerDoNotDereference);
     }
 }
-
-
 
 ////////////////////////////////////////////////////////////////
 /// Missile
 ////////////////////////////////////////////////////////////////
 
-Missile::Missile(const char *filename,
-        int faction,
-        const string &modifications,
-        const float damage,
-        float phasedamage,
-        float time,
-        float radialeffect,
-        float radmult,
-        float detonation_radius) :
-        Unit(filename, false, faction, modifications),
-        time(time),
-        damage(damage),
-        phasedamage(phasedamage),
-        radial_effect(radialeffect),
-        radial_multiplier(radmult),
-        detonation_radius(detonation_radius),
-        discharged(false),
-        retarget(-1),
-        had_target(false) {
-}
+Missile::Missile(const char *filename, int faction, const string &modifications, const float damage, float phasedamage,
+                 float time, float radialeffect, float radmult, float detonation_radius)
+    : Unit(filename, false, faction, modifications),
+      time(time),
+      damage(damage),
+      phasedamage(phasedamage),
+      radial_effect(radialeffect),
+      radial_multiplier(radmult),
+      detonation_radius(detonation_radius),
+      discharged(false),
+      retarget(-1),
+      had_target(false) {}
 
 void Missile::Discharge() {
     if ((damage != 0 || phasedamage != 0) && !discharged) {
         Unit *target = Unit::Target();
-        VS_LOG(info, (boost::format("Missile discharged (target %1%)")
-                % ((target != nullptr) ? target->name.get() : "NULL")));
+        VS_LOG(info, (boost::format("Missile discharged (target %1%)") %
+                      ((target != nullptr) ? target->name.get() : "NULL")));
         _Universe->activeStarSystem()->AddMissileToQueue(
-                new MissileEffect(Position(), damage, phasedamage,
-                        radial_effect, radial_multiplier, owner));
+                new MissileEffect(Position(), damage, phasedamage, radial_effect, radial_multiplier, owner));
         discharged = true;
     }
 }
@@ -236,14 +213,9 @@ void Missile::Kill(bool erase) {
     Unit::Kill(erase);
 }
 
-void Missile::UpdatePhysics2(const Transformation &trans,
-        const Transformation &old_physical_state,
-        const Vector &accel,
-        float difficulty,
-        const Matrix &transmat,
-        const Vector &CumulativeVelocity,
-        bool ResolveLast,
-        UnitCollection *uc) {
+void Missile::UpdatePhysics2(const Transformation &trans, const Transformation &old_physical_state, const Vector &accel,
+                             float difficulty, const Matrix &transmat, const Vector &CumulativeVelocity,
+                             bool ResolveLast, UnitCollection *uc) {
     // First we move the missile by calling the super
     Unit::UpdatePhysics2(trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc);
 
@@ -266,9 +238,9 @@ void Missile::UpdatePhysics2(const Transformation &trans,
             target = nullptr;
         } else {
             // What does this do?
-            static unsigned int pointdef = ROLES::getRole("POINTDEF");
+            static unsigned int pointdef       = ROLES::getRole("POINTDEF");
             target->graphicOptions.missilelock = true;
-            un_iter i = target->getSubUnits();
+            un_iter i                          = target->getSubUnits();
 
             Unit *su;
             for (; (su = *i) != nullptr; ++i) {
@@ -315,7 +287,7 @@ Unit *Missile::breakECMLock(Unit *target) {
         return nullptr;
     }
 
-    if(target->ecm.BreakLock(this)) {
+    if (target->ecm.BreakLock(this)) {
         return nullptr;
     } else {
         return target;
@@ -328,7 +300,7 @@ bool Missile::proximityFuse(Unit *target) {
         return false;
     }
 
-    QVector endpos = Position();
+    QVector endpos   = Position();
     QVector startpos = endpos - (simulation_atom_var * GetVelocity());
 
     // checker - checks proximity fuse?
@@ -337,13 +309,13 @@ bool Missile::proximityFuse(Unit *target) {
         // Set position to the collision point
         SetPosition(startpos + (endpos - startpos) * checker);
 
-        //spiritplumber assumes that the missile is hitting a much larger object than itself
-        // It seems spiritplumber is a former dev of the project.
+        // spiritplumber assumes that the missile is hitting a much larger object than itself
+        //  It seems spiritplumber is a former dev of the project.
         Velocity += configuration().physics.percent_missile_match_target_velocity_flt * (target->Velocity - Velocity);
 
         Discharge();
         time = -1;
-        return true; // We've exploded
+        return true;  // We've exploded
     }
 
     return false;

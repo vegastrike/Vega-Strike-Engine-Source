@@ -29,71 +29,66 @@
 /// Nav computer functions
 /// Draws in-system map, and  galaxy map of known sectors and systems
 
+#include "drawgalaxy.h"
+
 #include <algorithm>
+#include <assert.h>  //needed for assert() calls
 #include <cmath>
-#include "root_generic/vs_globals.h"
-#include "src/vegastrike.h"
-#include "gfx/gauge.h"
-#include "gfx/cockpit.h"
-#include "src/universe.h"
-#include "src/star_system.h"
-#include "cmd/unit_generic.h"
+
+#include "cmd/ai/aggressive.h"
+#include "cmd/ai/firekeyboard.h"
+#include "cmd/ai/flyjoystick.h"
 #include "cmd/collection.h"
-#include "gfx/hud.h"
-#include "root_generic/lin_time.h" //for fps
-#include "src/config_xml.h"
-#include "root_generic/lin_time.h"
 #include "cmd/images.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
-#include "cmd/ai/flyjoystick.h"
-#include "cmd/ai/firekeyboard.h"
-#include "cmd/ai/aggressive.h"
-#include "src/main_loop.h"
-#include <assert.h>     //needed for assert() calls
-#include "vegadisk/savegame.h"
-#include "gfx/animation.h"
-#include "gfx_generic/mesh.h"
-#include "src/universe_util.h"
-#include "src/in_mouse.h"
-#include "gui/glut_support.h"
+#include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
-#include "src/hashtable.h"
-#include "gfx/nav/navscreen.h"
+#include "gfx/animation.h"
+#include "gfx/cockpit.h"
+#include "gfx/gauge.h"
+#include "gfx/hud.h"
 #include "gfx/masks.h"
+#include "gfx/nav/navscreen.h"
 #include "gfx/nav/navscreenoccupied.h"
+#include "gfx_generic/mesh.h"
+#include "gui/glut_support.h"
+#include "root_generic/lin_time.h"  //for fps
+#include "root_generic/lin_time.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/hashtable.h"
+#include "src/in_mouse.h"
+#include "src/main_loop.h"
+#include "src/star_system.h"
+#include "src/universe.h"
+#include "src/universe_util.h"
+#include "src/vegastrike.h"
+#include "vegadisk/savegame.h"
 
-#include "drawgalaxy.h"
-
-float SYSTEM_DEFAULT_SIZE = 0.02;
+float    SYSTEM_DEFAULT_SIZE = 0.02;
 GFXColor GrayColor(.5, .5, .5, .5);
 
-void DrawNodeDescription(string text,
-        float x_,
-        float y_,
-        float size_x,
-        float size_y,
-        bool ignore_occupied_areas,
-        const GFXColor &col,
-        navscreenoccupied *screenoccupation) {
-    //take the head and stick it in the back
+void DrawNodeDescription(string text, float x_, float y_, float size_x, float size_y, bool ignore_occupied_areas,
+                         const GFXColor &col, navscreenoccupied *screenoccupation) {
+    // take the head and stick it in the back
     if (text.size() == 0) {
         return;
     }
-    TextPlane displayname;   //will be used to display shits names
-    displayname.color = static_cast<ImU32>(col);
+    TextPlane displayname;  // will be used to display shits names
+    displayname.color            = static_cast<ImU32>(col);
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    int length = text.size();
-    float offset = (float(length) * 0.005);
+    int         length           = text.size();
+    float       offset           = (float(length) * 0.005);
     if (ignore_occupied_areas) {
         displayname.SetPos((x_ - offset), y_);
         displayname.SetText(text);
         displayname.SetCharSize(size_x, size_y);
 
         GFXColor tpbg(displayname.background_color);
-        bool automatte = (0 == tpbg.a);
+        bool     automatte = (0 == tpbg.a);
         if (automatte) {
-            GFXColor temp_background_color( 0, 0, 0, background_alpha );
+            GFXColor temp_background_color(0, 0, 0, background_alpha);
             displayname.background_color = static_cast<ImU32>(temp_background_color);
         }
         displayname.Draw(text, 0, true, false, automatte);
@@ -104,16 +99,15 @@ void DrawNodeDescription(string text,
         displayname.SetText(text);
         displayname.SetCharSize(size_x, size_y);
         GFXColor tpbg(displayname.background_color);
-        bool automatte = (0 == tpbg.a);
+        bool     automatte = (0 == tpbg.a);
         if (automatte) {
-            GFXColor temp_background_color( 0, 0, 0, background_alpha );
+            GFXColor temp_background_color(0, 0, 0, background_alpha);
             displayname.background_color = static_cast<ImU32>(temp_background_color);
         }
         displayname.Draw(text, 0, true, false, automatte);
         displayname.background_color = static_cast<ImU32>(tpbg);
     }
 }
-
 
 // TODO: fix this undocumented function
 // Currently, it returns 'm' if system has been visited twice.
@@ -127,7 +121,7 @@ void DrawNodeDescription(string text,
 // Worse, the visit counter keeps iterating every time you visit the system.
 // This means that the color will turn grey for twice and then not.
 char GetSystemColor(string source) {
-    //FIXME: update me!!!
+    // FIXME: update me!!!
     vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData("visited_" + source);
     if (v->size()) {
         float k = (*v)[0];
@@ -138,29 +132,20 @@ char GetSystemColor(string source) {
     return 'v';
 }
 
-void DrawNode(int type,
-        float size,
-        float x,
-        float y,
-        std::string source,
-        navscreenoccupied *screenoccupation,
-        bool moused,
-        GFXColor race,
-        bool mouseover,
-        bool willclick,
-        string insector) {
+void DrawNode(int type, float size, float x, float y, std::string source, navscreenoccupied *screenoccupation,
+              bool moused, GFXColor race, bool mouseover, bool willclick, string insector) {
     char color = GetSystemColor(source);
     if (moused) {
         return;
     }
     if (willclick == true && mouseover == false) {
-        //Perhaps some key binding or mouseclick will be set in the future to do this.
+        // Perhaps some key binding or mouseclick will be set in the future to do this.
         mouseover = true;
     }
-    static GFXColor
-            highlighted_tail_col = vs_config->getColor("nav", "highlighted_unit_on_tail", GFXColor(1, .3, .3, .8));
-    static GFXColor
-            highlighted_tail_text = vs_config->getColor("nav", "highlighted_text_on_tail", GFXColor(1, 1, .7, 1));
+    static GFXColor highlighted_tail_col =
+            vs_config->getColor("nav", "highlighted_unit_on_tail", GFXColor(1, .3, .3, .8));
+    static GFXColor highlighted_tail_text =
+            vs_config->getColor("nav", "highlighted_text_on_tail", GFXColor(1, 1, .7, 1));
     if (color == 'm') {
         race = GrayColor;
     }
@@ -168,8 +153,8 @@ void DrawNode(int type,
         if (willclick) {
             race = highlighted_tail_col;
         } else {
-            //Leave just a faint resemblence of the original color,
-            //but also make it look whiteish.
+            // Leave just a faint resemblence of the original color,
+            // but also make it look whiteish.
             race.r += .75;
             race.g += .75;
             race.b += .75;
@@ -181,7 +166,7 @@ void DrawNode(int type,
         Beautify(source, tsector, nam);
         if (willclick) {
             race = highlighted_tail_text;
-            nam = tsector + " / " + nam;
+            nam  = tsector + " / " + nam;
         }
         if (willclick || !(insector.compare("")) || !(insector.compare(tsector))) {
             DrawNodeDescription(nam, x, y, 1.0, 1.0, 0, race, screenoccupation);
@@ -189,28 +174,20 @@ void DrawNode(int type,
     }
 }
 
-
-
-
-//typedef Hashtable <std::string, const systemdrawnode, 127> systemdrawhashtable;
+// typedef Hashtable <std::string, const systemdrawnode, 127> systemdrawhashtable;
 
 bool testandset(bool &b, bool val) {
     bool tmp = b;
-    b = val;
+    b        = val;
     return tmp;
 }
 
-
-
-
-
 bool checkedVisited(const std::string &n) {
-    const bool dontbothervisiting =
-            !configuration().graphics.explore_for_map;
+    const bool dontbothervisiting = !configuration().graphics.explore_for_map;
     if (dontbothervisiting) {
         return true;
     } else {
-        string key(string("visited_") + n);
+        string         key(string("visited_") + n);
         vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
         if (v->size() > 0) {
             return true;
@@ -228,15 +205,15 @@ NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::operator++()
             for (int j = 0; j < nas; ++j) {
                 string n = UniverseUtil::GetAdjacentSystem(vstack[i], j);
                 if (!testandset(visited[n], true)) {
-//if (checkedVisited(n)) {
+                    // if (checkedVisited(n)) {
                     newsys.push_back(n);
                 }
-//}
+                //}
             }
         }
         vstack.swap(newsys);
         count += 1;
-        which = 0;
+        which  = 0;
         if (count > maxcount) {
             vstack.clear();
         }
@@ -246,11 +223,6 @@ NavigationSystem::SystemIterator &NavigationSystem::SystemIterator::operator++()
 
 //************************************************
 //
-//SYSTEM SECTION
+// SYSTEM SECTION
 //
 //************************************************
-
-
-
-
-

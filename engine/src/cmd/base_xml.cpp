@@ -27,26 +27,29 @@
 
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
-#if BOOST_VERSION != 102800
-#include <boost/python/object.hpp>
+
+#include <boost/version.hpp>
+#if BOOST_VERSION != 102'800
+#    include <boost/python/object.hpp>
 #else
-#include <boost/python/objects.hpp>
+#    include <boost/python/objects.hpp>
 #endif
 
 #include <Python.h>
-#include <vector>
-#include <string>
+
 #include <math.h>
-#include "src/python/python_class.h"
+#include <string>
+#include <vector>
+
 #include "cmd/base.h"
 #include "cmd/base_util.h"
+#include "src/python/python_class.h"
 #include "vegadisk/vsfilesystem.h"
 
 static FILE *withAndWithout(std::string filename, std::string time_of_day_hint) {
     string with(filename + "_" + time_of_day_hint + BASE_EXTENSION);
-    FILE *fp = VSFileSystem::vs_open(with.c_str(), "r");
+    FILE  *fp = VSFileSystem::vs_open(with.c_str(), "r");
     if (!fp) {
         string without(filename + BASE_EXTENSION);
         fp = VSFileSystem::vs_open(without.c_str(), "r");
@@ -65,7 +68,7 @@ static FILE *getFullFile(std::string filename, std::string time_of_day_hint, std
 void BaseInterface::Load(const char *filename, const char *time_of_day_hint, const char *faction) {
     FILE *inFile = getFullFile(string("bases/") + filename, time_of_day_hint, faction);
     if (!inFile) {
-        bool planet = false;
+        bool  planet = false;
         Unit *baseun = this->baseun.GetUnit();
         if (baseun) {
             planet = (baseun->getUnitType() == Vega_UnitType::planet);
@@ -79,11 +82,10 @@ void BaseInterface::Load(const char *filename, const char *time_of_day_hint, con
             return;
         }
     }
-    //now that we have a FILE * named inFile and a std::string named newfile we can finally begin the python
+    // now that we have a FILE * named inFile and a std::string named newfile we can finally begin the python
     string compilefile = string(filename) + time_of_day_hint + string(faction) + BASE_EXTENSION;
     Python::reseterrors();
     VegaPyRunFile(inFile, compilefile);
     Python::reseterrors();
     VSFileSystem::vs_close(inFile);
 }
-

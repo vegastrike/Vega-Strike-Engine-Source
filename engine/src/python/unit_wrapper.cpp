@@ -27,32 +27,34 @@
 
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
+
+#include <boost/version.hpp>
 typedef boost::python::dict BoostPythonDictionary;
 
-#include "src/python/python_class.h"
-#include "cmd/container.h"
 #include <string>
-#include "src/python/init.h"
-#include "gfx_generic/vec.h"
-#include "cmd/unit_generic.h"
-#include "src/universe_util.h"
-#include "cmd/unit_util.h"
-#include "root_generic/faction_generic.h"
+
 #include "cmd/ai/fire.h"
+#include "cmd/container.h"
 #include "cmd/engineVersion.h"
-#include "src/python/unit_wrapper_class.h"
-#include "src/python/unit_from_to_python.h"
+#include "cmd/unit_generic.h"
+#include "cmd/unit_util.h"
 #include "cmd/weapon_info.h"
-#if _MSC_VER <= 1200
+#include "gfx_generic/vec.h"
+#include "root_generic/faction_generic.h"
+#include "src/python/init.h"
+#include "src/python/python_class.h"
+#include "src/python/unit_from_to_python.h"
+#include "src/python/unit_wrapper_class.h"
+#include "src/universe_util.h"
+#if _MSC_VER <= 1'200
 #else
-#include "src/python/define_odd_unit_functions.h"
+#    include "src/python/define_odd_unit_functions.h"
 #endif
 
 extern void StarSystemExports();
 
-//makes to_python for both vector and qvector turn them into tuples :-)
+// makes to_python for both vector and qvector turn them into tuples :-)
 using namespace UnitUtil;
 using namespace UniverseUtil;
 using Orders::FireAt;
@@ -68,131 +70,118 @@ UnitWrapper newGetPlayer() {
 void setOwner(int obj, UnitWrapper un) {
     setOwnerII(obj, un.GetUnit());
 }
-}
+}  // namespace UniverseUtil
+
 PYTHON_INIT_INHERIT_GLOBALS(VS, FireAt);
 PYTHON_INIT_INHERIT_GLOBALS(VS, VegaStrike::EngineVersionData);
-BOOST_PYTHON_MODULE(VS) {
 
-//#undef EXPORT_UTIL
-//#undef voidEXPORT_UTIL
-#define EXPORT_UTIL(name, aff) PYTHON_DEFINE_GLOBAL( VS, &UniverseUtil::name, #name );
-#define voidEXPORT_UTIL(name) EXPORT_UTIL( name, 0 )
-//#undef EXPORT_FACTION
-//#undef voidEXPORT_FACTION
-#define EXPORT_FACTION(name, aff) PYTHON_DEFINE_GLOBAL( VS, &FactionUtil::name, #name );
-#define voidEXPORT_FACTION(name) EXPORT_FACTION( name, 0 )
+BOOST_PYTHON_MODULE(VS) {
+// #undef EXPORT_UTIL
+// #undef voidEXPORT_UTIL
+#define EXPORT_UTIL(name, aff) PYTHON_DEFINE_GLOBAL(VS, &UniverseUtil::name, #name);
+#define voidEXPORT_UTIL(name)  EXPORT_UTIL(name, 0)
+// #undef EXPORT_FACTION
+// #undef voidEXPORT_FACTION
+#define EXPORT_FACTION(name, aff) PYTHON_DEFINE_GLOBAL(VS, &FactionUtil::name, #name);
+#define voidEXPORT_FACTION(name)  EXPORT_FACTION(name, 0)
     EXPORT_UTIL(getUnitList, PythonUnitIter())
     EXPORT_UTIL(getScratchUnit, Unit())
-    voidEXPORT_UTIL(setScratchUnit)
-    EXPORT_UTIL(getNumPlayers, 1)
-    EXPORT_UTIL(getVariable, "")
-    EXPORT_UTIL(getSubVariable, "")
-    EXPORT_UTIL(newGetPlayer, Unit())
-    EXPORT_UTIL(GetContrabandList, Unit())
-    EXPORT_UTIL(getUnit, Unit())
-    EXPORT_UTIL(getUnitByName, Unit())
-    EXPORT_UTIL(launchJumppoint, Unit())
-    EXPORT_UTIL(launch, Unit())
-    EXPORT_UTIL(getPlayer, Unit())
-    EXPORT_UTIL(getPlayerX, Unit())
-    EXPORT_UTIL(GetMasterPartList, Unit())
-    voidEXPORT_UTIL(setOwner)
-    EXPORT_UTIL(getOwner, Unit())
-    StarSystemExports();
+    voidEXPORT_UTIL(setScratchUnit) EXPORT_UTIL(getNumPlayers, 1) EXPORT_UTIL(getVariable, "")
+            EXPORT_UTIL(getSubVariable, "") EXPORT_UTIL(newGetPlayer, Unit()) EXPORT_UTIL(GetContrabandList, Unit())
+                    EXPORT_UTIL(getUnit, Unit()) EXPORT_UTIL(getUnitByName, Unit()) EXPORT_UTIL(launchJumppoint, Unit())
+                            EXPORT_UTIL(launch, Unit()) EXPORT_UTIL(getPlayer, Unit()) EXPORT_UTIL(getPlayerX, Unit())
+                                    EXPORT_UTIL(GetMasterPartList, Unit()) voidEXPORT_UTIL(setOwner)
+                                            EXPORT_UTIL(getOwner, Unit()) StarSystemExports();
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 #undef EXPORT_FACTION
 #undef voidEXPORT_FACTION
     boost::python::class_<Cargo>("Cargo")
-        .def(boost::python::init<>())
-        // Dedicated constructor for python, as primary constructor has default values
-        // for some parameters, which is not supported by boost::python.
-        .def(boost::python::init<std::string, std::string, float, int, float, float>())
-        .def("SetPrice", &Cargo::SetPrice)
-        .def("GetPrice", &Cargo::GetPrice)
-        .def("SetMass", &Cargo::SetMass)
-        .def("GetMass", &Cargo::GetMass)
-        .def("SetVolume", &Cargo::SetVolume)
-        .def("GetVolume", &Cargo::GetVolume)
-        .def("SetQuantity", &Cargo::SetQuantity)
-        .def("GetQuantity", &Cargo::GetQuantity)
-        .def("SetContent", &Cargo::SetName)
-        .def("GetContent", &Cargo::GetContentPython)
-        .def("SetCategory", &Cargo::SetCategory)
-        .def("GetCategory", &Cargo::GetCategoryPython)
-        .def("SetMissionFlag", &Cargo::SetMissionFlag)
-        .def("GetMissionFlag", &Cargo::IsMissionFlag)
-        .def("GetDescription", &Cargo::GetDescriptionPython)
-        .def("SetFunctionality", &Cargo::SetFunctionality);
-        
-    PYTHON_BEGIN_CLASS(VS, UnitWrapper, "Unit")
-        PYTHON_DEFINE_METHOD(Class, &UnitWrapper::getSubUnits, "getSubUnits");
-        ExportUnit(Class);
-//WARNING: Macro City 2 ahead.  Please skip this section, also if you don't like macros.
+            .def(boost::python::init<>())
+            // Dedicated constructor for python, as primary constructor has default values
+            // for some parameters, which is not supported by boost::python.
+            .def(boost::python::init<std::string, std::string, float, int, float, float>())
+            .def("SetPrice", &Cargo::SetPrice)
+            .def("GetPrice", &Cargo::GetPrice)
+            .def("SetMass", &Cargo::SetMass)
+            .def("GetMass", &Cargo::GetMass)
+            .def("SetVolume", &Cargo::SetVolume)
+            .def("GetVolume", &Cargo::GetVolume)
+            .def("SetQuantity", &Cargo::SetQuantity)
+            .def("GetQuantity", &Cargo::GetQuantity)
+            .def("SetContent", &Cargo::SetName)
+            .def("GetContent", &Cargo::GetContentPython)
+            .def("SetCategory", &Cargo::SetCategory)
+            .def("GetCategory", &Cargo::GetCategoryPython)
+            .def("SetMissionFlag", &Cargo::SetMissionFlag)
+            .def("GetMissionFlag", &Cargo::IsMissionFlag)
+            .def("GetDescription", &Cargo::GetDescriptionPython)
+            .def("SetFunctionality", &Cargo::SetFunctionality);
 
-//End of Macro City 2
-//#if BOOST_VERSION != 102800
-        PYTHON_DEFINE_METHOD(Class, &UnitWrapper::equal, "__eq__");
-        PYTHON_DEFINE_METHOD(Class, &UnitWrapper::notequal, "__ne__");
-//#else
-//Class.def (boost::python::operators< (boost::python::op_eq | boost::python::op_ne) >(), boost::python::right_operand<UnitWrapper>());
-//#endif
-        DefineOddUnitFunctions(Class);
+    PYTHON_BEGIN_CLASS(VS, UnitWrapper, "Unit")
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::getSubUnits, "getSubUnits");
+    ExportUnit(Class);
+    // WARNING: Macro City 2 ahead.  Please skip this section, also if you don't like macros.
+
+    // End of Macro City 2
+    // #if BOOST_VERSION != 102800
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::equal, "__eq__");
+    PYTHON_DEFINE_METHOD(Class, &UnitWrapper::notequal, "__ne__");
+    // #else
+    // Class.def (boost::python::operators< (boost::python::op_eq | boost::python::op_ne) >(),
+    // boost::python::right_operand<UnitWrapper>()); #endif
+    DefineOddUnitFunctions(Class);
     PYTHON_END_CLASS(VS, UnitWrapper)
 
     PYTHON_BEGIN_CLASS(VS, UniverseUtil::PythonUnitIter, "un_iter")
 
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::current, "current");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::isDone, "isDone");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advance, "advance");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceN, "advanceN");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceSignificant, "advanceSignificant");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceNSignificant, "advanceNSignificant");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceInsignificant, "advanceInsignificant");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceNInsignificant, "advanceNInsignificant");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advancePlanet, "advancePlanet");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceNPlanet, "advanceNPlanet");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceJumppoint, "advanceJumppoint");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceNJumppoint, "advanceNJumppoint");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::size, "size");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::next, "next");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::next, "__next__");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::current, "__iter__");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::remove, "remove");
-        PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::preinsert, "preinsert");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::current, "current");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::isDone, "isDone");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advance, "advance");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceN, "advanceN");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceSignificant, "advanceSignificant");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceNSignificant, "advanceNSignificant");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceInsignificant, "advanceInsignificant");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceNInsignificant, "advanceNInsignificant");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advancePlanet, "advancePlanet");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceNPlanet, "advanceNPlanet");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceJumppoint, "advanceJumppoint");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::advanceNJumppoint, "advanceNJumppoint");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::size, "size");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::next, "next");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::next, "__next__");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::current, "__iter__");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::remove, "remove");
+    PYTHON_DEFINE_METHOD(Class, &UniverseUtil::PythonUnitIter::preinsert, "preinsert");
     PYTHON_END_CLASS(VS, UniverseUtil::PythonUnitIter)
     typedef PythonAI<FireAt> PythonAIFireAt;
     PYTHON_BEGIN_INHERIT_CLASS(VS, PythonAIFireAt, FireAt, "PythonAI")
-        PYTHON_DEFINE_METHOD_DEFAULT(Class, &FireAt::Execute, "Execute", PythonAI<FireAt>::default_Execute);
-        PYTHON_DEFINE_METHOD_DEFAULT(Class,
-                &FireAt::ChooseTarget,
-                "ChooseTarget",
-                PythonAI<FireAt>::default_ChooseTarget);
-        PYTHON_DEFINE_METHOD_DEFAULT(Class, &FireAt::SetParent, "init", PythonAI<FireAt>::default_SetParent);
-        PYTHON_DEFINE_METHOD(Class, &FireAt::GetParent, "GetParent");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::AddReplaceLastOrder, "AddReplaceLastOrder");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::ExecuteLastScriptFor, "ExecuteLastScriptFor");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::FaceTarget, "FaceTarget");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::FaceTargetITTS, "FaceTargetITTS");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::MatchLinearVelocity, "MatchLinearVelocity");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::MatchAngularVelocity, "MatchAngularVelocity");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::ChangeHeading, "ChangeHeading");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::ChangeLocalDirection, "ChangeLocalDirection");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::MoveTo, "MoveTo");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::MatchVelocity, "MatchVelocity");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::Cloak, "Cloak");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::FormUp, "FormUp");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::FormUpToOwner, "FormUpToOwner");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::FaceDirection, "FaceDirection");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::XMLScript, "XMLScript");
-        PYTHON_DEFINE_METHOD(Class, &FireAt::LastPythonScript, "LastPythonScript");
+    PYTHON_DEFINE_METHOD_DEFAULT(Class, &FireAt::Execute, "Execute", PythonAI<FireAt>::default_Execute);
+    PYTHON_DEFINE_METHOD_DEFAULT(Class, &FireAt::ChooseTarget, "ChooseTarget", PythonAI<FireAt>::default_ChooseTarget);
+    PYTHON_DEFINE_METHOD_DEFAULT(Class, &FireAt::SetParent, "init", PythonAI<FireAt>::default_SetParent);
+    PYTHON_DEFINE_METHOD(Class, &FireAt::GetParent, "GetParent");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::AddReplaceLastOrder, "AddReplaceLastOrder");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::ExecuteLastScriptFor, "ExecuteLastScriptFor");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::FaceTarget, "FaceTarget");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::FaceTargetITTS, "FaceTargetITTS");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::MatchLinearVelocity, "MatchLinearVelocity");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::MatchAngularVelocity, "MatchAngularVelocity");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::ChangeHeading, "ChangeHeading");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::ChangeLocalDirection, "ChangeLocalDirection");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::MoveTo, "MoveTo");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::MatchVelocity, "MatchVelocity");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::Cloak, "Cloak");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::FormUp, "FormUp");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::FormUpToOwner, "FormUpToOwner");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::FaceDirection, "FaceDirection");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::XMLScript, "XMLScript");
+    PYTHON_DEFINE_METHOD(Class, &FireAt::LastPythonScript, "LastPythonScript");
     PYTHON_END_CLASS(VS, FireAt)
 
     PYTHON_BEGIN_CLASS(VS, VegaStrike::EngineVersionData, "EngineVersion")
-        PYTHON_DEFINE_METHOD(Class, &VegaStrike::EngineVersionData::GetVersion, "GetVersion");
-        PYTHON_DEFINE_METHOD(Class, &VegaStrike::EngineVersionData::GetAssetAPIVersion, "GetAssetAPIVersion");
+    PYTHON_DEFINE_METHOD(Class, &VegaStrike::EngineVersionData::GetVersion, "GetVersion");
+    PYTHON_DEFINE_METHOD(Class, &VegaStrike::EngineVersionData::GetAssetAPIVersion, "GetAssetAPIVersion");
     PYTHON_END_CLASS(VS, VegaStrike::EngineVersionData)
-
 }
 
 void InitVS() {
@@ -219,8 +208,7 @@ static std::string ParseSizeFlags(int size) {
             std::pair<int, std::string>(as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE), " CAPSHIPLIGHTMISSILE"),
             std::pair<int, std::string>(as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE), " CAPSHIPHEAVYMISSILE"),
             std::pair<int, std::string>(as_integer(MOUNT_SIZE::SPECIALMISSILE), " SPECIALMISSILE"),
-            std::pair<int, std::string>(as_integer(MOUNT_SIZE::AUTOTRACKING), " AUTOTRACKING")
-    };
+            std::pair<int, std::string>(as_integer(MOUNT_SIZE::AUTOTRACKING), " AUTOTRACKING")};
     std::string rv;
     for (unsigned int i = 0; i < sizeof(masks) / sizeof(*masks); ++i) {
         if (size & masks[i].first) {
@@ -235,11 +223,11 @@ static std::string ParseSizeFlags(int size) {
 }
 
 #define PARSE_CASE(Class, Enum) \
-case Class::Enum:                 \
-    return std::string( #Enum )
+    case Class::Enum:           \
+        return std::string(#Enum)
 #define PARSE_CASE_DEFAULT \
-default:                   \
-    return std::string( "UNDEFINED" )
+    default:               \
+        return std::string("UNDEFINED")
 
 static std::string ParseMountStatus(Mount::STATUS status) {
     switch (status) {
@@ -269,42 +257,42 @@ static std::string ParseWeaponType(WEAPON_TYPE type) {
 static BoostPythonDictionary GatherWeaponInfo(const WeaponInfo *wi) {
     BoostPythonDictionary rv;
     if (wi) {
-        rv["type"] = ParseWeaponType(wi->type);
-        rv["speed"] = wi->speed;
-        rv["range"] = wi->range;
-        rv["damage"] = wi->damage;
+        rv["type"]        = ParseWeaponType(wi->type);
+        rv["speed"]       = wi->speed;
+        rv["range"]       = wi->range;
+        rv["damage"]      = wi->damage;
         rv["phaseDamage"] = wi->phase_damage;
-        rv["stability"] = wi->stability;
-        rv["longRange"] = wi->long_range;
-        rv["lockTime"] = wi->lock_time;
-        rv["energyRate"] = wi->energy_rate;
-        rv["refire"] = wi->Refire();
-        rv["volume"] = wi->volume;
-        rv["name"] = wi->name;
+        rv["stability"]   = wi->stability;
+        rv["longRange"]   = wi->long_range;
+        rv["lockTime"]    = wi->lock_time;
+        rv["energyRate"]  = wi->energy_rate;
+        rv["refire"]      = wi->Refire();
+        rv["volume"]      = wi->volume;
+        rv["name"]        = wi->name;
     }
     return rv;
 }
 
 BoostPythonDictionary UnitWrapper::GetMountInfo(int index) const {
     BoostPythonDictionary rv;
-    if ((index >= 0) && ((unsigned) index < unit->mounts.size())) {
+    if ((index >= 0) && ((unsigned)index < unit->mounts.size())) {
         Mount &mnt = unit->mounts[index];
 
-        Vector pos = mnt.GetMountLocation();
-        Vector scale = Vector(mnt.xyscale, mnt.xyscale, mnt.zscale);
+        Vector     pos         = mnt.GetMountLocation();
+        Vector     scale       = Vector(mnt.xyscale, mnt.xyscale, mnt.zscale);
         Quaternion orientation = mnt.GetMountOrientation();
 
-        rv["position"] = VS_BOOST_MAKE_TUPLE(pos.i, pos.j, pos.k);
+        rv["position"]    = VS_BOOST_MAKE_TUPLE(pos.i, pos.j, pos.k);
         rv["orientation"] = VS_BOOST_MAKE_TUPLE_4(orientation.v.i, orientation.v.j, orientation.v.k, orientation.s);
-        rv["scale"] = VS_BOOST_MAKE_TUPLE(scale.i, scale.j, scale.k);
+        rv["scale"]       = VS_BOOST_MAKE_TUPLE(scale.i, scale.j, scale.k);
 
-        rv["empty"] = mnt.IsEmpty();
-        rv["volume"] = mnt.volume;
-        rv["ammo"] = mnt.ammo;
-        rv["size"] = mnt.size;
-        rv["size_flags"] = ParseSizeFlags(mnt.size);
-        rv["bank"] = mnt.bank;
-        rv["functionality"] = mnt.functionality;
+        rv["empty"]            = mnt.IsEmpty();
+        rv["volume"]           = mnt.volume;
+        rv["ammo"]             = mnt.ammo;
+        rv["size"]             = mnt.size;
+        rv["size_flags"]       = ParseSizeFlags(mnt.size);
+        rv["bank"]             = mnt.bank;
+        rv["functionality"]    = mnt.functionality;
         rv["maxfunctionality"] = mnt.maxfunctionality;
 
         rv["status"] = ParseMountStatus(mnt.status);
@@ -312,9 +300,8 @@ BoostPythonDictionary UnitWrapper::GetMountInfo(int index) const {
             rv["weapon_info"] = GatherWeaponInfo(mnt.type);
         }
     } else {
-        rv["empty"] = true;
+        rv["empty"]  = true;
         rv["status"] = std::string("UNDEFINED");
     }
     return rv;
 }
-

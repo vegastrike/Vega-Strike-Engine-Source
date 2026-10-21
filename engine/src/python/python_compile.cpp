@@ -28,21 +28,24 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include "cmd/unit_generic.h"
+
 #include "src/python/python_compile.h"
+
 #include <compile.h>
+
+#include "cmd/unit_generic.h"
 #if ((PY_VERSION_HEX) < 0x030B0000)
-#include <eval.h>
+#    include <eval.h>
 #endif
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
-#include "vegadisk/vsfilesystem.h"
+#include "src/in_kb_data.h"
 #include "src/python/init.h"
 #include "src/universe_util.h"
-#include "src/in_kb_data.h"
 #include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
-Hashtable<string, PyObject, 1023> compiled_python;
+Hashtable<string, PyObject, 1'023> compiled_python;
 
 char *LoadString(const char *filename) {
     FILE *fp = VSFileSystem::vs_open(filename, "r");
@@ -50,12 +53,12 @@ char *LoadString(const char *filename) {
         return NULL;
     }
     VSFileSystem::vs_fseek(fp, 0, SEEK_END);
-    long len = VSFileSystem::vs_ftell(fp);
+    long  len    = VSFileSystem::vs_ftell(fp);
     char *retval = NULL;
     VSFileSystem::vs_fseek(fp, 0, SEEK_SET);
     if (len) {
-        retval = (char *) malloc((len + 2) * sizeof(char));
-        len = VSFileSystem::vs_read(retval, 1, len, fp);
+        retval      = (char *)malloc((len + 2) * sizeof(char));
+        len         = VSFileSystem::vs_read(retval, 1, len, fp);
         retval[len] = '\0';
     }
     VSFileSystem::vs_close(fp);
@@ -69,7 +72,7 @@ std::string getCompilingName(const std::string &name) {
 
 void InterpretPython(const std::string &name) {
     char *temp = strdup(getCompilingName(name).c_str());
-    FILE *fp = VSFileSystem::vs_open(name.c_str(), "r");
+    FILE *fp   = VSFileSystem::vs_open(name.c_str(), "r");
     if (fp) {
         PyRun_SimpleFile(fp, temp);
         Python::reseterrors();
@@ -80,7 +83,7 @@ void InterpretPython(const std::string &name) {
 
 PyObject *CompilePython(const std::string &name) {
     Python::reseterrors();
-    PyObject * retval = compiled_python.Get(name);
+    PyObject *retval = compiled_python.Get(name);
     Python::reseterrors();
     if (retval) {
         return retval;
@@ -90,7 +93,7 @@ PyObject *CompilePython(const std::string &name) {
         VS_LOG(info, (boost::format("Compiling python module %1$s\n") % name));
 
         std::string compiling_name = getCompilingName(name).c_str();
-        char *temp = strdup(compiling_name.c_str());
+        char       *temp           = strdup(compiling_name.c_str());
 
         retval = Py_CompileString(str, temp, Py_file_input);
         if (retval) {
@@ -113,23 +116,23 @@ void CompileRunPython(const std::string &filename) {
     const bool ndebug_libs = configuration().ai.compile_python;
     if (ndebug_libs) {
         Python::reseterrors();
-        PyObject * CompiledProgram = CompilePython(filename);
+        PyObject *CompiledProgram = CompilePython(filename);
         Python::reseterrors();
         if (CompiledProgram) {
-            PyObject * m, *d;
-            static char main_str[16] = "__main__"; //by chuck_starchaser, to squash a warning
+            PyObject   *m, *d;
+            static char main_str[16] = "__main__";  // by chuck_starchaser, to squash a warning
             if ((m = PyImport_AddModule(main_str)) != NULL) {
-                PyObject * localdict = PyDict_New();
+                PyObject *localdict = PyDict_New();
                 if ((d = PyModule_GetDict(m)) != NULL) {
-                    PyObject * exe = PyEval_EvalCode(
-#if (PY_VERSION_HEX >= 0x03020000)
+                    PyObject *exe = PyEval_EvalCode(
+#    if (PY_VERSION_HEX >= 0x03020000)
                             CompiledProgram,
-#else
-                            (PyCodeObject*)CompiledProgram,
-#endif
+#    else
+                            (PyCodeObject *)CompiledProgram,
+#    endif
                             d, localdict);
                     Py_XDECREF(exe);
-                    //unref exe?
+                    // unref exe?
                 }
                 Py_XDECREF(localdict);
             }
@@ -143,11 +146,12 @@ void CompileRunPython(const std::string &filename) {
 }
 
 PyObject *CreateTuple(const std::vector<PythonBasicType> &values) {
-    PyObject * retval = PyTuple_New(values.size());
+    PyObject *retval = PyTuple_New(values.size());
     for (unsigned int i = 0; i < values.size(); i++) {
-        PyObject * val = values[i].NewObject();
-        if (val)
+        PyObject *val = values[i].NewObject();
+        if (val) {
             PyTuple_SET_ITEM(retval, i, val);
+        }
     }
     return retval;
 }
@@ -202,4 +206,3 @@ void RunPythonPhysicsFrame(const KBData &s, KBSTATE k) {
         UniverseUtil::setScratchVector(Vector(0, 0, 0));
     }
 }
-

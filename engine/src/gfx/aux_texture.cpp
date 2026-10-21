@@ -26,26 +26,28 @@
  */
 
 
-#include <stdio.h>
+#include "gfx/aux_texture.h"
+
 #include <assert.h>
-#include "src/gfxlib.h"
+#include <stdio.h>
 #include <string>
-#include "src/endianness.h"
-#include "src/hashtable.h"
-#include "vegadisk/vsfilesystem.h"
+
 #include "gfx/vsimage.h"
+#include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
+#include "src/endianness.h"
+#include "src/gfxlib.h"
+#include "src/hashtable.h"
 #include "src/in_kb.h"
 #include "src/main_loop.h"
-#include "gfx/aux_texture.h"
-#include "root_generic/configxml.h"
+#include "vegadisk/vsfilesystem.h"
 
 using std::string;
 using namespace VSFileSystem;
 using namespace XMLSupport;
-///holds all the textures in a huge hash table
-Hashtable<string, Texture, 4007> texHashTable;
-Hashtable<string, bool, 4007> badtexHashTable;
+/// holds all the textures in a huge hash table
+Hashtable<string, Texture, 4'007> texHashTable;
+Hashtable<string, bool, 4'007>    badtexHashTable;
 
 Texture *Texture::Exists(string s, string a) {
     return Texture::Exists(s + a);
@@ -75,20 +77,20 @@ void Texture::setReference(Texture *other) {
     original = other;
     original->refcount++;
 
-    //Copy shared attributes
-    texfilename = other->texfilename;
-    data = other->data;
-    name = other->name;
-    bound = other->bound;
-    boundSizeX = other->boundSizeX;
-    boundSizeY = other->boundSizeY;
-    boundMode = other->boundMode;
+    // Copy shared attributes
+    texfilename    = other->texfilename;
+    data           = other->data;
+    name           = other->name;
+    bound          = other->bound;
+    boundSizeX     = other->boundSizeX;
+    boundSizeY     = other->boundSizeY;
+    boundMode      = other->boundMode;
     texture_target = other->texture_target;
-    image_target = other->image_target;
+    image_target   = other->image_target;
 }
 
 GFXBOOL Texture::checkold(const string &s, bool shared, string &hashname) {
-    hashname = shared ? VSFileSystem::GetSharedTextureHashName(s) : VSFileSystem::GetHashName(s);
+    hashname        = shared ? VSFileSystem::GetSharedTextureHashName(s) : VSFileSystem::GetHashName(s);
     Texture *oldtex = texHashTable.Get(hashname);
     if (oldtex != NULL) {
         //*this = *oldtex;//will be obsoleted--unpredictable results with string()
@@ -100,34 +102,35 @@ GFXBOOL Texture::checkold(const string &s, bool shared, string &hashname) {
 }
 
 void Texture::modold(const string &s, bool shared, string &hashname) {
-    hashname = shared ? VSFileSystem::GetSharedTextureHashName(s) : VSFileSystem::GetHashName(s);
+    hashname        = shared ? VSFileSystem::GetSharedTextureHashName(s) : VSFileSystem::GetHashName(s);
     Texture *oldtex = new Texture;
-    //oldtex->InitTexture();new calls this
-    oldtex->name = -1;
+    // oldtex->InitTexture();new calls this
+    oldtex->name     = -1;
     oldtex->refcount = 1;
     oldtex->original = NULL;
-    oldtex->palette = NULL;
-    oldtex->data = NULL;
+    oldtex->palette  = NULL;
+    oldtex->data     = NULL;
     texHashTable.Put(hashname, oldtex);
     original = oldtex;
 }
 
 void Texture::InitTexture() {
-    bound = false;
-    original = 0;
-    refcount = 0;
-    name = -1;
-    palette = NULL;
-    data = NULL;
-    mintcoord = Vector(0.0f, 0.0f, 0.0f);
-    maxtcoord = Vector(1.0f, 1.0f, 1.0f);
+    bound        = false;
+    original     = 0;
+    refcount     = 0;
+    name         = -1;
+    palette      = NULL;
+    data         = NULL;
+    mintcoord    = Vector(0.0f, 0.0f, 0.0f);
+    maxtcoord    = Vector(1.0f, 1.0f, 1.0f);
     address_mode = DEFAULT_ADDRESS_MODE;
 }
 
 void Texture::setold() {
-    //*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its strangeass copy constructor)
+    //*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its
+    //strangeass copy constructor)
     *original = *this;
-    //memcpy (original, this, sizeof (Texture));
+    // memcpy (original, this, sizeof (Texture));
     original->original = NULL;
     original->refcount++;
 }
@@ -151,8 +154,8 @@ Texture *Texture::Original() {
 Texture *Texture::Clone() {
     Texture *retval = new Texture();
     Texture *target = Original();
-    *retval = *target;
-    //memcpy (this, target, sizeof (Texture));
+    *retval         = *target;
+    // memcpy (this, target, sizeof (Texture));
     if (retval->name != -1) {
         retval->original = target;
         retval->original->refcount++;
@@ -161,11 +164,11 @@ Texture *Texture::Clone() {
     }
     retval->refcount = 0;
     return retval;
-    //assert (!original->original);
+    // assert (!original->original);
 }
 
 void Texture::FileNotFound(const string &texfilename) {
-    //We may need to remove from texHashTable if we found the file but it is a bad one
+    // We may need to remove from texHashTable if we found the file but it is a bad one
     texHashTable.Delete(texfilename);
 
     setbad(texfilename);
@@ -181,13 +184,13 @@ void Texture::FileNotFound(const string &texfilename) {
 
 bool Texture::checkbad(const string &s) {
     string hashname = VSFileSystem::GetSharedTextureHashName(s);
-    bool *found = NULL;
-    found = badtexHashTable.Get(hashname);
+    bool  *found    = NULL;
+    found           = badtexHashTable.Get(hashname);
     if (found != NULL) {
         return true;
     }
     hashname = VSFileSystem::GetHashName(s);
-    found = badtexHashTable.Get(hashname);
+    found    = badtexHashTable.Get(hashname);
     if (found != NULL) {
         return true;
     }
@@ -195,7 +198,7 @@ bool Texture::checkbad(const string &s) {
 }
 
 void Texture::setbad(const string &s) {
-    //Put both current path+texfile and shared texfile since they both have been looked for
+    // Put both current path+texfile and shared texfile since they both have been looked for
     static bool _TRUEVAL = true;
     if (VSFileSystem::current_path.back() != "") {
         badtexHashTable.Put(VSFileSystem::GetHashName(s), &_TRUEVAL);
@@ -203,44 +206,33 @@ void Texture::setbad(const string &s) {
     badtexHashTable.Put(VSFileSystem::GetSharedTextureHashName(s), &_TRUEVAL);
 }
 
-Texture::Texture(int stage,
-        enum FILTER mipmap,
-        enum TEXTURE_TARGET target,
-        enum TEXTURE_IMAGE_TARGET imagetarget,
-        enum ADDRESSMODE address_mode) {
+Texture::Texture(int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget,
+                 enum ADDRESSMODE address_mode) {
     InitTexture();
-    data = NULL;
-    ismipmapped = mipmap;
-    palette = NULL;
+    data           = NULL;
+    ismipmapped    = mipmap;
+    palette        = NULL;
     texture_target = target;
-    image_target = imagetarget;
-    this->stage = stage;
+    image_target   = imagetarget;
+    this->stage    = stage;
 }
 
-Texture::Texture(VSFile *f,
-        int stage,
-        enum FILTER mipmap,
-        enum TEXTURE_TARGET target,
-        enum TEXTURE_IMAGE_TARGET imagetarget,
-        GFXBOOL force_load,
-        int maxdimension,
-        GFXBOOL detailtexture,
-        GFXBOOL nocache,
-        enum ADDRESSMODE address_mode,
-        Texture *main) {
-    data = NULL;
+Texture::Texture(VSFile *f, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target,
+                 enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension, GFXBOOL detailtexture,
+                 GFXBOOL nocache, enum ADDRESSMODE address_mode, Texture *main) {
+    data        = NULL;
     ismipmapped = mipmap;
     InitTexture();
-    palette = NULL;
+    palette        = NULL;
     texture_target = target;
-    image_target = imagetarget;
-    this->stage = stage;
-    data = this->ReadImage(f, NULL, true, NULL);
+    image_target   = imagetarget;
+    this->stage    = stage;
+    data           = this->ReadImage(f, NULL, true, NULL);
     if (data) {
         if (mode >= _DXT1 && mode <= _DXT5) {
-            if ((int) data[0] == 0) {
+            if ((int)data[0] == 0) {
                 detailtexture = NEAREST;
-                ismipmapped = NEAREST;
+                ismipmapped   = NEAREST;
             }
         }
         if (main) {
@@ -258,42 +250,17 @@ Texture::Texture(VSFile *f,
     }
 }
 
-Texture::Texture(const char *FileName,
-        int stage,
-        enum FILTER mipmap,
-        enum TEXTURE_TARGET target,
-        enum TEXTURE_IMAGE_TARGET imagetarget,
-        GFXBOOL force_load,
-        int maxdimension,
-        GFXBOOL detailtexture,
-        GFXBOOL nocache,
-        enum ADDRESSMODE address_mode,
-        Texture *main) {
+Texture::Texture(const char *FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target,
+                 enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension, GFXBOOL detailtexture,
+                 GFXBOOL nocache, enum ADDRESSMODE address_mode, Texture *main) {
     InitTexture();
-    Load(FileName,
-            stage,
-            mipmap,
-            target,
-            imagetarget,
-            force_load,
-            maxdimension,
-            detailtexture,
-            nocache,
-            address_mode,
-            main);
+    Load(FileName, stage, mipmap, target, imagetarget, force_load, maxdimension, detailtexture, nocache, address_mode,
+         main);
 }
 
-void Texture::Load(const char *FileName,
-        int stage,
-        enum FILTER mipmap,
-        enum TEXTURE_TARGET target,
-        enum TEXTURE_IMAGE_TARGET imagetarget,
-        GFXBOOL force_load,
-        int maxdimension,
-        GFXBOOL detailtexture,
-        GFXBOOL nocache,
-        enum ADDRESSMODE address_mode,
-        Texture *main) {
+void Texture::Load(const char *FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target,
+                   enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension, GFXBOOL detailtexture,
+                   GFXBOOL nocache, enum ADDRESSMODE address_mode, Texture *main) {
     if (data != nullptr) {
         free(data);
         data = nullptr;
@@ -302,31 +269,30 @@ void Texture::Load(const char *FileName,
         free(palette);
         palette = nullptr;
     }
-    ismipmapped = mipmap;
-    texture_target = target;
-    image_target = imagetarget;
-    this->stage = stage;
+    ismipmapped        = mipmap;
+    texture_target     = target;
+    image_target       = imagetarget;
+    this->stage        = stage;
     this->address_mode = address_mode;
-    string texfn = string(FileName);
+    string texfn       = string(FileName);
     if (checkbad(texfn)) {
         return;
     }
     if (!nocache) {
         string tempstr;
-        if (checkold(texfn, false, tempstr)
-                || checkold(texfn, true, tempstr)) {
+        if (checkold(texfn, false, tempstr) || checkold(texfn, true, tempstr)) {
             texfilename = tempstr;
             return;
         }
     }
-    char *t = strdup(FileName);
-    int tmp = strlen(FileName);
+    char *t   = strdup(FileName);
+    int   tmp = strlen(FileName);
     if (tmp > 3) {
         t[tmp - 3] = 'a';
         t[tmp - 2] = 'l';
         t[tmp - 1] = 'p';
     }
-    VSFile f2;
+    VSFile  f2;
     VSError err2 = VSFileSystem::FileNotFound;
     if (t) {
         if (t[0] != '\0') {
@@ -337,13 +303,13 @@ void Texture::Load(const char *FileName,
         }
     }
     if (err2 <= Ok) {
-        //texfilename += string(t);
+        // texfilename += string(t);
     }
-    //this->texfilename = texfilename;
-    //strcpy (filename,texfilename.c_str());
-    VSFile f;
-    VSError err; //FIXME err not always initialized before use
-    err = Ok; //FIXME this line added temporarily by chuck_starchaser
+    // this->texfilename = texfilename;
+    // strcpy (filename,texfilename.c_str());
+    VSFile  f;
+    VSError err;  // FIXME err not always initialized before use
+    err = Ok;     // FIXME this line added temporarily by chuck_starchaser
     if (FileName) {
         if (FileName[0]) {
             err = f.OpenReadOnly(FileName, TextureFile);
@@ -355,7 +321,7 @@ void Texture::Load(const char *FileName,
         f.Close();
         err = Unspecified;
     }
-    if (err > Ok) { //FIXME err not guaranteed to have been initialized!
+    if (err > Ok) {  // FIXME err not guaranteed to have been initialized!
         FileNotFound(texfn);
         if (err2 <= Ok) {
             f2.Close();
@@ -370,7 +336,7 @@ void Texture::Load(const char *FileName,
     if (texfn.find("white") == string::npos) {
         bootstrap_draw("Loading " + string(FileName));
     }
-    //strcpy(filename, FileName);
+    // strcpy(filename, FileName);
     if (err2 > Ok) {
         data = this->ReadImage(&f, NULL, true, NULL);
     } else {
@@ -378,9 +344,9 @@ void Texture::Load(const char *FileName,
     }
     if (data) {
         if (mode >= _DXT1 && mode <= _DXT5) {
-            if ((int) data[0] == 0) {
+            if ((int)data[0] == 0) {
                 detailtexture = NEAREST;
-                ismipmapped = NEAREST;
+                ismipmapped   = NEAREST;
             }
         }
         if (main) {
@@ -402,51 +368,19 @@ void Texture::Load(const char *FileName,
     }
 }
 
-Texture::Texture(const char *FileNameRGB,
-        const char *FileNameA,
-        int stage,
-        enum FILTER mipmap,
-        enum TEXTURE_TARGET target,
-        enum TEXTURE_IMAGE_TARGET imagetarget,
-        float alpha,
-        int zeroval,
-        GFXBOOL force_load,
-        int maxdimension,
-        GFXBOOL detailtexture,
-        GFXBOOL nocache,
-        enum ADDRESSMODE address_mode,
-        Texture *main) {
+Texture::Texture(const char *FileNameRGB, const char *FileNameA, int stage, enum FILTER mipmap,
+                 enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval,
+                 GFXBOOL force_load, int maxdimension, GFXBOOL detailtexture, GFXBOOL nocache,
+                 enum ADDRESSMODE address_mode, Texture *main) {
     InitTexture();
-    Load(FileNameRGB,
-            FileNameA,
-            stage,
-            mipmap,
-            target,
-            imagetarget,
-            alpha,
-            zeroval,
-            force_load,
-            maxdimension,
-            detailtexture,
-            nocache,
-            address_mode,
-            main);
+    Load(FileNameRGB, FileNameA, stage, mipmap, target, imagetarget, alpha, zeroval, force_load, maxdimension,
+         detailtexture, nocache, address_mode, main);
 }
 
-void Texture::Load(const char *FileNameRGB,
-        const char *FileNameA,
-        int stage,
-        enum FILTER mipmap,
-        enum TEXTURE_TARGET target,
-        enum TEXTURE_IMAGE_TARGET imagetarget,
-        float alpha,
-        int zeroval,
-        GFXBOOL force_load,
-        int maxdimension,
-        GFXBOOL detailtexture,
-        GFXBOOL nocache,
-        enum ADDRESSMODE address_mode,
-        Texture *main) {
+void Texture::Load(const char *FileNameRGB, const char *FileNameA, int stage, enum FILTER mipmap,
+                   enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval,
+                   GFXBOOL force_load, int maxdimension, GFXBOOL detailtexture, GFXBOOL nocache,
+                   enum ADDRESSMODE address_mode, Texture *main) {
     if (data != nullptr) {
         free(data);
         data = nullptr;
@@ -457,26 +391,25 @@ void Texture::Load(const char *FileNameRGB,
     }
     ismipmapped = mipmap;
 
-    this->stage = stage;
+    this->stage        = stage;
     this->address_mode = address_mode;
-    texture_target = target;
-    image_target = imagetarget;
-    string texfn = string(FileNameRGB) + string("|") + string(FileNameA);
+    texture_target     = target;
+    image_target       = imagetarget;
+    string texfn       = string(FileNameRGB) + string("|") + string(FileNameA);
     if (!nocache) {
         string tempstr;
-        if (checkold(texfn, false, tempstr)
-                || checkold(texfn, true, tempstr)) {
+        if (checkold(texfn, false, tempstr) || checkold(texfn, true, tempstr)) {
             texfilename = tempstr;
             return;
         }
     }
-    //this->texfilename = texfilename;
-    //strcpy (filename,texfilename.c_str());
-    VSFile f;
+    // this->texfilename = texfilename;
+    // strcpy (filename,texfilename.c_str());
+    VSFile  f;
     VSError err = Unspecified;
-    err = f.OpenReadOnly(FileNameRGB, TextureFile);
+    err         = f.OpenReadOnly(FileNameRGB, TextureFile);
     if (!nocache) {
-        bool shared = (err == Shared);
+        bool   shared = (err == Shared);
         string tempstr;
         modold(texfn, shared, tempstr);
         texfilename = tempstr;
@@ -489,7 +422,7 @@ void Texture::Load(const char *FileNameRGB,
         FileNotFound(texfilename);
         return;
     }
-    VSFile f1;
+    VSFile  f1;
     VSError err1 = Unspecified;
     if (FileNameA) {
         const bool use_alphamap = configuration().graphics.bitmap_alphamap;
@@ -498,7 +431,7 @@ void Texture::Load(const char *FileNameRGB,
             err1 = f1.OpenReadOnly(FileNameA, TextureFile);
 
             if (err1 > Ok) {
-                data = NULL;
+                data      = NULL;
                 FileNameA = NULL;
             }
         } else {
@@ -512,9 +445,9 @@ void Texture::Load(const char *FileNameRGB,
     }
     if (data) {
         if (mode >= _DXT1 && mode <= _DXT5) {
-            if ((int) data[0] == 0) {
+            if ((int)data[0] == 0) {
                 detailtexture = NEAREST;
-                ismipmapped = NEAREST;
+                ismipmapped   = NEAREST;
             }
         }
         if (main) {
@@ -569,17 +502,17 @@ void Texture::UnBind() {
         GFXDeleteTexture(name);
         name = -1;
     }
-    //glDeleteTextures(1, &name);
+    // glDeleteTextures(1, &name);
 }
 
 void Texture::Transfer(int maxdimension, GFXBOOL detailtexture) {
-    //Implement this in D3D
-    //if(mode == _8BIT)
-    //glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB8, 256, GL_RGB, GL_UNSIGNED_BYTE, palette);
+    // Implement this in D3D
+    // if(mode == _8BIT)
+    // glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB8, 256, GL_RGB, GL_UNSIGNED_BYTE, palette);
 
     TEXTUREFORMAT internformat;
     switch (mode) {
-        //send DXT1,DXT3,DXT5 ...need to have the function call other glcompressedTexImage2D function
+        // send DXT1,DXT3,DXT5 ...need to have the function call other glcompressedTexImage2D function
         case _DXT1:
             internformat = DXT1;
             break;
@@ -635,31 +568,24 @@ int Texture::Bind(int maxdimension, GFXBOOL detailtexture) {
                 break;
 
             case _24BITRGBA:
-                //GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage);
+                // GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage);
                 GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage, ismipmapped, texture_target, address_mode);
                 break;
             case _24BIT:
-                //not supported by most cards, so i use rgba32
-                //GFXCreateTexture(sizeX, sizeY, RGB24, &name);
+                // not supported by most cards, so i use rgba32
+                // GFXCreateTexture(sizeX, sizeY, RGB24, &name);
                 GFXCreateTexture(sizeX, sizeY, RGB24, &name, NULL, stage, ismipmapped, texture_target, address_mode);
                 break;
             case _8BIT:
-                GFXCreateTexture(sizeX,
-                        sizeY,
-                        PALETTE8,
-                        &name,
-                        (char *) palette,
-                        stage,
-                        ismipmapped,
-                        texture_target,
-                        address_mode);
+                GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage, ismipmapped, texture_target,
+                                 address_mode);
                 break;
         }
     }
     boundSizeX = sizeX;
     boundSizeY = sizeY;
-    boundMode = mode;
-    bound = true;
+    boundMode  = mode;
+    bound      = true;
     Transfer(maxdimension, detailtexture);
     return name;
 }
@@ -669,9 +595,9 @@ int Texture::Bind(Texture *other, int maxdimension, GFXBOOL detailtexture) {
 
     boundSizeX = other->boundSizeX;
     boundSizeY = other->boundSizeY;
-    boundMode = other->boundMode;
-    bound = other->bound;
-    name = other->name;
+    boundMode  = other->boundMode;
+    bound      = other->bound;
+    name       = other->name;
     Transfer(maxdimension, detailtexture);
     return name;
 }
@@ -711,7 +637,6 @@ void Texture::MakeActive(int stag, int pass) {
 
         GFXActiveTexture(stag);
         GFXSelectTexture(name, stag);
-        GFXTextureAddressMode(address_mode, texture_target);         //In case it changed - it's possible
+        GFXTextureAddressMode(address_mode, texture_target);  // In case it changed - it's possible
     }
 }
-

@@ -28,22 +28,23 @@
 /*
  *  Joystick support written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
-#include <list>
-#include "root_generic/lin_time.h"
-#include "src/vegastrike.h"
-#include "root_generic/vs_globals.h"
-#include "src/vs_logging.h"
-
-#include "src/in_handler.h"
 #include "src/in_joystick.h"
+
+#include <list>
+
+#include "root_generic/lin_time.h"
+#include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
+#include "src/in_handler.h"
 #include "src/in_mouse.h"
+#include "src/vegastrike.h"
+#include "src/vs_logging.h"
 #ifndef HAVE_SDL
-#include "gldrv/gl_include.h"
-#if (GLUT_API_VERSION >= 4 || GLUT_XLIB_IMPLEMENTATION >= 13)
-#else
-#define NO_SDL_JOYSTICK
-#endif
+#    include "gldrv/gl_include.h"
+#    if (GLUT_API_VERSION >= 4 || GLUT_XLIB_IMPLEMENTATION >= 13)
+#    else
+#        define NO_SDL_JOYSTICK
+#    endif
 #endif
 
 #include "root_generic/options.h"
@@ -58,15 +59,15 @@ static const float MOUSE_PIXELS_PER_FULL = 250.0f;
 // off over a couple of seconds regardless of frame rate.
 static const float WARP_DECAY_TAU = 0.4f;
 #ifdef HAVE_SDL
-#include <SDL3/SDL_joystick.h>
-#include <SDL3/SDL_error.h>
-#include <SDL3/SDL_video.h>
+#    include <SDL3/SDL_error.h>
+#    include <SDL3/SDL_joystick.h>
+#    include <SDL3/SDL_video.h>
 #endif
 #include "configuration/configuration.h"
 #include "gldrv/mouse_cursor.h"
 
 
-//Used for storing the max and min values of the tree Joystick Axes - Okona
+// Used for storing the max and min values of the tree Joystick Axes - Okona
 static int maxx = 1;
 static int minx = -1;
 static int maxy = 1;
@@ -74,8 +75,8 @@ static int miny = -1;
 static int maxz = 1;
 static int minz = -1;
 
-JoyStick *joystick[MAX_JOYSTICKS]{}; //until I know where I place it
-int num_joysticks = 0;
+JoyStick *joystick[MAX_JOYSTICKS]{};  // until I know where I place it
+int       num_joysticks = 0;
 
 void modifyDeadZone(JoyStick *j) {
     for (int a = 0; a < j->nr_of_axes; a++) {
@@ -93,11 +94,12 @@ void modifyDeadZone(JoyStick *j) {
 }
 
 void modifyExponent(JoyStick *j) {
-    if ((configuration().joystick.joystick_exponent_flt != 1.0F) && (configuration().joystick.joystick_exponent_flt > 0.0F)) {
+    if ((configuration().joystick.joystick_exponent_flt != 1.0F) &&
+        (configuration().joystick.joystick_exponent_flt > 0.0F)) {
         for (int a = 0; a < j->nr_of_axes; a++) {
             j->joy_axis[a] =
-                    ((j->joy_axis[a] < 0) ? -std::pow(-j->joy_axis[a], configuration().joystick.joystick_exponent_flt) : std::pow(j->joy_axis[a],
-                            configuration().joystick.joystick_exponent_flt));
+                    ((j->joy_axis[a] < 0) ? -std::pow(-j->joy_axis[a], configuration().joystick.joystick_exponent_flt)
+                                          : std::pow(j->joy_axis[a], configuration().joystick.joystick_exponent_flt));
         }
     }
 }
@@ -123,7 +125,7 @@ void myGlutJoystickCallback(unsigned int buttonmask, int x, int y, int z) {
     if (JoyStickToggle) {
         joystick[0]->joy_buttons = buttonmask;
         if (joystick[0]->nr_of_axes > 0) {
-            //Set the max and min of each axis - Okona
+            // Set the max and min of each axis - Okona
             if (x < minx) {
                 minx = x;
             }
@@ -131,8 +133,8 @@ void myGlutJoystickCallback(unsigned int buttonmask, int x, int y, int z) {
         if (x > maxx) {
             maxx = x;
         }
-        //Calculate an autocalibrated value based on the max min values - Okona
-        joystick[0]->joy_axis[0] = ((float) x - (((float) (maxx + minx)) / 2.0)) / (((float) (maxx - minx)) / 2.0);
+        // Calculate an autocalibrated value based on the max min values - Okona
+        joystick[0]->joy_axis[0] = ((float)x - (((float)(maxx + minx)) / 2.0)) / (((float)(maxx - minx)) / 2.0);
         if (joystick[0]->nr_of_axes > 1) {
             if (y < miny) {
                 miny = y;
@@ -141,7 +143,7 @@ void myGlutJoystickCallback(unsigned int buttonmask, int x, int y, int z) {
         if (y > maxy) {
             maxy = y;
         }
-        joystick[0]->joy_axis[1] = ((float) y - (((float) (maxy + miny)) / 2.0)) / (((float) (maxy - miny)) / 2.0);
+        joystick[0]->joy_axis[1] = ((float)y - (((float)(maxy + miny)) / 2.0)) / (((float)(maxy - miny)) / 2.0);
         if (joystick[0]->nr_of_axes > 2) {
             if (z < minz) {
                 minz = z;
@@ -150,7 +152,7 @@ void myGlutJoystickCallback(unsigned int buttonmask, int x, int y, int z) {
         if (z > maxz) {
             maxz = z;
         }
-        joystick[0]->joy_axis[2] = ((float) z - (((float) (maxz + minz)) / 2.0)) / (((float) (maxz - minz)) / 2.0);
+        joystick[0]->joy_axis[2] = ((float)z - (((float)(maxz + minz)) / 2.0)) / (((float)(maxz - minz)) / 2.0);
         modifyDeadZone(joystick[0]);
         modifyExponent(joystick[0]);
     }
@@ -158,12 +160,12 @@ void myGlutJoystickCallback(unsigned int buttonmask, int x, int y, int z) {
 
 JoyStick::JoyStick() {
     for (int j = 0; j < MAX_AXES; ++j) {
-        axis_axis[j] = -1;
+        axis_axis[j]    = -1;
         axis_inverse[j] = false;
         joy_axis[j] = axis_axis[j] = 0;
     }
     joy_buttons = 0;
-    instanceID  = 0; // SDL3
+    instanceID  = 0;  // SDL3
 }
 
 int JoystickPollingRate() {
@@ -209,12 +211,12 @@ void InitJoystick() {
         // It reports available but has a null SDL handle until a real device
         // attaches via JoyStick::Attach() on hotplug. GetJoyStick guards the null
         // handle and returns zeros, so reads on an unattached slot are safe.
-        joystick[i1] = new JoyStick(i1, 0);   // no device yet
-        joystick[i1]->joy = nullptr;
+        joystick[i1]                = new JoyStick(i1, 0);  // no device yet
+        joystick[i1]->joy           = nullptr;
         joystick[i1]->joy_available = true;
-        joystick[i1]->nr_of_axes = 0;
+        joystick[i1]->nr_of_axes    = 0;
         joystick[i1]->nr_of_buttons = 0;
-        joystick[i1]->nr_of_hats = 0;
+        joystick[i1]->nr_of_hats    = 0;
         if (joysticks && i1 < num_joysticks) {
             // A real device is present at startup: attach it to this slot.
             joystick[i1]->Attach(joysticks[i1]);
@@ -228,7 +230,7 @@ void InitJoystick() {
 }
 
 void DeInitJoystick() {
-    for (auto & i : joystick) {
+    for (auto &i : joystick) {
         delete i;
     }
     num_joysticks = 0;
@@ -236,14 +238,14 @@ void DeInitJoystick() {
 
 JoyStick::JoyStick(const int which, const SDL_JoystickID instance_id) : mouse(which == MOUSE_JOYSTICK) {
     for (int j = 0; j < MAX_AXES; ++j) {
-        axis_axis[j] = -1;
+        axis_axis[j]    = -1;
         axis_inverse[j] = false;
-        joy_axis[j] = 0;
+        joy_axis[j]     = 0;
     }
     instanceID = instance_id;
 
-    joy_buttons = 0;
-    player = 0; //which;     //by default bind players to whichever joystick it is
+    joy_buttons             = 0;
+    player                  = 0;  // which;     //by default bind players to whichever joystick it is
     debug_digital_hatswitch = configuration().joystick.debug_digital_hatswitch;
     if (which != MOUSE_JOYSTICK) {
         deadzone = configuration().joystick.deadband_flt;
@@ -255,48 +257,48 @@ JoyStick::JoyStick(const int which, const SDL_JoystickID instance_id) : mouse(wh
     if (which == MOUSE_JOYSTICK) {
         InitMouse(which);
     }
-#if defined (NO_SDL_JOYSTICK)
+#if defined(NO_SDL_JOYSTICK)
     return;
 
 #else
-#ifdef HAVE_SDL
+#    ifdef HAVE_SDL
     if (which >= num_joysticks) {
         if (which != MOUSE_JOYSTICK) {
             joy_available = false;
         }
         return;
     }
-    joy = SDL_OpenJoystick(instance_id);     //joystick nr should be configurable
+    joy = SDL_OpenJoystick(instance_id);  // joystick nr should be configurable
     if (joy == nullptr) {
         VS_LOG(warning, (boost::format("warning: no joystick nr %1%\n") % which));
         joy_available = false;
         return;
     }
     joy_available = true;
-    nr_of_axes = SDL_GetNumJoystickAxes(joy);
+    nr_of_axes    = SDL_GetNumJoystickAxes(joy);
     nr_of_buttons = SDL_GetNumJoystickButtons(joy);
-    nr_of_hats = SDL_GetNumJoystickHats(joy);
+    nr_of_hats    = SDL_GetNumJoystickHats(joy);
 
-    nr_of_axes = std::min(nr_of_axes, MAX_AXES);
+    nr_of_axes    = std::min(nr_of_axes, MAX_AXES);
     nr_of_buttons = std::min(nr_of_buttons, MAX_BUTTONS);
-    nr_of_hats = std::min(nr_of_hats, MAX_DIGITAL_HATSWITCHES);
-#else
-    //WE HAVE GLUT
+    nr_of_hats    = std::min(nr_of_hats, MAX_DIGITAL_HATSWITCHES);
+#    else
+    // WE HAVE GLUT
     if (which > 0 && which != MOUSE_JOYSTICK) {
         joy_available = false;
         return;
     }
     joy_available = true;
-    nr_of_axes    = 3;     //glutDeviceGet(GLUT_JOYSTICK_AXES);
-    nr_of_buttons = 15;     //glutDeviceGet(GLUT_JOYSTICK_BUTTONS);
+    nr_of_axes    = 3;   // glutDeviceGet(GLUT_JOYSTICK_AXES);
+    nr_of_buttons = 15;  // glutDeviceGet(GLUT_JOYSTICK_BUTTONS);
     nr_of_hats    = 0;
-#endif //we have GLUT
+#    endif  // we have GLUT
 #endif
     VS_LOG(info, (boost::format("axes: %1% buttons: %2% hats: %3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
 }
 
 JoyStick::~JoyStick() {
-#if defined (HAVE_SDL)
+#if defined(HAVE_SDL)
     if (joy != nullptr) {
         SDL_CloseJoystick(joy);
         joy = nullptr;
@@ -308,34 +310,35 @@ JoyStick::~JoyStick() {
 // existing/fake handle, opens the new device, and refreshes the axis/button/hat
 // counts. The slot's bindings (keyed by slot index) are untouched.
 void JoyStick::Attach(SDL_JoystickID instance_id) {
-#if defined (HAVE_SDL)
+#if defined(HAVE_SDL)
     if (joy != nullptr) {
         SDL_CloseJoystick(joy);
         joy = nullptr;
     }
     instanceID = instance_id;
-    joy = SDL_OpenJoystick(instance_id);
+    joy        = SDL_OpenJoystick(instance_id);
     if (joy == nullptr) {
         joy_available = false;
         return;
     }
     joy_available = true;
-    nr_of_axes = SDL_GetNumJoystickAxes(joy);
+    nr_of_axes    = SDL_GetNumJoystickAxes(joy);
     nr_of_buttons = SDL_GetNumJoystickButtons(joy);
-    nr_of_hats = SDL_GetNumJoystickHats(joy);
-    nr_of_axes = std::min(nr_of_axes, MAX_AXES);
+    nr_of_hats    = SDL_GetNumJoystickHats(joy);
+    nr_of_axes    = std::min(nr_of_axes, MAX_AXES);
     nr_of_buttons = std::min(nr_of_buttons, MAX_BUTTONS);
-    nr_of_hats = std::min(nr_of_hats, MAX_DIGITAL_HATSWITCHES);
-    VS_LOG(important_info, (boost::format("[joy] attached slot: axes=%1% buttons=%2% hats=%3%\n") % nr_of_axes % nr_of_buttons % nr_of_hats));
+    nr_of_hats    = std::min(nr_of_hats, MAX_DIGITAL_HATSWITCHES);
+    VS_LOG(important_info, (boost::format("[joy] attached slot: axes=%1% buttons=%2% hats=%3%\n") % nr_of_axes %
+                            nr_of_buttons % nr_of_hats));
 #endif
 }
 
 void JoyStick::InitMouse(int which) {
-    player = 0;     //default to first player
+    player        = 0;  // default to first player
     joy_available = true;
-    nr_of_axes = 2;     //x and y for mouse
+    nr_of_axes    = 2;  // x and y for mouse
     nr_of_buttons = 15;
-    nr_of_hats = 0;
+    nr_of_hats    = 0;
 }
 
 bool JoyStick::isAvailable() {
@@ -343,22 +346,21 @@ bool JoyStick::isAvailable() {
 }
 
 struct mouseData {
-    int dx;
-    int dy;
+    int   dx;
+    int   dy;
     float time;
 
     mouseData() {
         dx = dy = 0;
-        time = 0;
+        time    = 0;
     }
 
     mouseData(int ddx, int ddy, float ttime) {
-        dx = ddx;
-        dy = ddy;
+        dx   = ddx;
+        dy   = ddy;
         time = ttime;
     }
 };
-
 
 extern void GetMouseXY(int &mousex, int &mousey);
 
@@ -386,36 +388,46 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
         // relative mouse displacement: moving in one direction builds it, moving
         // back subtracts it (cancels), so the ship steers to where the cursor
         // has "displaced" regardless of absolute position.
-        const float gain = sensitivity / MOUSE_PIXELS_PER_FULL;
-        warp_x += static_cast<float>(dx) * gain;
-        warp_y += static_cast<float>(dy) * gain;
+        const float gain  = sensitivity / MOUSE_PIXELS_PER_FULL;
+        warp_x           += static_cast<float>(dx) * gain;
+        warp_y           += static_cast<float>(dy) * gain;
         // Clamp the accumulated displacement to +/-5 so a huge flick doesn't
         // overdrive the ship, while still letting the deflection move freely
         // toward/past zero so opposite movement cancels it (the actual turn rate
         // is clamped to -1..1 downstream in flyjoystick).
-        if (warp_x > 5.0f) { warp_x = 5.0f; }
-        if (warp_x < -5.0f) { warp_x = -5.0f; }
-        if (warp_y > 5.0f) { warp_y = 5.0f; }
-        if (warp_y < -5.0f) { warp_y = -5.0f; }
+        if (warp_x > 5.0f) {
+            warp_x = 5.0f;
+        }
+        if (warp_x < -5.0f) {
+            warp_x = -5.0f;
+        }
+        if (warp_y > 5.0f) {
+            warp_y = 5.0f;
+        }
+        if (warp_y < -5.0f) {
+            warp_y = -5.0f;
+        }
         // Time-based decay toward center (frame-rate independent): the deflection
         // eases back to center over WARP_DECAY_TAU seconds regardless of frame
         // rate. This is separate from the cancel behavior (opposite movement
         // subtracts via the accumulation above).
-        const float dt = static_cast<float>(GetElapsedTime());
-        const float decay = std::exp(-dt / WARP_DECAY_TAU);
-        warp_x *= decay;
-        warp_y *= decay;
+        const float dt     = static_cast<float>(GetElapsedTime());
+        const float decay  = std::exp(-dt / WARP_DECAY_TAU);
+        warp_x            *= decay;
+        warp_y            *= decay;
         // Dead-band (noise floor) and the response curve. Apply a smooth
         // deadband that nips tiny jitter but lets the value cross through center
         // freely so opposite movement cancels symmetrically. Use the full
         // mouse_exponent as the response curve (warp-only knob; mouse_sensitivity
         // is shared with glide).
         const float dead = configuration().joystick.mouse_deadband_flt;
-        const float mexp = configuration().joystick.mouse_exponent_flt > 0.0f
-                ? configuration().joystick.mouse_exponent_flt : 1.0f;
+        const float mexp =
+                configuration().joystick.mouse_exponent_flt > 0.0f ? configuration().joystick.mouse_exponent_flt : 1.0f;
         auto shape = [&](float v) {
             float a = std::fabs(v);
-            if (a <= dead) { return 0.0f; }              // neutral/noise floor
+            if (a <= dead) {
+                return 0.0f;
+            }  // neutral/noise floor
             float s = a - dead;
             return (v < 0.0f ? -1.0f : 1.0f) * std::pow(s, mexp);
         };
@@ -429,18 +441,18 @@ void JoyStick::GetMouse(float &x, float &y, float &z, int &buttons) {
     } else {
         // Glide (absolute) mode: axis = normalized absolute cursor position.
         std::pair<double, double> pair = GetJoystickFromMouse();
-        x = static_cast<float>(pair.first) * sensitivity;
-        y = static_cast<float>(pair.second) * sensitivity;
+        x                              = static_cast<float>(pair.first) * sensitivity;
+        y                              = static_cast<float>(pair.second) * sensitivity;
     }
-    z = 0;
+    z           = 0;
     joy_axis[0] = x;
     joy_axis[1] = y;
     joy_axis[2] = z = 0;
-    buttons = getMouseButtonStatus();
+    buttons         = getMouseButtonStatus();
 }
 
-void JoyStick::GetJoyStick(float &x, float &y, float &z, long long& buttons) {
-    //int status;
+void JoyStick::GetJoyStick(float &x, float &y, float &z, long long &buttons) {
+    // int status;
     if (!joy_available || joy == nullptr) {
         // Unavailable, or a fake slot with no real device attached yet: return
         // zeros safely so bindings stay bound but produce no input until a real
@@ -448,9 +460,9 @@ void JoyStick::GetJoyStick(float &x, float &y, float &z, long long& buttons) {
         for (int a = 0; a < MAX_AXES; a++) {
             joy_axis[a] = 0;
         }
-        x = y = z = 0;
+        x = y = z   = 0;
         joy_buttons = 0;
-        buttons = 0L;
+        buttons     = 0L;
         return;
     } else if (mouse) {
         int btn;
@@ -460,7 +472,7 @@ void JoyStick::GetJoyStick(float &x, float &y, float &z, long long& buttons) {
     }
     int a;
 #ifndef NO_SDL_JOYSTICK
-#if defined (HAVE_SDL)
+#    if defined(HAVE_SDL)
     std::vector<Sint16> axi(nr_of_axes);
     for (a = 0; a < nr_of_axes; a++) {
         axi[a] = SDL_GetJoystickAxis(joy, a);
@@ -481,18 +493,18 @@ void JoyStick::GetJoyStick(float &x, float &y, float &z, long long& buttons) {
     }
     modifyDeadZone(this);
     modifyExponent(this);
-#else //we have glut
-    if (JoystickPollingRate() <= 0)
+#    else  // we have glut
+    if (JoystickPollingRate() <= 0) {
         glutForceJoystickFunc();
-#endif
-    x = joy_axis[0];
-    y = joy_axis[1];
-    z = joy_axis[2];
+    }
+#    endif
+    x       = joy_axis[0];
+    y       = joy_axis[1];
+    z       = joy_axis[2];
     buttons = joy_buttons;
-#endif //we have no joystick
+#endif  // we have no joystick
 }
 
 int JoyStick::NumButtons() {
     return nr_of_buttons;
 }
-

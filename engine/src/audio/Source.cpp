@@ -31,43 +31,43 @@
 //
 
 #include "Source.h"
-#include "SourceListener.h"
-#include "utils.h"
 
 #include <math.h>
 
+#include "SourceListener.h"
+#include "utils.h"
+
 namespace Audio {
 
-Source::Source(SharedPtr<Sound> sound, bool _looping) :
-        soundPtr(sound),
+Source::Source(SharedPtr<Sound> sound, bool _looping)
+    : soundPtr(sound),
 
-        // Some safe defaults
-        position(0, 0, 0),
-        direction(0, 0, 1),
-        velocity(0, 0, 0),
+      // Some safe defaults
+      position(0, 0, 0),
+      direction(0, 0, 1),
+      velocity(0, 0, 0),
 
-        cosAngleRange(-1, -1),
+      cosAngleRange(-1, -1),
 
-        radius(1),
+      radius(1),
 
-        pfRadiusRatios(1, 1),
-        referenceFreqs(250, 5000),
+      pfRadiusRatios(1, 1),
+      referenceFreqs(250, 5'000),
 
-        gain(1),
+      gain(1),
 
-        lastKnownPlayingTime(0),
-        lastKnownPlayingTimeTime(getRealTime()) {
+      lastKnownPlayingTime(0),
+      lastKnownPlayingTimeTime(getRealTime()) {
     // Some default flags
     setLooping(_looping);
     setRelative(false);
     setAttenuated(true);
 }
 
-Source::~Source() {
-}
+Source::~Source() {}
 
 Timestamp Source::setLastKnownPlayingTime(Timestamp timestamp) {
-    lastKnownPlayingTime = timestamp;
+    lastKnownPlayingTime     = timestamp;
     lastKnownPlayingTimeTime = getRealTime();
     return timestamp;
 }
@@ -117,7 +117,6 @@ void Source::continuePlaying() {
         if (sourceListenerPtr.get() != 0 && sourceListenerPtr->wantPlayEvents()) {
             sourceListenerPtr->onPrePlay(*this, true);
         }
-
     }
 }
 
@@ -160,14 +159,13 @@ bool Source::isActive() const {
 }
 
 Range<Scalar> Source::getAngleRange() const {
-    return Range<Scalar>(Scalar(acos(cosAngleRange.min)),
-            Scalar(acos(cosAngleRange.max)));
+    return Range<Scalar>(Scalar(acos(cosAngleRange.min)), Scalar(acos(cosAngleRange.max)));
 }
 
 void Source::setAngleRange(Range<Scalar> r) {
     cosAngleRange.min = Scalar(cos(r.min));
     cosAngleRange.max = Scalar(cos(r.max));
-    dirty.attributes = 1;
+    dirty.attributes  = 1;
 }
 
 void Source::updateRenderable(int flags, const Listener &sceneListener) {
@@ -240,4 +238,4 @@ void Source::seek(Timestamp time) {
     }
 }
 
-};
+};  // namespace Audio

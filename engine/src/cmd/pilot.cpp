@@ -26,53 +26,55 @@
  */
 
 
-#include "root_generic/faction_generic.h"
-#include "cmd/unit_generic.h"
 #include "cmd/pilot.h"
+
+#include <vector>
+
 #include "cmd/ai/order.h"
-#include "src/universe_util.h"
+#include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
 #include "root_generic/configxml.h"
+#include "root_generic/faction_generic.h"
 #include "src/universe.h"
+#include "src/universe_util.h"
 #include "src/vs_logging.h"
-#include <vector>
 
 Pilot::Pilot(int faction) {
     const float reaction = configuration().ai.firing.reaction_time_flt;
-    const float ran = configuration().ai.default_rank_flt;
-    this->rank = ran;
+    const float ran      = configuration().ai.default_rank_flt;
+    this->rank           = ran;
 
     this->reaction_time = reaction;
-    this->faction = faction;
-    comm_face = NULL;
-    gender = 0;
+    this->faction       = faction;
+    comm_face           = NULL;
+    gender              = 0;
 }
 
 void Pilot::SetComm(Unit *parent) {
     this->faction = parent->faction;
-    //GET BETTER REACTION TIME AND RANK HERE
+    // GET BETTER REACTION TIME AND RANK HERE
     comm_face = FactionUtil::GetRandCommAnimation(faction, parent, gender);
 }
 
 float Pilot::adjustSpecificRelationship(Unit *parent, void *aggressor, float factor, int faction) {
     relationmap::iterator i = effective_relationship.insert(std::pair<const void *, float>(aggressor, 0)).first;
     if (faction != FactionUtil::GetNeutralFaction()) {
-        float rel = UnitUtil::getRelationToFaction(parent, faction);         /* What the bloody hell? */
-        bool abovezero = (*i).second + rel < 0;
+        float rel       = UnitUtil::getRelationToFaction(parent, faction); /* What the bloody hell? */
+        bool  abovezero = (*i).second + rel < 0;
         if (!abovezero) {
-            const float slowrel = configuration().ai.slow_diplomacy_for_enemies_flt;
-            factor *= slowrel;
+            const float slowrel  = configuration().ai.slow_diplomacy_for_enemies_flt;
+            factor              *= slowrel;
         }
         (*i).second += factor;
         if (rel + factor < 0 && parent->Target() == nullptr && parent->aistate) {
             parent->aistate->ChooseTarget();
         }
     } else {
-        const float lessrel = configuration().ai.unknown_relation_enemy_flt;
-        bool abovezero = (*i).second < lessrel;
+        const float lessrel   = configuration().ai.unknown_relation_enemy_flt;
+        bool        abovezero = (*i).second < lessrel;
         if (!abovezero) {
-            const float slowrel = configuration().ai.slow_diplomacy_for_enemies_flt;
-            factor *= slowrel;
+            const float slowrel  = configuration().ai.slow_diplomacy_for_enemies_flt;
+            factor              *= slowrel;
         }
         (*i).second += factor;
         if ((*i).second < lessrel && parent->Target() == nullptr && parent->aistate) {
@@ -91,7 +93,7 @@ void Pilot::DoHit(Unit *parent, void *aggressor, int faction) {
             UniverseUtil::adjustRelationModifierInt(whichCp, faction, hitcost * getRank());
         } else {
             /* Instead use the Aggressor's cockpit? */
-            whichCp = _Universe->whichPlayerStarship((const Unit *) aggressor);
+            whichCp = _Universe->whichPlayerStarship((const Unit *)aggressor);
             if (whichCp != -1) {
                 Flightgroup *fg = parent->getFlightgroup();
                 if (parent->faction != faction) {
@@ -117,26 +119,26 @@ float Pilot::getAnger(const Unit *parent, const Unit *target) const {
     }
     if (target->IsPlayerShip()) {
         if (FactionUtil::GetFactionName(faction).find("pirates") != std::string::npos) {
-            static unsigned int cachedCargoNum = 0;
-            static bool empty_cargo_hold = true;
+            static unsigned int cachedCargoNum   = 0;
+            static bool         empty_cargo_hold = true;
             if (cachedCargoNum != target->cargo_hold.Size()) {
                 cachedCargoNum = target->cargo_hold.Size();
 
-                // Check if pirates 
-                if(cachedCargoNum == 0) {
+                // Check if pirates
+                if (cachedCargoNum == 0) {
                     empty_cargo_hold = true;
                 } else {
                     empty_cargo_hold = false;
                 }
             }
             if (empty_cargo_hold) {
-                const float goodness_for_nocargo = configuration().ai.pirate_bonus_for_empty_hold_flt;
-                rel += goodness_for_nocargo;
+                const float goodness_for_nocargo  = configuration().ai.pirate_bonus_for_empty_hold_flt;
+                rel                              += goodness_for_nocargo;
             }
         }
     }
     {
-        int fac = faction;
+        int                      fac     = faction;
         MapStringFloat::iterator mapiter = factions[fac]->ship_relation_modifier.find(target->name);
         if (mapiter != factions[fac]->ship_relation_modifier.end()) {
             rel += (*mapiter).second;
@@ -184,12 +186,11 @@ Animation *Pilot::getCommFace(Unit *parent, float mood, unsigned char &sex) {
     if (ani->size() == 0) {
         return NULL;
     }
-    mood += .1;
-    mood *= (ani->size()) / .2;
-    unsigned int index = (unsigned int) myroundclamp(floor(mood));
+    mood               += .1;
+    mood               *= (ani->size()) / .2;
+    unsigned int index  = (unsigned int)myroundclamp(floor(mood));
     if (index >= ani->size()) {
         index = ani->size() - 1;
     }
     return (*ani)[index];
 }
-

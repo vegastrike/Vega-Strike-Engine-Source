@@ -24,22 +24,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <queue>
 #include <list>
-using std::queue;
+#include <queue>
 using std::list;
-
-#include "src/in_kb.h"
-#include "src/in_mouse.h"
-#include "src/in_joystick.h"
-#include "src/in_handler.h"
+using std::queue;
 
 #include <map>
 
+#include "src/in_handler.h"
+#include "src/in_joystick.h"
+#include "src/in_kb.h"
+#include "src/in_mouse.h"
+
 
 queue<InputListener *> activationreqqueue;
-list<InputListener *> listeners;
-InputListener *activelistener;
+list<InputListener *>  listeners;
+InputListener         *activelistener;
 
 void AddListener(InputListener *il) {
     il->mousex = &mousex;
@@ -73,4 +73,3 @@ void InitInput() {
 void DeInitInput() {
     DeInitJoystick();
 }
-

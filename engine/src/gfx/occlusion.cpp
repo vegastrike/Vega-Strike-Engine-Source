@@ -26,27 +26,24 @@
  */
 
 
-#include "src/vegastrike.h"
-
 #include "gfx/occlusion.h"
-
-#include <vector>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "src/vs_logging.h"
-#include "root_generic/vs_globals.h"
-#include "src/config_xml.h"
-#include "root_generic/xml_support.h"
-#include "gfx/camera.h"
-#include "src/universe.h"
-
-#include "gldrv/gl_globals.h"
-#include "src/physics.h"
 
 #include <limits>
 #include <set>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+
+#include "gfx/camera.h"
+#include "gldrv/gl_globals.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
 #include "src/heap.h"
+#include "src/physics.h"
+#include "src/universe.h"
+#include "src/vegastrike.h"
+#include "src/vs_logging.h"
 
 namespace Occlusion {
 
@@ -54,20 +51,20 @@ class Occluder {
     // Camera and light position for rating computations
     QVector cam;
     QVector light;
-    float lightSize;
+    float   lightSize;
 
     // Occluding object data
     QVector pos;
-    float rSize;
+    float   rSize;
 
     // Occlusion influence
     float maxOcclusionDistance;
     float occlusionRating;
 
     void computeOcclusionRating() {
-        const double distanceSq = (pos - light).MagnitudeSquared();
+        const double distanceSq                  = (pos - light).MagnitudeSquared();
         const double max_occlusion_distance_temp = maxOcclusionDistance;
-        const double maxSq = max_occlusion_distance_temp * max_occlusion_distance_temp;
+        const double maxSq                       = max_occlusion_distance_temp * max_occlusion_distance_temp;
         if (distanceSq >= maxSq) {
             occlusionRating = 0.f;
         } else {
@@ -76,15 +73,15 @@ class Occluder {
                 occlusionRating = 1.0;
             } else {
                 double camDistance = (pos - cam).Magnitude();
-                occlusionRating = rSize / (rSize + distance + camDistance * 0.2);
+                occlusionRating    = rSize / (rSize + distance + camDistance * 0.2);
             }
         }
     }
 
     void computeMaxOcclusionDistance() {
         double distance = (pos - light).Magnitude() - rSize - lightSize;
-        float inner = (rSize - lightSize);
-        float outer = (rSize + lightSize);
+        float  inner    = (rSize - lightSize);
+        float  outer    = (rSize + lightSize);
         // TODO: Think
 
         // Inner cone tangent is (rSize - lSize) / distance
@@ -115,7 +112,7 @@ class Occluder {
 
 public:
     Occluder(const QVector &pos_, float rSize_, const QVector &cam_, const QVector &light_, float lightSize_)
-            : cam(cam_), light(light_), lightSize(lightSize_), pos(pos_), rSize(rSize_) {
+        : cam(cam_), light(light_), lightSize(lightSize_), pos(pos_), rSize(rSize_) {
         cam = _Universe->AccessCamera()->GetPosition();
         computeMaxOcclusionDistance();
         computeOcclusionRating();
@@ -132,10 +129,7 @@ public:
     }
 
     bool affects(const QVector &ctr, float rSize, float threshSize) const {
-        return (
-                (this->rSize >= threshSize)
-                        && (((pos - ctr).Magnitude() - rSize) <= maxOcclusionDistance)
-        );
+        return ((this->rSize >= threshSize) && (((pos - ctr).Magnitude() - rSize) <= maxOcclusionDistance));
     }
 
     float test(const QVector &lightPos, float lightSize, const QVector &pos, float rSize) const {
@@ -144,7 +138,7 @@ public:
         // and scale the tangent direction by the occluder's size
 
         QVector relOccluder = this->pos - lightPos;
-        QVector relObject = pos - lightPos;
+        QVector relObject   = pos - lightPos;
 
         double D = relOccluder.Magnitude();
 
@@ -158,8 +152,8 @@ public:
             return 1.f;
         }
 
-        double Dinv = 1.0 / D;
-        double Tinv = 1.0 / this->rSize;
+        double Dinv  = 1.0 / D;
+        double Tinv  = 1.0 / this->rSize;
         relOccluder *= Dinv;
 
         // Here, occD = 1.0, occT = 0.0
@@ -173,10 +167,10 @@ public:
 
         // pSize = 1.0 due to T scaling
         // Scale rSize and lightSize accordingly
-        objD *= Dinv;
-        objT *= Tinv;
+        objD      *= Dinv;
+        objT      *= Tinv;
         lightSize *= Tinv;
-        rSize *= Tinv;
+        rSize     *= Tinv;
 
         // Our math can't handle objD==1.0, and it could happen
         // due to rounding error. In that case, it won't be
@@ -209,19 +203,18 @@ public:
     }
 
     unsigned long hash() const {
-        return ((unsigned long) (long) (pos.x * 17)
-                ^ (unsigned long) (long) (pos.y * 19)
-                ^ (unsigned long) (long) (pos.z * 5));
+        return ((unsigned long)(long)(pos.x * 17) ^ (unsigned long)(long)(pos.y * 19) ^
+                (unsigned long)(long)(pos.z * 5));
     }
 };
 
-static std::vector<Occluder> forced_occluders;
+static std::vector<Occluder>   forced_occluders;
 static std::set<unsigned long> forced_occluders_set;
 
 static VS::priority_queue<Occluder> dynamic_occluders;
 
 static QVector biggestLightPos;
-static float biggestLightSize;
+static float   biggestLightSize;
 
 void /*GFXDRVAPI*/ start() {
     end();
@@ -229,30 +222,29 @@ void /*GFXDRVAPI*/ start() {
     std::vector<int> globalLights;
     GFXGlobalLights(globalLights);
 
-    float bigSize = 0.f;
-    int bigLight = -1;
+    float bigSize  = 0.f;
+    int   bigLight = -1;
 
     for (std::vector<int>::const_iterator it = globalLights.begin(); it != globalLights.end(); ++it) {
         const GFXLight &light = GFXGetLight(*it);
         if (bigLight < 0 || light.size > bigSize) {
             bigLight = *it;
-            bigSize = light.size;
+            bigSize  = light.size;
         }
     }
 
     if (bigLight >= 0) {
-        biggestLightPos = GFXGetLight(bigLight).getPosition().Cast();
+        biggestLightPos  = GFXGetLight(bigLight).getPosition().Cast();
         biggestLightSize = bigSize;
     } else {
-        biggestLightPos = QVector(0, 0, 0);
+        biggestLightPos  = QVector(0, 0, 0);
         biggestLightSize = 1.f;
     }
 }
 
 void /*GFXDRVAPI*/ end() {
-    VS_LOG(trace, (boost::format("Occluders: %1% forced and %2% dynamic")
-            % forced_occluders.size()
-            % dynamic_occluders.size()));
+    VS_LOG(trace, (boost::format("Occluders: %1% forced and %2% dynamic") % forced_occluders.size() %
+                   dynamic_occluders.size()));
     // FIXME - I think these three lines are memory leaks -- stephengtuggy 2019-10-01
     forced_occluders.clear();
     forced_occluders_set.clear();
@@ -260,11 +252,7 @@ void /*GFXDRVAPI*/ end() {
 }
 
 void /*GFXDRVAPI*/ addOccluder(const QVector &pos, float rSize, bool significant) {
-    Occluder occ(
-            pos, rSize,
-            _Universe->AccessCamera()->GetPosition(),
-            biggestLightPos, biggestLightSize
-    );
+    Occluder occ(pos, rSize, _Universe->AccessCamera()->GetPosition(), biggestLightPos, biggestLightSize);
 
     if (significant) {
         unsigned long occHash = occ.hash();
@@ -297,7 +285,7 @@ float /*GFXDRVAPI*/ testOcclusion(const QVector &lightPos, float lightSize, cons
 
     {
         for (VS::priority_queue<Occluder>::const_iterator it = dynamic_occluders.begin(); it != dynamic_occluders.end();
-                ++it) {
+             ++it) {
             if (it->affects(pos, rSize, rSize * 4.f)) {
                 rv *= it->test(lightPos, lightSize, pos, rSize);
                 if (rv <= 0.f) {

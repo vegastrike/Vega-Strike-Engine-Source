@@ -26,11 +26,11 @@
  */
 
 
-#include <string>
 #include <stdio.h>
+#include <string>
 
 #ifndef _WIN32
-#include <unistd.h>
+#    include <unistd.h>
 #endif
 
 using std::string;
@@ -38,16 +38,16 @@ using std::string;
 
 #ifndef _WIN32
 
-//Directories to look for data
+// Directories to look for data
 const char *datadirs[] = {
         ".",
         "../data",
         "../../data",
-//Added for MacOS X
+        // Added for MacOS X
         "../Resources/data",
-#ifdef DATA_DIR
+#    ifdef DATA_DIR
         DATA_DIR,
-#endif
+#    endif
         "/usr/share/local/vegastrike/data",
         "/usr/local/share/vegastrike/data",
         "/usr/local/vegastrike/data",
@@ -66,8 +66,8 @@ const char *datadirs[] = {
 
 string getdatadir() {
     string datadir;
-    char tmppwd[65536];
-    if (NULL == getcwd(tmppwd, 32768)) {
+    char   tmppwd[65'536];
+    if (NULL == getcwd(tmppwd, 32'768)) {
         tmppwd[0] = '\0';
     }
     unsigned int i = 0;
@@ -78,7 +78,7 @@ string getdatadir() {
         FILE *tfp = fopen("config.json", "r");
         if (tfp) {
             fclose(tfp);
-            //We have found the data directory
+            // We have found the data directory
             break;
         }
     }
@@ -92,10 +92,10 @@ string getdatadir() {
             printf("Unable to set current directory to data directory\n");
         }
     }
-        //Set data dir
+    // Set data dir
     else if (datadirs[i][0] != '/') {
-        //Was a relative path
-        datadir = tmppwd;
+        // Was a relative path
+        datadir  = tmppwd;
         datadir += '/';
         datadir += datadirs[i];
     } else {
@@ -104,5 +104,4 @@ string getdatadir() {
     return datadir;
 }
 
-#endif //!_WIN32
-
+#endif  //!_WIN32

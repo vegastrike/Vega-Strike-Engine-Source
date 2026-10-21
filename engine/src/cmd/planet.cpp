@@ -26,48 +26,50 @@
  */
 
 
-#include <math.h>
-#include "src/vegastrike.h"
 #include "cmd/planet.h"
-#include "src/gfxlib.h"
-#include "gfx_generic/sphere.h"
-#include "cmd/collection.h"
-#include "cmd/ai/order.h"
-#include "src/gfxlib_struct.h"
-#include "root_generic/vs_globals.h"
-#include "src/config_xml.h"
+
 #include <assert.h>
-#include "cmd/cont_terrain.h"
+#include <math.h>
+
 #include "atmosphere.h"
+#include "cmd/ai/order.h"
+#include "cmd/collection.h"
+#include "cmd/cont_terrain.h"
+#include "gfx_generic/sphere.h"
 #include "root_generic/atmospheric_fog_mesh.h"
 #include "root_generic/vega_random.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/gfxlib.h"
+#include "src/gfxlib_struct.h"
+#include "src/vegastrike.h"
 
 #ifdef FIX_TERRAIN
-#include "gfx/planetary_transform.h"
+#    include "gfx/planetary_transform.h"
 #endif
 
-#include "src/vega_cast_utils.h"
-#include "collide2/CSopcodecollider.h"
-#include "cmd/images.h"
-#include "gfx/halo.h"
-#include "gfx/animation.h"
-#include "cmd/script/flightgroup.h"
-#include "gfx/ring.h"
 #include "cmd/alphacurve.h"
-#include "gfx/vsimage.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "gfx/camera.h"
-#include "src/universe.h"
-#include "configuration/game_config.h"
+#include "cmd/images.h"
 #include "cmd/planetary_orbit.h"
+#include "cmd/script/flightgroup.h"
+#include "collide2/CSopcodecollider.h"
+#include "configuration/game_config.h"
+#include "gfx/animation.h"
+#include "gfx/camera.h"
+#include "gfx/halo.h"
+#include "gfx/ring.h"
+#include "gfx/vsimage.h"
+#include "src/universe.h"
 #include "src/universe_util.h"
+#include "src/vega_cast_utils.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
 using std::endl;
 
-extern float ScaleJumpRadius(float);
+extern float        ScaleJumpRadius(float);
 extern Flightgroup *getStaticBaseFlightgroup(int faction);
-//extern bool CrashForceDock(Unit *thus, Unit *dockingUn, bool force);
+// extern bool CrashForceDock(Unit *thus, Unit *dockingUn, bool force);
 extern void PlayDockingSound(int dock);
 
 //////////////////////////////////////////////
@@ -85,8 +87,8 @@ char *getnoslash(char *inp) {
 }
 
 string getCargoUnitName(const char *textname) {
-    char *tmp2 = strdup(textname);
-    char *tmp = getnoslash(tmp2);
+    char        *tmp2 = strdup(textname);
+    char        *tmp  = getnoslash(tmp2);
     unsigned int i;
     for (i = 0; tmp[i] != '\0' && (isalpha(tmp[i]) || tmp[i] == '_'); i++) {
     }
@@ -100,10 +102,10 @@ string getCargoUnitName(const char *textname) {
 
 string GetElMeshName(string name, string faction, char direction) {
     using namespace VSFileSystem;
-    char strdir[2] = {direction, 0};
-    string elxmesh = string(strdir) + "_elevator.bfxm";
-    string elevator_mesh = name + "_" + faction + elxmesh;
-    VSFile f;
+    char    strdir[2]     = {direction, 0};
+    string  elxmesh       = string(strdir) + "_elevator.bfxm";
+    string  elevator_mesh = name + "_" + faction + elxmesh;
+    VSFile  f;
     VSError err = f.OpenReadOnly(elevator_mesh, MeshFile);
     if (err > Ok) {
         f.Close();
@@ -127,35 +129,26 @@ Mesh *MakeFogMesh(const AtmosphericFogMesh &f, float radius) {
     static int count = 0;
     count++;
     string nam = f.meshname + XMLSupport::tostring(count) + ".png";
-    if (f.min_alpha != 0 || f.max_alpha != 255 || f.concavity != 0 || f.focus != .5 || f.tail_mode_start != -1
-            || f.tail_mode_end != -1) {
-        const int rez = configuration().graphics.atmosphere_texture_resolution;
-        unsigned char *tex = (unsigned char *) malloc(sizeof(char) * rez * 4);
+    if (f.min_alpha != 0 || f.max_alpha != 255 || f.concavity != 0 || f.focus != .5 || f.tail_mode_start != -1 ||
+        f.tail_mode_end != -1) {
+        const int      rez = configuration().graphics.atmosphere_texture_resolution;
+        unsigned char *tex = (unsigned char *)malloc(sizeof(char) * rez * 4);
         for (int i = 0; i < rez; ++i) {
-            tex[i * 4] = 255;
+            tex[i * 4]     = 255;
             tex[i * 4 + 1] = 255;
             tex[i * 4 + 2] = 255;
-            tex[i * 4 + 3] = get_alpha(i,
-                    rez,
-                    f.min_alpha,
-                    f.max_alpha,
-                    f.focus,
-                    f.concavity,
-                    f.tail_mode_start,
-                    f.tail_mode_end);
+            tex[i * 4 + 3] = get_alpha(i, rez, f.min_alpha, f.max_alpha, f.focus, f.concavity, f.tail_mode_start,
+                                       f.tail_mode_end);
         }
-        //Writing in the homedir texture directory
+        // Writing in the homedir texture directory
         ::VSImage image;
         using VSFileSystem::TextureFile;
-        image.WriteImage((char *) nam.c_str(), &tex[0], PngImage, rez, 1, true, 8, TextureFile);
+        image.WriteImage((char *)nam.c_str(), &tex[0], PngImage, rez, 1, true, 8, TextureFile);
     }
     vector<string> override;
     override.push_back(nam);
-    Mesh *ret = Mesh::LoadMesh(f.meshname.c_str(),
-            Vector(f.scale * radius, f.scale * radius, f.scale * radius),
-            0,
-            nullptr,
-            override);
+    Mesh *ret = Mesh::LoadMesh(f.meshname.c_str(), Vector(f.scale * radius, f.scale * radius, f.scale * radius), 0,
+                               nullptr, override);
     ret->setConvex(true);
     SetFogMaterialColor(ret, GFXColor(f.er, f.eg, f.eb, f.ea), GFXColor(f.dr, f.dg, f.db, f.da));
     return ret;
@@ -168,23 +161,22 @@ class AtmosphereHalo : public Unit {
 public:
     float planetRadius;
 
-    AtmosphereHalo(float radiusOfPlanet, vector<Mesh *> &meshes, int faction) :
-            Unit(meshes, true, faction) {
+    AtmosphereHalo(float radiusOfPlanet, vector<Mesh *> &meshes, int faction) : Unit(meshes, true, faction) {
         planetRadius = radiusOfPlanet;
     }
 
     void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix) override {
-        QVector dirtocam = _Universe->AccessCamera()->GetPosition() - m.p;
-        Transformation qua = quat;
-        Matrix mat = m;
-        float distance = dirtocam.Magnitude();
+        QVector        dirtocam = _Universe->AccessCamera()->GetPosition() - m.p;
+        Transformation qua      = quat;
+        Matrix         mat      = m;
+        float          distance = dirtocam.Magnitude();
 
         float MyDistanceRadiusFactor = planetRadius / distance;
-        float HorizonHeight = sqrt(1 - MyDistanceRadiusFactor * MyDistanceRadiusFactor) * planetRadius;
+        float HorizonHeight          = sqrt(1 - MyDistanceRadiusFactor * MyDistanceRadiusFactor) * planetRadius;
 
         float zscale;
         float xyscale = zscale = HorizonHeight / planetRadius;
-        zscale = 0;
+        zscale                 = 0;
         dirtocam.Normalize();
         mat.p += sqrt(planetRadius * planetRadius - HorizonHeight * HorizonHeight) * dirtocam;
         ScaleMatrix(mat, Vector(xyscale, xyscale, zscale));
@@ -198,42 +190,25 @@ public:
 //////////////////////////////////////////////
 // Constructors and the like
 //////////////////////////////////////////////
-Planet::Planet() :
-        Unit(0) {
+Planet::Planet() : Unit(0) {
     Init();
-    SetAI(new Order());     //no behavior
+    SetAI(new Order());  // no behavior
 }
 
 extern const vector<string> &ParseDestinations(const string &value);
 
-Planet::Planet(QVector x,
-        QVector y,
-        float vely,
-        const Vector &rotvel,
-        float pos,
-        float gravity,
-        float radius,
-        const string &textname,
-        const string &technique,
-        const string &unitname,
-        BLENDFUNC blendSrc,
-        BLENDFUNC blendDst,
-        const vector<string> &dest,
-        const QVector &orbitcent,
-        Unit *parent,
-        const GFXMaterial &ourmat,
-        const std::vector<GFXLightLocal> &ligh,
-        int faction,
-        string fgid,
-        bool inside_out,
-        float days) :
-        Unit(0) {
-    atmosphere = nullptr;
+Planet::Planet(QVector x, QVector y, float vely, const Vector &rotvel, float pos, float gravity, float radius,
+               const string &textname, const string &technique, const string &unitname, BLENDFUNC blendSrc,
+               BLENDFUNC blendDst, const vector<string> &dest, const QVector &orbitcent, Unit *parent,
+               const GFXMaterial &ourmat, const std::vector<GFXLightLocal> &ligh, int faction, string fgid,
+               bool inside_out, float days)
+    : Unit(0) {
+    atmosphere  = nullptr;
     atmospheric = false;
 
-    inside = false;
-    shine = nullptr;
-    terrain = nullptr;
+    inside       = false;
+    shine        = nullptr;
+    terrain      = nullptr;
     terraintrans = nullptr;
 
     unsigned int nlights = 0;
@@ -247,24 +222,24 @@ Planet::Planet(QVector x,
     }
     bool wormhole = dest.size() != 0;
     if (wormhole) {
-        const std::string& wormhole_unit = configuration().graphics.wormhole_unit;
-        string stab(".stable");
+        const std::string &wormhole_unit = configuration().graphics.wormhole_unit;
+        string             stab(".stable");
         if (VegaRandom::Instance().RandomDoubleInRange(0.0, 1.0) > 0.99) {
             stab = ".unstable";
         }
-        string wormholename = wormhole_unit + stab;
+        string wormholename        = wormhole_unit + stab;
         string wormholeneutralname = wormhole_unit + ".neutral" + stab;
-        Unit *jum = new Unit(wormholename.c_str(), true, faction);
-        int neutralfaction = FactionUtil::GetNeutralFaction();
-        faction = neutralfaction;
+        Unit  *jum                 = new Unit(wormholename.c_str(), true, faction);
+        int    neutralfaction      = FactionUtil::GetNeutralFaction();
+        faction                    = neutralfaction;
 
-        Unit *neujum = new Unit(wormholeneutralname.c_str(), true, neutralfaction);
-        Unit *jump = jum;
-        bool anytrue = false;
+        Unit *neujum  = new Unit(wormholeneutralname.c_str(), true, neutralfaction);
+        Unit *jump    = jum;
+        bool  anytrue = false;
         while (jump != nullptr) {
             if (jump->name != "LOAD_FAILED") {
-                anytrue = true;
-                radius = jump->rSize();
+                anytrue      = true;
+                radius       = jump->rSize();
                 Mesh *shield = jump->meshdata.size() ? jump->meshdata.back() : nullptr;
                 if (jump->meshdata.size()) {
                     jump->meshdata.pop_back();
@@ -288,43 +263,36 @@ Planet::Planet(QVector x,
         }
         if (anytrue) {
             meshdata.push_back(nullptr);
-        }              //shield mesh...otherwise is a standard planet
+        }  // shield mesh...otherwise is a standard planet
         wormhole = anytrue;
     }
     if (!wormhole) {
         const int stacks = configuration().graphics.planet_detail_level;
-        atmospheric = !(blendSrc == ONE && blendDst == ZERO);
-        meshdata.push_back(new SphereMesh(radius,
-                stacks,
-                stacks,
-                textname.c_str(),
-                technique,
-                nullptr,
-                inside_out,
-                blendSrc,
-                blendDst));
+        atmospheric      = !(blendSrc == ONE && blendDst == ZERO);
+        meshdata.push_back(new SphereMesh(radius, stacks, stacks, textname.c_str(), technique, nullptr, inside_out,
+                                          blendSrc, blendDst));
         meshdata.back()->setEnvMap(GFXFALSE);
         meshdata.back()->SetMaterial(ourmat);
         meshdata.push_back(nullptr);
     }
     calculate_extent(false);
     if (wormhole) {
-        const float radscale = configuration().physics.jump_mesh_radius_scale_flt;
-        radius *= radscale;
+        const float radscale  = configuration().physics.jump_mesh_radius_scale_flt;
+        radius               *= radscale;
         corner_min.i = corner_min.j = corner_min.k = -radius;
         corner_max.i = corner_max.j = corner_max.k = radius;
-        radial_size = radius;
+        radial_size                                = radius;
         if (!meshdata.empty()) {
             meshdata[0]->setVirtualBoundingBox(corner_min, corner_max, radius);
         }
     }
     if (ligh.size() > 0) {
         const float bodyradius = configuration().graphics.star_body_radius_flt;
-        const bool drawglow = configuration().graphics.draw_star_glow;
-        const bool drawstar = configuration().graphics.draw_star_body;
+        const bool  drawglow   = configuration().graphics.draw_star_glow;
+        const bool  drawstar   = configuration().graphics.draw_star_body;
         const float glowradius = configuration().graphics.star_glow_radius_flt / bodyradius;
         if (drawglow) {
-            GFXColor c = getMaterialEmissive(ourmat);
+            GFXColor   c    = getMaterialEmissive(ourmat);
             const bool spec = configuration().graphics.glow_ambient_star_light;
             const bool diff = configuration().graphics.glow_diffuse_star_light;
             if (diff) {
@@ -335,19 +303,14 @@ Planet::Planet(QVector x,
             }
 
             // TODO: Refactor the below section of code
-            vector<string>
-                    shines = ParseDestinations(configuration().graphics.star_shine);
+            vector<string> shines = ParseDestinations(configuration().graphics.star_shine);
             if (shines.empty()) {
                 shines.emplace_back("shine.ani");
             }
 
-            shine = new Animation(shines.at(VegaRandom::Instance().RandomSizeTLessThan(shines.size())).c_str(),
-                    true,
-                    .1,
-                    BILINEAR,
-                    false,
-                    true,
-                    c);             //GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
+            shine = new Animation(shines.at(VegaRandom::Instance().RandomSizeTLessThan(shines.size())).c_str(), true,
+                                  .1, BILINEAR, false, true,
+                                  c);  // GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
             shine->SetDimensions(glowradius * radius, glowradius * radius);
             if (!drawstar) {
                 delete meshdata[0];
@@ -356,16 +319,8 @@ Planet::Planet(QVector x,
             }
         }
     }
-    this->InitPlanet(x, y, vely, rotvel,
-            pos,
-            gravity, radius,
-            textname, technique, unitname,
-            dest,
-            orbitcent, parent,
-            faction, fgid,
-            inside_out,
-            nlights,
-            days);
+    this->InitPlanet(x, y, vely, rotvel, pos, gravity, radius, textname, technique, unitname, dest, orbitcent, parent,
+                     faction, fgid, inside_out, nlights, days);
 }
 
 Planet::~Planet() {
@@ -384,32 +339,18 @@ Planet::~Planet() {
 #ifdef FIX_TERRAIN
     if (terraintrans) {
         Matrix *tmp = new Matrix();
-        *tmp = cumulative_transformation_matrix;
-        terraintrans->SetTransformation( tmp );
-        //FIXME
-        //We're losing memory here...but alas alas... planets don't die that often
+        *tmp        = cumulative_transformation_matrix;
+        terraintrans->SetTransformation(tmp);
+        // FIXME
+        // We're losing memory here...but alas alas... planets don't die that often
     }
 #endif
 }
 
-void Planet::InitPlanet(QVector x,
-                        QVector y,
-                        float vely,
-                        const Vector &rotvel,
-                        float pos,
-                        float gravity,
-                        float radius,
-                        const string &filename,
-                        const string &technique,
-                        const string &unitname,
-                        const vector<string> &dest,
-                        const QVector &orbitcent,
-                        Unit *parent,
-                        int faction,
-                        string fullname,
-                        bool inside_out,
-                        unsigned int lights_num,
-                        const float days) {
+void Planet::InitPlanet(QVector x, QVector y, float vely, const Vector &rotvel, float pos, float gravity, float radius,
+                        const string &filename, const string &technique, const string &unitname,
+                        const vector<string> &dest, const QVector &orbitcent, Unit *parent, int faction,
+                        string fullname, bool inside_out, unsigned int lights_num, const float days) {
     const float bodyradius = configuration().graphics.star_body_radius_flt;
 
     if (lights_num) {
@@ -417,26 +358,27 @@ void Planet::InitPlanet(QVector x,
     }
 
     curr_physical_state.position = prev_physical_state.position = cumulative_transformation.position = orbitcent + x;
-    //static int neutralfaction=FactionUtil::GetFaction("neutral");
-    //this->faction = neutralfaction;
-    killed = false;
+    // static int neutralfaction=FactionUtil::GetFaction("neutral");
+    // this->faction = neutralfaction;
+    killed            = false;
     bool notJumppoint = dest.empty();
-    for (const auto & each_destination : dest) {
+    for (const auto &each_destination : dest) {
         AddDestination(each_destination);
     }
-    //name = "Planet - ";
-    //name += textname;
-    name = fullname;
-    this->fullname = name;
-    this->radius = radius;
-    this->gravity = gravity;
-    this->days = days;
-    const float densityOfRock = configuration().physics.density_of_rock_flt;
+    // name = "Planet - ";
+    // name += textname;
+    name                           = fullname;
+    this->fullname                 = name;
+    this->radius                   = radius;
+    this->gravity                  = gravity;
+    this->days                     = days;
+    const float densityOfRock      = configuration().physics.density_of_rock_flt;
     const float densityOfJumpPoint = configuration().physics.density_of_jump_point_flt;
-    //const float massofplanet = configuration().physics.mass_of_planet;
+    // const float massofplanet = configuration().physics.mass_of_planet;
     hull.Set((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : densityOfJumpPoint));
-    this->SetMass((4.0 / 3.0) * M_PI * radius * radius * radius * (notJumppoint ? densityOfRock : (densityOfJumpPoint / 100000)));
-    SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent));     //behavior
+    this->SetMass((4.0 / 3.0) * M_PI * radius * radius * radius *
+                  (notJumppoint ? densityOfRock : (densityOfJumpPoint / 100'000)));
+    SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent));  // behavior
     terraintrans = nullptr;
 
     colTrees = nullptr;
@@ -444,7 +386,7 @@ void Planet::InitPlanet(QVector x,
     // The port this creates is the planet's docking zone, so it is sized from the same setting that
     // decides how far out a ship may dock. The minimum is a floor for small bodies, where the
     // proportion is only a few hundred metres.
-    const float planetdockportsize = configuration().dock.dock_planet_radius_percent_flt;
+    const float planetdockportsize    = configuration().dock.dock_planet_radius_percent_flt;
     const float planetdockportminsize = configuration().dock.planet_dock_port_min_size_flt;
     if ((!atmospheric) && notJumppoint) {
         float dock = radius * planetdockportsize;
@@ -465,26 +407,27 @@ void Planet::InitPlanet(QVector x,
     const bool smartplanets = configuration().physics.planets_can_have_subunits;
     if (un->name != string("LOAD_FAILED")) {
         // TODO: test this
-        cargo_hold = un->cargo_hold;
+        cargo_hold    = un->cargo_hold;
         upgrade_space = un->upgrade_space;
-        
 
-        VSSprite *tmp = pImage->pHudImage;
-        pImage->pHudImage = un->GetImageInformation().pHudImage;
+
+        VSSprite *tmp                       = pImage->pHudImage;
+        pImage->pHudImage                   = un->GetImageInformation().pHudImage;
         un->GetImageInformation().pHudImage = tmp;
         ftl_energy.SetCapacity(un->ftl_energy.MaxLevel());
         if (smartplanets) {
             SubUnits.prepend(un);
             un->SetRecursiveOwner(this);
             this->SetTurretAI();
-            un->SetTurretAI();              //allows adding planetary defenses, also allows launching fighters from planets, interestingly
+            un->SetTurretAI();  // allows adding planetary defenses, also allows launching fighters from planets,
+                                // interestingly
             un->name = "Defense_grid";
         }
         const bool neutralplanets = configuration().physics.planets_always_neutral;
         if (neutralplanets) {
             // TODO: Move to configuration()
             const int neutralfaction = FactionUtil::GetNeutralFaction();
-            this->faction = neutralfaction;
+            this->faction            = neutralfaction;
         } else {
             this->faction = faction;
         }
@@ -498,64 +441,42 @@ void Planet::InitPlanet(QVector x,
 // Methods
 //////////////////////////////////////////////
 
-void Planet::AddAtmosphere(const std::string &texture,
-        float radius,
-        BLENDFUNC blendSrc,
-        BLENDFUNC blendDst,
-        bool inside_out) {
+void Planet::AddAtmosphere(const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst,
+                           bool inside_out) {
     if (meshdata.empty()) {
         meshdata.push_back(nullptr);
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
     const int stacks = configuration().graphics.planet_detail_level;
-    meshdata.push_back(new SphereMesh(radius,
-            stacks,
-            stacks,
-            texture.c_str(),
-            string(),
-            nullptr,
-            inside_out,
-            blendSrc,
-            blendDst));
+    meshdata.push_back(
+            new SphereMesh(radius, stacks, stacks, texture.c_str(), string(), nullptr, inside_out, blendSrc, blendDst));
     if (meshdata.back()) {
-        //By klauss - this needs to be done for most atmospheres
-        GFXMaterial a = {
-                0, 0, 0, 0,
-                1, 1, 1, 1,
-                0, 0, 0, 0,
-                0, 0, 0, 0,
-                0
-        };
+        // By klauss - this needs to be done for most atmospheres
+        GFXMaterial a = {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         meshdata.back()->SetMaterial(a);
     }
     meshdata.push_back(shield);
 }
 
-void Planet::AddCity(const std::string &texture,
-        float radius,
-        int numwrapx,
-        int numwrapy,
-        BLENDFUNC blendSrc,
-        BLENDFUNC blendDst,
-        bool inside_out,
-        bool reverse_normals) {
+void Planet::AddCity(const std::string &texture, float radius, int numwrapx, int numwrapy, BLENDFUNC blendSrc,
+                     BLENDFUNC blendDst, bool inside_out, bool reverse_normals) {
     if (meshdata.empty()) {
         meshdata.push_back(nullptr);
     }
     Mesh *shield = meshdata.back();
     meshdata.pop_back();
-    const float materialweight = configuration().graphics.city_light_strength_flt;
+    const float materialweight    = configuration().graphics.city_light_strength_flt;
     const float daymaterialweight = configuration().graphics.day_city_light_strength_flt;
     GFXMaterial m{};
     setMaterialAmbient(m, 0.0);
     setMaterialDiffuse(m, materialweight);
     setMaterialSpecular(m, 0.0);
     setMaterialEmissive(m, daymaterialweight);
-    m.power = 0.0;
+    m.power          = 0.0;
     const int stacks = configuration().graphics.planet_detail_level;
     meshdata.push_back(new CityLights(radius, stacks, stacks, texture.c_str(), numwrapx, numwrapy, inside_out, ONE, ONE,
-            false, 0, M_PI, 0.0, 2 * M_PI, reverse_normals));
+                                      false, 0, M_PI, 0.0, 2 * M_PI, reverse_normals));
     meshdata.back()->setEnvMap(GFXFALSE);
     meshdata.back()->SetMaterial(m);
 
@@ -584,20 +505,12 @@ void Planet::AddFog(const std::vector<AtmosphericFogMesh> &v, bool opticalillusi
     fawg->setFaceCamera();
     getSubUnits().preinsert(fawg);
 #ifdef MESHONLY
-    meshdata.push_back( shield );
+    meshdata.push_back(shield);
 #endif
 }
 
-void Planet::AddRing(const std::string &texture,
-        float iradius,
-        float oradius,
-        const QVector &R,
-        const QVector &S,
-        int slices,
-        int wrapx,
-        int wrapy,
-        BLENDFUNC blendSrc,
-        BLENDFUNC blendDst) {
+void Planet::AddRing(const std::string &texture, float iradius, float oradius, const QVector &R, const QVector &S,
+                     int slices, int wrapx, int wrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst) {
     if (meshdata.empty()) {
         meshdata.push_back(nullptr);
     }
@@ -610,19 +523,9 @@ void Planet::AddRing(const std::string &texture,
             stacks = 3;
         }
         for (int i = 0; i < slices; i++) {
-            meshdata.push_back(new RingMesh(iradius,
-                    oradius,
-                    stacks,
-                    texture.c_str(),
-                    R,
-                    S,
-                    wrapx,
-                    wrapy,
-                    blendSrc,
-                    blendDst,
-                    false,
-                    i * (2 * M_PI) / ((float) slices),
-                    (i + 1) * (2 * M_PI) / ((float) slices)));
+            meshdata.push_back(new RingMesh(iradius, oradius, stacks, texture.c_str(), R, S, wrapx, wrapy, blendSrc,
+                                            blendDst, false, i * (2 * M_PI) / ((float)slices),
+                                            (i + 1) * (2 * M_PI) / ((float)slices)));
         }
     }
     meshdata.push_back(shield);
@@ -656,18 +559,15 @@ Vector Planet::AddSpaceElevator(const std::string &name, const std::string &fact
             break;
     }
     Matrix ElevatorLoc(Vector(dir.j, dir.k, dir.i), dir, Vector(dir.k, dir.i, dir.j));
-    scale = dir * radius + Vector(1, 1, 1) - dir;
-    Mesh *shield = meshdata.back();
-    string elevator_mesh = GetElMeshName(name, faction, direction);     //filename
-    Mesh *tmp = meshdata.back() = Mesh::LoadMesh(elevator_mesh.c_str(),
-            scale,
-            FactionUtil::
-            GetFactionIndex(faction),
-            nullptr);
+    scale                = dir * radius + Vector(1, 1, 1) - dir;
+    Mesh  *shield        = meshdata.back();
+    string elevator_mesh = GetElMeshName(name, faction, direction);  // filename
+    Mesh  *tmp           = meshdata.back() =
+            Mesh::LoadMesh(elevator_mesh.c_str(), scale, FactionUtil::GetFactionIndex(faction), nullptr);
 
     meshdata.push_back(shield);
     {
-        //subunit computations
+        // subunit computations
         Vector mn(tmp->corner_min());
         Vector mx(tmp->corner_max());
         if (dir.Dot(Vector(1, 1, 1)) > 0) {
@@ -694,19 +594,19 @@ Vector Planet::AddSpaceElevator(const std::string &name, const std::string &fact
 vector<UnitContainer *> PlanetTerrainDrawQueue;
 
 void Planet::Draw(const Transformation &quat, const Matrix &m) {
-    //Do lighting fx
-    //if cam inside don't draw?
-    //if(!inside) {
+    // Do lighting fx
+    // if cam inside don't draw?
+    // if(!inside) {
     Unit::Draw(quat, m);
     //}
-    QVector t(_Universe->AccessCamera()->GetPosition() - Position());
+    QVector    t(_Universe->AccessCamera()->GetPosition() - Position());
     static int counter = 0;
     if (counter++ > 100) {
         if (t.Magnitude() < corner_max.i) {
             inside = true;
         } else {
             inside = false;
-            ///somehow warp unit to reasonable place outisde of planet
+            /// somehow warp unit to reasonable place outisde of planet
             if (terrain) {
 #ifdef PLANETARYTRANSFORM
                 terrain->DisableUpdate();
@@ -722,7 +622,7 @@ void Planet::Draw(const Transformation &quat, const Matrix &m) {
         PlanetTerrainDrawQueue.push_back(new UnitContainer(this));
     }
     if (shine) {
-        Vector p, q, r;
+        Vector  p, q, r;
         QVector c;
         // Pretty sure q and r were switched around here -- SGT 2022-05-11
         MatrixToVectors(cumulative_transformation_matrix, p, q, r, c);
@@ -742,9 +642,9 @@ void Planet::DrawTerrain() {
     }
 #ifdef PLANETARYTRANSFORM
     TerrainUp = t;
-    Normalize( TerrainUp );
-    TerrainH  = TerrainUp.Cross( Vector( -TerrainUp.i+.25, TerrainUp.j-.24, -TerrainUp.k+.24 ) );
-    Normalize( TerrainH );
+    Normalize(TerrainUp);
+    TerrainH = TerrainUp.Cross(Vector(-TerrainUp.i + .25, TerrainUp.j - .24, -TerrainUp.k + .24));
+    Normalize(TerrainH);
 #endif
 
     GFXLoadIdentity(MODEL);
@@ -754,19 +654,19 @@ void Planet::DrawTerrain() {
         terrain->AdjustTerrain(_Universe->activeStarSystem());
         terrain->Draw();
 #ifdef PLANETARYTRANSFORM
-        terraintrans->GrabPerpendicularOrigin( _Universe->AccessCamera()->GetPosition(), tmp );
-        terrain->SetTransformation( tmp );
-        terrain->AdjustTerrain( _Universe->activeStarSystem() );
+        terraintrans->GrabPerpendicularOrigin(_Universe->AccessCamera()->GetPosition(), tmp);
+        terrain->SetTransformation(tmp);
+        terrain->AdjustTerrain(_Universe->activeStarSystem());
         terrain->Draw();
         if (atmosphere) {
-            Vector tup( tmp[4], tmp[5], tmp[6] );
-            Vector p    = ( _Universe->AccessCamera()->GetPosition() );
-            Vector blah = p-Vector( tmp[12], tmp[13], tmp[14] );
-            blah    = p-( blah.Dot( tup ) )*tup;
-            tmp[12] = blah.i;
-            tmp[13] = blah.j;
-            tmp[14] = blah.k;
-            atmosphere->SetMatricesAndDraw( _Universe->AccessCamera()->GetPosition(), tmp );
+            Vector tup(tmp[4], tmp[5], tmp[6]);
+            Vector p    = (_Universe->AccessCamera()->GetPosition());
+            Vector blah = p - Vector(tmp[12], tmp[13], tmp[14]);
+            blah        = p - (blah.Dot(tup)) * tup;
+            tmp[12]     = blah.i;
+            tmp[13]     = blah.j;
+            tmp[14]     = blah.k;
+            atmosphere->SetMatricesAndDraw(_Universe->AccessCamera()->GetPosition(), tmp);
         }
 #endif
     }
@@ -774,50 +674,28 @@ void Planet::DrawTerrain() {
 
 ///////////////////////////////////////////////////////////////////////
 
-Unit *Planet::beginElement(QVector x,
-                           QVector y,
-                           float vely,
-                           const Vector &rotvel,
-                           float pos,
-                           float gravity,
-                           float radius,
-                           const string &filename,
-                           const string &technique,
-                           const string &unitname,
-                           BLENDFUNC blendSrc,
-                           BLENDFUNC blendDst,
-                           const vector<string> &dest,
-                           int level,
-                           const GFXMaterial &ourmat,
-                           const vector<GFXLightLocal> &ligh,
-                           bool isunit,
-                           int faction,
-                           string fullname,
-                           bool inside_out,
-                           const float days) {
-    //this function is OBSOLETE
+Unit *Planet::beginElement(QVector x, QVector y, float vely, const Vector &rotvel, float pos, float gravity,
+                           float radius, const string &filename, const string &technique, const string &unitname,
+                           BLENDFUNC blendSrc, BLENDFUNC blendDst, const vector<string> &dest, int level,
+                           const GFXMaterial &ourmat, const vector<GFXLightLocal> &ligh, bool isunit, int faction,
+                           string fullname, bool inside_out, const float days) {
+    // this function is OBSOLETE
     Unit *un = nullptr;
     if (level > 2) {
         un_iter satiterator = satellites.createIterator();
         assert(*satiterator);
         if ((*satiterator)->getUnitType() == Vega_UnitType::planet) {
-            un = vega_dynamic_cast_ptr<Planet>(*satiterator)->beginElement(x, y, vely, rotvel, pos,
-                                                                  gravity, radius,
-                                                                  filename, technique, unitname,
-                                                                  blendSrc, blendDst,
-                                                                  dest,
-                                                                  level - 1,
-                                                                  ourmat, ligh,
-                                                                  isunit,
-                                                                  faction, fullname,
-                                                                  inside_out, days);
+            un = vega_dynamic_cast_ptr<Planet>(*satiterator)
+                         ->beginElement(x, y, vely, rotvel, pos, gravity, radius, filename, technique, unitname,
+                                        blendSrc, blendDst, dest, level - 1, ourmat, ligh, isunit, faction, fullname,
+                                        inside_out, days);
         } else {
             VS_LOG(error, "Planets are unable to orbit around units");
         }
     } else {
         if (isunit == true) {
-            Unit *sat_unit = nullptr;
-            Flightgroup *fg = getStaticBaseFlightgroup(faction);
+            Unit        *sat_unit = nullptr;
+            Flightgroup *fg       = getStaticBaseFlightgroup(faction);
             satellites.prepend(sat_unit = new Unit(filename.c_str(), false, faction, "", fg, fg->nr_ships - 1));
             sat_unit->setFullname(fullname);
             un = sat_unit;
@@ -826,15 +704,15 @@ Unit *Planet::beginElement(QVector x,
             (*satiterator)->SetOwner(this);
         } else {
             // For debug
-//            BOOST_LOG_TRIVIAL(trace) << "name" << " : " << filename << " : " << unitname << endl;
-//            BOOST_LOG_TRIVIAL(trace) << "R/X: " << x.i << " : " << x.j << " : " << x.k << endl;
-//            BOOST_LOG_TRIVIAL(trace) << "S/Y: " << y.i << " : " << y.j << " : " << y.k << endl;
-//            BOOST_LOG_TRIVIAL(trace) << "CmpRotVel: " << rotvel.i << " : " <<
-//                    rotvel.j << " : " << rotvel.k << endl;
-//            BOOST_LOG_TRIVIAL(trace) << vely << " : " << pos << " : " << gravity << " : " << radius << endl;
-//            BOOST_LOG_TRIVIAL(trace) << dest.size() << " : " << "orbit_center" << " : " << ligh.size() << endl;
-//            BOOST_LOG_TRIVIAL(trace) << blendSrc << " : " << blendDst << " : " << inside_out << endl;
-
+            //            BOOST_LOG_TRIVIAL(trace) << "name" << " : " << filename << " : " << unitname << endl;
+            //            BOOST_LOG_TRIVIAL(trace) << "R/X: " << x.i << " : " << x.j << " : " << x.k << endl;
+            //            BOOST_LOG_TRIVIAL(trace) << "S/Y: " << y.i << " : " << y.j << " : " << y.k << endl;
+            //            BOOST_LOG_TRIVIAL(trace) << "CmpRotVel: " << rotvel.i << " : " <<
+            //                    rotvel.j << " : " << rotvel.k << endl;
+            //            BOOST_LOG_TRIVIAL(trace) << vely << " : " << pos << " : " << gravity << " : " << radius <<
+            //            endl; BOOST_LOG_TRIVIAL(trace) << dest.size() << " : " << "orbit_center" << " : " <<
+            //            ligh.size() << endl; BOOST_LOG_TRIVIAL(trace) << blendSrc << " : " << blendDst << " : " <<
+            //            inside_out << endl;
 
 
 
@@ -842,16 +720,13 @@ Unit *Planet::beginElement(QVector x,
             if (dest.size() != 0) {
                 radius = ScaleJumpRadius(radius);
             }
-            satellites.prepend(p = new Planet(x, y, vely, rotvel, pos, gravity, radius,
-                    filename, technique, unitname,
-                    blendSrc, blendDst, dest,
-                    QVector(0, 0, 0), this, ourmat, ligh, faction, fullname, inside_out, days));
+            satellites.prepend(p = new Planet(x, y, vely, rotvel, pos, gravity, radius, filename, technique, unitname,
+                                              blendSrc, blendDst, dest, QVector(0, 0, 0), this, ourmat, ligh, faction,
+                                              fullname, inside_out, days));
             un = p;
             p->SetOwner(this);
-            VS_LOG(trace,
-                    (boost::format("Created planet %1% of type %2% orbiting %3%") % fullname % p->fullname
-                            % this->fullname));
-
+            VS_LOG(trace, (boost::format("Created planet %1% of type %2% orbiting %3%") % fullname % p->fullname %
+                           this->fullname));
         }
     }
     return un;
@@ -869,12 +744,11 @@ void Planet::EnableLights() {
     }
 }
 
-void Planet::endElement() {
-}
+void Planet::endElement() {}
 
 string Planet::getHumanReadablePlanetType() const {
-    //static std::map<std::string, std::string> planetTypes (readPlanetTypes("planet_types.xml"));
-    //return planetTypes[getCargoUnitName()];
+    // static std::map<std::string, std::string> planetTypes (readPlanetTypes("planet_types.xml"));
+    // return planetTypes[getCargoUnitName()];
     return _Universe->getGalaxy()->getPlanetNameFromTexture(getCargoUnitName());
 }
 
@@ -883,7 +757,7 @@ Planet *Planet::GetTopPlanet(int level) {
         un_iter satiterator = satellites.createIterator();
         assert(*satiterator);
         if ((*satiterator)->getUnitType() == Vega_UnitType::planet) {
-            return ((Planet *) (*satiterator))->GetTopPlanet(level - 1);
+            return ((Planet *)(*satiterator))->GetTopPlanet(level - 1);
         } else {
             VS_LOG(error, "Planets are unable to orbit around units");
             return nullptr;
@@ -911,7 +785,7 @@ void Planet::Kill(bool erasefromsave) {
 
 void Planet::ProcessTerrains() {
     while (!PlanetTerrainDrawQueue.empty()) {
-        Planet *pl = (Planet *) PlanetTerrainDrawQueue.back()->GetUnit();
+        Planet *pl = (Planet *)PlanetTerrainDrawQueue.back()->GetUnit();
         pl->DrawTerrain();
         PlanetTerrainDrawQueue.back()->SetUnit(nullptr);
         delete PlanetTerrainDrawQueue.back();
@@ -929,8 +803,8 @@ PlanetaryTransform *Planet::setTerrain(ContinuousTerrain *t, float ratiox, int n
     float x, z;
     t->GetTotalSize(x, z);
 #ifdef FIX_TERRAIN
-    terraintrans = new PlanetaryTransform( .8*corner_max.i, x*ratiox, z, numwraps, scaleatmos );
-    terraintrans->SetTransformation( &cumulative_transformation_matrix );
+    terraintrans = new PlanetaryTransform(.8 * corner_max.i, x * ratiox, z, numwraps, scaleatmos);
+    terraintrans->SetTransformation(&cumulative_transformation_matrix);
 
     return terraintrans;
 #endif
@@ -966,4 +840,3 @@ bool operator==(const Planet &lhs, const Planet &rhs) {
 
     return equal;
 }
-

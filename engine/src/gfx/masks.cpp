@@ -78,4 +78,3 @@ float Delta(float a, float b) {
         return ans;
     }
 }
-

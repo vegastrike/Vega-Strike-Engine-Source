@@ -27,24 +27,26 @@
 
 
 #include "navigation.h"
+
+#include <math.h>
+
 #include "cmd/dock_utils.h"
 #include "root_generic/macosx_math.h"
-#include <math.h>
 #ifndef _WIN32
-#include <assert.h>
+#    include <assert.h>
 #endif
-#include "cmd/unit_generic.h"
-#include "root_generic/lin_time.h"
 #include "cmd/script/flightgroup.h"
-#include "src/config_xml.h"
-#include "root_generic/vs_globals.h"
-#include "src/vs_logging.h"
-#include "warpto.h"
-#include "flybywire.h"
+#include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
+#include "flybywire.h"
+#include "root_generic/lin_time.h"
 #include "root_generic/vega_random.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
 #include "src/star_system.h"
 #include "src/universe.h"
+#include "src/vs_logging.h"
+#include "warpto.h"
 
 using namespace Orders;
 
@@ -63,11 +65,12 @@ constexpr float M_PI_FLT = M_PI;
  * t = ( -2v0 (+/-) sqrtf (4*v0^2 - 4*(.5*v0^2 - accel*Length) ) / (2*accel))
  * t = -v0/accel (+/-) sqrtf (.5*v0^2 + Length*accel)/accel;
  *
- * 8/15/05 Patched Calulate BalancedDecel time: our previous quantization factor ignored the quantization during ACCEL phase and also ignored the fact that we overestimated the integral rather than underestimated
- *         new quantization factor is .5*accel*simulation_atom_var*simulation_atom_var-.5*initialVelocity*simulation_atom_var
- *            also this threshold idea is silly--accelerate if t>SIM_ATOM decel if t<0  still havent fixed t between 0 and SIM_ATOM...have decent approx for now.
- * 3/2/02  Patched CalculateBalancedDecel time with the fact that length should be more by a
- * quantity of .5*initialVelocity*simulation_atom_var
+ * 8/15/05 Patched Calulate BalancedDecel time: our previous quantization factor ignored the quantization during ACCEL
+ * phase and also ignored the fact that we overestimated the integral rather than underestimated new quantization factor
+ * is .5*accel*simulation_atom_var*simulation_atom_var-.5*initialVelocity*simulation_atom_var also this threshold idea
+ * is silly--accelerate if t>SIM_ATOM decel if t<0  still havent fixed t between 0 and SIM_ATOM...have decent approx for
+ * now. 3/2/02  Patched CalculateBalancedDecel time with the fact that length should be more by a quantity of
+ * .5*initialVelocity*simulation_atom_var
  *
  */
 
@@ -81,8 +84,8 @@ static float CalculateBalancedDecelTime(float l, float v, float &F, float mass) 
         v = -v;
         F = -F;
     }
-    double temp = .5 * v * v
-            + (l - v * simulation_atom_var * (.5) + .5 * simulation_atom_var * simulation_atom_var * accel) * accel;
+    double temp = .5 * v * v +
+                  (l - v * simulation_atom_var * (.5) + .5 * simulation_atom_var * simulation_atom_var * accel) * accel;
     if (temp < 0) {
         temp = 0;
     }
@@ -99,46 +102,47 @@ static float CalculateBalancedDecelTime(float l, float v, float &F, float mass) 
  *
  * imbalanced thrust equation
  * Length = .5*(accel+accel*accel/decel) * t^2 +  t*v0(1+accel/decel) + .5*v0^2/decel
- * t = ( -v0*(1+accel/decel) (+/-) sqrtf (v0^2*(1+accel/decel)^2 - 2*(accel+accel*accel/decel)*(.5*v0^2/decel-Length)))/2*.5*(accel+accel*accel/decel);
- * t = (-v0 (+/-) sqrtf (v0^2 - 2*(accel/(1+accel/decel))*(.5*v0^2/decel-Length)))/accel
+ * t = ( -v0*(1+accel/decel) (+/-) sqrtf (v0^2*(1+accel/decel)^2 -
+ * 2*(accel+accel*accel/decel)*(.5*v0^2/decel-Length)))/2*.5*(accel+accel*accel/decel); t = (-v0 (+/-) sqrtf (v0^2 -
+ * 2*(accel/(1+accel/decel))*(.5*v0^2/decel-Length)))/accel
  */
 
 static float CalculateDecelTime(float l, float v, float &F, float D, float mass) {
     float accel = F / mass;
     float decel = D / mass;
     if (l < 0) {
-        l = -l;
-        v = -v;
+        l     = -l;
+        v     = -v;
         accel = decel;
         decel = F / mass;
-        F = -D;
+        F     = -D;
     }
-    float vsqr = v * v;
+    float vsqr   = v * v;
     float fourac = 2 * accel * ((.5 * v * v / decel) - v * simulation_atom_var * .5 - l) / (1 + accel / decel);
     if (fourac > vsqr) {
         return FLT_MAX;
-    }       //FIXME avoid sqrt negative  not sure if this is right
+    }  // FIXME avoid sqrt negative  not sure if this is right
 
     return (-v + sqrtf(vsqr - fourac)) / accel;
 }
 
-//failed attempt below
+// failed attempt below
 /**
  * The Time We need to start slowing down from the now calculation.
  * k = num simulation atoms before we slow down. m = num sim atoms till we stop
  * R = P = 1    We know  v + S*k*a-S*m*d=0  (stopped at end)  m = v/(d*S)+k*a/d
  * L = a*S^2 (k*(k+R)*.5) -  d*S^2 (m*(m+P)*.5) + v*(k+m)*S
  * L = .5*a*k^2*S^2+.5*a*k*R*s^2 - .5*d*S^2 (k*a/d + v/(d*S))*(k*a/d+v/(d*S)+P) + S*v*(v/(d*S) + k*a/d + k)
- * L = k^2 (.5*a*S^2) +.5*a*k*R*S^2 - .5*d*S^2 (k^2 a^2 / d^2 + 2*(k*a/d)*v/(dS) + v^2/(d^2 s^2) + Pk*a/d + P * v/(d*S)) + v^2/d + S*v*k (a/d + 1)
- * 0 = k^2 (.5*a*S*S*(1-a/d)) + k*S*( .5*R*a*S - .5*P*a*S- .5*2*a*v/d+v(1+a/d)) + v*v/d-.5*v*v/d- P*v*S*.5 - L
- * 0 = (k*S)^2 *(.5*a*(1-a/d)) + k*S*v + v^2/(2d) - vS/2 -L
- * kS = -v (+/-) sqrtf (v*v-a*(1-a/d)*(v*v/d-vS-L))/(a*(1-a/d))
+ * L = k^2 (.5*a*S^2) +.5*a*k*R*S^2 - .5*d*S^2 (k^2 a^2 / d^2 + 2*(k*a/d)*v/(dS) + v^2/(d^2 s^2) + Pk*a/d + P * v/(d*S))
+ * + v^2/d + S*v*k (a/d + 1) 0 = k^2 (.5*a*S*S*(1-a/d)) + k*S*( .5*R*a*S - .5*P*a*S- .5*2*a*v/d+v(1+a/d)) +
+ * v*v/d-.5*v*v/d- P*v*S*.5 - L 0 = (k*S)^2 *(.5*a*(1-a/d)) + k*S*v + v^2/(2d) - vS/2 -L kS = -v (+/-) sqrtf
+ * (v*v-a*(1-a/d)*(v*v/d-vS-L))/(a*(1-a/d))
  */
-//end failed attempt
+// end failed attempt
 
 void MoveTo::SetDest(const QVector &target) {
     targetlocation = target;
-    done = false;
+    done           = false;
 }
 
 bool MoveToParent::OptimizeSpeed(Unit *parent, float v, float &a, float max_speed) {
@@ -146,8 +150,7 @@ bool MoveToParent::OptimizeSpeed(Unit *parent, float v, float &a, float max_spee
     if ((!max_speed) || fabs(v) <= max_speed) {
         return true;
     }
-    float deltaa =
-            parent->GetMass() * (fabs(v) - max_speed) / simulation_atom_var;       //clamping should take care of it
+    float deltaa = parent->GetMass() * (fabs(v) - max_speed) / simulation_atom_var;  // clamping should take care of it
     a += (v > 0) ? -deltaa : deltaa;
     return false;
 }
@@ -155,9 +158,8 @@ bool MoveToParent::OptimizeSpeed(Unit *parent, float v, float &a, float max_spee
 float MOVETHRESHOLD = simulation_atom_var / 1.9;
 
 bool MoveToParent::Done(const Vector &ang_vel) {
-    if (fabs(ang_vel.i) < THRESHOLD
-            && fabs(ang_vel.j) < THRESHOLD
-            && fabs(ang_vel.k) < THRESHOLD) {      //if velocity is lower than threshold
+    if (fabs(ang_vel.i) < THRESHOLD && fabs(ang_vel.j) < THRESHOLD &&
+        fabs(ang_vel.k) < THRESHOLD) {  // if velocity is lower than threshold
         return true;
     }
     return false;
@@ -168,32 +170,27 @@ void MoveTo::Execute() {
 }
 
 bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
-    bool done = false;
+    bool   done = false;
     Vector local_vel(parent->UpCoordinateLevel(parent->GetVelocity()));
-    //local location is ued for storing the last velocity;
+    // local location is ued for storing the last velocity;
     terminatingX += ((local_vel.i > 0) != (last_velocity.i > 0) || (!local_vel.i));
     terminatingY += ((local_vel.j > 0) != (last_velocity.j > 0) || (!local_vel.j));
     terminatingZ += ((local_vel.k > 0) != (last_velocity.k > 0) || (!local_vel.k));
 
-    last_velocity = local_vel;
+    last_velocity  = local_vel;
     Vector heading = parent->ToLocalCoordinates((targetlocation - parent->Position()).Cast());
     Vector thrust(parent->drive.lateral, parent->drive.vertical,
-            afterburn ? parent->afterburner.thrust : parent->drive.forward);
-    float max_speed =
-            (afterburn ? parent->MaxAfterburnerSpeed() : parent->MaxSpeed());
+                  afterburn ? parent->afterburner.thrust : parent->drive.forward);
+    float  max_speed   = (afterburn ? parent->MaxAfterburnerSpeed() : parent->MaxSpeed());
     Vector normheading = heading;
     normheading.Normalize();
     Vector max_velocity = max_speed * normheading;
-    max_velocity.Set(fabs(max_velocity.i),
-            fabs(max_velocity.j),
-            fabs(max_velocity.k));
+    max_velocity.Set(fabs(max_velocity.i), fabs(max_velocity.j), fabs(max_velocity.k));
     if (done) {
         return done;
-    }       //unreachable
+    }  // unreachable
 
-    if (terminatingX > switchbacks
-            && terminatingY > switchbacks
-            && terminatingZ > switchbacks) {
+    if (terminatingX > switchbacks && terminatingY > switchbacks && terminatingZ > switchbacks) {
         if (Done(last_velocity)) {
             if (selfterminating) {
                 done = true;
@@ -206,7 +203,7 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
         }
         thrust = (-parent->GetMass() / simulation_atom_var) * last_velocity;
     } else {
-        float div = 1.0f;
+        float div  = 1.0f;
         float vdiv = 1.0f;
         if (selfterminating && terminatingX > 8 && terminatingY > 8 && terminatingZ > 8) {
             int tmp = (terminatingX - 4);
@@ -220,27 +217,24 @@ bool MoveToParent::Execute(Unit *parent, const QVector &targetlocation) {
             if (tmp > 30) {
                 tmp = 30;
             }
-            vdiv = (float) (1 << tmp);
-            div = vdiv;
+            vdiv      = (float)(1 << tmp);
+            div       = vdiv;
             thrust.i /= div;
             thrust.j /= div;
             thrust.k /= div;
         }
-        //start with Forward/Reverse:
+        // start with Forward/Reverse:
         float t =
                 CalculateDecelTime(heading.k, last_velocity.k, thrust.k, parent->drive.retro / div, parent->GetMass());
         if (t < THRESHOLD) {
-            thrust.k =
-                    (thrust.k > 0 ? -parent->drive.retro
-                            / div : (afterburn ? parent->afterburner.thrust / div : parent->drive.forward / div));
+            thrust.k = (thrust.k > 0 ? -parent->drive.retro / div
+                                     : (afterburn ? parent->afterburner.thrust / div : parent->drive.forward / div));
         } else if (t < simulation_atom_var) {
             thrust.k *= t / simulation_atom_var;
-            thrust.k +=
-                    (simulation_atom_var
-                            - t)
-                            * (thrust.k > 0 ? -parent->drive.retro
-                                    / div : (afterburn ? parent->afterburner.thrust / div : parent->drive.forward / div))
-                            / simulation_atom_var;
+            thrust.k += (simulation_atom_var - t) *
+                        (thrust.k > 0 ? -parent->drive.retro / div
+                                      : (afterburn ? parent->afterburner.thrust / div : parent->drive.forward / div)) /
+                        simulation_atom_var;
         }
         OptimizeSpeed(parent, last_velocity.k, thrust.k, max_velocity.k / vdiv);
         t = CalculateBalancedDecelTime(heading.i, last_velocity.i, thrust.i, parent->GetMass());
@@ -275,12 +269,12 @@ bool ChangeHeading::OptimizeAngSpeed(float optimal_speed_pos, float optimal_spee
         return true;
     }
     if (v > 0) {
-        float deltaa = static_cast<float>(parent->GetMass()) * (v - optimal_speed_pos)
-                / simulation_atom_var;           //clamping should take care of it
+        float deltaa = static_cast<float>(parent->GetMass()) * (v - optimal_speed_pos) /
+                       simulation_atom_var;  // clamping should take care of it
         a -= deltaa;
     } else {
-        float deltaa = static_cast<float>(parent->GetMass()) * (-v - optimal_speed_neg)
-                / simulation_atom_var;           //clamping should take care of it
+        float deltaa = static_cast<float>(parent->GetMass()) * (-v - optimal_speed_neg) /
+                       simulation_atom_var;  // clamping should take care of it
         a += deltaa;
     }
     return false;
@@ -291,35 +285,33 @@ bool ChangeHeading::OptimizeAngSpeed(float optimal_speed_pos, float optimal_spee
  * works for both pitch and yaw axis if you pass in the -ang_vel.j for the y
  */
 void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei) {
-    //We need to end up at destination with positive velocity, but no more than we can decelerate from in a single simulation_atom_var
+    // We need to end up at destination with positive velocity, but no more than we can decelerate from in a single
+    // simulation_atom_var
     if (1) {
-        float mass = static_cast<float>(parent->GetMass());
+        float mass              = static_cast<float>(parent->GetMass());
         float max_arrival_speed = torquei * simulation_atom_var / mass;
-        float accel_needed = (atancalc / simulation_atom_var - ang_veli) / simulation_atom_var;
-        float arrival_velocity = accel_needed * simulation_atom_var + ang_veli;
+        float accel_needed      = (atancalc / simulation_atom_var - ang_veli) / simulation_atom_var;
+        float arrival_velocity  = accel_needed * simulation_atom_var + ang_veli;
         if (fabs(arrival_velocity) <= max_arrival_speed && fabs(accel_needed) < torquei / mass) {
             torquei = accel_needed * mass;
             return;
         }
     }
-    float t = CalculateBalancedDecelTime(atancalc,
-            ang_veli,
-            torquei,
-            static_cast<float>(parent->GetMass()));     //calculate when we should decel
+    float t = CalculateBalancedDecelTime(atancalc, ang_veli, torquei,
+                                         static_cast<float>(parent->GetMass()));  // calculate when we should decel
     if (t < 0) {
-        //if it can't make it: try the other way
-        torquei = fabs(torquei);         //copy sign again
-        t = CalculateBalancedDecelTime(atancalc > 0 ? atancalc - 2 * PI : atancalc + 2 * PI,
-                ang_veli,
-                torquei,
-                static_cast<float>(parent->GetMass()));
+        // if it can't make it: try the other way
+        torquei = fabs(torquei);  // copy sign again
+        t       = CalculateBalancedDecelTime(atancalc > 0 ? atancalc - 2 * PI : atancalc + 2 * PI, ang_veli, torquei,
+                                       static_cast<float>(parent->GetMass()));
     }
     if (t > 0) {
         if (t < simulation_atom_var) {
             torquei *= ((t / simulation_atom_var) - ((simulation_atom_var - t) / simulation_atom_var));
         }
     } else {
-        torquei = -static_cast<float>(parent->GetMass()) * ang_veli / simulation_atom_var;         //clamping should take care of it
+        torquei = -static_cast<float>(parent->GetMass()) * ang_veli /
+                  simulation_atom_var;  // clamping should take care of it
     }
 }
 
@@ -330,11 +322,9 @@ void ChangeHeading::SetDest(const QVector &target) {
 
 float TURNTHRESHOLD = simulation_atom_var / 1.9;
 
-///if velocity is lower than threshold
+/// if velocity is lower than threshold
 bool ChangeHeading::Done(const Vector &ang_vel) {
-    if (fabs(ang_vel.i) < THRESHOLD
-            && fabs(ang_vel.j) < THRESHOLD
-            && fabs(ang_vel.k) < THRESHOLD) {
+    if (fabs(ang_vel.i) < THRESHOLD && fabs(ang_vel.j) < THRESHOLD && fabs(ang_vel.k) < THRESHOLD) {
         return true;
     }
     return false;
@@ -343,19 +333,20 @@ bool ChangeHeading::Done(const Vector &ang_vel) {
 void ChangeHeading::Execute() {
     bool temp = done;
     Order::Execute();
-    done = temp;
+    done           = temp;
     Vector ang_vel = parent->GetAngularVelocity();
     Vector local_velocity(parent->UpCoordinateLevel(ang_vel));
     Vector local_heading(parent->ToLocalCoordinates((final_heading - parent->Position()).Cast()));
-    char xswitch =
+    char   xswitch =
             ((local_heading.i > 0) != (last_velocity.i > 0) || (!local_heading.i)) && last_velocity.i != 0 ? 1 : 0;
     char yswitch =
             ((local_heading.j > 0) != (last_velocity.j > 0) || (!local_heading.j)) && last_velocity.j != 0 ? 1 : 0;
-    const bool AICheat = configuration().ai.turn_cheat;
-    bool cheater = false;
+    const bool  AICheat              = configuration().ai.turn_cheat;
+    bool        cheater              = false;
     const float min_for_no_oversteer = configuration().ai.min_angular_accel_cheat_flt;
-    if (AICheat && ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->GetMass()) > min_for_no_oversteer)
-            && !parent->isSubUnit()) {
+    if (AICheat &&
+        ((parent->drive.yaw + parent->drive.pitch) * 180 / (PI * parent->GetMass()) > min_for_no_oversteer) &&
+        !parent->isSubUnit()) {
         if (xswitch || yswitch) {
             Vector P, Q, R;
             parent->GetOrientation(P, Q, R);
@@ -371,29 +362,29 @@ void ChangeHeading::Execute() {
                     if (yswitch) {
                         local_velocity.j = .0f;
                         local_velocity.i = .0f;
-                        ang_vel.i = .0f;
-                        ang_vel.j = .0f;
+                        ang_vel.i        = .0f;
+                        ang_vel.j        = .0f;
                     } else {
                         local_velocity.i = .0f;
-                        ang_vel.i = .0f;
+                        ang_vel.i        = .0f;
                     }
                 } else if (yswitch) {
                     local_velocity.j = .0f;
-                    ang_vel.j = .0f;
+                    ang_vel.j        = .0f;
                 }
-                cheater = true;
+                cheater   = true;
                 ang_vel.k = local_velocity.k = 0;
                 parent->SetAngularVelocity(ang_vel);
             }
         }
     }
-    terminatingX += xswitch;
-    terminatingY += yswitch;
-    last_velocity = local_velocity;
+    terminatingX  += xswitch;
+    terminatingY  += yswitch;
+    last_velocity  = local_velocity;
     if (done /*||(xswitch&&yswitch)*/) {
         return;
     }
-    Vector torque(parent->drive.pitch, parent->drive.yaw, 0);     //set torque to max accel in any direction
+    Vector torque(parent->drive.pitch, parent->drive.yaw, 0);  // set torque to max accel in any direction
     if (terminatingX > switchbacks && terminatingY > switchbacks) {
         if (Done(local_velocity)) {
             if (this->terminating) {
@@ -406,20 +397,16 @@ void ChangeHeading::Execute() {
         }
         torque = (-static_cast<float>(parent->GetMass()) / simulation_atom_var) * local_velocity;
     } else {
-        TurnToward(atan2(local_heading.j, local_heading.k),
-                local_velocity.i,
-                torque.i);         //find angle away from axis 0,0,1 in yz plane
-        OptimizeAngSpeed(turningspeed * parent->drive.max_pitch_down,
-                turningspeed * parent->drive.max_pitch_up,
-                local_velocity.i,
-                torque.i);
+        TurnToward(atan2(local_heading.j, local_heading.k), local_velocity.i,
+                   torque.i);  // find angle away from axis 0,0,1 in yz plane
+        OptimizeAngSpeed(turningspeed * parent->drive.max_pitch_down, turningspeed * parent->drive.max_pitch_up,
+                         local_velocity.i, torque.i);
         TurnToward(atan2(local_heading.i, local_heading.k), -local_velocity.j, torque.j);
         torque.j = -torque.j;
-        OptimizeAngSpeed(turningspeed * parent->drive.max_yaw_left,
-                turningspeed * parent->drive.max_yaw_right,
-                local_velocity.j,
-                torque.j);
-        torque.k = -static_cast<float>(parent->GetMass()) * local_velocity.k / simulation_atom_var;         //try to counteract roll;
+        OptimizeAngSpeed(turningspeed * parent->drive.max_yaw_left, turningspeed * parent->drive.max_yaw_right,
+                         local_velocity.j, torque.j);
+        torque.k = -static_cast<float>(parent->GetMass()) * local_velocity.k /
+                   simulation_atom_var;  // try to counteract roll;
     }
     if (!cheater) {
         parent->ApplyLocalTorque(torque);
@@ -433,10 +420,10 @@ ChangeHeading::~ChangeHeading() {
 }
 
 FaceTargetITTS::FaceTargetITTS(bool fini, int accuracy) : ChangeHeading(QVector(0, 0, 1), accuracy), finish(fini) {
-    type = FACING;
-    subtype = STARGET;
-    speed = float(.00001);
-    useitts = true;
+    type                     = FACING;
+    subtype                  = STARGET;
+    speed                    = float(.00001);
+    useitts                  = true;
     const bool alwaysuseitts = configuration().ai.always_use_itts;
     if (!alwaysuseitts) {
         if (VegaRandom::Instance().GenRandUInt32() >= g_game.difficulty * static_cast<double>(RAND_MAX)) {
@@ -466,7 +453,7 @@ void FaceTargetITTS::Execute() {
         }
     }
     SetDest(useitts ? target->PositionITTS(parent->Position(), parent->cumulative_velocity, speed, false)
-            : target->Position());
+                    : target->Position());
     ChangeHeading::Execute();
     if (!finish) {
         ResetDone();
@@ -474,7 +461,7 @@ void FaceTargetITTS::Execute() {
 }
 
 FaceTarget::FaceTarget(bool fini, int accuracy) : ChangeHeading(QVector(0, 0, 1), accuracy), finish(fini) {
-    type = FACING;
+    type    = FACING;
     subtype = STARGET;
 }
 
@@ -498,10 +485,10 @@ FaceTarget::~FaceTarget() {
 }
 
 AutoLongHaul::AutoLongHaul(bool fini, int accuracy) : ChangeHeading(QVector(0, 0, 1), accuracy), finish(fini) {
-    type = FACING | MOVEMENT;
-    subtype = STARGET;
-    deactivatewarp = false;
-    StraightToTarget = true;
+    type                = FACING | MOVEMENT;
+    subtype             = STARGET;
+    deactivatewarp      = false;
+    StraightToTarget    = true;
     inside_landing_zone = false;
 }
 
@@ -509,9 +496,9 @@ void AutoLongHaul::MakeLinearVelocityOrder() {
     eraseType(MOVEMENT);
     const float combat_mode_mult = configuration().physics.auto_docking_speed_boost_flt;
 
-    float speed =
-            parent->computer.combat_mode ? parent->drive.speed
-                    : parent->afterburner.speed /*won't do insanity flight mode + spec = ludicrous speed*/;
+    float speed = parent->computer.combat_mode
+                          ? parent->drive.speed
+                          : parent->afterburner.speed /*won't do insanity flight mode + spec = ludicrous speed*/;
     if (inside_landing_zone) {
         speed *= combat_mode_mult;
     }
@@ -548,8 +535,8 @@ inline void WarpRampOff(Unit *un, bool rampdown) {
 }
 
 inline void CautiousWarpRampOn(Unit *un) {
-    if ((!un->ftl_drive.Enabled())
-            && (un->graphicOptions.RampCounter == 0)) { // don't restart warp during ramp-down - avoid shaking
+    if ((!un->ftl_drive.Enabled()) &&
+        (un->graphicOptions.RampCounter == 0)) {  // don't restart warp during ramp-down - avoid shaking
         un->ftl_drive.Enable();
         un->graphicOptions.WarpRamping = 1;
     }
@@ -557,19 +544,19 @@ inline void CautiousWarpRampOn(Unit *un) {
 
 bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
     const float specInterdictionLimit = configuration().physics.min_spec_interdiction_for_jittery_autopilot_flt;
-    if (target->isPlanet() == false
-            && (target->graphicOptions.specInterdictionOnline == 0
-                    || fabs(target->ship_functions.Value(Function::ftl_interdiction)) < specInterdictionLimit)) {
+    if (target->isPlanet() == false &&
+        (target->graphicOptions.specInterdictionOnline == 0 ||
+         fabs(target->ship_functions.Value(Function::ftl_interdiction)) < specInterdictionLimit)) {
         return true;
     }
     if (parent->computer.combat_mode == false) {
         return true;
     }
-    float maxspeed = parent->afterburner.speed;
+    float       maxspeed         = parent->afterburner.speed;
     const float accel_auto_limit = configuration().physics.max_accel_for_smooth_autopilot_flt;
     const float speed_auto_limit = configuration().physics.max_over_combat_speed_for_smooth_autopilot_flt;
-    if (minaccel < accel_auto_limit || parent->Velocity.MagnitudeSquared() > maxspeed * maxspeed * speed_auto_limit
-            * speed_auto_limit) {
+    if (minaccel < accel_auto_limit ||
+        parent->Velocity.MagnitudeSquared() > maxspeed * maxspeed * speed_auto_limit * speed_auto_limit) {
         return true;
     }
     return false;
@@ -577,43 +564,40 @@ bool useJitteryAutopilot(Unit *parent, Unit *target, float minaccel) {
 
 bool AutoLongHaul::InsideLandingPort(const Unit *obstacle) const {
     const float landing_port_limit = configuration().physics.auto_landing_port_unclamped_seconds_flt;
-    return UnitUtil::getSignificantDistance(parent,
-            obstacle)
-            < -landing_port_limit * parent->afterburner.speed;
+    return UnitUtil::getSignificantDistance(parent, obstacle) < -landing_port_limit * parent->afterburner.speed;
 }
 
 void AutoLongHaul::Execute() {
     Unit *target = group.GetUnit();
     if (target == NULL) {
         group.SetUnit(parent->Target());
-        done = finish;
+        done                    = finish;
         parent->autopilotactive = false;
         return;
     }
-    const bool compensate_for_interdiction = configuration().physics.auto_pilot_compensate_for_interdiction;
-    const float enough_warp_for_cruise = configuration().physics.enough_warp_for_cruise_flt;
-    const float go_perpendicular_speed = configuration().physics.warp_perpendicular_flt;
-    const float min_warp_orbit_radius = configuration().physics.min_warp_orbit_radius_flt;
-    const float warp_orbit_multiplier = configuration().physics.warp_orbit_multiplier_flt;
-    const float warp_behind_angle = cos(M_PI_FLT * configuration().physics.warp_behind_angle_flt / 180.0F);
-    QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
-    QVector destination = target->isSubUnit() ? target->Position() : target->LocalPosition();     //get destination
-    QVector destinationdirection = (destination - myposition);       //find vector from us to destination
-    double destinationdistance = destinationdirection.Magnitude();
-    destinationdirection =
-            destinationdirection * (1. / destinationdistance);       //this is a direction, so it is normalize
+    const bool  compensate_for_interdiction = configuration().physics.auto_pilot_compensate_for_interdiction;
+    const float enough_warp_for_cruise      = configuration().physics.enough_warp_for_cruise_flt;
+    const float go_perpendicular_speed      = configuration().physics.warp_perpendicular_flt;
+    const float min_warp_orbit_radius       = configuration().physics.min_warp_orbit_radius_flt;
+    const float warp_orbit_multiplier       = configuration().physics.warp_orbit_multiplier_flt;
+    const float warp_behind_angle           = cos(M_PI_FLT * configuration().physics.warp_behind_angle_flt / 180.0F);
+    QVector     myposition  = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();  // get unit pos
+    QVector     destination = target->isSubUnit() ? target->Position() : target->LocalPosition();  // get destination
+    QVector     destinationdirection = (destination - myposition);             // find vector from us to destination
+    double      destinationdistance  = destinationdirection.Magnitude();
+    destinationdirection = destinationdirection * (1. / destinationdistance);  // this is a direction, so it is
+                                                                               // normalize
 
-    StraightToTarget = true;    // free to fly
+    StraightToTarget = true;  // free to fly
 
-    //Free to fly. Read the drive's capability here rather than what the ship is currently getting:
-    //the orthogonal thrust cost is self-inflicted and passes, so steering must not react to it.
-    if ((parent->GetMaxWarpFieldStrength() < enough_warp_for_cruise)
-            && (parent->graphicOptions.RampCounter == 0)) {
-        //face target unless warp ramping is done and warp is less than some intolerable ammt
+    // Free to fly. Read the drive's capability here rather than what the ship is currently getting:
+    // the orthogonal thrust cost is self-inflicted and passes, so steering must not react to it.
+    if ((parent->GetMaxWarpFieldStrength() < enough_warp_for_cruise) && (parent->graphicOptions.RampCounter == 0)) {
+        // face target unless warp ramping is done and warp is less than some intolerable ammt
         Unit *obstacle = NULL;
-        float maxmultiplier = parent->CalculateNearestWarpUnit(FLT_MAX,
-                &obstacle,
-                compensate_for_interdiction);         //find the unit affecting our spec
+        float maxmultiplier =
+                parent->CalculateNearestWarpUnit(FLT_MAX, &obstacle,
+                                                 compensate_for_interdiction);  // find the unit affecting our spec
         bool currently_inside_landing_zone = false;
         if (obstacle) {
             currently_inside_landing_zone = InsideLandingPort(obstacle);
@@ -630,46 +614,50 @@ void AutoLongHaul::Execute() {
             target_root = UnitUtil::owner(target);
         }
         if (obstacle != NULL && obstacle != target && obstacle != target_root) {
-            //if it exists and is not our destination
-            QVector obstacledirection =
-                    (obstacle->LocalPosition() - myposition);               //find vector from us to obstacle
-            double obstacledistance = obstacledirection.Magnitude();
+            // if it exists and is not our destination
+            QVector obstacledirection = (obstacle->LocalPosition() - myposition);  // find vector from us to obstacle
+            double  obstacledistance  = obstacledirection.Magnitude();
 
-            obstacledirection = obstacledirection
-                    * (1. / obstacledistance);               //normalize the obstacle direction as well
+            obstacledirection = obstacledirection * (1. / obstacledistance);  // normalize the obstacle direction as
+                                                                              // well
             float angle = obstacledirection.Dot(destinationdirection);
-            if ((obstacledistance - obstacle->rSize() < destinationdistance - target->rSize())
-                    && (angle > warp_behind_angle)) {
+            if ((obstacledistance - obstacle->rSize() < destinationdistance - target->rSize()) &&
+                (angle > warp_behind_angle)) {
                 StraightToTarget = false;
-                //if our obstacle is closer than obj and the obstacle is not behind us
-                QVector planetdest =
-                        destination - obstacle->LocalPosition();                 //find the vector from planet to dest
-                QVector planetme = -obstacledirection;                 //obstacle to me
-                QVector planetperp = planetme.Cross(planetdest);                 //find vector out of that plane
-                QVector detourvector =
-                        destinationdirection.Cross(planetperp);                 //find vector perpendicular to our desired course emerging from planet
+                // if our obstacle is closer than obj and the obstacle is not behind us
+                QVector planetdest   = destination - obstacle->LocalPosition();  // find the vector from planet to dest
+                QVector planetme     = -obstacledirection;                       // obstacle to me
+                QVector planetperp   = planetme.Cross(planetdest);               // find vector out of that plane
+                QVector detourvector = destinationdirection.Cross(
+                        planetperp);  // find vector perpendicular to our desired course emerging from planet
                 double renormalizedetour = detourvector.Magnitude();
                 if (renormalizedetour > .01) {
                     detourvector = detourvector * (1. / renormalizedetour);
-                }                     //normalize it
+                }  // normalize it
                 double finaldetourdistance = mymax(obstacle->rSize() * warp_orbit_multiplier,
-                        min_warp_orbit_radius);                //scale that direction by some multiplier of obstacle size and a constant
-                detourvector = detourvector
-                        * finaldetourdistance;                 //we want to go perpendicular to our transit direction by that ammt
+                                                   min_warp_orbit_radius);  // scale that direction by some multiplier
+                                                                            // of obstacle size and a constant
+                detourvector =
+                        detourvector *
+                        finaldetourdistance;  // we want to go perpendicular to our transit direction by that ammt
                 QVector newdestination = NewDestination(obstacle->LocalPosition() + detourvector,
-                        finaldetourdistance);                 //add to our position
-                float weight = (maxmultiplier - go_perpendicular_speed) / (enough_warp_for_cruise
-                        - go_perpendicular_speed);                   //find out how close we are to our desired warp multiplier and weight our direction by that
-                weight *= weight;                 //
+                                                        finaldetourdistance);  // add to our position
+                float   weight         = (maxmultiplier - go_perpendicular_speed) /
+                               (enough_warp_for_cruise -
+                                go_perpendicular_speed);  // find out how close we are to our desired warp multiplier
+                                                          // and weight our direction by that
+                weight *= weight;  //
                 if (maxmultiplier < go_perpendicular_speed) {
                     QVector perpendicular = myposition + planetme * (finaldetourdistance / planetme.Magnitude());
-                    weight = (go_perpendicular_speed - maxmultiplier) / go_perpendicular_speed;
-                    destination = weight * perpendicular + (1 - weight) * newdestination;
+                    weight                = (go_perpendicular_speed - maxmultiplier) / go_perpendicular_speed;
+                    destination           = weight * perpendicular + (1 - weight) * newdestination;
                 } else {
-                    QVector olddestination = myposition + destinationdirection
-                            * finaldetourdistance;                     //destination direction in the same magnitude as the newdestination from the ship
-                    destination = newdestination * (1 - weight) + olddestination
-                            * weight;                       //use the weight to combine our direction and the dest
+                    QVector olddestination =
+                            myposition +
+                            destinationdirection * finaldetourdistance;  // destination direction in the same magnitude
+                                                                         // as the newdestination from the ship
+                    destination = newdestination * (1 - weight) +
+                                  olddestination * weight;  // use the weight to combine our direction and the dest
                 }
             }
         }
@@ -682,35 +670,33 @@ void AutoLongHaul::Execute() {
     // destination, or taking a detour, must not drop the ship out of warp. Dropping out on a
     // brief deviation of the facing made SPEC flicker in and out whenever the ship turned --
     // for instance leaving a planet, now behind it, to line up with a faraway object.
-    double speed = parent->cumulative_transformation_matrix.getR().Magnitude();
+    double      speed                       = parent->cumulative_transformation_matrix.getR().Magnitude();
     const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
     if (parent->GetMaxWarpFieldStrength() < min_warpfield_to_enter_warp) {
         deactivatewarp = true;
     }
-    double maxspeed =
-            mymax(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
-    double dis = UnitUtil::getSignificantDistance(parent, target);
-    float time_to_destination = dis / maxspeed;
+    double maxspeed            = mymax(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
+    double dis                 = UnitUtil::getSignificantDistance(parent, target);
+    float  time_to_destination = dis / maxspeed;
 
-    const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
+    const bool  rampdown         = configuration().physics.auto_pilot_ramp_warp_down;
     const float warprampdowntime = configuration().physics.warp_ramp_down_time_flt;
-    float time_to_stop = simulation_atom_var;
+    float       time_to_stop     = simulation_atom_var;
     if (rampdown) {
         time_to_stop += warprampdowntime;
     }
     if (time_to_destination <= time_to_stop) {
         deactivatewarp = true;
     }
-    if (DistanceWarrantsWarpTo(parent,
-            UnitUtil::getSignificantDistance(parent, target), false) && deactivatewarp == false) {
-        \
+    if (DistanceWarrantsWarpTo(parent, UnitUtil::getSignificantDistance(parent, target), false) &&
+        deactivatewarp == false) {
         CautiousWarpRampOn(parent);
     } else {
         WarpRampOff(parent, rampdown);
     }
     SetDest(destination);
-    bool combat_mode = parent->computer.combat_mode;
-    parent->computer.combat_mode = !inside_landing_zone;     //turn off limits in landing zone
+    bool combat_mode             = parent->computer.combat_mode;
+    parent->computer.combat_mode = !inside_landing_zone;  // turn off limits in landing zone
     ChangeHeading::Execute();
     parent->computer.combat_mode = combat_mode;
     if (!finish) {
@@ -718,20 +704,20 @@ void AutoLongHaul::Execute() {
     }
     // Distance where the autopilot terminates and docking begins: the target's docking distance,
     // where SPEC also stops, so the autopilot hands over dockable rather than short of it.
-    const float distance_to_stop = static_cast<float>(DockingDistance(target));
+    const float distance_to_stop       = static_cast<float>(DockingDistance(target));
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
-    const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
-    bool stopnow = false;
-    maxspeed = parent->afterburner.speed;
+    const bool  do_auto_finish         = configuration().physics.auto_pilot_terminate;
+    bool        stopnow                = false;
+    maxspeed                           = parent->afterburner.speed;
     if (maxspeed && parent->drive.retro) {
-        double time_to_destination = dis / maxspeed;         //conservative
-        double time_to_stop = speed * mass / parent->drive.retro;
+        double time_to_destination = dis / maxspeed;  // conservative
+        double time_to_stop        = speed * mass / parent->drive.retro;
         if (time_to_destination <= time_to_stop) {
             stopnow = true;
         }
     }
-    if (do_auto_finish
-            && (stopnow || dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
+    if (do_auto_finish &&
+        (stopnow || dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
         parent->autopilotactive = false;
         WarpRampOff(parent, rampdown);
         done = true;
@@ -740,7 +726,7 @@ void AutoLongHaul::Execute() {
 
 AutoLongHaul::~AutoLongHaul() {
 #ifdef ORDERDEBUG
-    VS_LOG_AND_FLUSH(trace, (boost::format("alh%1$x") % this));    // Was "ft"
+    VS_LOG_AND_FLUSH(trace, (boost::format("alh%1$x") % this));  // Was "ft"
 #endif
 }
 
@@ -751,11 +737,11 @@ void FaceDirection::SetParent(Unit *un) {
     ChangeHeading::SetParent(un);
 }
 
-FaceDirection::FaceDirection(float dist, bool fini, int accuracy) : ChangeHeading(QVector(0, 0, 1), accuracy),
-        finish(fini) {
-    type = FACING;
-    subtype |= SSELF;
-    this->dist = dist;
+FaceDirection::FaceDirection(float dist, bool fini, int accuracy)
+    : ChangeHeading(QVector(0, 0, 1), accuracy), finish(fini) {
+    type        = FACING;
+    subtype    |= SSELF;
+    this->dist  = dist;
 }
 
 void FaceDirection::Execute() {
@@ -778,7 +764,7 @@ void FaceDirection::Execute() {
 
 FaceDirection::~FaceDirection() {
 #ifdef ORDERDEBUG
-    VS_LOG_AND_FLUSH(trace, (boost::format("fd%1$x") % this));     // Was "ft"
+    VS_LOG_AND_FLUSH(trace, (boost::format("fd%1$x") % this));  // Was "ft"
 #endif
 }
 
@@ -802,22 +788,20 @@ void FormUp::Execute() {
     if (targ) {
         MoveTo::SetDest(Transform(targ->GetTransformation(), Pos));
         const bool can_warp_to = configuration().ai.warp_to_wingmen;
-        if (VegaRandom::Instance().RandomUInt32UpTo(63) == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
+        if (VegaRandom::Instance().RandomUInt32UpTo(63) == 0 &&
+            (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
             WarpToP(parent, targ, true);
         }
     }
     MoveTo::Execute();
 }
 
-FormUp::~FormUp() {
-}
+FormUp::~FormUp() {}
 
 void FormUpToOwner::SetParent(Unit *un) {
     Unit *ownerDoNotDereference = NULL;
     Unit *temp;
-    for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
-            (temp = *i) != NULL;
-            ++i) {
+    for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (temp = *i) != NULL; ++i) {
         if (temp == un->owner) {
             ownerDoNotDereference = temp;
             break;
@@ -842,13 +826,12 @@ void FormUpToOwner::Execute() {
     if (targ) {
         MoveTo::SetDest(Transform(targ->GetTransformation(), Pos));
         const bool can_warp_to = configuration().ai.warp_to_wingmen;
-        if (VegaRandom::Instance().RandomUInt32UpTo(63) == 0 && (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
+        if (VegaRandom::Instance().RandomUInt32UpTo(63) == 0 &&
+            (can_warp_to || _Universe->AccessCockpit()->autoInProgress())) {
             WarpToP(parent, targ, true);
         }
     }
     MoveTo::Execute();
 }
 
-FormUpToOwner::~FormUpToOwner() {
-}
-
+FormUpToOwner::~FormUpToOwner() {}

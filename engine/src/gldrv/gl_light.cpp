@@ -31,25 +31,26 @@
 #include "configuration/configuration.h"
 using std::stack;
 #include <assert.h>
-#include "root_generic/vs_globals.h"
-#include "src/gfxlib.h"
+
 #include "gl_light.h"
-#include "src/config_xml.h"
 #include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/gfxlib.h"
 
-GLint GFX_MAX_LIGHTS = 8;
-GLint GFX_OPTIMAL_LIGHTS = 4;
-GFXBOOL GFXLIGHTING = GFXFALSE;
+GLint   GFX_MAX_LIGHTS     = 8;
+GLint   GFX_OPTIMAL_LIGHTS = 4;
+GFXBOOL GFXLIGHTING        = GFXFALSE;
 
-int _currentContext = 0;
-vector<vector<gfx_light> > _local_lights_dat;
-vector<GFXColor> _ambient_light;
-vector<gfx_light> *_llights = NULL;
+int                       _currentContext = 0;
+vector<vector<gfx_light>> _local_lights_dat;
+vector<GFXColor>          _ambient_light;
+vector<gfx_light>        *_llights = NULL;
 
-//currently stored GL lights!
-OpenGLLights *GLLights = NULL; //{-1,-1,-1,-1,-1,-1,-1,-1};
-static stack<bool *> GlobalEffects;
-static stack<bool *> GlobalEffectsFreelist;
+// currently stored GL lights!
+OpenGLLights          *GLLights = NULL;  //{-1,-1,-1,-1,-1,-1,-1,-1};
+static stack<bool *>   GlobalEffects;
+static stack<bool *>   GlobalEffectsFreelist;
 static stack<GFXColor> GlobalEffectsAmbient;
 
 void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
@@ -61,7 +62,7 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
         GlobalEffectsFreelist.pop();
     }
 
-    unpicklights();     //costly but necessary to get rid of pesky local enables that shoudln't be tagged to get reenabled
+    unpicklights();  // costly but necessary to get rid of pesky local enables that shoudln't be tagged to get reenabled
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
         tmp[i] = (0 != (GLLights[i].options & OpenGLL::GL_ENABLED));
         if (GLLights[i].options & OpenGLL::GL_ENABLED) {
@@ -95,17 +96,10 @@ GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects() {
     return true;
 }
 
-GFXLight::GFXLight(const bool enabled,
-        const GFXColor &vect,
-        const GFXColor &diffuse,
-        const GFXColor &specular,
-        const GFXColor &ambient,
-        const GFXColor &attenuate,
-        const GFXColor &direction,
-        float exp,
-        float cutoff,
-        float size) {
-    target = -1;
+GFXLight::GFXLight(const bool enabled, const GFXColor &vect, const GFXColor &diffuse, const GFXColor &specular,
+                   const GFXColor &ambient, const GFXColor &attenuate, const GFXColor &direction, float exp,
+                   float cutoff, float size) {
+    target  = -1;
     options = 0;
     memcpy(this->vect, &vect, sizeof(float) * 3);
     memcpy(this->diffuse, &diffuse, sizeof(float) * 4);
@@ -113,9 +107,9 @@ GFXLight::GFXLight(const bool enabled,
     memcpy(this->ambient, &ambient, sizeof(float) * 4);
     memcpy(this->attenuate, &attenuate, sizeof(float) * 3);
     memcpy(this->direction, &direction, sizeof(this->direction));
-    this->exp = exp;
+    this->exp    = exp;
     this->cutoff = cutoff;
-    this->size = size;
+    this->size   = size;
     apply_attenuate(attenuated());
     if (enabled) {
         this->enable();
@@ -137,9 +131,7 @@ bool GFXLight::attenuated() const {
 }
 
 void GFXLight::apply_attenuate(bool attenuated) {
-    options = attenuated
-            ? (options | GFX_ATTENUATED)
-            : (options & (~GFX_ATTENUATED));
+    options = attenuated ? (options | GFX_ATTENUATED) : (options & (~GFX_ATTENUATED));
 }
 
 void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GFXColor &color) {
@@ -179,13 +171,14 @@ void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GF
     apply_attenuate(attenuated());
 }
 
-void /*GFXDRVAPI*/ GFXLight::SetProperties(const enum LIGHT_TARGET light_target, const Vector& vector) {
+void /*GFXDRVAPI*/ GFXLight::SetProperties(const enum LIGHT_TARGET light_target, const Vector &vector) {
     switch (light_target) {
         case DIFFUSE:
         case SPECULAR:
         case AMBIENT:
-            VS_LOG(error, (boost::format("%1%: Called wrong overload for this property, with Vector& instead of GFXColor&")
-                    % __FUNCTION__));
+            VS_LOG(error,
+                   (boost::format("%1%: Called wrong overload for this property, with Vector& instead of GFXColor&") %
+                    __FUNCTION__));
             break;
         case POSITION:
             vect[0] = vector.i;
@@ -207,35 +200,21 @@ void /*GFXDRVAPI*/ GFXLight::SetProperties(const enum LIGHT_TARGET light_target,
 GFXColor /*GFXDRVAPI*/ GFXLight::GetProperties(enum LIGHT_TARGET lighttarg) const {
     switch (lighttarg) {
         case SPECULAR:
-            return GFXColor(specular[0],
-                    specular[1],
-                    specular[2],
-                    specular[3]);
+            return GFXColor(specular[0], specular[1], specular[2], specular[3]);
 
         case AMBIENT:
-            return GFXColor(ambient[0],
-                    ambient[1],
-                    ambient[2],
-                    ambient[3]);
+            return GFXColor(ambient[0], ambient[1], ambient[2], ambient[3]);
 
         case POSITION:
-            return GFXColor(vect[0],
-                    vect[1],
-                    vect[2]);
+            return GFXColor(vect[0], vect[1], vect[2]);
 
             break;
         case ATTENUATE:
-            return GFXColor(
-                    attenuate[0],
-                    attenuate[1],
-                    attenuate[2]);
+            return GFXColor(attenuate[0], attenuate[1], attenuate[2]);
 
         case DIFFUSE:
-        default:     //just for kicks
-            return GFXColor(diffuse[0],
-                    diffuse[1],
-                    diffuse[2],
-                    diffuse[3]);
+        default:  // just for kicks
+            return GFXColor(diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
     }
 }
 
@@ -249,7 +228,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff(const float ttcutoff) {
 
 void /*GFXDRVAPI*/ GFXSetOptimalIntensity(const float intensity, const float saturate) {
     optintense = intensity;
-    optsat = saturate;
+    optsat     = saturate;
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights(const int numLights) {
@@ -261,7 +240,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights(const int numLights) {
 }
 
 GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(const GFXBOOL spec) {
-#if !defined (_WIN32) && !defined (__CYGWIN__)
+#if !defined(_WIN32) && !defined(__CYGWIN__)
     if (spec) {
         glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
     } else {
@@ -320,7 +299,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET lt, c
     return GFXTRUE;
 }
 
-GFXBOOL /*GFXDRVAPI*/  GFXSetLight(const int light, const enum LIGHT_TARGET lt, const Vector& vector) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, const enum LIGHT_TARGET lt, const Vector &vector) {
     if ((*_llights)[light].Target() == -2) {
         return GFXFALSE;
     }
@@ -335,7 +314,7 @@ const GFXLight & /*GFXDRVAPI*/ GFXGetLight(const int light) {
 
 GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(int light) {
     assert(light >= 0 && light <= static_cast<int>(_llights->size()));
-    //return FALSE;
+    // return FALSE;
     if ((*_llights)[light].Target() == -2) {
         return GFXFALSE;
     }
@@ -360,7 +339,7 @@ void /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number) {
         LightInit = GFXTRUE;
         SetupGLLightGlobals();
     }
-    con_number = _local_lights_dat.size();
+    con_number      = _local_lights_dat.size();
     _currentContext = con_number;
     _ambient_light.push_back(GFXColor(0, 0, 0, 1));
     _local_lights_dat.push_back(vector<gfx_light>());
@@ -373,13 +352,13 @@ void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number) {
 
 void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number) {
     unpicklights();
-    int GLLindex = 0;
+    int          GLLindex = 0;
     unsigned int i;
     lighttable.Clear();
     _currentContext = con_number;
-    _llights = &_local_lights_dat[con_number];
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (GLfloat *) &(_ambient_light[con_number]));
-    //reset all lights so they arean't in GLLights
+    _llights        = &_local_lights_dat[con_number];
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, (GLfloat *)&(_ambient_light[con_number]));
+    // reset all lights so they arean't in GLLights
     for (i = 0; i < _llights->size(); i++) {
         (*_llights)[i].Target() = -1;
     }
@@ -388,14 +367,14 @@ void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number) {
             if ((*_llights)[i].LocalLight()) {
                 (*_llights)[i].AddToTable();
             } else {
-                GLLights[GLLindex].index = -1;                 //make it clobber completley! no trace of old light.
+                GLLights[GLLindex].index = -1;  // make it clobber completley! no trace of old light.
                 (*_llights)[i].ClobberGLLight(GLLindex);
                 GLLindex++;
             }
         }
     }
     for (; GLLindex < GFX_MAX_LIGHTS; GLLindex++) {
-        GLLights[GLLindex].index = -1;
+        GLLights[GLLindex].index   = -1;
         GLLights[GLLindex].options = OpenGLL::GLL_OFF;
         glDisable(GL_LIGHT0 + GLLindex);
     }
@@ -411,17 +390,19 @@ void GFXDestroyAllLights() {
 
 static void SetupGLLightGlobals() {
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,
-            1);     //don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
+                  1);  // don't want lighting coming from infinity....we have to take the hit due to sphere mapping
+                       // matrix tweaking
     glGetIntegerv(GL_MAX_LIGHTS, &GFX_MAX_LIGHTS);
     if (!GLLights) {
-        GLLights = (OpenGLLights *) malloc(sizeof(OpenGLLights) * GFX_MAX_LIGHTS);
+        GLLights = (OpenGLLights *)malloc(sizeof(OpenGLLights) * GFX_MAX_LIGHTS);
         for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
             GLLights[i].index = -1;
         }
     }
 
     GFXSetCutoff(configuration().graphics.light_cutoff_flt);
-    GFXSetOptimalIntensity(configuration().graphics.light_optimal_intensity_flt, configuration().graphics.light_saturation_flt);
+    GFXSetOptimalIntensity(configuration().graphics.light_optimal_intensity_flt,
+                           configuration().graphics.light_saturation_flt);
     GFXSetOptimalNumLights(configuration().graphics.num_lights);
     GFXSetSeparateSpecularColor(configuration().graphics.separate_specular_color ? GFXTRUE : GFXFALSE);
 }

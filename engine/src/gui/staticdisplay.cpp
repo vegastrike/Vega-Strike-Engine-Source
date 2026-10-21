@@ -27,58 +27,58 @@
 
 #include "staticdisplay.h"
 
+#include "configuration/configuration.h"
 #include "guidefs.h"
 #include "scroller.h"
-#include "configuration/configuration.h"
 
-//The StaticDisplay class is used to show something on a window.
-//Right now, it supports formatted text which can be single-line or multi-line.
-//it can be used in a scrollable container as well
-//This control does not respond to input events.
+// The StaticDisplay class is used to show something on a window.
+// Right now, it supports formatted text which can be single-line or multi-line.
+// it can be used in a scrollable container as well
+// This control does not respond to input events.
 
-//The rect for the text object has changed -- reset it.
+// The rect for the text object has changed -- reset it.
 void StaticDisplay::setPaintTextRect(void) {
     const Rect textRect = m_rect.copyAndInset(m_textMargins);
     m_paintText.setRect(textRect);
 }
 
-//Set text margins.
+// Set text margins.
 void StaticDisplay::setTextMargins(const Size &s) {
     m_textMargins = s;
     setPaintTextRect();
 }
 
-//The outside boundaries of the control.
+// The outside boundaries of the control.
 void StaticDisplay::setRect(const Rect &r) {
     Control::setRect(r);
     setPaintTextRect();
 }
 
-//Draw the control.
+// Draw the control.
 void StaticDisplay::draw(void) {
-    //Draw the background.
+    // Draw the background.
     drawBackground();
-    //If we have a scroller and the layout has changed, need to reset the scroller.
+    // If we have a scroller and the layout has changed, need to reset the scroller.
     if (m_scroller && m_layoutVersion != m_paintText.layoutVersion()) {
         const int lineCount = m_paintText.lineCount();
-        const int visible = m_paintText.visibleLineCountStartingWith(m_scrollPosition, m_rect.size.height);
+        const int visible   = m_paintText.visibleLineCountStartingWith(m_scrollPosition, m_rect.size.height);
         m_scroller->setRangeValues(lineCount - 1, visible);
         if (m_scrollPosition > lineCount - 2 && lineCount > visible) {
             m_scrollPosition = lineCount - 1;
         }
         m_scroller->setScrollPosition(m_scrollPosition);
-        m_layoutVersion = m_paintText.layoutVersion();         //Remember layout version for next time.
+        m_layoutVersion = m_paintText.layoutVersion();  // Remember layout version for next time.
     }
     m_paintText.draw(m_scrollPosition);
-}  
+}
 
-//Set the object that takes care of scrolling.
+// Set the object that takes care of scrolling.
 void StaticDisplay::setScroller(Scroller *s) {
     m_scroller = s;
     s->setCommandTarget(this);
 }
 
-//Process a command event.
+// Process a command event.
 bool StaticDisplay::processCommand(const EventCommandId &command, Control *control) {
     if (command == "Scroller::PositionChanged") {
         assert(control == m_scroller);
@@ -88,7 +88,7 @@ bool StaticDisplay::processCommand(const EventCommandId &command, Control *contr
     return Control::processCommand(command, control);
 }
 
-//Process wheel events for scrolling.
+// Process wheel events for scrolling.
 bool StaticDisplay::processMouseDown(const InputEvent &event) {
     const int zoominc = configuration().general.wheel_increment_lines;
     if (m_scroller) {
@@ -105,11 +105,9 @@ bool StaticDisplay::processMouseDown(const InputEvent &event) {
     return Control::processMouseDown(event);
 }
 
-//CONSTRUCTION
-StaticDisplay::StaticDisplay(void) :
-        m_textMargins(Size(0.0, 0.0)),
-        m_scrollPosition(0),
-        m_layoutVersion(m_paintText.layoutVersion()),
-        m_scroller(NULL) {
-}
-
+// CONSTRUCTION
+StaticDisplay::StaticDisplay(void)
+    : m_textMargins(Size(0.0, 0.0)),
+      m_scrollPosition(0),
+      m_layoutVersion(m_paintText.layoutVersion()),
+      m_scroller(NULL) {}

@@ -25,17 +25,18 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <iostream>
 #include <map>
-#include <vector>
-#include <string>
 #include <set>
-//no sane programmer has a max size... but this is late...and you can set the thing...be aware that a bad datafile could crash your computer
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <vector>
+// no sane programmer has a max size... but this is late...and you can set the thing...be aware that a bad datafile
+// could crash your computer
 
-#define MAXSIZE 2048
+#define MAXSIZE 2'048
 
 using namespace std;
 
@@ -43,8 +44,7 @@ class Averaging {
 public:
     vector<int> samples;
 
-    Averaging() {
-    }
+    Averaging() {}
 
     Averaging &operator+=(int a) {
         samples.push_back(a);
@@ -52,8 +52,8 @@ public:
     }
 
     float spread() {
-        int min = -1;
-        int max = -1;
+        int min       = -1;
+        int max       = -1;
         int zerocount = 0;
         for (int i = 0; i < samples.size(); ++i) {
             if (samples[i] == 0) {
@@ -67,7 +67,7 @@ public:
                 }
             }
         }
-        //printf ("maxmin %d %d\n",max,min);
+        // printf ("maxmin %d %d\n",max,min);
         if (zerocount == 0) {
             if (max == min && samples.size() <= 1) {
                 return .25 * max;
@@ -84,7 +84,7 @@ public:
     float realaverage() {
         float ave = 0;
         for (int i = 0; i < samples.size(); ++i) {
-            ave += samples[i] / (float) samples.size();
+            ave += samples[i] / (float)samples.size();
         }
         return ave;
     }
@@ -97,7 +97,7 @@ public:
             }
         }
         for (int i = 0; i < samples.size(); ++i) {
-            ave += samples[i] / (float) samples.size();
+            ave += samples[i] / (float)samples.size();
         }
         return ave;
     }
@@ -111,8 +111,8 @@ void merge(map<string, Averaging> &inout, map<string, Averaging> in) {
     }
 }
 
-map<string, string> basekey;
-map<string, map<string, Averaging> > total;
+map<string, string>                 basekey;
+map<string, map<string, Averaging>> total;
 
 int main(int argc, char **argv) {
     std::string arg;
@@ -124,118 +124,114 @@ int main(int argc, char **argv) {
     } else {
         arg = argv[2];
     }
-    basekey["Sutur"] = "agricultural_planets";
-    basekey["Charon"] = "mining_base";
-    basekey["Heimdel"] = "mining_base";
-    basekey["Smallville"] = "mining_base__pirates";
-    basekey["Achilles"] = "mining_base";
-    basekey["Anapolis"] = "refinery";
-    basekey["Basque"] = "mining_base";
-    basekey["Basque"] = "mining_base";
-    basekey["Basra"] = "refinery";
-    basekey["Beaconsfield"] = "refinery";
-    basekey["Bodensee"] = "agricultural_planets";
-    basekey["Burton"] = "agricultural_planets";
-    basekey["Drake"] = "mining_base__pirates";
-    basekey["Edinburg"] = "refinery";
-    basekey["Edom"] = "agricultural_planets";
-    basekey["Palan"] = "agricultural_planets";
-    basekey["Elysia"] = "agricultural_planets";
-    basekey["Erewhon"] = "agricultural_planets";
-    basekey["Glasgow"] = "refinery";
-    basekey["Gracchus"] = "refinery";
-    basekey["Hector"] = "mining_base";
-    basekey["Heimdal"] = "agricultural_planets";
-    basekey["Helen"] = "agricultural_planets";
-    basekey["Jolson"] = "pleasure_planets";
-    basekey["Joplin"] = "refinery";
-    basekey["Kronecker"] = "mining_base";
-    basekey["Lisacc"] = "mining_base";
-    basekey["Liverpool"] = "refinery";
-    basekey["Macabee"] = "mining_base";
-    basekey["Magdaline"] = "pleasure_planets";
-    basekey["Matahari"] = arg;
-    basekey["Meadow"] = "refinery";
-    basekey["Megiddo"] = "mining_base__pirates";
-    basekey["Mjolnar"] = "agricultural_planets";
-    basekey["Munchen"] = "refinery";
-    basekey["N1912-1"] = arg;
+    basekey["Sutur"]              = "agricultural_planets";
+    basekey["Charon"]             = "mining_base";
+    basekey["Heimdel"]            = "mining_base";
+    basekey["Smallville"]         = "mining_base__pirates";
+    basekey["Achilles"]           = "mining_base";
+    basekey["Anapolis"]           = "refinery";
+    basekey["Basque"]             = "mining_base";
+    basekey["Basque"]             = "mining_base";
+    basekey["Basra"]              = "refinery";
+    basekey["Beaconsfield"]       = "refinery";
+    basekey["Bodensee"]           = "agricultural_planets";
+    basekey["Burton"]             = "agricultural_planets";
+    basekey["Drake"]              = "mining_base__pirates";
+    basekey["Edinburg"]           = "refinery";
+    basekey["Edom"]               = "agricultural_planets";
+    basekey["Palan"]              = "agricultural_planets";
+    basekey["Elysia"]             = "agricultural_planets";
+    basekey["Erewhon"]            = "agricultural_planets";
+    basekey["Glasgow"]            = "refinery";
+    basekey["Gracchus"]           = "refinery";
+    basekey["Hector"]             = "mining_base";
+    basekey["Heimdal"]            = "agricultural_planets";
+    basekey["Helen"]              = "agricultural_planets";
+    basekey["Jolson"]             = "pleasure_planets";
+    basekey["Joplin"]             = "refinery";
+    basekey["Kronecker"]          = "mining_base";
+    basekey["Lisacc"]             = "mining_base";
+    basekey["Liverpool"]          = "refinery";
+    basekey["Macabee"]            = "mining_base";
+    basekey["Magdaline"]          = "pleasure_planets";
+    basekey["Matahari"]           = arg;
+    basekey["Meadow"]             = "refinery";
+    basekey["Megiddo"]            = "mining_base__pirates";
+    basekey["Mjolnar"]            = "agricultural_planets";
+    basekey["Munchen"]            = "refinery";
+    basekey["N1912-1"]            = arg;
     basekey["New_Constantinople"] = "new_constantinople";
-    basekey["New_Detroit"] = "new_detroit_planets";
-    basekey["New_Iberia"] = "agricultural_planets";
-    basekey["New_Reno"] = "pleasure_planets";
-    basekey["Nitir"] = "agricultural_planets";
-    basekey["Oakham"] = "mining_base__pirates";
-    basekey["Olympus"] = arg;
-    basekey["Oresville"] = "agricultural_planets";
-    basekey["Oxford"] = "university_planets";
-    basekey["Perry Naval Base"] = "perry";
-    basekey["Remus"] = "refinery";
-    basekey["Rilke"] = "refinery";
-    basekey["Rodin"] = "agricultural_planets";
-    basekey["Romulus"] = "mining_base";
-    basekey["Rygannon"] = "mining_base";
-    basekey["Saratov"] = "mining_base";
-    basekey["Siva"] = "agricultural_planets";
-    basekey["Speke"] = "pleasure_planets";
-    basekey["Surtur"] = "agricultural_planets";
-    basekey["Thisbury"] = "refinery";
-    basekey["Trinsic"] = "agricultural_planets";
-    basekey["Tuck's"] = "mining_base__pirates";
-    basekey["Valkyrie"] = "mining_base";
-    basekey["Victoria"] = "agricultural_planets";
-    basekey["Vishnu"] = "mining_base";
-    basekey["Wickerton"] = "refinery";
-    FILE *fp = fopen(argv[1], "r");
-    char name[MAXSIZE];
-    char field[MAXSIZE];
-    char end[MAXSIZE];
+    basekey["New_Detroit"]        = "new_detroit_planets";
+    basekey["New_Iberia"]         = "agricultural_planets";
+    basekey["New_Reno"]           = "pleasure_planets";
+    basekey["Nitir"]              = "agricultural_planets";
+    basekey["Oakham"]             = "mining_base__pirates";
+    basekey["Olympus"]            = arg;
+    basekey["Oresville"]          = "agricultural_planets";
+    basekey["Oxford"]             = "university_planets";
+    basekey["Perry Naval Base"]   = "perry";
+    basekey["Remus"]              = "refinery";
+    basekey["Rilke"]              = "refinery";
+    basekey["Rodin"]              = "agricultural_planets";
+    basekey["Romulus"]            = "mining_base";
+    basekey["Rygannon"]           = "mining_base";
+    basekey["Saratov"]            = "mining_base";
+    basekey["Siva"]               = "agricultural_planets";
+    basekey["Speke"]              = "pleasure_planets";
+    basekey["Surtur"]             = "agricultural_planets";
+    basekey["Thisbury"]           = "refinery";
+    basekey["Trinsic"]            = "agricultural_planets";
+    basekey["Tuck's"]             = "mining_base__pirates";
+    basekey["Valkyrie"]           = "mining_base";
+    basekey["Victoria"]           = "agricultural_planets";
+    basekey["Vishnu"]             = "mining_base";
+    basekey["Wickerton"]          = "refinery";
+    FILE                  *fp     = fopen(argv[1], "r");
+    char                   name[MAXSIZE];
+    char                   field[MAXSIZE];
+    char                   end[MAXSIZE];
     map<string, Averaging> base;
-    set<string> cargotypes;
-    string key;
+    set<string>            cargotypes;
+    string                 key;
     while (fgets(end, MAXSIZE, fp) != NULL) {
         if (end == string(",,\n")) {
             int maxsamples = 0;
-            for (map<string, Averaging>::iterator i = base.begin();
-                    i != base.end();
-                    ++i) {
+            for (map<string, Averaging>::iterator i = base.begin(); i != base.end(); ++i) {
                 int tmp = i->second.samples.size();
                 if (tmp > maxsamples) {
                     maxsamples = tmp;
                 }
             }
-            for (map<string, Averaging>::iterator i = base.begin();
-                    i != base.end();
-                    ++i) {
+            for (map<string, Averaging>::iterator i = base.begin(); i != base.end(); ++i) {
                 while (i->second.samples.size() < maxsamples) {
                     i->second += 0;
                 }
             }
             merge(total[key], base);
             base = map<string, Averaging>();
-            key = "";
+            key  = "";
             while (fgets(field, MAXSIZE, fp) != NULL) {
                 if (field != string(",,\n")) {
                     sscanf(field, "%s", end);
                     string tmp = end;
-                    key = tmp.substr(0, tmp.find(","));
+                    key        = tmp.substr(0, tmp.find(","));
                     if (basekey[key] == "") {
                         printf("Key Lookup :%s:\n", key.c_str());
                     }
-                    key = (basekey[key] == "") ? key : basekey[key];
+                    key  = (basekey[key] == "") ? key : basekey[key];
                     base = map<string, Averaging>();
                     break;
                 }
             }
         } else {
-            int quant, price;
+            int   quant, price;
             char *firstcomma = strstr(end, ",");
             if (firstcomma) {
                 char *secondcomma = strstr(firstcomma + 1, ",");
                 if (secondcomma) {
-                    *firstcomma++ = '\0';
+                    *firstcomma++  = '\0';
                     *secondcomma++ = '\0';
-                    //printf ("Have %s %s\n",end,firstcomma);
+                    // printf ("Have %s %s\n",end,firstcomma);
                     base[end] += atoi(firstcomma);
                     cargotypes.insert(end);
                 }
@@ -247,16 +243,13 @@ int main(int argc, char **argv) {
         cout << ", " << *j << "_MaxMinusMinOver2";
     }
     cout << endl;
-    for (map<string, map<string, Averaging> >::iterator i = total.begin(); i != total.end(); ++i) {
+    for (map<string, map<string, Averaging>>::iterator i = total.begin(); i != total.end(); ++i) {
         cout << i->first;
         for (set<string>::iterator j = cargotypes.begin(); j != cargotypes.end(); ++j) {
             if (i->second.find(*j) != i->second.end()) {
-                cout << ","
-                        << i->second[*j].average()
-                        << ","
-                        << i->second[*j].spread() / 2;
+                cout << "," << i->second[*j].average() << "," << i->second[*j].spread() / 2;
             } else {
-                //cout << *j<<",NOTHING, NOTHING, ";
+                // cout << *j<<",NOTHING, NOTHING, ";
                 cout << ",,";
             }
         }
@@ -264,4 +257,3 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
-

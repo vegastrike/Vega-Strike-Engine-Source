@@ -26,39 +26,41 @@
  */
 
 
-#include "src/endianness.h"
-#include <float.h>
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
 #include <assert.h>
+#include <float.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "gfx/vsimage.h"
+
 #include "gfx/aux_texture.h"
+#include "gfx/vsimage.h"
 #include "gldrv/sdds.h"
+#include "src/endianness.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 #ifndef WIN32
 #else
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif //tells VCC not to generate min/max macros
-#include <windows.h>
-#include <wingdi.h>
+#    ifndef NOMINMAX
+#        define NOMINMAX
+#    endif  // tells VCC not to generate min/max macros
+#    include <windows.h>
+#    include <wingdi.h>
 #endif
 
-#if _MSC_VER >= 1300
-#define snprintf _snprintf
+#if _MSC_VER >= 1'300
+#    define snprintf _snprintf
 #endif
 
-static char *InputName = NULL;
-static char *OutputName = NULL;
-static bool pushdown = false;
-static float affine = 0;
+static char *InputName      = NULL;
+static char *OutputName     = NULL;
+static bool  pushdown       = false;
+static float affine         = 0;
 static float multiplicitive = 1;
-static float power = 1;
+static float power          = 1;
 
-using namespace VSFileSystem;   // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide -- stephengtuggy 2021-09-07
+using namespace VSFileSystem;  // FIXME -- Shouldn't include an entire namespace, according to Google Style Guide --
+                               // stephengtuggy 2021-09-07
 
 /*
 struct Vector {
@@ -120,17 +122,17 @@ static void Lighting( RGBColor &Col, const Vector &Norm )
 }
 */
 
-const int lmwid = 512;
-const int lmwido2 = lmwid / 2;
-const float ooWIDTHo2 = 2. / lmwid;
+const int   lmwid      = 512;
+const int   lmwido2    = lmwid / 2;
+const float ooWIDTHo2  = 2. / lmwid;
 const float PIoWIDTHo2 = 2 * 3.1415926535 / lmwid;
-const char bytepp = 3;
+const char  bytepp     = 3;
 
 struct CubeCoord {
-    float s;
-    float t;
-    unsigned int TexMap;    //0 = front, 1=back,2=right,3=left,4=up,5=down
-    unsigned int padding;  //added by chuck_starchaser
+    float        s;
+    float        t;
+    unsigned int TexMap;   // 0 = front, 1=back,2=right,3=left,4=up,5=down
+    unsigned int padding;  // added by chuck_starchaser
 };
 
 static void gluSphereMap(CubeCoord &Tex, Vector Normal, float Theta) {
@@ -140,58 +142,58 @@ static void gluSphereMap(CubeCoord &Tex, Vector Normal, float Theta) {
         Tex.t = vert * lmwido2 + lmwido2;
         Tex.s = Theta;
     } else {
-        Tex.t = ((int) (vert * lmwido2)) % lmwid;
+        Tex.t = ((int)(vert * lmwido2)) % lmwid;
         Tex.s = Theta;
     }
 }
 
 static void TexMap(CubeCoord &Tex, Vector Normal) {
-    float r[6] = {0, 0, 0, 0, 0, 0};
-    Normal.i = Normal.i;
-    Normal.j = -Normal.j;
-    Normal.k = -Normal.k;
-    const float CubeSize = lmwido2;     //half of the length of any of the cube's sides
+    float r[6]           = {0, 0, 0, 0, 0, 0};
+    Normal.i             = Normal.i;
+    Normal.j             = -Normal.j;
+    Normal.k             = -Normal.k;
+    const float CubeSize = lmwido2;  // half of the length of any of the cube's sides
     if (Normal.k) {
         r[0] = CubeSize / Normal.k;
-    }                   //find what you need to multiply to get to the cube
+    }  // find what you need to multiply to get to the cube
     if (Normal.i) {
         r[2] = CubeSize / Normal.i;
-    }                   //find what you need to multiply to get to the cube
+    }  // find what you need to multiply to get to the cube
     if (Normal.j) {
         r[4] = CubeSize / Normal.j;
-    }                   //find what you need to multiply to get to the cube
+    }  // find what you need to multiply to get to the cube
     if (!Normal.k) {
-        r[0] = r[1] = CubeSize * 1000;
+        r[0] = r[1] = CubeSize * 1'000;
     }
     if (!Normal.i) {
-        r[2] = r[3] = CubeSize * 1000;
+        r[2] = r[3] = CubeSize * 1'000;
     }
     if (!Normal.j) {
-        r[4] = r[5] = CubeSize * 1000;
+        r[4] = r[5] = CubeSize * 1'000;
     }
     r[1] = -r[0];
     r[3] = -r[2];
     r[5] = -r[4];
 
     float rf;
-    rf = CubeSize * 1000;
+    rf = CubeSize * 1'000;
     for (int i = 0; i < 6; i++) {
         if (r[i] >= CubeSize) {
             if (rf > r[i]) {
-                rf = r[i];
+                rf         = r[i];
                 Tex.TexMap = i;
             }
         }
     }
-    ///find coordinates on this tex map 'box in space'
+    /// find coordinates on this tex map 'box in space'
     switch (Tex.TexMap) {
         case 0:
-            Tex.s = rf * Normal.i + lmwido2;         //btw 0 and 256
-            Tex.t = lmwido2 - rf * Normal.j;          //top left is 0,0
+            Tex.s = rf * Normal.i + lmwido2;  // btw 0 and 256
+            Tex.t = lmwido2 - rf * Normal.j;  // top left is 0,0
             break;
         case 1:
-            Tex.s = lmwido2 - rf * Normal.i;         //btw 0 and 256
-            Tex.t = lmwido2 - rf * Normal.j;          //top left is 0,0
+            Tex.s = lmwido2 - rf * Normal.i;  // btw 0 and 256
+            Tex.t = lmwido2 - rf * Normal.j;  // top left is 0,0
             break;
         case 2:
             Tex.s = lmwido2 - rf * Normal.k;
@@ -215,25 +217,25 @@ static void TexMap(CubeCoord &Tex, Vector Normal) {
 static bool LoadTex(char *FileName, unsigned char scdata[lmwid][lmwid][3]) {
     using namespace VSFileSystem;
 
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly(FileName, TextureFile);
     if (err > Ok) {
         return false;
     }
-    Texture tex;
-    unsigned char *data = tex.ReadImage(&f, texTransform, true);
-    int bpp = tex.Depth();
-    int format = tex.Format();
+    Texture        tex;
+    unsigned char *data   = tex.ReadImage(&f, texTransform, true);
+    int            bpp    = tex.Depth();
+    int            format = tex.Format();
 
-    unsigned char *buffer = NULL;
-    bpp /= 8;
-    //999 is the code for DDS file, we must decompress them.
+    unsigned char *buffer  = NULL;
+    bpp                   /= 8;
+    // 999 is the code for DDS file, we must decompress them.
     if (format == 999) {
         unsigned char *tmpbuffer = data + 2;
-        TEXTUREFORMAT internformat;
+        TEXTUREFORMAT  internformat;
         bpp = 1;
-        //Make sure we are reading a DXT1 file. All backgrounds
-        //should be DXT1
+        // Make sure we are reading a DXT1 file. All backgrounds
+        // should be DXT1
         switch (tex.mode) {
             case ::VSImage::_DXT1:
                 internformat = DXT1;
@@ -241,32 +243,32 @@ static bool LoadTex(char *FileName, unsigned char scdata[lmwid][lmwid][3]) {
             default:
                 return false;
         }
-        //we could hardware decompress, but that involves more
-        //pollution of gl in gfx.
+        // we could hardware decompress, but that involves more
+        // pollution of gl in gfx.
         ddsDecompress(tmpbuffer, buffer, internformat, tex.sizeY, tex.sizeX);
-        //We are done with the DDS file data.  Remove it.
+        // We are done with the DDS file data.  Remove it.
         free(data);
         data = buffer;
 
-        //stride and row_pointers are used for the texTransform
-        unsigned long stride = 4 * sizeof(unsigned char);
-        unsigned char **row_pointers = (unsigned char **) malloc(sizeof(unsigned char *) * tex.sizeY);
+        // stride and row_pointers are used for the texTransform
+        unsigned long   stride       = 4 * sizeof(unsigned char);
+        unsigned char **row_pointers = (unsigned char **)malloc(sizeof(unsigned char *) * tex.sizeY);
         for (unsigned int i = 0; i < tex.sizeY; ++i) {
             row_pointers[i] = &data[i * stride * tex.sizeX];
         }
-        //texTransform demands that the first argument (bpp) be 8. So we abide
-        int tmp = 8;
+        // texTransform demands that the first argument (bpp) be 8. So we abide
+        int tmp  = 8;
         int tmp2 = PNG_HAS_COLOR + PNG_HAS_ALPHA;
-        buffer = texTransform(tmp, tmp2, tex.sizeX, tex.sizeY, row_pointers);
-        //We're done with row_pointers, free it
+        buffer   = texTransform(tmp, tmp2, tex.sizeX, tex.sizeY, row_pointers);
+        // We're done with row_pointers, free it
         free(row_pointers);
         row_pointers = NULL;
-        //We're done with the decompressed dds data, free it
+        // We're done with the decompressed dds data, free it
         free(data);
-        //We set data to the transformed image data
-        data = buffer;
+        // We set data to the transformed image data
+        data   = buffer;
         buffer = NULL;
-        //it's 3 because 24/8
+        // it's 3 because 24/8
         bpp = 4;
     } else if (format & PNG_HAS_ALPHA) {
         bpp *= 4;
@@ -279,7 +281,7 @@ static bool LoadTex(char *FileName, unsigned char scdata[lmwid][lmwid][3]) {
         for (int i = 0; i < lmwid; i++) {
             ii = (i * tex.sizeY) / lmwid;
             for (int j = 0; j < lmwid; j++) {
-                jj = (j * tex.sizeX) / lmwid;
+                jj              = (j * tex.sizeX) / lmwid;
                 scdata[i][j][0] = data[(ii * tex.sizeX + jj) * bpp];
                 scdata[i][j][1] = data[(ii * tex.sizeX + jj) * bpp + 1];
                 scdata[i][j][2] = data[(ii * tex.sizeX + jj) * bpp + 2];
@@ -304,9 +306,9 @@ static char *makebgname(char *tmp, size_t size, const char *InputName, const cha
         strcat(tmp, add);
         strcat(tmp, suffix);
     } else {
-        std::string temp = InputName;
-        temp += add;
-        temp += suffix;
+        std::string temp  = InputName;
+        temp             += add;
+        temp             += suffix;
         strncpy(tmp, temp.c_str(), size);
         tmp[size - 1] = '\0';
     }
@@ -315,43 +317,32 @@ static char *makebgname(char *tmp, size_t size, const char *InputName, const cha
 
 static void Spherize(CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid], unsigned char Col[]) {
     Texmp *Data = NULL;
-    Data = new Texmp[6];
+    Data        = new Texmp[6];
     if (!Data) {
         return;
-    }          //borken down and down Data[5], right Data[3]
+    }  // borken down and down Data[5], right Data[3]
 
-    size_t tmpsize = strlen(InputName) + 60;
-    char *tmp = (char *) malloc(tmpsize);
-    const char *suffix = ".image";
+    size_t      tmpsize = strlen(InputName) + 60;
+    char       *tmp     = (char *)malloc(tmpsize);
+    const char *suffix  = ".image";
     {
         std::string temp(InputName);
         if (VSFileSystem::LookForFile(temp + "_up.image", TextureFile) > VSFileSystem::Ok) {
-            //greater than Ok means failed to load.
+            // greater than Ok means failed to load.
             if (VSFileSystem::LookForFile(temp + "_sphere.image", TextureFile) > VSFileSystem::Ok) {
                 if (VSFileSystem::LookForFile(temp + ".image", TextureFile) > VSFileSystem::Ok) {
                     suffix = ".bmp";
                 }
             }
         }
-        //backwards compatibility
+        // backwards compatibility
     }
-    if (!(LoadTex(makebgname(tmp, tmpsize, InputName, "_front",
-                    suffix),
-            Data[0].D)
-            && LoadTex(makebgname(tmp, tmpsize, InputName, "_back",
-                            suffix),
-                    Data[1].D)
-            && LoadTex(makebgname(tmp, tmpsize, InputName, "_left",
-                            suffix),
-                    Data[2].D)
-            && LoadTex(makebgname(tmp, tmpsize, InputName, "_right",
-                            suffix),
-                    Data[3].D)
-            && LoadTex(makebgname(tmp, tmpsize, InputName, "_up",
-                            suffix),
-                    Data[4].D)
-            && LoadTex(makebgname(tmp, tmpsize, InputName, "_down",
-                    suffix), Data[5].D))) {
+    if (!(LoadTex(makebgname(tmp, tmpsize, InputName, "_front", suffix), Data[0].D) &&
+          LoadTex(makebgname(tmp, tmpsize, InputName, "_back", suffix), Data[1].D) &&
+          LoadTex(makebgname(tmp, tmpsize, InputName, "_left", suffix), Data[2].D) &&
+          LoadTex(makebgname(tmp, tmpsize, InputName, "_right", suffix), Data[3].D) &&
+          LoadTex(makebgname(tmp, tmpsize, InputName, "_up", suffix), Data[4].D) &&
+          LoadTex(makebgname(tmp, tmpsize, InputName, "_down", suffix), Data[5].D))) {
         if (!LoadTex(makebgname(tmp, tmpsize, InputName, "_sphere", suffix), Data[0].D)) {
             LoadTex(makebgname(tmp, tmpsize, InputName, "", suffix), Data[0].D);
         }
@@ -366,56 +357,56 @@ static void Spherize(CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid]
             float b = 0;
             {
                 float avg = 1;
-                if ((int) floor(Tex[t][s].s) > lmwid - 1) {
+                if ((int)floor(Tex[t][s].s) > lmwid - 1) {
                     Tex[t][s].s = lmwid - 1;
                 }
-                if ((int) floor(Tex[t][s].t) > lmwid - 1) {
+                if ((int)floor(Tex[t][s].t) > lmwid - 1) {
                     Tex[t][s].t = lmwid - 1;
                 }
-                if ((int) floor(Tex[t][s].t) < 0) {
+                if ((int)floor(Tex[t][s].t) < 0) {
                     Tex[t][s].t = 0;
                 }
-                if ((int) floor(Tex[t][s].s) < 0) {
+                if ((int)floor(Tex[t][s].s) < 0) {
                     Tex[t][s].s = 0;
                 }
-                r = Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t)][(int) floor(Tex[t][s].s)][0];
-                g = Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t)][(int) floor(Tex[t][s].s)][1];
-                b = Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t)][(int) floor(Tex[t][s].s)][2];
-                if ((int) floor(Tex[t][s].s) < lmwid - 1) {
+                r = Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t)][(int)floor(Tex[t][s].s)][0];
+                g = Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t)][(int)floor(Tex[t][s].s)][1];
+                b = Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t)][(int)floor(Tex[t][s].s)][2];
+                if ((int)floor(Tex[t][s].s) < lmwid - 1) {
                     avg++;
-                    r += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t)][(int) floor(Tex[t][s].s + 1)][0];
-                    g += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t)][(int) floor(Tex[t][s].s + 1)][1];
-                    b += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t)][(int) floor(Tex[t][s].s + 1)][2];
+                    r += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t)][(int)floor(Tex[t][s].s + 1)][0];
+                    g += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t)][(int)floor(Tex[t][s].s + 1)][1];
+                    b += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t)][(int)floor(Tex[t][s].s + 1)][2];
                 }
-                if ((int) floor(Tex[t][s].t) < lmwid - 1) {
+                if ((int)floor(Tex[t][s].t) < lmwid - 1) {
                     avg++;
-                    r += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t + 1)][(int) floor(Tex[t][s].s)][0];
-                    g += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t + 1)][(int) floor(Tex[t][s].s)][1];
-                    b += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t + 1)][(int) floor(Tex[t][s].s)][2];
+                    r += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t + 1)][(int)floor(Tex[t][s].s)][0];
+                    g += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t + 1)][(int)floor(Tex[t][s].s)][1];
+                    b += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t + 1)][(int)floor(Tex[t][s].s)][2];
                 }
-                if ((int) floor(Tex[t][s].t) > 0) {
+                if ((int)floor(Tex[t][s].t) > 0) {
                     avg++;
-                    r += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t - 1)][(int) floor(Tex[t][s].s)][0];
-                    g += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t - 1)][(int) floor(Tex[t][s].s)][1];
-                    b += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t - 1)][(int) floor(Tex[t][s].s)][2];
+                    r += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t - 1)][(int)floor(Tex[t][s].s)][0];
+                    g += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t - 1)][(int)floor(Tex[t][s].s)][1];
+                    b += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t - 1)][(int)floor(Tex[t][s].s)][2];
                 }
-                if ((int) floor(Tex[t][s].s) > 0) {
+                if ((int)floor(Tex[t][s].s) > 0) {
                     avg++;
-                    r += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t)][(int) floor(Tex[t][s].s - 1)][0];
-                    g += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t)][(int) floor(Tex[t][s].s - 1)][1];
-                    b += Data[Tex[t][s].TexMap].D[(int) floor(Tex[t][s].t)][(int) floor(Tex[t][s].s - 1)][2];
+                    r += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t)][(int)floor(Tex[t][s].s - 1)][0];
+                    g += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t)][(int)floor(Tex[t][s].s - 1)][1];
+                    b += Data[Tex[t][s].TexMap].D[(int)floor(Tex[t][s].t)][(int)floor(Tex[t][s].s - 1)][2];
                 }
                 r /= avg;
                 g /= avg;
                 b /= avg;
             }
-            unsigned int rr = (unsigned int) r;
-            unsigned int gg = (unsigned int) g;
-            unsigned int bb = (unsigned int) b;
+            unsigned int rr = (unsigned int)r;
+            unsigned int gg = (unsigned int)g;
+            unsigned int bb = (unsigned int)b;
             if (affine != 0 || multiplicitive != 1 || power != 1) {
-                rr = (unsigned int) (affine + ((std::pow((float) r, power)) * multiplicitive));
-                gg = (unsigned int) (affine + ((std::pow((float) g, power)) * multiplicitive));
-                bb = (unsigned int) (affine + ((std::pow((float) b, power)) * multiplicitive));
+                rr = (unsigned int)(affine + ((std::pow((float)r, power))*multiplicitive));
+                gg = (unsigned int)(affine + ((std::pow((float)g, power))*multiplicitive));
+                bb = (unsigned int)(affine + ((std::pow((float)b, power))*multiplicitive));
             }
             if (rr > 255) {
                 rr = 255;
@@ -426,32 +417,32 @@ static void Spherize(CubeCoord Tex[lmwid][lmwid], CubeCoord gluSph[lmwid][lmwid]
             if (bb > 255) {
                 bb = 255;
             }
-            Col[bytepp * (lmwid * (lmwid - 1 - t) + (lmwid - 1 - s))] = rr;
+            Col[bytepp * (lmwid * (lmwid - 1 - t) + (lmwid - 1 - s))]     = rr;
             Col[bytepp * (lmwid * (lmwid - 1 - t) + (lmwid - 1 - s)) + 1] = gg;
             Col[bytepp * (lmwid * (lmwid - 1 - t) + (lmwid - 1 - s)) + 2] = bb;
-            //Col[4*(256*(255-t)+(255-s))+3] = 255;
+            // Col[4*(256*(255-t)+(255-s))+3] = 255;
         }
     }
     delete[] Data;
 }
 
 static void GenerateSphereMap() {
-    //float SinPhi;
-    //float CosPhi;
-    //float Theta;
+    // float SinPhi;
+    // float CosPhi;
+    // float Theta;
     Vector Normal;
-    //RGBColor Col;
+    // RGBColor Col;
     static CubeCoord TexCoord[lmwid][lmwid];
     static CubeCoord gluSphereCoord[lmwid][lmwid];
-    unsigned char *LightMap = (unsigned char *) malloc(lmwid * lmwid * 4);
-    int t;
+    unsigned char   *LightMap = (unsigned char *)malloc(lmwid * lmwid * 4);
+    int              t;
     for (t = 0; t < lmwid; t++) {
-        //keep in mind that t = lmwido2 (sin phi) +lmwido2
+        // keep in mind that t = lmwido2 (sin phi) +lmwido2
         float to256 = t / (104. * lmwid / 256) - 1.23;
         for (int s = 0; s < lmwid; s++) {
-            //is is none other than Theta * lmwido2/PI
-            float so256 = s / (104. * lmwid / 256) - 1.23;
-            Normal.k = 2 * (1 - so256 * so256 - to256 * to256);
+            // is is none other than Theta * lmwido2/PI
+            float so256                  = s / (104. * lmwid / 256) - 1.23;
+            Normal.k                     = 2 * (1 - so256 * so256 - to256 * to256);
             float double_one_more_normal = 2 * (Normal.k + 1);
             if (double_one_more_normal >= 0) {
                 Normal.i = so256 * sqrt(2 * (Normal.k + 1));
@@ -459,28 +450,28 @@ static void GenerateSphereMap() {
             } else {
                 Normal.i = Normal.j = 0.0;
             }
-            float sz = sqrt(Normal.k * Normal.k + Normal.j * Normal.j + Normal.i * Normal.i);
+            float sz  = sqrt(Normal.k * Normal.k + Normal.j * Normal.j + Normal.i * Normal.i);
             Normal.k /= -sz;
             Normal.i /= sz;
             Normal.j /= sz;
-            TexMap(TexCoord[t][s], Normal);             //find what the lighting is
+            TexMap(TexCoord[t][s], Normal);  // find what the lighting is
             gluSphereMap(gluSphereCoord[t][s], Normal, s);
         }
     }
     Spherize(TexCoord, gluSphereCoord, LightMap);
     ::VSImage image;
-    image.WriteImage((char *) OutputName, LightMap, PngImage, lmwid, lmwid, false, 8, TextureFile);
+    image.WriteImage((char *)OutputName, LightMap, PngImage, lmwid, lmwid, false, 8, TextureFile);
 }
 
 void EnvironmentMapGeneratorMain(const char *inpt, const char *outpt, float a, float m, float p, bool w) {
-    affine = a;
+    affine         = a;
     multiplicitive = m;
-    power = p;
-    pushdown = w;
-    int size = sizeof(char) * strlen(inpt) + 40;
-    char *tmp = (char *) malloc(size);
+    power          = p;
+    pushdown       = w;
+    int   size     = sizeof(char) * strlen(inpt) + 40;
+    char *tmp      = (char *)malloc(size);
     strcpy(tmp, inpt);
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly(strcat(tmp, "_sphere.image"), TextureFile);
     if (err > Ok) {
         err = f.OpenReadOnly(strcat(tmp, "_sphere.bmp"), TextureFile);
@@ -493,16 +484,16 @@ void EnvironmentMapGeneratorMain(const char *inpt, const char *outpt, float a, f
             }
         }
     }
-    //bool share = false;
+    // bool share = false;
     std::string s;
     if (err > Ok) {
-        //s = VSFileSystem::GetSharedTexturePath (std::string (inpt));
-        s = VSFileSystem::sharedtextures + "/" + std::string(inpt);
-        InputName = (char *) malloc(sizeof(char) * (s.length() + 2));
+        // s = VSFileSystem::GetSharedTexturePath (std::string (inpt));
+        s         = VSFileSystem::sharedtextures + "/" + std::string(inpt);
+        InputName = (char *)malloc(sizeof(char) * (s.length() + 2));
         strcpy(InputName, s.c_str());
     } else {
         f.Close();
-        InputName = (char *) malloc(sizeof(char) * (strlen(inpt) + 2));
+        InputName = (char *)malloc(sizeof(char) * (strlen(inpt) + 2));
         strcpy(InputName, inpt);
     }
     OutputName = strdup(outpt);
@@ -514,6 +505,3 @@ void EnvironmentMapGeneratorMain(const char *inpt, const char *outpt, float a, f
     free(InputName);
     free(OutputName);
 }
-
-
-

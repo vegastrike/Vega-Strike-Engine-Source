@@ -25,15 +25,14 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <vector>
-#include <string>
-#include <stdio.h>
 #include <algorithm>
+#include <stdio.h>
+#include <string>
+#include <vector>
 using std::string;
 using std::vector;
 
-int nextnondigit(string a)
-{
+int nextnondigit(string a) {
     for (unsigned int i = 0; i < a.length(); ++i) {
         if (!isdigit(a[i])) {
             return i;
@@ -44,8 +43,7 @@ int nextnondigit(string a)
 
 class LexibackwardComparator {
 public:
-    bool operator()(string a, string b)
-    {
+    bool operator()(string a, string b) {
         if (a.empty() || b.empty()) {
             return false;
         }
@@ -64,11 +62,9 @@ public:
         }
         return a[0] < b[0];
     }
-
 };
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     vector<string> l;
     for (int i = 1; i < argc; ++i) {
         l.push_back(argv[i]);
@@ -79,5 +75,4 @@ int main(int argc, char **argv)
             printf("%s\n", l[i].c_str());
         }
     }
-
 }

@@ -25,11 +25,11 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
-#include <stdlib.h>
-#include <vector>
 #include <algorithm>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <vector>
 using namespace std;
 
 string FileToString(const char *argv) {
@@ -39,13 +39,13 @@ string FileToString(const char *argv) {
         long len = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         char *finder = new char[len + 1];
-        finder[len] = 0;
+        finder[len]  = 0;
         if (fread(finder, len, 1, fp) != 1) {
             exit(-1);
         }
         string ret(finder, len);
         fclose(fp);
-        //printf ("%s",ret.c_str());
+        // printf ("%s",ret.c_str());
         return ret;
     } else {
         return "";
@@ -57,9 +57,9 @@ bool findit(const char *argv, string replace) {
 }
 
 void replaceit(const char *argv, string fin, string rep) {
-    string file = FileToString(argv);
+    string       file   = FileToString(argv);
     unsigned int curpos = 0;
-    FILE *fp = fopen(argv, "wb");
+    FILE        *fp     = fopen(argv, "wb");
     if (fp) {
         while (curpos < file.length()) {
             size_t where = file.find(fin, curpos);
@@ -92,4 +92,3 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
-

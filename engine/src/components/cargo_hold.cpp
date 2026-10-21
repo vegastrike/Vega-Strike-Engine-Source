@@ -25,36 +25,34 @@
  */
 
 #include "cargo_hold.h"
-#include "components_manager.h"
-
-#include "vs_logging.h"
-#include "cmd/unit_csv_factory.h"
-#include "configuration/configuration.h"
 
 #include <numeric>
 
-CargoHold::CargoHold(HoldType hold_type) : 
-    Component(), hold_type(hold_type) {
+#include "cmd/unit_csv_factory.h"
+#include "components_manager.h"
+#include "configuration/configuration.h"
+#include "vs_logging.h"
+
+CargoHold::CargoHold(HoldType hold_type) : Component(), hold_type(hold_type) {
     type = ComponentType::Dummy;
 }
-
 
 // Component Methods
 void CargoHold::Load(std::string unit_key) {
     Component::Load(unit_key);
 
-    switch(hold_type) {
+    switch (hold_type) {
         case HoldType::cargo:
-            capacity = Resource<double>(0,0,UnitCSVFactory::GetVariable(unit_key, "Hold_Volume", 0.0f));
+            capacity = Resource<double>(0, 0, UnitCSVFactory::GetVariable(unit_key, "Hold_Volume", 0.0f));
             break;
         case HoldType::hidden:
-            capacity = Resource<double>(0,0,UnitCSVFactory::GetVariable(unit_key, "Hidden_Hold_Volume", 0.0f));
+            capacity = Resource<double>(0, 0, UnitCSVFactory::GetVariable(unit_key, "Hidden_Hold_Volume", 0.0f));
             break;
         case HoldType::upgrade:
-            capacity = Resource<double>(0,0,UnitCSVFactory::GetVariable(unit_key, "Upgrade_Storage_Volume", 0.0f));
+            capacity = Resource<double>(0, 0, UnitCSVFactory::GetVariable(unit_key, "Upgrade_Storage_Volume", 0.0f));
             break;
     }
-}      
+}
 
 void CargoHold::SaveToCSV(std::map<std::string, std::string>& unit) const {}
 
@@ -75,22 +73,21 @@ bool CargoHold::Upgrade(const std::string upgrade_key) {
 }
 
 // Cargo Hold Methods
-bool CargoHold::CanAddCargo(const Cargo &cargo) const {
+bool CargoHold::CanAddCargo(const Cargo& cargo) const {
     // Always can, in this case (this accounts for some odd precision issues)
     if ((cargo.quantity == 0) || (cargo.GetVolume() == 0)) {
         return true;
     }
-    
-    //Test volume availability
+
+    // Test volume availability
     double total_volume = cargo.quantity.Value() * cargo.GetVolume();
     return total_volume <= capacity.AdjustedValue() - capacity.Value();
 }
 
-Cargo CargoHold::RemoveCargo(ComponentsManager *manager, const std::string& name, 
-                           int quantity) {
+Cargo CargoHold::RemoveCargo(ComponentsManager* manager, const std::string& name, int quantity) {
     int index = GetIndex(name);
 
-    if(index == -1) {
+    if (index == -1) {
         VS_LOG(error, "(previously) FATAL problem...removing cargo that is not in the hold.");
         Cargo cargo;
         cargo.quantity = 0;
@@ -100,24 +97,23 @@ Cargo CargoHold::RemoveCargo(ComponentsManager *manager, const std::string& name
     return RemoveCargo(manager, index, quantity);
 }
 
-Cargo CargoHold::RemoveCargo(ComponentsManager *manager, unsigned int index, 
-                           int quantity) {
+Cargo CargoHold::RemoveCargo(ComponentsManager* manager, unsigned int index, int quantity) {
     if (index >= _items.size()) {
         VS_LOG(error, "(previously) FATAL problem...removing cargo that is past the end of array bounds.");
         return Cargo();
     }
 
     Cargo& cargo_in_hold = GetCargo(index);
-    Cargo cargo_to_remove(cargo_in_hold);
+    Cargo  cargo_to_remove(cargo_in_hold);
 
     // Adjust quantity - can't exceed what's actually in hold
-    quantity = std::min(quantity, cargo_in_hold.quantity.Value());
-    cargo_to_remove.quantity = quantity;
-    cargo_in_hold.quantity -= quantity;
+    quantity                  = std::min(quantity, cargo_in_hold.quantity.Value());
+    cargo_to_remove.quantity  = quantity;
+    cargo_in_hold.quantity   -= quantity;
 
     capacity -= quantity * cargo_to_remove.volume;
 
-    if(configuration().physics.use_cargo_mass) {
+    if (configuration().physics.use_cargo_mass) {
         manager->mass -= quantity * cargo_to_remove.mass;
     }
 
@@ -127,26 +123,26 @@ Cargo CargoHold::RemoveCargo(ComponentsManager *manager, unsigned int index,
     return cargo_to_remove;
 }
 
-void CargoHold::AddCargo(ComponentsManager *manager, const Cargo &cargo, bool sort) {
-    if(configuration().physics.use_cargo_mass) {
+void CargoHold::AddCargo(ComponentsManager* manager, const Cargo& cargo, bool sort) {
+    if (configuration().physics.use_cargo_mass) {
         manager->mass += cargo.quantity.Value() * cargo.mass;
     }
 
     bool found = false;
 
-    for(Cargo& c: _items) {
-        if(c.name == cargo.name && c.category == cargo.category) {
-            found = true;
+    for (Cargo& c : _items) {
+        if (c.name == cargo.name && c.category == cargo.category) {
+            found       = true;
             c.quantity += cargo.quantity.Value();
         }
     }
 
-    if(!found) {
+    if (!found) {
         _items.push_back(cargo);
     }
 
     capacity += cargo.quantity.Value() * cargo.volume;
-    
+
     if (sort) {
         std::sort(_items.begin(), _items.end());
     }
@@ -155,7 +151,6 @@ void CargoHold::AddCargo(ComponentsManager *manager, const Cargo &cargo, bool so
 void CargoHold::Clear() {
     _items.clear();
 }
-
 
 Cargo& CargoHold::GetCargo(unsigned int i) {
     return _items[i];
@@ -180,7 +175,7 @@ double CargoHold::AvailableCapacity() const {
 std::string CargoHold::Serialize() const {
     std::string cargo_hold_text;
 
-    for(const Cargo& c : _items) {
+    for (const Cargo& c : _items) {
         cargo_hold_text += c.Serialize();
     }
 
@@ -195,8 +190,7 @@ std::string CargoHold::Serialize() const {
 void CargoHold::Enslave() {
     // TODO: take HoldType into account
     // Get number of none-slave passengers and erase passengers
-    int none_slave_passengers = std::accumulate(_items.begin(), _items.end(), 0,
-        [](int current_sum, Cargo c) {
+    int none_slave_passengers = std::accumulate(_items.begin(), _items.end(), 0, [](int current_sum, Cargo c) {
         if (c.IsPassenger() && !c.IsSlave()) {
             return current_sum + c.GetQuantity();
         } else {
@@ -205,26 +199,23 @@ void CargoHold::Enslave() {
     });
 
     // If there are no passengers, exit
-    if(none_slave_passengers == 0) {
+    if (none_slave_passengers == 0) {
         return;
     }
 
     // Delete all passengers
-    _items.erase(std::remove_if(_items.begin(), _items.end(), 
-            [](Cargo& c) {
-        return (c.IsPassenger() && !c.IsSlave());
-    }), _items.end());
+    _items.erase(
+            std::remove_if(_items.begin(), _items.end(), [](Cargo& c) { return (c.IsPassenger() && !c.IsSlave()); }),
+            _items.end());
 
     // Find the first slaves instance if exists
-    auto it = std::find_if(_items.begin(), _items.end(), [](const Cargo& c) {
-        return c.IsSlave();
-    });
+    auto it = std::find_if(_items.begin(), _items.end(), [](const Cargo& c) { return c.IsSlave(); });
 
     // Look for existing slaves
     if (it != _items.end()) {
         // Found slaves
         // Get a pointer to the found element
-        Cargo* existing_slaves = &(*it); 
+        Cargo* existing_slaves = &(*it);
         existing_slaves->Add(none_slave_passengers);
     } else {
         // Not found. Create a new instance
@@ -256,15 +247,13 @@ void CargoHold::Free() {
     // No hitchhikers found, modify slaves instance.
     if (hitch_it == _items.end()) {
         // TODO: name should come from config.
-        Cargo* existing_slaves = &(*slave_it); 
+        Cargo* existing_slaves = &(*slave_it);
         existing_slaves->SetName("Hitchhiker");
         existing_slaves->SetCategory("Passengers");
     } else {
         Cargo* existing_hitchhikers = &(*hitch_it);
-        Cargo* existing_slaves = &(*slave_it);
+        Cargo* existing_slaves      = &(*slave_it);
         existing_hitchhikers->Add(existing_slaves->GetQuantity());
         _items.erase(slave_it);
     }
-    
 }
-

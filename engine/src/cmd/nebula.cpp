@@ -27,24 +27,27 @@
 
 
 #include "nebula.h"
-#include "src/vegastrike.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
+
 #include <assert.h>
-#include "src/config_xml.h"
-#include "root_generic/vs_globals.h"
+
 #include <sys/stat.h>
-#include "root_generic/xml_support.h"
-#include "gfx_generic/mesh.h"
+
 #include "gfx/cockpit.h"
+#include "gfx_generic/mesh.h"
 #include "root_generic/vega_random.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
 #include "src/universe.h"
+#include "src/vegastrike.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
 #undef BOOST_NO_CWCHAR
 
-using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
+using XMLSupport::EnumMap;
 
 // FIXME -- Shouldn't include entire namespaces, according to Google Style Guide -- stephengtuggy 2021-09-07
 using namespace XMLSupport;
@@ -65,9 +68,9 @@ FOGMODE NebulaXML::parse_fogmode(string val) {
     }
 }
 
-//WARNING : USED TO CALL a GameUnit constructor but now Nebula::Nebula calls a Unit one
-Nebula::Nebula(const char *unitfile, bool SubU, int faction, Flightgroup *fg, int fg_snumber) :
-        Unit(unitfile, SubU, faction, string(""), fg, fg_snumber) {
+// WARNING : USED TO CALL a GameUnit constructor but now Nebula::Nebula calls a Unit one
+Nebula::Nebula(const char *unitfile, bool SubU, int faction, Flightgroup *fg, int fg_snumber)
+    : Unit(unitfile, SubU, faction, string(""), fg, fg_snumber) {
     fogme = true;
     string fullpath(unitfile);
     fullpath += ".nebula";
@@ -75,24 +78,24 @@ Nebula::Nebula(const char *unitfile, bool SubU, int faction, Flightgroup *fg, in
     LoadXML(fullpath.c_str());
 
     fadeinvalue = 0;
-    lastfadein = 0;
+    lastfadein  = 0;
 }
 
 void Nebula::beginElement(void *Userdata, const XML_Char *name, const XML_Char **atts) {
-    ((Nebula *) Userdata)->beginElem(std::string(name), AttributeList(atts));
+    ((Nebula *)Userdata)->beginElem(std::string(name), AttributeList(atts));
 }
 
 void Nebula::beginElem(const std::string &name, const AttributeList &atts) {
-    Names elem = (Names) element_map.lookup(name);
+    Names                         elem = (Names)element_map.lookup(name);
     AttributeList::const_iterator iter;
     switch (elem) {
         case UNKNOWN:
             break;
         case NEBULA:
-            fogme = true;
+            fogme         = true;
             explosiontime = 0;
-            index = 0;
-            fogmode = FOG_LINEAR;
+            index         = 0;
+            fogmode       = FOG_LINEAR;
             for (iter = atts.begin(); iter != atts.end(); iter++) {
                 switch (attribute_map.lookup((*iter).name)) {
                     case DENSITY:
@@ -126,8 +129,8 @@ void Nebula::beginElem(const std::string &name, const AttributeList &atts) {
                         color.b = parse_float((*iter).value);
                         break;
                     default:
-                        VS_LOG(warning, (boost::format("%1%: Unrecognized color component in switch statement: %2%")
-                                % __FUNCTION__ % attribute_map.lookup((*iter).name)));
+                        VS_LOG(warning, (boost::format("%1%: Unrecognized color component in switch statement: %2%") %
+                                         __FUNCTION__ % attribute_map.lookup((*iter).name)));
                         break;
                 }
             }
@@ -149,12 +152,11 @@ void Nebula::beginElem(const std::string &name, const AttributeList &atts) {
     }
 }
 
-static void Nebula_endElement(void *Userdata, const XML_Char *) {
-}
+static void Nebula_endElement(void *Userdata, const XML_Char *) {}
 
 void Nebula::LoadXML(const char *filename) {
-    VSFile f;
-    VSError err = f.OpenReadOnly(filename, UnitFile);
+    VSFile     f;
+    VSError    err    = f.OpenReadOnly(filename, UnitFile);
     const bool usefog = configuration().graphics.fog;
     if (err > Ok || !usefog) {
         if (err <= Ok) {
@@ -174,40 +176,29 @@ void Nebula::LoadXML(const char *filename) {
 }
 
 void Nebula::SetFogState() const {
-    float thisfadein = (lastfadein * (1 - interpolation_blend_factor) + (fadeinvalue) * interpolation_blend_factor);
+    float thisfadein = (lastfadein * (1 - interpolation_blend_factor) + (fadeinvalue)*interpolation_blend_factor);
     GFXFogMode(fogmode);
     GFXFogDensity(Density * thisfadein);
     GFXFogLimits(fognear, fogfar * thisfadein);
-    GFXFogColor( color);
+    GFXFogColor(color);
     GFXFogIndex(index);
 }
 
 Nebula::~Nebula() = default;
 
-void Nebula::UpdatePhysics2(const Transformation &trans,
-                            const Transformation &old_physical_state,
-                            const Vector &accel,
-                            float difficulty,
-                            const Matrix &transmat,
-                            const Vector &CumulativeVelocity,
-                            bool ResolveLast,
-                            UnitCollection *uc) {
-    const float nebdelta = configuration().graphics.fog_time_flt;
-    lastfadein = fadeinvalue;
-    fadeinvalue -= nebdelta * simulation_atom_var;
+void Nebula::UpdatePhysics2(const Transformation &trans, const Transformation &old_physical_state, const Vector &accel,
+                            float difficulty, const Matrix &transmat, const Vector &CumulativeVelocity,
+                            bool ResolveLast, UnitCollection *uc) {
+    const float nebdelta  = configuration().graphics.fog_time_flt;
+    lastfadein            = fadeinvalue;
+    fadeinvalue          -= nebdelta * simulation_atom_var;
     if (fadeinvalue < 0) {
         fadeinvalue = 0;
     }
-    this->Unit::UpdatePhysics2(trans,
-            old_physical_state,
-            accel,
-            difficulty,
-            transmat,
-            CumulativeVelocity,
-            ResolveLast,
-            uc);
-    Vector t1;
-    float dis;
+    this->Unit::UpdatePhysics2(trans, old_physical_state, accel, difficulty, transmat, CumulativeVelocity, ResolveLast,
+                               uc);
+    Vector       t1;
+    float        dis;
     unsigned int i;
     if (_Universe->activeStarSystem() == _Universe->AccessCockpit()->activeStarSystem) {
         for (i = 0; i < NUM_CAM; i++) {
@@ -219,10 +210,11 @@ void Nebula::UpdatePhysics2(const Transformation &trans,
     if (nummesh() > 0) {
         i = VegaRandom::Instance().RandomSizeTLessThan(nummesh());
         const Vector random_explosion(VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()),
-                VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()),
-                VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()));
+                                      VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()),
+                                      VegaRandom::Instance().RandomFloatInRange(-rSize(), rSize()));
         if (static_cast<int>(explosiontime / simulation_atom_var) != 0) {
-            if (VegaRandom::Instance().RandomSizeTLessThan(static_cast<uint_fast32_t>(explosiontime / simulation_atom_var)) == 0) {
+            if (VegaRandom::Instance().RandomSizeTLessThan(
+                        static_cast<uint_fast32_t>(explosiontime / simulation_atom_var)) == 0) {
                 meshdata[i]->AddDamageFX(random_explosion, Vector(0, 0, 0), .00001, color);
             }
         }
@@ -230,7 +222,7 @@ void Nebula::UpdatePhysics2(const Transformation &trans,
 }
 
 void Nebula::PutInsideCam(int i) {
-    const float nebdelta = configuration().graphics.fog_time_flt;
+    const float nebdelta   = configuration().graphics.fog_time_flt;
     const float fadeinrate = configuration().graphics.fog_fade_in_percent_flt;
     if (_Universe->AccessCamera() == _Universe->AccessCamera(i)) {
         fadeinvalue += (1 + fadeinrate) * nebdelta * simulation_atom_var;
@@ -240,4 +232,3 @@ void Nebula::PutInsideCam(int i) {
     }
     _Universe->AccessCamera(i)->SetNebula(this);
 }
-

@@ -27,83 +27,101 @@
 
 #include "controls_factory.h"
 
+#include <clocale>
 #include <cstdio>
+#include <map>
 #include <sstream>
 #include <string>
-#include <map>
 
-
-#include <clocale>
 #include <boost/json.hpp>
 
-#include "src/vega_cast_utils.h"
 #include "cmd/drawable.h"
-
-#include "gui/staticdisplay.h"
+#include "gui/control.h"
 #include "gui/newbutton.h"
 #include "gui/scroller.h"
-#include "gui/control.h"
 #include "gui/simplepicker.h"
+#include "gui/staticdisplay.h"
 #include "gui/textinputdisplay.h"
+#include "src/vega_cast_utils.h"
 
 // All supported UI control property keys
 enum class ControlProp {
     Unknown,
     // Text / Content
-    Id, Name, Type, Parent, Scroller, Text, Label, Command, Texture,
+    Id,
+    Name,
+    Type,
+    Parent,
+    Scroller,
+    Text,
+    Label,
+    Command,
+    Texture,
     // Layout / Geometry
-    Rect, Justification, TextMargins, Multiline, Font,
+    Rect,
+    Justification,
+    TextMargins,
+    Multiline,
+    Font,
     // Colors
-    Color, TextColor, DownTextColor, DownColor, HighlightColor,
-    HighlightTextColor, BorderColor, EndBorderColor, ButtonColor,
-    OutlineColor, SelectionColor,
+    Color,
+    TextColor,
+    DownTextColor,
+    DownColor,
+    HighlightColor,
+    HighlightTextColor,
+    BorderColor,
+    EndBorderColor,
+    ButtonColor,
+    OutlineColor,
+    SelectionColor,
     // Numeric Parameters
-    CycleTime, ShadowWidth
+    CycleTime,
+    ShadowWidth
 };
 
 // Fast string-to-enum mapper
 static ControlProp parseProp(const std::string& key) {
     static const std::unordered_map<std::string, ControlProp> propMap = {
-        {"name",               ControlProp::Name},
-        {"type",               ControlProp::Type},
-        {"parent",             ControlProp::Parent},
-        {"scroller",           ControlProp::Scroller},
-        {"text",               ControlProp::Text},
-        {"label",              ControlProp::Label},
-        {"command",            ControlProp::Command},
-        {"texture",            ControlProp::Texture},
-        {"rect",               ControlProp::Rect},
-        {"justification",      ControlProp::Justification},
-        {"textMargins",        ControlProp::TextMargins},
-        {"multiline",          ControlProp::Multiline},
-        {"font",               ControlProp::Font},
-        {"color",              ControlProp::Color},
-        {"textColor",          ControlProp::TextColor},
-        {"downTextColor",      ControlProp::DownTextColor},
-        {"downColor",          ControlProp::DownColor},
-        {"highlightColor",     ControlProp::HighlightColor},
-        {"highlightTextColor", ControlProp::HighlightTextColor},
-        {"borderColor",        ControlProp::BorderColor},
-        {"endBorderColor",     ControlProp::EndBorderColor},
-        {"buttonColor",        ControlProp::ButtonColor},
-        {"outlineColor",       ControlProp::OutlineColor},
-        {"selectionColor",     ControlProp::SelectionColor},
-        {"id",                 ControlProp::Id},
-        {"cycleTime",          ControlProp::CycleTime},
-        {"shadowWidth",        ControlProp::ShadowWidth}
-    };
+            {"name", ControlProp::Name},
+            {"type", ControlProp::Type},
+            {"parent", ControlProp::Parent},
+            {"scroller", ControlProp::Scroller},
+            {"text", ControlProp::Text},
+            {"label", ControlProp::Label},
+            {"command", ControlProp::Command},
+            {"texture", ControlProp::Texture},
+            {"rect", ControlProp::Rect},
+            {"justification", ControlProp::Justification},
+            {"textMargins", ControlProp::TextMargins},
+            {"multiline", ControlProp::Multiline},
+            {"font", ControlProp::Font},
+            {"color", ControlProp::Color},
+            {"textColor", ControlProp::TextColor},
+            {"downTextColor", ControlProp::DownTextColor},
+            {"downColor", ControlProp::DownColor},
+            {"highlightColor", ControlProp::HighlightColor},
+            {"highlightTextColor", ControlProp::HighlightTextColor},
+            {"borderColor", ControlProp::BorderColor},
+            {"endBorderColor", ControlProp::EndBorderColor},
+            {"buttonColor", ControlProp::ButtonColor},
+            {"outlineColor", ControlProp::OutlineColor},
+            {"selectionColor", ControlProp::SelectionColor},
+            {"id", ControlProp::Id},
+            {"cycleTime", ControlProp::CycleTime},
+            {"shadowWidth", ControlProp::ShadowWidth}};
 
     auto it = propMap.find(key);
     return (it != propMap.end()) ? it->second : ControlProp::Unknown;
 }
 
-std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFileSystem::VSFile &file) {
+std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFileSystem::VSFile& file) {
     const std::string json_text = file.ReadFull();
 
     std::map<std::string, std::map<std::string, std::string>> controls_map;
 
     boost::system::error_code ec;
-    boost::json::value json_value = boost::json::parse(json_text, ec);
+    boost::json::value        json_value = boost::json::parse(json_text, ec);
     if (ec) {
         VS_LOG(error, (boost::format("parseControlsJSON: Error parsing JSON - %1%") % ec.message()));
         return controls_map;
@@ -121,12 +139,12 @@ std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFi
             continue;
         }
 
-        const boost::json::object& control = control_value.get_object();
+        const boost::json::object&         control = control_value.get_object();
         std::map<std::string, std::string> control_attributes;
 
         // Iterate dynamically over all keys in the object withou filtering!
         for (boost::json::object::const_iterator it = control.begin(); it != control.end(); ++it) {
-            std::string key(it->key());
+            std::string               key(it->key());
             const boost::json::value& val = it->value();
 
             if (val.is_bool()) {
@@ -169,10 +187,11 @@ std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFi
     return controls_map;
 }
 
-// TODO: CLion informs me that delim is always 44 (','). As such, we could probably eliminate this parameter at some point.
-static std::vector<double> splitAndConvert (const std::string &s, char delim) {
+// TODO: CLion informs me that delim is always 44 (','). As such, we could probably eliminate this parameter at some
+// point.
+static std::vector<double> splitAndConvert(const std::string& s, char delim) {
     std::vector<double> result;
-    std::istringstream overall_ss (s);
+    std::istringstream  overall_ss(s);
     overall_ss.imbue(GetGlobalLocale());
     std::string item;
 
@@ -190,12 +209,13 @@ GFXColor getColor(const std::string& colorString) {
     } else if (colorTuple.size() == 3) {
         return GFXColor(colorTuple.at(0), colorTuple.at(1), colorTuple.at(2));
     }
-    
+
     VS_LOG(error, "getColor(): Invalid color string: " + colorString);
-    return GFXColor(); // Return default fallback color
+    return GFXColor();  // Return default fallback color
 }
 
-Control* getControl(const std::map<std::string, std::string>& attributes, std::vector<unsigned int>* base_keyboard_queue) {
+Control* getControl(const std::map<std::string, std::string>& attributes,
+                    std::vector<unsigned int>*                base_keyboard_queue) {
     auto itType = attributes.find("type");
     if (itType == attributes.end()) {
         VS_LOG(error, "getControl(): Missing 'type' attribute");
@@ -203,15 +223,15 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
     }
 
     const std::string& type = itType->second;
-    Control* c = nullptr;
+    Control*           c    = nullptr;
 
     // --- Type-Specific Construction & Configuration ---
     if (type == "staticDisplay") {
         auto* sd = new StaticDisplay;
-        c = sd;
+        c        = sd;
 
         for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
+            const std::string& key   = pair.first;
             const std::string& value = pair.second;
             switch (parseProp(key)) {
                 case ControlProp::Text:
@@ -245,51 +265,81 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
         }
     } else if (type == "button") {
         auto* b = new NewButton;
-        c = b;
+        c       = b;
 
         for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
+            const std::string& key   = pair.first;
             const std::string& value = pair.second;
             switch (parseProp(key)) {
-                case ControlProp::Label:          b->setLabel(value); break;
-                case ControlProp::Command:        b->setCommand(value); break;
-                case ControlProp::DownTextColor:  b->setDownTextColor(getColor(value)); break;
-                case ControlProp::DownColor:      b->setDownColor(getColor(value)); break;
-                case ControlProp::HighlightColor: b->setHighlightColor(getColor(value)); break;
-                case ControlProp::BorderColor:    b->setBorderColor(getColor(value)); break;
-                case ControlProp::EndBorderColor: b->setEndBorderColor(getColor(value)); break;
-                case ControlProp::CycleTime:      b->setVariableBorderCycleTime(locale_aware_stof(value)); break;
-                case ControlProp::ShadowWidth:    b->setShadowWidth(locale_aware_stof(value)); break;
+                case ControlProp::Label:
+                    b->setLabel(value);
+                    break;
+                case ControlProp::Command:
+                    b->setCommand(value);
+                    break;
+                case ControlProp::DownTextColor:
+                    b->setDownTextColor(getColor(value));
+                    break;
+                case ControlProp::DownColor:
+                    b->setDownColor(getColor(value));
+                    break;
+                case ControlProp::HighlightColor:
+                    b->setHighlightColor(getColor(value));
+                    break;
+                case ControlProp::BorderColor:
+                    b->setBorderColor(getColor(value));
+                    break;
+                case ControlProp::EndBorderColor:
+                    b->setEndBorderColor(getColor(value));
+                    break;
+                case ControlProp::CycleTime:
+                    b->setVariableBorderCycleTime(locale_aware_stof(value));
+                    break;
+                case ControlProp::ShadowWidth:
+                    b->setShadowWidth(locale_aware_stof(value));
+                    break;
                 default:
                     break;
             }
         }
     } else if (type == "scroller") {
         auto* s = new Scroller;
-        c = s;
+        c       = s;
 
         for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
+            const std::string& key   = pair.first;
             const std::string& value = pair.second;
             switch (parseProp(key)) {
-                case ControlProp::ButtonColor:  s->setButtonColor(getColor(value)); break;
-                case ControlProp::OutlineColor: s->setOutlineColor(getColor(value)); break;
+                case ControlProp::ButtonColor:
+                    s->setButtonColor(getColor(value));
+                    break;
+                case ControlProp::OutlineColor:
+                    s->setOutlineColor(getColor(value));
+                    break;
                 default:
                     break;
             }
         }
     } else if (type == "picker") {
         auto* p = new SimplePicker;
-        c = p;
+        c       = p;
 
         for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
+            const std::string& key   = pair.first;
             const std::string& value = pair.second;
             switch (parseProp(key)) {
-                case ControlProp::OutlineColor:       p->setOutlineColor(getColor(value)); break;
-                case ControlProp::SelectionColor:     p->setSelectionColor(getColor(value)); break;
-                case ControlProp::HighlightColor:     p->setHighlightColor(getColor(value)); break;
-                case ControlProp::HighlightTextColor: p->setHighlightTextColor(getColor(value)); break;
+                case ControlProp::OutlineColor:
+                    p->setOutlineColor(getColor(value));
+                    break;
+                case ControlProp::SelectionColor:
+                    p->setSelectionColor(getColor(value));
+                    break;
+                case ControlProp::HighlightColor:
+                    p->setHighlightColor(getColor(value));
+                    break;
+                case ControlProp::HighlightTextColor:
+                    p->setHighlightTextColor(getColor(value));
+                    break;
                 case ControlProp::TextMargins: {
                     auto size = splitAndConvert(value, ',');
                     if (size.size() >= 2) {
@@ -303,30 +353,33 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
         }
     } else if (type == "staticImageDisplay") {
         auto* sid = new StaticImageDisplay;
-        c = sid;
+        c         = sid;
 
         for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
+            const std::string& key   = pair.first;
             const std::string& value = pair.second;
             switch (parseProp(key)) {
-                case ControlProp::Texture: sid->setTexture(value); break;
-                default:                   break;
+                case ControlProp::Texture:
+                    sid->setTexture(value);
+                    break;
+                default:
+                    break;
             }
         }
     } else if (type == "textInputDisplay") {
         // TextInputDisplay requires keyboard queue and filter string
-        std::string filter = "\x1b\r*?\\/|:<>\"^"; // Default filter mask
-        
+        std::string filter = "\x1b\r*?\\/|:<>\"^";  // Default filter mask
+
         auto itFilter = attributes.find("invalidChars");
         if (itFilter != attributes.end()) {
             filter = itFilter->second;
         }
 
         auto* tid = new TextInputDisplay(base_keyboard_queue, filter.c_str());
-        c = tid;
+        c         = tid;
 
         for (const auto& pair : attributes) {
-            const std::string& key = pair.first;
+            const std::string& key   = pair.first;
             const std::string& value = pair.second;
             switch (parseProp(key)) {
                 case ControlProp::Text:
@@ -361,7 +414,7 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
     } else if (type == "groupControl") {
         // GroupControls act primarily as structural containers
         auto* gc = new GroupControl;
-        c = gc;
+        c        = gc;
         // Add any GroupControl-specific property parsing here if needed in the future
     } else {
         VS_LOG(error, (boost::format("%1%: Unrecognized control type '%2%'") % __FUNCTION__ % type));
@@ -370,7 +423,7 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
 
     // --- Common Base Properties ---
     for (const auto& pair : attributes) {
-        const std::string& key = pair.first;
+        const std::string& key   = pair.first;
         const std::string& value = pair.second;
         switch (parseProp(key)) {
             case ControlProp::Id:
@@ -387,7 +440,8 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
                 if (rect.size() >= 4) {
                     c->setRect(Rect(rect[0], rect[1], rect[2], rect[3]));
                 } else {
-                    VS_LOG(error, (boost::format("getControl(): 'rect' requires 4 float values, got %1%") % rect.size()));
+                    VS_LOG(error,
+                           (boost::format("getControl(): 'rect' requires 4 float values, got %1%") % rect.size()));
                 }
                 break;
             }
@@ -410,14 +464,11 @@ Control* getControl(const std::map<std::string, std::string>& attributes, std::v
     return c;
 }
 
-bool getControls(
-        const std::string& filename, // the file name of the JSON data 
-        Window* window, // the window the group controls will be added to
-        std::vector<unsigned int>* base_keyboard_queue
-    ) {
-
+bool getControls(const std::string&         filename,  // the file name of the JSON data
+                 Window*                    window,    // the window the group controls will be added to
+                 std::vector<unsigned int>* base_keyboard_queue) {
     // Load file via engine API
-    VSFileSystem::VSFile jsonFile;
+    VSFileSystem::VSFile  jsonFile;
     VSFileSystem::VSError err = jsonFile.OpenReadOnly(filename);
     if (err > VSFileSystem::Ok) {
         VS_LOG(error, (boost::format("%1%: '%2%' not found") % __FUNCTION__ % filename));
@@ -431,15 +482,15 @@ bool getControls(
         return false;
     }
 
-    std::map<std::string, Control*> controlMap;
+    std::map<std::string, Control*>               controlMap;
     std::vector<std::pair<Control*, std::string>> parentLinks;
     std::vector<std::pair<Control*, std::string>> scrollerLinks;
 
     // --- Pass 1: Instantiate all controls ---
     for (const auto& pair : parsedControls) {
         const std::string& controlName = pair.first;
-        const auto& attributes = pair.second;
-        Control* c = getControl(attributes, base_keyboard_queue);
+        const auto&        attributes  = pair.second;
+        Control*           c           = getControl(attributes, base_keyboard_queue);
         if (!c) {
             continue;
         }
@@ -454,7 +505,7 @@ bool getControls(
             parentLinks.emplace_back(c, itParent->second);
         } else {
             // controls without parent are top-level and get added to the window
-           window->addControl(c);
+            window->addControl(c);
         }
 
         auto itScroller = attributes.find("scroller");
@@ -465,9 +516,9 @@ bool getControls(
 
     // --- Pass 2: Wire Hierarchy & Bindings ---
     for (const auto& pair : parentLinks) {
-        Control* child = pair.first;
+        Control*           child      = pair.first;
         const std::string& parentName = pair.second;
-        auto it = controlMap.find(parentName);
+        auto               it         = controlMap.find(parentName);
         if (it != controlMap.end()) {
             if (auto* group = dynamic_cast<GroupControl*>(it->second)) {
                 group->addChild(child);
@@ -479,9 +530,9 @@ bool getControls(
 
     // --- Pass 3: Add the scrollers ---
     for (const auto& pair : scrollerLinks) {
-        Control* targetControl = pair.first;
-        const std::string& scrollerName = pair.second;
-        auto it = controlMap.find(scrollerName);
+        Control*           targetControl = pair.first;
+        const std::string& scrollerName  = pair.second;
+        auto               it            = controlMap.find(scrollerName);
         if (it != controlMap.end()) {
             if (auto* scroller = vega_dynamic_cast_ptr<Scroller>(it->second, true)) {
                 if (auto* picker = vega_dynamic_cast_ptr<SimplePicker>(targetControl, true)) {
@@ -491,7 +542,8 @@ bool getControls(
                 }
             }
         } else {
-            VS_LOG(error, (boost::format("getControls(): Scroller '%1%' not found for control binding") % scrollerName));
+            VS_LOG(error,
+                   (boost::format("getControls(): Scroller '%1%' not found for control binding") % scrollerName));
         }
     }
 

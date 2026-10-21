@@ -31,19 +31,19 @@
 //
 
 #include "OpenALStreamingSound.h"
-#include "OpenALHelpers.h"
 
 #include "../../CodecRegistry.h"
 #include "../../Stream.h"
 #include "al.h"
+#include "OpenALHelpers.h"
 
 #ifdef max
-#undef max
+#    undef max
 #endif
 
-#include <utility>
 #include <list>
 #include <string>
+#include <utility>
 
 using namespace Audio::__impl::OpenAL;
 
@@ -53,23 +53,20 @@ using namespace Audio::__impl::OpenAL;
 namespace Audio {
 
 OpenALStreamingSound::OpenALStreamingSound(const std::string &name, VSFileSystem::VSFileType type,
-        unsigned int _bufferSamples) :
-        SimpleSound(name, type, true),
-        bufferSamples(_bufferSamples) {
+                                           unsigned int _bufferSamples)
+    : SimpleSound(name, type, true), bufferSamples(_bufferSamples) {
     for (size_t i = 0; i < NUM_BUFFERS; ++i) {
         bufferHandles[i] = AL_NULL_BUFFER;
     }
 }
 
-OpenALStreamingSound::~OpenALStreamingSound() {
-}
+OpenALStreamingSound::~OpenALStreamingSound() {}
 
 void OpenALStreamingSound::loadImpl(bool wait) {
     // just in case
     unloadImpl();
 
     try {
-
         flags.loading = 1;
 
         // load the stream
@@ -83,9 +80,9 @@ void OpenALStreamingSound::loadImpl(bool wait) {
 
         // setup formatted buffer
         // if the format does not match an OpenAL built-in format, we must convert it.
-        targetFormat = stream->getFormat();
+        targetFormat               = stream->getFormat();
         targetFormat.signedSamples = (targetFormat.bitsPerSample > 8);
-        targetFormat.nativeOrder = 1;
+        targetFormat.nativeOrder   = 1;
         if (targetFormat.bitsPerSample > 8) {
             targetFormat.bitsPerSample = 16;
         } else {
@@ -94,7 +91,7 @@ void OpenALStreamingSound::loadImpl(bool wait) {
 
         // Set capacity to a quarter second or 16k samples, whatever's bigger
         // TODO: make it configurable. But first, implement a central configuration repository.
-        bufferSamples = std::max(16384U, targetFormat.sampleFrequency / 4);
+        bufferSamples = std::max(16'384U, targetFormat.sampleFrequency / 4);
 
         // Prepare a buffer, so we avoid repeated allocation/deallocation
         buffer.reserve(bufferSamples, targetFormat);
@@ -155,10 +152,8 @@ ALBufferHandle OpenALStreamingSound::readAndFlip() {
     ALBufferHandle bufferHandle = bufferHandles[readBufferIndex];
 
     clearAlError();
-    alBufferData(bufferHandle,
-            asALFormat(targetFormat),
-            buffer.getBuffer(), buffer.getUsedBytes(),
-            targetFormat.sampleFrequency);
+    alBufferData(bufferHandle, asALFormat(targetFormat), buffer.getBuffer(), buffer.getUsedBytes(),
+                 targetFormat.sampleFrequency);
     checkAlError();
 
     if (playBufferIndex == NUM_BUFFERS) {
@@ -187,4 +182,4 @@ Timestamp OpenALStreamingSound::getTimeBase() const {
     return bufferStarts[playBufferIndex];
 }
 
-};
+};  // namespace Audio

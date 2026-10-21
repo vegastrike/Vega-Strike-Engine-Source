@@ -30,26 +30,26 @@
 // C++ Implementation: Audio::Test
 //
 
-#include "Types.h"
+#include <iostream>
+#include <string>
+
 #include "Exceptions.h"
-#include "SceneManager.h"
-#include "Scene.h"
-#include "Sound.h"
 #include "Listener.h"
+#include "renderers/OpenAL/OpenALRenderer.h"
+#include "Scene.h"
+#include "SceneManager.h"
+#include "Sound.h"
 #include "Source.h"
 #include "SourceListener.h"
 #include "SourceTemplate.h"
-#include "renderers/OpenAL/OpenALRenderer.h"
-
-#include <iostream>
-#include <string>
-//#include <limits>
+#include "Types.h"
+// #include <limits>
 #include <cassert>
-#include "src/vega_cast_utils.h"
 
-#include "utils.h"
 #include "root_generic/vega_random.h"
+#include "src/vega_cast_utils.h"
 #include "src/vs_math.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -83,7 +83,6 @@ void clearScene() {
     if (!sm->getSceneIterator()->eos()) {
         throw Exception("WTF: SceneManager has scenes after clearing them all?");
     }
-
 }
 
 void smTick() {
@@ -139,7 +138,7 @@ void testSimpleScene() {
     //   4. Finish (16s)
     cerr << "  Creating resources" << endl;
     cerr << "    creating sounds..." << flush;
-    SharedPtr<Sound> absound = sm->getRenderer()->getSound("afterburner.wav", VSFileSystem::SoundFile);
+    SharedPtr<Sound> absound   = sm->getRenderer()->getSound("afterburner.wav", VSFileSystem::SoundFile);
     SharedPtr<Sound> beamsound = sm->getRenderer()->getSound("beam.wav", VSFileSystem::SoundFile);
     cerr << " ok" << endl;
     cerr << "    loading sounds..." << flush;
@@ -153,7 +152,7 @@ void testSimpleScene() {
     cerr << " ok" << endl;
 
     cerr << "    creating sources..." << flush;
-    SharedPtr<Source> absource = sm->createSource(absound, true);
+    SharedPtr<Source> absource    = sm->createSource(absound, true);
     SharedPtr<Source> beamsource1 = sm->createSource(beamsound);
     SharedPtr<Source> beamsource2 = sm->createSource(beamsound);
     absource->setPosition(Vector3(0, 0, -1));
@@ -169,22 +168,22 @@ void testSimpleScene() {
     cerr << "  playing out scene..." << flush;
 
     absource->startPlaying();
-    for (i = 0; i < 40; ++i) { // 4s = 40 ticks
+    for (i = 0; i < 40; ++i) {  // 4s = 40 ticks
         smTick();
     }
 
     beamsource1->startPlaying();
-    for (i = 0; i < 40; ++i) { // 4s = 40 ticks
+    for (i = 0; i < 40; ++i) {  // 4s = 40 ticks
         smTick();
     }
 
     beamsource2->startPlaying();
-    for (i = 0; i < 80; ++i) { // 8s = 80 ticks
+    for (i = 0; i < 80; ++i) {  // 8s = 80 ticks
         smTick();
     }
 
     absource->stopPlaying();
-    for (i = 0; i < 10; ++i) { // 1s = 10 ticks
+    for (i = 0; i < 10; ++i) {  // 1s = 10 ticks
         smTick();
     }
 
@@ -194,10 +193,8 @@ void testSimpleScene() {
 void testSimpleSceneWDynTemplates() {
     cerr << " Simple scene (dynamic templates)" << endl;
 
-    SharedPtr<SourceTemplate> abtpl(
-            new SourceTemplate("afterburner.wav", VSFileSystem::SoundFile, true));
-    SharedPtr<SourceTemplate> beamtpl(
-            new SourceTemplate("beam.wav", VSFileSystem::SoundFile, false));
+    SharedPtr<SourceTemplate> abtpl(new SourceTemplate("afterburner.wav", VSFileSystem::SoundFile, true));
+    SharedPtr<SourceTemplate> beamtpl(new SourceTemplate("beam.wav", VSFileSystem::SoundFile, false));
     beamtpl->setGain(0.5f);
 }
 
@@ -206,55 +203,46 @@ void testSimpleSceneWFileTemplates() {
 }
 
 class EngParticleListener : public UpdateSourceListener {
-    const vector<LVector3> &engPaths; // x=phase, y=speed, z=wobble
+    const vector<LVector3> &engPaths;  // x=phase, y=speed, z=wobble
 
 public:
     double time;
 
 public:
-    EngParticleListener(const vector<LVector3> &engpaths, double worldsize) :
-            engPaths(engpaths) {
-    }
+    EngParticleListener(const vector<LVector3> &engpaths, double worldsize) : engPaths(engpaths) {}
 
     LVector3 computePosition(long which, double phaseOffset = 0.0) const {
-        assert(which >= 0 && which < (long) engPaths.size());
+        assert(which >= 0 && which < (long)engPaths.size());
 
         double phase = engPaths[which].x + phaseOffset;
         double speed = engPaths[which].y;
         double radii = engPaths[which].z;
 
-        LVector3 vBase = LVector3(
-                cos(phase + time * speed) * radii,
-                -sin(phase + time * speed) * radii,
-                0
-        );
+        LVector3 vBase = LVector3(cos(phase + time * speed) * radii, -sin(phase + time * speed) * radii, 0);
 
         return vBase;
     }
 
     LVector3 computeVelocity(long which, double phaseOffset = 0.0) const {
-        assert(which >= 0 && which < (long) engPaths.size());
+        assert(which >= 0 && which < (long)engPaths.size());
 
         double phase = engPaths[which].x + phaseOffset;
         double speed = engPaths[which].y;
         double radii = engPaths[which].z;
 
-        LVector3 dvBase = LVector3(
-                -sin(phase + time * speed) * radii * speed,
-                -cos(phase + time * speed) * radii * speed,
-                0
-        );
+        LVector3 dvBase =
+                LVector3(-sin(phase + time * speed) * radii * speed, -cos(phase + time * speed) * radii * speed, 0);
 
         return dvBase;
     }
 
     /**
-    * Called when the source is ABOUT TO be updated.
-    * @param source the source to be updated
-    * @param updateFlags the level of update the source will
-    *      receive. See RenderableSource::UpdateFlags
-    * @see SourceListener::onUpdate
-    */
+     * Called when the source is ABOUT TO be updated.
+     * @param source the source to be updated
+     * @param updateFlags the level of update the source will
+     *      receive. See RenderableSource::UpdateFlags
+     * @see SourceListener::onUpdate
+     */
     virtual void onUpdate(Source &source, int updateFlags) {
         if (updateFlags & RenderableSource::UPDATE_LOCATION) {
             long which = source.getUserDataLong();
@@ -271,7 +259,7 @@ void testComplexScene(bool doppler) {
 
     clearScene();
 
-    int i;
+    int    i;
     double t;
 
     SceneManager *sm = SceneManager::getSingleton();
@@ -299,7 +287,7 @@ void testComplexScene(bool doppler) {
     //      which is bigger than the maximum activation
     //      distance (forcing sources on/off)
 
-    const size_t nengs = 100;
+    const size_t nengs     = 100;
     const double worldsize = 500.0;
 
     // Set scene manager settings for test
@@ -320,18 +308,17 @@ void testComplexScene(bool doppler) {
 
     cerr << "    creating looping sources..." << flush;
 
-    vector<SharedPtr<Source> > engsources;
-    vector<LVector3> engpaths; // x=phase, y=speed, z=wobble
+    vector<SharedPtr<Source>> engsources;
+    vector<LVector3>          engpaths;  // x=phase, y=speed, z=wobble
 
     // Fill in engpaths
-    SharedPtr<SourceListener> englistener(
-            new EngParticleListener(engpaths, worldsize));
+    SharedPtr<SourceListener> englistener(new EngParticleListener(engpaths, worldsize));
 
     {
         constexpr double phase_step = 2.0 * M_PI / nengs;
         for (size_t j = 0; j < nengs; ++j) {
             const double phase = j * phase_step;
-            const double speed = 2.0 * phase_step * VegaRandom::Instance().RandomDoubleInRange(0.5, 1.5); // max 1.0?
+            const double speed = 2.0 * phase_step * VegaRandom::Instance().RandomDoubleInRange(0.5, 1.5);  // max 1.0?
             const double radii = worldsize * (1.0 + 0.25 * VegaRandom::Instance().RandomDoubleInRange(-0.5, 0.5));
 
             engpaths.push_back(LVector3(phase, speed, radii));
@@ -343,44 +330,36 @@ void testComplexScene(bool doppler) {
     cerr << "  playing out scene..." << flush;
 
     {
-        for (vector<SharedPtr<Source> >::iterator i = engsources.begin(); i != engsources.end(); ++i) {
+        for (vector<SharedPtr<Source>>::iterator i = engsources.begin(); i != engsources.end(); ++i) {
             (*i)->startPlaying();
         }
     }
 
-    for (t = getRealTime(); (getRealTime() - t) < 20.0;) { // 20s = 200 ticks
+    for (t = getRealTime(); (getRealTime() - t) < 20.0;) {  // 20s = 200 ticks
         const double phase_step = 2.0 * M_PI / 20;
-        double phase = (getRealTime() - t) * phase_step;
-        double speed = phase_step;
+        double       phase      = (getRealTime() - t) * phase_step;
+        double       speed      = phase_step;
 
-        LVector3 pos = LVector3(
-                cos(phase) * worldsize,
-                -sin(phase) * worldsize,
-                0
-        );
+        LVector3 pos = LVector3(cos(phase) * worldsize, -sin(phase) * worldsize, 0);
 
-        LVector3 dpos = LVector3(
-                -sin(phase) * worldsize * speed,
-                -cos(phase) * worldsize * speed,
-                0
-        );
+        LVector3 dpos = LVector3(-sin(phase) * worldsize * speed, -cos(phase) * worldsize * speed, 0);
 
         spcscene->getListener().setOrientation(dpos, Vector3(0, 1, 0));
         spcscene->getListener().setPosition(pos);
 
         EngParticleListener *p_listener = vega_dynamic_cast_ptr<EngParticleListener>(englistener.get());
-        p_listener->time = (getRealTime() - t) / 20.0;
+        p_listener->time                = (getRealTime() - t) / 20.0;
 
         smQuickTick();
     }
 
     {
-        for (vector<SharedPtr<Source> >::iterator i = engsources.begin(); i != engsources.end(); ++i) {
+        for (vector<SharedPtr<Source>>::iterator i = engsources.begin(); i != engsources.end(); ++i) {
             (*i)->stopPlaying();
         }
     }
 
-    for (i = 0; i < 10; ++i) { // 1s = 10 ticks
+    for (i = 0; i < 10; ++i) {  // 1s = 10 ticks
         smTick();
     }
 
@@ -392,7 +371,7 @@ void testStreaming() {
 
     clearScene();
 
-    int i;
+    int    i;
     double timeDelta = 0.0;
 
     SceneManager *sm = SceneManager::getSingleton();
@@ -406,8 +385,7 @@ void testStreaming() {
     //   1. A streaming music track playing as usual
     cerr << "  Creating resources" << endl;
     cerr << "    creating sounds..." << flush;
-    SharedPtr<Sound> music = sm->getRenderer()->getSound(
-            "AyMambo.ogg", VSFileSystem::MusicFile, true);
+    SharedPtr<Sound> music = sm->getRenderer()->getSound("AyMambo.ogg", VSFileSystem::MusicFile, true);
     cerr << " ok" << endl;
     cerr << "    loading sounds..." << flush;
     music->load();
@@ -431,14 +409,14 @@ void testStreaming() {
 
     double startPlayingTime = getRealTime();
     musicsource->startPlaying();
-    for (i = 0; i < 200; ++i) { // 20s = 200 ticks
+    for (i = 0; i < 200; ++i) {  // 20s = 200 ticks
         smTick();
 
         // Track drift
-        double realTime = getRealTime();
-        double curPlayingTime = musicsource->getPlayingTime();
+        double realTime          = getRealTime();
+        double curPlayingTime    = musicsource->getPlayingTime();
         double shouldPlayingTime = realTime - startPlayingTime;
-        double delta = fabs(curPlayingTime - shouldPlayingTime);
+        double delta             = fabs(curPlayingTime - shouldPlayingTime);
         if (delta > timeDelta) {
             timeDelta = delta;
         }
@@ -447,18 +425,18 @@ void testStreaming() {
         // drift (which isn't that bad, and quite normal in fact)
         startPlayingTime = realTime - curPlayingTime;
 
-        cerr << "Time delta: " << int(delta * 1000) << "ms  (max " << int(timeDelta * 1000) << "ms)\t\r" << flush;
+        cerr << "Time delta: " << int(delta * 1'000) << "ms  (max " << int(timeDelta * 1'000) << "ms)\t\r" << flush;
     }
 
     musicsource->stopPlaying();
-    for (i = 0; i < 10; ++i) { // 1s = 10 ticks
+    for (i = 0; i < 10; ++i) {  // 1s = 10 ticks
         smTick();
     }
 
     if (timeDelta > (1.0 / 30.0)) {
         cerr << "\nWARNING: Poor time tracking resolution\n";
     }
-    cerr << "  Time drift at " << int(timeDelta * 1000) << "ms" << endl;
+    cerr << "  Time drift at " << int(timeDelta * 1'000) << "ms" << endl;
 
     cerr << " ok" << endl;
 }
@@ -468,7 +446,7 @@ void testMultiStreaming() {
 
     clearScene();
 
-    int i;
+    int    i;
     double timeDelta = 0.0;
 
     SceneManager *sm = SceneManager::getSingleton();
@@ -482,10 +460,8 @@ void testMultiStreaming() {
     //   1. Two streaming music tracks playing simultaneously
     cerr << "  Creating resources" << endl;
     cerr << "    creating sounds..." << flush;
-    SharedPtr<Sound> music = sm->getRenderer()->getSound(
-            "AyMambo.ogg", VSFileSystem::MusicFile, true);
-    SharedPtr<Sound> music2 = sm->getRenderer()->getSound(
-            "Bliss.ogg", VSFileSystem::MusicFile, true);
+    SharedPtr<Sound> music  = sm->getRenderer()->getSound("AyMambo.ogg", VSFileSystem::MusicFile, true);
+    SharedPtr<Sound> music2 = sm->getRenderer()->getSound("Bliss.ogg", VSFileSystem::MusicFile, true);
     cerr << " ok" << endl;
     cerr << "    loading sounds..." << flush;
     music->load();
@@ -521,14 +497,14 @@ void testMultiStreaming() {
     double startPlayingTime = getRealTime();
     musicsource->startPlaying();
     musicsource2->startPlaying();
-    for (i = 0; i < 200; ++i) { // 20s = 200 ticks
+    for (i = 0; i < 200; ++i) {  // 20s = 200 ticks
         smTick();
 
         // Track drift
-        double realTime = getRealTime();
-        double curPlayingTime = musicsource->getPlayingTime();
+        double realTime          = getRealTime();
+        double curPlayingTime    = musicsource->getPlayingTime();
         double shouldPlayingTime = realTime - startPlayingTime;
-        double delta = fabs(curPlayingTime - shouldPlayingTime);
+        double delta             = fabs(curPlayingTime - shouldPlayingTime);
         if (delta > timeDelta) {
             timeDelta = delta;
         }
@@ -537,23 +513,23 @@ void testMultiStreaming() {
         // drift (which isn't that bad, and quite normal in fact)
         startPlayingTime = realTime - curPlayingTime;
 
-        cerr << "Time delta: " << int(delta * 1000) << "ms  (max " << int(timeDelta * 1000) << "ms)\t\r" << flush;
+        cerr << "Time delta: " << int(delta * 1'000) << "ms  (max " << int(timeDelta * 1'000) << "ms)\t\r" << flush;
     }
 
     musicsource->stopPlaying();
-    for (i = 0; i < 50; ++i) { // 5s = 50 ticks
+    for (i = 0; i < 50; ++i) {  // 5s = 50 ticks
         smTick();
     }
 
     musicsource2->stopPlaying();
-    for (i = 0; i < 10; ++i) { // 1s = 10 ticks
+    for (i = 0; i < 10; ++i) {  // 1s = 10 ticks
         smTick();
     }
 
     if (timeDelta > (1.0 / 30.0)) {
         cerr << "\nWARNING: Poor time tracking resolution\n";
     }
-    cerr << "  Time drift at " << int(timeDelta * 1000) << "ms" << endl;
+    cerr << "  Time drift at " << int(timeDelta * 1'000) << "ms" << endl;
 
     cerr << " ok" << endl;
 }
@@ -563,7 +539,7 @@ void testMultiStreaming2() {
 
     clearScene();
 
-    int i;
+    int    i;
     double timeDelta = 0.0;
 
     SceneManager *sm = SceneManager::getSingleton();
@@ -577,10 +553,8 @@ void testMultiStreaming2() {
     //   1. Two streaming music tracks playing simultaneously
     cerr << "  Creating resources" << endl;
     cerr << "    creating sounds..." << flush;
-    SharedPtr<Sound> music = sm->getRenderer()->getSound(
-            "SonOfSandFleaRemix.ogg", VSFileSystem::MusicFile, true);
-    SharedPtr<Sound> music2 = sm->getRenderer()->getSound(
-            "SonOfSandFleaRemix.ogg", VSFileSystem::MusicFile, true);
+    SharedPtr<Sound> music  = sm->getRenderer()->getSound("SonOfSandFleaRemix.ogg", VSFileSystem::MusicFile, true);
+    SharedPtr<Sound> music2 = sm->getRenderer()->getSound("SonOfSandFleaRemix.ogg", VSFileSystem::MusicFile, true);
     cerr << " ok" << endl;
     cerr << "    loading sounds..." << flush;
     music->load();
@@ -616,14 +590,14 @@ void testMultiStreaming2() {
     double startPlayingTime = getRealTime();
     musicsource->startPlaying();
     musicsource2->startPlaying(60.0);
-    for (i = 0; i < 200; ++i) { // 20s = 200 ticks
+    for (i = 0; i < 200; ++i) {  // 20s = 200 ticks
         smTick();
 
         // Track drift
-        double realTime = getRealTime();
-        double curPlayingTime = musicsource->getPlayingTime();
+        double realTime          = getRealTime();
+        double curPlayingTime    = musicsource->getPlayingTime();
         double shouldPlayingTime = realTime - startPlayingTime;
-        double delta = fabs(curPlayingTime - shouldPlayingTime);
+        double delta             = fabs(curPlayingTime - shouldPlayingTime);
         if (delta > timeDelta) {
             timeDelta = delta;
         }
@@ -632,23 +606,23 @@ void testMultiStreaming2() {
         // drift (which isn't that bad, and quite normal in fact)
         startPlayingTime = realTime - curPlayingTime;
 
-        cerr << "Time delta: " << int(delta * 1000) << "ms  (max " << int(timeDelta * 1000) << "ms)\t\r" << flush;
+        cerr << "Time delta: " << int(delta * 1'000) << "ms  (max " << int(timeDelta * 1'000) << "ms)\t\r" << flush;
     }
 
     musicsource->stopPlaying();
-    for (i = 0; i < 50; ++i) { // 5s = 50 ticks
+    for (i = 0; i < 50; ++i) {  // 5s = 50 ticks
         smTick();
     }
 
     musicsource2->stopPlaying();
-    for (i = 0; i < 10; ++i) { // 1s = 10 ticks
+    for (i = 0; i < 10; ++i) {  // 1s = 10 ticks
         smTick();
     }
 
     if (timeDelta > (1.0 / 30.0)) {
         cerr << "\nWARNING: Poor time tracking resolution\n";
     }
-    cerr << "  Time drift at " << int(timeDelta * 1000) << "ms" << endl;
+    cerr << "  Time drift at " << int(timeDelta * 1'000) << "ms" << endl;
 
     cerr << " ok" << endl;
 }
@@ -658,7 +632,7 @@ void initALRenderer() {
     SceneManager *sm = SceneManager::getSingleton();
 
     SharedPtr<Renderer> renderer(new OpenALRenderer);
-    renderer->setOutputFormat(Format(44100, 16, 2));
+    renderer->setOutputFormat(Format(44'100, 16, 2));
 
     sm->setRenderer(renderer);
 }
@@ -686,15 +660,15 @@ int main(int argc, char **argv) {
         // Rendererful tests
         cerr << "Running rendererful tests..." << endl;
         initALRenderer();
-        testRendererless(); // <-- whatever worked without renderer must work again with it
+        testRendererless();  // <-- whatever worked without renderer must work again with it
         testSimpleScene();
-        testSimpleScene();  // Test replay ability
+        testSimpleScene();   // Test replay ability
         testSimpleSceneWDynTemplates();
         testSimpleSceneWFileTemplates();
 
         // Now more complex scenes...
         testComplexScene(false);
-        testComplexScene(false); // Test replay ability
+        testComplexScene(false);  // Test replay ability
         testComplexScene(true);
 
         // Streaming tests
@@ -706,9 +680,7 @@ int main(int argc, char **argv) {
         closeRenderer();
 
     } catch (const Exception &e) {
-        cerr << "Uncaught exception: "
-                << e.what()
-                << endl;
+        cerr << "Uncaught exception: " << e.what() << endl;
         rv = 1;
     };
     if (rv) {
@@ -717,5 +689,5 @@ int main(int argc, char **argv) {
     return rv;
 }
 
-};
-};
+};  // namespace Test
+};  // namespace Audio

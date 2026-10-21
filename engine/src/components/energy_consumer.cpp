@@ -32,34 +32,36 @@
 double EnergyConsumer::simulation_atom_var = 0.1;
 
 EnergyConsumerSource GetSource(const int source) {
-    switch(source) {
-        case 0: return EnergyConsumerSource::Infinite;
-        case 1: return EnergyConsumerSource::Fuel;
-        case 2: return EnergyConsumerSource::Energy;
-        case 3: return EnergyConsumerSource::FTLEnergy;
-        default: return EnergyConsumerSource::NoSource;
+    switch (source) {
+        case 0:
+            return EnergyConsumerSource::Infinite;
+        case 1:
+            return EnergyConsumerSource::Fuel;
+        case 2:
+            return EnergyConsumerSource::Energy;
+        case 3:
+            return EnergyConsumerSource::FTLEnergy;
+        default:
+            return EnergyConsumerSource::NoSource;
     }
 }
 
-EnergyConsumer::~EnergyConsumer()
-= default;
+EnergyConsumer::~EnergyConsumer() = default;
 
-EnergyConsumer::EnergyConsumer(EnergyContainer *source,
-                               bool partial,
-                               double consumption, bool infinite):
-                               consumption(consumption),
-                               atom_consumption(consumption * simulation_atom_var),
-                               source(source),
-                               partial(partial),
-                               infinite(false) {}
+EnergyConsumer::EnergyConsumer(EnergyContainer *source, bool partial, double consumption, bool infinite)
+    : consumption(consumption),
+      atom_consumption(consumption * simulation_atom_var),
+      source(source),
+      partial(partial),
+      infinite(false) {}
 
 bool EnergyConsumer::CanConsume() const {
-    if(infinite) {
+    if (infinite) {
         return true;
     }
 
     // TODO: need to check if operational somewhere else
-    if(!source) {
+    if (!source) {
         return false;
     }
 
@@ -67,11 +69,11 @@ bool EnergyConsumer::CanConsume() const {
 }
 
 double EnergyConsumer::Consume() {
-    if(infinite) {
+    if (infinite) {
         return atom_consumption;
     }
 
-    if(!source) {
+    if (!source) {
         return 0.0;
     }
 
@@ -88,15 +90,15 @@ double EnergyConsumer::GetAtomConsumption() const {
 
 void EnergyConsumer::SetConsumption(double consumption) {
     this->consumption = consumption;
-    atom_consumption = consumption * simulation_atom_var;
+    atom_consumption  = consumption * simulation_atom_var;
 }
 
-void EnergyConsumer::SetSource(EnergyContainer* source) {
+void EnergyConsumer::SetSource(EnergyContainer *source) {
     this->source = source;
 }
 
 void EnergyConsumer::ZeroSource() {
-    if(!source) {
+    if (!source) {
         return;
     }
 

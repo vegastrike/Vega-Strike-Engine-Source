@@ -30,16 +30,16 @@
 
 #include "launcher/general.h"
 #if defined(__APPLE__) || defined(MACOSX)
-#include <sys/param.h> // For MAXPATHLEN
+#    include <sys/param.h>  // For MAXPATHLEN
 #endif
 #ifdef __MINGW32__
-#include <dirent.h>
+#    include <dirent.h>
 #endif
 using std::string;
 using std::vector;
 #ifdef _G_RANDOM
-#include "root_generic/vega_random.h"
-#endif    // _G_RANDOM
+#    include "root_generic/vega_random.h"
+#endif  // _G_RANDOM
 
 // Gets the next parameter from the string, sorted by a space
 // Sticks a \0 at the space and returns a pointer to the right side.
@@ -69,19 +69,19 @@ char *next_parm(char *string) {
 // It's not working. I'll fix it when I need it. For now, use next_parm
 
 char *split_words(char *string, int max_words) {
-	char *array[MAX_ELEM];
-	int cur = 0;
-	char *parm;
+    char *array[MAX_ELEM];
+    int cur = 0;
+    char *parm;
 
-	if (max_words >= MAX_ELEM || max_words <= 0) { max_words = MAX_ELEM; }
-	while ((parm = next_parm(string)) != 0) {
-		if (cur <= MAX_ELEM) { array[cur] = string; }
-		cur++;
+    if (max_words >= MAX_ELEM || max_words <= 0) { max_words = MAX_ELEM; }
+    while ((parm = next_parm(string)) != 0) {
+        if (cur <= MAX_ELEM) { array[cur] = string; }
+        cur++;
 
-		string = parm;
-	}
+        string = parm;
+    }
 //	printf("Debug: %s - %s - %s\n", array[0], array[1], array[2]);
-	return *array;
+    return *array;
 }
 */
 
@@ -99,7 +99,7 @@ char *split_words(char *string, int max_words) {
 
 char *ptr_copy(char *string) {
     char *alloc;
-    alloc = (char *) malloc(strlen(string) + 1);
+    alloc = (char *)malloc(strlen(string) + 1);
     if (alloc == 0) {
         ShowError("Out of memory", "G01", 1);
         return NULL;
@@ -115,7 +115,7 @@ char *ptr_copy(char *string) {
 void chomp(char *line) {
     int current;
     for (current = strlen(line) - 1; (line[current] == '\n' || line[current] == ' ' || line[current] == 13);
-            current--) {
+         current--) {
         line[current] = '\0';
     }
 }
@@ -138,7 +138,7 @@ char *pre_chomp(char *line) {
  */
 
 char *replace(char *line, char *search, char *replace, int LENGTH) {
-    int length, dif, calc;
+    int   length, dif, calc;
     char *chr_new, *current;
     char *ptr_new, *location;
     calc = strlen(line) - strlen(search) + strlen(replace);
@@ -147,11 +147,11 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
     }
     chr_new = new char[LENGTH + 1];
     current = new char[LENGTH + 1];
-    length = strlen(line);
+    length  = strlen(line);
     strcpy(current, line);
     while ((location = strstr(current, search)) > 0) {
         chr_new[0] = '\0';
-        calc = strlen(current) - strlen(search) + strlen(replace);
+        calc       = strlen(current) - strlen(search) + strlen(replace);
         if (calc > LENGTH) {
             strcpy(line, current);
             return line;
@@ -197,9 +197,9 @@ void strappend(char *dest, char *source, int length) {
 }
 
 char *StripPath(char *filename) {
-    int length, cur;
+    int   length, cur;
     char *last = filename;
-    length = strlen(filename) - 1;
+    length     = strlen(filename) - 1;
     if (length <= 0) {
         return filename;
     }
@@ -215,9 +215,9 @@ char *StripPath(char *filename) {
 }
 
 char *StripExtension(char *filename) {
-    int length, cur;
+    int   length, cur;
     char *last = filename;
-    length = strlen(filename) - 1;
+    length     = strlen(filename) - 1;
     if (length <= 0) {
         return const_cast<char *>("");
     }
@@ -233,7 +233,7 @@ char *StripExtension(char *filename) {
     return last;
 }
 
-#endif    // _G_STRING_PARSE
+#endif  // _G_STRING_PARSE
 
 #ifdef _G_RANDOM
 int randnum(int start, int end) {
@@ -253,11 +253,19 @@ void randcode(char *line, int length) {
     int current, randomA, randomB, test;
     test = 2;
     for (current = 0; current < length; current++) {
-        if (test % 5 == 1 && current > 1) { line[current] = '-'; test++; continue; }
-        randomA = randnum(1,2);
+        if (test % 5 == 1 && current > 1) {
+            line[current] = '-';
+            test++;
+            continue;
+        }
+        randomA = randnum(1, 2);
         randomB = 60;
-        if (randomA == 1) { randomB = randnum(48,57); }
-        if (randomA == 2) { randomB = randnum(65,90); }
+        if (randomA == 1) {
+            randomB = randnum(48, 57);
+        }
+        if (randomA == 2) {
+            randomB = randnum(65, 90);
+        }
         line[current] = randomB;
         test++;
     }
@@ -265,26 +273,32 @@ void randcode(char *line, int length) {
     return;
 }
 
-#endif    // _G_RANDOM
+#endif  // _G_RANDOM
 
 #ifdef _G_NUMBER
 
 void itoa(char *line, int number, int length) {
     int current, cur, multiplier, reduce, base;
-    base = number;
-    cur = 0;
+    base    = number;
+    cur     = 0;
     line[0] = '\0';
     while (1) {
         multiplier = 0;
-        current = base;
-        while (current / 10 >= 1) { current /= 10; multiplier++; continue; }
-        if (base == 0) { break; }
-        current /= 10;
-        reduce = pwer(1,multiplier);
-        current = base / reduce;
-        reduce = pwer(current,multiplier);
-        current += 48;
-        line[cur] = current;
+        current    = base;
+        while (current / 10 >= 1) {
+            current /= 10;
+            multiplier++;
+            continue;
+        }
+        if (base == 0) {
+            break;
+        }
+        current   /= 10;
+        reduce     = pwer(1, multiplier);
+        current    = base / reduce;
+        reduce     = pwer(current, multiplier);
+        current   += 48;
+        line[cur]  = current;
         cur++;
         base -= reduce;
     }
@@ -295,23 +309,23 @@ void itoa(char *line, int number, int length) {
 // pwer is for x * 10^y
 // pwr is for x^y
 int pwer(int start, int end) {
-        return do_power(start, end, 10);
+    return do_power(start, end, 10);
 }
 
 int pwr(int start, int end) {
-        return do_power(1, end, start);
+    return do_power(1, end, start);
 }
 
 int do_power(int start, int end, int multiply) {
-        int current, val_return;
-        val_return = start;
-        for (current = 2; current <= end; current++) {
-                val_return *= multiply;
-        }
-        return val_return;
+    int current, val_return;
+    val_return = start;
+    for (current = 2; current <= end; current++) {
+        val_return *= multiply;
+    }
+    return val_return;
 }
 
-#ifdef __cplusplus
+#    ifdef __cplusplus
 
 double pwer(double start, long end) {
     double current, val_return;
@@ -322,25 +336,32 @@ double pwer(double start, long end) {
     return val_return;
 }
 
-#endif    // __cplusplus
+#    endif  // __cplusplus
 
-// Potential buffer overflow in this function. If you need it a lot, create a nbtoa(char *dest, char *string, int length)
-// This function converts a binary number stored in a string into real numbers (stored in a string)
+// Potential buffer overflow in this function. If you need it a lot, create a nbtoa(char *dest, char *string, int
+// length) This function converts a binary number stored in a string into real numbers (stored in a string)
 
 void btoa(char *dest, char *string) {
-    int max, cur, pos, new_val;
+    int   max, cur, pos, new_val;
     char *ptr_char, cur_char[1];
-    char new_string[strlen(string)+1];
-    max = 7;
-    cur = 7;
-    pos = 0;
+    char  new_string[strlen(string) + 1];
+    max      = 7;
+    cur      = 7;
+    pos      = 0;
     ptr_char = string;
-    new_val = 0;
+    new_val  = 0;
     while (ptr_char[0] != '\0') {
         cur_char[0] = ptr_char[0];
-        if (ptr_char[0] == '1') { new_val += pwr(2,cur); }
+        if (ptr_char[0] == '1') {
+            new_val += pwr(2, cur);
+        }
         cur--;
-        if (cur < 0) { cur = max; new_string[pos] = new_val; new_val = 0; pos++; }
+        if (cur < 0) {
+            cur             = max;
+            new_string[pos] = new_val;
+            new_val         = 0;
+            pos++;
+        }
         ptr_char++;
     }
     new_string[pos] = '\0';
@@ -348,19 +369,23 @@ void btoa(char *dest, char *string) {
     return;
 }
 
-#endif    // _G_NUMBER
+#endif  // _G_NUMBER
 
 #ifdef _G_STRING_MANAGE
-#ifdef G_GLIB
+#    ifdef G_GLIB
 
 // Some handy wrappers for glib that help error handling which prevent segfaults
 char *GetString(GString *line) {
-    if (line == 0) { return '\0'; }
+    if (line == 0) {
+        return '\0';
+    }
     return line->str;
 }
 
 void SetString(GString **ptr, char *line) {
-    if (ptr <= 0) { return; }
+    if (ptr <= 0) {
+        return;
+    }
     if (*ptr <= 0) {
         *ptr = g_string_new(line);
         return;
@@ -368,20 +393,23 @@ void SetString(GString **ptr, char *line) {
     g_string_sprintf(*ptr, "%s", line);
 }
 
-#endif    // G_GLIB
+#    endif  // G_GLIB
 
-#ifndef __cplusplus
+#    ifndef __cplusplus
 char *NewString(char *line) {
     char *new_str;
-    new_str = (char *)malloc(strlen(line)+1);
-    if (new_str == 0) { ShowError("Out of Memory", "G02", 1); return NULL; }
+    new_str = (char *)malloc(strlen(line) + 1);
+    if (new_str == 0) {
+        ShowError("Out of Memory", "G02", 1);
+        return NULL;
+    }
     strcpy(new_str, line);
     new_str[strlen(line)] = '\0';
     return new_str;
 }
-#endif  // not __cplusplus
+#    endif  // not __cplusplus
 
-#ifdef __cplusplus
+#    ifdef __cplusplus
 
 char *GetString(char *line) {
     if (line == 0) {
@@ -402,32 +430,32 @@ char *NewString(char *line) {
     return strdup(line);
 }
 
-#endif    // __cplusplus
-#endif    // _G_STRING_MANAGE
+#    endif  // __cplusplus
+#endif      // _G_STRING_MANAGE
 
 #ifdef _G_ERROR
 
 // if _G_ERROR is defined, it will print the error message
 // if EXIT_ON_FATAL is defined, and is_fatal is greater than 0, the program will exit
 void ShowError(char *error_msg, char *error_code, int is_fatal) {
-#ifdef _G_ERROR
+#    ifdef _G_ERROR
     if (is_fatal > 0) {
         fprintf(stderr, "Fatal ");
     }
     fprintf(stderr, "Error [%s]: %s\n", error_code, error_msg);
-#endif    // _G_ERROR
+#    endif  // _G_ERROR
     if (is_fatal > 0) {
-#ifdef _G_ERROR
+#    ifdef _G_ERROR
         fprintf(stderr, "Program will now exit\n");
-#endif    // _G_ERROR
-#ifdef EXIT_ON_FATAL
+#    endif  // _G_ERROR
+#    ifdef EXIT_ON_FATAL
         exit(EXIT_ON_FATAL);
-#endif    // EXIT_ON_FATAL
+#    endif  // EXIT_ON_FATAL
     }
     return;
 }
 
-#endif    // _G_ERROR
+#endif  // _G_ERROR
 
 // Checks for a <!-- and returns a pointer to the next character
 // A \0 is placed at the < so that anything in front can be kept
@@ -436,36 +464,51 @@ void ShowError(char *error_msg, char *error_code, int is_fatal) {
 
 char *xml_pre_chomp_comment(char *string) {
     int length, cur;
-    if (string[0] == '<' && string[1] == '!') { string[0] = '\0'; return string += 5; }
+    if (string[0] == '<' && string[1] == '!') {
+        string[0]      = '\0';
+        return string += 5;
+    }
     length = strlen(string) - 5;
     for (cur = 0; cur <= length; cur++) {
-        if (string[cur] == '<' && string[cur+1] == '!') { string[cur] = '\0'; return &string[cur+5]; }
+        if (string[cur] == '<' && string[cur + 1] == '!') {
+            string[cur] = '\0';
+            return &string[cur + 5];
+        }
     }
-    return &string[length+5];
+    return &string[length + 5];
 }
+
 char *xml_chomp_comment(char *string) {
     int len, cur;
-    if (string[0] == '\0') { return string; }
+    if (string[0] == '\0') {
+        return string;
+    }
     len = strlen(string) - 1;
-    if (len <= 3) { return &string[len+1]; }
-    if (string[len] == '>' && string[len-1] == '-' && string[len-2] == '-') {
-        if (string[len-3] == ' ') { string[len-3] = '\0'; }
-        string[len-2] = '\0';
-        return &string[len-2];
+    if (len <= 3) {
+        return &string[len + 1];
+    }
+    if (string[len] == '>' && string[len - 1] == '-' && string[len - 2] == '-') {
+        if (string[len - 3] == ' ') {
+            string[len - 3] = '\0';
+        }
+        string[len - 2] = '\0';
+        return &string[len - 2];
     }
     len -= 3;
     for (cur = 0; cur <= len; cur++) {
-        if (string[cur] == '-' && string[cur+2] == '>') {
-            if (string[cur-1] == ' ') { string[cur-1] = '\0'; }
-            string[cur] = '\0';
-            string[cur+2] = '\0';
-            return &string[cur+3];
+        if (string[cur] == '-' && string[cur + 2] == '>') {
+            if (string[cur - 1] == ' ') {
+                string[cur - 1] = '\0';
+            }
+            string[cur]     = '\0';
+            string[cur + 2] = '\0';
+            return &string[cur + 3];
         }
     }
-    return &string[len+4];
+    return &string[len + 4];
 }
 
-#endif    // _G_XML
+#endif  // _G_XML
 
 #ifdef _G_PATH
 
@@ -496,28 +539,28 @@ int isdir(const char *file) {
 
 glob_t *FindPath(char *path, int type) {
     glob_t *FILES = new glob_t;
-    string mypath(path);
-#if defined(__APPLE__) || defined(MACOSX)
+    string  mypath(path);
+#    if defined(__APPLE__) || defined(MACOSX)
     char thispath[MAXPATHLEN];
-#else
-    char thispath[800000];
-#endif
-    char *curpath = 0;
-    DIR *dir;
+#    else
+    char thispath[800'000];
+#    endif
+    char          *curpath = 0;
+    DIR           *dir;
     vector<string> result;
     vector<string> pathlist;
-    dirent *entry;
-    unsigned int cur;
-    char *newpath = 0;
-#if defined(__APPLE__) || defined(MACOSX)
+    dirent        *entry;
+    unsigned int   cur;
+    char          *newpath = 0;
+#    if defined(__APPLE__) || defined(MACOSX)
     getcwd(thispath, MAXPATHLEN);
-#else
-    getcwd(thispath, 790000);
-#endif
+#    else
+    getcwd(thispath, 790'000);
+#    endif
     pathlist.push_back((string(thispath) + SEPERATOR + mypath).c_str());
     for (cur = 0; cur < pathlist.size(); cur++) {
         curpath = strdup(pathlist[cur].c_str());
-        dir = opendir(curpath);
+        dir     = opendir(curpath);
         chdir(curpath);
         if (dir == 0) {
             continue;
@@ -540,12 +583,15 @@ glob_t *FindPath(char *path, int type) {
 
     FILES->gl_pathc = result.size();
 
-    #ifdef __cplusplus
+#    ifdef __cplusplus
     FILES->gl_pathv = new char *[FILES->gl_pathc];
-    #else
+#    else
     FILES->gl_pathv = (char *)malloc(sizof(char *) * FILES->gl_pathc);
-    if (FILES->gl_pathv == 0) { ShowError("Out of memory", "G04", 1); return NULL; }
-    #endif
+    if (FILES->gl_pathv == 0) {
+        ShowError("Out of memory", "G04", 1);
+        return NULL;
+    }
+#    endif
 
     for (cur = 0; cur < FILES->gl_pathc; cur++) {
         FILES->gl_pathv[cur] = strdup(result[cur].c_str());
@@ -564,22 +610,22 @@ glob_t *FindDirs(char *path) {
 
 /*
 glob_t *FindDirs(char *path) {
-	glob_t *DIRS;
-	char *pattern;
+    glob_t *DIRS;
+    char *pattern;
 
 #ifdef __cplusplus
-	DIRS = new glob_t;
-	pattern = new char[strlen(path) + 2];
+    DIRS = new glob_t;
+    pattern = new char[strlen(path) + 2];
 #else
-	DIRS = (glob_t *)malloc(sizeof(glob_t));
-	pattern = (char *)malloc(strlen(path) + 2);
-	if (DIRS == NULL || pattern == NULL) { ShowError("Out of memory", "G04", 1); return NULL; }
+    DIRS = (glob_t *)malloc(sizeof(glob_t));
+    pattern = (char *)malloc(strlen(path) + 2);
+    if (DIRS == NULL || pattern == NULL) { ShowError("Out of memory", "G04", 1); return NULL; }
 #endif    // __cplusplus
 
-	sprintf(pattern, "%s*", path);
-	glob(pattern, GLOB_MARK, NULL, DIRS);
-	return DIRS;
+    sprintf(pattern, "%s*", path);
+    glob(pattern, GLOB_MARK, NULL, DIRS);
+    return DIRS;
 }
 */
 
-#endif    // _G_PATH
+#endif  // _G_PATH

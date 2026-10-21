@@ -34,11 +34,9 @@
 
 namespace Audio {
 
-Renderer::Renderer() {
-}
+Renderer::Renderer() {}
 
-Renderer::~Renderer() {
-}
+Renderer::~Renderer() {}
 
 void Renderer::setMeterDistance(Scalar distance) {
     meterDistance = distance;
@@ -71,4 +69,4 @@ void Renderer::beginTransaction() {
 void Renderer::commitTransaction() {
     // intentionally blank
 }
-};
+};  // namespace Audio

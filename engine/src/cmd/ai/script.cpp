@@ -27,32 +27,32 @@
 
 
 #include "script.h"
-#include "navigation.h"
-#include "root_generic/xml_support.h"
-#include "flybywire.h"
-#include <stdio.h>
-#include <vector>
-#include <stack>
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "tactics.h"
-#include "cmd/unit_generic.h"
-#include "hard_coded_scripts.h"
-#include "src/universe_util.h"
-#include "root_generic/configxml.h"
-#include "src/universe.h"
-#include "src/vs_exit.h"
 
 #include <assert.h>
+#include <stack>
+#include <stdio.h>
+#include <vector>
 
+#include "cmd/unit_generic.h"
+#include "flybywire.h"
+#include "hard_coded_scripts.h"
+#include "navigation.h"
+#include "root_generic/configxml.h"
 #include "root_generic/vega_random.h"
+#include "root_generic/xml_support.h"
+#include "src/universe.h"
+#include "src/universe_util.h"
+#include "src/vs_exit.h"
+#include "src/vs_logging.h"
+#include "tactics.h"
+#include "vegadisk/vsfilesystem.h"
 
 using namespace XMLSupport;
 
 typedef vsUMap<string, CCScript *> HardCodedMap;
 
 static HardCodedMap MakeHardCodedScripts() {
-    HardCodedMap tmp;
+    HardCodedMap                               tmp;
     typedef std::pair<std::string, CCScript *> MyPair;
     tmp.insert(MyPair("loop around fast", &LoopAroundFast));
     tmp.insert(MyPair("aggressive loop around fast", &AggressiveLoopAroundFast));
@@ -123,17 +123,17 @@ bool validateHardCodedScript(std::string s) {
 }
 
 struct AIScriptXML {
-    int unitlevel;
-    int acc;
-    vector<float> executefor;
-    bool itts;
-    bool afterburn;
-    bool terminate;
-    char lin;
-    QVector defaultvec;
-    float defaultf;
-    std::stack<QVector> vectors;
-    std::stack<float> floats;
+    int                  unitlevel;
+    int                  acc;
+    vector<float>        executefor;
+    bool                 itts;
+    bool                 afterburn;
+    bool                 terminate;
+    char                 lin;
+    QVector              defaultvec;
+    float                defaultf;
+    std::stack<QVector>  vectors;
+    std::stack<float>    floats;
     std::vector<Order *> orders;
 };
 
@@ -156,11 +156,8 @@ void AIScript::popf() {
 QVector &AIScript::topv() {
     if (!xml->vectors.size()) {
         xml->vectors.push(xml->defaultvec);
-        VS_LOG(error, (boost::format(
-                "ERROR: Vector stack is empty... Will return <%1%, %2%, %3%>")
-                % xml->defaultvec.i
-                % xml->defaultvec.j
-                % xml->defaultvec.k));
+        VS_LOG(error, (boost::format("ERROR: Vector stack is empty... Will return <%1%, %2%, %3%>") %
+                       xml->defaultvec.i % xml->defaultvec.j % xml->defaultvec.k));
     }
     return xml->vectors.top();
 }
@@ -174,11 +171,11 @@ void AIScript::popv() {
 }
 
 void AIScript::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-    ((AIScript *) userData)->beginElement(name, AttributeList(atts));
+    ((AIScript *)userData)->beginElement(name, AttributeList(atts));
 }
 
 void AIScript::endElement(void *userData, const XML_Char *name) {
-    ((AIScript *) userData)->endElement(name);
+    ((AIScript *)userData)->endElement(name);
 }
 
 namespace AiXml {
@@ -235,65 +232,61 @@ enum Names {
     DEFAULT
 };
 
-const EnumMap::Pair element_names[] = {
-        EnumMap::Pair("UNKNOWN", UNKNOWN),
-        EnumMap::Pair("Float", FFLOAT),
-        EnumMap::Pair("Script", SCRIPT),
-        EnumMap::Pair("Vector", VECTOR),
-        EnumMap::Pair("Moveto", MOVETO),
-        EnumMap::Pair("Default", DEFAULT),
-        EnumMap::Pair("Targetworld", TARGETWORLD),
-        EnumMap::Pair("Yourworld", YOURWORLD),
-        EnumMap::Pair("Targetlocal", TARGETLOCAL),
-        EnumMap::Pair("Yourlocal", YOURLOCAL),
-        EnumMap::Pair("FaceTarget", FACETARGET),
-        EnumMap::Pair("CloakFor", CLOAKFOR),
-        EnumMap::Pair("ExecuteFor", EXECUTEFOR),
-        EnumMap::Pair("ChangeHead", CHANGEHEAD),
-        EnumMap::Pair("MatchLin", MATCHLIN),
-        EnumMap::Pair("MatchAng", MATCHANG),
-        EnumMap::Pair("MatchVel", MATCHVEL),
-        EnumMap::Pair("Angular", ANGULAR),
-        EnumMap::Pair("Add", ADD),
-        EnumMap::Pair("Neg", NEG),
-        EnumMap::Pair("Sub", SUB),
-        EnumMap::Pair("Normalize", NORMALIZE),
-        EnumMap::Pair("Scale", SCALE),
-        EnumMap::Pair("Cross", CROSS),
-        EnumMap::Pair("Dot", DOT),
-        EnumMap::Pair("Multf", MULTF),
-        EnumMap::Pair("Addf", ADDF),
-        EnumMap::Pair("Fromf", FROMF),
-        EnumMap::Pair("Tof", TOF),
-        EnumMap::Pair("Linear", LINEAR),
-        EnumMap::Pair("Threatworld", THREATWORLD),
-        EnumMap::Pair("Threatlocal", THREATLOCAL)
-};
-const EnumMap::Pair attribute_names[] = {
-        EnumMap::Pair("UNKNOWN", UNKNOWN),
-        EnumMap::Pair("accuracy", ACCURACY),
-        EnumMap::Pair("x", X),
-        EnumMap::Pair("y", Y),
-        EnumMap::Pair("z", Z),
-        EnumMap::Pair("Time", TIME),
-        EnumMap::Pair("Terminate", TERMINATE),
-        EnumMap::Pair("Local", LOCAL),
-        EnumMap::Pair("Value", VALUE),
-        EnumMap::Pair("ITTS", ITTTS),
-        EnumMap::Pair("Afterburn", AFTERBURN),
-        EnumMap::Pair("Position", YOURPOS),
-        EnumMap::Pair("TargetPos", TARGETPOS),
-        EnumMap::Pair("ThreatPos", THREATPOS),
-        EnumMap::Pair("Velocity", YOURV),
-        EnumMap::Pair("TargetV", TARGETV),
-        EnumMap::Pair("ThreatV", THREATV),
-        EnumMap::Pair("SimlationAtom", SIMATOM),
-        EnumMap::Pair("Dup", DUPLIC)
-};
+const EnumMap::Pair element_names[]   = {EnumMap::Pair("UNKNOWN", UNKNOWN),
+                                         EnumMap::Pair("Float", FFLOAT),
+                                         EnumMap::Pair("Script", SCRIPT),
+                                         EnumMap::Pair("Vector", VECTOR),
+                                         EnumMap::Pair("Moveto", MOVETO),
+                                         EnumMap::Pair("Default", DEFAULT),
+                                         EnumMap::Pair("Targetworld", TARGETWORLD),
+                                         EnumMap::Pair("Yourworld", YOURWORLD),
+                                         EnumMap::Pair("Targetlocal", TARGETLOCAL),
+                                         EnumMap::Pair("Yourlocal", YOURLOCAL),
+                                         EnumMap::Pair("FaceTarget", FACETARGET),
+                                         EnumMap::Pair("CloakFor", CLOAKFOR),
+                                         EnumMap::Pair("ExecuteFor", EXECUTEFOR),
+                                         EnumMap::Pair("ChangeHead", CHANGEHEAD),
+                                         EnumMap::Pair("MatchLin", MATCHLIN),
+                                         EnumMap::Pair("MatchAng", MATCHANG),
+                                         EnumMap::Pair("MatchVel", MATCHVEL),
+                                         EnumMap::Pair("Angular", ANGULAR),
+                                         EnumMap::Pair("Add", ADD),
+                                         EnumMap::Pair("Neg", NEG),
+                                         EnumMap::Pair("Sub", SUB),
+                                         EnumMap::Pair("Normalize", NORMALIZE),
+                                         EnumMap::Pair("Scale", SCALE),
+                                         EnumMap::Pair("Cross", CROSS),
+                                         EnumMap::Pair("Dot", DOT),
+                                         EnumMap::Pair("Multf", MULTF),
+                                         EnumMap::Pair("Addf", ADDF),
+                                         EnumMap::Pair("Fromf", FROMF),
+                                         EnumMap::Pair("Tof", TOF),
+                                         EnumMap::Pair("Linear", LINEAR),
+                                         EnumMap::Pair("Threatworld", THREATWORLD),
+                                         EnumMap::Pair("Threatlocal", THREATLOCAL)};
+const EnumMap::Pair attribute_names[] = {EnumMap::Pair("UNKNOWN", UNKNOWN),
+                                         EnumMap::Pair("accuracy", ACCURACY),
+                                         EnumMap::Pair("x", X),
+                                         EnumMap::Pair("y", Y),
+                                         EnumMap::Pair("z", Z),
+                                         EnumMap::Pair("Time", TIME),
+                                         EnumMap::Pair("Terminate", TERMINATE),
+                                         EnumMap::Pair("Local", LOCAL),
+                                         EnumMap::Pair("Value", VALUE),
+                                         EnumMap::Pair("ITTS", ITTTS),
+                                         EnumMap::Pair("Afterburn", AFTERBURN),
+                                         EnumMap::Pair("Position", YOURPOS),
+                                         EnumMap::Pair("TargetPos", TARGETPOS),
+                                         EnumMap::Pair("ThreatPos", THREATPOS),
+                                         EnumMap::Pair("Velocity", YOURV),
+                                         EnumMap::Pair("TargetV", TARGETV),
+                                         EnumMap::Pair("ThreatV", THREATV),
+                                         EnumMap::Pair("SimlationAtom", SIMATOM),
+                                         EnumMap::Pair("Dup", DUPLIC)};
 
 const EnumMap element_map(element_names, 32);
 const EnumMap attribute_map(attribute_names, 19);
-}
+}  // namespace AiXml
 
 void AIScript::beginElement(const string &name, const AttributeList &attributes) {
     using namespace AiXml;
@@ -302,14 +295,14 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 #ifdef AIDBG
     VS_LOG(debug, "0");
 #endif
-    Names elem = (Names) element_map.lookup(name);
+    Names elem = (Names)element_map.lookup(name);
 #ifdef AIDBG
     VS_LOG(debug, (boost::format("1%1$x ") % &elem));
 #endif
     AttributeList::const_iterator iter;
     switch (elem) {
         case DEFAULT:
-            xml->unitlevel += 2;         //pretend it's at a reasonable level
+            xml->unitlevel += 2;  // pretend it's at a reasonable level
             break;
         case UNKNOWN:
             xml->unitlevel++;
@@ -338,7 +331,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 #ifdef AIDBG
                         VS_LOG(debug, (boost::format("1%1$x ") % &elem));
 #endif
-                        xml->vectors.pop();                 //get rid of dummy vector pushed on above
+                        xml->vectors.pop();  // get rid of dummy vector pushed on above
                         xml->vectors.push(xml->vectors.top());
                         break;
                     case THREATPOS:
@@ -387,14 +380,15 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
                         topv() = (this->parent->GetVelocity());
                         break;
                     default:
-                        VS_LOG(warning, (boost::format("Unknown attribute_map lookup value: %1%") % attribute_map.lookup((*iter).name)));
+                        VS_LOG(warning, (boost::format("Unknown attribute_map lookup value: %1%") %
+                                         attribute_map.lookup((*iter).name)));
                         break;
                 }
             }
             break;
         case MOVETO:
             xml->unitlevel++;
-            xml->acc = 2;
+            xml->acc       = 2;
             xml->afterburn = true;
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
                 switch (attribute_map.lookup((*iter).name)) {
@@ -411,8 +405,8 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
             VS_LOG(debug, "ft");
 #endif
             xml->unitlevel++;
-            xml->acc = 3;
-            xml->itts = false;
+            xml->acc       = 3;
+            xml->itts      = false;
             xml->afterburn = true;
             xml->terminate = true;
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -436,7 +430,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 
         case CHANGEHEAD:
             xml->unitlevel++;
-            xml->acc = 2;
+            xml->acc       = 2;
             xml->afterburn = true;
             xml->terminate = true;
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -499,7 +493,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
                     case SIMATOM:
                         topf() = SIMULATION_ATOM;
                     case DUPLIC:
-                        xml->floats.pop();                 //get rid of dummy vector pushed on above
+                        xml->floats.pop();  // get rid of dummy vector pushed on above
                         xml->floats.push(xml->floats.top());
                         break;
                 }
@@ -513,7 +507,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 #endif
 
             xml->unitlevel++;
-            xml->acc = 0;
+            xml->acc       = 0;
             xml->afterburn = false;
             xml->terminate = true;
             for (iter = attributes.begin(); iter != attributes.end(); iter++) {
@@ -570,13 +564,13 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 void AIScript::endElement(const string &name) {
     using namespace AiXml;
     QVector temp(0, 0, 0);
-    Names elem = (Names) element_map.lookup(name);
-    Unit *tmp;
+    Names   elem = (Names)element_map.lookup(name);
+    Unit   *tmp;
     switch (elem) {
         case UNKNOWN:
             xml->unitlevel--;
             break;
-            //Vector
+            // Vector
         case THREATWORLD:
             xml->unitlevel++;
             if ((tmp = parent->Threat())) {
@@ -709,27 +703,22 @@ void AIScript::endElement(const string &name) {
             break;
         case MATCHANG:
             xml->unitlevel--;
-            xml->orders.push_back(new Orders::MatchAngularVelocity(parent->ClampAngVel(topv()), ((bool) xml->acc),
-                    xml->terminate));
+            xml->orders.push_back(
+                    new Orders::MatchAngularVelocity(parent->ClampAngVel(topv()), ((bool)xml->acc), xml->terminate));
             popv();
             break;
         case FACETARGET:
             xml->unitlevel--;
             if (xml->itts || parent->computer.itts) {
-                xml->orders.push_back(new Orders::FaceTargetITTS(xml->terminate,
-                        (bool) xml->acc));
+                xml->orders.push_back(new Orders::FaceTargetITTS(xml->terminate, (bool)xml->acc));
             } else {
-                xml->orders.push_back(new Orders::FaceTarget(xml->terminate,
-                        (bool) xml->acc));
+                xml->orders.push_back(new Orders::FaceTarget(xml->terminate, (bool)xml->acc));
             }
             break;
         case MATCHLIN:
             xml->unitlevel--;
-            xml->orders.push_back(new Orders::MatchLinearVelocity(parent->ClampVelocity(topv(),
-                            xml->afterburn),
-                    ((bool) xml->acc),
-                    xml->afterburn,
-                    xml->terminate));
+            xml->orders.push_back(new Orders::MatchLinearVelocity(parent->ClampVelocity(topv(), xml->afterburn),
+                                                                  ((bool)xml->acc), xml->afterburn, xml->terminate));
             popv();
             break;
         case MATCHVEL:
@@ -737,17 +726,13 @@ void AIScript::endElement(const string &name) {
             temp = topv();
             popv();
             if (xml->lin == 1) {
-                xml->orders.push_back(new Orders::MatchVelocity(parent->ClampVelocity(topv(),
-                                xml->afterburn),
-                        parent->ClampAngVel(temp),
-                        ((bool) xml->acc),
-                        xml->afterburn,
-                        xml->terminate));
+                xml->orders.push_back(new Orders::MatchVelocity(parent->ClampVelocity(topv(), xml->afterburn),
+                                                                parent->ClampAngVel(temp), ((bool)xml->acc),
+                                                                xml->afterburn, xml->terminate));
             } else {
-                xml->orders.push_back(new Orders::MatchVelocity(parent->ClampVelocity(temp,
-                                xml->afterburn),
-                        parent->ClampAngVel(topv()), ((bool) xml->acc),
-                        xml->afterburn, xml->terminate));
+                xml->orders.push_back(new Orders::MatchVelocity(parent->ClampVelocity(temp, xml->afterburn),
+                                                                parent->ClampAngVel(topv()), ((bool)xml->acc),
+                                                                xml->afterburn, xml->terminate));
             }
             xml->lin = 0;
             popv();
@@ -770,8 +755,8 @@ void AIScript::endElement(const string &name) {
             }
             break;
         case DEFAULT:
-            xml->unitlevel -= 2;
-            xml->defaultvec = topv();
+            xml->unitlevel  -= 2;
+            xml->defaultvec  = topv();
             popv();
             xml->defaultf = topf();
             popf();
@@ -786,19 +771,18 @@ void AIScript::LoadXML() {
     const int aidebug = configuration().ai.debug_level;
     using namespace AiXml;
     using namespace VSFileSystem;
-    string full_filename = filename;
-    bool doroll = false;
-    HardCodedMap::const_iterator iter = hard_coded_scripts.find(full_filename);
-    if (iter == hard_coded_scripts.end() && full_filename.length() > 5 && full_filename[0] == 'r'
-            && full_filename[1] == 'o' && full_filename[2] == 'l'
-            && full_filename[3] == 'l' && full_filename[4] == ' ') {
-        doroll = true;
+    string                       full_filename = filename;
+    bool                         doroll        = false;
+    HardCodedMap::const_iterator iter          = hard_coded_scripts.find(full_filename);
+    if (iter == hard_coded_scripts.end() && full_filename.length() > 5 && full_filename[0] == 'r' &&
+        full_filename[1] == 'o' && full_filename[2] == 'l' && full_filename[3] == 'l' && full_filename[4] == ' ') {
+        doroll        = true;
         full_filename = full_filename.substr(5);
-        iter = hard_coded_scripts.find(full_filename);
+        iter          = hard_coded_scripts.find(full_filename);
     }
     if (iter != hard_coded_scripts.end()) {
         CCScript *myscript = (*iter).second;
-        (*myscript)(this, parent);
+                  (*myscript)(this, parent);
         if (doroll) {
             const uint_fast32_t val = VegaRandom::Instance().GenRandUInt32();
             if (val < RAND_MAX / 4) {
@@ -810,34 +794,34 @@ void AIScript::LoadXML() {
             }
         }
         if (aidebug > 1) {
-            VS_LOG(debug, (boost::format("%1% using hcs %2% for %3% threat %4%")
-                    % mission->getGametime()
-                    % filename
-                    % parent->name
-                    % parent->computer.threatlevel));
+            VS_LOG(debug, (boost::format("%1% using hcs %2% for %3% threat %4%") % mission->getGametime() % filename %
+                           parent->name % parent->computer.threatlevel));
         }
         if (parent && parent->Target() && parent->Target()->IsPlayerShip()) {
-            double value;
+            double       value;
             const double game_speed = configuration().physics.game_speed_dbl;
             const double game_accel = configuration().physics.game_accel_dbl;
             {
                 const Unit *targ = parent->Target();
                 if (targ) {
                     const Vector PosDifference = (targ->Position() - parent->Position()).Cast();
-                    const double pdmag = PosDifference.Magnitude();
-                    value = (pdmag - parent->rSize() - targ->rSize());
+                    const double pdmag         = PosDifference.Magnitude();
+                    value                      = (pdmag - parent->rSize() - targ->rSize());
                     const double myvel =
                             pdmag > 0 ? PosDifference.Dot(parent->GetVelocity() - targ->GetVelocity()) / pdmag : 0;
                     if (myvel > 0) {
                         value -= myvel * myvel / (2 * (parent->drive.retro / parent->GetMass()));
                     }
                 } else {
-                    value = 10000;
+                    value = 10'000;
                 }
                 value /= game_speed * game_accel;
             }
             if (aidebug > 0) {
-                UniverseUtil::IOmessage(0, parent->name, "all", (boost::format("using script %1% threat %2% dis %3%") % filename % parent->computer.threatlevel % value).str());
+                UniverseUtil::IOmessage(0, parent->name, "all",
+                                        (boost::format("using script %1% threat %2% dis %3%") % filename %
+                                         parent->computer.threatlevel % value)
+                                                .str());
             }
         }
         return;
@@ -846,8 +830,9 @@ void AIScript::LoadXML() {
             VS_LOG(debug, (boost::format("using soft coded script %1%") % filename));
         }
         if (aidebug > 0) {
-            UniverseUtil::IOmessage(0, parent->name, "all", string("FAILED(or missile) script ") + string(
-                    filename) + " threat " + XMLSupport::tostring(parent->computer.threatlevel));
+            UniverseUtil::IOmessage(0, parent->name, "all",
+                                    string("FAILED(or missile) script ") + string(filename) + " threat " +
+                                            XMLSupport::tostring(parent->computer.threatlevel));
         }
     }
 #ifdef AIDBG
@@ -857,7 +842,7 @@ void AIScript::LoadXML() {
 #ifdef AIDBG
     VS_LOG(debug, "echd");
 #endif
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly(filename, AiFile);
 #ifdef AIDBG
     VS_LOG(debug, "backup ");
@@ -872,13 +857,13 @@ void AIScript::LoadXML() {
 #ifdef BIDBG
     VS_LOG(debug, "nxml");
 #endif
-    xml = new AIScriptXML;
-    xml->unitlevel = 0;
-    xml->terminate = true;
-    xml->afterburn = true;
-    xml->acc = 2;
+    xml             = new AIScriptXML;
+    xml->unitlevel  = 0;
+    xml->terminate  = true;
+    xml->afterburn  = true;
+    xml->acc        = 2;
     xml->defaultvec = QVector(0, 0, 0);
-    xml->defaultf = 0;
+    xml->defaultf   = 0;
 #ifdef BIDBG
     VS_LOG(debug, "parscrea");
 #endif
@@ -954,4 +939,3 @@ void AIScript::Execute() {
     }
     Order::Execute();
 }
-

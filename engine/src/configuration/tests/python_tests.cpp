@@ -29,35 +29,39 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
+
 #include <Python.h>
-#include <boost/version.hpp>
-#include <gtest/gtest.h>
-#include <boost/filesystem.hpp>
+
 #include <iostream>
+
+#include <boost/filesystem.hpp>
+#include <boost/version.hpp>
+
+#include <gtest/gtest.h>
 
 #include "src/python/config/python_utils.h"
 
 using namespace boost::python;
 
-
-struct World
-{
+struct World {
     World(std::string msg) : msg(msg) {}
-    void set(std::string msg) { this->msg = msg; }
-    std::string greet() { return msg; }
+
+    void set(std::string msg) {
+        this->msg = msg;
+    }
+
+    std::string greet() {
+        return msg;
+    }
+
     std::string msg;
 };
 
-BOOST_PYTHON_MODULE(python_sanity)
-{
-    class_<World>("World", init<std::string>())
-        .def("greet", &World::greet)
-        .def("set", &World::set)
-    ;
+BOOST_PYTHON_MODULE(python_sanity) {
+    class_<World>("World", init<std::string>()).def("greet", &World::greet).def("set", &World::set);
 }
 
 const std::string hello_world = "Hello World\n";
-
 
 TEST(Python, Sanity) {
     World world(hello_world);
@@ -91,7 +95,7 @@ TEST(Python, Call_Function) {
         Py_ExitStatusException(status);
     }
 
-    const std::string python_path = GetPythonPath();
+    const std::string  python_path = GetPythonPath();
     const std::wstring python_path_w(python_path.begin(), python_path.end());
 
     PyWideStringList python_path_py_wide_string_list{};
@@ -104,7 +108,7 @@ TEST(Python, Call_Function) {
     PyConfig_InitPythonConfig(&config);
 
     config.module_search_paths = python_path_py_wide_string_list;
-    config.isolated = 0;
+    config.isolated            = 0;
 
     status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) {
@@ -114,7 +118,7 @@ TEST(Python, Call_Function) {
 
     PyObject* module = PyImport_ImportModule("python_tests");
     std::cout << "PyImport_ImportModule did not crash\n" << std::flush;
-    if(!module) {
+    if (!module) {
         std::cout << "PyImport_ImportModule is null\n" << std::flush;
         PyErr_Print();
         Py_Finalize();
@@ -123,22 +127,20 @@ TEST(Python, Call_Function) {
         std::cout << "PyImport_ImportModule is not null\n" << std::flush;
     }
 
-    PyObject* function = PyObject_GetAttrString(module,"append");
+    PyObject* function = PyObject_GetAttrString(module, "append");
     std::cout << "PyObject_GetAttrString did not crash\n" << std::flush;
-    if(function == nullptr) {
+    if (function == nullptr) {
         std::cout << "PyObject_GetAttrString is null\n" << std::flush;
-        //PyErr_Print();
+        // PyErr_Print();
         Py_Finalize();
         return;
     } else {
         std::cout << "PyObject_GetAttrString is not null\n" << std::flush;
     }
 
-    PyObject* args = PyTuple_Pack(2,
-                                  PyUnicode_FromString("Hello "),
-                                  PyUnicode_FromString("World\n"));
+    PyObject* args = PyTuple_Pack(2, PyUnicode_FromString("Hello "), PyUnicode_FromString("World\n"));
     std::cout << "PyTuple_Pack did not crash\n" << std::flush;
-    if(args == nullptr) {
+    if (args == nullptr) {
         std::cout << "PyTuple_Pack is null\n" << std::flush;
         PyErr_Print();
         Py_Finalize();
@@ -156,5 +158,5 @@ TEST(Python, Call_Function) {
     EXPECT_EQ(result, hello_world);
 
     // Uncomment to see prints
-    //EXPECT_FALSE(true);
+    // EXPECT_FALSE(true);
 }

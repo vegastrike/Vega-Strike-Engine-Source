@@ -32,11 +32,10 @@
 
 #include "utils.h"
 
-#include "src/universe_util.h"
-#include "root_generic/lin_time.h"
-
-#include "Source.h"
 #include "Listener.h"
+#include "root_generic/lin_time.h"
+#include "Source.h"
+#include "src/universe_util.h"
 
 namespace Audio {
 
@@ -53,12 +52,10 @@ Scalar estimateGain(const Source &src, const Listener &listener) {
     Scalar gain = src.getGain();
 
     // Account for distance attenuation
-    LScalar distance = listener.getPosition().distance(src.getPosition())
-            - listener.getRadius()
-            - src.getRadius();
-    LScalar ref = listener.getRadius();
-    LScalar rolloff = listener.getRadius() / src.getRadius();
-    gain *= (distance <= 0) ? 1.f : float(ref / (ref + rolloff * distance));
+    LScalar distance  = listener.getPosition().distance(src.getPosition()) - listener.getRadius() - src.getRadius();
+    LScalar ref       = listener.getRadius();
+    LScalar rolloff   = listener.getRadius() / src.getRadius();
+    gain             *= (distance <= 0) ? 1.f : float(ref / (ref + rolloff * distance));
 
     // Account for dispersion/sensing angle limitations
     Scalar cosangle = listener.getAtDirection().dot(src.getDirection());
@@ -73,7 +70,6 @@ Scalar estimateGain(const Source &src, const Listener &listener) {
 }
 
 void sleep(unsigned int ms) {
-    micro_sleep(ms * 1000);
+    micro_sleep(ms * 1'000);
 }
-};
-
+};  // namespace Audio

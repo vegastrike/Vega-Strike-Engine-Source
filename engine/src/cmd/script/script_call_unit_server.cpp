@@ -27,13 +27,12 @@
 
 
 #include <string>
-#include "gfx_generic/cockpit_generic.h"
-#include "cmd/planet_generic.h"
 
-void AddAnimation(Cockpit *cp, std::string anim) {
-}
+#include "cmd/planet_generic.h"
+#include "gfx_generic/cockpit_generic.h"
+
+void AddAnimation(Cockpit *cp, std::string anim) {}
 
 bool PlanetHasLights(Unit *un) {
-    return ((Planet *) un)->hasLights();
+    return ((Planet *)un)->hasLights();
 }
-

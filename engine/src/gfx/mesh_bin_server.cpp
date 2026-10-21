@@ -28,10 +28,6 @@
 
 #include "gfx_generic/mesh.h"
 
-//by chuck starchaser
+// by chuck starchaser
 
-void Mesh::LoadBinary(const char *filename, int faction) {
-}
-
-
-
+void Mesh::LoadBinary(const char *filename, int faction) {}

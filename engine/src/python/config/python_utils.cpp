@@ -27,19 +27,21 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
+#include <boost/python.hpp>
+
 #include "python_utils.h"
 
 #include <iostream>
-#include <boost/python.hpp>
+
 #include <boost/filesystem.hpp>
 
-//#include "vegadisk/vsfilesystem.h"
-//#include "src/vs_logging.h"
+// #include "vegadisk/vsfilesystem.h"
+// #include "src/vs_logging.h"
 
 using namespace boost::python;
 using namespace boost::filesystem;
 
-#define Q(x) #x
+#define Q(x)     #x
 #define QUOTE(x) Q(x)
 
 // This is a kludge. It runs python before
@@ -49,25 +51,19 @@ std::string GetPythonPath() {
     wchar_t* w_path_ptr = Py_GetPath();
     Py_Finalize();
 
-    std::wstring w_path_w( w_path_ptr );
-    std::string path( w_path_w.begin(), w_path_w.end() );
+    std::wstring w_path_w(w_path_ptr);
+    std::string  path(w_path_w.begin(), w_path_w.end());
 
     return path;
 }
 
-
-
 // A utility function to call a function and get a PyObject as a result
-PyObject* GetClassFromPython(
-    const std::string build_path,
-    const std::string path_string,
-    const std::string datadir,
-    const std::string module_name,
-    const std::string function_name) {
+PyObject* GetClassFromPython(const std::string build_path, const std::string path_string, const std::string datadir,
+                             const std::string module_name, const std::string function_name) {
     boost::filesystem::path full_path = boost::filesystem::path(path_string);
     boost::filesystem::current_path(full_path);
 
-    if(!boost::filesystem::exists(module_name + ".py")) {
+    if (!boost::filesystem::exists(module_name + ".py")) {
         // TODO: throw exception
         return nullptr;
     }
@@ -85,13 +81,14 @@ PyObject* GetClassFromPython(
         Py_ExitStatusException(status);
     }
 
-    const std::string python_path = GetPythonPath();
+    const std::string  python_path = GetPythonPath();
     const std::wstring python_path_w(python_path.begin(), python_path.end());
-    const std::wstring path_string_w = std::wstring(path_string.begin(), path_string.end());
-    const std::string python_sitelib_path = QUOTE(Python_SITELIB);
-    const std::wstring python_sitelib_path_wstring = std::wstring(python_sitelib_path.begin(), python_sitelib_path.end());
+    const std::wstring path_string_w       = std::wstring(path_string.begin(), path_string.end());
+    const std::string  python_sitelib_path = QUOTE(Python_SITELIB);
+    const std::wstring python_sitelib_path_wstring =
+            std::wstring(python_sitelib_path.begin(), python_sitelib_path.end());
     const std::wstring build_path_w = std::wstring(build_path.begin(), build_path.end());
-    const std::wstring data_path_w = std::wstring(datadir.begin(), datadir.end());
+    const std::wstring data_path_w  = std::wstring(datadir.begin(), datadir.end());
 
     PyWideStringList python_path_py_wide_string_list{};
     status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
@@ -129,7 +126,7 @@ PyObject* GetClassFromPython(
     PyConfig_InitPythonConfig(&config);
 
     config.module_search_paths = python_path_py_wide_string_list;
-    config.isolated = 0;
+    config.isolated            = 0;
 
     status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) {
@@ -141,7 +138,7 @@ PyObject* GetClassFromPython(
 
     PyObject* module = PyImport_ImportModule(module_name.c_str());
 
-    if(!module) {
+    if (!module) {
         std::cerr << "Python module import failed (PyImport_ImportModule is null)" << std::endl << std::flush;
         PyErr_Print();
         Py_Finalize();
@@ -149,8 +146,8 @@ PyObject* GetClassFromPython(
         return nullptr;
     }
 
-    PyObject* function = PyObject_GetAttrString(module,function_name.c_str());
-    if(!function) {
+    PyObject* function = PyObject_GetAttrString(module, function_name.c_str());
+    if (!function) {
         std::cerr << "PyObject_GetAttrString is null" << std::endl << std::flush;
         PyErr_Print();
         Py_Finalize();

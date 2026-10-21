@@ -26,29 +26,29 @@
  */
 
 #include "ship_functions.h"
-#include "component_utils.h"
-#include "cmd/unit_csv_factory.h"
 
-ShipFunctions::ShipFunctions() :
-    Component(),
-    cockpit(Resource<double>(1,0,1)),
-    communications(Resource<double>(1,0,1)),
-    fire_control(Resource<double>(1,0,1)),
-    life_support(Resource<double>(1,0,1)) {
+#include "cmd/unit_csv_factory.h"
+#include "component_utils.h"
+
+ShipFunctions::ShipFunctions()
+    : Component(),
+      cockpit(Resource<double>(1, 0, 1)),
+      communications(Resource<double>(1, 0, 1)),
+      fire_control(Resource<double>(1, 0, 1)),
+      life_support(Resource<double>(1, 0, 1)) {
     type = ComponentType::ShipFunctions;
 }
-
 
 // Component Methods
 void ShipFunctions::Load(std::string unit_key) {
     Component::Load(unit_key);
 
-    std::string values[] = {"cockpit", "communications", "fire_control", "life_support"};
+    std::string      values[]         = {"cockpit", "communications", "fire_control", "life_support"};
     Resource<double> attribute_ptrs[] = {cockpit, communications, fire_control, life_support};
 
-    for(int i=0;i<4;i++) {
+    for (int i = 0; i < 4; i++) {
         std::string value = UnitCSVFactory::GetVariable(unit_key, values[i], std::string());
-        if(value.empty()) {
+        if (value.empty()) {
             attribute_ptrs[i] = Resource<double>(1.0, 0.0, 1.0);
         } else {
             attribute_ptrs[i] = Resource<double>(value, 1.0);
@@ -59,10 +59,10 @@ void ShipFunctions::Load(std::string unit_key) {
 }
 
 void ShipFunctions::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    unit["cockpit"] = cockpit.Serialize();
-    unit["communications"] = cockpit.Serialize();
-    unit["fire_control"] = cockpit.Serialize();
-    unit["life_support"] = cockpit.Serialize();
+    unit["cockpit"]          = cockpit.Serialize();
+    unit["communications"]   = cockpit.Serialize();
+    unit["fire_control"]     = cockpit.Serialize();
+    unit["life_support"]     = cockpit.Serialize();
     unit["ftl_interdiction"] = std::to_string(ftl_interdiction);
 }
 
@@ -82,7 +82,6 @@ bool ShipFunctions::Upgrade(const std::string upgrade_key) {
     return false;
 }
 
-
 void ShipFunctions::Repair() {
     cockpit.RepairFully();
     communications.RepairFully();
@@ -93,42 +92,67 @@ void ShipFunctions::Repair() {
 // Ship Function Methods
 double ShipFunctions::Value(Function function) const {
     switch (function) {
-        case Function::cockpit: return cockpit.Value();
-        case Function::communications: return communications.Value();
-        case Function::fire_control: return fire_control.Value();
-        case Function::life_support: return life_support.Value();
-        case Function::ftl_interdiction: return ftl_interdiction;
-        default: return 0;
+        case Function::cockpit:
+            return cockpit.Value();
+        case Function::communications:
+            return communications.Value();
+        case Function::fire_control:
+            return fire_control.Value();
+        case Function::life_support:
+            return life_support.Value();
+        case Function::ftl_interdiction:
+            return ftl_interdiction;
+        default:
+            return 0;
     }
 }
 
 double ShipFunctions::Max(Function function) const {
     switch (function) {
-        case Function::cockpit: return cockpit.MaxValue();
-        case Function::communications: return communications.MaxValue();
-        case Function::fire_control: return fire_control.MaxValue();
-        case Function::life_support: return life_support.MaxValue();
-        default: return 0;
+        case Function::cockpit:
+            return cockpit.MaxValue();
+        case Function::communications:
+            return communications.MaxValue();
+        case Function::fire_control:
+            return fire_control.MaxValue();
+        case Function::life_support:
+            return life_support.MaxValue();
+        default:
+            return 0;
     }
 }
 
 double ShipFunctions::Percent(Function function) const {
     switch (function) {
-        case Function::cockpit: return cockpit.Percent();
-        case Function::communications: return communications.Percent();
-        case Function::fire_control: return fire_control.Percent();
-        case Function::life_support: return life_support.Percent();
-        default: return 0;
+        case Function::cockpit:
+            return cockpit.Percent();
+        case Function::communications:
+            return communications.Percent();
+        case Function::fire_control:
+            return fire_control.Percent();
+        case Function::life_support:
+            return life_support.Percent();
+        default:
+            return 0;
     }
 }
 
 void ShipFunctions::Damage(Function function) {
     switch (function) {
-        case Function::cockpit: cockpit.RandomDamage(); break;
-        case Function::communications: communications.RandomDamage(); break;
-        case Function::fire_control: fire_control.RandomDamage(); break;
-        case Function::life_support: life_support.RandomDamage(); break;
-        case Function::ftl_interdiction: break; // Do nothing as doesn't support damage.
+        case Function::cockpit:
+            cockpit.RandomDamage();
+            break;
+        case Function::communications:
+            communications.RandomDamage();
+            break;
+        case Function::fire_control:
+            fire_control.RandomDamage();
+            break;
+        case Function::life_support:
+            life_support.RandomDamage();
+            break;
+        case Function::ftl_interdiction:
+            break;  // Do nothing as doesn't support damage.
     }
 }
 

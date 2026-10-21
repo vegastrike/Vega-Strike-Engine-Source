@@ -33,8 +33,7 @@ namespace vs_settings {
 
 // Build a child node from a value (object -> branch, array -> array-branch,
 // scalar -> leaf). `user` is the matching user value or null.
-static std::shared_ptr<JsonConfigNode> make_node(const boost::json::value& assets,
-                                                 const boost::json::value* user) {
+static std::shared_ptr<JsonConfigNode> make_node(const boost::json::value& assets, const boost::json::value* user) {
     if (assets.is_object()) {
         const boost::json::object* u = (user != nullptr && user->is_object()) ? &user->as_object() : nullptr;
         return std::make_shared<JsonConfigBranch>(assets.as_object(), u);
@@ -50,19 +49,18 @@ static std::shared_ptr<JsonConfigNode> make_node(const boost::json::value& asset
     return std::make_shared<JsonConfigLeaf>(assets, assets);
 }
 
-JsonConfigBranch::JsonConfigBranch(const boost::json::object& assets,
-                                   const boost::json::object* user) {
+JsonConfigBranch::JsonConfigBranch(const boost::json::object& assets, const boost::json::object* user) {
     for (const auto& kv : assets) {
-        const std::string& key = kv.key();
-        const boost::json::value& value = kv.value();
-        const auto* user_node = (user != nullptr) ? user->if_contains(key) : nullptr;
+        const std::string&        key       = kv.key();
+        const boost::json::value& value     = kv.value();
+        const auto*               user_node = (user != nullptr) ? user->if_contains(key) : nullptr;
         children.emplace_back(key, make_node(value, user_node));
     }
     // Any user keys not present in assets are user-defined leaves/branches (they
     // round-trip and stay dirty so they are written back).
     if (user != nullptr) {
         for (const auto& kv : *user) {
-            const std::string& key = kv.key();
+            const std::string&        key   = kv.key();
             const boost::json::value& value = kv.value();
             if (!assets.contains(key)) {
                 auto node = make_node(value, nullptr);
@@ -77,12 +75,11 @@ JsonConfigBranch::JsonConfigBranch(const boost::json::object& assets,
     }
 }
 
-JsonConfigBranch::JsonConfigBranch(const boost::json::array& assets,
-                                   const boost::json::array* user) {
+JsonConfigBranch::JsonConfigBranch(const boost::json::array& assets, const boost::json::array* user) {
     is_array_ = true;
     for (size_t i = 0; i < assets.size(); ++i) {
-        std::string key = std::to_string(i);
-        const boost::json::value* u = (user != nullptr && i < user->size()) ? &(*user)[i] : nullptr;
+        std::string               key = std::to_string(i);
+        const boost::json::value* u   = (user != nullptr && i < user->size()) ? &(*user)[i] : nullptr;
         children.emplace_back(key, make_node(assets[i], u));
     }
 }
@@ -96,8 +93,8 @@ bool JsonConfigBranch::is_dirty() const {
         return true;
     }
     for (const auto& kv : children) {
-        const std::string& key = kv.first;
-        const auto& child = kv.second;
+        const std::string& key   = kv.first;
+        const auto&        child = kv.second;
         if (child->is_dirty()) {
             return true;
         }
@@ -148,13 +145,13 @@ boost::json::value JsonConfigBranch::changes_dictionary() const {
     }
     boost::json::object changes;
     for (const auto& kv : children) {
-        const std::string& key = kv.first;
-        const auto& child = kv.second;
+        const std::string& key   = kv.first;
+        const auto&        child = kv.second;
         if (child->is_dirty()) {
             if (auto branch = dynamic_cast<const JsonConfigBranch*>(child.get())) {
                 changes[key] = branch->changes_dictionary();
             } else {
-                auto leaf = dynamic_cast<const JsonConfigLeaf*>(child.get());
+                auto leaf    = dynamic_cast<const JsonConfigLeaf*>(child.get());
                 changes[key] = leaf ? leaf->value() : boost::json::value();
             }
         }
@@ -167,8 +164,8 @@ const JsonConfigNode* JsonConfigBranch::get_node(const std::vector<std::string>&
         return this;
     }
     for (const auto& kv : children) {
-        const std::string& key = kv.first;
-        const auto& child = kv.second;
+        const std::string& key   = kv.first;
+        const auto&        child = kv.second;
         if (key == path[0]) {
             if (path.size() == 1) {
                 return child.get();
@@ -183,8 +180,7 @@ const JsonConfigNode* JsonConfigBranch::get_node(const std::vector<std::string>&
 }
 
 JsonConfigNode* JsonConfigBranch::get_node(const std::vector<std::string>& path) {
-    return const_cast<JsonConfigNode*>(
-        static_cast<const JsonConfigBranch*>(this)->get_node(path));
+    return const_cast<JsonConfigNode*>(static_cast<const JsonConfigBranch*>(this)->get_node(path));
 }
 
 void JsonConfigBranch::set(const std::vector<std::string>& path, const boost::json::value& v) {
@@ -194,8 +190,8 @@ void JsonConfigBranch::set(const std::vector<std::string>& path, const boost::js
     // Find or create the child for path[0].
     JsonConfigNode* child = nullptr;
     for (auto& kv : children) {
-        const std::string& key = kv.first;
-        JsonConfigNode* node = kv.second.get();
+        const std::string& key  = kv.first;
+        JsonConfigNode*    node = kv.second.get();
         if (key == path[0]) {
             child = node;
             break;
@@ -232,7 +228,7 @@ void JsonConfigBranch::set(const std::vector<std::string>& path, const boost::js
     // path.size() > 1: descend into/ create an intermediate branch.
     if (child == nullptr) {
         boost::json::object empty_obj;
-        auto new_branch = std::make_shared<JsonConfigBranch>(empty_obj, nullptr);
+        auto                new_branch = std::make_shared<JsonConfigBranch>(empty_obj, nullptr);
         children.emplace_back(path[0], new_branch);
         new_branch->set(std::vector<std::string>(path.begin() + 1, path.end()), v);
     } else if (auto branch = dynamic_cast<JsonConfigBranch*>(child)) {
@@ -246,16 +242,15 @@ void JsonConfigBranch::set(const std::vector<std::string>& path, const boost::js
             }
         }
         boost::json::object empty_obj;
-        auto new_branch = std::make_shared<JsonConfigBranch>(empty_obj, nullptr);
+        auto                new_branch = std::make_shared<JsonConfigBranch>(empty_obj, nullptr);
         children.emplace_back(path[0], new_branch);
         new_branch->set(std::vector<std::string>(path.begin() + 1, path.end()), v);
     }
 }
 
-JsonConfigModel::JsonConfigModel(const boost::json::value& assets_json,
-                                 const boost::json::value* user_json) {
+JsonConfigModel::JsonConfigModel(const boost::json::value& assets_json, const boost::json::value* user_json) {
     const boost::json::object* user_obj =
-        (user_json != nullptr && user_json->is_object()) ? &user_json->as_object() : nullptr;
+            (user_json != nullptr && user_json->is_object()) ? &user_json->as_object() : nullptr;
     root_ = std::make_shared<JsonConfigBranch>(assets_json.as_object(), user_obj);
 }
 
@@ -279,4 +274,4 @@ boost::json::value JsonConfigModel::changes_dictionary() const {
     return boost::json::object();
 }
 
-} // namespace vs_settings
+}  // namespace vs_settings

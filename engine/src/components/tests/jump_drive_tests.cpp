@@ -25,29 +25,27 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
 #include <map>
 
+#include <gtest/gtest.h>
+
+#include "cmd/unit_csv_factory.h"
 #include "components/jump_drive.h"
 #include "resource/random_utils.h"
-#include "cmd/unit_csv_factory.h"
 
 static const std::string upgrades_suffix_string = "__upgrades";
-static const std::string jump_drive_string = "jump_drive";
+static const std::string jump_drive_string      = "jump_drive";
 
-static const std::map<std::string,std::string> jump_drive_map = {
-    {"Key", "jump_drive__upgrades"},
-    {"Name", "Interstellar Jump Drive"},
-    {"Upgrade_Type", "Jump_Drive"},
-    {"Object_Type", "Upgrade_Replacement"},
-    {"Textual_Description", "\"@upgrades/jump_drive.png@Jump drive for traveling between stars\"\n"},
-    {"Mass", "10"},
-    {"Moment_Of_Inertia", "10"},
-    {"Jump_Drive_Present", "TRUE"},
-    {"Jump_Drive_Delay", "1"}
-};
-
-
+static const std::map<std::string, std::string> jump_drive_map = {
+        {"Key", "jump_drive__upgrades"},
+        {"Name", "Interstellar Jump Drive"},
+        {"Upgrade_Type", "Jump_Drive"},
+        {"Object_Type", "Upgrade_Replacement"},
+        {"Textual_Description", "\"@upgrades/jump_drive.png@Jump drive for traveling between stars\"\n"},
+        {"Mass", "10"},
+        {"Moment_Of_Inertia", "10"},
+        {"Jump_Drive_Present", "TRUE"},
+        {"Jump_Drive_Delay", "1"}};
 
 // Used to quickly figure out why the code wasn't working properly
 TEST(JumpDrive, Damage) {
@@ -65,5 +63,5 @@ TEST(JumpDrive, Damage) {
     std::cout << chance_to_damage << std::endl;
     std::cout << jump_drive.PercentOperational() << std::endl;
 
-    //EXPECT_FALSE(true);
+    // EXPECT_FALSE(true);
 }

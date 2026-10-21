@@ -28,28 +28,28 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "component.h"
+
 #include "cmd/unit_csv_factory.h"
 #include "resource/cargo.h"
 #include "resource/manifest.h"
 
 
 
-const std::string NAME = "Name";
-const std::string MASS = "Mass";
+const std::string NAME   = "Name";
+const std::string MASS   = "Mass";
 const std::string VOLUME = "Volume";
 
-Component::~Component()
-= default;
+Component::~Component() = default;
 
-Component::Component(double mass, double volume, bool installed, bool integral):
-                     upgrade_name(""),
-                     description(""),
-                     price(0.0),
-                     mass(mass), volume(volume),
-                     operational(Resource<double>(1.0,0.0,1.0)),
-                     installed(installed),
-                     integral(integral) {}
-
+Component::Component(double mass, double volume, bool installed, bool integral)
+    : upgrade_name(""),
+      description(""),
+      price(0.0),
+      mass(mass),
+      volume(volume),
+      operational(Resource<double>(1.0, 0.0, 1.0)),
+      installed(installed),
+      integral(integral) {}
 
 void Component::Load(std::string unit_key) {
     this->upgrade_key = "";
@@ -73,19 +73,16 @@ void Component::Load(std::string unit_key) {
     // TODO: bool integral = false;
 }
 
-
-
 // TODO: convert to std::pair<bool, double>
-bool Component::CanWillUpDowngrade(const std::string upgrade_key,
-                                   bool upgrade, bool apply) {
-    if(upgrade) {
-        if(apply) {
+bool Component::CanWillUpDowngrade(const std::string upgrade_key, bool upgrade, bool apply) {
+    if (upgrade) {
+        if (apply) {
             return Upgrade(upgrade_key);
         } else {
             return CanUpgrade(upgrade_key);
         }
     } else {
-        if(apply) {
+        if (apply) {
             return Downgrade();
         } else {
             return CanDowngrade();
@@ -95,21 +92,21 @@ bool Component::CanWillUpDowngrade(const std::string upgrade_key,
 
 bool Component::Downgrade() {
     upgrade_name = std::string();
-    upgrade_key = std::string();
+    upgrade_key  = std::string();
 
-    mass = 0.0;
-    volume = 0.0;
+    mass      = 0.0;
+    volume    = 0.0;
     installed = false;
     return true;
 }
 
 bool Component::Upgrade(const std::string upgrade_key) {
     this->upgrade_key = upgrade_key;
-    upgrade_name = UnitCSVFactory::GetVariable(upgrade_key, NAME, std::string());
+    upgrade_name      = UnitCSVFactory::GetVariable(upgrade_key, NAME, std::string());
 
     mass = UnitCSVFactory::GetVariable(upgrade_key, MASS, 0.0);
     // TODO: volume currently not in units.json. need to merge with items list
-    volume = UnitCSVFactory::GetVariable(upgrade_key, VOLUME, 0.0);
+    volume    = UnitCSVFactory::GetVariable(upgrade_key, VOLUME, 0.0);
     installed = true;
     return true;
 }
@@ -155,12 +152,30 @@ void Component::SetIntegral(bool integral) {
 }
 
 // Getters
-const std::string Component::GetUpgradeName() const { return upgrade_name; }
-const std::string Component::GetUpgradeKey() const { return upgrade_key; }
-const std::string Component::GetDescription() const { return description; }
+const std::string Component::GetUpgradeName() const {
+    return upgrade_name;
+}
 
-const double Component::GetPrice() const { return price; }
-const double Component::GetMass() const { return mass; }
-const double Component::GetVolume() const { return volume; }
+const std::string Component::GetUpgradeKey() const {
+    return upgrade_key;
+}
 
-const bool Component::Integral() const { return integral; }
+const std::string Component::GetDescription() const {
+    return description;
+}
+
+const double Component::GetPrice() const {
+    return price;
+}
+
+const double Component::GetMass() const {
+    return mass;
+}
+
+const double Component::GetVolume() const {
+    return volume;
+}
+
+const bool Component::Integral() const {
+    return integral;
+}

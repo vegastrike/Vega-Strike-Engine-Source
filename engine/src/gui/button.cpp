@@ -26,18 +26,20 @@
  */
 
 #include "button.h"
-#include "gldrv/winsys.h"
+
 #include <cstdlib>
 #include <cstring>
 
-//Button::Button(float x, float y, float wid, float hei, char *name) { ; }
+#include "gldrv/winsys.h"
+
+// Button::Button(float x, float y, float wid, float hei, char *name) { ; }
 Button::Button(float x, float y, float wid, float hei, const char *name) {
-    //Initialize the variables
-    xcoord = x;
-    ycoord = y;
-    width = wid;
-    height = hei;
-    label = strdup(name);
+    // Initialize the variables
+    xcoord    = x;
+    ycoord    = y;
+    width     = wid;
+    height    = hei;
+    label     = strdup(name);
     highlight = 0;
 
     Refresh();
@@ -75,7 +77,7 @@ int Button::MouseClick(int button, int state, float x, float y) {
     }
     if (state != WS_MOUSE_UP) {
         return 0;
-    }                                      //Returning the 1 says it's been clicked
+    }  // Returning the 1 says it's been clicked
 
     return 1;
 }
@@ -90,7 +92,7 @@ int Button::MouseMove(float x, float y) {
 }
 
 int Button::MouseMoveClick(float x, float y) {
-    //Nothing to do
+    // Nothing to do
     return 0;
 }
 
@@ -119,4 +121,3 @@ int Button::Inside(float x, float y) {
     }
     return 1;
 }
-
