@@ -27,67 +27,69 @@
 #ifndef VEGA_STRIKE_ENGINE_SAVEGAME_H
 #define VEGA_STRIKE_ENGINE_SAVEGAME_H
 
-//#include "cmd/script/mission.h"
+// #include "cmd/script/mission.h"
 
 #include "gfx_generic/vec.h"
 
-//WARNING, SAVE FILES ARE LIMITED TO MAXBUFFER SIZE !!! (LOOK IN NETWORKING/CONST.H)
+// WARNING, SAVE FILES ARE LIMITED TO MAXBUFFER SIZE !!! (LOOK IN NETWORKING/CONST.H)
 
-#include <string>
 #include <set>
+#include <string>
 #include <vector>
-#include "src/SharedPool.h"
+
 #include "cmd/unit_type.h"
+#include "src/SharedPool.h"
 
 // TODO: implement ParseSaveGameHeader
 struct SaveGameHeader {
-    float credits;
-    std::string force_star_system;
-    std::string original_star_system;
-    QVector previous_position;
+    float                    credits;
+    std::string              force_star_system;
+    std::string              original_star_system;
+    QVector                  previous_position;
     std::vector<std::string> fleet;
 };
 
 std::string GetSaveGame();
-void SetSaveGame(std::string save_game);
+void        SetSaveGame(std::string save_game);
 
 struct SavedUnits {
     StringPool::Reference filename;
-    Vega_UnitType type;
+    Vega_UnitType         type;
     StringPool::Reference faction;
 
     SavedUnits(const char *filen, int typ, const char *fact) {
-        faction = std::string(fact);
+        faction  = std::string(fact);
         filename = std::string(filen);
-        type = DeserializeUnitType(typ);
+        type     = DeserializeUnitType(typ);
     }
 };
 class MissionFloatDat;
 class MissionStringDat;
-class SaveGame {
-    SaveGame(const SaveGame &) {
-    } //not used!
 
-    std::string savestring;
-    std::string ForceStarSystem;
-    QVector PlayerLocation;
-    std::string last_pickled_data;
-    std::string last_written_pickled_data;
-    std::string outputsavegame;
-    std::string originalsystem;
-    std::string callsign;
-    std::string WriteMissionData();
-    void WriteMissionStringData(std::vector<char> &ret);
-    std::string WriteNewsData();
-    void ReadStardate(char *&buf);
-    void ReadNewsData(char *&buf, bool just_skip = false);
-    void ReadMissionData(char *&buf, bool select_data = false,
-            const std::set<std::string> &select_data_filter = std::set<std::string>());
-    void ReadMissionStringData(char *&buf, bool select_data = false,
-            const std::set<std::string> &select_data_filter = std::set<std::string>());
+class SaveGame {
+    SaveGame(const SaveGame &) {}  // not used!
+
+    std::string       savestring;
+    std::string       ForceStarSystem;
+    QVector           PlayerLocation;
+    std::string       last_pickled_data;
+    std::string       last_written_pickled_data;
+    std::string       outputsavegame;
+    std::string       originalsystem;
+    std::string       callsign;
+    std::string       WriteMissionData();
+    void              WriteMissionStringData(std::vector<char> &ret);
+    std::string       WriteNewsData();
+    void              ReadStardate(char *&buf);
+    void              ReadNewsData(char *&buf, bool just_skip = false);
+    void              ReadMissionData(char *&buf, bool select_data = false,
+                                      const std::set<std::string> &select_data_filter = std::set<std::string>());
+    void              ReadMissionStringData(char *&buf, bool select_data = false,
+                                            const std::set<std::string> &select_data_filter = std::set<std::string>());
     MissionStringDat *missionstringdata;
-    MissionFloatDat *missiondata;
-    std::string playerfaction;
+    MissionFloatDat  *missiondata;
+    std::string       playerfaction;
+
 public:
     ~SaveGame();
     void ReloadPickledData();
@@ -119,10 +121,10 @@ public:
     unsigned int getMissionStringDataLength(const std::string &magic_number) const;
 
     SaveGame(const std::string &pilotname);
-    void PurgeZeroStarships();
-    void SetPlayerLocation(const QVector &playerloc);
-    QVector GetPlayerLocation();
-    void SetStarSystem(std::string sys);
+    void        PurgeZeroStarships();
+    void        SetPlayerLocation(const QVector &playerloc);
+    QVector     GetPlayerLocation();
+    void        SetStarSystem(std::string sys);
     std::string GetStarSystem();
     std::string GetOldStarSystem();
 
@@ -135,44 +137,30 @@ public:
     }
 
     std::string WriteSavedUnit(SavedUnits *su);
-    std::string WriteSaveGame(const char *systemname,
-            const QVector &Pos,
-            std::vector<std::string> unitname,
-            int player_num,
-            std::string fact = "",
-            bool write = true);
-    std::string WritePlayerData(const QVector &FP,
-            std::vector<std::string> unitname,
-            const char *systemname,
-            std::string fact = "");
+    std::string WriteSaveGame(const char *systemname, const QVector &Pos, std::vector<std::string> unitname,
+                              int player_num, std::string fact = "", bool write = true);
+    std::string WritePlayerData(const QVector &FP, std::vector<std::string> unitname, const char *systemname,
+                                std::string fact = "");
     std::string WriteDynamicUniverse();
-    void ReadSavedPackets(char *&buf, bool commitfaction, bool skip_news = false, bool select_data = false,
-            const std::set<std::string> &select_data_filter = std::set<std::string>());
-///cast address to long (for 64 bits compatibility)
-    void AddUnitToSave(const char *unitname, int type, const char *faction, long address);
-    void RemoveUnitFromSave(long address); //cast it to a long
-    void SetOutputFileName(const std::string &filename);
-    float ParseSaveGame(const std::string &filename,
-            std::string &ForceStarSystem,
-            const std::string &originalstarsystem,
-            QVector &pos,
-            bool &shouldupdatedfighter0pos,
-            std::vector<std::string> &originalunit,
-            int player_num,
-            const std::string &savestr = std::string(),
-            bool read = true,
-            bool commitFaction = true,
-            bool quick_read = false,
-            bool skip_news = false,
-            bool select_data = false,
-            const std::set<std::string> &select_data_filter =
-            std::set<std::string>());
-    void LoadSavedMissions();
+    void        ReadSavedPackets(char *&buf, bool commitfaction, bool skip_news = false, bool select_data = false,
+                                 const std::set<std::string> &select_data_filter = std::set<std::string>());
+    /// cast address to long (for 64 bits compatibility)
+    void  AddUnitToSave(const char *unitname, int type, const char *faction, long address);
+    void  RemoveUnitFromSave(long address);  // cast it to a long
+    void  SetOutputFileName(const std::string &filename);
+    float ParseSaveGame(const std::string &filename, std::string &ForceStarSystem,
+                        const std::string &originalstarsystem, QVector &pos, bool &shouldupdatedfighter0pos,
+                        std::vector<std::string> &originalunit, int player_num,
+                        const std::string &savestr = std::string(), bool read = true, bool commitFaction = true,
+                        bool quick_read = false, bool skip_news = false, bool select_data = false,
+                        const std::set<std::string> &select_data_filter = std::set<std::string>());
+    void  LoadSavedMissions();
 
     static bool new_save_game_format;
 };
-void WriteSaveGame(class Cockpit *cp, bool auto_save);
-const std::string &GetSaveDir();
-bool isUtf8SaveGame(std::string filename);
 
-#endif //VEGA_STRIKE_ENGINE_SAVEGAME_H
+void               WriteSaveGame(class Cockpit *cp, bool auto_save);
+const std::string &GetSaveDir();
+bool               isUtf8SaveGame(std::string filename);
+
+#endif  // VEGA_STRIKE_ENGINE_SAVEGAME_H

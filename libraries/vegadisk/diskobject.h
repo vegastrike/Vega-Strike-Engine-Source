@@ -27,46 +27,61 @@
 #ifndef VEGA_DISK_DISK_OBJECT_H
 #define VEGA_DISK_DISK_OBJECT_H
 
+#include <archive.h>
 #include <deque>
 #include <string>
 
-#include <archive.h>
-
 namespace vega_disk {
 
-    class DiskObject {
-        public:
-            enum {
-                ERROR_OK=0,
-                ERROR_NO_FILE,
-                ERROR_OPEN_READ_FAILED,
-                ERROR_OPEN_WRITE_FAILED,
-                ERROR_ARCHIVE_READ_FAILED,
-                ERROR_ARCHIVE_CLOSE_FAILED,
-                ERROR_ARCHIVE_FATAL_ERROR,
-            };
-
-            DiskObject() {}
-            DiskObject(const std::string& _filename): filename(_filename) {}
-
-            inline const std::string GetFilename() const { return filename; }
-            inline void SetFilename(const std::string& _filename) { filename = _filename; }
-            int ReadEntry(const std::string& entry_name, std::string& data);
-            int ListEntries(std::deque<std::string>& entries);
-            int WriteEntry(const std::string& entry_name, const std::string& data);
-
-            inline int GetError() const { return error_code; }
-            inline void ClearError() { error_code = ERROR_OK; error_message.clear(); }
-
-            inline const std::string GetErrorString() const { return error_message; }
-        protected:
-            std::string filename{};
-            int error_code{0};
-            std::string error_message{};
-
-            bool record_archive_error(int archive_error, struct archive* archive_file);
+class DiskObject {
+public:
+    enum {
+        ERROR_OK = 0,
+        ERROR_NO_FILE,
+        ERROR_OPEN_READ_FAILED,
+        ERROR_OPEN_WRITE_FAILED,
+        ERROR_ARCHIVE_READ_FAILED,
+        ERROR_ARCHIVE_CLOSE_FAILED,
+        ERROR_ARCHIVE_FATAL_ERROR,
     };
 
+    DiskObject() {}
+
+    DiskObject(const std::string& _filename) : filename(_filename) {}
+
+    inline const std::string GetFilename() const {
+        return filename;
+    }
+
+    inline void SetFilename(const std::string& _filename) {
+        filename = _filename;
+    }
+
+    int ReadEntry(const std::string& entry_name, std::string& data);
+    int ListEntries(std::deque<std::string>& entries);
+    int WriteEntry(const std::string& entry_name, const std::string& data);
+
+    inline int GetError() const {
+        return error_code;
+    }
+
+    inline void ClearError() {
+        error_code = ERROR_OK;
+        error_message.clear();
+    }
+
+    inline const std::string GetErrorString() const {
+        return error_message;
+    }
+
+protected:
+    std::string filename{};
+    int         error_code{0};
+    std::string error_message{};
+
+    bool record_archive_error(int archive_error, struct archive* archive_file);
 };
 
-#endif //VEGA_DISK_DISK_OBJECT_H
+};  // namespace vega_disk
+
+#endif  // VEGA_DISK_DISK_OBJECT_H
