@@ -89,12 +89,15 @@ IncludeCategories:
   - Regex: '^"src/python/unit_from_to_python\.h"$'
     Priority: 12
     SortPriority: 13
-  - Regex: '^"[[:alnum:]./_]+"$'
+  - Regex: '^"src/python/define_odd_unit_functions\.h"$'
     Priority: 13
+    SortPriority: 14
+  - Regex: '^"[[:alnum:]./_]+"$'
+    Priority: 14
     SortPriority: 11
   - Regex: '.*'
-    Priority: 14
-    SortPriority: 14
+    Priority: 15
+    SortPriority: 15
 IndentAccessModifiers: false
 IndentExternBlock: Indent
 IndentPPDirectives: AfterHash
