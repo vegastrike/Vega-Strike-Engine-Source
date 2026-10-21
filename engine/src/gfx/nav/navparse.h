@@ -24,8 +24,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
 
+#ifndef VEGA_STRIKE_ENGINE_SRC_GFX_NAV_NAVPARSE_H
+#define VEGA_STRIKE_ENGINE_SRC_GFX_NAV_NAVPARSE_H
+
+#include "gfx_generic/mesh.h"
 #include "vegadisk/vsfilesystem.h"
 
 // using namespace VSFileSystem;
@@ -369,3 +372,4 @@ bool NavigationSystem::ParseFile(string filename) {
         return 0;
     }
 }
+#endif // VEGA_STRIKE_ENGINE_SRC_GFX_NAV_NAVPARSE_H

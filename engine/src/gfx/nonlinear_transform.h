@@ -24,17 +24,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 #ifndef VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
 #define VEGA_STRIKE_ENGINE_GFX_NONLINEAR_TRANSFORM_H
 
 #include <math.h>
 
+#include "gfxlib.h"
+#include "gfxlib_struct.h"
 #include "root_generic/macosx_math.h"
 #ifndef M_PI
 #    define M_PI (3.1415926536)
 #endif
 /**
- * We could make it virtual and ahve a sphere-map or cube-map version of this
+ * We could make it virtual and have a sphere-map or cube-map version of this
  *
  */
 class IdentityTransform {

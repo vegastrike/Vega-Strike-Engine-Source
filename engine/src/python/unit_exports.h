@@ -24,7 +24,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
+
+#ifndef VEGA_STRIKE_ENGINE_SRC_PYTHON_UNIT_EXPORTS_H
+#define VEGA_STRIKE_ENGINE_SRC_PYTHON_UNIT_EXPORTS_H
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
@@ -122,3 +124,4 @@ void EXP_UN(boost::python::class_builder<UnitWrapper> &Class) {
 #undef voidEXPORT_UTIL2
 #undef voidEXPORT_UTIL3
 }
+#endif // VEGA_STRIKE_ENGINE_SRC_PYTHON_UNIT_EXPORTS_H

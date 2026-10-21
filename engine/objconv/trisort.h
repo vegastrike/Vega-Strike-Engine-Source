@@ -24,12 +24,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
+
+#ifndef VEGA_STRIKE_ENGINE_OBJCONV_TRISORT_H
+#define VEGA_STRIKE_ENGINE_OBJCONV_TRISORT_H
+
+#include <cstdio>
+#include <vector>
 
 enum POLYGON_RELATION {
     BACK    = -1,
     UNKNOWN = 0,
-    FRONT   = 1
+    FRONT   = 1,
 };
 
 class Vector {
@@ -46,7 +51,7 @@ public:
 
     Index(Vector xyz, int p, int n, int t, int c) : V(xyz), p(p), n(n), t(t), c(c) {}
 
-    void write(FILE *fp) const;
+    void write(std::FILE *fp) const;
 };
 
 class Plane {
@@ -92,5 +97,6 @@ public:
     Mesh(const char *filename);
     void sort();
     void write(const char *filename) const;
-    void writeIndex(FILE *fp, const Index &) const;
+    void writeIndex(std::FILE *fp, const Index &) const;
 };
+#endif // VEGA_STRIKE_ENGINE_OBJCONV_TRISORT_H

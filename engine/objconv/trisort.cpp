@@ -28,10 +28,10 @@
 #include "objconv/trisort.h"
 
 #include <algorithm>
-#include <ctype.h>
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string>
 #include <vector>
 
@@ -71,7 +71,7 @@ bool Face::Cross(Plane &result) const {
         size     = result.a * result.a + result.b * result.b + result.c * result.c;
     }
     if (size) {
-        size = ((double)1) / sqrtf(size);
+        size = 1.0 / sqrtf(size);
     } else {
         return false;
     }
@@ -140,7 +140,7 @@ void Mesh::sort() {
     std::sort(f.begin(), f.end());
 }
 
-void Index::write(FILE *fp) const {
+void Index::write(std::FILE *fp) const {
     printf("G: %lf\n", V.z);
     fprintf(fp, "%d/", p);
     if (n != -1) {
@@ -156,7 +156,7 @@ void Index::write(FILE *fp) const {
 }
 
 void Mesh::write(const char *filename) const {
-    FILE *fp = fopen(filename, "w");
+    std::FILE *fp = fopen(filename, "w");
     if (fp) {
         unsigned int i;
         for (i = 0; i < p.size(); i++) {
@@ -231,7 +231,7 @@ Index Mesh::processfacevertex(char *vertex) const {
         }
     }
     Vector v(0, 0, 0);
-    if (a <= (int)p.size() && a > 0) {
+    if (a <= static_cast<int>(p.size()) && a > 0) {
         v = p[a - 1];
     }
     return Index(v, a, b, c, d);
@@ -288,7 +288,7 @@ void Mesh::processline(char *line) {
 }
 
 Mesh::Mesh(const char *filename) {
-    FILE *fp = fopen(filename, "r");
+    std::FILE *fp = fopen(filename, "r");
     char  line[65'536];
     line[65'535] = 0;
     while (fgets(line, 65'535, fp)) {

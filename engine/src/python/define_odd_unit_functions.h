@@ -24,10 +24,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
+
+#ifndef VEGA_STRIKE_ENGINE_SRC_PYTHON_DEFINE_ODD_UNIT_FUNCTIONS_H
+#define VEGA_STRIKE_ENGINE_SRC_PYTHON_DEFINE_ODD_UNIT_FUNCTIONS_H
 
 
-void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
+#include "unit_wrapper_class.h"
+
+#include "python_class.h"
+
+inline void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::setNull, "setNull");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::isNull, "isNull");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::notNull, "__nonzero__");
@@ -60,3 +66,4 @@ void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetHullPercent, "GetHullPercent");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::rSize, "rSize");
 }
+#endif // VEGA_STRIKE_ENGINE_SRC_PYTHON_DEFINE_ODD_UNIT_FUNCTIONS_H

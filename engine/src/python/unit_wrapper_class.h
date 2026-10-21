@@ -24,12 +24,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
+
+#ifndef VEGA_STRIKE_ENGINE_SRC_PYTHON_UNIT_WRAPPER_CLASS_H
+#define VEGA_STRIKE_ENGINE_SRC_PYTHON_UNIT_WRAPPER_CLASS_H
 
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
 
+#include "src/python/python_class.h"
 #include "src/vs_logging.h"
 #include "universe_util.h"
 using std::string;
@@ -447,3 +450,4 @@ public:
 #undef voidEXPORT_UTIL2
 #undef voidEXPORT_UTIL3
 #undef voidEXPORT_UTIL5
+#endif  // VEGA_STRIKE_ENGINE_SRC_PYTHON_UNIT_WRAPPER_CLASS_H
