@@ -99,7 +99,6 @@ jobs:
             ${{ github.workspace }}\vcpkgBin
             ${{ github.workspace }}\vcpkgBuild
           key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
-        if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Build the code
         run: |
