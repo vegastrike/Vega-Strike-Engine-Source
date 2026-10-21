@@ -33,10 +33,10 @@
 
 void setBackgroundColor(float red, float green, float blue, float transparent) {
     // Get a reference to the ImGui style
-    ImGuiStyle& style = ImGui::GetStyle();
+    ImGuiStyle &style = ImGui::GetStyle();
 
     // Get a pointer to the array of colors in the style
-    ImVec4* colors = style.Colors;
+    ImVec4 *colors = style.Colors;
 
     // Define your desired background color (RGBA values from 0.0 to 1.0)
     // For example, a light gray with some transparency
@@ -47,12 +47,12 @@ void setBackgroundColor(float red, float green, float blue, float transparent) {
 }
 
 // Show Menu
-void showMenu(SDL_Renderer* renderer, SDL_Window* window) {
+void showMenu(SDL_Renderer *renderer, SDL_Window *window) {
     std::cout << "Begin showMenu\n";
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io{ImGui::GetIO()};
+    ImGuiIO &io{ImGui::GetIO()};
     ImGui::StyleColorsDark();
 
     std::cout << "Finished init\n";
@@ -119,7 +119,7 @@ void showMenu(SDL_Renderer* renderer, SDL_Window* window) {
 
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);  // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::ColorEdit3("clear color",
-                              reinterpret_cast<float*>(&clear_color));  // Edit 3 floats representing a color
+                              reinterpret_cast<float *>(&clear_color));  // Edit 3 floats representing a color
 
             if (ImGui::Button("Button")) {  // Buttons return true when clicked (most widgets return true when
                                             // edited/activated)

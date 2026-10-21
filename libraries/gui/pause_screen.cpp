@@ -59,7 +59,7 @@ void pauseGame() {
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+        SDL_Window *current_window = SDL_GL_GetCurrentWindow();
         SDL_GL_SwapWindow(current_window);
     }
 }
