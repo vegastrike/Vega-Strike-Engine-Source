@@ -29,11 +29,13 @@
 #define VEGA_STRIKE_ENGINE_SRC_PYTHON_DEFINE_ODD_UNIT_FUNCTIONS_H
 
 
-#include "unit_wrapper_class.h"
-
 #include "python_class.h"
 
-inline void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
+#include "unit_wrapper_class.h"
+
+// Warning: Do not mark this function inline. If you do, you will get a linker error.
+// ReSharper disable once CppNonInlineFunctionDefinitionInHeaderFile
+void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::setNull, "setNull");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::isNull, "isNull");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::notNull, "__nonzero__");
@@ -66,4 +68,4 @@ inline void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Cl
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetHullPercent, "GetHullPercent");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::rSize, "rSize");
 }
-#endif // VEGA_STRIKE_ENGINE_SRC_PYTHON_DEFINE_ODD_UNIT_FUNCTIONS_H
+#endif  // VEGA_STRIKE_ENGINE_SRC_PYTHON_DEFINE_ODD_UNIT_FUNCTIONS_H
