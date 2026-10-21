@@ -24,6 +24,7 @@ set -euo pipefail
 
 declare -a file_extensions=('h' 'c' 'cpp')
 echo "File extensions:" "${file_extensions[@]}"
+
 declare -a dirs=('engine' 'libraries/cmd' 'libraries/gfx_generic' 'libraries/gui' 'libraries/posh' \
     'libraries/root_generic' 'libraries/vegadisk')
 echo "Directories:" "${dirs[@]}"
@@ -33,7 +34,7 @@ for subdir in "${dirs[@]}"; do
   for file_extension in "${file_extensions[@]}"; do
     echo "Processing .${file_extension} files in ${subdir} subdirectory"
     if test -n "$(find "${subdir}" -name "*.${file_extension}" -type f -print -quit)"; then
-      find "${subdir}" -name "*.${file_extension}" -type f -print0 | xargs -0 clang-format -i
+      find "${subdir}" -name "*.${file_extension}" -type f -print0 | xargs -0 clang-format-21 -i
       git add "${subdir}"
       if test -n "$(git status -z)"; then
         git commit -m "Apply clang-format -i (in-place) to all .${file_extension} files under ${subdir}"
