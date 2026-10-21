@@ -29,10 +29,12 @@
 #include "gfx/vsimage.h"
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#include <glext.h>
-#include <glut.h>
+#include <cstring>
 #include <png.h>
-#include <string.h>
+
+#include <glut.h>
+
+#include <glext.h>
 
 #include "cmd/unit_generic.h"
 #include "posh/posh.h"
@@ -557,7 +559,7 @@ unsigned char *VSImage::ReadBMP() {
          */
         if (le16_to_cpu(info.biBitCount) == 24) {
             mode = _24BIT;  // Someone said _24BIT isn't supported by most cards, but PNG and JPEG use it widely without
-                            // problems, so it must be untrue...
+            // problems, so it must be untrue...
             if (img_file2 && img_file2->Valid()) {
                 mode = _24BITRGBA;
             }
