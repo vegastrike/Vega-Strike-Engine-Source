@@ -98,7 +98,7 @@ then
 fi
 echo "Number of threads to build with after capping: $num_threads_to_build_with"
 
-VERBOSE=1 cmake --build --preset="build-${preset_name}" -j ${num_threads_to_build_with}
+cmake --build --preset="build-${preset_name}" -j ${num_threads_to_build_with}
 
 cd "${ROOT_DIR}"
 
