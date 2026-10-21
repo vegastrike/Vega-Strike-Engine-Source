@@ -29,7 +29,7 @@ private:
         return val > 0 ? 1 : val < 0 ? -1 : 0;
     }
 
-    iTerrainCell *cell;
+    iTerrainCell    *cell;
     const csVector3 &start;
     const csVector3 &end;
 
@@ -52,27 +52,23 @@ private:
     bool firsttime, vertical, verticalhit;
 
 public:
-    csTerrainSegmentCellCollider(iTerrainCell *cell, const csVector3 &
-    start, const csVector3 &end)
-            : start(start), end(end), pos(cell->GetPosition()), size(cell->GetSize()),
-            vertical(false), verticalhit(false) {
+    csTerrainSegmentCellCollider(iTerrainCell *cell, const csVector3 &start, const csVector3 &end)
+        : start(start), end(end), pos(cell->GetPosition()), size(cell->GetSize()), vertical(false), verticalhit(false) {
         // Constants
-        const float rootOf2 = 1.414213f;
+        const float rootOf2   = 1.414213f;
         const float halfRoot2 = rootOf2 / 2;
 
         this->cell = cell;
 
-        width = cell->GetGridWidth();
+        width  = cell->GetGridWidth();
         height = cell->GetGridHeight();
 
         scale_u = size.x / (width - 1);
         scale_v = size.z / (height - 1);
 
         // Offset from grid 0,0
-        const csVector2 gridOffsetStart = csVector2(start.x - pos.x,
-                -(start.z - (pos.y + size.z)));
-        const csVector2 gridOffsetEnd = csVector2(end.x - pos.x,
-                -(end.z - (pos.y + size.z)));
+        const csVector2 gridOffsetStart = csVector2(start.x - pos.x, -(start.z - (pos.y + size.z)));
+        const csVector2 gridOffsetEnd   = csVector2(end.x - pos.x, -(end.z - (pos.y + size.z)));
 
         // U, V and height of segment start in cell space
         u0 = (gridOffsetStart.x) / scale_u;
@@ -94,8 +90,7 @@ public:
             vertical = true;
 
             float height = cell->GetHeight(gridOffsetStart);
-            if (csMin(h0, h1) <= height &&
-                    csMax(h0, h1) >= height) {
+            if (csMin(h0, h1) <= height && csMax(h0, h1) >= height) {
                 verticalhit = true;
             }
         }
@@ -122,7 +117,7 @@ public:
         }
 
         oneOverdp = 1 / dp;
-        ep = fabs(dp) * (1 - eu - ev) / (dv + du); // line-line intersection
+        ep        = fabs(dp) * (1 - eu - ev) / (dv + du);  // line-line intersection
 
         // Fixup for positive directions
         if (du > 0) {
@@ -136,8 +131,8 @@ public:
         }
 
         // Stepping variables
-        t = 0;
-        h = h0;
+        t           = 0;
+        h           = h0;
         cell_height = cell->GetHeight(gridOffsetStart);
 
         firsttime = true;
@@ -148,7 +143,7 @@ public:
     // -1 - loop stop
     int GetIntersection(csVector3 &result, csVector2 &cell_result) {
         // Constants
-        const float rootOf2 = 1.414213f;
+        const float rootOf2   = 1.414213f;
         const float halfRoot2 = rootOf2 / 2;
 
         if (t < 0 || t >= 1) {
@@ -158,7 +153,7 @@ public:
             return -1;
         }
 
-        float r_h0 = h;
+        float r_h0  = h;
         float tstep = 0;
 
         if (vertical) {
@@ -179,9 +174,9 @@ public:
         }
 
         if (!firsttime) {
-            float tToU = eu * fabs(oneOverdu); // Time to reach U intersection
-            float tToV = ev * fabs(oneOverdv); // Time to reach V intersection
-            float tToP = ep * fabs(oneOverdp); // Time to reach P intersection
+            float tToU = eu * fabs(oneOverdu);  // Time to reach U intersection
+            float tToV = ev * fabs(oneOverdv);  // Time to reach V intersection
+            float tToP = ep * fabs(oneOverdp);  // Time to reach P intersection
 
             if (tToU <= tToV && tToU <= tToP) {
                 // U intersection first
@@ -189,11 +184,11 @@ public:
                     tToU = 1 - t;
                 }
 
-                tstep = tToU;
-                t += tToU;
+                tstep  = tToU;
+                t     += tToU;
 
                 // Update distances
-                eu = 0;
+                eu  = 0;
                 ev -= fabs(dv) * tToU;
                 ep -= fabs(dp) * tToU;
 
@@ -205,12 +200,12 @@ public:
                     tToV = 1 - t;
                 }
 
-                tstep = tToV;
-                t += tToV;
+                tstep  = tToV;
+                t     += tToV;
 
                 // Update distances
                 eu -= fabs(du) * tToV;
-                ev = 0;
+                ev  = 0;
                 ep -= fabs(dp) * tToV;
 
                 // Update height
@@ -221,13 +216,13 @@ public:
                     tToP = 1 - t;
                 }
 
-                tstep = tToP;
-                t += tToP;
+                tstep  = tToP;
+                t     += tToP;
 
                 // Update distances
                 eu -= fabs(du) * tToP;
                 ev -= fabs(dv) * tToP;
-                ep = 0;
+                ep  = 0;
 
                 // Update height
                 h += dh * tToP;
@@ -251,9 +246,8 @@ public:
         float r_h1 = h;
         float h_h0 = cell_height;
 
-        csVector2 uv = csVector2((u0 + du * t) * scale_u,
-                (v0 + dv * t) * scale_v);
-        float h_h1 = cell->GetHeight(uv);
+        csVector2 uv   = csVector2((u0 + du * t) * scale_u, (v0 + dv * t) * scale_v);
+        float     h_h1 = cell->GetHeight(uv);
 
         // Remember height value
         cell_height = h_h1;
@@ -287,11 +281,10 @@ public:
             result.y = h0 + dh * correct_t;
             result.z = pos.y + height - cell_result.y * scale_v;
 
-            return (cell_result.x >= 0 && cell_result.x <= width - 1 &&
-                    cell_result.y >= 0 && cell_result.y <= height - 1);
+            return (cell_result.x >= 0 && cell_result.x <= width - 1 && cell_result.y >= 0 &&
+                    cell_result.y <= height - 1);
         }
 
         return 0;
     }
 };
-

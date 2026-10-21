@@ -31,21 +31,19 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_VOLUMECOLLIDER_H
 
 struct OPCODE_API VolumeCache {
-    VolumeCache() : Model(nullptr) {
-    }
+    VolumeCache() : Model(nullptr) {}
 
-    ~VolumeCache() {
-    }
+    ~VolumeCache() {}
 
-    Container TouchedPrimitives;    //!< Indices of touched primitives
-    const BaseModel *Model;                //!< Owner
+    Container        TouchedPrimitives;  //!< Indices of touched primitives
+    const BaseModel *Model;              //!< Owner
 };
 
 class OPCODE_API VolumeCollider : public Collider {
 public:
     // Constructor / Destructor
     VolumeCollider();
-    virtual                                ~VolumeCollider() = 0;
+    virtual ~VolumeCollider() = 0;
 
     // Collision report
 
@@ -57,7 +55,7 @@ public:
      *	\return		the number of touched primitives
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbTouchedPrimitives() const {
+    inline_ uint32_t GetNbTouchedPrimitives() const {
         return mTouchedPrimitives ? mTouchedPrimitives->GetNbEntries() : 0;
     }
 
@@ -69,7 +67,7 @@ public:
      *	\return		the list of touched primitives (primitive indices)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_        const uint32_t *GetTouchedPrimitives() const {
+    inline_ const uint32_t *GetTouchedPrimitives() const {
         return mTouchedPrimitives ? mTouchedPrimitives->GetEntries() : nullptr;
     }
 
@@ -82,7 +80,7 @@ public:
      *	\return		the number of Volume-BV tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbVolumeBVTests() const {
+    inline_ uint32_t GetNbVolumeBVTests() const {
         return mNbVolumeBVTests;
     }
 
@@ -93,7 +91,7 @@ public:
      *	\return		the number of Volume-Triangle tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbVolumePrimTests() const {
+    inline_ uint32_t GetNbVolumePrimTests() const {
         return mNbVolumePrimTests;
     }
 
@@ -101,7 +99,8 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     *	Validates current settings. You should call this method after all the settings / callbacks have been defined for a collider.
+     *	Validates current settings. You should call this method after all the settings / callbacks have been defined for
+     *a collider.
      *	\return		nullptr if everything is ok, else a string describing the problem
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,14 +108,14 @@ public:
 
 protected:
     // Touched primitives
-    Container *mTouchedPrimitives;    //!< List of touched primitives
+    Container *mTouchedPrimitives;  //!< List of touched primitives
 
     // Dequantization coeffs
     Point mCenterCoeff;
     Point mExtentsCoeff;
     // Stats
     uint32_t mNbVolumeBVTests;    //!< Number of Volume-BV tests
-    uint32_t mNbVolumePrimTests;    //!< Number of Volume-Primitive tests
+    uint32_t mNbVolumePrimTests;  //!< Number of Volume-Primitive tests
     // Internal methods
     void _Dump(const AABBCollisionNode *node);
     void _Dump(const AABBNoLeafNode *node);
@@ -128,14 +127,14 @@ protected:
      *	Initializes a query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    override(Collider) inline_    void InitQuery() {
+    override(Collider) inline_ void InitQuery() {
         // Reset stats & contact status
-        mNbVolumeBVTests = 0;
+        mNbVolumeBVTests   = 0;
         mNbVolumePrimTests = 0;
         Collider::InitQuery();
     }
 
-    inline_                BOOL IsCacheValid(VolumeCache &cache) {
+    inline_ BOOL IsCacheValid(VolumeCache &cache) {
         // We're going to do a volume-vs-model query.
         if (cache.Model != mCurrentModel) {
             // Cached list was for another model so we can't keep it
@@ -149,4 +148,4 @@ protected:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_VOLUMECOLLIDER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_VOLUMECOLLIDER_H

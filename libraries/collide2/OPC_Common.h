@@ -27,40 +27,42 @@
 
 // [GOTTFRIED]: Just a small change for readability.
 #ifdef OPC_CPU_COMPARE
-#define GREATER(x, y)	AIR(x) > IR(y)
+#    define GREATER(x, y) AIR(x) > IR(y)
 #else
-#define GREATER(x, y)    fabsf(x) > (y)
+#    define GREATER(x, y) fabsf(x) > (y)
 #endif
 
 class OPCODE_API CollisionAABB {
 public:
     //! Constructor
-    inline_ CollisionAABB() {
-    }
+    inline_ CollisionAABB() {}
+
     //! Constructor
     inline_ CollisionAABB(const AABB &b) {
         b.GetCenter(mCenter);
         b.GetExtents(mExtents);
     }
+
     //! Destructor
-    inline_                ~CollisionAABB() {
-    }
+    inline_ ~CollisionAABB() {}
 
     //! Get min point of the box
-    inline_    void GetMin(Point &min) const {
+    inline_ void GetMin(Point &min) const {
         min = mCenter - mExtents;
     }
+
     //! Get max point of the box
-    inline_    void GetMax(Point &max) const {
+    inline_ void GetMax(Point &max) const {
         max = mCenter + mExtents;
     }
 
     //! Get component of the box's min point along a given axis
-    inline_    float GetMin(uint32_t axis) const {
+    inline_ float GetMin(uint32_t axis) const {
         return mCenter[axis] - mExtents[axis];
     }
+
     //! Get component of the box's max point along a given axis
-    inline_    float GetMax(uint32_t axis) const {
+    inline_ float GetMax(uint32_t axis) const {
         return mCenter[axis] + mExtents[axis];
     }
 
@@ -71,8 +73,8 @@ public:
      *	\param		max			[in] the max point
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    void SetMinMax(const Point &min, const Point &max) {
-        mCenter = (max + min) * 0.5f;
+    inline_ void SetMinMax(const Point &min, const Point &max) {
+        mCenter  = (max + min) * 0.5f;
         mExtents = (max - min) * 0.5f;
     }
 
@@ -83,7 +85,7 @@ public:
      *	\return		true if current box is inside input box
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    BOOL IsInside(const CollisionAABB &box) const {
+    inline_ BOOL IsInside(const CollisionAABB &box) const {
         if (box.GetMin(0) > GetMin(0)) {
             return FALSE;
         }
@@ -105,21 +107,20 @@ public:
         return TRUE;
     }
 
-    Point mCenter;                //!< Box center
-    Point mExtents;                //!< Box extents
+    Point mCenter;   //!< Box center
+    Point mExtents;  //!< Box extents
 };
 
 class OPCODE_API QuantizedAABB {
 public:
     //! Constructor
-    inline_ QuantizedAABB() {
-    }
-    //! Destructor
-    inline_                ~QuantizedAABB() {
-    }
+    inline_ QuantizedAABB() {}
 
-    int16_t mCenter[3];                //!< Quantized center
-    uint16_t mExtents[3];            //!< Quantized extents
+    //! Destructor
+    inline_ ~QuantizedAABB() {}
+
+    int16_t  mCenter[3];   //!< Quantized center
+    uint16_t mExtents[3];  //!< Quantized extents
 };
 
 //! Quickly rotates & translates a vector
@@ -129,4 +130,4 @@ inline_ void TransformPoint(Point &dest, const Point &source, const Matrix3x3 &r
     dest.z = trans.z + source.x * rot.m[0][2] + source.y * rot.m[1][2] + source.z * rot.m[2][2];
 }
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COMMON_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COMMON_H

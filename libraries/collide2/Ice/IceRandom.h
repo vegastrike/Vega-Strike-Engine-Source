@@ -16,7 +16,7 @@
 #define VEGA_STRIKE_LIBRARIES_COLLIDE2_ICE_ICE_RANDOM_H
 
 ICECORE_API void SRand(uint32_t seed);
-uint32_t Rand();
+uint32_t         Rand();
 
 /// Returns a unit random double value (between 0 and 1, I believe)
 inline_ double UnitRandomDouble() {
@@ -31,4 +31,4 @@ inline_ float UnitRandomFloat() {
 //! Returns a random index so that 0<= index < max_index
 ICECORE_API uint32_t GetRandomIndex(uint32_t max_index);
 
-#endif //VEGA_STRIKE_LIBRARIES_COLLIDE2_ICE_ICE_RANDOM_H
+#endif  // VEGA_STRIKE_LIBRARIES_COLLIDE2_ICE_ICE_RANDOM_H

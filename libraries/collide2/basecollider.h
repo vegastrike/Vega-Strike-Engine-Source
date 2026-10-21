@@ -26,9 +26,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_BASECOLLIDER_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_BASECOLLIDER_H
 
-#define CS_MESH_COLLIDER   0
-#define CS_TERRAFORMER_COLLIDER  1
-#define CS_TERRAIN_COLLIDER 2
+#define CS_MESH_COLLIDER        0
+#define CS_TERRAFORMER_COLLIDER 1
+#define CS_TERRAIN_COLLIDER     2
 
 #include "collide2/Opcode.h"
 
@@ -37,16 +37,15 @@
  */
 struct csCollisionPair {
     csCollisionPair()
-            : a1(0.0f, 0.0f, 0.0f),
-            b1(0.0f, 0.0f, 0.0f),
-            c1(0.0f, 0.0f, 0.0f),
-            a2(0.0f, 0.0f, 0.0f),
-            b2(0.0f, 0.0f, 0.0f),
-            c2(0.0f, 0.0f, 0.0f) {
-    }
+        : a1(0.0f, 0.0f, 0.0f),
+          b1(0.0f, 0.0f, 0.0f),
+          c1(0.0f, 0.0f, 0.0f),
+          a2(0.0f, 0.0f, 0.0f),
+          b2(0.0f, 0.0f, 0.0f),
+          c2(0.0f, 0.0f, 0.0f) {}
 
-    Opcode::Point a1, b1, c1;   // First triangle
-    Opcode::Point a2, b2, c2;   // Second triangle
+    Opcode::Point a1, b1, c1;  // First triangle
+    Opcode::Point a2, b2, c2;  // Second triangle
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_BASECOLLIDER_H
+#endif                         // VEGA_STRIKE_ENGINE_CMD_COLLSION2_BASECOLLIDER_H

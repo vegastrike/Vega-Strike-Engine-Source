@@ -27,40 +27,39 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H
 
 
-//#define OPC_USE_CALLBACKS 1
+// #define OPC_USE_CALLBACKS 1
 
 #define ICE_NO_DLL
 #define CS_PROCESSOR_X86
 #define CS_NO_QSQRT
 
 #ifndef CS_FORCEINLINE
-# ifdef CS_COMPILER_GCC
-#  define CS_FORCEINLINE inline __attribute__((always_inline))
-#  if (__GNUC__ == 3) && (__GNUC_MINOR__ == 4)
+#    ifdef CS_COMPILER_GCC
+#        define CS_FORCEINLINE inline __attribute__((always_inline))
+#        if (__GNUC__ == 3) && (__GNUC_MINOR__ == 4)
 // Work around a gcc 3.4 issue where forcing inline doesn't always work
-#   define CS_FORCEINLINE_TEMPLATEMETHOD inline
-#  endif
-# else
-#  define CS_FORCEINLINE inline
-# endif
+#            define CS_FORCEINLINE_TEMPLATEMETHOD inline
+#        endif
+#    else
+#        define CS_FORCEINLINE inline
+#    endif
 #endif
 #ifndef CS_FORCEINLINE_TEMPLATEMETHOD
-# define CS_FORCEINLINE_TEMPLATEMETHOD CS_FORCEINLINE
+#    define CS_FORCEINLINE_TEMPLATEMETHOD CS_FORCEINLINE
 #endif
 
 #define SMALL_EPSILON .000001
-#define EPSILON .00001
-#define ABS(x) (x>=0?x:-x)
+#define EPSILON       .00001
+#define ABS(x)        (x >= 0 ? x : -x)
 #define __CS_CSSYSDEFS_H__
 
 #include <cassert>
 
-class csObject {
-};
-struct iBase {
-};
+class csObject {};
+
+struct iBase {};
 
 #define CS_ASSERT assert
 
 #include "collide2/opcodetypes.h"
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2CS_COMPAT_H

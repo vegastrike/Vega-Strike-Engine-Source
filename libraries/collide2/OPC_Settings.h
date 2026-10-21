@@ -36,7 +36,7 @@
 // Defining this causes aliasing bugs. It is not legal C++ to do so.
 // i.e. the AIR() and IR() defines are very buggy and actually cause wrong
 // code in optimize.
-//#define OPC_CPU_COMPARE
+// #define OPC_CPU_COMPARE
 #endif
 
 //! Use FCOMI / FCMOV on Pentium-Pro based processors (comment that line to use plain C++)
@@ -62,4 +62,4 @@
 
 // NB: no compilation flag to enable/disable stats since they're actually needed in the box/box overlap test
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SETTINGS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SETTINGS_H

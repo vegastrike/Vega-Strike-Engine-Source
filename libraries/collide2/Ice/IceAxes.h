@@ -38,19 +38,17 @@ enum AxisOrder {
 
 class ICEMATHS_API Axes {
 public:
-
     inline_ Axes(AxisOrder order) {
         mAxis0 = (order) & 3;
         mAxis1 = (order >> 2) & 3;
         mAxis2 = (order >> 4) & 3;
     }
 
-    inline_            ~Axes() {
-    }
+    inline_ ~Axes() {}
 
     uint32_t mAxis0;
     uint32_t mAxis1;
     uint32_t mAxis2;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_AXES_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_AXES_H

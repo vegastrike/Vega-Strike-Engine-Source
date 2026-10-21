@@ -32,16 +32,16 @@ struct OPCODE_API AABBCache : VolumeCache {
     }
 
     // Cached faces signature
-    CollisionAABB FatBox;        //!< Box used when performing the query resulting in cached faces
+    CollisionAABB FatBox;  //!< Box used when performing the query resulting in cached faces
     // User settings
-    float FatCoeff;    //!< mRadius2 multiplier used to create a fat sphere
+    float FatCoeff;  //!< mRadius2 multiplier used to create a fat sphere
 };
 
 class OPCODE_API AABBCollider : public VolumeCollider {
 public:
     // Constructor / Destructor
     AABBCollider();
-    virtual                                ~AABBCollider();
+    virtual ~AABBCollider();
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -60,12 +60,13 @@ public:
     bool Collide(AABBCache &cache, const CollisionAABB &box, const Model &model);
     //
     bool Collide(AABBCache &cache, const CollisionAABB &box, const AABBTree *tree);
+
 protected:
-    CollisionAABB mBox;            //!< Query box in (center, extents) form
-    Point mMin;            //!< Query box min point
-    Point mMax;            //!< Query box max point
+    CollisionAABB mBox;  //!< Query box in (center, extents) form
+    Point         mMin;  //!< Query box min point
+    Point         mMax;  //!< Query box max point
     // Leaf description
-    Point mLeafVerts[3];    //!< Triangle vertices
+    Point mLeafVerts[3];  //!< Triangle vertices
     // Internal methods
     void _Collide(const AABBCollisionNode *node);
     void _Collide(const AABBNoLeafNode *node);
@@ -77,9 +78,9 @@ protected:
     void _CollideNoPrimitiveTest(const AABBQuantizedNode *node);
     void _CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node);
     // Overlap tests
-    inline_                bool AABBContainsBox(const Point &bc, const Point &be);
-    inline_                bool AABBAABBOverlap(const Point &b, const Point &Pb);
-    inline_                bool TriBoxOverlap();
+    inline_ bool AABBContainsBox(const Point &bc, const Point &be);
+    inline_ bool AABBAABBOverlap(const Point &b, const Point &Pb);
+    inline_ bool TriBoxOverlap();
     // Init methods
     bool InitQuery(AABBCache &cache, const CollisionAABB &box);
 };
@@ -88,11 +89,12 @@ class OPCODE_API HybridAABBCollider : public AABBCollider {
 public:
     // Constructor / Destructor
     HybridAABBCollider();
-    virtual                                ~HybridAABBCollider();
+    virtual ~HybridAABBCollider();
 
     bool Collide(AABBCache &cache, const CollisionAABB &box, const HybridModel &model);
+
 protected:
     Container mTouchedBoxes;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_AABBCOLLIDER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_AABBCOLLIDER_H

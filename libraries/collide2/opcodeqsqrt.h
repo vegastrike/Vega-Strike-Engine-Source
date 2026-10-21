@@ -27,13 +27,14 @@
 // version of sqrt not behaving properly. If you find something like
 // that I'd like to be notified of this so we can make sure this really
 // is the problem.
-//#define CS_NO_QSQRT
+// #define CS_NO_QSQRT
 
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_QSQRT_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_QSQRT_H
 
-#if (!defined (CS_NO_QSQRT)) && defined (CS_PROCESSOR_X86) && defined (CS_COMPILER_GCC)
-#include "collide2/Opcode.h"
+#if (!defined(CS_NO_QSQRT)) && defined(CS_PROCESSOR_X86) && defined(CS_COMPILER_GCC)
+#    include "collide2/Opcode.h"
+
 /*
   NB: Single-precision floating-point format (32 bits):
     SEEEEEEE.EMMMMMMM.MMMMMMMM.MMMMMMMM
@@ -51,45 +52,43 @@
  * approximatively 50 clocks, while a division is 42 clocks.
  */
 
-static inline float qsqrt (float x)
-{
-  float ret;
+static inline float qsqrt(float x) {
+    float ret;
 
-// Original C++ formulae:
-// float tmp = x;
-// *((unsigned *)&tmp) = (0xbe6f0000 - *((unsigned *)&tmp)) >> 1;
-// double h = x * 0.5;
-// double a = tmp;
-// a *= 1.5 - a * a * h;
-// a *= 1.5 - a * a * h;
-// return a * x;
+    // Original C++ formulae:
+    // float tmp = x;
+    // *((unsigned *)&tmp) = (0xbe6f0000 - *((unsigned *)&tmp)) >> 1;
+    // double h = x * 0.5;
+    // double a = tmp;
+    // a *= 1.5 - a * a * h;
+    // a *= 1.5 - a * a * h;
+    // return a * x;
 
-  __asm__ (
-        "flds	%1\n"			// x
-        "movl	$0xbe6f0000,%%eax\n"
-        "subl	%1,%%eax\n"
-        "shrl	$1,%%eax\n"
-        "movl	%%eax,%1\n"
-        "flds	%2\n"			// x 0.5
-        "fmul	%%st(1)\n"		// x h
-        "flds	%3\n"			// x h 1.5
-        "flds	%1\n"			// x h 1.5 a
-        "fld	%%st\n"			// x h 1.5 a a
-        "fmul	%%st\n"			// x h 1.5 a a*a
-        "fmul	%%st(3)\n"		// x h 1.5 a a*a*h
-        "fsubr	%%st(2)\n"		// x h 1.5 a 1.5-a*a*h
-        "fmulp	%%st(1)\n"		// x h 1.5 a
-        "fld	%%st\n"			// x h 1.5 a a
-        "fmul	%%st\n"			// x h 1.5 a a*a
-        "fmulp	%%st(3)\n"		// x a*a*h 1.5 a
-        "fxch\n"			// x a*a*h a 1.5
-        "fsubp  %%st,%%st(2)\n"		// x 1.5-a*a*h a
-        "fmulp	%%st(1)\n"		// x a
-        "fmulp	%%st(1)\n"		// a
-    : "=&t" (ret), "+m" (x) : "m" (0.5F), "m" (1.5F)
-    : "eax", "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)"
-  );
-  return ret;
+    __asm__("flds	%1\n"  // x
+            "movl	$0xbe6f0000,%%eax\n"
+            "subl	%1,%%eax\n"
+            "shrl	$1,%%eax\n"
+            "movl	%%eax,%1\n"
+            "flds	%2\n"            // x 0.5
+            "fmul	%%st(1)\n"       // x h
+            "flds	%3\n"            // x h 1.5
+            "flds	%1\n"            // x h 1.5 a
+            "fld	%%st\n"          // x h 1.5 a a
+            "fmul	%%st\n"          // x h 1.5 a a*a
+            "fmul	%%st(3)\n"       // x h 1.5 a a*a*h
+            "fsubr	%%st(2)\n"       // x h 1.5 a 1.5-a*a*h
+            "fmulp	%%st(1)\n"       // x h 1.5 a
+            "fld	%%st\n"          // x h 1.5 a a
+            "fmul	%%st\n"          // x h 1.5 a a*a
+            "fmulp	%%st(3)\n"       // x a*a*h 1.5 a
+            "fxch\n"                 // x a*a*h a 1.5
+            "fsubp  %%st,%%st(2)\n"  // x 1.5-a*a*h a
+            "fmulp	%%st(1)\n"       // x a
+            "fmulp	%%st(1)\n"       // a
+            : "=&t"(ret), "+m"(x)
+            : "m"(0.5F), "m"(1.5F)
+            : "eax", "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)");
+    return ret;
 }
 
 /**
@@ -99,37 +98,35 @@ static inline float qsqrt (float x)
  * because the routine is a little faster than qsqrt() and also you avoid
  * a division (which gives you an overall 2X speedup).
  */
-static inline float qisqrt (float x)
-{
-  float ret;
-  __asm__ (
-        "flds	%1\n"			// x
-        "movl	$0xbe6f0000,%%eax\n"
-        "subl	%1,%%eax\n"
-        "shrl	$1,%%eax\n"
-        "movl	%%eax,%1\n"
-        "flds	%2\n"			// x 0.5
-        "fmulp	%%st(1)\n"		// h
-        "flds	%3\n"			// h 1.5
-        "flds	%1\n"			// h 1.5 a
-        "fld	%%st\n"			// h 1.5 a a
-        "fmul	%%st\n"			// h 1.5 a a*a
-        "fmul	%%st(3)\n"		// h 1.5 a a*a*h
-        "fsubr	%%st(2)\n"		// h 1.5 a 1.5-a*a*h
-        "fmulp	%%st(1)\n"		// h 1.5 a
-        "fld	%%st\n"			// h 1.5 a a
-        "fmul	%%st\n"			// h 1.5 a a*a
-        "fmulp	%%st(3)\n"		// a*a*h 1.5 a
-        "fxch\n"			// a*a*h a 1.5
-        "fsubp  %%st,%%st(2)\n"		// 1.5-a*a*h a
-        "fmulp	%%st(1)\n"		// a
-    : "=t" (ret), "+m" (x) : "m" (0.5F), "m" (1.5F)
-    : "eax", "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)"
-  );
-  return ret;
+static inline float qisqrt(float x) {
+    float ret;
+    __asm__("flds	%1\n"  // x
+            "movl	$0xbe6f0000,%%eax\n"
+            "subl	%1,%%eax\n"
+            "shrl	$1,%%eax\n"
+            "movl	%%eax,%1\n"
+            "flds	%2\n"            // x 0.5
+            "fmulp	%%st(1)\n"       // h
+            "flds	%3\n"            // h 1.5
+            "flds	%1\n"            // h 1.5 a
+            "fld	%%st\n"          // h 1.5 a a
+            "fmul	%%st\n"          // h 1.5 a a*a
+            "fmul	%%st(3)\n"       // h 1.5 a a*a*h
+            "fsubr	%%st(2)\n"       // h 1.5 a 1.5-a*a*h
+            "fmulp	%%st(1)\n"       // h 1.5 a
+            "fld	%%st\n"          // h 1.5 a a
+            "fmul	%%st\n"          // h 1.5 a a*a
+            "fmulp	%%st(3)\n"       // a*a*h 1.5 a
+            "fxch\n"                 // a*a*h a 1.5
+            "fsubp  %%st,%%st(2)\n"  // 1.5-a*a*h a
+            "fmulp	%%st(1)\n"       // a
+            : "=t"(ret), "+m"(x)
+            : "m"(0.5F), "m"(1.5F)
+            : "eax", "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)");
+    return ret;
 }
 
-#elif (!defined (CS_NO_QSQRT)) && defined (PROC_POWERPC) && defined (CS_COMPILER_GCC)
+#elif (!defined(CS_NO_QSQRT)) && defined(PROC_POWERPC) && defined(CS_COMPILER_GCC)
 
 /**
  * Use the PowerPC fsqrte to get an estimate of 1/sqrt(x) Then apply two
@@ -138,45 +135,42 @@ static inline float qisqrt (float x)
  * to get a more accurate result.  Zero is treated as a special case, otherwise
  * we end up returning NaN (Not a Number).
  */
-static inline float qsqrt(float x)
-{
-  float y0 = 0.0;
+static inline float qsqrt(float x) {
+    float y0 = 0.0;
 
-  if (x != 0.0)
-  {
-    float x0 = x * 0.5f;
+    if (x != 0.0) {
+        float x0 = x * 0.5f;
 
-    asm ("frsqrte %0,%1" : "=f" (y0) : "f" (x));
+        asm("frsqrte %0,%1" : "=f"(y0) : "f"(x));
 
-    y0 = y0 * (1.5f - x0 * y0 * y0);
-    y0 = (y0 * (1.5f - x0 * y0 * y0)) * x;
-  };
+        y0 = y0 * (1.5f - x0 * y0 * y0);
+        y0 = (y0 * (1.5f - x0 * y0 * y0)) * x;
+    };
 
-  return y0;
+    return y0;
 };
 
 /**
  * Similar to qsqrt() above, except we do not multiply by x at the end, and
  * return 1/sqrt(x).
  */
-static inline float qisqrt(float x)
-{
-  float x0 = x * 0.5f;
-  float y0;
-  asm ("frsqrte %0,%1" : "=f" (y0) : "f" (x));
+static inline float qisqrt(float x) {
+    float x0 = x * 0.5f;
+    float y0;
+    asm("frsqrte %0,%1" : "=f"(y0) : "f"(x));
 
-  y0 = y0 * (1.5f - x0 * y0 * y0);
-  y0 = y0 * (1.5f - x0 * y0 * y0);
+    y0 = y0 * (1.5f - x0 * y0 * y0);
+    y0 = y0 * (1.5f - x0 * y0 * y0);
 
-  return y0;
+    return y0;
 };
 
 #else
 
-#include <math.h>
-#define qsqrt(x)  sqrt(x)
-#define qisqrt(x) (1.0/sqrt(x))
+#    include <math.h>
+#    define qsqrt(x)  sqrt(x)
+#    define qisqrt(x) (1.0 / sqrt(x))
 
 #endif
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_QSQRT_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_QSQRT_H

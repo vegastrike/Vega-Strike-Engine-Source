@@ -27,43 +27,43 @@
 
 // config.h is the VS ./configure determined header.
 #include <cfloat>
-#include <cwchar>
 #include <cstdint>
-#if defined(_WIN32) && !defined(__CYGWIN__) // && defined(_MSC_VER)
+#include <cwchar>
+#if defined(_WIN32) && !defined(__CYGWIN__)  // && defined(_MSC_VER)
 // Hack
-#define CS_COMPILER_MSVC 1
-#ifdef _WIN64
-#  define CS_PROCESSOR_SIZE 64 /* Only used if intptr_t is not found. */
-#else
-#  define CS_PROCESSOR_SIZE 32 /* Only used if intptr_t is not found. (cough VC6 cough) */
-#endif
-#define CS_HAVE_INTPTR_T 1
+#    define CS_COMPILER_MSVC 1
+#    ifdef _WIN64
+#        define CS_PROCESSOR_SIZE 64 /* Only used if intptr_t is not found. */
+#    else
+#        define CS_PROCESSOR_SIZE 32 /* Only used if intptr_t is not found. (cough VC6 cough) */
+#    endif
+#    define CS_HAVE_INTPTR_T 1
 
-#else /* GCC or other platform */
+#else                            /* GCC or other platform */
 
-#define CS_COMPILER_GCC 1
-#define CS_PROCESSOR_SIZE 64 /* Upper limit on pointer size, only used it intptr_t is not found. */
-#define CS_HAVE_INTPTR_T 1
+#    define CS_COMPILER_GCC   1
+#    define CS_PROCESSOR_SIZE 64 /* Upper limit on pointer size, only used it intptr_t is not found. */
+#    define CS_HAVE_INTPTR_T  1
 
 #endif
 // End Hack
 
 
 #if defined(HAVE_STDINT_H)
-#ifndef __STDC_CONSTANT_MACROS
-#define __STDC_CONSTANT_MACROS
-#endif
-#ifndef __STDC_LIMIT_MACROS
-#define __STDC_LIMIT_MACROS
-#endif
-#include <stdint.h>
+#    ifndef __STDC_CONSTANT_MACROS
+#        define __STDC_CONSTANT_MACROS
+#    endif
+#    ifndef __STDC_LIMIT_MACROS
+#        define __STDC_LIMIT_MACROS
+#    endif
+#    include <stdint.h>
 #endif
 
 #if defined(HAVE_INTTYPES_H)
-#ifndef __STDC_FORMAT_MACROS
-#define __STDC_FORMAT_MACROS
-#endif
-#include <inttypes.h>
+#    ifndef __STDC_FORMAT_MACROS
+#        define __STDC_FORMAT_MACROS
+#    endif
+#    include <inttypes.h>
 #endif
 
 // /**\name Specific sized types
@@ -90,28 +90,28 @@
  * Compilers differ in 64-bit wide number specification. Employ this
  * macro to use the appropriate mechanism automatically.
  */
-#define CONST_INT64(x) INT64_C(x)
+#    define CONST_INT64(x) INT64_C(x)
 
 /**\def CONST_UINT64
  * Specify 64 bit unsigned integer constant.
  * Compilers differ in 64-bit wide number specification. Employ this
  * macro to use the appropriate mechanism automatically.
  */
-#define CONST_UINT64(x) UINT64_C(x)
+#    define CONST_UINT64(x) UINT64_C(x)
 
-#else // CS_HAVE_INT64_C
+#else  // CS_HAVE_INT64_C
 
-#if defined(CS_COMPILER_GCC)
-#define CONST_INT64(x)  x ## LL
-#define CONST_UINT64(x) x ## ULL
-#elif defined(CS_COMPILER_MSVC) || defined(CS_COMPILER_BCC)
-#define CONST_INT64(x)  x##i64
-#define CONST_UINT64(x) x##ui64
-#else
-#error Do not know how to contruct 64-bit integer constants
-#endif // CS_COMPILER_GCC
+#    if defined(CS_COMPILER_GCC)
+#        define CONST_INT64(x)  x##LL
+#        define CONST_UINT64(x) x##ULL
+#    elif defined(CS_COMPILER_MSVC) || defined(CS_COMPILER_BCC)
+#        define CONST_INT64(x)  x##i64
+#        define CONST_UINT64(x) x##ui64
+#    else
+#        error Do not know how to contruct 64-bit integer constants
+#    endif  // CS_COMPILER_GCC
 
-#endif // CS_HAVE_INT64_C
+#endif      // CS_HAVE_INT64_C
 
 /** @} */
 
@@ -144,23 +144,23 @@ typedef intptr_t opc_ptrdiff_t;
 // too.
 #include <stddef.h>
 #if defined(HAVE_WCTYPE_H)
-#include <wctype.h>
+#    include <wctype.h>
 #endif
 #if !((defined(CS_HAVE_WINT_T) && defined(_WCTYPE_T_DEFINED)) || defined(_WINT_T) || defined(_WINT_T_DECLARED))
-#ifndef wint_t
-#if _MSC_VER >= 1300
+#    ifndef wint_t
+#        if _MSC_VER >= 1'300
 typedef unsigned short wint_t;
-#else
-#if defined(HAVE_WCHAR_H)
-#include <wchar.h>
-#else
+#        else
+#            if defined(HAVE_WCHAR_H)
+#                include <wchar.h>
+#            else
 typedef wchar_t wint_t;
-#endif
-#endif
-#endif
-#define _WCTYPE_T_DEFINED
-#define _WINT_T
-#define _WINT_T_DECLARED
+#            endif
+#        endif
+#    endif
+#    define _WCTYPE_T_DEFINED
+#    define _WINT_T
+#    define _WINT_T_DECLARED
 #endif
 
 /**
@@ -177,4 +177,4 @@ typedef unsigned int opc_uint;
 
 /** @} */
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_CSTYPES_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_CSTYPES_H

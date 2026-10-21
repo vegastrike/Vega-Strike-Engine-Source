@@ -24,15 +24,15 @@ static float OPC_PointTriangleSqrDist(const Point &point, const Point &p0, const
     Point TriEdge1 = p2 - p0;
 
     Point kDiff = p0 - point;
-    float fA00 = TriEdge0.SquareMagnitude();
-    float fA01 = TriEdge0 | TriEdge1;
-    float fA11 = TriEdge1.SquareMagnitude();
-    float fB0 = kDiff | TriEdge0;
-    float fB1 = kDiff | TriEdge1;
-    float fC = kDiff.SquareMagnitude();
-    float fDet = fabsf(fA00 * fA11 - fA01 * fA01);
-    float fS = fA01 * fB1 - fA11 * fB0;
-    float fT = fA01 * fB0 - fA00 * fB1;
+    float fA00  = TriEdge0.SquareMagnitude();
+    float fA01  = TriEdge0 | TriEdge1;
+    float fA11  = TriEdge1.SquareMagnitude();
+    float fB0   = kDiff | TriEdge0;
+    float fB1   = kDiff | TriEdge1;
+    float fC    = kDiff.SquareMagnitude();
+    float fDet  = fabsf(fA00 * fA11 - fA01 * fA01);
+    float fS    = fA01 * fB1 - fA11 * fB0;
+    float fT    = fA01 * fB0 - fA00 * fB1;
     float fSqrDist;
 
     if (fS + fT <= fDet) {
@@ -79,9 +79,9 @@ static float OPC_PointTriangleSqrDist(const Point &point, const Point &p0, const
             if (fDet == 0.0f) {
                 fSqrDist = MAX_FLOAT;
             } else {
-                float fInvDet = 1.0f / fDet;
-                fS *= fInvDet;
-                fT *= fInvDet;
+                float fInvDet  = 1.0f / fDet;
+                fS            *= fInvDet;
+                fT            *= fInvDet;
                 fSqrDist = fS * (fA00 * fS + fA01 * fT + 2.0f * fB0) + fT * (fA01 * fS + fA11 * fT + 2.0f * fB1) + fC;
             }
         }
@@ -163,20 +163,20 @@ static float OPC_SegmentSegmentSqrDist(const Segment &rkSeg0, const Segment &rkS
     Point rkSeg1Direction = rkSeg1.ComputeDirection();
 
     Point kDiff = rkSeg0.mP0 - rkSeg1.mP0;
-    float fA00 = rkSeg0Direction.SquareMagnitude();
-    float fA01 = -rkSeg0Direction.Dot(rkSeg1Direction);
-    float fA11 = rkSeg1Direction.SquareMagnitude();
-    float fB0 = kDiff.Dot(rkSeg0Direction);
-    float fC = kDiff.SquareMagnitude();
-    float fDet = fabsf(fA00 * fA11 - fA01 * fA01);
+    float fA00  = rkSeg0Direction.SquareMagnitude();
+    float fA01  = -rkSeg0Direction.Dot(rkSeg1Direction);
+    float fA11  = rkSeg1Direction.SquareMagnitude();
+    float fB0   = kDiff.Dot(rkSeg0Direction);
+    float fC    = kDiff.SquareMagnitude();
+    float fDet  = fabsf(fA00 * fA11 - fA01 * fA01);
 
     float fB1, fS, fT, fSqrDist, fTmp;
 
     if (fDet >= gs_fTolerance) {
         // line segments are not parallel
         fB1 = -kDiff.Dot(rkSeg1Direction);
-        fS = fA01 * fB1 - fA11 * fB0;
-        fT = fA01 * fB0 - fA00 * fB1;
+        fS  = fA01 * fB1 - fA11 * fB0;
+        fT  = fA01 * fB0 - fA00 * fB1;
 
         if (fS >= 0.0f) {
             if (fS <= fDet) {
@@ -184,11 +184,11 @@ static float OPC_SegmentSegmentSqrDist(const Segment &rkSeg0, const Segment &rkS
                     if (fT <= fDet)  // region 0 (interior)
                     {
                         // minimum at two interior points of 3D lines
-                        float fInvDet = 1.0f / fDet;
-                        fS *= fInvDet;
-                        fT *= fInvDet;
-                        fSqrDist = fS * (fA00 * fS + fA01 * fT + 2.0f * fB0) + fT * (fA01 * fS + fA11 * fT + 2.0f * fB1)
-                                + fC;
+                        float fInvDet  = 1.0f / fDet;
+                        fS            *= fInvDet;
+                        fT            *= fInvDet;
+                        fSqrDist       = fS * (fA00 * fS + fA01 * fT + 2.0f * fB0) +
+                                   fT * (fA01 * fS + fA11 * fT + 2.0f * fB1) + fC;
                     } else  // region 3 (side)
                     {
                         fTmp = fA01 + fB0;
@@ -292,7 +292,7 @@ static float OPC_SegmentSegmentSqrDist(const Segment &rkSeg0, const Segment &rkS
                         }
                     }
                 }
-            } else   // region 6 (corner)
+            } else  // region 6 (corner)
             {
                 if (fB0 < 0.0f) {
                     if (-fB0 >= fA00) {
@@ -320,12 +320,12 @@ static float OPC_SegmentSegmentSqrDist(const Segment &rkSeg0, const Segment &rkS
             } else if (-fB0 <= fA00) {
                 fSqrDist = fB0 * (-fB0 / fA00) + fC;
             } else {
-                fB1 = -kDiff.Dot(rkSeg1Direction);
+                fB1  = -kDiff.Dot(rkSeg1Direction);
                 fTmp = fA00 + fB0;
                 if (-fTmp >= fA01) {
                     fSqrDist = fA00 + fA11 + fC + 2.0f * (fA01 + fB0 + fB1);
                 } else {
-                    fT = -fTmp / fA01;
+                    fT       = -fTmp / fA01;
                     fSqrDist = fA00 + 2.0f * fB0 + fC + fT * (fA11 * fT + 2.0f * (fA01 + fB1));
                 }
             }
@@ -340,7 +340,7 @@ static float OPC_SegmentSegmentSqrDist(const Segment &rkSeg0, const Segment &rkS
                 if (fB0 >= -fA01) {
                     fSqrDist = fA11 + 2.0f * fB1 + fC;
                 } else {
-                    fT = -fB0 / fA01;
+                    fT       = -fB0 / fA01;
                     fSqrDist = fC + fT * (2.0f * fB1 + fA11 * fT);
                 }
             }
@@ -358,36 +358,36 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
     const Point TriEdge0 = p1 - p0;
     const Point TriEdge1 = p2 - p0;
 
-    const Point &rkSegOrigin = segment.GetOrigin();
-    Point rkSegDirection = segment.ComputeDirection();
+    const Point &rkSegOrigin    = segment.GetOrigin();
+    Point        rkSegDirection = segment.ComputeDirection();
 
-    Point kDiff = p0 - rkSegOrigin;
-    float fA00 = rkSegDirection.SquareMagnitude();
-    float fA01 = -rkSegDirection.Dot(TriEdge0);
-    float fA02 = -rkSegDirection.Dot(TriEdge1);
-    float fA11 = TriEdge0.SquareMagnitude();
-    float fA12 = TriEdge0.Dot(TriEdge1);
-    float fA22 = TriEdge1.Dot(TriEdge1);
-    float fB0 = -kDiff.Dot(rkSegDirection);
-    float fB1 = kDiff.Dot(TriEdge0);
-    float fB2 = kDiff.Dot(TriEdge1);
+    Point kDiff  = p0 - rkSegOrigin;
+    float fA00   = rkSegDirection.SquareMagnitude();
+    float fA01   = -rkSegDirection.Dot(TriEdge0);
+    float fA02   = -rkSegDirection.Dot(TriEdge1);
+    float fA11   = TriEdge0.SquareMagnitude();
+    float fA12   = TriEdge0.Dot(TriEdge1);
+    float fA22   = TriEdge1.Dot(TriEdge1);
+    float fB0    = -kDiff.Dot(rkSegDirection);
+    float fB1    = kDiff.Dot(TriEdge0);
+    float fB2    = kDiff.Dot(TriEdge1);
     float fCof00 = fA11 * fA22 - fA12 * fA12;
     float fCof01 = fA02 * fA12 - fA01 * fA22;
     float fCof02 = fA01 * fA12 - fA02 * fA11;
-    float fDet = fA00 * fCof00 + fA01 * fCof01 + fA02 * fCof02;
+    float fDet   = fA00 * fCof00 + fA01 * fCof01 + fA02 * fCof02;
 
-    Ray kTriSeg;
+    Ray   kTriSeg;
     Point kPt;
     float fSqrDist, fSqrDist0;
 
     if (fabsf(fDet) >= gs_fTolerance) {
-        float fCof11 = fA00 * fA22 - fA02 * fA02;
-        float fCof12 = fA02 * fA01 - fA00 * fA12;
-        float fCof22 = fA00 * fA11 - fA01 * fA01;
+        float fCof11  = fA00 * fA22 - fA02 * fA02;
+        float fCof12  = fA02 * fA01 - fA00 * fA12;
+        float fCof22  = fA00 * fA11 - fA01 * fA01;
         float fInvDet = 1.0f / fDet;
-        float fRhs0 = -fB0 * fInvDet;
-        float fRhs1 = -fB1 * fInvDet;
-        float fRhs2 = -fB2 * fInvDet;
+        float fRhs0   = -fB0 * fInvDet;
+        float fRhs1   = -fB1 * fInvDet;
+        float fRhs2   = -fB2 * fInvDet;
 
         float fR = fCof00 * fRhs0 + fCof01 * fRhs1 + fCof02 * fRhs2;
         float fS = fCof01 * fRhs0 + fCof11 * fRhs1 + fCof12 * fRhs2;
@@ -400,11 +400,11 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                     {
                         // min on face s=0 or t=0 or r=0
                         kTriSeg.mOrig = p0;
-                        kTriSeg.mDir = TriEdge1;
-                        fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                        kTriSeg.mDir  = TriEdge1;
+                        fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                         kTriSeg.mOrig = p0;
-                        kTriSeg.mDir = TriEdge0;
-                        fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                        kTriSeg.mDir  = TriEdge0;
+                        fSqrDist0     = OPC_SegmentRaySqrDist(segment, kTriSeg);
                         if (fSqrDist0 < fSqrDist) {
                             fSqrDist = fSqrDist0;
                         }
@@ -416,9 +416,9 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                     {
                         // min on face s=0 or r=0
                         kTriSeg.mOrig = p0;
-                        kTriSeg.mDir = TriEdge1;
-                        fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
-                        fSqrDist0 = OPC_PointTriangleSqrDist(rkSegOrigin, p0, p1, p2);
+                        kTriSeg.mDir  = TriEdge1;
+                        fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                        fSqrDist0     = OPC_PointTriangleSqrDist(rkSegOrigin, p0, p1, p2);
                         if (fSqrDist0 < fSqrDist) {
                             fSqrDist = fSqrDist0;
                         }
@@ -427,9 +427,9 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                 {
                     // min on face t=0 or r=0
                     kTriSeg.mOrig = p0;
-                    kTriSeg.mDir = TriEdge0;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
-                    fSqrDist0 = OPC_PointTriangleSqrDist(rkSegOrigin, p0, p1, p2);
+                    kTriSeg.mDir  = TriEdge0;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    fSqrDist0     = OPC_PointTriangleSqrDist(rkSegOrigin, p0, p1, p2);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
                     }
@@ -443,11 +443,11 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                 {
                     // min on face s=0 or s+t=1 or r=0
                     kTriSeg.mOrig = p0;
-                    kTriSeg.mDir = TriEdge1;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge1;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     kTriSeg.mOrig = p1;
-                    kTriSeg.mDir = TriEdge1 - TriEdge0;
-                    fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge1 - TriEdge0;
+                    fSqrDist0     = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
                     }
@@ -459,11 +459,11 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                 {
                     // min on face t=0 or s+t=1 or r=0
                     kTriSeg.mOrig = p0;
-                    kTriSeg.mDir = TriEdge0;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge0;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     kTriSeg.mOrig = p1;
-                    kTriSeg.mDir = TriEdge1 - TriEdge0;
-                    fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge1 - TriEdge0;
+                    fSqrDist0     = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
                     }
@@ -475,9 +475,9 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                 {
                     // min on face s+t=1 or r=0
                     kTriSeg.mOrig = p1;
-                    kTriSeg.mDir = TriEdge1 - TriEdge0;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
-                    fSqrDist0 = OPC_PointTriangleSqrDist(rkSegOrigin, p0, p1, p2);
+                    kTriSeg.mDir  = TriEdge1 - TriEdge0;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    fSqrDist0     = OPC_PointTriangleSqrDist(rkSegOrigin, p0, p1, p2);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
                     }
@@ -490,11 +490,11 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                     {
                         // min on face s=0 or t=0
                         kTriSeg.mOrig = p0;
-                        kTriSeg.mDir = TriEdge1;
-                        fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                        kTriSeg.mDir  = TriEdge1;
+                        fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                         kTriSeg.mOrig = p0;
-                        kTriSeg.mDir = TriEdge0;
-                        fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                        kTriSeg.mDir  = TriEdge0;
+                        fSqrDist0     = OPC_SegmentRaySqrDist(segment, kTriSeg);
                         if (fSqrDist0 < fSqrDist) {
                             fSqrDist = fSqrDist0;
                         }
@@ -502,33 +502,32 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                     {
                         // min on face s=0
                         kTriSeg.mOrig = p0;
-                        kTriSeg.mDir = TriEdge1;
-                        fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                        kTriSeg.mDir  = TriEdge1;
+                        fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     }
                 } else if (fT < 0.0f)  // region 5
                 {
                     // min on face t=0
                     kTriSeg.mOrig = p0;
-                    kTriSeg.mDir = TriEdge0;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge0;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                 } else  // region 0
                 {
                     // global minimum is interior, done
-                    fSqrDist = fR * (fA00 * fR + fA01 * fS + fA02 * fT + 2.0f * fB0)
-                            + fS * (fA01 * fR + fA11 * fS + fA12 * fT + 2.0f * fB1)
-                            + fT * (fA02 * fR + fA12 * fS + fA22 * fT + 2.0f * fB2)
-                            + kDiff.SquareMagnitude();
+                    fSqrDist = fR * (fA00 * fR + fA01 * fS + fA02 * fT + 2.0f * fB0) +
+                               fS * (fA01 * fR + fA11 * fS + fA12 * fT + 2.0f * fB1) +
+                               fT * (fA02 * fR + fA12 * fS + fA22 * fT + 2.0f * fB2) + kDiff.SquareMagnitude();
                 }
             } else {
                 if (fS < 0.0f)  // region 2
                 {
                     // min on face s=0 or s+t=1
                     kTriSeg.mOrig = p0;
-                    kTriSeg.mDir = TriEdge1;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge1;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     kTriSeg.mOrig = p1;
-                    kTriSeg.mDir = TriEdge1 - TriEdge0;
-                    fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge1 - TriEdge0;
+                    fSqrDist0     = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
                     }
@@ -536,11 +535,11 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                 {
                     // min on face t=0 or s+t=1
                     kTriSeg.mOrig = p0;
-                    kTriSeg.mDir = TriEdge0;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge0;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     kTriSeg.mOrig = p1;
-                    kTriSeg.mDir = TriEdge1 - TriEdge0;
-                    fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge1 - TriEdge0;
+                    fSqrDist0     = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
                     }
@@ -548,8 +547,8 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                 {
                     // min on face s+t=1
                     kTriSeg.mOrig = p1;
-                    kTriSeg.mDir = TriEdge1 - TriEdge0;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge1 - TriEdge0;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                 }
             }
         } else  // fR > 1
@@ -560,15 +559,15 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                     {
                         // min on face s=0 or t=0 or r=1
                         kTriSeg.mOrig = p0;
-                        kTriSeg.mDir = TriEdge1;
-                        fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                        kTriSeg.mDir  = TriEdge1;
+                        fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                         kTriSeg.mOrig = p0;
-                        kTriSeg.mDir = TriEdge0;
-                        fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                        kTriSeg.mDir  = TriEdge0;
+                        fSqrDist0     = OPC_SegmentRaySqrDist(segment, kTriSeg);
                         if (fSqrDist0 < fSqrDist) {
                             fSqrDist = fSqrDist0;
                         }
-                        kPt = rkSegOrigin + rkSegDirection;
+                        kPt       = rkSegOrigin + rkSegDirection;
                         fSqrDist0 = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
                         if (fSqrDist0 < fSqrDist) {
                             fSqrDist = fSqrDist0;
@@ -577,10 +576,10 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                     {
                         // min on face s=0 or r=1
                         kTriSeg.mOrig = p0;
-                        kTriSeg.mDir = TriEdge1;
-                        fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
-                        kPt = rkSegOrigin + rkSegDirection;
-                        fSqrDist0 = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
+                        kTriSeg.mDir  = TriEdge1;
+                        fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                        kPt           = rkSegOrigin + rkSegDirection;
+                        fSqrDist0     = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
                         if (fSqrDist0 < fSqrDist) {
                             fSqrDist = fSqrDist0;
                         }
@@ -589,17 +588,17 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                 {
                     // min on face t=0 or r=1
                     kTriSeg.mOrig = p0;
-                    kTriSeg.mDir = TriEdge0;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
-                    kPt = rkSegOrigin + rkSegDirection;
-                    fSqrDist0 = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
+                    kTriSeg.mDir  = TriEdge0;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kPt           = rkSegOrigin + rkSegDirection;
+                    fSqrDist0     = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
                     }
                 } else  // region 0p
                 {
                     // min face on r=1
-                    kPt = rkSegOrigin + rkSegDirection;
+                    kPt      = rkSegOrigin + rkSegDirection;
                     fSqrDist = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
                 }
             } else {
@@ -607,15 +606,15 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                 {
                     // min on face s=0 or s+t=1 or r=1
                     kTriSeg.mOrig = p0;
-                    kTriSeg.mDir = TriEdge1;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge1;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     kTriSeg.mOrig = p1;
-                    kTriSeg.mDir = TriEdge1 - TriEdge0;
-                    fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge1 - TriEdge0;
+                    fSqrDist0     = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
                     }
-                    kPt = rkSegOrigin + rkSegDirection;
+                    kPt       = rkSegOrigin + rkSegDirection;
                     fSqrDist0 = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
@@ -624,15 +623,15 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                 {
                     // min on face t=0 or s+t=1 or r=1
                     kTriSeg.mOrig = p0;
-                    kTriSeg.mDir = TriEdge0;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge0;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     kTriSeg.mOrig = p1;
-                    kTriSeg.mDir = TriEdge1 - TriEdge0;
-                    fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kTriSeg.mDir  = TriEdge1 - TriEdge0;
+                    fSqrDist0     = OPC_SegmentRaySqrDist(segment, kTriSeg);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
                     }
-                    kPt = rkSegOrigin + rkSegDirection;
+                    kPt       = rkSegOrigin + rkSegDirection;
                     fSqrDist0 = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
@@ -641,10 +640,10 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
                 {
                     // min on face s+t=1 or r=1
                     kTriSeg.mOrig = p1;
-                    kTriSeg.mDir = TriEdge1 - TriEdge0;
-                    fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
-                    kPt = rkSegOrigin + rkSegDirection;
-                    fSqrDist0 = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
+                    kTriSeg.mDir  = TriEdge1 - TriEdge0;
+                    fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
+                    kPt           = rkSegOrigin + rkSegDirection;
+                    fSqrDist0     = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
                     if (fSqrDist0 < fSqrDist) {
                         fSqrDist = fSqrDist0;
                     }
@@ -654,18 +653,18 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
     } else {
         // segment and triangle are parallel
         kTriSeg.mOrig = p0;
-        kTriSeg.mDir = TriEdge0;
-        fSqrDist = OPC_SegmentRaySqrDist(segment, kTriSeg);
+        kTriSeg.mDir  = TriEdge0;
+        fSqrDist      = OPC_SegmentRaySqrDist(segment, kTriSeg);
 
         kTriSeg.mDir = TriEdge1;
-        fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+        fSqrDist0    = OPC_SegmentRaySqrDist(segment, kTriSeg);
         if (fSqrDist0 < fSqrDist) {
             fSqrDist = fSqrDist0;
         }
 
         kTriSeg.mOrig = p1;
-        kTriSeg.mDir = TriEdge1 - TriEdge0;
-        fSqrDist0 = OPC_SegmentRaySqrDist(segment, kTriSeg);
+        kTriSeg.mDir  = TriEdge1 - TriEdge0;
+        fSqrDist0     = OPC_SegmentRaySqrDist(segment, kTriSeg);
         if (fSqrDist0 < fSqrDist) {
             fSqrDist = fSqrDist0;
         }
@@ -675,7 +674,7 @@ static float OPC_SegmentTriangleSqrDist(const Segment &segment, const Point &p0,
             fSqrDist = fSqrDist0;
         }
 
-        kPt = rkSegOrigin + rkSegDirection;
+        kPt       = rkSegOrigin + rkSegDirection;
         fSqrDist0 = OPC_PointTriangleSqrDist(kPt, p0, p1, p2);
         if (fSqrDist0 < fSqrDist) {
             fSqrDist = fSqrDist0;

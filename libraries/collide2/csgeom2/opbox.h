@@ -24,9 +24,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_BOX_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_BOX_H
 
-#include "collide2/opcodetypes.h"
-#include "collide2/opcodesysdef.h"
 #include "collide2/csgeom2/opvector3.h"
+#include "collide2/opcodesysdef.h"
+#include "collide2/opcodetypes.h"
 
 class csPlane3;
 
@@ -106,15 +106,17 @@ protected:
     csVector3 maxbox;
 
     struct bEdge {
-        uint8_t v1, v2; // Indices of vertex in bounding box (BOX_CORNER_...)
-        uint8_t fl, fr; // Indices of left/right faces sharing edge (BOX_SIDE_...)
+        uint8_t v1, v2;        // Indices of vertex in bounding box (BOX_CORNER_...)
+        uint8_t fl, fr;        // Indices of left/right faces sharing edge (BOX_SIDE_...)
     };
-    typedef uint8_t bFace[4];    // Indices of four clock-wise edges (0..23)
+
+    typedef uint8_t bFace[4];  // Indices of four clock-wise edges (0..23)
     // Index by edge number. Edge e and e+1 with e even are opposite edges.
     // (BOX_EDGE_...)
     static bEdge edges[24];
     // Index by BOX_SIDE_? number.
     static bFace faces[6];
+
 public:
     /// Get the minimum X value of the box
     float MinX() const {
@@ -181,9 +183,9 @@ public:
      * (index BOX_CORNER_???) and left/right faces (BOX_SIDE_???).
      */
     void GetEdgeInfo(int edge, int &v1, int &v2, int &fleft, int &fright) const {
-        v1 = edges[edge].v1;
-        v2 = edges[edge].v2;
-        fleft = edges[edge].fl;
+        v1     = edges[edge].v1;
+        v2     = edges[edge].v2;
+        fleft  = edges[edge].fl;
         fright = edges[edge].fr;
     }
 
@@ -292,8 +294,8 @@ public:
     /// Test if this box contains the other box.
     bool Contains(const csBox3 &box) const {
         return (box.minbox.x >= minbox.x && box.maxbox.x <= maxbox.x) &&
-                (box.minbox.y >= minbox.y && box.maxbox.y <= maxbox.y) &&
-                (box.minbox.z >= minbox.z && box.maxbox.z <= maxbox.z);
+               (box.minbox.y >= minbox.y && box.maxbox.y <= maxbox.y) &&
+               (box.minbox.z >= minbox.z && box.maxbox.z <= maxbox.z);
     }
 
     /// Test if this box is empty.
@@ -397,30 +399,22 @@ public:
     //-----
 
     /// Initialize this box to empty.
-    csBox3() :
-            minbox(CS_BOUNDINGBOX_MAXVALUE,
-                    CS_BOUNDINGBOX_MAXVALUE,
-                    CS_BOUNDINGBOX_MAXVALUE),
-            maxbox(-CS_BOUNDINGBOX_MAXVALUE,
-                    -CS_BOUNDINGBOX_MAXVALUE,
-                    -CS_BOUNDINGBOX_MAXVALUE) {
-    }
+    csBox3()
+        : minbox(CS_BOUNDINGBOX_MAXVALUE, CS_BOUNDINGBOX_MAXVALUE, CS_BOUNDINGBOX_MAXVALUE),
+          maxbox(-CS_BOUNDINGBOX_MAXVALUE, -CS_BOUNDINGBOX_MAXVALUE, -CS_BOUNDINGBOX_MAXVALUE) {}
 
     /// Initialize this box with one point.
-    csBox3(const csVector3 &v) : minbox(v), maxbox(v) {
-    }
+    csBox3(const csVector3 &v) : minbox(v), maxbox(v) {}
 
     /// Initialize this box with two points.
-    csBox3(const csVector3 &v1, const csVector3 &v2) :
-            minbox(v1), maxbox(v2) {
+    csBox3(const csVector3 &v1, const csVector3 &v2) : minbox(v1), maxbox(v2) {
         if (Empty()) {
             StartBoundingBox();
         }
     }
 
     /// Initialize this box with the given values.
-    csBox3(float x1, float y1, float z1, float x2, float y2, float z2) :
-            minbox(x1, y1, z1), maxbox(x2, y2, z2) {
+    csBox3(float x1, float y1, float z1, float x2, float y2, float z2) : minbox(x1, y1, z1), maxbox(x2, y2, z2) {
         if (Empty()) {
             StartBoundingBox();
         }
@@ -477,8 +471,7 @@ public:
      * If you set bVisible true, you will get all visible corners - this
      * could be up to 7.
      */
-    void GetConvexOutline(const csVector3 &pos,
-            csVector3 *array, int &num_array, bool bVisible = false) const;
+    void GetConvexOutline(const csVector3 &pos, csVector3 *array, int &num_array, bool bVisible = false) const;
 
     /**
      * Test if this box is between two others.
@@ -530,4 +523,4 @@ public:
     friend bool operator<(const csVector3 &point, const csBox3 &box);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_BOX_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_BOX_H

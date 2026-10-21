@@ -31,12 +31,13 @@ public:
     Container(const Container &object);
     Container(uint32_t size, float growth_factor);
     ~Container();
+
     // Management
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      *	A O(1) method to add a value in the container. The container is automatically resized if needed.
-     *	The method is inline, not the resize. The call overhead happens on resizes only, which is not a problem since the resizing operation
-     *	costs a lot more than the call overhead...
+     *	The method is inline, not the resize. The call overhead happens on resizes only, which is not a problem since
+     *the resizing operation costs a lot more than the call overhead...
      *
      *	\param		entry		[in] a uint32_t to store in the container
      *	\see		Add(float entry)
@@ -45,7 +46,7 @@ public:
      *	\return		Self-Reference
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    Container &Add(uint32_t entry) {
+    inline_ Container &Add(uint32_t entry) {
         // Resize if needed
         if (mCurNbEntries == mMaxNbEntries) {
             Resize();
@@ -56,7 +57,7 @@ public:
         return *this;
     }
 
-    inline_    Container &Add(const uint32_t *entries, uint32_t nb) {
+    inline_ Container &Add(const uint32_t *entries, uint32_t nb) {
         // Resize if needed
         if (mCurNbEntries + nb > mMaxNbEntries) {
             Resize(nb);
@@ -71,8 +72,8 @@ public:
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      *	A O(1) method to add a value in the container. The container is automatically resized if needed.
-     *	The method is inline, not the resize. The call overhead happens on resizes only, which is not a problem since the resizing operation
-     *	costs a lot more than the call overhead...
+     *	The method is inline, not the resize. The call overhead happens on resizes only, which is not a problem since
+     *the resizing operation costs a lot more than the call overhead...
      *
      *	\param		entry		[in] a float to store in the container
      *	\see		Add(uint32_t entry)
@@ -81,7 +82,7 @@ public:
      *	\return		Self-Reference
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    Container &Add(float entry) {
+    inline_ Container &Add(float entry) {
         // Resize if needed
         if (mCurNbEntries == mMaxNbEntries) {
             Resize();
@@ -92,7 +93,7 @@ public:
         return *this;
     }
 
-    inline_    Container &Add(const float *entries, uint32_t nb) {
+    inline_ Container &Add(const float *entries, uint32_t nb) {
         // Resize if needed
         if (mCurNbEntries + nb > mMaxNbEntries) {
             Resize(nb);
@@ -105,7 +106,7 @@ public:
     }
 
     //! Add unique [slow]
-    inline_    Container &AddUnique(uint32_t entry) {
+    inline_ Container &AddUnique(uint32_t entry) {
         if (!Contains(entry)) {
             Add(entry);
         }
@@ -123,12 +124,12 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     *	Resets the container. Stored values are discarded but the buffer is kept so that further calls don't need resizing again.
-     *	That's a kind of temporal coherence.
+     *	Resets the container. Stored values are discarded but the buffer is kept so that further calls don't need
+     *resizing again. That's a kind of temporal coherence.
      *	\see		Empty()
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    void Reset() {
+    inline_ void Reset() {
         // Avoid the write if possible
         // ### CMOV
         if (mCurNbEntries) {
@@ -137,7 +138,7 @@ public:
     }
 
     // HANDLE WITH CARE
-    inline_    void ForceSize(uint32_t size) {
+    inline_ void ForceSize(uint32_t size) {
         mCurNbEntries = size;
     }
 
@@ -164,60 +165,69 @@ public:
     bool Delete(uint32_t entry);
     // Deletes an entry - does preserve insertion order.
     bool DeleteKeepingOrder(uint32_t entry);
+
     //! Deletes the very last entry.
-    inline_    void DeleteLastEntry() {
+    inline_ void DeleteLastEntry() {
         if (mCurNbEntries) {
             mCurNbEntries--;
         }
     }
+
     //! Deletes the entry whose index is given
-    inline_    void DeleteIndex(uint32_t index) {
+    inline_ void DeleteIndex(uint32_t index) {
         mEntries[index] = mEntries[--mCurNbEntries];
     }
 
     // Helpers
     Container &FindNext(uint32_t &entry, FindMode find_mode = FIND_CLAMP);
     Container &FindPrev(uint32_t &entry, FindMode find_mode = FIND_CLAMP);
-    // Data access.
-    inline_    uint32_t GetNbEntries() const {
-        return mCurNbEntries;
-    }    //!< Returns the current number of entries.
-    inline_    uint32_t GetEntry(uint32_t i) const {
-        return mEntries[i];
-    }    //!< Returns ith entry
-    inline_    uint32_t *GetEntries() const {
-        return mEntries;
-    }    //!< Returns the list of entries.
 
-    inline_    uint32_t GetFirst() const {
+    // Data access.
+    inline_ uint32_t GetNbEntries() const {
+        return mCurNbEntries;
+    }  //!< Returns the current number of entries.
+
+    inline_ uint32_t GetEntry(uint32_t i) const {
+        return mEntries[i];
+    }  //!< Returns ith entry
+
+    inline_ uint32_t *GetEntries() const {
+        return mEntries;
+    }  //!< Returns the list of entries.
+
+    inline_ uint32_t GetFirst() const {
         return mEntries[0];
     }
 
-    inline_    uint32_t GetLast() const {
+    inline_ uint32_t GetLast() const {
         return mEntries[mCurNbEntries - 1];
     }
 
     // Growth control
-    inline_    float GetGrowthFactor() const {
+    inline_ float GetGrowthFactor() const {
         return mGrowthFactor;
-    }    //!< Returns the growth factor
-    inline_    void SetGrowthFactor(float growth) {
+    }  //!< Returns the growth factor
+
+    inline_ void SetGrowthFactor(float growth) {
         mGrowthFactor = growth;
-    }    //!< Sets the growth factor
-    inline_    bool IsFull() const {
+    }  //!< Sets the growth factor
+
+    inline_ bool IsFull() const {
         return mCurNbEntries == mMaxNbEntries;
-    }    //!< Checks the container is full
-    inline_    BOOL IsNotEmpty() const {
+    }  //!< Checks the container is full
+
+    inline_ BOOL IsNotEmpty() const {
         return mCurNbEntries;
-    }    //!< Checks the container is empty
+    }  //!< Checks the container is empty
 
     //! Read-access as an array
-    inline_    uint32_t operator[](uint32_t i) const {
+    inline_ uint32_t operator[](uint32_t i) const {
         OPASSERT(i >= 0 && i < mCurNbEntries);
         return mEntries[i];
     }
+
     //! Write-access as an array
-    inline_    uint32_t &operator[](uint32_t i) {
+    inline_ uint32_t &operator[](uint32_t i) {
         OPASSERT(i >= 0 && i < mCurNbEntries);
         return mEntries[i];
     }
@@ -230,27 +240,26 @@ public:
 
 #ifdef CONTAINER_STATS
 
-    inline_    uint32_t GetNbContainers() const {
+    inline_ uint32_t GetNbContainers() const {
         return mNbContainers;
     }
 
-    inline_    uint32_t GetTotalBytes() const {
+    inline_ uint32_t GetTotalBytes() const {
         return mUsedRam;
     }
 
 private:
-
-    static uint32_t mNbContainers;        //!< Number of containers around
-    static uint32_t mUsedRam;            //!< Amount of bytes used by containers in the system
+    static uint32_t mNbContainers;  //!< Number of containers around
+    static uint32_t mUsedRam;       //!< Amount of bytes used by containers in the system
 #endif
 private:
     // Resizing
     bool Resize(uint32_t needed = 1);
     // Data
-    uint32_t mMaxNbEntries;        //!< Maximum possible number of entries
-    uint32_t mCurNbEntries;        //!< Current number of entries
-    uint32_t *mEntries;            //!< List of entries
-    float mGrowthFactor;        //!< Resize: new number of entries = old number * mGrowthFactor
+    uint32_t  mMaxNbEntries;  //!< Maximum possible number of entries
+    uint32_t  mCurNbEntries;  //!< Current number of entries
+    uint32_t *mEntries;       //!< List of entries
+    float     mGrowthFactor;  //!< Resize: new number of entries = old number * mGrowthFactor
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_CONTAINER_H
+#endif                        // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_CONTAINER_H

@@ -33,16 +33,16 @@ struct OPCODE_API OBBCache : VolumeCache {
     }
 
     // Cached faces signature
-    OBB FatBox;        //!< Box used when performing the query resulting in cached faces
+    OBB FatBox;  //!< Box used when performing the query resulting in cached faces
     // User settings
-    float FatCoeff;    //!< extents multiplier used to create a fat box
+    float FatCoeff;  //!< extents multiplier used to create a fat box
 };
 
 class OPCODE_API OBBCollider : public VolumeCollider {
 public:
     // Constructor / Destructor
     OBBCollider();
-    virtual                                ~OBBCollider();
+    virtual ~OBBCollider();
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -60,11 +60,8 @@ public:
      *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    bool Collide(OBBCache &cache,
-            const OBB &box,
-            const Model &model,
-            const Matrix4x4 *worldb = nullptr,
-            const Matrix4x4 *worldm = nullptr);
+    bool Collide(OBBCache &cache, const OBB &box, const Model &model, const Matrix4x4 *worldb = nullptr,
+                 const Matrix4x4 *worldm = nullptr);
 
     // Settings
 
@@ -74,7 +71,7 @@ public:
      *	\param		flag		[in] true for full tests, false for coarse tests
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetFullBoxBoxTest(bool flag) {
+    inline_ void SetFullBoxBoxTest(bool flag) {
         mFullBoxBoxTest = flag;
     }
 
@@ -82,7 +79,8 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     *	Validates current settings. You should call this method after all the settings and callbacks have been defined for a collider.
+     *	Validates current settings. You should call this method after all the settings and callbacks have been defined
+     *for a collider.
      *	\return		nullptr if everything is ok, else a string describing the problem
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,15 +88,15 @@ public:
 
 protected:
     // Precomputed data
-    Matrix3x3 mAR;                //!< Absolute rotation matrix
-    Matrix3x3 mRModelToBox;        //!< Rotation from model space to obb space
-    Matrix3x3 mRBoxToModel;        //!< Rotation from obb space to model space
-    Point mTModelToBox;        //!< Translation from model space to obb space
-    Point mTBoxToModel;        //!< Translation from obb space to model space
+    Matrix3x3 mAR;           //!< Absolute rotation matrix
+    Matrix3x3 mRModelToBox;  //!< Rotation from model space to obb space
+    Matrix3x3 mRBoxToModel;  //!< Rotation from obb space to model space
+    Point     mTModelToBox;  //!< Translation from model space to obb space
+    Point     mTBoxToModel;  //!< Translation from obb space to model space
 
     Point mBoxExtents;
-    Point mB0;                //!< - mTModelToBox + mBoxExtents
-    Point mB1;                //!< - mTModelToBox - mBoxExtents
+    Point mB0;               //!< - mTModelToBox + mBoxExtents
+    Point mB1;               //!< - mTModelToBox - mBoxExtents
 
     float mBBx1;
     float mBBy1;
@@ -115,9 +113,9 @@ protected:
     float mBB_9;
 
     // Leaf description
-    Point mLeafVerts[3];        //!< Triangle vertices
+    Point mLeafVerts[3];  //!< Triangle vertices
     // Settings
-    bool mFullBoxBoxTest;    //!< Perform full BV-BV tests (true) or SAT-lite tests (false)
+    bool mFullBoxBoxTest;  //!< Perform full BV-BV tests (true) or SAT-lite tests (false)
     // Internal methods
     void _Collide(const AABBCollisionNode *node);
     void _Collide(const AABBNoLeafNode *node);
@@ -128,29 +126,25 @@ protected:
     void _CollideNoPrimitiveTest(const AABBQuantizedNode *node);
     void _CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node);
     // Overlap tests
-    inline_                bool OBBContainsBox(const Point &bc, const Point &be);
-    inline_                bool BoxBoxOverlap(const Point &extents, const Point &center);
-    inline_                bool TriBoxOverlap();
+    inline_ bool OBBContainsBox(const Point &bc, const Point &be);
+    inline_ bool BoxBoxOverlap(const Point &extents, const Point &center);
+    inline_ bool TriBoxOverlap();
     // Init methods
-    bool InitQuery(OBBCache &cache,
-            const OBB &box,
-            const Matrix4x4 *worldb = nullptr,
-            const Matrix4x4 *worldm = nullptr);
+    bool InitQuery(OBBCache &cache, const OBB &box, const Matrix4x4 *worldb = nullptr,
+                   const Matrix4x4 *worldm = nullptr);
 };
 
 class OPCODE_API HybridOBBCollider : public OBBCollider {
 public:
     // Constructor / Destructor
     HybridOBBCollider();
-    virtual                                ~HybridOBBCollider();
+    virtual ~HybridOBBCollider();
 
-    bool Collide(OBBCache &cache,
-            const OBB &box,
-            const HybridModel &model,
-            const Matrix4x4 *worldb = nullptr,
-            const Matrix4x4 *worldm = nullptr);
+    bool Collide(OBBCache &cache, const OBB &box, const HybridModel &model, const Matrix4x4 *worldb = nullptr,
+                 const Matrix4x4 *worldm = nullptr);
+
 protected:
     Container mTouchedBoxes;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_OBB_COLLIDER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_OBB_COLLIDER_H

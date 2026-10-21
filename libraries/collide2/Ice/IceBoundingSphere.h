@@ -27,53 +27,52 @@ enum BSphereMethod {
 class ICEMATHS_API Sphere {
 public:
     //! Constructor
-    inline_ Sphere() {
-    }
+    inline_ Sphere() {}
+
     //! Constructor
-    inline_ Sphere(const Point &center, float radius) : mCenter(center), mRadius(radius) {
-    }
+    inline_ Sphere(const Point &center, float radius) : mCenter(center), mRadius(radius) {}
 
     //! Constructor
     Sphere(uint32_t nb_verts, const Point *verts);
+
     //! Copy constructor
-    inline_ Sphere(const Sphere &sphere) : mCenter(sphere.mCenter), mRadius(sphere.mRadius) {
-    }
+    inline_ Sphere(const Sphere &sphere) : mCenter(sphere.mCenter), mRadius(sphere.mRadius) {}
+
     //! Destructor
-    inline_                    ~Sphere() {
-    }
+    inline_ ~Sphere() {}
 
     BSphereMethod Compute(uint32_t nb_verts, const Point *verts);
-    bool FastCompute(uint32_t nb_verts, const Point *verts);
+    bool          FastCompute(uint32_t nb_verts, const Point *verts);
 
     // Access methods
-    inline_    const Point &GetCenter() const {
+    inline_ const Point &GetCenter() const {
         return mCenter;
     }
 
-    inline_    float GetRadius() const {
+    inline_ float GetRadius() const {
         return mRadius;
     }
 
-    inline_    const Point &Center() const {
+    inline_ const Point &Center() const {
         return mCenter;
     }
 
-    inline_    float Radius() const {
+    inline_ float Radius() const {
         return mRadius;
     }
 
-    inline_    Sphere &Set(const Point &center, float radius) {
+    inline_ Sphere &Set(const Point &center, float radius) {
         mCenter = center;
         mRadius = radius;
         return *this;
     }
 
-    inline_    Sphere &SetCenter(const Point &center) {
+    inline_ Sphere &SetCenter(const Point &center) {
         mCenter = center;
         return *this;
     }
 
-    inline_    Sphere &SetRadius(float radius) {
+    inline_ Sphere &SetRadius(float radius) {
         mRadius = radius;
         return *this;
     }
@@ -85,7 +84,7 @@ public:
      *	\return		true if inside the sphere
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    bool Contains(const Point &p) const {
+    inline_ bool Contains(const Point &p) const {
         return mCenter.SquareDistance(p) <= mRadius * mRadius;
     }
 
@@ -96,7 +95,7 @@ public:
      *	\return		true if inside the sphere
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    bool Contains(const Sphere &sphere) const {
+    inline_ bool Contains(const Sphere &sphere) const {
         // If our radius is the smallest, we can't possibly contain the other sphere
         if (mRadius < sphere.mRadius) {
             return false;
@@ -118,8 +117,8 @@ public:
         // Sounds ok but maybe there's a better way?
         float R2 = mRadius * mRadius;
 #ifdef USE_MIN_MAX
-        const Point& Max = ((ShadowAABB&)&aabb).mMax;
-        const Point& Min = ((ShadowAABB&)&aabb).mMin;
+        const Point &Max = ((ShadowAABB &)&aabb).mMax;
+        const Point &Min = ((ShadowAABB &)&aabb).mMin;
 #else
         Point Max;
         aabb.GetMax(Max);
@@ -176,7 +175,7 @@ public:
      *	\return		true if spheres overlap
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    bool Intersect(const Sphere &sphere) const {
+    inline_ bool Intersect(const Sphere &sphere) const {
         float r = mRadius + sphere.mRadius;
         return mCenter.SquareDistance(sphere.mCenter) <= r * r;
     }
@@ -187,7 +186,7 @@ public:
      *	\return		true if the box is valid
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    BOOL IsValid() const {
+    inline_ BOOL IsValid() const {
         // Consistency condition for spheres: Radius >= 0.0f
         if (mRadius < 0.0f) {
             return FALSE;
@@ -196,8 +195,8 @@ public:
     }
 
 public:
-    Point mCenter;        //!< Sphere center
-    float mRadius;        //!< Sphere radius
+    Point mCenter;  //!< Sphere center
+    float mRadius;  //!< Sphere radius
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_BOUNDING_SPHERE_H
+#endif              // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_BOUNDING_SPHERE_H

@@ -18,26 +18,25 @@
 class ICEMATHS_API Ray {
 public:
     //! Constructor
-    inline_ Ray() {
-    }
+    inline_ Ray() {}
+
     //! Constructor
-    inline_ Ray(const Point &orig, const Point &dir) : mOrig(orig), mDir(dir) {
-    }
+    inline_ Ray(const Point &orig, const Point &dir) : mOrig(orig), mDir(dir) {}
+
     //! Copy constructor
-    inline_ Ray(const Ray &ray) : mOrig(ray.mOrig), mDir(ray.mDir) {
-    }
+    inline_ Ray(const Ray &ray) : mOrig(ray.mOrig), mDir(ray.mDir) {}
+
     //! Destructor
-    inline_                    ~Ray() {
-    }
+    inline_ ~Ray() {}
 
     float SquareDistance(const Point &point, float *t = nullptr) const;
 
-    inline_            float Distance(const Point &point, float *t = nullptr) const {
+    inline_ float Distance(const Point &point, float *t = nullptr) const {
         return sqrtf(SquareDistance(point, t));
     }
 
-    Point mOrig;        //!< Ray origin
-    Point mDir;        //!< Normalized direction
+    Point mOrig;  //!< Ray origin
+    Point mDir;   //!< Normalized direction
 };
 
 inline_ void ComputeReflexionVector(Point &reflected, const Point &incoming_dir, const Point &outward_normal) {
@@ -45,15 +44,13 @@ inline_ void ComputeReflexionVector(Point &reflected, const Point &incoming_dir,
 }
 
 inline_ void ComputeReflexionVector(Point &reflected, const Point &source, const Point &impact, const Point &normal) {
-    Point V = impact - source;
+    Point V   = impact - source;
     reflected = V - normal * 2.0f * (V | normal);
 }
 
-inline_ void DecomposeVector(Point &normal_compo,
-        Point &tangent_compo,
-        const Point &outward_dir,
-        const Point &outward_normal) {
-    normal_compo = outward_normal * (outward_dir | outward_normal);
+inline_ void DecomposeVector(Point &normal_compo, Point &tangent_compo, const Point &outward_dir,
+                             const Point &outward_normal) {
+    normal_compo  = outward_normal * (outward_dir | outward_normal);
     tangent_compo = outward_dir - normal_compo;
 }
 
@@ -67,8 +64,8 @@ inline_ void DecomposeVector(Point &normal_compo,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ void ComputeLocalDirection(Point &local_dir, const Point &world_dir, const Matrix4x4 &world) {
     // Get world direction back in local space
-//		Matrix3x3 InvWorld = world;
-//		local_dir = InvWorld * world_dir;
+    //		Matrix3x3 InvWorld = world;
+    //		local_dir = InvWorld * world_dir;
     local_dir = Matrix3x3(world) * world_dir;
 }
 
@@ -101,4 +98,4 @@ inline_ void ComputeLocalRay(Ray &local_ray, const Ray &world_ray, const Matrix4
     ComputeLocalPoint(local_ray.mOrig, world_ray.mOrig, world);
 }
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RAY_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_RAY_H

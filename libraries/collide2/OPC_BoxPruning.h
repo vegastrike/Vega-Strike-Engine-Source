@@ -27,19 +27,12 @@
 
 // Optimized versions
 FUNCTION OPCODE_API bool CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, const Axes &axes);
-FUNCTION OPCODE_API bool BipartiteBoxPruning(uint32_t nb0,
-        const AABB **array0,
-        uint32_t nb1,
-        const AABB **array1,
-        Pairs &pairs,
-        const Axes &axes);
+FUNCTION OPCODE_API bool BipartiteBoxPruning(uint32_t nb0, const AABB **array0, uint32_t nb1, const AABB **array1,
+                                             Pairs &pairs, const Axes &axes);
 
 // Brute-force versions
 FUNCTION OPCODE_API bool BruteForceCompleteBoxTest(uint32_t nb, const AABB **array, Pairs &pairs);
-FUNCTION OPCODE_API bool BruteForceBipartiteBoxTest(uint32_t nb0,
-        const AABB **array0,
-        uint32_t nb1,
-        const AABB **array1,
-        Pairs &pairs);
+FUNCTION OPCODE_API bool BruteForceBipartiteBoxTest(uint32_t nb0, const AABB **array0, uint32_t nb1,
+                                                    const AABB **array1, Pairs &pairs);
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_BOXPRUNING_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_BOXPRUNING_H

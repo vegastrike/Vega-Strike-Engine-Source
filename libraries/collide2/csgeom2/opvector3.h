@@ -26,6 +26,7 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H
 #include <cmath>
+
 #include "collide2/Opcode.h"
 
 /**
@@ -45,27 +46,22 @@ public:
      * initialized. This makes the code slightly faster as
      * csVector3 objects are used a lot.
      */
-    csVector3() {
-    }
+    csVector3() {}
 
     /**
      * Make a new initialized vector.
      * Creates a new vector and initializes it to m*<1,1,1>.  To create
      * a vector initialized to the zero vector, use csVector3(0)
      */
-    csVector3(float m) : x(m), y(m), z(m) {
-    }
+    csVector3(float m) : x(m), y(m), z(m) {}
 
     /// Make a new vector and initialize with the given values.
-    csVector3(float ix, float iy, float iz = 0) : x(ix), y(iy), z(iz) {
-    }
+    csVector3(float ix, float iy, float iz = 0) : x(ix), y(iy), z(iz) {}
 
     /// Copy Constructor.
-    csVector3(const csVector3 &v) : x(v.x), y(v.y), z(v.z) {
-    }
+    csVector3(const csVector3 &v) : x(v.x), y(v.y), z(v.z) {}
 
-    csVector3(const Vector v) : x(v.i), y(v.j), z(v.k) {
-    }
+    csVector3(const Vector v) : x(v.i), y(v.j), z(v.k) {}
 
     /// Conversion from double precision vector to single.
     /// Add two vectors.
@@ -89,9 +85,7 @@ public:
 
     /// Take the cross product of two vectors.
     inline friend csVector3 operator%(const csVector3 &v1, const csVector3 &v2) {
-        return csVector3(v1.y * v2.z - v1.z * v2.y,
-                v1.z * v2.x - v1.x * v2.z,
-                v1.x * v2.y - v1.y * v2.x);
+        return csVector3(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
     }
 
     /// Take cross product of two vectors and put result in this vector.
@@ -207,7 +201,7 @@ public:
 
     /// Divide this vector by a scalar.
     inline csVector3 &operator/=(float f) {
-        f = 1.0f / f;
+        f  = 1.0f / f;
         x *= f;
         y *= f;
         z *= f;
@@ -274,4 +268,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_VECTOR3_H

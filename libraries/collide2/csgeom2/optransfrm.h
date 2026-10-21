@@ -45,8 +45,7 @@ public:
     /**
      * Initialize with the identity transformation.
      */
-    csTransform() : m_o2t(), v_o2t(0, 0, 0) {
-    }
+    csTransform() : m_o2t(), v_o2t(0, 0, 0) {}
 
     /**
      * Initialize with the given transformation. The transformation
@@ -55,9 +54,7 @@ public:
      * O the vector in 'other' space, M the transformation matrix and
      * V the transformation vector.
      */
-    csTransform(const csMatrix3 &other2this, const csVector3 &origin_pos) :
-            m_o2t(other2this), v_o2t(origin_pos) {
-    }
+    csTransform(const csMatrix3 &other2this, const csVector3 &origin_pos) : m_o2t(other2this), v_o2t(origin_pos) {}
 
     /**
      * Get 'other' to 'this' transformation matrix. This is the 3x3
@@ -131,21 +128,21 @@ public:
     /**
      * Convert a plane in 'other' space to 'this' space.
      */
-//  csPlane3 Other2This (const csPlane3& p) const;
+    //  csPlane3 Other2This (const csPlane3& p) const;
 
     /**
      * Convert a plane in 'other' space to 'this' space.
      * This version ignores translation.
      */
-//  csPlane3 Other2ThisRelative (const csPlane3& p) const;
+    //  csPlane3 Other2ThisRelative (const csPlane3& p) const;
 
     /**
      * Convert a plane in 'other' space to 'this' space. This is an optimized
      * version for which a point on the new plane is known (point). The result
      * is stored in 'result'.
      */
-//  void Other2This (const csPlane3& p, const csVector3& point,
-//  	csPlane3& result) const;
+    //  void Other2This (const csPlane3& p, const csVector3& point,
+    //  	csPlane3& result) const;
 
     /**
      * Apply a transformation to a 3D vector.
@@ -157,11 +154,11 @@ public:
     /// Apply a transformation to a 3D vector.
     friend csVector3 &operator*=(csVector3 &v, const csTransform &t);
     /// Apply a transformation to a Plane.
-//  friend csPlane3 operator* (const csPlane3& p, const csTransform& t);
+    //  friend csPlane3 operator* (const csPlane3& p, const csTransform& t);
     /// Apply a transformation to a Plane.
-//  friend csPlane3 operator* (const csTransform& t, const csPlane3& p);
+    //  friend csPlane3 operator* (const csTransform& t, const csPlane3& p);
     /// Apply a transformation to a Plane.
-//  friend csPlane3& operator*= (csPlane3& p, const csTransform& t);
+    //  friend csPlane3& operator*= (csPlane3& p, const csTransform& t);
 
     /// Multiply a matrix with the transformation matrix.
     friend csMatrix3 operator*(const csMatrix3 &m, const csTransform &t);
@@ -170,15 +167,14 @@ public:
     /// Multiply a matrix with the transformation matrix.
     friend csMatrix3 &operator*=(csMatrix3 &m, const csTransform &t);
     /// Combine two transforms, rightmost first.
-    friend csTransform operator*(const csTransform &t1,
-            const csReversibleTransform &t2);
+    friend csTransform operator*(const csTransform &t1, const csReversibleTransform &t2);
 
     /**
      * Return a transform that represents a mirroring across a plane.
      * This function will return a csTransform which represents a reflection
      * across the plane pl.
      */
-//  static csTransform GetReflect (const csPlane3& pl);
+    //  static csTransform GetReflect (const csPlane3& pl);
 };
 
 /**
@@ -196,30 +192,22 @@ protected:
     /**
      * Initialize transform with both transform matrix and inverse tranform.
      */
-    csReversibleTransform(const csMatrix3 &o2t, const csMatrix3 &t2o,
-            const csVector3 &pos) : csTransform(o2t, pos), m_t2o(t2o) {
-    }
+    csReversibleTransform(const csMatrix3 &o2t, const csMatrix3 &t2o, const csVector3 &pos)
+        : csTransform(o2t, pos), m_t2o(t2o) {}
 
 public:
     /**
      * Initialize with the identity transformation.
      */
-    csReversibleTransform() : csTransform(), m_t2o() {
-    }
+    csReversibleTransform() : csTransform(), m_t2o() {}
 
-    ///Daniel: I think that this matrix is in row major order...
-    ///but it appears to look for the matrix that takes from world to object
-    ///hence it is the transpose... transpose of transpose is identty...which is what I pass in below
-    csReversibleTransform(const Matrix &m) :
-            csTransform(
-                    csMatrix3(m.r[0], m.r[3], m.r[6],
-                            m.r[1], m.r[4], m.r[7],
-                            m.r[2], m.r[5], m.r[8]).GetInverse(),
-                    csVector3(m.p.i, m.p.j, m.p.k)),
-            m_t2o(m.r[0], m.r[3], m.r[6],
-                    m.r[1], m.r[4], m.r[7],
-                    m.r[2], m.r[5], m.r[8]) {
-    }
+    /// Daniel: I think that this matrix is in row major order...
+    /// but it appears to look for the matrix that takes from world to object
+    /// hence it is the transpose... transpose of transpose is identty...which is what I pass in below
+    csReversibleTransform(const Matrix &m)
+        : csTransform(csMatrix3(m.r[0], m.r[3], m.r[6], m.r[1], m.r[4], m.r[7], m.r[2], m.r[5], m.r[8]).GetInverse(),
+                      csVector3(m.p.i, m.p.j, m.p.k)),
+          m_t2o(m.r[0], m.r[3], m.r[6], m.r[1], m.r[4], m.r[7], m.r[2], m.r[5], m.r[8]) {}
 
     /**
      * Initialize with the given transformation. The transformation
@@ -228,27 +216,24 @@ public:
      * O the vector in 'other' space, M the transformation matrix and
      * V the transformation vector.
      */
-    csReversibleTransform(const csMatrix3 &o2t, const csVector3 &pos) :
-            csTransform(o2t, pos) {
+    csReversibleTransform(const csMatrix3 &o2t, const csVector3 &pos) : csTransform(o2t, pos) {
         m_t2o = m_o2t.GetInverse();
     }
 
     /**
      * Initialize with the given transformation.
      */
-    csReversibleTransform(const csTransform &t) :
-            csTransform(t) {
+    csReversibleTransform(const csTransform &t) : csTransform(t) {
         m_t2o = m_o2t.GetInverse();
     }
 
-    csReversibleTransform(const csReversibleTransform &t) :
-            csTransform(t) {
+    csReversibleTransform(const csReversibleTransform &t) : csTransform(t) {
         m_t2o = t.m_t2o;
     }
 
     /**
-    * Get 'this' to 'other' transformation matrix.
-    */
+     * Get 'this' to 'other' transformation matrix.
+     */
     inline const csMatrix3 &GetT2O() const {
         return m_t2o;
     }
@@ -302,21 +287,21 @@ public:
     /**
      * Convert a plane in 'this' space to 'other' space.
      */
-//  csPlane3 This2Other (const csPlane3& p) const;
+    //  csPlane3 This2Other (const csPlane3& p) const;
 
     /**
      * Convert a plane in 'this' space to 'other' space.
      * This version ignores translation.
      */
-//  csPlane3 This2OtherRelative (const csPlane3& p) const;
+    //  csPlane3 This2OtherRelative (const csPlane3& p) const;
 
     /**
      * Convert a plane in 'this' space to 'other' space. This is an optimized
      * version for which a point on the new plane is known (point). The result
      * is stored in 'result'.
      */
-//  void This2Other (const csPlane3& p, const csVector3& point,
-//  	csPlane3& result) const;
+    //  void This2Other (const csPlane3& p, const csVector3& point,
+    //  	csPlane3& result) const;
 
 
     /**
@@ -364,13 +349,12 @@ public:
     friend csVector3 &operator/=(csVector3 &v, const csReversibleTransform &t);
 
     /// Reverse a transformation on a Plane.
-//  friend csPlane3 operator/ (const csPlane3& p, const csReversibleTransform& t);
+    //  friend csPlane3 operator/ (const csPlane3& p, const csReversibleTransform& t);
     /// Reverse a transformation on a Plane.
-//  friend csPlane3& operator/= (csPlane3& p, const csReversibleTransform& t);
+    //  friend csPlane3& operator/= (csPlane3& p, const csReversibleTransform& t);
     /// Combine two transforms, with the rightmost being applied first.
-    friend csReversibleTransform &operator*=(csReversibleTransform &t1,
-            const csReversibleTransform &t2) {
-        t1.v_o2t = t2.m_t2o * t1.v_o2t;
+    friend csReversibleTransform &operator*=(csReversibleTransform &t1, const csReversibleTransform &t2) {
+        t1.v_o2t  = t2.m_t2o * t1.v_o2t;
         t1.v_o2t += t2.v_o2t;
         t1.m_o2t *= t2.m_o2t;
         t1.m_t2o *= t1.m_t2o;
@@ -378,21 +362,16 @@ public:
     }
 
     /// Combine two transforms, with the rightmost being applied first.
-    friend csReversibleTransform operator*(const csReversibleTransform &t1,
-            const csReversibleTransform &t2) {
-        return csReversibleTransform(t1.m_o2t * t2.m_o2t, t2.m_t2o * t1.m_t2o,
-                t2.v_o2t + t2.m_t2o * t1.v_o2t);
+    friend csReversibleTransform operator*(const csReversibleTransform &t1, const csReversibleTransform &t2) {
+        return csReversibleTransform(t1.m_o2t * t2.m_o2t, t2.m_t2o * t1.m_t2o, t2.v_o2t + t2.m_t2o * t1.v_o2t);
     }
 
     /// Combine two transforms, with the rightmost being applied first.
-    friend csTransform operator*(const csTransform &t1,
-            const csReversibleTransform &t2);
+    friend csTransform operator*(const csTransform &t1, const csReversibleTransform &t2);
     /// Combine two transforms, reversing t2 then applying t1.
-    friend csReversibleTransform &operator/=(csReversibleTransform &t1,
-            const csReversibleTransform &t2);
+    friend csReversibleTransform &operator/=(csReversibleTransform &t1, const csReversibleTransform &t2);
     /// Combine two transforms, reversing t2 then applying t1.
-    friend csReversibleTransform operator/(const csReversibleTransform &t1,
-            const csReversibleTransform &t2);
+    friend csReversibleTransform operator/(const csReversibleTransform &t1, const csReversibleTransform &t2);
 };
 
 /**
@@ -406,22 +385,19 @@ public:
     /**
      * Initialize with the identity transformation.
      */
-    csOrthoTransform() : csReversibleTransform() {
-    }
+    csOrthoTransform() : csReversibleTransform() {}
 
     /**
      * Initialize with the given transformation.
      */
-    csOrthoTransform(const csMatrix3 &o2t, const csVector3 &pos) :
-            csReversibleTransform(o2t, o2t.GetTranspose(), pos) {
-    }
+    csOrthoTransform(const csMatrix3 &o2t, const csVector3 &pos)
+        : csReversibleTransform(o2t, o2t.GetTranspose(), pos) {}
 
     /**
      * Initialize with the given transformation.
      */
-    csOrthoTransform(const csTransform &t) :
-            csReversibleTransform(t.GetO2T(), t.GetO2T().GetTranspose(), t.GetO2TTranslation()) {
-    }
+    csOrthoTransform(const csTransform &t)
+        : csReversibleTransform(t.GetO2T(), t.GetO2T().GetTranspose(), t.GetO2TTranslation()) {}
 
     /**
      * Set 'other' to 'this' transformation matrix.
@@ -440,4 +416,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_TRANSFORM_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_CS_TRANSFORM_H

@@ -15,8 +15,14 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_UTILS_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_UTILS_H
 
-#define START_RUNONCE    { static bool __RunOnce__ = false;    if(!__RunOnce__){
-#define END_RUNONCE        __RunOnce__ = true;}}
+#define START_RUNONCE                    \
+    {                                    \
+        static bool __RunOnce__ = false; \
+        if (!__RunOnce__) {
+#define END_RUNONCE     \
+    __RunOnce__ = true; \
+    }                   \
+    }
 
 //! Reverse all the bits in a 32 bit word (from Steve Baker's Cute Code Collection)
 //! (each line can be done in any order.
@@ -122,7 +128,7 @@ inline_ void Swap(uint32_t &x, uint32_t &y) {
 //! int IsLittleEndian()	{ int x=1;	return ( ((char*)(&x))[0] );	}
 inline_ char LittleEndian() {
     int i = 1;
-    return *((char *) &i);
+    return *((char *)&i);
 }
 
 //!< Alternative abs function
@@ -138,14 +144,15 @@ inline_ int32_t min_(int32_t a, int32_t b) {
 }
 
 // Determine if one of the bytes in a 4 byte word is zero
-inline_    BOOL HasNullByte(uint32_t x) {
+inline_ BOOL HasNullByte(uint32_t x) {
     return ((x + 0xfefefeff) & (~x) & 0x80808080);
 }
 
 // To find the smallest 1 bit in a word  EG: ~~~~~~10---0    =>    0----010---0
-inline_    uint32_t LowestOneBit(uint32_t w) {
+inline_ uint32_t LowestOneBit(uint32_t w) {
     return ((w) & (~(w) + 1));
 }
+
 //	inline_	uint32_t	LowestOneBit_(uint32_t w)			{ return ((w) & (-(w)));					}
 
 // Most Significant 1 Bit
@@ -191,36 +198,36 @@ inline_ float FeedbackFilter(float val, float &memory, float sharpness) {
 //! limited (abs(x) must be < ((1<<31u)-32767)), then you can use the
 //! following code to clamp the resulting value into [-32768,+32767] range:
 inline_ int ClampToInt16(int x) {
-//		ASSERT(abs(x) < (int)((1<<31u)-32767));
+    //		ASSERT(abs(x) < (int)((1<<31u)-32767));
 
-    int delta = 32767 - x;
-    x += (delta >> 31) & delta;
-    delta = x + 32768;
-    x -= (delta >> 31) & delta;
+    int delta  = 32'767 - x;
+    x         += (delta >> 31) & delta;
+    delta      = x + 32'768;
+    x         -= (delta >> 31) & delta;
     return x;
 }
 
 // Generic functions
-template<class Type>
+template <class Type>
 inline_ void TSwap(Type &a, Type &b) {
     const Type c = a;
-    a = b;
-    b = c;
+    a            = b;
+    b            = c;
 }
 
-template<class Type>
+template <class Type>
 inline_ Type TClamp(const Type &x, const Type &lo, const Type &hi) {
     return ((x < lo) ? lo : (x > hi) ? hi : x);
 }
 
-template<class Type>
+template <class Type>
 inline_ void TSort(Type &a, Type &b) {
     if (a > b) {
         TSwap(a, b);
     }
 }
 
-template<class Type>
+template <class Type>
 inline_ void TSort(Type &a, Type &b, Type &c) {
     if (a > b) {
         TSwap(a, b);
@@ -237,12 +244,16 @@ inline_ void TSort(Type &a, Type &b, Type &c) {
 }
 
 // Prevent nasty user-manipulations (strategy borrowed from Charles Bloom)
-//	#define PREVENT_COPY(curclass)	void operator = (const curclass& object)	{	ASSERT(!"Bad use of operator =");	}
+//	#define PREVENT_COPY(curclass)	void operator = (const curclass& object)	{	ASSERT(!"Bad use of operator =");
+//}
 // ... actually this is better !
-#define PREVENT_COPY(cur_class)    private: cur_class(const cur_class& object);    cur_class& operator=(const cur_class& object);
+#define PREVENT_COPY(cur_class)         \
+private:                                \
+    cur_class(const cur_class &object); \
+    cur_class &operator=(const cur_class &object);
 
 //! TO BE DOCUMENTED
-#define OFFSET_OF(Class, Member)    (size_t)&(((Class*)0)->Member)
+#define OFFSET_OF(Class, Member) (size_t)&(((Class *)0)->Member)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -254,12 +265,12 @@ inline_ void TSort(Type &a, Type &b, Type &c) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 FUNCTION ICECORE_API uint32_t Alignment(uint32_t address);
 
-#define IS_ALIGNED_2(x)        ((x&1)==0)
-#define IS_ALIGNED_4(x)        ((x&3)==0)
-#define IS_ALIGNED_8(x)        ((x&7)==0)
+#define IS_ALIGNED_2(x) ((x & 1) == 0)
+#define IS_ALIGNED_4(x) ((x & 3) == 0)
+#define IS_ALIGNED_8(x) ((x & 7) == 0)
 
 inline_ void _prefetch(void const *ptr) {
-    (void) *(char const volatile *) ptr;
+    (void)*(char const volatile *)ptr;
 }
 
 // Compute implicit coords from an index:
@@ -291,4 +302,4 @@ inline_ void Compute3DCoords(uint32_t &u, uint32_t &v, uint32_t &w, uint32_t i, 
     Compute2DCoords(u, v, i - (w * nbu_nbv), nbu);
 }
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_UTILS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_UTILS_H

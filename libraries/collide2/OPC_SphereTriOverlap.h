@@ -30,19 +30,19 @@ bool SphereCollider::SphereTriOverlap(const Point &vert0, const Point &vert1, co
 
     // Early exit if one of the vertices is inside the sphere
     Point kDiff = vert2 - mCenter;
-    float fC = kDiff.SquareMagnitude();
+    float fC    = kDiff.SquareMagnitude();
     if (fC <= mRadius2) {
         return TRUE;
     }
 
     kDiff = vert1 - mCenter;
-    fC = kDiff.SquareMagnitude();
+    fC    = kDiff.SquareMagnitude();
     if (fC <= mRadius2) {
         return TRUE;
     }
 
     kDiff = vert0 - mCenter;
-    fC = kDiff.SquareMagnitude();
+    fC    = kDiff.SquareMagnitude();
     if (fC <= mRadius2) {
         return TRUE;
     }
@@ -51,16 +51,16 @@ bool SphereCollider::SphereTriOverlap(const Point &vert0, const Point &vert1, co
     Point TriEdge0 = vert1 - vert0;
     Point TriEdge1 = vert2 - vert0;
 
-//Point kDiff	= vert0 - mCenter;
+    // Point kDiff	= vert0 - mCenter;
     float fA00 = TriEdge0.SquareMagnitude();
     float fA01 = TriEdge0 | TriEdge1;
     float fA11 = TriEdge1.SquareMagnitude();
-    float fB0 = kDiff | TriEdge0;
-    float fB1 = kDiff | TriEdge1;
-//float fC	= kDiff.SquareMagnitude();
+    float fB0  = kDiff | TriEdge0;
+    float fB1  = kDiff | TriEdge1;
+    // float fC	= kDiff.SquareMagnitude();
     float fDet = fabsf(fA00 * fA11 - fA01 * fA01);
-    float u = fA01 * fB1 - fA11 * fB0;
-    float v = fA01 * fB0 - fA00 * fB1;
+    float u    = fA01 * fB1 - fA11 * fB0;
+    float v    = fA01 * fB0 - fA00 * fB1;
     float SqrDist;
 
     if (u + v <= fDet) {
@@ -68,52 +68,59 @@ bool SphereCollider::SphereTriOverlap(const Point &vert0, const Point &vert1, co
             if (v < 0.0f)  // region 4
             {
                 if (fB0 < 0.0f) {
-//					v = 0.0f;
-                    if (-fB0 >= fA00) { /*u = 1.0f;*/        SqrDist = fA00 + 2.0f * fB0 + fC;
+                    //					v = 0.0f;
+                    if (-fB0 >= fA00) { /*u = 1.0f;*/
+                        SqrDist = fA00 + 2.0f * fB0 + fC;
                     } else {
-                        u = -fB0 / fA00;
+                        u       = -fB0 / fA00;
                         SqrDist = fB0 * u + fC;
                     }
                 } else {
-//					u = 0.0f;
-                    if (fB1 >= 0.0f) { /*v = 0.0f;*/        SqrDist = fC;
-                    } else if (-fB1 >= fA11) { /*v = 1.0f;*/        SqrDist = fA11 + 2.0f * fB1 + fC;
+                    //					u = 0.0f;
+                    if (fB1 >= 0.0f) {         /*v = 0.0f;*/
+                        SqrDist = fC;
+                    } else if (-fB1 >= fA11) { /*v = 1.0f;*/
+                        SqrDist = fA11 + 2.0f * fB1 + fC;
                     } else {
-                        v = -fB1 / fA11;
+                        v       = -fB1 / fA11;
                         SqrDist = fB1 * v + fC;
                     }
                 }
             } else  // region 3
             {
-//				u = 0.0f;
-                if (fB1 >= 0.0f) { /*v = 0.0f;*/        SqrDist = fC;
-                } else if (-fB1 >= fA11) { /*v = 1.0f;*/        SqrDist = fA11 + 2.0f * fB1 + fC;
+                //				u = 0.0f;
+                if (fB1 >= 0.0f) {         /*v = 0.0f;*/
+                    SqrDist = fC;
+                } else if (-fB1 >= fA11) { /*v = 1.0f;*/
+                    SqrDist = fA11 + 2.0f * fB1 + fC;
                 } else {
-                    v = -fB1 / fA11;
+                    v       = -fB1 / fA11;
                     SqrDist = fB1 * v + fC;
                 }
             }
         } else if (v < 0.0f)  // region 5
         {
-//			v = 0.0f;
-            if (fB0 >= 0.0f) { /*u = 0.0f;*/        SqrDist = fC;
-            } else if (-fB0 >= fA00) { /*u = 1.0f;*/        SqrDist = fA00 + 2.0f * fB0 + fC;
+            //			v = 0.0f;
+            if (fB0 >= 0.0f) {         /*u = 0.0f;*/
+                SqrDist = fC;
+            } else if (-fB0 >= fA00) { /*u = 1.0f;*/
+                SqrDist = fA00 + 2.0f * fB0 + fC;
             } else {
-                u = -fB0 / fA00;
+                u       = -fB0 / fA00;
                 SqrDist = fB0 * u + fC;
             }
         } else  // region 0
         {
             // minimum at interior point
             if (fDet == 0.0f) {
-//				u = 0.0f;
-//				v = 0.0f;
+                //				u = 0.0f;
+                //				v = 0.0f;
                 SqrDist = MAX_FLOAT;
             } else {
-                float fInvDet = 1.0f / fDet;
-                u *= fInvDet;
-                v *= fInvDet;
-                SqrDist = u * (fA00 * u + fA01 * v + 2.0f * fB0) + v * (fA01 * u + fA11 * v + 2.0f * fB1) + fC;
+                float fInvDet  = 1.0f / fDet;
+                u             *= fInvDet;
+                v             *= fInvDet;
+                SqrDist        = u * (fA00 * u + fA01 * v + 2.0f * fB0) + v * (fA01 * u + fA11 * v + 2.0f * fB1) + fC;
             }
         }
     } else {
@@ -127,20 +134,22 @@ bool SphereCollider::SphereTriOverlap(const Point &vert0, const Point &vert1, co
                 fNumer = fTmp1 - fTmp0;
                 fDenom = fA00 - 2.0f * fA01 + fA11;
                 if (fNumer >= fDenom) {
-//					u = 1.0f;
-//					v = 0.0f;
+                    //					u = 1.0f;
+                    //					v = 0.0f;
                     SqrDist = fA00 + 2.0f * fB0 + fC;
                 } else {
-                    u = fNumer / fDenom;
-                    v = 1.0f - u;
+                    u       = fNumer / fDenom;
+                    v       = 1.0f - u;
                     SqrDist = u * (fA00 * u + fA01 * v + 2.0f * fB0) + v * (fA01 * u + fA11 * v + 2.0f * fB1) + fC;
                 }
             } else {
-//				u = 0.0f;
-                if (fTmp1 <= 0.0f) { /*v = 1.0f;*/        SqrDist = fA11 + 2.0f * fB1 + fC;
-                } else if (fB1 >= 0.0f) { /*v = 0.0f;*/        SqrDist = fC;
+                //				u = 0.0f;
+                if (fTmp1 <= 0.0f) {      /*v = 1.0f;*/
+                    SqrDist = fA11 + 2.0f * fB1 + fC;
+                } else if (fB1 >= 0.0f) { /*v = 0.0f;*/
+                    SqrDist = fC;
                 } else {
-                    v = -fB1 / fA11;
+                    v       = -fB1 / fA11;
                     SqrDist = fB1 * v + fC;
                 }
             }
@@ -152,20 +161,22 @@ bool SphereCollider::SphereTriOverlap(const Point &vert0, const Point &vert1, co
                 fNumer = fTmp1 - fTmp0;
                 fDenom = fA00 - 2.0f * fA01 + fA11;
                 if (fNumer >= fDenom) {
-//					v = 1.0f;
-//					u = 0.0f;
+                    //					v = 1.0f;
+                    //					u = 0.0f;
                     SqrDist = fA11 + 2.0f * fB1 + fC;
                 } else {
-                    v = fNumer / fDenom;
-                    u = 1.0f - v;
+                    v       = fNumer / fDenom;
+                    u       = 1.0f - v;
                     SqrDist = u * (fA00 * u + fA01 * v + 2.0f * fB0) + v * (fA01 * u + fA11 * v + 2.0f * fB1) + fC;
                 }
             } else {
-//				v = 0.0f;
-                if (fTmp1 <= 0.0f) { /*u = 1.0f;*/        SqrDist = fA00 + 2.0f * fB0 + fC;
-                } else if (fB0 >= 0.0f) { /*u = 0.0f;*/        SqrDist = fC;
+                //				v = 0.0f;
+                if (fTmp1 <= 0.0f) {      /*u = 1.0f;*/
+                    SqrDist = fA00 + 2.0f * fB0 + fC;
+                } else if (fB0 >= 0.0f) { /*u = 0.0f;*/
+                    SqrDist = fC;
                 } else {
-                    u = -fB0 / fA00;
+                    u       = -fB0 / fA00;
                     SqrDist = fB0 * u + fC;
                 }
             }
@@ -173,18 +184,18 @@ bool SphereCollider::SphereTriOverlap(const Point &vert0, const Point &vert1, co
         {
             fNumer = fA11 + fB1 - fA01 - fB0;
             if (fNumer <= 0.0f) {
-//				u = 0.0f;
-//				v = 1.0f;
+                //				u = 0.0f;
+                //				v = 1.0f;
                 SqrDist = fA11 + 2.0f * fB1 + fC;
             } else {
                 fDenom = fA00 - 2.0f * fA01 + fA11;
                 if (fNumer >= fDenom) {
-//					u = 1.0f;
-//					v = 0.0f;
+                    //					u = 1.0f;
+                    //					v = 0.0f;
                     SqrDist = fA00 + 2.0f * fB0 + fC;
                 } else {
-                    u = fNumer / fDenom;
-                    v = 1.0f - u;
+                    u       = fNumer / fDenom;
+                    v       = 1.0f - u;
                     SqrDist = u * (fA00 * u + fA01 * v + 2.0f * fB0) + v * (fA01 * u + fA11 * v + 2.0f * fB1) + fC;
                 }
             }
