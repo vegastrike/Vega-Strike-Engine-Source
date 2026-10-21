@@ -1046,9 +1046,9 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals) {
     floatbuf = VSSwapHostFloatToLittle(memfile.scale);
     runningbytenum +=
             sizeof(float32bit) * (uint32bit)fwrite(&floatbuf, sizeof(float32bit), 1, Outputfile);        // Mesh Scale
-    intbuf = VSSwapHostIntToLittle(memfile.reverse);
+    intbuf          = VSSwapHostIntToLittle(memfile.reverse);
     runningbytenum += sizeof(uint32bit) * (uint32bit)fwrite(&intbuf, sizeof(uint32bit), 1, Outputfile);  // reverse flag
-    intbuf = VSSwapHostIntToLittle(memfile.force_texture);
+    intbuf          = VSSwapHostIntToLittle(memfile.force_texture);
     runningbytenum +=
             sizeof(uint32bit) * (uint32bit)fwrite(&intbuf, sizeof(uint32bit), 1, Outputfile);      // Force texture flag
     intbuf = VSSwapHostIntToLittle(memfile.sharevert);
@@ -1057,9 +1057,9 @@ uint32bit appendmeshfromxml(XML memfile, FILE *Outputfile, bool forcenormals) {
     floatbuf = VSSwapHostFloatToLittle(memfile.polygon_offset);
     runningbytenum +=
             sizeof(float32bit) * (uint32bit)fwrite(&floatbuf, sizeof(float32bit), 1, Outputfile);  // Polygon offset
-    intbuf = VSSwapHostIntToLittle(memfile.blend_src);
+    intbuf          = VSSwapHostIntToLittle(memfile.blend_src);
     runningbytenum += sizeof(uint32bit) * (uint32bit)fwrite(&intbuf, sizeof(uint32bit), 1, Outputfile);  // Blend Source
-    intbuf = VSSwapHostIntToLittle(memfile.blend_dst);
+    intbuf          = VSSwapHostIntToLittle(memfile.blend_dst);
     runningbytenum +=
             sizeof(uint32bit) * (uint32bit)fwrite(&intbuf, sizeof(uint32bit), 1, Outputfile);  // Blend Destination
     NormalizeMaterial(memfile.material);

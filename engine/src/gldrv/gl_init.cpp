@@ -78,6 +78,7 @@
 #    define GLX_GLXEXT_PROTOTYPES 1
 #    define GLX_GLXEXT_LEGACY     1
 #    include <GL/glext.h>
+
 #    include <GL/glx.h>
 #endif
 

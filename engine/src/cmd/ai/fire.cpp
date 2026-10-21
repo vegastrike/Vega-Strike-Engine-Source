@@ -472,8 +472,8 @@ int pollindex[2] = {
 void FireAt::ChooseTargets(int numtargs, bool force) {
     float gun_speed, gun_range, missile_range;
     parent->getAverageGunSpeed(gun_speed, gun_range, missile_range);
-    static float target_timer = UniverseUtil::GetGameTime();  // timer used to determine passage of physics frames
-    const float  min_time_to_switch      = configuration().ai.targeting.min_time_to_switch_targets_flt;
+    static float target_timer       = UniverseUtil::GetGameTime();  // timer used to determine passage of physics frames
+    const float  min_time_to_switch = configuration().ai.targeting.min_time_to_switch_targets_flt;
     const float  min_null_time_to_switch = configuration().ai.targeting.min_null_time_to_switch_targets_flt;
     const int    min_num_pollers         = configuration().ai.targeting.min_number_of_pollers_per_frame;
     // maximum number of vessels allowed to search for a target in a given physics frame

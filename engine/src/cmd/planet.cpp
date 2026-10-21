@@ -48,11 +48,12 @@
 #    include "gfx/planetary_transform.h"
 #endif
 
+#include "collide2/CSopcodecollider.h"
+
 #include "cmd/alphacurve.h"
 #include "cmd/images.h"
 #include "cmd/planetary_orbit.h"
 #include "cmd/script/flightgroup.h"
-#include "collide2/CSopcodecollider.h"
 #include "configuration/game_config.h"
 #include "gfx/animation.h"
 #include "gfx/camera.h"

@@ -150,8 +150,8 @@ bool MoveToParent::OptimizeSpeed(Unit *parent, float v, float &a, float max_spee
     if ((!max_speed) || fabs(v) <= max_speed) {
         return true;
     }
-    float deltaa = parent->GetMass() * (fabs(v) - max_speed) / simulation_atom_var;  // clamping should take care of it
-    a += (v > 0) ? -deltaa : deltaa;
+    float deltaa  = parent->GetMass() * (fabs(v) - max_speed) / simulation_atom_var;  // clamping should take care of it
+    a            += (v > 0) ? -deltaa : deltaa;
     return false;
 }
 
@@ -588,7 +588,7 @@ void AutoLongHaul::Execute() {
     destinationdirection = destinationdirection * (1. / destinationdistance);  // this is a direction, so it is
                                                                                // normalize
 
-    StraightToTarget = true;  // free to fly
+    StraightToTarget = true;                                                   // free to fly
 
     // Free to fly. Read the drive's capability here rather than what the ship is currently getting:
     // the orthogonal thrust cost is self-inflicted and passes, so steering must not react to it.
@@ -646,7 +646,7 @@ void AutoLongHaul::Execute() {
                                (enough_warp_for_cruise -
                                 go_perpendicular_speed);  // find out how close we are to our desired warp multiplier
                                                           // and weight our direction by that
-                weight *= weight;  //
+                weight *= weight;                         //
                 if (maxmultiplier < go_perpendicular_speed) {
                     QVector perpendicular = myposition + planetme * (finaldetourdistance / planetme.Magnitude());
                     weight                = (go_perpendicular_speed - maxmultiplier) / go_perpendicular_speed;

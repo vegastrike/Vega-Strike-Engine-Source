@@ -29,8 +29,9 @@
 #include <set>
 #include <string>
 
-#include "cmd/unit_collide.h"
 #include "collide2/CSopcodecollider.h"
+
+#include "cmd/unit_collide.h"
 #include "gfx/animation.h"
 #include "gfx/halo.h"
 #include "gfx/sprite.h"

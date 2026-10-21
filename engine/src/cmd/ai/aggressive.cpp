@@ -1258,7 +1258,7 @@ static Unit *ChooseNavPoint(Unit *parent, Unit **otherdest, float *lurk_on_arriv
     bool                   insys = (!parent->jump_drive.Installed()) || fgname.find(insysString) != std::string::npos;
     std::string::size_type whereconvoy = fgname.find(arrowString);
     bool                   convoy      = (whereconvoy != std::string::npos);
-    size_t                 total_size = stats->navs[0].size() + stats->navs[whichlist].size();  // friendly and neutral
+    size_t                 total_size  = stats->navs[0].size() + stats->navs[whichlist].size();  // friendly and neutral
     const bool             bad_units_lurk = configuration().ai.hostile_lurk;
     if (hostile && bad_units_lurk) {
         if (anarchy && !siege) {

@@ -128,7 +128,7 @@ void Texture::InitTexture() {
 
 void Texture::setold() {
     //*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its
-    //strangeass copy constructor)
+    // strangeass copy constructor)
     *original = *this;
     // memcpy (original, this, sizeof (Texture));
     original->original = NULL;

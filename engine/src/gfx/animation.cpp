@@ -447,7 +447,7 @@ void Animation::Draw() {
         /**/
         // Why do all this if we can use ::CalculateOrientation?
         //-- well one reason is that the code change broke it :-/  Until suns display properly or we switch to ogre we
-        //should keep it as it was (problem was, flare wouldn't display--- or would display behind the sun)
+        // should keep it as it was (problem was, flare wouldn't display--- or would display behind the sun)
         QVector      R(_Universe->AccessCamera()->GetR().i, _Universe->AccessCamera()->GetR().j,
                        _Universe->AccessCamera()->GetR().k);
         const double too_far_dist = configuration().graphics.anim_far_percent_dbl;

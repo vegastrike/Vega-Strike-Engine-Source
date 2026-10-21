@@ -173,7 +173,7 @@ void LocationSelect::Draw() {
         Vector tLocation(t.p.Cast());
         Vector tP(t.getP());  // the p vector of the plane being selected on
         Vector tQ(t.getQ());  // the q vector of the plane being selected on
-        /// unused    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
+                              /// unused    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
 #ifdef DELTA_MOVEMENT
         float zvalueXY = tLocation.k + LocalPosition.i * tP.k + LocalPosition.j * tQ.k;  // z val of the parallelogram
 #else

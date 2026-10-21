@@ -2451,8 +2451,8 @@ void GameCockpit::SetupViewPort(bool clip) {
                                               ? refkpsoverride
                                               : LookupUnitStat(UnitImages<void>::MAXCOMBATABKPS,
                                                                un);  // This one is stable, as opposed to SETKPS - for full
-                                                          // stability, use the override (user override of governor
-                                                          // settings will create weird behaviour if done under SPEC)
+            // stability, use the override (user override of governor
+            // settings will create weird behaviour if done under SPEC)
             float kps                  = LookupUnitStat(UnitImages<void>::KPS, un);
             float st_warpfieldstrength = std::pow(
                     (max(stable_lowarpref, min(stable_asymptotic ? FLT_MAX : stable_hiwarpref, warpfieldstrength)) -

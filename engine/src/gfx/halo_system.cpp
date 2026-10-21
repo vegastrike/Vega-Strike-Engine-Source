@@ -33,10 +33,11 @@
 #include <string>
 #include <vector>
 
+#include "collide2/CSopcodecollider.h"
+
 #include "car_assist.h"
 #include "cmd/unit_collide.h"
 #include "cmd/unit_generic.h"
-#include "collide2/CSopcodecollider.h"
 #include "gfx/animation.h"
 #include "gfx/particle.h"
 #include "gfx_generic/matrix.h"

@@ -397,7 +397,7 @@ void Music::Listen() {
                 }
                 music_loading = false;
                 music_loaded  = false;  // once the loading thread sees this, it will try to grab a lock and wait.
-                // The lock will only be achieved once the next song is put in the queue.
+                                        // The lock will only be achieved once the next song is put in the queue.
 
 #ifdef HAVE_AL
                 if (music_load_info->success && music_load_info->wave) {

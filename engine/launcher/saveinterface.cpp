@@ -880,7 +880,7 @@ void LoadSaveFunction(char *Filename, char *otherstr, int i, GtkSignalFunc func,
         gtk_widget_show(GTK_FILE_SELECTION(filew)->button_area);
         GtkWidget *newb = gtk_button_new_with_label("Delete Game");
         //	char *Addon="\nWarning: Do not use the \"Delete File\" button to delete saved games...\nUse the \"Delete
-        //Game\" button instead."; 	char *otherstr=new char [strlen(othstr)+strlen(Addon)+5];
+        // Game\" button instead."; 	char *otherstr=new char [strlen(othstr)+strlen(Addon)+5];
         //	sprintf(otherstr,"%s%s",othstr,Addon);
         gtk_widget_show(newb);
         gtk_container_add(GTK_CONTAINER(GTK_FILE_SELECTION(filew)->button_area), newb);

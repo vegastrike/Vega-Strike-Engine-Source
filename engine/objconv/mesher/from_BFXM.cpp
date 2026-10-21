@@ -169,12 +169,12 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
             uint32bit meshbeginword = word32index;
             uint32bit meshheaderlength =
                     VSSwapHostIntToLittle(inmemfile[word32index].i32val);  // length of record header in bytes
-            word32index += 1;
-            uint32bit  meshlength = VSSwapHostIntToLittle(inmemfile[word32index].i32val);  // length of record in bytes
-            float32bit scale      = VSSwapHostFloatToLittle(inmemfile[meshbeginword + 2].f32val);  // scale
-            uint32bit  reverse    = VSSwapHostIntToLittle(inmemfile[meshbeginword + 3].i32val);    // reverse flag
-            uint32bit forcetexture = VSSwapHostIntToLittle(inmemfile[meshbeginword + 4].i32val);   // force texture flag
-            uint32bit sharevert    = VSSwapHostIntToLittle(inmemfile[meshbeginword + 5].i32val);   // share vertex flag
+            word32index           += 1;
+            uint32bit  meshlength  = VSSwapHostIntToLittle(inmemfile[word32index].i32val);  // length of record in bytes
+            float32bit scale       = VSSwapHostFloatToLittle(inmemfile[meshbeginword + 2].f32val);  // scale
+            uint32bit  reverse     = VSSwapHostIntToLittle(inmemfile[meshbeginword + 3].i32val);    // reverse flag
+            uint32bit  forcetexture = VSSwapHostIntToLittle(inmemfile[meshbeginword + 4].i32val);  // force texture flag
+            uint32bit  sharevert    = VSSwapHostIntToLittle(inmemfile[meshbeginword + 5].i32val);  // share vertex flag
             float32bit polygonoffset = VSSwapHostFloatToLittle(inmemfile[meshbeginword + 6].f32val);  // polygonoffset
             uint32bit  bsrc          = VSSwapHostIntToLittle(inmemfile[meshbeginword + 7].i32val);  // Blendmode source
             uint32bit  bdst  = VSSwapHostIntToLittle(inmemfile[meshbeginword + 8].i32val);     // Blendmode destination
@@ -195,9 +195,11 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
             float32bit sg    = VSSwapHostFloatToLittle(inmemfile[meshbeginword + 23].f32val);  // Specular: green
             float32bit sb    = VSSwapHostFloatToLittle(inmemfile[meshbeginword + 24].f32val);  // Specular: blue
             float32bit sa    = VSSwapHostFloatToLittle(inmemfile[meshbeginword + 25].f32val);  // Specular: Alpha
-            uint32bit cullface = (VSSwapHostIntToLittle(inmemfile[meshbeginword + 26].i32val) != 0) ? 1 : 0;  // CullFace
-            uint32bit lighting = (VSSwapHostIntToLittle(inmemfile[meshbeginword + 27].i32val) != 0) ? 1 : 0;  // lighting
-            uint32bit reflect = (VSSwapHostIntToLittle(inmemfile[meshbeginword + 28].i32val) != 0) ? 1 : 0;   // reflect
+            uint32bit  cullface =
+                    (VSSwapHostIntToLittle(inmemfile[meshbeginword + 26].i32val) != 0) ? 1 : 0;             // CullFace
+            uint32bit lighting =
+                    (VSSwapHostIntToLittle(inmemfile[meshbeginword + 27].i32val) != 0) ? 1 : 0;              // lighting
+            uint32bit reflect = (VSSwapHostIntToLittle(inmemfile[meshbeginword + 28].i32val) != 0) ? 1 : 0;  // reflect
             uint32bit usenormals =
                     (VSSwapHostIntToLittle(inmemfile[meshbeginword + 29].i32val) != 0) ? 1 : 0;  // usenormals
             float32bit alphatest = 0;
@@ -266,8 +268,8 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
             word32index           += 1;
             bool emit              = false;
             for (uint32bit tex = 0; tex < numtextures; tex++) {
-                uint32bit textype  = VSSwapHostIntToLittle(inmemfile[word32index].i32val);        // texture type
-                uint32bit texindex = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);    // texture index
+                uint32bit textype    = VSSwapHostIntToLittle(inmemfile[word32index].i32val);      // texture type
+                uint32bit texindex   = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);  // texture index
                 uint32bit texnamelen = VSSwapHostIntToLittle(inmemfile[word32index + 2].i32val);  // texture name length
                 word32index         += 3;
                 string    texname    = "";
@@ -406,7 +408,7 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
                 }
                 word32index += 5;
                 for (uint32bit ref = 0; ref < numrefs; ref++) {
-                    uint32bit refnum = VSSwapHostIntToLittle(inmemfile[word32index].i32val);         // Logo ref
+                    uint32bit  refnum = VSSwapHostIntToLittle(inmemfile[word32index].i32val);        // Logo ref
                     float32bit weight = VSSwapHostFloatToLittle(inmemfile[word32index + 1].f32val);  // reference weight
                     if (isxmesh) {
                         fprintf(Outputfile, "\t<Ref point=\"%d\" weight=\"%f\"/>\n", refnum, weight);
@@ -663,7 +665,7 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
             for (uint32bit lstrip = 0; lstrip < numlinestrips; lstrip++) {
                 uint32bit numstripelements = VSSwapHostIntToLittle(inmemfile[word32index].i32val);  // number of
                                                                                                     // vertices
-                uint32bit flatshade = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);  // flatshade
+                uint32bit flatshade = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);     // flatshade
                 if (isxmesh) {
                     fprintf(Outputfile, "\t<Linestrip flatshade=\"%d\">\n", flatshade);
                 }
@@ -688,7 +690,7 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
             for (uint32bit tstrip = 0; tstrip < numtristrips; tstrip++) {
                 uint32bit numstripelements = VSSwapHostIntToLittle(inmemfile[word32index].i32val);  // number of
                                                                                                     // vertices
-                uint32bit flatshade = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);  // flatshade
+                uint32bit flatshade = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);     // flatshade
                 if (isxmesh) {
                     fprintf(Outputfile, "\t<Tristrip flatshade=\"%d\">\n", flatshade);
                 }
@@ -740,7 +742,7 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
             for (uint32bit tfan = 0; tfan < numtrifans; tfan++) {
                 uint32bit numstripelements = VSSwapHostIntToLittle(inmemfile[word32index].i32val);  // number of
                                                                                                     // vertices
-                uint32bit flatshade = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);  // flatshade
+                uint32bit flatshade = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);     // flatshade
                 if (isxmesh) {
                     fprintf(Outputfile, "\t<Trifan flatshade=\"%d\">\n", flatshade);
                 }
@@ -788,7 +790,7 @@ void BFXMToXmeshOrOBJ(FILE *Inputfile, FILE *Outputfile, FILE *OutputObj, FILE *
             for (uint32bit qstrip = 0; qstrip < numquadstrips; qstrip++) {
                 uint32bit numstripelements = VSSwapHostIntToLittle(inmemfile[word32index].i32val);  // number of
                                                                                                     // vertices
-                uint32bit flatshade = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);  // flatshade
+                uint32bit flatshade = VSSwapHostIntToLittle(inmemfile[word32index + 1].i32val);     // flatshade
                 if (isxmesh) {
                     fprintf(Outputfile, "\t<Quadstrip flatshade=\"%d\">\n", flatshade);
                 }
@@ -949,9 +951,9 @@ void BFXMtoBoxDims(FILE *Inputfile, const char *name) {
             uint32bit meshbeginword = word32index;
             uint32bit meshheaderlength =
                     VSSwapHostIntToLittle(inmemfile[word32index].i32val);  // length of record header in bytes
-            word32index += 1;
-            uint32bit  meshlength = VSSwapHostIntToLittle(inmemfile[word32index].i32val);  // length of record in bytes
-            float32bit scale      = VSSwapHostFloatToLittle(inmemfile[meshbeginword + 2].f32val);  // scale
+            word32index           += 1;
+            uint32bit  meshlength  = VSSwapHostIntToLittle(inmemfile[word32index].i32val);  // length of record in bytes
+            float32bit scale       = VSSwapHostFloatToLittle(inmemfile[meshbeginword + 2].f32val);  // scale
             // End Header
             // Go to Arbitrary Length Attributes section
             word32index                                 = meshbeginword + (meshheaderlength / 4);
