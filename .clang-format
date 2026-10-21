@@ -51,10 +51,12 @@ IncludeCategories:
     Priority: 2
   - Regex: '^<[[:alnum:]./_]+>$'
     Priority: 3
-  - Regex: '^"[[:alnum:]./_]+"$'
+  - Regex: '^"Ice/IcePreprocessor\.h"$'
     Priority: 4
-  - Regex: '.*'
+  - Regex: '^"[[:alnum:]./_]+"$'
     Priority: 5
+  - Regex: '.*'
+    Priority: 6
 IndentAccessModifiers: false
 IndentExternBlock: Indent
 IndentPPDirectives: AfterHash
