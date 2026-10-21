@@ -28,6 +28,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_AI_IKARUS_H
 
 #include <string>
+
 #include "cmd/ai/aggressive.h"
 
 namespace Orders {
