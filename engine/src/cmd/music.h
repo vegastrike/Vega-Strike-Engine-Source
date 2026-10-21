@@ -28,6 +28,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_MUSIC_H
 
 #include <list>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -184,7 +185,7 @@ private:
     volatile bool              music_loading;    // Opposite order of music_loaded.
     bool                       freeWav;
     struct AUDSoundProperties *music_load_info;
-    vector<std::string>        music_load_list;  // reverse order.
+    std::vector<std::string>   music_load_list;  // reverse order.
 
     void _LoadLastSongAsync();
 
