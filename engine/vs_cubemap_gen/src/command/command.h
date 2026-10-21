@@ -29,4 +29,4 @@
 
 int command(int argc, char *argv[]);
 
-#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_COMMAND_H
+#endif  // VEGA_STRIKE_ENGINE_CUBE_MAP_COMMAND_H

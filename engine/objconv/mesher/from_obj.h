@@ -26,10 +26,10 @@
  */
 // NO HEADER GUARD
 
+#include <vector>
+
 #include "objconv/mesher/mesh_io.h"
 #include "objconv/mesher/to_BFXM.h"
-#include <vector>
-void ObjToXMESH(FILE *obj, FILE *mtl, std::vector<XML> &xml, bool forcenormals);
-void ObjToBFXM(FILE *, FILE *, FILE *, bool forcenormals);
+void   ObjToXMESH(FILE *obj, FILE *mtl, std::vector<XML> &xml, bool forcenormals);
+void   ObjToBFXM(FILE *, FILE *, FILE *, bool forcenormals);
 string ObjGetMtl(FILE *, string);
-

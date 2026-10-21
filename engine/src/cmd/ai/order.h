@@ -27,11 +27,12 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AI_ORDER_H
 #define VEGA_STRIKE_ENGINE_CMD_AI_ORDER_H
 
-#include "gfx_generic/vec.h"
-#include "cmd/container.h"
 #include <list>
-#include <vector>
 #include <string>
+#include <vector>
+
+#include "cmd/container.h"
+#include "gfx_generic/vec.h"
 
 /**
  * Order is the base class for all orders.  All orders inherit from Order
@@ -45,34 +46,37 @@
 
 class Animation;
 typedef std::vector<class varInst *> olist_t;
+
 class Order {
 public:
     virtual ~Order();
 
 protected:
-///The unit this order is attached to
+    /// The unit this order is attached to
     Unit *parent;
-///The bit code (from ORDERTYPES) that this order is (for parallel execution)
+    /// The bit code (from ORDERTYPES) that this order is (for parallel execution)
     unsigned int type;
 
     unsigned int subtype;
-///Whether or not this order is done
+    /// Whether or not this order is done
     bool done;
-///If this order applies to a group of units (as in form up with this group)
+    /// If this order applies to a group of units (as in form up with this group)
     UnitContainer group;
-///If this order applies to a physical location in world space
+    /// If this order applies to a physical location in world space
     QVector targetlocation;
-///The queue of suborders that will be executed in parallel according to bit code
+    /// The queue of suborders that will be executed in parallel according to bit code
     std::vector<Order *> suborders;
-///a bunch of communications that have not been answered CommunicationMessages are actually containing reference to a nice Finite State Machine that can allow a player to have a reasonable conversation with an AI
+    /// a bunch of communications that have not been answered CommunicationMessages are actually containing reference to
+    /// a nice Finite State Machine that can allow a player to have a reasonable conversation with an AI
     std::list<class CommunicationMessage *> messagequeue;
-///changes the local relation of this unit to another...may inform superiors about "good" or bad! behavior depending on the AI
+    /// changes the local relation of this unit to another...may inform superiors about "good" or bad! behavior
+    /// depending on the AI
     virtual void Destructor();
+
 protected:
-/// this function calls the destructor (needs to be overridden for python;
+    /// this function calls the destructor (needs to be overridden for python;
 
 public:
-
     virtual void ChooseTarget() {
         /*not implemented see fire.cpp*/
     }
@@ -81,52 +85,60 @@ public:
         return false;
     }
 
-///clears the messasges of this order
+    /// clears the messasges of this order
     void ClearMessages();
-///The varieties of order types  MOVEMENT,FACING, and WEAPON orders may not be mutually executed (lest one engine goes left, the other right)
-    enum ORDERTYPES { MOVEMENT = 1, FACING = 2, WEAPON = 4, CLOAKING = 8, ALLTYPES = (1 | 2 | 4 | 8) };
-    enum SUBORDERTYPES { SLOCATION = 1, STARGET = 2, SSELF = 4 };
 
-///The default constructor setting everything to NULL and no dependency on order
+    /// The varieties of order types  MOVEMENT,FACING, and WEAPON orders may not be mutually executed (lest one engine
+    /// goes left, the other right)
+    enum ORDERTYPES {
+        MOVEMENT = 1,
+        FACING   = 2,
+        WEAPON   = 4,
+        CLOAKING = 8,
+        ALLTYPES = (1 | 2 | 4 | 8)
+    };
+
+    enum SUBORDERTYPES {
+        SLOCATION = 1,
+        STARGET   = 2,
+        SSELF     = 4
+    };
+
+    /// The default constructor setting everything to NULL and no dependency on order
     Order()
-            : parent(NULL),
-            type(0),
-            subtype(0),
-            done(false),
-            targetlocation(0, 0, 0) {
+        : parent(NULL),
+          type(0),
+          subtype(0),
+          done(false),
+          targetlocation(0, 0, 0){VSCONSTRUCT1('O')}
+
+          /// The constructor that specifies what order dependencies this order has
+          Order(int type, int subtype)
+        : parent(NULL), type(type), subtype(subtype), done(false), targetlocation(0, 0, 0) {
         VSCONSTRUCT1('O')
     }
 
-///The constructor that specifies what order dependencies this order has
-    Order(int type, int subtype)
-            : parent(NULL),
-            type(type),
-            subtype(subtype),
-            done(false),
-            targetlocation(0, 0, 0) {
-        VSCONSTRUCT1('O')
-    }
-
-///The virutal function that unrefs all memory then calls Destruct () which takes care of unreffing this or calling delete on this
+    /// The virutal function that unrefs all memory then calls Destruct () which takes care of unreffing this or calling
+    /// delete on this
     virtual void Destroy();
 
-///The function that gets called and executes all queued suborders
+    /// The function that gets called and executes all queued suborders
     virtual void Execute();
-///returns a pointer to the first order that may be bitwised ored with that type
+    /// returns a pointer to the first order that may be bitwised ored with that type
     Order *queryType(unsigned int type);
-///returns a pointer to the first order that may be bitwise ored with any type
+    /// returns a pointer to the first order that may be bitwise ored with any type
     Order *queryAny(unsigned int type);
-///Erases all orders that bitwise OR with that type
+    /// Erases all orders that bitwise OR with that type
     void eraseType(unsigned int type);
-///Attaches a group of targets to this order (used for strategery-type games)
+    /// Attaches a group of targets to this order (used for strategery-type games)
     bool AttachOrder(Unit *targets);
-///Attaches a navigation point to this order
+    /// Attaches a navigation point to this order
     bool AttachOrder(QVector target);
-///Attaches a group (form up) to this order
+    /// Attaches a group (form up) to this order
     bool AttachSelfOrder(Unit *targets);
-///Enqueues another order that will be executed (in parallel perhaps) when next void Execute() is called
+    /// Enqueues another order that will be executed (in parallel perhaps) when next void Execute() is called
     Order *EnqueueOrder(Order *ord);
-///Replaces the first order of that type in the order queue
+    /// Replaces the first order of that type in the order queue
     Order *ReplaceOrder(Order *ord);
 
     bool Done() {
@@ -141,7 +153,7 @@ public:
         return subtype;
     }
 
-///Sets the parent of this Unit.  Any virtual functions must call this one
+    /// Sets the parent of this Unit.  Any virtual functions must call this one
     virtual void SetParent(Unit *parent1) {
         parent = parent1;
     }
@@ -150,20 +162,20 @@ public:
         return parent;
     }
 
-///Sends a communication message from the Unit (encapulated in c) to this unit
+    /// Sends a communication message from the Unit (encapulated in c) to this unit
     virtual void Communicate(const class CommunicationMessage &c);
-///processes a single message...generally called by the Messages() func
+    /// processes a single message...generally called by the Messages() func
     virtual void ProcessCommMessage(class CommunicationMessage &c);
-///responds (or does not) to certain messages in the message queue
+    /// responds (or does not) to certain messages in the message queue
     virtual void ProcessCommunicationMessages(float CommRepsonseTime, bool RemoveMessageProcessed);
-/// return pointer to order or NULL if not found
+    /// return pointer to order or NULL if not found
     Order *findOrder(Order *ord);
-/// erase that order from the list
+    /// erase that order from the list
     void eraseOrder(Order *ord);
-/// enqueue order as first order
+    /// enqueue order as first order
     Order *EnqueueOrderFirst(Order *ord);
 
-/// returns the orderlist (NULL for orders that haven't got any)
+    /// returns the orderlist (NULL for orders that haven't got any)
     virtual olist_t *getOrderList() {
         return NULL;
     }
@@ -174,8 +186,8 @@ public:
         return "empty";
     }
 
-///searches the suborders recursively for the first order that has an orderlist
-    Order *findOrderList();
+    /// searches the suborders recursively for the first order that has an orderlist
+    Order      *findOrderList();
     std::string createFullOrderDescription(int level = 0);
 
     void setActionString(std::string astring) {
@@ -193,15 +205,15 @@ public:
 protected:
     std::string actionstring;
 };
-///Convenience order factory for "clicking to create an order"
+
+/// Convenience order factory for "clicking to create an order"
 class OrderFactory {
 public:
     virtual int type() {
         return 0;
     }
 
-    OrderFactory() {
-    }
+    OrderFactory() {}
 
     virtual Order *newOrder() {
         return new Order;
@@ -210,31 +222,27 @@ public:
 
 namespace Orders {
 
-///Executes another order for a number of seconds
+/// Executes another order for a number of seconds
 class ExecuteFor : public Order {
 private:
-
-///The child order to execute
+    /// The child order to execute
     Order *child;
-///the time it has executed the child order for
+    /// the time it has executed the child order for
     float time;
-///the total time it can execute child order
+    /// the total time it can execute child order
     float maxtime;
+
 protected:
-    virtual ~ExecuteFor() {
-    }
+    virtual ~ExecuteFor() {}
 
 public:
-    ExecuteFor(Order *chld, float seconds) : Order(chld->getType(), chld->getSubType()),
-            child(chld),
-            time(0),
-            maxtime(seconds) {
-    }
+    ExecuteFor(Order *chld, float seconds)
+        : Order(chld->getType(), chld->getSubType()), child(chld), time(0), maxtime(seconds) {}
 
-///Executes child order and then any suborders that may be pertinant
+    /// Executes child order and then any suborders that may be pertinant
     void Execute();
 
-///Removes this order
+    /// Removes this order
     virtual void Destroy() {
         child->Destroy();
         Order::Destroy();
@@ -244,9 +252,7 @@ public:
 // Execute two orders simultaneously and wait until both has finished.
 class Join : public Order {
 public:
-    Join(Unit *parent,
-            Order *firstOrder,
-            Order *secondOrder);
+    Join(Unit *parent, Order *firstOrder, Order *secondOrder);
     void Execute();
 
 private:
@@ -257,15 +263,13 @@ private:
 // Execute one order and prevent other orders with excludeTypes from executing at the same time.
 class Sequence : public Order {
 public:
-    Sequence(Unit *parent,
-            Order *order,
-            unsigned int excludeTypes);
+    Sequence(Unit *parent, Order *order, unsigned int excludeTypes);
     void Execute();
 
 private:
     Order *order;
 };
 
-} // namespace Orders
+}  // namespace Orders
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_ORDER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_ORDER_H

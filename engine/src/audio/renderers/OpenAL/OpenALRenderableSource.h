@@ -31,12 +31,10 @@
 // C++ Interface: Audio::OpenALRenderableSource
 //
 
-#include "al.h"
-
-#include "../../RenderableSource.h"
-
 #include "../../Exceptions.h"
+#include "../../RenderableSource.h"
 #include "../../Types.h"
+#include "al.h"
 
 namespace Audio {
 
@@ -49,7 +47,7 @@ namespace Audio {
  */
 class OpenALRenderableSource : public RenderableSource {
     ALuint alSource;
-    bool alBuffersAttached;
+    bool   alBuffersAttached;
 
 public:
     OpenALRenderableSource(Source *source);
@@ -86,6 +84,6 @@ protected:
     void attachALBuffers();
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERABLE_SOURCE_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERABLE_SOURCE_H

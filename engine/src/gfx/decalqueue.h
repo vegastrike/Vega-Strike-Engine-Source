@@ -26,11 +26,11 @@
  */
 // NO HEADER GUARD
 
-#include "root_generic/vs_globals.h"
-#include "gfx/aux_texture.h"
-
-#include <vector>
 #include <string>
+#include <vector>
+
+#include "gfx/aux_texture.h"
+#include "root_generic/vs_globals.h"
 
 /*
  * A decal is a plastic, cloth, paper, or ceramic substrate that has printed on it a pattern or image that
@@ -73,4 +73,3 @@ public:
         return decals.size() - 1;
     }
 };
-

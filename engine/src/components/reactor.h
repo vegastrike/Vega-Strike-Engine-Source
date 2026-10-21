@@ -31,33 +31,30 @@
 #define VEGA_STRIKE_ENGINE_COMPONENTS_REACTOR_H
 
 #include "component.h"
-#include "components/energy_container.h"
 #include "components/energy_consumer.h"
+#include "components/energy_container.h"
 #include "resource/resource.h"
 
 class EnergyManager;
 
-class Reactor: public Component, public EnergyConsumer
-{
+class Reactor : public Component, public EnergyConsumer {
 private:
     Resource<double> capacity;          // Capacity per second
-    double atom_capacity;               // Capacity per atom
-    const double conversion_ratio;            // Used to calculate fuel consumption
+    double           atom_capacity;     // Capacity per atom
+    const double     conversion_ratio;  // Used to calculate fuel consumption
 
     EnergyContainer *energy;
     EnergyContainer *ftl_energy;
 
 public:
-    Reactor(EnergyContainer *source,
-            EnergyContainer *energy,
-            EnergyContainer *ftl_energy,
-            double conversion_ratio = 0.0001); // < 0.01 or very short flight
+    Reactor(EnergyContainer *source, EnergyContainer *energy, EnergyContainer *ftl_energy,
+            double conversion_ratio = 0.0001);  // < 0.01 or very short flight
     ~Reactor() override;
 
 
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -74,13 +71,13 @@ public:
     bool Damaged() const override;
     bool Installed() const override;
 
-    void Generate();
+    void   Generate();
     double Capacity() const;
     double MaxCapacity() const;
-    void SetCapacity(double capacity);
+    void   SetCapacity(double capacity);
 
     // EnergyConsumer method(s)
     double Consume() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_REACTOR_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_REACTOR_H

@@ -32,31 +32,32 @@
 
 #include <expat.h>
 #include <glob.h>
-#include <gtk/gtk.h>
 #include <map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <gtk/gtk.h>
 #ifndef _WIN32
-#include <unistd.h>
+#    include <unistd.h>
 #endif
-#include "mission/include/general.h"
 #include "mission/include/display_gtk.h"
-#include "mission/include/file.h"
 #include "mission/include/easydom.h"
-#include "mission/include/xml_support.h"
+#include "mission/include/file.h"
+#include "mission/include/general.h"
 #include "mission/include/hashtable.h"
+#include "mission/include/xml_support.h"
 
 #ifndef MAX_READ
-#define MAX_READ 1024	// Maximum number of characters to read from a line
+#    define MAX_READ 1'024  // Maximum number of characters to read from a line
 #endif
 
-#define EXT_MISSION "*.mission"
+#define EXT_MISSION  "*.mission"
 #define EXT_CAMPAIGN "*.campaign"
 
 #define DIR_MISSION "./mission/"
 char *Start(int run_vegastrike);
-void RunMission(void);
+void  RunMission(void);
 
 struct mission_data {
     char *name;
@@ -67,7 +68,7 @@ struct mission_data {
     char *numplayers;
 };
 
-extern glob_t *MISSIONS;
+extern glob_t             *MISSIONS;
 extern struct mission_data DATA;
 
-#endif //VEGA_STRIKE_ENGINE_MISSION_CENTRAL_H
+#endif  // VEGA_STRIKE_ENGINE_MISSION_CENTRAL_H

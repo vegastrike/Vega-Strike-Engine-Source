@@ -31,12 +31,12 @@
 // C++ Interface: Audio::SimpleScene
 //
 
-#include "Exceptions.h"
-#include "Types.h"
-#include "Scene.h"
-#include "Listener.h"
-
 #include <set>
+
+#include "Exceptions.h"
+#include "Listener.h"
+#include "Scene.h"
+#include "Types.h"
 
 namespace Audio {
 
@@ -51,7 +51,7 @@ class SimpleSource;
  *
  */
 class SimpleScene : public Scene, public SharedFromThis<SimpleScene> {
-    typedef std::set<SharedPtr<Source> > SourceSet;
+    typedef std::set<SharedPtr<Source>> SourceSet;
 
     Listener listener;
 
@@ -61,7 +61,6 @@ public:
     typedef SourceSet::iterator SourceIterator;
 
 public:
-
     //
     // Standard Scene interface
     //
@@ -103,6 +102,6 @@ protected:
     void detach(SimpleSource *source);
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_SIMPLESCENE_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_SIMPLESCENE_H

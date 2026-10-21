@@ -35,10 +35,9 @@ namespace Radar {
 class NullDisplay : public Display {
 public:
     // Shows nothing
-    void Draw(const Sensor &, VSSprite *, VSSprite *) {
-    }
+    void Draw(const Sensor &, VSSprite *, VSSprite *) {}
 };
 
-} // namespace Radar
+}  // namespace Radar
 
-#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_NULL_DISPLAY_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_RADAR_NULL_DISPLAY_H

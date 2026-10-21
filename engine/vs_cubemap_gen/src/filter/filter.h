@@ -33,32 +33,25 @@ class mem_cubemap;
 
 class filter_mip {
     mem_tex<S> const &source_;
-    mem_tex<S> &target_;
-    Radians radius_;
-    void init_constants();
-    Steradians solid_angle_;
-    float shininess_;
-    //etceteras...
+    mem_tex<S>       &target_;
+    Radians           radius_;
+    void              init_constants();
+    Steradians        solid_angle_;
+    float             shininess_;
+    // etceteras...
 public:
     virtual ~filter_mip();
-    filter
-    (
-            mem_tex<S>
-    const & source
-    ,
-    mem_tex<S> const &target
-    , Radians
-    const & radius
-    )
-    :
 
-    source_ (source)
-    , target_(target)
-    , radius_(radius) {
+    filter(mem_tex<S> const &source, mem_tex<S> const &target, Radians const &radius)
+        :
+
+          source_(source),
+          target_(target),
+          radius_(radius) {
         init_constants();
     }
 
     void do_it();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_FILTER_H
+#endif  // VEGA_STRIKE_ENGINE_CUBE_MAP_FILTER_H

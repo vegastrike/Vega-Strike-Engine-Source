@@ -28,8 +28,8 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_VIEWAREA_H
 #define VEGA_STRIKE_ENGINE_GFX_RADAR_VIEWAREA_H
 
-#include "gfx_generic/vec.h"
 #include "gfx/sprite.h"
+#include "gfx_generic/vec.h"
 
 struct GFXColor;  // Edit from class to struct as defined in gfxlib_struct.
 
@@ -47,10 +47,10 @@ struct ViewArea {
     bool IsActive() const;
 
     VSSprite *sprite;
-    Vector position;
-    Vector size;
+    Vector    position;
+    Vector    size;
 };
 
-} // namespace Radar
+}  // namespace Radar
 
-#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_VIEWAREA_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_RADAR_VIEWAREA_H

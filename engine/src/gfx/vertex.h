@@ -58,4 +58,4 @@ struct glVertex {
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_VERTEX_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_VERTEX_H

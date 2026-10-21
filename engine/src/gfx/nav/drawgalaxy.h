@@ -36,37 +36,21 @@
 
 #include "gfxlib_struct.h"
 
-extern float SYSTEM_DEFAULT_SIZE;
+extern float    SYSTEM_DEFAULT_SIZE;
 extern GFXColor GrayColor;
 
 class navscreenoccupied;
 
-void DrawNodeDescription(std::string text,
-        float x_,
-        float y_,
-        float size_x,
-        float size_y,
-        bool ignore_occupied_areas,
-        const GFXColor &col,
-        navscreenoccupied *screenoccupation);
+void DrawNodeDescription(std::string text, float x_, float y_, float size_x, float size_y, bool ignore_occupied_areas,
+                         const GFXColor &col, navscreenoccupied *screenoccupation);
 
 
 char GetSystemColor(std::string source);
 
-void DrawNode(int type,
-        float size,
-        float x,
-        float y,
-        std::string source,
-        navscreenoccupied *screenoccupation,
-        bool moused,
-        GFXColor race,
-        bool mouseover = false,
-        bool willclick = false,
-        std::string insector = "");
+void DrawNode(int type, float size, float x, float y, std::string source, navscreenoccupied *screenoccupation,
+              bool moused, GFXColor race, bool mouseover = false, bool willclick = false, std::string insector = "");
 
 bool checkedVisited(const std::string &n);
 
 
-#endif //VEGA_STRIKE_ENGINE_GFX_NAV_DRAW_GALAXY_H
-
+#endif  // VEGA_STRIKE_ENGINE_GFX_NAV_DRAW_GALAXY_H

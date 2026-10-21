@@ -29,4 +29,4 @@
 
 void Screenshot(const KBData &, KBSTATE);
 
-#endif //VEGA_STRIKE_ENGINE_GFX_SCREENSHOT_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_SCREENSHOT_H

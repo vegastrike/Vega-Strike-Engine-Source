@@ -50,28 +50,28 @@ class Computer : public Component {
     // the "correct" "subclass". This is Unit for ComponentsManager and
     // Vector for CoreVector.
 
-    //The nav point the unit may be heading for
+    // The nav point the unit may be heading for
     CoreVector nav_point;
 
-    //The target that the unit has in computer
+    // The target that the unit has in computer
     ComponentsManager* target;
-    //Any target that may be attacking and has set this threat
+    // Any target that may be attacking and has set this threat
 
     ComponentsManager* threat;
 
-    //Unit that it should match velocity with (not speed) if null, matches velocity with universe frame (star)
+    // Unit that it should match velocity with (not speed) if null, matches velocity with universe frame (star)
     ComponentsManager* velocity_reference;
 
-    public:
+public:
     bool force_velocity_ref;
 
-    //The threat level that was calculated from attacking unit's threat
+    // The threat level that was calculated from attacking unit's threat
     float threatlevel;
 
-    //The speed the flybywire system attempts to maintain
+    // The speed the flybywire system attempts to maintain
     float set_speed;
 
-    //Whether or not an 'lead' indicator appears in front of target
+    // Whether or not an 'lead' indicator appears in front of target
     unsigned char slide_start;
     unsigned char slide_end;
 
@@ -105,4 +105,4 @@ public:
     ~Computer() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPUTER_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_COMPUTER_H

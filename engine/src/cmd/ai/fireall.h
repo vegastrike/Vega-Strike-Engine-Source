@@ -29,6 +29,7 @@
 #define VEGA_STRIKE_ENGINE_SRC_CMD_AI_FIREALL_H
 
 #include "order.h"
+
 namespace Orders {
 class FireAllYouGot : public Order {
 public:
@@ -37,6 +38,6 @@ public:
     void Execute() override;
     void Destructor() override;
 };
-}
+}  // namespace Orders
 
-#endif // VEGA_STRIKE_ENGINE_SRC_CMD_AI_FIREALL_H
+#endif  // VEGA_STRIKE_ENGINE_SRC_CMD_AI_FIREALL_H

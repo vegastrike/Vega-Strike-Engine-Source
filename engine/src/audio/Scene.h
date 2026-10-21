@@ -81,6 +81,6 @@ public:
     virtual Listener &getListener() = 0;
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_SCENE_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_SCENE_H

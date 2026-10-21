@@ -27,29 +27,26 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_HALO_H
 #define VEGA_STRIKE_ENGINE_GFX_HALO_H
 
-#include "src/gfxlib.h"
-#include "gfx_generic/vec.h"
 #include "gfx_generic/quaternion.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib.h"
 
-#define TranslucentWhite ( GFXColor( 1, 1, 1, .5 ) )
-#define ZeroQvector ( QVector( 0, 0, 0 ) )
+#define TranslucentWhite (GFXColor(1, 1, 1, .5))
+#define ZeroQvector      (QVector(0, 0, 0))
 
 class Halo {
     QVector position;
-    float sizex;
-    float sizey;
-    int decal;
-    int quadnum;
+    float   sizex;
+    float   sizey;
+    int     decal;
+    int     quadnum;
+
 public:
     ~Halo();
-    Halo(const char *texture,
-            const GFXColor &col = TranslucentWhite,
-            const QVector &pos = ZeroQvector,
-            float sizx = 1,
-            float sizy = 1);
-    void Draw(const Transformation &quat = identity_transformation,
-            const Matrix &m = identity_matrix,
-            float alpha = -1);
+    Halo(const char *texture, const GFXColor &col = TranslucentWhite, const QVector &pos = ZeroQvector, float sizx = 1,
+         float sizy = 1);
+    void        Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix,
+                     float alpha = -1);
     static void ProcessDrawQueue();
 
     void SetDimensions(float wid, float hei) {
@@ -73,4 +70,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_HALO_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_HALO_H

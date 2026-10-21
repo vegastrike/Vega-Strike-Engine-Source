@@ -43,8 +43,8 @@ void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::cosAngleFromMountTo, "cosAngleFromMountTo");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::getAverageGunSpeed, "getAverageGunSpeed");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::InsideCollideTree, "InsideCollideTree");
-//  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::getFlightgroupLeader,"getFlightgroupLeader");
-//  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::setFlightgroupLeader,"setFlightgroupLeader");
+    //  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::getFlightgroupLeader,"getFlightgroupLeader");
+    //  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::setFlightgroupLeader,"setFlightgroupLeader");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetVelocityDifficultyMult, "GetVelocityDifficultyMult");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetJumpStatus, "GetJumpStatus");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::ApplyDamage, "ApplyDamage");

@@ -33,35 +33,39 @@
 #include "components/energy_container.h"
 
 enum class EnergyConsumerSource {
-    Infinite, Fuel, Energy, FTLEnergy, NoSource
+    Infinite,
+    Fuel,
+    Energy,
+    FTLEnergy,
+    NoSource
 };
 
 EnergyConsumerSource GetSource(const int source);
 
 class EnergyConsumer {
 protected:
-    double consumption;         // Directly converted to atomic. Mostly for book keeping.
-    double atom_consumption;    // consumption per 0.1 seconds.
+    double consumption;       // Directly converted to atomic. Mostly for book keeping.
+    double atom_consumption;  // consumption per 0.1 seconds.
 
     static double simulation_atom_var;
 
 private:
     EnergyContainer *source;
-    bool partial; // Can power consumer with less energy than requested
+    bool             partial;  // Can power consumer with less energy than requested
 
 protected:
-    bool infinite; // Connected to infinite power source. Ignore source field. Always work.
+    bool infinite;             // Connected to infinite power source. Ignore source field. Always work.
 public:
     virtual ~EnergyConsumer();
-    EnergyConsumer(EnergyContainer *source = nullptr, bool partial = false, double consumption = 0.0, bool infinite = false);
-    bool CanConsume() const;
+    EnergyConsumer(EnergyContainer *source = nullptr, bool partial = false, double consumption = 0.0,
+                   bool infinite = false);
+    bool           CanConsume() const;
     virtual double Consume();
-    double GetConsumption() const;
-    double GetAtomConsumption() const;
-    void SetConsumption(double consumption);
-    void SetSource(EnergyContainer* source);
-    void ZeroSource();
-
+    double         GetConsumption() const;
+    double         GetAtomConsumption() const;
+    void           SetConsumption(double consumption);
+    void           SetSource(EnergyContainer *source);
+    void           ZeroSource();
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONSUMER_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONSUMER_H

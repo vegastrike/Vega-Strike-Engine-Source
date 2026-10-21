@@ -32,9 +32,9 @@
 void InitInput();
 void DeInitInput();
 void ProcessInput(size_t whichplayer);
-int TermInput();
+int  TermInput();
 void AddListener(InputListener *il);
 void ActivateListener(InputListener *il);
 void RemoveListener(InputListener *il);
 
-#endif //VEGA_STRIKE_ENGINE_IN_MAIN_H
+#endif  // VEGA_STRIKE_ENGINE_IN_MAIN_H

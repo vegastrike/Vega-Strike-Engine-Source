@@ -27,42 +27,44 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_MUSIC_H
 #define VEGA_STRIKE_ENGINE_CMD_MUSIC_H
 
-#include "cmd/container.h"
-#include <vector>
-#include <string>
 #include <list>
+#include <string>
+#include <vector>
+
+#include "cmd/container.h"
 #if defined(__HAIKU__)
-#include <pthread.h>
+#    include <pthread.h>
 #endif
 
 namespace Muzak {
 #ifndef _WIN32
 extern void *readerThread(void *input);
 #else
-extern DWORD WINAPI readerThread( PVOID input );
+extern DWORD WINAPI readerThread(PVOID input);
 #endif
-};
+};  // namespace Muzak
 
 class Music {
-    bool random;
-    int socketr;
-    int socketw;
+    bool          random;
+    int           socketr;
+    int           socketw;
     UnitContainer p;
-    int song; //currently playing song
-    int lastlist;
-    float vol;
-    float soft_vol;
-    float soft_vol_up_latency;
-    float soft_vol_down_latency;
+    int           song;  // currently playing song
+    int           lastlist;
+    float         vol;
+    float         soft_vol;
+    float         soft_vol_up_latency;
+    float         soft_vol_down_latency;
 
     std::list<int> playingSource;
 
     bool LoadMusic(const char *file);
+
     struct PlayList {
-        typedef std::vector<std::string> SongList;
+        typedef std::vector<std::string>           SongList;
         typedef std::map<std::string, std::string> PragmaList;
 
-        SongList songs;
+        SongList   songs;
         PragmaList pragmas;
 
         unsigned int counter;
@@ -104,18 +106,29 @@ class Music {
             }
         }
     };
+
     std::vector<PlayList> playlist;
+
 public:
-    enum Playlist { NOLIST = -1, BATTLELIST = 0, PEACELIST, PANICLIST, VICTORYLIST, LOSSLIST, MAXLIST };
+    enum Playlist {
+        NOLIST     = -1,
+        BATTLELIST = 0,
+        PEACELIST,
+        PANICLIST,
+        VICTORYLIST,
+        LOSSLIST,
+        MAXLIST
+    };
+
     Music(Unit *parent = NULL);
-    int loopsleft;
+    int  loopsleft;
     void Listen();
     ~Music();
     void SetParent(Unit *parent);
 
     void GotoSong(int whichlist, int whichsong, bool skip, int layer = -1);
 
-    static int Addlist(std::string listfile);
+    static int  Addlist(std::string listfile);
     static void SetLoops(int numloops, int layer = -1);
     static void ChangeVolume(float inc = 0, int layer = -1);
 
@@ -130,14 +143,15 @@ public:
     static void CleanupMuzak();
     static void MuzakCycle();
 
-    static void SetVolume(float vol, int layer = -1, bool hardware = false, float latency_override = -1);
-    static void Mute(bool mute = true, int layer = -1);
+    static void      SetVolume(float vol, int layer = -1, bool hardware = false, float latency_override = -1);
+    static void      Mute(bool mute = true, int layer = -1);
     std::vector<int> sounds_to_stop;
+
 private:
     void _StopLater();
     void _StopNow();
     void _GotoSong(std::string mus);
-    int _Addlist(std::string listfile);
+    int  _Addlist(std::string listfile);
     void _SetVolume(float vol = 0, bool hardware = false, float latency_override = -1);
     void _SkipRandSong(int whichlist, int layer = -1);
     void _SkipRandList(int layer = -1);
@@ -151,32 +165,33 @@ private:
 #ifndef _WIN32
     friend void *Muzak::readerThread(void *input);
 #else
-    friend DWORD WINAPI Muzak::readerThread( PVOID input );
+    friend DWORD WINAPI Muzak::readerThread(PVOID input);
 #endif
 
 #ifdef _WIN32
-    void     *a_thread;
-    HANDLE    musicinfo_mutex;
+    void  *a_thread;
+    HANDLE musicinfo_mutex;
 #else
-    pthread_t a_thread;
+    pthread_t       a_thread;
     pthread_mutex_t musicinfo_mutex;
 #endif
 
-    int thread_initialized;
-    volatile bool moredata;
-    volatile bool music_loaded;
-    volatile bool killthread;
-    volatile bool threadalive;
-    volatile bool music_loading; //Opposite order of music_loaded.
-    bool freeWav;
+    int                        thread_initialized;
+    volatile bool              moredata;
+    volatile bool              music_loaded;
+    volatile bool              killthread;
+    volatile bool              threadalive;
+    volatile bool              music_loading;    // Opposite order of music_loaded.
+    bool                       freeWav;
     struct AUDSoundProperties *music_load_info;
-    vector<std::string> music_load_list; //reverse order.
+    vector<std::string>        music_load_list;  // reverse order.
 
     void _LoadLastSongAsync();
 
     std::string cur_song_file;
 };
-extern Music *muzak;
-extern int muzak_count;
 
-#endif //VEGA_STRIKE_ENGINE_CMD_MUSIC_H
+extern Music *muzak;
+extern int    muzak_count;
+
+#endif  // VEGA_STRIKE_ENGINE_CMD_MUSIC_H

@@ -30,7 +30,6 @@
 
 #include "component.h"
 #include "components/energy_consumer.h"
-
 #include "resource/resource.h"
 
 class EnergyContainer;
@@ -47,29 +46,29 @@ class Drive : public Component, public EnergyConsumer {
 
     /* Afterburner was split from drive. Same comments apply there. */
 public:
-// Limits
-    //max ypr--both pos/neg are symmetrical
+    // Limits
+    // max ypr--both pos/neg are symmetrical
     Resource<double> yaw;
     Resource<double> pitch;
     Resource<double> roll;
 
-    //side-side engine thrust max
+    // side-side engine thrust max
     Resource<double> lateral;
 
-    //vertical engine thrust max
+    // vertical engine thrust max
     Resource<double> vertical;
 
-    //forward engine thrust max
+    // forward engine thrust max
     Resource<double> forward;
 
-    //reverse engine thrust max
+    // reverse engine thrust max
     Resource<double> retro;
 
-// Computer
-    //Computers limitation of speed during combat
+    // Computer
+    // Computers limitation of speed during combat
     Resource<double> speed;
 
-    //Computer's restrictions of YPR to limit space combat maneuvers
+    // Computer's restrictions of YPR to limit space combat maneuvers
     Resource<double> max_yaw_left;
     Resource<double> max_yaw_right;
     Resource<double> max_pitch_down;
@@ -77,14 +76,14 @@ public:
     Resource<double> max_roll_left;
     Resource<double> max_roll_right;
 
-// Constructors
+    // Constructors
     explicit Drive(EnergyContainer *source = nullptr);
     ~Drive() override;
 
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
     bool Downgrade() override;
@@ -98,4 +97,4 @@ public:
     double Consume() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_DRIVE_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_DRIVE_H

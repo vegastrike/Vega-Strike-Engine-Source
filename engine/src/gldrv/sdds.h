@@ -41,4 +41,4 @@
 
 void ddsDecompress(unsigned char *&input, unsigned char *&output, TEXTUREFORMAT format, int height, int width);
 
-#endif //VEGA_STRIKE_ENGINE_GLDRV_SDDS_H
+#endif  // VEGA_STRIKE_ENGINE_GLDRV_SDDS_H

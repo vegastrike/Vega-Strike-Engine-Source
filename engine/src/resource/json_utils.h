@@ -29,23 +29,20 @@
 #define VEGA_STRIKE_ENGINE_RESOURCE_JSON_UTILS_H
 
 #include <string>
+
 #include <boost/json.hpp>
 
 // Use when default value already defined
-template<typename T>
-void ConditionalJsonGet(boost::json::object& object, 
-                          T& value, 
-                          const std::string& key) {
+template <typename T>
+void ConditionalJsonGet(boost::json::object& object, T& value, const std::string& key) {
     if (object.if_contains(key)) {
         value = boost::json::value_to<T>(object.at(key));
     }
 }
 
 // Use when default value is not defined
-template<typename T>
-const T JsonGetWithDefault(boost::json::object object, 
-                              const std::string& key, 
-                              const T default_value) {
+template <typename T>
+const T JsonGetWithDefault(boost::json::object object, const std::string& key, const T default_value) {
     if (object.if_contains(key)) {
         return boost::json::value_to<T>(object.at(key));
     }
@@ -53,18 +50,14 @@ const T JsonGetWithDefault(boost::json::object object,
     return default_value;
 }
 
-
-
 // This function supports multi-level key
-const std::string JsonGetStringWithDefault(boost::json::object object, 
-                                           const std::string& key, 
+const std::string JsonGetStringWithDefault(boost::json::object object, const std::string& key,
                                            const char* default_value);
 
 // This function supports multi-level key
-const boost::json::value JsonGetValue(boost::json::object object, 
-                                      const std::string& key);
+const boost::json::value JsonGetValue(boost::json::object object, const std::string& key);
 
-bool GetBool(boost::json::object object, const std::string key, bool default_value);
+bool   GetBool(boost::json::object object, const std::string key, bool default_value);
 double GetDouble(boost::json::object object, const std::string key, double default_value);
 
-#endif //VEGA_STRIKE_ENGINE_RESOURCE_JSON_UTILS_H
+#endif  // VEGA_STRIKE_ENGINE_RESOURCE_JSON_UTILS_H

@@ -29,28 +29,29 @@
 
 #include <string>
 #include <vector>
-#include "gfx_generic/vec.h"
+
 #include "cmd/container.h"
-#include "src/SharedPool.h"
-#include "gfx/sprite.h"
 #include "gfx/animation.h"
+#include "gfx/sprite.h"
+#include "gfx_generic/vec.h"
 #include "resource/cargo.h"
+#include "src/SharedPool.h"
 
 struct DockingPorts {
     struct Type {
         enum Value {
             CATEGORY_CONNECTED = 10,
-            CATEGORY_WAYPOINT = 20,
+            CATEGORY_WAYPOINT  = 20,
 
             // Unconnected types corresponds to the old true/false values
             OUTSIDE = 0,
-            INSIDE = 1,
+            INSIDE  = 1,
 
             CONNECTED_OUTSIDE = CATEGORY_CONNECTED + OUTSIDE,
-            CONNECTED_INSIDE = CATEGORY_CONNECTED + INSIDE,
+            CONNECTED_INSIDE  = CATEGORY_CONNECTED + INSIDE,
 
             WAYPOINT_OUTSIDE = CATEGORY_WAYPOINT + OUTSIDE,
-            WAYPOINT_INSIDE = CATEGORY_WAYPOINT + INSIDE,
+            WAYPOINT_INSIDE  = CATEGORY_WAYPOINT + INSIDE,
 
             DEFAULT = OUTSIDE
         };
@@ -87,33 +88,25 @@ struct DockingPorts {
         }
     };
 
-    DockingPorts()
-            : radius(0),
-            isInside(false),
-            isConnected(false),
-            isWaypoint(false),
-            isOccupied(false) {
-    }
+    DockingPorts() : radius(0), isInside(false), isConnected(false), isWaypoint(false), isOccupied(false) {}
 
     DockingPorts(const Vector &center, float radius, float minradius, const Type::Value &type)
-            : center(center),
-            radius(radius),
-            isInside(Type::IsInside(type)),
-            isConnected(Type::IsConnected(type)),
-            isWaypoint(Type::IsWaypoint(type)),
-            isOccupied(isWaypoint) // Waypoints are always occupied
-    {
-    }
+        : center(center),
+          radius(radius),
+          isInside(Type::IsInside(type)),
+          isConnected(Type::IsConnected(type)),
+          isWaypoint(Type::IsWaypoint(type)),
+          isOccupied(isWaypoint)  // Waypoints are always occupied
+    {}
 
     DockingPorts(const Vector &min, const Vector &max, float minradius, const Type::Value &type)
-            : center((min + max) / 2.0f),
-            radius((max - min).Magnitude() / 2.0f),
-            isInside(Type::IsInside(type)),
-            isConnected(Type::IsConnected(type)),
-            isWaypoint(Type::IsWaypoint(type)),
-            isOccupied(isWaypoint) // Waypoints are always occupied
-    {
-    }
+        : center((min + max) / 2.0f),
+          radius((max - min).Magnitude() / 2.0f),
+          isInside(Type::IsInside(type)),
+          isConnected(Type::IsConnected(type)),
+          isWaypoint(Type::IsWaypoint(type)),
+          isOccupied(isWaypoint)  // Waypoints are always occupied
+    {}
 
     float GetRadius() const {
         return radius;
@@ -148,19 +141,18 @@ struct DockingPorts {
 
 private:
     Vector center;
-    float radius;
-    bool isInside;
-    bool isConnected;
-    bool isWaypoint;
-    bool isOccupied;
+    float  radius;
+    bool   isInside;
+    bool   isConnected;
+    bool   isWaypoint;
+    bool   isOccupied;
 };
 
 struct DockedUnits {
     UnitContainer uc;
-    unsigned int whichdock;
+    unsigned int  whichdock;
 
-    DockedUnits(Unit *un, unsigned int w) : uc(un), whichdock(w) {
-    }
+    DockedUnits(Unit *un, unsigned int w) : uc(un), whichdock(w) {}
 };
 
 class Box;
@@ -168,8 +160,8 @@ class VSSprite;
 class Animation;
 
 // TODO: why is this a template??
-template<typename BOGUS>
-//added by chuck starchaser, to try to break dependency to VSSprite in vegaserver
+template <typename BOGUS>
+// added by chuck starchaser, to try to break dependency to VSSprite in vegaserver
 struct UnitImages {
     UnitImages();
 
@@ -177,28 +169,25 @@ struct UnitImages {
 
     StringPool::Reference cockpitImage;
     StringPool::Reference explosion_type;
-    Vector CockpitCenter;
-    VSSprite *pHudImage = nullptr;
-    ///The explosion starts at null, when activated time explode is incremented and ends at null
-    Animation *pExplosion = nullptr;
-    float timeexplode = 0;
+    Vector                CockpitCenter;
+    VSSprite             *pHudImage = nullptr;
+    /// The explosion starts at null, when activated time explode is incremented and ends at null
+    Animation *pExplosion  = nullptr;
+    float      timeexplode = 0;
 
 
 
-
-
-
-    std::vector<std::string> destination;
+    std::vector<std::string>  destination;
     std::vector<DockingPorts> dockingports;
-    ///warning unreliable pointer, never dereference!
-    std::vector<Unit *> clearedunits;
+    /// warning unreliable pointer, never dereference!
+    std::vector<Unit *>        clearedunits;
     std::vector<DockedUnits *> dockedunits;
-    UnitContainer DockedTo;
-    float unitscale;     //for output
-    class XMLSerializer *unitwriter = nullptr;
+    UnitContainer              DockedTo;
+    float                      unitscale;  // for output
+    class XMLSerializer       *unitwriter = nullptr;
 
     enum GAUGES {
-        //Image-based gauges
+        // Image-based gauges
         ARMORF,
         ARMORB,
         ARMORR,
@@ -226,12 +215,12 @@ struct UnitImages {
         ECM,
         HULL,
         WARPENERGY,
-        //target gauges
+        // target gauges
         TARGETSHIELDF,
         TARGETSHIELDB,
         TARGETSHIELDR,
         TARGETSHIELDL,
-        KPS,         //KEEP KPS HERE - it marks the start of text-based gauges
+        KPS,  // KEEP KPS HERE - it marks the start of text-based gauges
         SETKPS,
         COCKPIT_FPS,
         WARPFIELDSTRENGTH,
@@ -240,7 +229,7 @@ struct UnitImages {
         MAXCOMBATKPS,
         MAXCOMBATABKPS,
         MASSEFFECT,
-        AUTOPILOT_MODAL,         //KEEP first multimodal gauge HERE -- it marks the start of multi-modal gauges
+        AUTOPILOT_MODAL,  // KEEP first multimodal gauge HERE -- it marks the start of multi-modal gauges
         SPEC_MODAL,
         FLIGHTCOMPUTER_MODAL,
         TURRETCONTROL_MODAL,
@@ -254,8 +243,9 @@ struct UnitImages {
         COLLISIONWARNING_MODAL,
         CANJUMP_MODAL,
         CANDOCK_MODAL,
-        NUMGAUGES         //KEEP THIS LAST - obvious reasons, marks the end of all gauges
+        NUMGAUGES  // KEEP THIS LAST - obvious reasons, marks the end of all gauges
     };
+
     enum MODALGAUGEVALUES {
         OFF,
         ON,
@@ -275,37 +265,31 @@ struct UnitImages {
     };
 };
 
-//From star_system_jump.cpp
+// From star_system_jump.cpp
 class StarSystem;
+
 struct unorigdest {
     UnitContainer un;
     UnitContainer jumppoint;
-    StarSystem *orig;
-    StarSystem *dest;
-    float delay;
-    int animation;
-    bool justloaded;
-    bool ready;
-    QVector final_location;
+    StarSystem   *orig;
+    StarSystem   *dest;
+    float         delay;
+    int           animation;
+    bool          justloaded;
+    bool          ready;
+    QVector       final_location;
 
-    unorigdest(Unit *un,
-            Unit *jumppoint,
-            StarSystem *orig,
-            StarSystem *dest,
-            float delay,
-            int ani,
-            bool justloaded,
-            QVector use_coordinates /*set to 0,0,0 for crap*/ )
-            : un(un),
-            jumppoint(jumppoint),
-            orig(orig),
-            dest(dest),
-            delay(delay),
-            animation(ani),
-            justloaded(justloaded),
-            ready(true),
-            final_location(use_coordinates) {
-    }
+    unorigdest(Unit *un, Unit *jumppoint, StarSystem *orig, StarSystem *dest, float delay, int ani, bool justloaded,
+               QVector use_coordinates /*set to 0,0,0 for crap*/)
+        : un(un),
+          jumppoint(jumppoint),
+          orig(orig),
+          dest(dest),
+          delay(delay),
+          animation(ani),
+          justloaded(justloaded),
+          ready(true),
+          final_location(use_coordinates) {}
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_IMAGES_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_IMAGES_H

@@ -27,30 +27,31 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_GFX_CLICK_LIST_H
 #define VEGA_STRIKE_ENGINE_CMD_GFX_CLICK_LIST_H
 
-//#include "src/vegastrike.h"
-#include "gfx_generic/matrix.h"
+// #include "src/vegastrike.h"
 #include "cmd/collection.h"
+#include "gfx_generic/matrix.h"
 #include "src/star_system.h"
-Vector MouseCoordinate(int x, int y); //FIXME
+Vector MouseCoordinate(int x, int y);  // FIXME
 
 // Possible: This may be a list of options in flight
 // Basically, iterating between targets in front of you
 class ClickList {
 private:
     UnitCollection *parentIter;
-    StarSystem *parentSystem;
+    StarSystem     *parentSystem;
     UnitCollection *lastCollection;
-    Unit *lastSelected;
+    Unit           *lastSelected;
+
 public:
-//gets passed in unnormalized mouse values btw 0 and configuration().graphics.resolution_x&& configuration().graphics.resolution_y
-    bool queryShip(int mouseX, int mouseY, Unit *); //returns if the ship's in iterator utilizes
+    // gets passed in unnormalized mouse values btw 0 and configuration().graphics.resolution_x&&
+    // configuration().graphics.resolution_y
+    bool queryShip(int mouseX, int mouseY, Unit *);  // returns if the ship's in iterator utilizes
     ClickList(StarSystem *parSystem, UnitCollection *parentIter);
 
-    ~ClickList() {
-    }
+    ~ClickList() {}
 
     UnitCollection *requestIterator(int mouseX, int mouseY);
     UnitCollection *requestIterator(int minX, int minY, int maxX, int maxY);
-    Unit *requestShip(int mouseX, int mouseY);
+    Unit           *requestShip(int mouseX, int mouseY);
 };
-#endif //VEGA_STRIKE_ENGINE_CMD_GFX_CLICK_LIST_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_GFX_CLICK_LIST_H

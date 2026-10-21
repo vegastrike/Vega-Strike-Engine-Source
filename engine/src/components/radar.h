@@ -30,10 +30,10 @@
 #ifndef VEGA_STRIKE_ENGINE_COMPONENTS_RADAR_H
 #define VEGA_STRIKE_ENGINE_COMPONENTS_RADAR_H
 
-#include <string>
+#include <iostream>
 #include <map>
 #include <memory>
-#include <iostream>
+#include <string>
 
 #include "component.h"
 #include "components/energy_consumer.h"
@@ -46,41 +46,42 @@ enum class RadarType {
 };
 
 enum RadarCapabilities {
-    NONE = 0,
-    FRIEND_FOE = 1,
+    NONE               = 0,
+    FRIEND_FOE         = 1,
     OBJECT_RECOGNITION = 2,
-    THREAT_ASSESSMENT = 4
+    THREAT_ASSESSMENT  = 4
 };
 
 // Can't call it radar because of namespace collision
 class CRadar : public Component, public EnergyConsumer {
     // TODO: move floats to doubles
-    //the max range the radar can handle
+    // the max range the radar can handle
     Resource<long> max_range;
 
-    //the dot with (0,0,1) indicating the farthest to the side the radar can handle.
-    // TODO: make this a resource when we move from radian to degrees
+    // the dot with (0,0,1) indicating the farthest to the side the radar can handle.
+    //  TODO: make this a resource when we move from radian to degrees
     double max_cone;
     double lock_cone;
     double tracking_cone;
 
-    //The minimum radius of the target
+    // The minimum radius of the target
     double min_target_size;
 
     // What kind of type and capability the radar supports
-    RadarType type;
+    RadarType    type;
     unsigned int capabilities;
-    bool locked;
-    bool can_lock;
-    bool tracking_active;
+    bool         locked;
+    bool         can_lock;
+    bool         tracking_active;
 
     friend class Armed;
     friend class Unit;
+
 public:
     CRadar();
     ~CRadar() override;
 
-// Component Methods
+    // Component Methods
     void Load(std::string unit_key) override;
 
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
@@ -98,20 +99,25 @@ public:
     void Repair() override;
     void Destroy() override;
 
-// Radar Methods
+    // Radar Methods
 
     // always_lock - override some checks for targets such as planets
     void Lock(bool always_lock = false);
     void Unlock();
     void ToggleLock(bool always_lock = false);
 
-    void Track(const bool track) { tracking_active = track; }
-    void ToggleTracking() { tracking_active = !tracking_active; }
+    void Track(const bool track) {
+        tracking_active = track;
+    }
 
-    RadarType GetType() const; // Formerly GetBrand
-    bool UseFriendFoe() const;
-    bool UseObjectRecognition() const;
-    bool UseThreatAssessment() const;
+    void ToggleTracking() {
+        tracking_active = !tracking_active;
+    }
+
+    RadarType GetType() const;  // Formerly GetBrand
+    bool      UseFriendFoe() const;
+    bool      UseObjectRecognition() const;
+    bool      UseThreatAssessment() const;
 
     float GetMaxRange() const;
     float GetMaxCone() const;
@@ -127,4 +133,4 @@ public:
     double Consume() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_RADAR_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_RADAR_H

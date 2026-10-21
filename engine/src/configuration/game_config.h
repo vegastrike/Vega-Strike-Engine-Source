@@ -27,18 +27,18 @@
 #ifndef VEGA_STRIKE_ENGINE_CONFIG_GAME_CONFIG_H
 #define VEGA_STRIKE_ENGINE_CONFIG_GAME_CONFIG_H
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/foreach.hpp>
-#include <boost/algorithm/string.hpp>
-
-#include <string>
-#include <set>
-#include <map>
+#include <cstdint>
 #include <exception>
 #include <iostream>
-#include <cstdint>
+#include <map>
+#include <set>
+#include <string>
 #include <type_traits>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 #include "src/vs_logging.h"
 
@@ -49,87 +49,86 @@ namespace vega_config {
 class GameConfig {
 private:
     // This is probably unique enough to ensure no collision
-//    constexpr static const char DEFAULT_ERROR_VALUE[] {"vega_config::GetGameConfig().GetVar DEFAULT_ERROR_VALUE"};
+    //    constexpr static const char DEFAULT_ERROR_VALUE[] {"vega_config::GetGameConfig().GetVar DEFAULT_ERROR_VALUE"};
 
-    static std::string EscapedString(std::string const & input);
+    static std::string                   EscapedString(std::string const &input);
     static boost::shared_ptr<pt::iptree> variables_();
 
 public:
-
     void LoadGameConfig(const std::string &filename);
 
-    template<typename T>
-    T GetVariable(std::string const & path, T default_value) {
+    template <typename T>
+    T GetVariable(std::string const &path, T default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline std::string GetEscapedString(std::string const & path, std::string const & default_value) {
+    inline std::string GetEscapedString(std::string const &path, std::string const &default_value) {
         return EscapedString(variables_()->get(path, default_value));
     }
 
-    inline std::string GetString(std::string const & path, std::string const & default_value) {
+    inline std::string GetString(std::string const &path, std::string const &default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline float GetFloat(std::string const & path, float default_value) {
+    inline float GetFloat(std::string const &path, float default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline double GetDouble(std::string const & path, double default_value) {
+    inline double GetDouble(std::string const &path, double default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline size_t GetSizeT(std::string const & path, uintmax_t default_value) {
+    inline size_t GetSizeT(std::string const &path, uintmax_t default_value) {
         return variables_()->get(path, static_cast<size_t>(default_value));
     }
 
-    inline uint8_t GetUInt8(std::string const & path, uint8_t default_value) {
+    inline uint8_t GetUInt8(std::string const &path, uint8_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline uint16_t GetUInt16(std::string const & path, uint16_t default_value) {
+    inline uint16_t GetUInt16(std::string const &path, uint16_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline uint32_t GetUInt32(std::string const & path, uint32_t default_value) {
+    inline uint32_t GetUInt32(std::string const &path, uint32_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline uint64_t GetUInt64(std::string const & path, uint64_t default_value) {
+    inline uint64_t GetUInt64(std::string const &path, uint64_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline uintmax_t GetUIntMaxT(std::string const & path, uintmax_t default_value) {
+    inline uintmax_t GetUIntMaxT(std::string const &path, uintmax_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline int8_t GetInt8(std::string const & path, int8_t default_value) {
+    inline int8_t GetInt8(std::string const &path, int8_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline int16_t GetInt16(std::string const & path, int16_t default_value) {
+    inline int16_t GetInt16(std::string const &path, int16_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline int32_t GetInt32(std::string const & path, int32_t default_value) {
+    inline int32_t GetInt32(std::string const &path, int32_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline int64_t GetInt64(std::string const & path, int64_t default_value) {
+    inline int64_t GetInt64(std::string const &path, int64_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline intmax_t GetIntMaxT(std::string const & path, intmax_t default_value) {
+    inline intmax_t GetIntMaxT(std::string const &path, intmax_t default_value) {
         return variables_()->get(path, default_value);
     }
 
-    inline bool GetBool(std::string const & path, bool default_value) {
+    inline bool GetBool(std::string const &path, bool default_value) {
         return variables_()->get(path, default_value);
     }
 };
 
-extern GameConfig& GetGameConfig();
+extern GameConfig &GetGameConfig();
 
-}
+}  // namespace vega_config
 
-#endif //VEGA_STRIKE_ENGINE_CONFIG_GAME_CONFIG_H
+#endif  // VEGA_STRIKE_ENGINE_CONFIG_GAME_CONFIG_H

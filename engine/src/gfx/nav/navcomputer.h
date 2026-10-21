@@ -27,120 +27,118 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_COMPUTER_H
 #define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_COMPUTER_H
 
-#include "gfx/nav/navscreen.h"
 #include "gfx/nav/navpath.h"
-#include "gui/windowcontroller.h"
+#include "gfx/nav/navscreen.h"
 #include "gui/simplepicker.h"
+#include "gui/windowcontroller.h"
 
 class PathManager;
 class NavigationSystem;
 
-//The NavComputer class displays an interactive screen that supports a
-//number of function.
-//Current list:
-//Setting descriptor seacrhes
+// The NavComputer class displays an interactive screen that supports a
+// number of function.
+// Current list:
+// Setting descriptor seacrhes
 class NavComputer : public WindowController {
 public:
-//The Computer displays that are possible.
+    // The Computer displays that are possible.
     enum DisplayMode {
-        LIST = 0,       //
-        EDIT,         //
-        DISPLAY_MODE_COUNT, //Number of display modes.
-        NULL_DISPLAY = DISPLAY_MODE_COUNT,     //No display.
+        LIST = 0,                           //
+        EDIT,                               //
+        DISPLAY_MODE_COUNT,                 // Number of display modes.
+        NULL_DISPLAY = DISPLAY_MODE_COUNT,  // No display.
     };
 
     enum SelectorMode {
-        TARGET = 0,       //
-        CRITERIA,         //
-        CHAIN,          //
-        SELECTOR_MODE_COUNT, //Number of display modes.
-        NULL_SELECTOR = SELECTOR_MODE_COUNT,     //No display.
+        TARGET = 0,                           //
+        CRITERIA,                             //
+        CHAIN,                                //
+        SELECTOR_MODE_COUNT,                  // Number of display modes.
+        NULL_SELECTOR = SELECTOR_MODE_COUNT,  // No display.
     };
 
-//Set up the window and get everything ready.
+                                              // Set up the window and get everything ready.
     virtual void init(void);
 
-//Start it up!
+    // Start it up!
     virtual void run(void);
 
-//Process a command event from the window.
+    // Process a command event from the window.
     virtual bool processWindowCommand(const EventCommandId &command, Control *control);
 
-//CONSTRUCTION
+    // CONSTRUCTION
     NavComputer(NavigationSystem *navsystem);
     virtual ~NavComputer(void);
 
 protected:
-/***********************************************************************
- *                                                                      *
- *                  Inner class to confirm choices                      *
- *                                                                      *
- ************************************************************************/
+    /***********************************************************************
+     *                                                                      *
+     *                  Inner class to confirm choices                      *
+     *                                                                      *
+     ************************************************************************/
 
     class RenameConfirm : public WindowController {
         NavComputer *m_parent;
 
     public:
-//CONSTRUCTION.
-        RenameConfirm(NavComputer *player) : m_parent(player) {
-        }
+        // CONSTRUCTION.
+        RenameConfirm(NavComputer *player) : m_parent(player) {}
 
-        virtual ~RenameConfirm(void) {
-        }
+        virtual ~RenameConfirm(void) {}
 
-//Set up the window and get everything ready.
+        // Set up the window and get everything ready.
         virtual void init(void);
 
-//Process a command event from the window.
+        // Process a command event from the window.
         virtual bool processWindowCommand(const EventCommandId &command, Control *control);
     };
     friend class RenameConfirm;
 
-/***********************************************************************
- *                                                                      *
- *                       Sets up the window                             *
- *                                                                      *
- ************************************************************************/
+    /***********************************************************************
+     *                                                                      *
+     *                       Sets up the window                             *
+     *                                                                      *
+     ************************************************************************/
 
-//Gets the color to be used for each control group
+    // Gets the color to be used for each control group
     GFXColor getColorForGroup(std::string id);
-//Create the controls that will be used for this window.
+    // Create the controls that will be used for this window.
     void createControls(void);
-//Contruct the controls in code.
+    // Contruct the controls in code.
     void constructControls(void);
 
-//Toggles the navcomputer's visibility
+    // Toggles the navcomputer's visibility
     bool toggleVisibility(const EventCommandId &command, Control *control);
 
-/***********************************************************************
- *                                                                      *
- *                 Functions to switch between modes                    *
- *                                                                      *
- ************************************************************************/
+    /***********************************************************************
+     *                                                                      *
+     *                 Functions to switch between modes                    *
+     *                                                                      *
+     ************************************************************************/
 
-//Change display mode to LIST
+    // Change display mode to LIST
     bool changeToListMode(const EventCommandId &command, Control *control);
-//Change display mode to EDIT
+    // Change display mode to EDIT
     bool changeToEditMode(const EventCommandId &command, Control *control);
-//Change display mode to TARGET
+    // Change display mode to TARGET
     bool changeToTargetMode(const EventCommandId &command, Control *control);
-//Change display mode to STRING
+    // Change display mode to STRING
     bool changeToCriteriaMode(const EventCommandId &command, Control *control);
-//Change display mode to CHAIN
+    // Change display mode to CHAIN
     bool changeToChainMode(const EventCommandId &command, Control *control);
 
-//Redo the title string.
+    // Redo the title string.
     void recalcTitle(void);
-//Switch to the set of controls used for the specified mode.
+    // Switch to the set of controls used for the specified mode.
     void switchToMajorControls(DisplayMode mode);
-//Switch to the set of controls used for the specified mode.
+    // Switch to the set of controls used for the specified mode.
     void switchToMinorControls(SelectorMode mode);
 
-/************************************************************************
-*                                                                      *
-*                       Control Functions                              *
-*                                                                      *
-************************************************************************/
+    /************************************************************************
+     *                                                                      *
+     *                       Control Functions                              *
+     *                                                                      *
+     ************************************************************************/
 
     void loadPathLister();
     void loadChainLister();
@@ -174,54 +172,55 @@ protected:
 
     void actionRenameConfirmed(std::string name);
 
-/***********************************************************************
- *                                                                      *
- *           Table to store command-function relationships              *
- *                                                                      *
- ************************************************************************/
+    /***********************************************************************
+     *                                                                      *
+     *           Table to store command-function relationships              *
+     *                                                                      *
+     ************************************************************************/
 
-//Dispatch table declarations.
-//This is a member table so the handler functions don't need to be public.
+    // Dispatch table declarations.
+    // This is a member table so the handler functions don't need to be public.
     typedef bool (NavComputer::*WCtlHandler)(const EventCommandId &command, Control *control);
+
     struct WctlTableEntry {
         EventCommandId command;
-        std::string controlId;
-        WCtlHandler function;
+        std::string    controlId;
+        WCtlHandler    function;
 
-        WctlTableEntry(const EventCommandId &cmd, const std::string &cid, const WCtlHandler &func) :
-                command(cmd), controlId(cid), function(func) {
-        }
+        WctlTableEntry(const EventCommandId &cmd, const std::string &cid, const WCtlHandler &func)
+            : command(cmd), controlId(cid), function(func) {}
     };
+
     static const WctlTableEntry WctlCommandTable[];
 
-/***********************************************************************
- *                                                                      *
- *                        Feature Member variables                      *
- *                                                                      *
- ************************************************************************/
+    /***********************************************************************
+     *                                                                      *
+     *                        Feature Member variables                      *
+     *                                                                      *
+     ************************************************************************/
 
-//VARIABLES
-    NavigationSystem *navsys;              //The navigation system to interface with
-    PathManager *pathman;                  //The path manager to interface with
+    // VARIABLES
+    NavigationSystem *navsys;   // The navigation system to interface with
+    PathManager      *pathman;  // The path manager to interface with
 
-    NavPath *currentPath;              //The currently selected path
-    PathNode *currentNode;              //The currently edited node
-    bool criteria;                         //The currently selected node is a criteria node
+    NavPath  *currentPath;      // The currently selected path
+    PathNode *currentNode;      // The currently edited node
+    bool      criteria;         // The currently selected node is a criteria node
 
-/***********************************************************************
- *                                                                      *
- *                        Inner Member variables                        *
- *                                                                      *
- ************************************************************************/
+                                /***********************************************************************
+                                 *                                                                      *
+                                 *                        Inner Member variables                        *
+                                 *                                                                      *
+                                 ************************************************************************/
 
-//VARIABLES
-    bool m_visible;
-    vector<DisplayMode> m_displayModes;   //List of displays to provide.
-    vector<SelectorMode> m_selectorModes;    //List of selectors to provide.
-    DisplayMode m_currentDisplay;          //The current display mode.
-    SelectorMode m_currentSelector;           //The current selector mode.
-    Control *m_displayModeGroups[DISPLAY_MODE_COUNT]; //Array of GroupControls, one for each display mode.
-    Control *m_selectorModeGroups[SELECTOR_MODE_COUNT]; //Array of GroupControls, one for each selector mode.
+    // VARIABLES
+    bool                 m_visible;
+    vector<DisplayMode>  m_displayModes;                 // List of displays to provide.
+    vector<SelectorMode> m_selectorModes;                // List of selectors to provide.
+    DisplayMode          m_currentDisplay;               // The current display mode.
+    SelectorMode         m_currentSelector;              // The current selector mode.
+    Control *m_displayModeGroups[DISPLAY_MODE_COUNT];    // Array of GroupControls, one for each display mode.
+    Control *m_selectorModeGroups[SELECTOR_MODE_COUNT];  // Array of GroupControls, one for each selector mode.
 };
 
-#endif   //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_COMPUTER_H
+#endif                                                   // VEGA_STRIKE_ENGINE_GFX_NAV_NAV_COMPUTER_H

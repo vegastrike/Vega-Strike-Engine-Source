@@ -29,25 +29,26 @@
 #include <cstdlib>
 
 #ifdef FUNCTORS_INC
-#else //FUNCTORS_INC
-#define FUNCTORS_INC 1
+#else   // FUNCTORS_INC
+#    define FUNCTORS_INC 1
+
 class Attributes {
 public:
     Attributes() {
-        hidden = false;
+        hidden  = false;
         webbcmd = false;
-        immcmd = false;
+        immcmd  = false;
     }
 
-    bool hidden;     //hidden
-    bool webbcmd;     //web command
-    bool immcmd;     //immortal command
-    int type;
-//nothing returns yet anyway, strings may be the most useful?
+    bool hidden;   // hidden
+    bool webbcmd;  // web command
+    bool immcmd;   // immortal command
+    int  type;
+
+                   // nothing returns yet anyway, strings may be the most useful?
     class returnType {
     public:
-        returnType() {
-        }
+        returnType() {}
 
         returnType(const returnType &in) {
             if (in.s.size() > 0) {
@@ -57,6 +58,7 @@ public:
 
         std::string s;
     };
+
     returnType m_return;
 };
 
@@ -64,47 +66,47 @@ class TFunctor {
 public:
     Attributes attribs;
 
-    virtual ~TFunctor() {
-    }
+    virtual ~TFunctor() {}
 
     virtual void *Call(std::vector<std::string> &d, int &sock_in, bool *isDown) = 0;
 };
-template<class TClass>
+
+template <class TClass>
 class Functor : public TFunctor {
-//To add a new callback method, add a new fpt type here,
-//set it to NULL in nullify, then add it to the list
-//of if/else in the main Call method.
+    // To add a new callback method, add a new fpt type here,
+    // set it to NULL in nullify, then add it to the list
+    // of if/else in the main Call method.
 private:
-    void (TClass::*fpt1)();
-    void (TClass::*fpt2)(std::string &);
-    void (TClass::*fpt3)(const char *);
-    void (TClass::*fpt4)(const char *array[]);
-    void (TClass::*fpt5)(const char *, const char *);
-    void (TClass::*fpt6)(bool *);
-    void (TClass::*fpt7)(int);
-    void (TClass::*fpt8)(char);
-    void (TClass::*fpt9)(std::vector<std::string *> *d);
-    void (TClass::*fpt10)(std::vector<std::string *> *d, int &sock_in);
-    void (TClass::*fpt11)(std::string &, int &);
-    void (TClass::*fpt12)(std::vector<std::string *> *, int &, bool);
-    TClass *pt2Object;             //pointer to object
+    void    (TClass::*fpt1)();
+    void    (TClass::*fpt2)(std::string &);
+    void    (TClass::*fpt3)(const char *);
+    void    (TClass::*fpt4)(const char *array[]);
+    void    (TClass::*fpt5)(const char *, const char *);
+    void    (TClass::*fpt6)(bool *);
+    void    (TClass::*fpt7)(int);
+    void    (TClass::*fpt8)(char);
+    void    (TClass::*fpt9)(std::vector<std::string *> *d);
+    void    (TClass::*fpt10)(std::vector<std::string *> *d, int &sock_in);
+    void    (TClass::*fpt11)(std::string &, int &);
+    void    (TClass::*fpt12)(std::vector<std::string *> *, int &, bool);
+    TClass *pt2Object;  // pointer to object
 public:
-//New singularlized call method {{{:
+    // New singularlized call method {{{:
     void *Call(std::vector<std::string> &d, int &sock_in, bool *isDown) override {
-        //Comments {{{
-        //ok, d[0] == command typed
-        //d[1] == arg1
-        //d[2] == arg2, etc.
-        //sometimes socket can be ignored
-        //}}}
+        // Comments {{{
+        // ok, d[0] == command typed
+        // d[1] == arg1
+        // d[2] == arg2, etc.
+        // sometimes socket can be ignored
+        // }}}
         if (fpt1 != NULL) {
-            //fpt1() no args {{{
+            // fpt1() no args {{{
             (*pt2Object.*fpt1)();
         }
-            //}}}
+        //}}}
         else if (fpt2 != NULL) {
-            //fpt2(std::string &)  {{{
-            std::string a;
+            // fpt2(std::string &)  {{{
+            std::string  a;
             unsigned int x;
             for (x = 0; x < d.size(); x++) {
                 a.append(d[x]);
@@ -113,11 +115,11 @@ public:
             (*pt2Object.*fpt2)(a);
             //}}}
         } else if (fpt3 != NULL) {
-            //fpt3(const char *); {{{
+            // fpt3(const char *); {{{
             if (d.size() >= 2) {
                 (*pt2Object.*fpt3)(d[1].c_str());
             } else {
-                (*pt2Object.*fpt3)((const char *) NULL);
+                (*pt2Object.*fpt3)((const char *)NULL);
             }
             //}}}
         } else if (fpt4 != NULL) {
@@ -135,9 +137,9 @@ public:
         } else if (fpt5 != NULL) {
             //(const char *, const char *); {{{
             if (d.size() < 2) {
-                (*pt2Object.*fpt5)((const char *) NULL, (const char *) NULL);
+                (*pt2Object.*fpt5)((const char *)NULL, (const char *)NULL);
             } else if (d.size() < 3) {
-                (*pt2Object.*fpt5)(d[1].c_str(), (const char *) NULL);
+                (*pt2Object.*fpt5)(d[1].c_str(), (const char *)NULL);
             } else {
                 (*pt2Object.*fpt5)(d[1].c_str(), d[2].c_str());
             }
@@ -146,7 +148,7 @@ public:
             //(bool *); {{{
             (*pt2Object.*fpt6)(isDown);
         }
-            //}}}
+        //}}}
         else if (fpt7 != NULL) {
             //(int) {{{
             if (d.size() < 2) {
@@ -159,14 +161,14 @@ public:
             //(char) {{{
             if (d.size() < 2) {
                 char err = 0;
-                (*pt2Object.*fpt8)(err);
+                     (*pt2Object.*fpt8)(err);
             } else {
                 (*pt2Object.*fpt8)(d[1][0]);
                 //}}}
             }
         } else if (fpt9 != NULL) {
             //(std::vector<std::string *> *d) {{{
-            std::vector<std::string *> dup;
+            std::vector<std::string *>         dup;
             std::vector<std::string>::iterator ptr = d.begin();
             while (ptr < d.end()) {
                 dup.push_back(&(*(ptr)));
@@ -176,7 +178,7 @@ public:
             //}}}
         } else if (fpt10 != NULL) {
             //(std::vector<std::string *> *d, int) {{{
-            std::vector<std::string *> dup;
+            std::vector<std::string *>         dup;
             std::vector<std::string>::iterator ptr = d.begin();
             while (ptr < d.end()) {
                 dup.push_back(&(*(ptr)));
@@ -186,7 +188,7 @@ public:
             //}}}
         } else if (fpt11 != NULL) {
             //(std::string &, int&); {{{
-            std::string a;
+            std::string  a;
             unsigned int x;
             for (x = 0; x < d.size(); x++) {
                 a.append(d[x]);
@@ -196,113 +198,115 @@ public:
             //}}}
         } else if (fpt12 != NULL) {
             //(std::vector<std::string *> *, int &, bool); // {{{
-            std::vector<std::string *> dup;
+            std::vector<std::string *>         dup;
             std::vector<std::string>::iterator ptr = d.begin();
             while (ptr < d.end()) {
                 dup.push_back(&(*(ptr)));
                 ptr++;
             }
             (*pt2Object.*fpt12)(&dup, sock_in, false);
-        }                 //}}}
+        }  //}}}
         return &(attribs.m_return);
 
         return NULL;
-    }             //}}}
+    }  //}}}
+
     void nullify() {
-        //Set all the fpt's to null {{{
-        fpt1 = NULL;
-        fpt2 = NULL;
-        fpt3 = NULL;
-        fpt4 = NULL;
-        fpt5 = NULL;
-        fpt6 = NULL;
-        fpt7 = NULL;
-        fpt8 = NULL;
-        fpt9 = NULL;
+        // Set all the fpt's to null {{{
+        fpt1  = NULL;
+        fpt2  = NULL;
+        fpt3  = NULL;
+        fpt4  = NULL;
+        fpt5  = NULL;
+        fpt6  = NULL;
+        fpt7  = NULL;
+        fpt8  = NULL;
+        fpt9  = NULL;
         fpt10 = NULL;
         fpt11 = NULL;
         fpt12 = NULL;
-    }              //Nullify }}}
-    //Constructors, call nullify, set pt2object and function pointer {{{
-    Functor(TClass *_pt2Object, void(TClass::*_fpt)()) {
+    }  // Nullify }}}
+
+    // Constructors, call nullify, set pt2object and function pointer {{{
+    Functor(TClass *_pt2Object, void (TClass::*_fpt)()) {
         nullify();
         pt2Object = _pt2Object;
-        fpt1 = _fpt;
+        fpt1      = _fpt;
     }
 
-//1 std::string
-    Functor(TClass *_pt2Object, void(TClass::*_fpt)(std::string &)) {
+    // 1 std::string
+    Functor(TClass *_pt2Object, void (TClass::*_fpt)(std::string &)) {
         nullify();
         pt2Object = _pt2Object;
-        fpt2 = _fpt;
+        fpt2      = _fpt;
     }
 
-//1 c string
-    Functor(TClass *_pt2Object, void(TClass::*_fpt)(const char *)) {
+    // 1 c string
+    Functor(TClass *_pt2Object, void (TClass::*_fpt)(const char *)) {
         nullify();
         pt2Object = _pt2Object;
-        fpt3 = _fpt;
+        fpt3      = _fpt;
     }
 
-    Functor(TClass *_pt2Object, void(TClass::*_fpt)(const char *array[])) {
+    Functor(TClass *_pt2Object, void (TClass::*_fpt)(const char *array[])) {
         nullify();
         pt2Object = _pt2Object;
-        fpt4 = _fpt;
+        fpt4      = _fpt;
     }
 
-//2 c strings
-    Functor(TClass *_Obj, void(TClass::*_fpt)(const char *, const char *)) {
+    // 2 c strings
+    Functor(TClass *_Obj, void (TClass::*_fpt)(const char *, const char *)) {
         nullify();
         pt2Object = _Obj;
-        fpt5 = _fpt;
+        fpt5      = _fpt;
     }
 
-//1 bool
-    Functor(TClass *_Obj, void(TClass::*_fpt)(bool *)) {
+    // 1 bool
+    Functor(TClass *_Obj, void (TClass::*_fpt)(bool *)) {
         nullify();
         pt2Object = _Obj;
-        fpt6 = _fpt;
+        fpt6      = _fpt;
     }
 
-    Functor(TClass *_Obj, void(TClass::*_fpt)(int)) {
+    Functor(TClass *_Obj, void (TClass::*_fpt)(int)) {
         nullify();
         pt2Object = _Obj;
-        fpt7 = _fpt;
+        fpt7      = _fpt;
     }
 
-    Functor(TClass *_Obj, void(TClass::*_fpt)(char)) {
+    Functor(TClass *_Obj, void (TClass::*_fpt)(char)) {
         nullify();
         pt2Object = _Obj;
-        fpt8 = _fpt;
+        fpt8      = _fpt;
     }
 
-    Functor(TClass *_Obj, void(TClass::*_fpt)(std::vector<std::string *> *d)) {
+    Functor(TClass *_Obj, void (TClass::*_fpt)(std::vector<std::string *> *d)) {
         nullify();
         pt2Object = _Obj, fpt9 = _fpt;
     }
 
-    Functor(TClass *_Obj, void(TClass::*_fpt)(std::vector<std::string *> *d, int &)) {
+    Functor(TClass *_Obj, void (TClass::*_fpt)(std::vector<std::string *> *d, int &)) {
         nullify();
         pt2Object = _Obj, fpt10 = _fpt;
     }
 
-    Functor(TClass *_pt2Object, void(TClass::*_fpt)(std::string &, int &)) {
+    Functor(TClass *_pt2Object, void (TClass::*_fpt)(std::string &, int &)) {
         nullify();
         pt2Object = _pt2Object;
-        fpt11 = _fpt;
+        fpt11     = _fpt;
     }
 
-    Functor(TClass *_Obj, void(TClass::*_fpt)(std::vector<std::string *> *d, int &, bool)) {
+    Functor(TClass *_Obj, void (TClass::*_fpt)(std::vector<std::string *> *d, int &, bool)) {
         nullify();
         pt2Object = _Obj, fpt12 = _fpt;
     }
-//}}}
 
-    ~Functor() override {
-    }
+    //}}}
+
+    ~Functor() override {}
 };
 
-#endif //FUNCTORS_INC
+#endif  // FUNCTORS_INC
 
 /*
  * Local variables:

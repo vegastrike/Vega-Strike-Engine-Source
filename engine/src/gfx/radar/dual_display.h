@@ -36,8 +36,8 @@
 namespace Radar {
 
 class DualDisplayBase : public Display {
-    typedef boost::rand48 RandomEngine;
-    typedef boost::normal_distribution<float> RandomDistribution;
+    typedef boost::rand48                                                RandomEngine;
+    typedef boost::normal_distribution<float>                            RandomDistribution;
     typedef boost::variate_generator<RandomEngine &, RandomDistribution> RandomGenerator;
 
 public:
@@ -48,22 +48,22 @@ public:
 
 protected:
     float Jitter(float errorOffset, float errorRange);
-    void Jitter(float errorOffset, float errorRange, Vector &position);
+    void  Jitter(float errorOffset, float errorRange, Vector &position);
 
 protected:
     ViewArea leftRadar;
     ViewArea rightRadar;
-    bool isPaused;
+    bool     isPaused;
 
-    RandomEngine randomEngine;
+    RandomEngine       randomEngine;
     RandomDistribution randomDistribution;
-    RandomGenerator randomGenerator;
+    RandomGenerator    randomGenerator;
 
 private:
-    float lastRandomNumber;
+    float  lastRandomNumber;
     Vector lastRandomVector;
 };
 
-} // namespace Radar
+}  // namespace Radar
 
-#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_DUALDISPLAY_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_RADAR_DUALDISPLAY_H

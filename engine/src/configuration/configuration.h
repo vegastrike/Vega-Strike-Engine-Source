@@ -29,33 +29,34 @@
 #ifndef VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H
 #define VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H
 
-#include <string>
-#include <memory>
 #include <map>
+#include <memory>
+#include <string>
 #include <vector>
+
 #include <boost/filesystem/path.hpp>
 #include <boost/json.hpp>
 
 #include "components/energy_consumer.h"
 
 namespace vega_config {
-	struct Configuration {
-	    Configuration();
-		explicit Configuration(const std::string& json_text);
-	    explicit Configuration(const boost::filesystem::path& config_file_path);
+struct Configuration {
+    Configuration();
+    explicit Configuration(const std::string& json_text);
+    explicit Configuration(const boost::filesystem::path& config_file_path);
 
-		void load_config(const std::string& json_text);
-		void load_config(const boost::filesystem::path & config_file_path);
+    void load_config(const std::string& json_text);
+    void load_config(const boost::filesystem::path& config_file_path);
 
-		// Parses the "colors" section (theme.json) into this->colors. Called
-		// from load_config() for each merged config file.
-		void parseColors(const boost::json::object& root_object);
+    // Parses the "colors" section (theme.json) into this->colors. Called
+    // from load_config() for each merged config file.
+    void parseColors(const boost::json::object& root_object);
 
-		// Parses the "actions" section (bindings.json) into this->actions.
-		void parseActions(const boost::json::object& root_object);
+    // Parses the "actions" section (bindings.json) into this->actions.
+    void parseActions(const boost::json::object& root_object);
 
-		// Parses the "axes" section (bindings.json) into this->axes.
-		void parseAxes(const boost::json::object& root_object);
+    // Parses the "axes" section (bindings.json) into this->axes.
+    void parseAxes(const boost::json::object& root_object);
 
 
     // Preset selectors from config.json's "preset" section (e.g.
@@ -65,7 +66,6 @@ namespace vega_config {
     std::map<std::string, std::string> preset;
 
     struct {
-
     } advanced;
 
     // --- Actions (input bindings) ---
@@ -78,20 +78,22 @@ namespace vega_config {
     //
     // Source: bindings.json, section "actions". See parseActions().
     struct ActionBinding {
-        std::string key;        // keyboard: key name, e.g. "a" or "tab"
-        std::string modifier;   // "none" | "alt" | "ctrl" (shift encoded in key)
-        int button = -1;        // mouse/joystick: button index
-        int joystick = -1;      // joystick: device index (mouse uses -1 + is_mouse)
-        bool is_mouse = false;  // true for mouse-button binds (mouse-as-joystick slot)
-        int hatswitch = -1;     // digital hat: hat index
-        std::string direction;  // digital hat: VS_HAT_* name ("up","right",...)
+        std::string key;                // keyboard: key name, e.g. "a" or "tab"
+        std::string modifier;           // "none" | "alt" | "ctrl" (shift encoded in key)
+        int         button    = -1;     // mouse/joystick: button index
+        int         joystick  = -1;     // joystick: device index (mouse uses -1 + is_mouse)
+        bool        is_mouse  = false;  // true for mouse-button binds (mouse-as-joystick slot)
+        int         hatswitch = -1;     // digital hat: hat index
+        std::string direction;          // digital hat: VS_HAT_* name ("up","right",...)
     };
+
     struct ActionBindings {
         std::vector<ActionBinding> keyboard;
         std::vector<ActionBinding> mouse;
         std::vector<ActionBinding> joystick;
         std::vector<ActionBinding> hat;
     };
+
     std::map<std::string, ActionBindings> actions;
 
     // --- Axes (input axes) ---
@@ -99,611 +101,611 @@ namespace vega_config {
     // role (x/y/z/throttle) -> source device + physical axis + inverse flag.
     // Source: bindings.json, section "axes". See parseAxes().
     struct AxisRole {
-        std::string source = "joystick";  // "joystick" | "mouse"
-        int joystick = 0;
-        int axis = -1;
-        bool inverse = false;
+        std::string source   = "joystick";  // "joystick" | "mouse"
+        int         joystick = 0;
+        int         axis     = -1;
+        bool        inverse  = false;
     };
+
     std::map<std::string, AxisRole> axes;
 
     struct {
-
         struct {
-            std::string key = "S";
+            std::string key      = "S";
             std::string modifier = "none";
 
         } Cockpit__SkipMusicTrack;
 
         struct {
-            std::string key = "i";
+            std::string key      = "i";
             std::string modifier = "none";
 
         } Screenshot;
 
         struct {
-            std::string key = "F";
+            std::string key      = "F";
             std::string modifier = "alt";
 
         } CommFormUp;
 
         struct {
-            std::string key = "B";
+            std::string key      = "B";
             std::string modifier = "alt";
 
         } CommBreakForm;
 
         struct {
-            std::string key = "H";
+            std::string key      = "H";
             std::string modifier = "alt";
 
         } CommHelpMeOut;
 
         struct {
-            std::string key = "D";
+            std::string key      = "D";
             std::string modifier = "alt";
 
         } CommAttackTarget;
 
         struct {
-            std::string key = "function-1";
+            std::string key      = "function-1";
             std::string modifier = "none";
 
         } Comm1Key;
 
         struct {
-            std::string key = "function-2";
+            std::string key      = "function-2";
             std::string modifier = "none";
 
         } Comm2Key;
 
         struct {
-            std::string key = "function-3";
+            std::string key      = "function-3";
             std::string modifier = "none";
 
         } Comm3Key;
 
         struct {
-            std::string key = "function-4";
+            std::string key      = "function-4";
             std::string modifier = "none";
 
         } Comm4Key;
 
         struct {
-            std::string key = "function-5";
+            std::string key      = "function-5";
             std::string modifier = "none";
 
         } Comm5Key;
 
         struct {
-            std::string key = "function-6";
+            std::string key      = "function-6";
             std::string modifier = "none";
 
         } Comm6Key;
 
         struct {
-            std::string key = "function-7";
+            std::string key      = "function-7";
             std::string modifier = "none";
 
         } Comm7Key;
 
         struct {
-            std::string key = "function-8";
+            std::string key      = "function-8";
             std::string modifier = "none";
 
         } Comm8Key;
 
         struct {
-            std::string key = "1";
+            std::string key      = "1";
             std::string modifier = "alt";
 
         } SaveTarget1;
 
         struct {
-            std::string key = "2";
+            std::string key      = "2";
             std::string modifier = "alt";
 
         } SaveTarget2;
 
         struct {
-            std::string key = "3";
+            std::string key      = "3";
             std::string modifier = "alt";
 
         } SaveTarget3;
 
         struct {
-            std::string key = "4";
+            std::string key      = "4";
             std::string modifier = "alt";
 
         } SaveTarget4;
 
         struct {
-            std::string key = "5";
+            std::string key      = "5";
             std::string modifier = "alt";
 
         } SaveTarget5;
 
         struct {
-            std::string key = "6";
+            std::string key      = "6";
             std::string modifier = "alt";
 
         } SaveTarget6;
 
         struct {
-            std::string key = "7";
+            std::string key      = "7";
             std::string modifier = "alt";
 
         } SaveTarget7;
 
         struct {
-            std::string key = "8";
+            std::string key      = "8";
             std::string modifier = "alt";
 
         } SaveTarget8;
 
         struct {
-            std::string key = "9";
+            std::string key      = "9";
             std::string modifier = "alt";
 
         } SaveTarget9;
 
         struct {
-            std::string key = "1";
+            std::string key      = "1";
             std::string modifier = "ctrl";
 
         } RestoreTarget1;
 
         struct {
-            std::string key = "2";
+            std::string key      = "2";
             std::string modifier = "ctrl";
 
         } RestoreTarget2;
 
         struct {
-            std::string key = "3";
+            std::string key      = "3";
             std::string modifier = "ctrl";
 
         } RestoreTarget3;
 
         struct {
-            std::string key = "4";
+            std::string key      = "4";
             std::string modifier = "ctrl";
 
         } RestoreTarget4;
 
         struct {
-            std::string key = "5";
+            std::string key      = "5";
             std::string modifier = "ctrl";
 
         } RestoreTarget5;
 
         struct {
-            std::string key = "6";
+            std::string key      = "6";
             std::string modifier = "ctrl";
 
         } RestoreTarget6;
 
         struct {
-            std::string key = "7";
+            std::string key      = "7";
             std::string modifier = "ctrl";
 
         } RestoreTarget7;
 
         struct {
-            std::string key = "8";
+            std::string key      = "8";
             std::string modifier = "ctrl";
 
         } RestoreTarget8;
 
         struct {
-            std::string key = "9";
+            std::string key      = "9";
             std::string modifier = "ctrl";
 
         } RestoreTarget9;
 
         struct {
-            std::string key = "space";
+            std::string key      = "space";
             std::string modifier = "none";
 
         } FireKey;
 
         struct {
-            std::string key = "y";
+            std::string key      = "y";
             std::string modifier = "none";
 
         } SwitchCombatMode;
 
         struct {
-            std::string key = "j";
+            std::string key      = "j";
             std::string modifier = "none";
 
         } JumpKey;
 
         struct {
-            std::string key = "A";
+            std::string key      = "A";
             std::string modifier = "none";
 
         } ToggleWarpDrive;
 
         struct {
-            std::string key = "a";
+            std::string key      = "a";
             std::string modifier = "none";
 
         } ASAP;
 
         struct {
-            std::string key = "c";
+            std::string key      = "c";
             std::string modifier = "none";
 
         } CloakKey;
 
         struct {
-            std::string key = "E";
+            std::string key      = "E";
             std::string modifier = "alt";
 
         } EjectKey;
 
         struct {
-            std::string key = "e";
+            std::string key      = "e";
             std::string modifier = "none";
 
         } ECMKey;
 
         struct {
-            std::string key = "Z";
+            std::string key      = "Z";
             std::string modifier = "none";
 
         } EjectCargoKey;
 
         struct {
-            std::string key = "keypad-enter";
+            std::string key      = "keypad-enter";
             std::string modifier = "none";
 
         } MissileKey;
 
         struct {
-            std::string key = "g";
+            std::string key      = "g";
             std::string modifier = "none";
 
         } WeapSelKey;
 
         struct {
-            std::string key = "G";
+            std::string key      = "G";
             std::string modifier = "none";
 
         } ReverseWeapSelKey;
 
         struct {
-            std::string key = ";";
+            std::string key      = ";";
             std::string modifier = "none";
 
         } Respawn;
 
         struct {
-            std::string key = "[";
+            std::string key      = "[";
             std::string modifier = "none";
 
         } TurretControl;
 
         struct {
-            std::string key = "]";
+            std::string key      = "]";
             std::string modifier = "none";
 
         } TextMessage;
 
         struct {
-            std::string key = "d";
+            std::string key      = "d";
             std::string modifier = "none";
 
         } DockKey;
 
         struct {
-            std::string key = "0";
+            std::string key      = "0";
             std::string modifier = "alt";
 
         } RequestClearenceKey;
 
         struct {
-            std::string key = "W";
+            std::string key      = "W";
             std::string modifier = "none";
 
         } ReverseMisSelKey;
 
         struct {
-            std::string key = "w";
+            std::string key      = "w";
             std::string modifier = "none";
 
         } MisSelKey;
 
         struct {
-            std::string key = "t";
+            std::string key      = "t";
             std::string modifier = "none";
 
         } TargetKey;
 
         struct {
-            std::string key = "n";
+            std::string key      = "n";
             std::string modifier = "none";
 
         } SigTargetKey;
 
         struct {
-            std::string key = "b";
+            std::string key      = "b";
             std::string modifier = "none";
 
         } SubUnitTargetKey;
 
         struct {
-            std::string key = "u";
+            std::string key      = "u";
             std::string modifier = "none";
 
         } UnitTargetKey;
 
         struct {
-            std::string key = "l";
+            std::string key      = "l";
             std::string modifier = "none";
 
         } LockTargetKey;
 
         struct {
-            std::string key = "p";
+            std::string key      = "p";
             std::string modifier = "none";
 
         } PickTargetKey;
 
         struct {
-            std::string key = "h";
+            std::string key      = "h";
             std::string modifier = "none";
 
         } NearestTargetKey;
 
         struct {
-            std::string key = "T";
+            std::string key      = "T";
             std::string modifier = "none";
 
         } ReverseTargetKey;
 
         struct {
-            std::string key = "r";
+            std::string key      = "r";
             std::string modifier = "none";
 
         } NearestHostileTargetKey;
 
         struct {
-            std::string key = "R";
+            std::string key      = "R";
             std::string modifier = "none";
 
         } NearestDangerousHostileKey;
 
         struct {
-            std::string key = "k";
+            std::string key      = "k";
             std::string modifier = "none";
 
         } NearestFriendlyKey;
 
         struct {
-            std::string key = "K";
+            std::string key      = "K";
             std::string modifier = "none";
 
         } NearestBaseKey;
 
         struct {
-            std::string key = "k";
+            std::string key      = "k";
             std::string modifier = "ctrl";
 
         } NearestPlanetKey;
 
         struct {
-            std::string key = "k";
+            std::string key      = "k";
             std::string modifier = "alt";
 
         } NearestJumpKey;
 
         struct {
-            std::string key = "P";
+            std::string key      = "P";
             std::string modifier = "none";
 
         } TurretTargetKey;
 
         struct {
-            std::string key = "o";
+            std::string key      = "o";
             std::string modifier = "none";
 
         } TurretAIOn;
 
         struct {
-            std::string key = "o";
+            std::string key      = "o";
             std::string modifier = "alt";
 
         } TurretAIOff;
 
         struct {
-            std::string key = "O";
+            std::string key      = "O";
             std::string modifier = "none";
 
         } TurretAIFireAtWill;
 
         struct {
-            std::string key = "H";
+            std::string key      = "H";
             std::string modifier = "none";
 
         } ReverseNearestTargetKey;
 
         struct {
-            std::string key = "N";
+            std::string key      = "N";
             std::string modifier = "alt";
 
         } ReverseMissionTargetKey;
 
         struct {
-            std::string key = "n";
+            std::string key      = "n";
             std::string modifier = "alt";
 
         } MissionTargetKey;
 
         struct {
-            std::string key = "N";
+            std::string key      = "N";
             std::string modifier = "none";
 
         } ReverseSigTargetKey;
 
         struct {
-            std::string key = "U";
+            std::string key      = "U";
             std::string modifier = "none";
 
         } ReverseUnitTargetKey;
 
         struct {
-            std::string key = "`";
+            std::string key      = "`";
             std::string modifier = "none";
 
         } Flight__Mode__InertialToggle;
 
         struct {
-            std::string key = "-";
+            std::string key      = "-";
             std::string modifier = "none";
 
         } DecelKey;
 
         struct {
-            std::string key = "+";
+            std::string key      = "+";
             std::string modifier = "none";
 
         } AccelKey;
 
         struct {
-            std::string key = "cursor-insert";
+            std::string key      = "cursor-insert";
             std::string modifier = "none";
 
         } RollLeftKey;
 
         struct {
-            std::string key = "cursor-delete";
+            std::string key      = "cursor-delete";
             std::string modifier = "none";
 
         } RollRightKey;
 
         struct {
-            std::string key = "backspace";
+            std::string key      = "backspace";
             std::string modifier = "none";
 
         } StopKey;
 
         struct {
-            std::string key = "\\";
+            std::string key      = "\\";
             std::string modifier = "none";
 
         } StartKey;
 
         struct {
-            std::string key = "tab";
+            std::string key      = "tab";
             std::string modifier = "none";
 
         } ABKey;
 
         struct {
-            std::string key = "!";
+            std::string key      = "!";
             std::string modifier = "none";
 
         } SuicideKey;
 
         struct {
-            std::string key = "keypad-8";
+            std::string key      = "keypad-8";
             std::string modifier = "none";
 
         } UpKey;
 
         struct {
-            std::string key = "keypad-5";
+            std::string key      = "keypad-5";
             std::string modifier = "none";
 
         } DownKey;
 
         struct {
-            std::string key = "keypad-4";
+            std::string key      = "keypad-4";
             std::string modifier = "none";
 
         } RightKey;
 
         struct {
-            std::string key = "keypad-6";
+            std::string key      = "keypad-6";
             std::string modifier = "none";
 
         } LeftKey;
 
         struct {
-            std::string key = "M";
+            std::string key      = "M";
             std::string modifier = "none";
 
         } Cockpit__NavScreen;
 
         struct {
-            std::string key = "1";
+            std::string key      = "1";
             std::string modifier = "none";
 
         } Cockpit__Inside;
 
         struct {
-            std::string key = "2";
+            std::string key      = "2";
             std::string modifier = "none";
 
         } Cockpit__InsideLeft;
 
         struct {
-            std::string key = "3";
+            std::string key      = "3";
             std::string modifier = "none";
 
         } Cockpit__InsideRight;
 
         struct {
-            std::string key = "4";
+            std::string key      = "4";
             std::string modifier = "none";
 
         } Cockpit__InsideBack;
 
         struct {
-            std::string key = "5";
+            std::string key      = "5";
             std::string modifier = "none";
 
         } Cockpit__Behind;
 
         struct {
-            std::string key = "6";
+            std::string key      = "6";
             std::string modifier = "none";
 
         } Cockpit__Pan;
 
         struct {
-            std::string key = "7";
+            std::string key      = "7";
             std::string modifier = "none";
 
         } Cockpit__ViewTarget;
 
         struct {
-            std::string key = "8";
+            std::string key      = "8";
             std::string modifier = "none";
 
         } Cockpit__PanTarget;
 
         struct {
-            std::string key = "9";
+            std::string key      = "9";
             std::string modifier = "none";
 
         } Cockpit__ZoomIn;
 
         struct {
-            std::string key = "0";
+            std::string key      = "0";
             std::string modifier = "none";
 
         } Cockpit__ZoomOut;
 
         struct {
-            std::string key = "0";
+            std::string key      = "0";
             std::string modifier = "ctrl";
 
         } Cockpit__OutsideTarget;
 
         struct {
-            std::string key = "pause";
+            std::string key      = "pause";
             std::string modifier = "none";
 
         } PauseKey;
@@ -729,115 +731,115 @@ namespace vega_config {
         } ThrustRight;
 
         struct {
-            std::string key = "function-9";
+            std::string key      = "function-9";
             std::string modifier = "none";
 
         } VolumeInc;
 
         struct {
-            std::string key = "function-10";
+            std::string key      = "function-10";
             std::string modifier = "none";
 
         } VolumeDec;
 
         struct {
-            std::string key = "function-11";
+            std::string key      = "function-11";
             std::string modifier = "none";
 
         } MusicVolumeInc;
 
         struct {
-            std::string key = "function-12";
+            std::string key      = "function-12";
             std::string modifier = "none";
 
         } MusicVolumeDec;
 
         struct {
-            std::string key = "v";
+            std::string key      = "v";
             std::string modifier = "ctrl";
 
         } NewShader;
 
         struct {
-            std::string key = "m";
+            std::string key      = "m";
             std::string modifier = "none";
 
         } Cockpit__SwitchLVDU;
 
         struct {
-            std::string key = "v";
+            std::string key      = "v";
             std::string modifier = "none";
 
         } Cockpit__SwitchRVDU;
 
         struct {
-            std::string key = "q";
+            std::string key      = "q";
             std::string modifier = "none";
 
         } Cockpit__PitchDown;
 
         struct {
-            std::string key = "z";
+            std::string key      = "z";
             std::string modifier = "none";
 
         } Cockpit__PitchUp;
 
         struct {
-            std::string key = "s";
+            std::string key      = "s";
             std::string modifier = "none";
 
         } Cockpit__YawLeft;
 
         struct {
-            std::string key = "f";
+            std::string key      = "f";
             std::string modifier = "none";
 
         } Cockpit__YawRight;
 
         struct {
-            std::string key = "keypad-3";
+            std::string key      = "keypad-3";
             std::string modifier = "none";
 
         } Cockpit__ScrollDown;
 
         struct {
-            std::string key = "keypad-9";
+            std::string key      = "keypad-9";
             std::string modifier = "none";
 
         } Cockpit__ScrollUp;
 
         struct {
-            std::string key = "function-1";
+            std::string key      = "function-1";
             std::string modifier = "ctrl";
 
         } ConsoleKeys__BringConsole;
 
         struct {
-            std::string key = "keypad-7";
+            std::string key      = "keypad-7";
             std::string modifier = "none";
 
         } SetVelocityRefKey;
 
         struct {
-            std::string key = "keypad-1";
+            std::string key      = "keypad-1";
             std::string modifier = "none";
 
         } SetVelocityNullKey;
 
         struct {
-            std::string key = "esc";
+            std::string key      = "esc";
             std::string modifier = "none";
 
         } Cockpit__Quit;
 
         struct {
-            std::string key = "f";
+            std::string key      = "f";
             std::string modifier = "ctrl";
 
         } FreeSlaves;
 
         struct {
-            std::string key = "e";
+            std::string key      = "e";
             std::string modifier = "ctrl";
 
         } Enslave;
@@ -848,196 +850,197 @@ namespace vega_config {
         bool enabled = true;
 
         struct {
-            int button = 0;
+            int         button   = 0;
             std::string modifier = "none";
 
         } FireKey;
-        bool inverse_x = false;
-        bool inverse_y = false;
-        std::string comment = "move joystick and keyboard here. Move bindings down a level.";
+
+        bool        inverse_x = false;
+        bool        inverse_y = false;
+        std::string comment   = "move joystick and keyboard here. Move bindings down a level.";
 
     } mouse;
 
     struct {
-        bool afterburn_to_no_enemies = true;
-        double ai_cheat_dot_dbl = 0.99;
-        float ai_cheat_dot_flt = 0.99;
-        bool allow_any_speed_reference = false;
-        bool allow_civil_war = false;
-        bool allow_nonplayer_faction_change = false;
-        bool always_fire_autotrackers = false;
-        bool always_have_jumpdrive_cheat = false;
-        bool always_obedient = true;
-        bool always_use_itts = false;
-        double anger_affects_response_dbl = 1.0;
-        float anger_affects_response_flt = 1.0;
-        bool arrest_energy_zero = false;
-        bool assist_friend_in_need = true;
-        double attacker_switch_time_dbl = 15.0;
-        float attacker_switch_time_flt = 15.0;
-        bool auto_dock = false;
-        bool can_dock_to_enemy_base = true;
-        bool capped_faction_rating = true;
-        std::string choose_destination_script = "";
-        double comm_initiate_time_dbl = 300.0;
-        float comm_initiate_time_flt = 300.0;
-        double comm_response_time_dbl = 3.0;
-        float comm_response_time_flt = 3.0;
-        double comm_to_player_percent_dbl = 0.0;
-        float comm_to_player_percent_flt = 0.0;
-        double comm_to_target_percent_dbl = 0.25;
-        float comm_to_target_percent_flt = 0.25;
-        double contraband_initiate_time_dbl = 3000.0;
-        float contraband_initiate_time_flt = 3000.0;
-        int contraband_madness = 5;
-        double contraband_to_player_percent_dbl = 0.0;
-        float contraband_to_player_percent_flt = 0.0;
-        double contraband_to_target_percent_dbl = 0.01;
-        float contraband_to_target_percent_flt = 0.01;
-        double contraband_update_time_dbl = 1.0;
-        float contraband_update_time_flt = 1.0;
-        int debug_level = 0;
-        double default_rank_dbl = 0.01;
-        float default_rank_flt = 0.01;
-        bool dock_on_load = true;
-        bool dock_to_area = false;
-        std::string docked_to_script = "";
-        double ease_to_anger_dbl = -0.5;
-        float ease_to_anger_flt = -0.5;
-        double ease_to_appease_dbl = 0.5;
-        float ease_to_appease_flt = 0.5;
-        bool eject_attacks = false;
-        double evasion_angle_dbl = 45.0;
-        float evasion_angle_flt = 45.0;
-        double faction_contraband_relation_adjust_dbl = -0.025;
-        float faction_contraband_relation_adjust_flt = -0.025;
-        double fg_nav_select_time_dbl = 120.0;
-        float fg_nav_select_time_flt = 120.0;
-        double force_jump_after_time_dbl = 120.0;
-        float force_jump_after_time_flt = 120.0;
-        double friend_factor_dbl = 0.1;
-        float friend_factor_flt = 0.1;
-        double gun_range_percent_ok_dbl = 0.66;
-        float gun_range_percent_ok_flt = 0.66;
-        bool hostile_lurk = true;
-        double how_far_to_stop_navigating_dbl = 100.0;
-        float how_far_to_stop_navigating_flt = 100.0;
-        int hull_damage_anger = 10;
-        double hull_percent_for_comm_dbl = 0.75;
-        float hull_percent_for_comm_flt = 0.75;
-        bool independent_turrets = false;
-        bool jump_cheat = true;
-        bool jump_without_energy = false;
-        double kill_factor_dbl = 0.2;
-        float kill_factor_flt = 0.2;
-        double loop_around_destination_distance_dbl = 20.0;
-        float loop_around_destination_distance_flt = 20.0;
-        double loop_around_destination_lateral_dbl = 4.0;
-        float loop_around_destination_lateral_flt = 4.0;
-        double loop_around_destination_vertical_dbl = 4.0;
-        float loop_around_destination_vertical_flt = 4.0;
-        double loop_around_distance_dbl = 1.0;
-        float loop_around_distance_flt = 1.0;
-        double loop_around_pursuit_velocity_percent_dbl = 0.9;
-        float loop_around_pursuit_velocity_percent_flt = 0.9;
-        double lurk_time_dbl = 600.0;
-        float lurk_time_flt = 600.0;
-        double lowest_negative_comm_choice_dbl = -1e-05;
-        float lowest_negative_comm_choice_flt = -1e-05;
-        double lowest_positive_comm_choice_dbl = 0.0;
-        float lowest_positive_comm_choice_flt = 0.0;
-        double match_velocity_cone_dbl = -0.8;
-        float match_velocity_cone_flt = -0.8;
-        bool match_velocity_of_pursuant = false;
-        double max_allowable_travel_time_dbl = 10.0;
-        float max_allowable_travel_time_flt = 10.0;
-        double max_faction_contraband_relation_dbl = -0.05;
-        float max_faction_contraband_relation_flt = -0.05;
-        int max_player_attackers = 0;
-        double min_angular_accel_cheat_dbl = 50.0;
-        float min_angular_accel_cheat_flt = 50.0;
-        double min_docking_relationship_dbl = -0.002;
-        float min_docking_relationship_flt = -0.002;
-        double min_energy_to_enter_warp_dbl = 0.33;
-        float min_energy_to_enter_warp_flt = 0.33;
-        double min_relationship_dbl = -20.0;
-        float min_relationship_flt = -20.0;
-        double min_time_to_auto_dbl = 25.0;
-        float min_time_to_auto_flt = 25.0;
-        double min_warp_to_try_dbl = 1.5;
-        float min_warp_to_try_flt = 1.5;
-        double missile_gun_delay_dbl = 4.0;
-        float missile_gun_delay_flt = 4.0;
-        double mood_affects_response_dbl = 0.0;
-        float mood_affects_response_flt = 0.0;
-        double mood_swing_level_dbl = 0.2;
-        float mood_swing_level_flt = 0.2;
-        bool no_turret_ai = false;
-        int num_contraband_scans_per_search = 10;
-        int num_pirates_per_asteroid_field = 12;
-        bool only_upgrade_speed_reference = false;
-        double percentage_speed_change_to_stop_search_dbl = 1.0;
-        float percentage_speed_change_to_stop_search_flt = 1.0;
-        double pirate_bonus_for_empty_hold_dbl = 0.75;
-        float pirate_bonus_for_empty_hold_flt = 0.75;
-        double pirate_nav_select_time_dbl = 400.0;
-        float pirate_nav_select_time_flt = 400.0;
-        double random_response_range_dbl = 0.8;
-        float random_response_range_flt = 0.8;
-        double random_spacing_factor_dbl = 4.0;
-        float random_spacing_factor_flt = 4.0;
-        double reaction_time_dbl = 0.2;
-        float reaction_time_flt = 0.2;
-        bool resistance_to_side_movement = false;
-        double resistance_to_side_force_percent_dbl = 1.0;
-        float resistance_to_side_force_percent_flt = 1.0;
-        double resistance_to_side_movement_percent_dbl = 0.01;
-        float resistance_to_side_movement_percent_flt = 0.01;
-        double roll_order_duration_dbl = 5.0;
-        float roll_order_duration_flt = 5.0;
-        double safety_spacing_dbl = 2500.0;
-        float safety_spacing_flt = 2500.0;
-        int shield_damage_anger = 1;
-        double slow_diplomacy_for_enemies_dbl = 0.25;
-        float slow_diplomacy_for_enemies_flt = 0.25;
-        std::string start_docked_to = "Atlantis";
-        double static_relationship_affects_response_dbl = 1.0;
-        float static_relationship_affects_response_flt = 1.0;
-        bool switch_nonowned_units = true;
-        double talk_relation_factor_dbl = 0.5;
-        float talk_relation_factor_flt = 0.5;
-        bool talking_faster_helps = true;
-        double too_close_for_warp_in_formation_dbl = 1500.0;
-        float too_close_for_warp_in_formation_flt = 1500.0;
-        double too_close_for_warp_tactic_dbl = 8000.0;
-        float too_close_for_warp_tactic_flt = 8000.0;
-        bool turn_cheat = false;
-        double unknown_relation_enemy_dbl = -0.05;
-        float unknown_relation_enemy_flt = -0.05;
-        double unknown_relation_hit_cost_dbl = 0.01;
-        float unknown_relation_hit_cost_flt = 0.01;
-        bool use_afterburner = true;
-        bool use_afterburner_to_follow = true;
-        bool use_afterburner_to_run = true;
-        double warp_cone_dbl = 0.8;
-        float warp_cone_flt = 0.8;
-        bool warp_to_enemies = true;
-        bool warp_to_no_enemies = true;
-        bool warp_to_wingmen = true;
+        bool        afterburn_to_no_enemies                    = true;
+        double      ai_cheat_dot_dbl                           = 0.99;
+        float       ai_cheat_dot_flt                           = 0.99;
+        bool        allow_any_speed_reference                  = false;
+        bool        allow_civil_war                            = false;
+        bool        allow_nonplayer_faction_change             = false;
+        bool        always_fire_autotrackers                   = false;
+        bool        always_have_jumpdrive_cheat                = false;
+        bool        always_obedient                            = true;
+        bool        always_use_itts                            = false;
+        double      anger_affects_response_dbl                 = 1.0;
+        float       anger_affects_response_flt                 = 1.0;
+        bool        arrest_energy_zero                         = false;
+        bool        assist_friend_in_need                      = true;
+        double      attacker_switch_time_dbl                   = 15.0;
+        float       attacker_switch_time_flt                   = 15.0;
+        bool        auto_dock                                  = false;
+        bool        can_dock_to_enemy_base                     = true;
+        bool        capped_faction_rating                      = true;
+        std::string choose_destination_script                  = "";
+        double      comm_initiate_time_dbl                     = 300.0;
+        float       comm_initiate_time_flt                     = 300.0;
+        double      comm_response_time_dbl                     = 3.0;
+        float       comm_response_time_flt                     = 3.0;
+        double      comm_to_player_percent_dbl                 = 0.0;
+        float       comm_to_player_percent_flt                 = 0.0;
+        double      comm_to_target_percent_dbl                 = 0.25;
+        float       comm_to_target_percent_flt                 = 0.25;
+        double      contraband_initiate_time_dbl               = 3000.0;
+        float       contraband_initiate_time_flt               = 3000.0;
+        int         contraband_madness                         = 5;
+        double      contraband_to_player_percent_dbl           = 0.0;
+        float       contraband_to_player_percent_flt           = 0.0;
+        double      contraband_to_target_percent_dbl           = 0.01;
+        float       contraband_to_target_percent_flt           = 0.01;
+        double      contraband_update_time_dbl                 = 1.0;
+        float       contraband_update_time_flt                 = 1.0;
+        int         debug_level                                = 0;
+        double      default_rank_dbl                           = 0.01;
+        float       default_rank_flt                           = 0.01;
+        bool        dock_on_load                               = true;
+        bool        dock_to_area                               = false;
+        std::string docked_to_script                           = "";
+        double      ease_to_anger_dbl                          = -0.5;
+        float       ease_to_anger_flt                          = -0.5;
+        double      ease_to_appease_dbl                        = 0.5;
+        float       ease_to_appease_flt                        = 0.5;
+        bool        eject_attacks                              = false;
+        double      evasion_angle_dbl                          = 45.0;
+        float       evasion_angle_flt                          = 45.0;
+        double      faction_contraband_relation_adjust_dbl     = -0.025;
+        float       faction_contraband_relation_adjust_flt     = -0.025;
+        double      fg_nav_select_time_dbl                     = 120.0;
+        float       fg_nav_select_time_flt                     = 120.0;
+        double      force_jump_after_time_dbl                  = 120.0;
+        float       force_jump_after_time_flt                  = 120.0;
+        double      friend_factor_dbl                          = 0.1;
+        float       friend_factor_flt                          = 0.1;
+        double      gun_range_percent_ok_dbl                   = 0.66;
+        float       gun_range_percent_ok_flt                   = 0.66;
+        bool        hostile_lurk                               = true;
+        double      how_far_to_stop_navigating_dbl             = 100.0;
+        float       how_far_to_stop_navigating_flt             = 100.0;
+        int         hull_damage_anger                          = 10;
+        double      hull_percent_for_comm_dbl                  = 0.75;
+        float       hull_percent_for_comm_flt                  = 0.75;
+        bool        independent_turrets                        = false;
+        bool        jump_cheat                                 = true;
+        bool        jump_without_energy                        = false;
+        double      kill_factor_dbl                            = 0.2;
+        float       kill_factor_flt                            = 0.2;
+        double      loop_around_destination_distance_dbl       = 20.0;
+        float       loop_around_destination_distance_flt       = 20.0;
+        double      loop_around_destination_lateral_dbl        = 4.0;
+        float       loop_around_destination_lateral_flt        = 4.0;
+        double      loop_around_destination_vertical_dbl       = 4.0;
+        float       loop_around_destination_vertical_flt       = 4.0;
+        double      loop_around_distance_dbl                   = 1.0;
+        float       loop_around_distance_flt                   = 1.0;
+        double      loop_around_pursuit_velocity_percent_dbl   = 0.9;
+        float       loop_around_pursuit_velocity_percent_flt   = 0.9;
+        double      lurk_time_dbl                              = 600.0;
+        float       lurk_time_flt                              = 600.0;
+        double      lowest_negative_comm_choice_dbl            = -1e-05;
+        float       lowest_negative_comm_choice_flt            = -1e-05;
+        double      lowest_positive_comm_choice_dbl            = 0.0;
+        float       lowest_positive_comm_choice_flt            = 0.0;
+        double      match_velocity_cone_dbl                    = -0.8;
+        float       match_velocity_cone_flt                    = -0.8;
+        bool        match_velocity_of_pursuant                 = false;
+        double      max_allowable_travel_time_dbl              = 10.0;
+        float       max_allowable_travel_time_flt              = 10.0;
+        double      max_faction_contraband_relation_dbl        = -0.05;
+        float       max_faction_contraband_relation_flt        = -0.05;
+        int         max_player_attackers                       = 0;
+        double      min_angular_accel_cheat_dbl                = 50.0;
+        float       min_angular_accel_cheat_flt                = 50.0;
+        double      min_docking_relationship_dbl               = -0.002;
+        float       min_docking_relationship_flt               = -0.002;
+        double      min_energy_to_enter_warp_dbl               = 0.33;
+        float       min_energy_to_enter_warp_flt               = 0.33;
+        double      min_relationship_dbl                       = -20.0;
+        float       min_relationship_flt                       = -20.0;
+        double      min_time_to_auto_dbl                       = 25.0;
+        float       min_time_to_auto_flt                       = 25.0;
+        double      min_warp_to_try_dbl                        = 1.5;
+        float       min_warp_to_try_flt                        = 1.5;
+        double      missile_gun_delay_dbl                      = 4.0;
+        float       missile_gun_delay_flt                      = 4.0;
+        double      mood_affects_response_dbl                  = 0.0;
+        float       mood_affects_response_flt                  = 0.0;
+        double      mood_swing_level_dbl                       = 0.2;
+        float       mood_swing_level_flt                       = 0.2;
+        bool        no_turret_ai                               = false;
+        int         num_contraband_scans_per_search            = 10;
+        int         num_pirates_per_asteroid_field             = 12;
+        bool        only_upgrade_speed_reference               = false;
+        double      percentage_speed_change_to_stop_search_dbl = 1.0;
+        float       percentage_speed_change_to_stop_search_flt = 1.0;
+        double      pirate_bonus_for_empty_hold_dbl            = 0.75;
+        float       pirate_bonus_for_empty_hold_flt            = 0.75;
+        double      pirate_nav_select_time_dbl                 = 400.0;
+        float       pirate_nav_select_time_flt                 = 400.0;
+        double      random_response_range_dbl                  = 0.8;
+        float       random_response_range_flt                  = 0.8;
+        double      random_spacing_factor_dbl                  = 4.0;
+        float       random_spacing_factor_flt                  = 4.0;
+        double      reaction_time_dbl                          = 0.2;
+        float       reaction_time_flt                          = 0.2;
+        bool        resistance_to_side_movement                = false;
+        double      resistance_to_side_force_percent_dbl       = 1.0;
+        float       resistance_to_side_force_percent_flt       = 1.0;
+        double      resistance_to_side_movement_percent_dbl    = 0.01;
+        float       resistance_to_side_movement_percent_flt    = 0.01;
+        double      roll_order_duration_dbl                    = 5.0;
+        float       roll_order_duration_flt                    = 5.0;
+        double      safety_spacing_dbl                         = 2500.0;
+        float       safety_spacing_flt                         = 2500.0;
+        int         shield_damage_anger                        = 1;
+        double      slow_diplomacy_for_enemies_dbl             = 0.25;
+        float       slow_diplomacy_for_enemies_flt             = 0.25;
+        std::string start_docked_to                            = "Atlantis";
+        double      static_relationship_affects_response_dbl   = 1.0;
+        float       static_relationship_affects_response_flt   = 1.0;
+        bool        switch_nonowned_units                      = true;
+        double      talk_relation_factor_dbl                   = 0.5;
+        float       talk_relation_factor_flt                   = 0.5;
+        bool        talking_faster_helps                       = true;
+        double      too_close_for_warp_in_formation_dbl        = 1500.0;
+        float       too_close_for_warp_in_formation_flt        = 1500.0;
+        double      too_close_for_warp_tactic_dbl              = 8000.0;
+        float       too_close_for_warp_tactic_flt              = 8000.0;
+        bool        turn_cheat                                 = false;
+        double      unknown_relation_enemy_dbl                 = -0.05;
+        float       unknown_relation_enemy_flt                 = -0.05;
+        double      unknown_relation_hit_cost_dbl              = 0.01;
+        float       unknown_relation_hit_cost_flt              = 0.01;
+        bool        use_afterburner                            = true;
+        bool        use_afterburner_to_follow                  = true;
+        bool        use_afterburner_to_run                     = true;
+        double      warp_cone_dbl                              = 0.8;
+        float       warp_cone_flt                              = 0.8;
+        bool        warp_to_enemies                            = true;
+        bool        warp_to_no_enemies                         = true;
+        bool        warp_to_wingmen                            = true;
 
         struct {
-            double aggressivity_dbl = 15.0;
-        float aggressivity_flt = 15.0;
-            double in_weapon_range_dbl = 1.2;
-        float in_weapon_range_flt = 1.2;
-            double missile_probability_dbl = 0.04;
-        float missile_probability_flt = 0.04;
-            double reaction_time_dbl = 0.2;
-        float reaction_time_flt = 0.2;
-            double turret_dot_cutoff_dbl = 0.4;
-        float turret_dot_cutoff_flt = 0.4;
+            double aggressivity_dbl               = 15.0;
+            float  aggressivity_flt               = 15.0;
+            double in_weapon_range_dbl            = 1.2;
+            float  in_weapon_range_flt            = 1.2;
+            double missile_probability_dbl        = 0.04;
+            float  missile_probability_flt        = 0.04;
+            double reaction_time_dbl              = 0.2;
+            float  reaction_time_flt              = 0.2;
+            double turret_dot_cutoff_dbl          = 0.4;
+            float  turret_dot_cutoff_flt          = 0.4;
             double turret_missile_probability_dbl = 0.01;
-        float turret_missile_probability_flt = 0.01;
+            float  turret_missile_probability_flt = 0.01;
 
             struct {
                 int minagg = 10;
@@ -1048,231 +1051,230 @@ namespace vega_config {
         } firing;
 
         struct {
-            bool assign_point_def = true;
-            double escort_distance_dbl = 10.0;
-        float escort_distance_flt = 10.0;
-            double mass_inertial_priority_cutoff_dbl = 5000.0;
-        float mass_inertial_priority_cutoff_flt = 5000.0;
-            double mass_inertial_priority_scale_dbl = 1e-07;
-        float mass_inertial_priority_scale_flt = 1e-07;
-            int max_number_of_pollers_per_frame = 49;
-            int min_number_of_pollers_per_frame = 5;
-            int min_rechoose_interval = 128;
-            double min_time_to_switch_targets_dbl = 3.0;
-        float min_time_to_switch_targets_flt = 3.0;
+            bool   assign_point_def                    = true;
+            double escort_distance_dbl                 = 10.0;
+            float  escort_distance_flt                 = 10.0;
+            double mass_inertial_priority_cutoff_dbl   = 5000.0;
+            float  mass_inertial_priority_cutoff_flt   = 5000.0;
+            double mass_inertial_priority_scale_dbl    = 1e-07;
+            float  mass_inertial_priority_scale_flt    = 1e-07;
+            int    max_number_of_pollers_per_frame     = 49;
+            int    min_number_of_pollers_per_frame     = 5;
+            int    min_rechoose_interval               = 128;
+            double min_time_to_switch_targets_dbl      = 3.0;
+            float  min_time_to_switch_targets_flt      = 3.0;
             double min_null_time_to_switch_targets_dbl = 5.0;
-        float min_null_time_to_switch_targets_flt = 5.0;
-            double mountless_gun_range_dbl = 300000000.0;
-        float mountless_gun_range_flt = 300000000.0;
-            double obedience_dbl = 0.99;
-        float obedience_flt = 0.99;
-            double search_extra_radius_dbl = 1000.0;
-        float search_extra_radius_flt = 1000.0;
-            int search_max_candidates = 64;
-            int search_max_role_priority = 16;
-            double threat_weight_dbl = 0.5;
-        float threat_weight_flt = 0.5;
-            double time_to_recommand_wing_dbl = 100.0;
-        float time_to_recommand_wing_flt = 100.0;
-            double time_until_switch_dbl = 20.0;
-        float time_until_switch_flt = 20.0;
-            double turn_leader_distance_dbl = 5.0;
-        float turn_leader_distance_flt = 5.0;
+            float  min_null_time_to_switch_targets_flt = 5.0;
+            double mountless_gun_range_dbl             = 300000000.0;
+            float  mountless_gun_range_flt             = 300000000.0;
+            double obedience_dbl                       = 0.99;
+            float  obedience_flt                       = 0.99;
+            double search_extra_radius_dbl             = 1000.0;
+            float  search_extra_radius_flt             = 1000.0;
+            int    search_max_candidates               = 64;
+            int    search_max_role_priority            = 16;
+            double threat_weight_dbl                   = 0.5;
+            float  threat_weight_flt                   = 0.5;
+            double time_to_recommand_wing_dbl          = 100.0;
+            float  time_to_recommand_wing_flt          = 100.0;
+            double time_until_switch_dbl               = 20.0;
+            float  time_until_switch_flt               = 20.0;
+            double turn_leader_distance_dbl            = 5.0;
+            float  turn_leader_distance_flt            = 5.0;
 
         } targeting;
 
     } ai;
 
     struct {
-        double afterburner_gain_dbl = 0.5;
-        float afterburner_gain_flt = 0.5;
-        bool ai_high_quality_weapon = false;
-        bool ai_sound = true;
-        double audio_max_distance_dbl = 1000000.0;
-        float audio_max_distance_flt = 1000000.0;
-        double audio_ref_distance_dbl = 4000.0;
-        float audio_ref_distance_flt = 4000.0;
-        std::string automatic_docking_zone = "automatic_landing_zone.wav";
-        std::string battle_playlist = "battle.m3u";
-        double buzzing_distance_dbl = 5.0;
-        float buzzing_distance_flt = 5.0;
-        bool buzzing_needs_afterburner = false;
-        double buzzing_time_dbl = 5.0;
-        float buzzing_time_flt = 5.0;
-        std::string cache_songs = "../music/land.ogg";
-        bool cross_fade_music = true;
-        std::string dj_script = "modules/dj.py";
-        bool doppler = false;
-        double doppler_scale_dbl = 1.0;
-        float doppler_scale_flt = 1.0;
-        bool every_other_mount = false;
-        double explosion_closeness_dbl = 0.8;
-        float explosion_closeness_flt = 0.8;
-        double exterior_weapon_gain_dbl = 0.35;
-        float exterior_weapon_gain_flt = 0.35;
-        int frequency = 48000;
-        bool high_quality_weapon = true;
-        std::string loading_sound = "../music/loading.ogg";
-        std::string loss_playlist = "loss.m3u";
-        double loss_relationship_dbl = -0.1;
-        float loss_relationship_flt = -0.1;
-        int max_single_sounds = 8;
-        int max_total_sounds = 20;
-        double max_range_to_hear_weapon_fire_dbl = 100000.0;
-        float max_range_to_hear_weapon_fire_flt = 100000.0;
-        double min_weapon_sound_refire_dbl = 0.2;
-        float min_weapon_sound_refire_flt = 0.2;
-        std::string mission_victory_song = "../music/victory.ogg";
-        bool music = true;
-        int music_layers = 1;
-        double music_muting_fade_in_dbl = 0.5;
-        float music_muting_fade_in_flt = 0.5;
-        double music_muting_fade_out_dbl = 0.2;
-        float music_muting_fade_out_flt = 0.2;
-        double music_volume_dbl = 0.5;
-        float music_volume_flt = 0.5;
-        double music_volume_down_latency_dbl = 2.0;
-        float music_volume_down_latency_flt = 2.0;
-        double music_volume_up_latency_dbl = 15.0;
-        float music_volume_up_latency_flt = 15.0;
-        std::string news_song = "../music/news1.ogg";
-        std::string panic_playlist = "panic.m3u";
-        std::string peace_playlist = "peace.m3u";
-        bool positional = true;
-        bool shuffle_songs = true;
-        bool sound = true;
-        double sound_gain_dbl = 0.5;
-        float sound_gain_flt = 0.5;
-        int thread_time = 1;
-        double time_between_music_dbl = 180.0;
-        float time_between_music_flt = 180.0;
-        std::string victory_playlist = "victory.m3u";
-        double victory_relationship_dbl = 0.5;
-        float victory_relationship_flt = 0.5;
-        double volume_dbl = 100.0;
-        float volume_flt = 100.0;
-        double weapon_gain_dbl = 0.25;
-        float weapon_gain_flt = 0.25;
+        double      afterburner_gain_dbl              = 0.5;
+        float       afterburner_gain_flt              = 0.5;
+        bool        ai_high_quality_weapon            = false;
+        bool        ai_sound                          = true;
+        double      audio_max_distance_dbl            = 1000000.0;
+        float       audio_max_distance_flt            = 1000000.0;
+        double      audio_ref_distance_dbl            = 4000.0;
+        float       audio_ref_distance_flt            = 4000.0;
+        std::string automatic_docking_zone            = "automatic_landing_zone.wav";
+        std::string battle_playlist                   = "battle.m3u";
+        double      buzzing_distance_dbl              = 5.0;
+        float       buzzing_distance_flt              = 5.0;
+        bool        buzzing_needs_afterburner         = false;
+        double      buzzing_time_dbl                  = 5.0;
+        float       buzzing_time_flt                  = 5.0;
+        std::string cache_songs                       = "../music/land.ogg";
+        bool        cross_fade_music                  = true;
+        std::string dj_script                         = "modules/dj.py";
+        bool        doppler                           = false;
+        double      doppler_scale_dbl                 = 1.0;
+        float       doppler_scale_flt                 = 1.0;
+        bool        every_other_mount                 = false;
+        double      explosion_closeness_dbl           = 0.8;
+        float       explosion_closeness_flt           = 0.8;
+        double      exterior_weapon_gain_dbl          = 0.35;
+        float       exterior_weapon_gain_flt          = 0.35;
+        int         frequency                         = 48'000;
+        bool        high_quality_weapon               = true;
+        std::string loading_sound                     = "../music/loading.ogg";
+        std::string loss_playlist                     = "loss.m3u";
+        double      loss_relationship_dbl             = -0.1;
+        float       loss_relationship_flt             = -0.1;
+        int         max_single_sounds                 = 8;
+        int         max_total_sounds                  = 20;
+        double      max_range_to_hear_weapon_fire_dbl = 100000.0;
+        float       max_range_to_hear_weapon_fire_flt = 100000.0;
+        double      min_weapon_sound_refire_dbl       = 0.2;
+        float       min_weapon_sound_refire_flt       = 0.2;
+        std::string mission_victory_song              = "../music/victory.ogg";
+        bool        music                             = true;
+        int         music_layers                      = 1;
+        double      music_muting_fade_in_dbl          = 0.5;
+        float       music_muting_fade_in_flt          = 0.5;
+        double      music_muting_fade_out_dbl         = 0.2;
+        float       music_muting_fade_out_flt         = 0.2;
+        double      music_volume_dbl                  = 0.5;
+        float       music_volume_flt                  = 0.5;
+        double      music_volume_down_latency_dbl     = 2.0;
+        float       music_volume_down_latency_flt     = 2.0;
+        double      music_volume_up_latency_dbl       = 15.0;
+        float       music_volume_up_latency_flt       = 15.0;
+        std::string news_song                         = "../music/news1.ogg";
+        std::string panic_playlist                    = "panic.m3u";
+        std::string peace_playlist                    = "peace.m3u";
+        bool        positional                        = true;
+        bool        shuffle_songs                     = true;
+        bool        sound                             = true;
+        double      sound_gain_dbl                    = 0.5;
+        float       sound_gain_flt                    = 0.5;
+        int         thread_time                       = 1;
+        double      time_between_music_dbl            = 180.0;
+        float       time_between_music_flt            = 180.0;
+        std::string victory_playlist                  = "victory.m3u";
+        double      victory_relationship_dbl          = 0.5;
+        float       victory_relationship_flt          = 0.5;
+        double      volume_dbl                        = 100.0;
+        float       volume_flt                        = 100.0;
+        double      weapon_gain_dbl                   = 0.25;
+        float       weapon_gain_flt                   = 0.25;
 
         struct {
             bool clear_history_on_list_change = true;
-            int history_depth = 5;
+            int  history_depth                = 5;
 
         } shuffle_songs_section;
 
         struct {
-            std::string afterburner = "engine_5.wav";
-            std::string armor = "armorhit2m.wav";
-            std::string cloak = "cloak.wav";
-            std::string explode = "explosion.wav";
-            std::string hull = "armorhit.wav";
-            std::string jump_arrive = "sfx43.wav";
-            std::string jump_leave = "sfx43.wav";
-            std::string locked = "locked.wav";
-            std::string locking = "locking.wav";
-            std::string locking_torp = "locking.wav";
-            bool locking_torp_trumps_music = false;
-            bool locking_trumps_music = false;
-            std::string player_afterburner = "sfx10.wav";
-            std::string player_armor_hit = "armorhit2.wav";
-            std::string player_hull_hit = "armorhit.wav";
-            std::string player_shield_hit = "shieldhit4short.wav";
-            std::string player_tractor_cargo = "tractor_onboard.wav";
+            std::string afterburner                     = "engine_5.wav";
+            std::string armor                           = "armorhit2m.wav";
+            std::string cloak                           = "cloak.wav";
+            std::string explode                         = "explosion.wav";
+            std::string hull                            = "armorhit.wav";
+            std::string jump_arrive                     = "sfx43.wav";
+            std::string jump_leave                      = "sfx43.wav";
+            std::string locked                          = "locked.wav";
+            std::string locking                         = "locking.wav";
+            std::string locking_torp                    = "locking.wav";
+            bool        locking_torp_trumps_music       = false;
+            bool        locking_trumps_music            = false;
+            std::string player_afterburner              = "sfx10.wav";
+            std::string player_armor_hit                = "armorhit2.wav";
+            std::string player_hull_hit                 = "armorhit.wav";
+            std::string player_shield_hit               = "shieldhit4short.wav";
+            std::string player_tractor_cargo            = "tractor_onboard.wav";
             std::string player_tractor_cargo_fromturret = "tractor_onboard.wav";
-            std::string shield = "shieldhit3short.wav";
+            std::string shield                          = "shieldhit3short.wav";
 
         } unit_audio;
 
     } audio;
 
     struct {
-        bool filter_expensive_cargo = false;
-        double junk_starship_mass_dbl = 50.0;
-        float junk_starship_mass_flt = 50.0;
-        double junk_starship_price_dbl = 100000.0;
-        float junk_starship_price_flt = 100000.0;
-        double junk_starship_volume_dbl = 1500.0;
-        float junk_starship_volume_flt = 1500.0;
-        double max_price_quant_adj_dbl = 5.0;
-        float max_price_quant_adj_flt = 5.0;
-        double min_cargo_price_dbl = 0.01;
-        float min_cargo_price_flt = 0.01;
-        double min_price_quant_adj_dbl = 1.0;
-        float min_price_quant_adj_flt = 1.0;
-        bool news_from_cargo_list = false;
+        bool   filter_expensive_cargo    = false;
+        double junk_starship_mass_dbl    = 50.0;
+        float  junk_starship_mass_flt    = 50.0;
+        double junk_starship_price_dbl   = 100000.0;
+        float  junk_starship_price_flt   = 100000.0;
+        double junk_starship_volume_dbl  = 1500.0;
+        float  junk_starship_volume_flt  = 1500.0;
+        double max_price_quant_adj_dbl   = 5.0;
+        float  max_price_quant_adj_flt   = 5.0;
+        double min_cargo_price_dbl       = 0.01;
+        float  min_cargo_price_flt       = 0.01;
+        double min_price_quant_adj_dbl   = 1.0;
+        float  min_price_quant_adj_flt   = 1.0;
+        bool   news_from_cargo_list      = false;
         double price_quant_adj_power_dbl = 1.0;
-        float price_quant_adj_power_flt = 1.0;
+        float  price_quant_adj_power_flt = 1.0;
         double price_recenter_factor_dbl = 0.75;
-        float price_recenter_factor_flt = 0.75;
-        double space_junk_price_dbl = 10.0;
-        float space_junk_price_flt = 10.0;
+        float  price_recenter_factor_flt = 0.75;
+        double space_junk_price_dbl      = 10.0;
+        float  space_junk_price_flt      = 10.0;
 
     } cargo;
 
     struct {
-        std::string automatic_landing_zone = "als";
+        std::string automatic_landing_zone  = "als";
         std::string automatic_landing_zone1 = "als";
         std::string automatic_landing_zone2 = "als";
-        std::string autopilot_available = "autopilot_available";
-        std::string autopilot_disabled = "autopilot_disabled";
-        std::string autopilot_enabled = "autopilot";
-        std::string autopilot_unavailable = "autopilot_unavailable";
-        std::string comm = "vdu_c";
-        bool comm_preload = false;
-        std::string compress_change = "compress_burst";
-        int compress_interval = 3;
-        std::string compress_loop = "compress_loop";
-        int compress_max = 3;
-        std::string compress_stop = "compress_end";
-        std::string docking_complete = "docking_complete";
-        std::string docking_denied = "request_denied";
-        std::string docking_failed = "docking_failed";
-        std::string docking_granted = "request_granted";
-        std::string examine = "vdu_b";
-        std::string jump_engaged = "jump";
-        std::string manifest = "vdu_a";
-        std::string missile_switch = "vdu_d";
-        std::string objective = "vdu_c";
-        std::string overload = "overload";
-        std::string overload_stopped = "overload_stopped";
-        std::string repair = "vdu_a";
-        std::string scanning = "vdu_c";
-        std::string shield = "vdu_d";
-        std::string sounds_extension_1 = "\n";
-        std::string sounds_extension_2 = "\n";
-        std::string sounds_extension_3 = "\n";
-        std::string sounds_extension_4 = "\n";
-        std::string sounds_extension_5 = "\n";
-        std::string sounds_extension_6 = "\n";
-        std::string sounds_extension_7 = "\n";
-        std::string sounds_extension_8 = "\n";
-        std::string sounds_extension_9 = "\n";
-        std::string target = "vdu_b";
-        std::string target_reverse = "vdu_a";
-        std::string undocking_complete = "undocking_complete";
-        std::string undocking_failed = "undocking_failed";
-        std::string vdu_static = "vdu_static";
-        std::string view = "vdu_b";
-        std::string weapon_switch = "vdu_d";
+        std::string autopilot_available     = "autopilot_available";
+        std::string autopilot_disabled      = "autopilot_disabled";
+        std::string autopilot_enabled       = "autopilot";
+        std::string autopilot_unavailable   = "autopilot_unavailable";
+        std::string comm                    = "vdu_c";
+        bool        comm_preload            = false;
+        std::string compress_change         = "compress_burst";
+        int         compress_interval       = 3;
+        std::string compress_loop           = "compress_loop";
+        int         compress_max            = 3;
+        std::string compress_stop           = "compress_end";
+        std::string docking_complete        = "docking_complete";
+        std::string docking_denied          = "request_denied";
+        std::string docking_failed          = "docking_failed";
+        std::string docking_granted         = "request_granted";
+        std::string examine                 = "vdu_b";
+        std::string jump_engaged            = "jump";
+        std::string manifest                = "vdu_a";
+        std::string missile_switch          = "vdu_d";
+        std::string objective               = "vdu_c";
+        std::string overload                = "overload";
+        std::string overload_stopped        = "overload_stopped";
+        std::string repair                  = "vdu_a";
+        std::string scanning                = "vdu_c";
+        std::string shield                  = "vdu_d";
+        std::string sounds_extension_1      = "\n";
+        std::string sounds_extension_2      = "\n";
+        std::string sounds_extension_3      = "\n";
+        std::string sounds_extension_4      = "\n";
+        std::string sounds_extension_5      = "\n";
+        std::string sounds_extension_6      = "\n";
+        std::string sounds_extension_7      = "\n";
+        std::string sounds_extension_8      = "\n";
+        std::string sounds_extension_9      = "\n";
+        std::string target                  = "vdu_b";
+        std::string target_reverse          = "vdu_a";
+        std::string undocking_complete      = "undocking_complete";
+        std::string undocking_failed        = "undocking_failed";
+        std::string vdu_static              = "vdu_static";
+        std::string view                    = "vdu_b";
+        std::string weapon_switch           = "vdu_d";
 
     } cockpit_audio;
 
     struct {
-        double collision_hack_distance_dbl = 10000.0;
-        float collision_hack_distance_flt = 10000.0;
-        bool collision_damage_to_ai = false;
-        bool crash_dock_hangar = false;
-        bool crash_dock_unit = false;
-        double front_collision_hack_angle_dbl = 0.9999257675004788;
-        float front_collision_hack_angle_flt = 0.9999257675004788;
+        double collision_hack_distance_dbl       = 10000.0;
+        float  collision_hack_distance_flt       = 10000.0;
+        bool   collision_damage_to_ai            = false;
+        bool   crash_dock_hangar                 = false;
+        bool   crash_dock_unit                   = false;
+        double front_collision_hack_angle_dbl    = 0.9999257675004788;
+        float  front_collision_hack_angle_flt    = 0.9999257675004788;
         double front_collision_hack_distance_dbl = 200000.0;
-        float front_collision_hack_distance_flt = 200000.0;
-        bool cargo_deals_collide_damage = false;
+        float  front_collision_hack_distance_flt = 200000.0;
+        bool   cargo_deals_collide_damage        = false;
 
     } collision_hacks;
 
     struct {
-
         struct {
             std::string energy_source = "fuel";
 
@@ -1284,20 +1286,20 @@ namespace vega_config {
         } cloak;
 
         struct {
-            double default_lock_cone_dbl = 0.8;
-        float default_lock_cone_flt = 0.8;
-            double default_max_range_dbl = 20000.0;
-        float default_max_range_flt = 20000.0;
+            double default_lock_cone_dbl     = 0.8;
+            float  default_lock_cone_flt     = 0.8;
+            double default_max_range_dbl     = 20000.0;
+            float  default_max_range_flt     = 20000.0;
             double default_tracking_cone_dbl = 0.93;
-        float default_tracking_cone_flt = 0.93;
+            float  default_tracking_cone_flt = 0.93;
 
         } computer;
 
         struct {
-            std::string energy_source = "energy";
-            int non_combat_mode_multiplier = 1000;
-            double minimum_drive_dbl = 0.15;
-        float minimum_drive_flt = 0.15;
+            std::string energy_source              = "energy";
+            int         non_combat_mode_multiplier = 1'000;
+            double      minimum_drive_dbl          = 0.15;
+            float       minimum_drive_flt          = 0.15;
 
         } drive;
 
@@ -1307,70 +1309,70 @@ namespace vega_config {
         } energy;
 
         struct {
-            double afterburner_fuel_usage_dbl = 4.0;
-        float afterburner_fuel_usage_flt = 4.0;
+            double afterburner_fuel_usage_dbl                = 4.0;
+            float  afterburner_fuel_usage_flt                = 4.0;
             double deuterium_relative_efficiency_lithium_dbl = 1.0;
-        float deuterium_relative_efficiency_lithium_flt = 1.0;
-            double ecm_energy_cost_dbl = 0.05;
-        float ecm_energy_cost_flt = 0.05;
-            double fmec_factor_dbl = 8e-09;
-        float fmec_factor_flt = 8e-09;
-            double fuel_efficiency_dbl = 1.0;
-        float fuel_efficiency_flt = 1.0;
-            bool fuel_equals_warp = false;
-            int factor = 600;
-            double megajoules_factor_dbl = 100.0;
-        float megajoules_factor_flt = 100.0;
-            double min_reactor_efficiency_dbl = 1e-05;
-        float min_reactor_efficiency_flt = 1e-05;
-            double no_fuel_afterburn_dbl = 0.1;
-        float no_fuel_afterburn_flt = 0.1;
-            double no_fuel_thrust_dbl = 0.4;
-        float no_fuel_thrust_flt = 0.4;
-            double normal_fuel_usage_dbl = 1.0;
-        float normal_fuel_usage_flt = 1.0;
-            double reactor_idle_efficiency_dbl = 0.98;
-        float reactor_idle_efficiency_flt = 0.98;
-            bool reactor_uses_fuel = false;
-            bool variable_fuel_consumption = false;
-            double vsd_mj_yield_dbl = 5.4;
-        float vsd_mj_yield_flt = 5.4;
+            float  deuterium_relative_efficiency_lithium_flt = 1.0;
+            double ecm_energy_cost_dbl                       = 0.05;
+            float  ecm_energy_cost_flt                       = 0.05;
+            double fmec_factor_dbl                           = 8e-09;
+            float  fmec_factor_flt                           = 8e-09;
+            double fuel_efficiency_dbl                       = 1.0;
+            float  fuel_efficiency_flt                       = 1.0;
+            bool   fuel_equals_warp                          = false;
+            int    factor                                    = 600;
+            double megajoules_factor_dbl                     = 100.0;
+            float  megajoules_factor_flt                     = 100.0;
+            double min_reactor_efficiency_dbl                = 1e-05;
+            float  min_reactor_efficiency_flt                = 1e-05;
+            double no_fuel_afterburn_dbl                     = 0.1;
+            float  no_fuel_afterburn_flt                     = 0.1;
+            double no_fuel_thrust_dbl                        = 0.4;
+            float  no_fuel_thrust_flt                        = 0.4;
+            double normal_fuel_usage_dbl                     = 1.0;
+            float  normal_fuel_usage_flt                     = 1.0;
+            double reactor_idle_efficiency_dbl               = 0.98;
+            float  reactor_idle_efficiency_flt               = 0.98;
+            bool   reactor_uses_fuel                         = false;
+            bool   variable_fuel_consumption                 = false;
+            double vsd_mj_yield_dbl                          = 5.4;
+            float  vsd_mj_yield_flt                          = 5.4;
 
         } fuel;
 
         struct {
             std::string energy_source = "ftl_energy";
-            double factor_dbl = 0.1;
-        float factor_flt = 0.1;
+            double      factor_dbl    = 0.1;
+            float       factor_flt    = 0.1;
 
         } ftl_drive;
 
         struct {
             double factor_dbl = 1.0;
-        float factor_flt = 1.0;
+            float  factor_flt = 1.0;
 
         } ftl_energy;
 
         struct {
             std::string energy_source = "ftl_energy";
-            double factor_dbl = 1.0;
-        float factor_flt = 1.0;
+            double      factor_dbl    = 1.0;
+            float       factor_flt    = 1.0;
 
         } jump_drive;
 
         struct {
             std::string energy_source = "fuel";
-            double factor_dbl = 1.0;
-        float factor_flt = 1.0;
+            double      factor_dbl    = 1.0;
+            float       factor_flt    = 1.0;
 
         } reactor;
 
         struct {
-            std::string energy_source = "energy";
-            double maintenance_factor_dbl = 0.05;
-        float maintenance_factor_flt = 0.05;
-            double regeneration_factor_dbl = 0.05;
-        float regeneration_factor_flt = 0.05;
+            std::string energy_source           = "energy";
+            double      maintenance_factor_dbl  = 0.05;
+            float       maintenance_factor_flt  = 0.05;
+            double      regeneration_factor_dbl = 0.05;
+            float       regeneration_factor_flt = 0.05;
 
         } shield;
 
@@ -1378,48 +1380,48 @@ namespace vega_config {
 
     struct {
         int megajoules_multiplier = 100;
-        int kilo = 1000;
-        int kj_per_unit_damage = 5400;
+        int kilo                  = 1'000;
+        int kj_per_unit_damage    = 5'400;
 
     } constants;
 
     struct {
-        std::string ai_directory = "ai";
-        std::string animations = "animations";
-        std::string capship_roles = "ESCORTCAP CAPITAL CARRIER BASE TROOP";
-        std::string cockpits = "cockpits";
-        std::string data_dir = "";
-        bool empty_cell_check = true;
-        std::string hqtextures = "hqtextures";
-        std::string master_part_list = "master_part_list";
-        std::string mod_unit_csv = "";
-        std::string movies = "movies";
-        std::string python_bases = "bases";
-        std::string python_modules = "modules";
-        std::string sectors = "sectors";
-        std::string serialized_xml = "serialized_xml";
-        std::string shared_meshes = "meshes";
-        std::string shared_sounds = "sounds";
-        std::string shared_textures = "textures";
-        std::string shared_units = "units";
-        std::string sprites = "sprites";
+        std::string ai_directory         = "ai";
+        std::string animations           = "animations";
+        std::string capship_roles        = "ESCORTCAP CAPITAL CARRIER BASE TROOP";
+        std::string cockpits             = "cockpits";
+        std::string data_dir             = "";
+        bool        empty_cell_check     = true;
+        std::string hqtextures           = "hqtextures";
+        std::string master_part_list     = "master_part_list";
+        std::string mod_unit_csv         = "";
+        std::string movies               = "movies";
+        std::string python_bases         = "bases";
+        std::string python_modules       = "modules";
+        std::string sectors              = "sectors";
+        std::string serialized_xml       = "serialized_xml";
+        std::string shared_meshes        = "meshes";
+        std::string shared_sounds        = "sounds";
+        std::string shared_textures      = "textures";
+        std::string shared_units         = "units";
+        std::string sprites              = "sprites";
         std::string techniques_base_path = "techniques";
-        std::string universe_path = "universe";
-        bool using_templates = true;
-        std::string volume_format = "pk3";
+        std::string universe_path        = "universe";
+        bool        using_templates      = true;
+        std::string volume_format        = "pk3";
 
     } data;
 
     struct {
-        double count_to_dock_range_dbl = 100000.0;
-        float count_to_dock_range_flt = 100000.0;
+        double count_to_dock_range_dbl        = 100000.0;
+        float  count_to_dock_range_flt        = 100000.0;
         double dock_planet_radius_percent_dbl = 1.5;
-        float dock_planet_radius_percent_flt = 1.5;
-        double planet_dock_port_min_size_dbl = 300.0;
-        float planet_dock_port_min_size_flt = 300.0;
-        bool simple_dock = true;
-        double simple_dock_range_dbl = 5000.0;
-        float simple_dock_range_flt = 5000.0;
+        float  dock_planet_radius_percent_flt = 1.5;
+        double planet_dock_port_min_size_dbl  = 300.0;
+        float  planet_dock_port_min_size_flt  = 300.0;
+        bool   simple_dock                    = true;
+        double simple_dock_range_dbl          = 5000.0;
+        float  simple_dock_range_flt          = 5000.0;
         // "simple" or "zones". Empty means the setting is not in the config, and the older
         // simple_dock boolean decides instead, so an overlay that only sets that still works.
         std::string mode = "";
@@ -1427,808 +1429,818 @@ namespace vega_config {
     } dock;
 
     struct {
-        double repair_price_dbl = 5000.0;
-        float repair_price_flt = 5000.0;
+        double repair_price_dbl            = 5000.0;
+        float  repair_price_flt            = 5000.0;
         double sellback_shipping_price_dbl = 6000.0;
-        float sellback_shipping_price_flt = 6000.0;
-        double ship_sellback_price_dbl = 0.5;
-        float ship_sellback_price_flt = 0.5;
-        double shipping_price_base_dbl = 0.0;
-        float shipping_price_base_flt = 0.0;
-        double shipping_price_insys_dbl = 1000.0;
-        float shipping_price_insys_flt = 1000.0;
-        double shipping_price_perjump_dbl = 25000.0;
-        float shipping_price_perjump_flt = 25000.0;
+        float  sellback_shipping_price_flt = 6000.0;
+        double ship_sellback_price_dbl     = 0.5;
+        float  ship_sellback_price_flt     = 0.5;
+        double shipping_price_base_dbl     = 0.0;
+        float  shipping_price_base_flt     = 0.0;
+        double shipping_price_insys_dbl    = 1000.0;
+        float  shipping_price_insys_flt    = 1000.0;
+        double shipping_price_perjump_dbl  = 25000.0;
+        float  shipping_price_perjump_flt  = 25000.0;
 
     } economics;
 
     struct {
-
         struct {
             bool initial = false;
-            bool enable = true;
+            bool enable  = true;
 
         } inertial;
 
     } flight;
 
     struct {
-        double ambient_light_factor_dbl = 0.0;
-        float ambient_light_factor_flt = 0.0;
-        double atmosphere_probability_dbl = 0.5;
-        float atmosphere_probability_flt = 0.5;
-        double compactness_scale_dbl = 27.0;
-        float compactness_scale_flt = 27.0;
-        std::string default_atmosphere_texture = "sol/earthcloudmaptrans.png";
-        std::string default_ring_texture = "planets/ring.pngwrapx36wrapy2";
-        double double_ring_probability_dbl = 0.025;
-        float double_ring_probability_flt = 0.025;
-        double inner_ring_radius_dbl = 1.5;
-        float inner_ring_radius_flt = 1.5;
-        double jump_compactness_scale_dbl = 54.0;
-        float jump_compactness_scale_flt = 54.0;
-        int mean_natural_phenomena = 1;
-        int mean_star_bases = 2;
-        double moon_relative_to_moon_dbl = 0.8;
-        float moon_relative_to_moon_flt = 0.8;
-        double moon_relative_to_planet_dbl = 0.4;
-        float moon_relative_to_planet_flt = 0.4;
-        double outer_ring_radius_dbl = 2.5;
-        float outer_ring_radius_flt = 2.5;
-        std::string police_faction = "homeland-security";
-        std::string prison_system = "Sol/Nu_Pheonix";
-        bool push_values_to_mean = false;
-        double ring_probability_dbl = 0.1;
-        float ring_probability_flt = 0.1;
-        double rocky_relative_to_primary_dbl = 0.009;
-        float rocky_relative_to_primary_flt = 0.009;
-        double second_ring_difference_dbl = 0.4;
-        float second_ring_difference_flt = 0.4;
-        double star_radius_scale_dbl = 50000.0;
-        float star_radius_scale_flt = 50000.0;
+        double      ambient_light_factor_dbl      = 0.0;
+        float       ambient_light_factor_flt      = 0.0;
+        double      atmosphere_probability_dbl    = 0.5;
+        float       atmosphere_probability_flt    = 0.5;
+        double      compactness_scale_dbl         = 27.0;
+        float       compactness_scale_flt         = 27.0;
+        std::string default_atmosphere_texture    = "sol/earthcloudmaptrans.png";
+        std::string default_ring_texture          = "planets/ring.pngwrapx36wrapy2";
+        double      double_ring_probability_dbl   = 0.025;
+        float       double_ring_probability_flt   = 0.025;
+        double      inner_ring_radius_dbl         = 1.5;
+        float       inner_ring_radius_flt         = 1.5;
+        double      jump_compactness_scale_dbl    = 54.0;
+        float       jump_compactness_scale_flt    = 54.0;
+        int         mean_natural_phenomena        = 1;
+        int         mean_star_bases               = 2;
+        double      moon_relative_to_moon_dbl     = 0.8;
+        float       moon_relative_to_moon_flt     = 0.8;
+        double      moon_relative_to_planet_dbl   = 0.4;
+        float       moon_relative_to_planet_flt   = 0.4;
+        double      outer_ring_radius_dbl         = 2.5;
+        float       outer_ring_radius_flt         = 2.5;
+        std::string police_faction                = "homeland-security";
+        std::string prison_system                 = "Sol/Nu_Pheonix";
+        bool        push_values_to_mean           = false;
+        double      ring_probability_dbl          = 0.1;
+        float       ring_probability_flt          = 0.1;
+        double      rocky_relative_to_primary_dbl = 0.009;
+        float       rocky_relative_to_primary_flt = 0.009;
+        double      second_ring_difference_dbl    = 0.4;
+        float       second_ring_difference_flt    = 0.4;
+        double      star_radius_scale_dbl         = 50000.0;
+        float       star_radius_scale_flt         = 50000.0;
 
     } galaxy;
 
     struct {
-        std::string campaigns = "privateer_campaign vegastrike_campaign";
+        std::string campaigns       = "privateer_campaign vegastrike_campaign";
         std::string default_mission = "main_menu.mission";
-        std::string introduction = "Welcome to Vega Strike!\nUse #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control),\n#8080FFarrows#000000 to steer.\nThe #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 activates the SPEC drive.\nTo go to another star system, buy a jump drive for about 10000 credits,\nfly to a wireframe jump-point and press #8080FFj#000000 to warp to a near star.\nTarget a base or planet;\nWhen you get close a green box will appear. Inside the box, #8080FFd#000000 will land.";
+        std::string introduction =
+                "Welcome to Vega Strike!\nUse #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise "
+                "control),\n#8080FFarrows#000000 to steer.\nThe #8080FFt#000000 key targets objects; "
+                "#8080FFspace#000000 fires at them & #8080FFa#000000 activates the SPEC drive.\nTo go to another star "
+                "system, buy a jump drive for about 10000 credits,\nfly to a wireframe jump-point and press "
+                "#8080FFj#000000 to warp to a near star.\nTarget a base or planet;\nWhen you get close a green box "
+                "will appear. Inside the box, #8080FFd#000000 will land.";
         std::string galaxy = "milky_way.xml";
 
     } game_start;
 
     struct {
-        double audio_atom_dbl = 0.05555555556;
-        float audio_atom_flt = 0.05555555556;
-        bool command_interpreter = false;
-        std::string custom_python = "import custom;custom.processMessage";
-        bool debug_config = true;
-        int debug_fs = 0;
-        bool delete_old_systems = true;
-        double docking_fee_dbl = 0.0;
-        float docking_fee_flt = 0.0;
-        double docking_time_dbl = 20.0;
-        float docking_time_flt = 20.0;
-        std::string empty_mission = "internal.mission";
-        bool force_anonymous_mission_names = true;
-        double fuel_docking_fee_dbl = 0.0;
-        float fuel_docking_fee_flt = 0.0;
-        int garbage_collect_frequency = 20;
-        double jump_key_delay_dbl = 0.125;
-        float jump_key_delay_flt = 0.125;
-        bool load_last_savegame = false;
-        std::string new_game_save_name = "New_Game";
-        int num_old_systems = 6;
-        double percentage_speed_change_to_fault_search_dbl = 300.0;
-        float percentage_speed_change_to_fault_search_flt = 300.0;
-        bool persistent_mission_across_ship_switch = true;
-        double pitch_dbl = 0.0;
-        float pitch_flt = 0.0;
-        bool quick_savegame_summaries = true;
-        int quick_savegame_summaries_buffer_size = 16384;
-        bool remember_savegame = true;
-        double remove_downgrades_less_than_percent_dbl = 0.9;
-        float remove_downgrades_less_than_percent_flt = 0.9;
-        bool remove_impossible_downgrades = true;
-        double roll_dbl = 0.0;
-        float roll_flt = 0.0;
-        int screen = 0;
-        double simulation_atom_dbl = 0.1;
-        float simulation_atom_flt = 0.1;
-        int times_to_show_help_screen = 0;
-        bool trade_interface_tracks_prices = true;
-        int trade_interface_tracks_prices_top_rank = 10;
-        int verbose_output = 0;
-        int wheel_increment_lines = 3;
-        bool while_loading_star_system = false;
-        bool write_savegame_on_exit = true;
-        double yaw_dbl = 0.0;
-        float yaw_flt = 0.0;
+        double      audio_atom_dbl                              = 0.05555555556;
+        float       audio_atom_flt                              = 0.05555555556;
+        bool        command_interpreter                         = false;
+        std::string custom_python                               = "import custom;custom.processMessage";
+        bool        debug_config                                = true;
+        int         debug_fs                                    = 0;
+        bool        delete_old_systems                          = true;
+        double      docking_fee_dbl                             = 0.0;
+        float       docking_fee_flt                             = 0.0;
+        double      docking_time_dbl                            = 20.0;
+        float       docking_time_flt                            = 20.0;
+        std::string empty_mission                               = "internal.mission";
+        bool        force_anonymous_mission_names               = true;
+        double      fuel_docking_fee_dbl                        = 0.0;
+        float       fuel_docking_fee_flt                        = 0.0;
+        int         garbage_collect_frequency                   = 20;
+        double      jump_key_delay_dbl                          = 0.125;
+        float       jump_key_delay_flt                          = 0.125;
+        bool        load_last_savegame                          = false;
+        std::string new_game_save_name                          = "New_Game";
+        int         num_old_systems                             = 6;
+        double      percentage_speed_change_to_fault_search_dbl = 300.0;
+        float       percentage_speed_change_to_fault_search_flt = 300.0;
+        bool        persistent_mission_across_ship_switch       = true;
+        double      pitch_dbl                                   = 0.0;
+        float       pitch_flt                                   = 0.0;
+        bool        quick_savegame_summaries                    = true;
+        int         quick_savegame_summaries_buffer_size        = 16'384;
+        bool        remember_savegame                           = true;
+        double      remove_downgrades_less_than_percent_dbl     = 0.9;
+        float       remove_downgrades_less_than_percent_flt     = 0.9;
+        bool        remove_impossible_downgrades                = true;
+        double      roll_dbl                                    = 0.0;
+        float       roll_flt                                    = 0.0;
+        int         screen                                      = 0;
+        double      simulation_atom_dbl                         = 0.1;
+        float       simulation_atom_flt                         = 0.1;
+        int         times_to_show_help_screen                   = 0;
+        bool        trade_interface_tracks_prices               = true;
+        int         trade_interface_tracks_prices_top_rank      = 10;
+        int         verbose_output                              = 0;
+        int         wheel_increment_lines                       = 3;
+        bool        while_loading_star_system                   = false;
+        bool        write_savegame_on_exit                      = true;
+        double      yaw_dbl                                     = 0.0;
+        float       yaw_flt                                     = 0.0;
 
     } general;
 
     struct {
-        double afterburner_color_red_dbl = 1.0;
-        float afterburner_color_red_flt = 1.0;
-        double afterburner_color_green_dbl = 0.0;
-        float afterburner_color_green_flt = 0.0;
-        double afterburner_color_blue_dbl = 0.0;
-        float afterburner_color_blue_flt = 0.0;
-        bool always_make_smooth_cam = false;
-        double anim_far_percent_dbl = 0.8;
-        float anim_far_percent_flt = 0.8;
-        std::string armor_flash_animation = "armorflash.ani";
-        double aspect_dbl = 1.33;
-        float aspect_flt = 1.33;
-        double atmosphere_emissive_dbl = 1.0;
-        float atmosphere_emissive_flt = 1.0;
-        double atmosphere_diffuse_dbl = 1.0;
-        float atmosphere_diffuse_flt = 1.0;
-        int atmosphere_texture_resolution = 512;
-        double auto_message_nav_switch_time_lim_dbl = 0.15;
-        float auto_message_nav_switch_time_lim_flt = 0.15;
-        double auto_message_time_lim_dbl = 5.0;
-        float auto_message_time_lim_flt = 5.0;
-        std::string automatic_landing_zone_warning = "comm_docking.ani";
-        std::string automatic_landing_zone_warning1 = "comm_docking.ani";
-        std::string automatic_landing_zone_warning2 = "comm_docking.ani";
-        std::string automatic_landing_zone_warning_text = "Now Entering an \"Automatic Landing Zone\".";
-        double autopilot_front_bias_dbl = 1.65;
-        float autopilot_front_bias_flt = 1.65;
-        double autopilot_rotation_speed_dbl = 0.15;
-        float autopilot_rotation_speed_flt = 0.15;
-        double autopilot_side_bias_dbl = 1.1;
-        float autopilot_side_bias_flt = 1.1;
-        bool background = true;
-        double background_edge_fixup_dbl = 2.0;
-        float background_edge_fixup_flt = 2.0;
-        double background_star_streak_velocity_scale_dbl = 0.01;
-        float background_star_streak_velocity_scale_flt = 0.01;
-        double base_faction_color_darkness_dbl = 0.75;
-        float base_faction_color_darkness_flt = 0.75;
-        double beam_fadeout_length_dbl = 0.8;
-        float beam_fadeout_length_flt = 0.8;
-        double beam_fadeout_hit_length_dbl = 0.95;
-        float beam_fadeout_hit_length_flt = 0.95;
-        double base_saturation_dbl = 1.0;
-        float base_saturation_flt = 1.0;
-        bool bitmap_alphamap = true;
-        bool blend_cockpit = false;
-        bool blend_guns = true;
-        bool blend_panels = true;
-        double bolt_offset_dbl = -0.2;
-        float bolt_offset_flt = -0.2;
-        double bolt_pixel_size_dbl = 0.5;
-        float bolt_pixel_size_flt = 0.5;
-        double camera_pan_speed_dbl = 0.0001;
-        float camera_pan_speed_flt = 0.0001;
-        bool can_target_asteroid = true;
-        bool can_target_cargo = false;
-        bool can_target_sun = true;
-        bool cargo_rotates_at_same_speed = true;
-        double cargo_rotation_speed_dbl = 60.0;
-        float cargo_rotation_speed_flt = 60.0;
-        bool chat_text = true;
-        double circle_accuracy_dbl = 0.1;
-        float circle_accuracy_flt = 0.1;
-        int city_light_filter = 4;
-        double city_light_strength_dbl = 10.0;
-        float city_light_strength_flt = 10.0;
-        bool clear_on_startup = true;
-        bool cockpit = true;
-        double cockpit_drift_amount_dbl = 0.05;
-        float cockpit_drift_amount_flt = 0.05;
-        double cockpit_drift_limit_dbl = 1.0;
-        float cockpit_drift_limit_flt = 1.0;
-        double cockpit_drift_ref_accel_dbl = 100.0;
-        float cockpit_drift_ref_accel_flt = 100.0;
-        double cockpit_nav_zfloor_dbl = 0.1;
-        float cockpit_nav_zfloor_flt = 0.1;
-        double cockpit_nav_zrange_dbl = 10.0;
-        float cockpit_nav_zrange_flt = 10.0;
-        double cockpit_shake_dbl = 3.0;
-        float cockpit_shake_flt = 3.0;
-        double cockpit_shake_max_dbl = 20.0;
-        float cockpit_shake_max_flt = 20.0;
-        bool cockpit_smooth_texture = false;
-        int cockpit_z_partitions = 1;
-        int color_depth = 32;
-        std::string comm_static = "static.ani";
-        bool crosshair_smooth_texture = true;
-        bool damage_flash_alpha = true;
-        double damage_flash_length_dbl = 0.1;
-        float damage_flash_length_flt = 0.1;
-        double day_city_light_strength_dbl = 0.0;
-        float day_city_light_strength_flt = 0.0;
-        std::string death_menu_script = "";
-        double death_scene_time_dbl = 4.0;
-        float death_scene_time_flt = 4.0;
-        std::string default_boot_message = "";
-        double default_engine_activation_dbl = 0.00048828125;
-        float default_engine_activation_flt = 0.00048828125;
-        std::string default_full_technique = "default";
-        std::string default_simple_technique = "fixed_simple";
-        double detail_texture_scale_dbl = 1.0;
-        float detail_texture_scale_flt = 1.0;
-        bool detail_texture_trilinear = true;
-        bool disabled_cockpit_allowed = true;
-        bool displaylists = false;
-        bool draw_cockpit_from_chase_cam = false;
-        bool draw_cockpit_from_padlock_cam = false;
-        bool draw_cockpit_from_panning_cam = false;
-        bool draw_cockpit_from_target_cam = false;
-        bool draw_docking_boxes = true;
-        bool draw_heading_marker = false;
-        bool draw_jump_target_nav_symbol = true;
-        bool draw_nav_button_labels = true;
-        bool draw_near_stars_in_front_of_planets = false;
-        bool draw_rendered_crosshairs = true;
-        bool draw_star_body = true;
-        bool draw_star_glow = true;
-        bool draw_star_glow_halo = false;
-        bool draw_target_nav_symbol = true;
-        bool draw_vdus_from_chase_cam = false;
-        bool draw_vdus_from_padlock_cam = false;
-        bool draw_vdus_from_panning_cam = false;
-        bool draw_vdus_from_target_cam = false;
-        bool draw_weapons = false;
-        double eject_rotation_speed_dbl = 0.0;
-        float eject_rotation_speed_flt = 0.0;
-        double engine_color_red_dbl = 1.0;
-        float engine_color_red_flt = 1.0;
-        double engine_color_green_dbl = 1.0;
-        float engine_color_green_flt = 1.0;
-        double engine_color_blue_dbl = 1.0;
-        float engine_color_blue_flt = 1.0;
-        double engine_length_scale_dbl = 1.25;
-        float engine_length_scale_flt = 1.25;
-        double engine_radii_scale_dbl = 0.4;
-        float engine_radii_scale_flt = 0.4;
-        bool explore_for_map = true;
-        std::string explosion_animation = "explosion_orange.ani";
-        bool explosion_face_player = true;
-        double explosion_force_dbl = 0.5;
-        float explosion_force_flt = 0.5;
-        double explosion_size_dbl = 3.0;
-        float explosion_size_flt = 3.0;
-        double explosion_torque_dbl = 0.001;
-        float explosion_torque_flt = 0.001;
-        bool ext_clamp_to_border = true;
-        bool ext_clamp_to_edge = true;
-        bool faction_dependent_textures = true;
-        double far_stars_sprite_size_dbl = 2.0;
-        float far_stars_sprite_size_flt = 2.0;
-        std::string far_stars_sprite_texture = "";
-        bool flash_behind_hud = true;
-        bool fog = false;
-        int fog_detail = 2;
-        double fog_fade_in_percent_dbl = 0.5;
-        float fog_fade_in_percent_flt = 0.5;
-        double fog_time_dbl = 0.01;
-        float fog_time_flt = 0.01;
-        std::string font = "helvetica12";
-        bool font_antialias = false;
-        double font_point_dbl = 16.0;
-        float font_point_flt = 16.0;
-        double font_width_hack_dbl = 0.925;
-        float font_width_hack_flt = 0.925;
-        bool force_glowmap_restore_write_to_depthmap = true;
-        bool force_lighting = true;
-        bool force_one_one_shield_blend = true;
-        double fov_dbl = 37.5;
-        float fov_flt = 37.5;
-        bool framerate_changes_shader = false;
+        double      afterburner_color_red_dbl                 = 1.0;
+        float       afterburner_color_red_flt                 = 1.0;
+        double      afterburner_color_green_dbl               = 0.0;
+        float       afterburner_color_green_flt               = 0.0;
+        double      afterburner_color_blue_dbl                = 0.0;
+        float       afterburner_color_blue_flt                = 0.0;
+        bool        always_make_smooth_cam                    = false;
+        double      anim_far_percent_dbl                      = 0.8;
+        float       anim_far_percent_flt                      = 0.8;
+        std::string armor_flash_animation                     = "armorflash.ani";
+        double      aspect_dbl                                = 1.33;
+        float       aspect_flt                                = 1.33;
+        double      atmosphere_emissive_dbl                   = 1.0;
+        float       atmosphere_emissive_flt                   = 1.0;
+        double      atmosphere_diffuse_dbl                    = 1.0;
+        float       atmosphere_diffuse_flt                    = 1.0;
+        int         atmosphere_texture_resolution             = 512;
+        double      auto_message_nav_switch_time_lim_dbl      = 0.15;
+        float       auto_message_nav_switch_time_lim_flt      = 0.15;
+        double      auto_message_time_lim_dbl                 = 5.0;
+        float       auto_message_time_lim_flt                 = 5.0;
+        std::string automatic_landing_zone_warning            = "comm_docking.ani";
+        std::string automatic_landing_zone_warning1           = "comm_docking.ani";
+        std::string automatic_landing_zone_warning2           = "comm_docking.ani";
+        std::string automatic_landing_zone_warning_text       = "Now Entering an \"Automatic Landing Zone\".";
+        double      autopilot_front_bias_dbl                  = 1.65;
+        float       autopilot_front_bias_flt                  = 1.65;
+        double      autopilot_rotation_speed_dbl              = 0.15;
+        float       autopilot_rotation_speed_flt              = 0.15;
+        double      autopilot_side_bias_dbl                   = 1.1;
+        float       autopilot_side_bias_flt                   = 1.1;
+        bool        background                                = true;
+        double      background_edge_fixup_dbl                 = 2.0;
+        float       background_edge_fixup_flt                 = 2.0;
+        double      background_star_streak_velocity_scale_dbl = 0.01;
+        float       background_star_streak_velocity_scale_flt = 0.01;
+        double      base_faction_color_darkness_dbl           = 0.75;
+        float       base_faction_color_darkness_flt           = 0.75;
+        double      beam_fadeout_length_dbl                   = 0.8;
+        float       beam_fadeout_length_flt                   = 0.8;
+        double      beam_fadeout_hit_length_dbl               = 0.95;
+        float       beam_fadeout_hit_length_flt               = 0.95;
+        double      base_saturation_dbl                       = 1.0;
+        float       base_saturation_flt                       = 1.0;
+        bool        bitmap_alphamap                           = true;
+        bool        blend_cockpit                             = false;
+        bool        blend_guns                                = true;
+        bool        blend_panels                              = true;
+        double      bolt_offset_dbl                           = -0.2;
+        float       bolt_offset_flt                           = -0.2;
+        double      bolt_pixel_size_dbl                       = 0.5;
+        float       bolt_pixel_size_flt                       = 0.5;
+        double      camera_pan_speed_dbl                      = 0.0001;
+        float       camera_pan_speed_flt                      = 0.0001;
+        bool        can_target_asteroid                       = true;
+        bool        can_target_cargo                          = false;
+        bool        can_target_sun                            = true;
+        bool        cargo_rotates_at_same_speed               = true;
+        double      cargo_rotation_speed_dbl                  = 60.0;
+        float       cargo_rotation_speed_flt                  = 60.0;
+        bool        chat_text                                 = true;
+        double      circle_accuracy_dbl                       = 0.1;
+        float       circle_accuracy_flt                       = 0.1;
+        int         city_light_filter                         = 4;
+        double      city_light_strength_dbl                   = 10.0;
+        float       city_light_strength_flt                   = 10.0;
+        bool        clear_on_startup                          = true;
+        bool        cockpit                                   = true;
+        double      cockpit_drift_amount_dbl                  = 0.05;
+        float       cockpit_drift_amount_flt                  = 0.05;
+        double      cockpit_drift_limit_dbl                   = 1.0;
+        float       cockpit_drift_limit_flt                   = 1.0;
+        double      cockpit_drift_ref_accel_dbl               = 100.0;
+        float       cockpit_drift_ref_accel_flt               = 100.0;
+        double      cockpit_nav_zfloor_dbl                    = 0.1;
+        float       cockpit_nav_zfloor_flt                    = 0.1;
+        double      cockpit_nav_zrange_dbl                    = 10.0;
+        float       cockpit_nav_zrange_flt                    = 10.0;
+        double      cockpit_shake_dbl                         = 3.0;
+        float       cockpit_shake_flt                         = 3.0;
+        double      cockpit_shake_max_dbl                     = 20.0;
+        float       cockpit_shake_max_flt                     = 20.0;
+        bool        cockpit_smooth_texture                    = false;
+        int         cockpit_z_partitions                      = 1;
+        int         color_depth                               = 32;
+        std::string comm_static                               = "static.ani";
+        bool        crosshair_smooth_texture                  = true;
+        bool        damage_flash_alpha                        = true;
+        double      damage_flash_length_dbl                   = 0.1;
+        float       damage_flash_length_flt                   = 0.1;
+        double      day_city_light_strength_dbl               = 0.0;
+        float       day_city_light_strength_flt               = 0.0;
+        std::string death_menu_script                         = "";
+        double      death_scene_time_dbl                      = 4.0;
+        float       death_scene_time_flt                      = 4.0;
+        std::string default_boot_message                      = "";
+        double      default_engine_activation_dbl             = 0.00048828125;
+        float       default_engine_activation_flt             = 0.00048828125;
+        std::string default_full_technique                    = "default";
+        std::string default_simple_technique                  = "fixed_simple";
+        double      detail_texture_scale_dbl                  = 1.0;
+        float       detail_texture_scale_flt                  = 1.0;
+        bool        detail_texture_trilinear                  = true;
+        bool        disabled_cockpit_allowed                  = true;
+        bool        displaylists                              = false;
+        bool        draw_cockpit_from_chase_cam               = false;
+        bool        draw_cockpit_from_padlock_cam             = false;
+        bool        draw_cockpit_from_panning_cam             = false;
+        bool        draw_cockpit_from_target_cam              = false;
+        bool        draw_docking_boxes                        = true;
+        bool        draw_heading_marker                       = false;
+        bool        draw_jump_target_nav_symbol               = true;
+        bool        draw_nav_button_labels                    = true;
+        bool        draw_near_stars_in_front_of_planets       = false;
+        bool        draw_rendered_crosshairs                  = true;
+        bool        draw_star_body                            = true;
+        bool        draw_star_glow                            = true;
+        bool        draw_star_glow_halo                       = false;
+        bool        draw_target_nav_symbol                    = true;
+        bool        draw_vdus_from_chase_cam                  = false;
+        bool        draw_vdus_from_padlock_cam                = false;
+        bool        draw_vdus_from_panning_cam                = false;
+        bool        draw_vdus_from_target_cam                 = false;
+        bool        draw_weapons                              = false;
+        double      eject_rotation_speed_dbl                  = 0.0;
+        float       eject_rotation_speed_flt                  = 0.0;
+        double      engine_color_red_dbl                      = 1.0;
+        float       engine_color_red_flt                      = 1.0;
+        double      engine_color_green_dbl                    = 1.0;
+        float       engine_color_green_flt                    = 1.0;
+        double      engine_color_blue_dbl                     = 1.0;
+        float       engine_color_blue_flt                     = 1.0;
+        double      engine_length_scale_dbl                   = 1.25;
+        float       engine_length_scale_flt                   = 1.25;
+        double      engine_radii_scale_dbl                    = 0.4;
+        float       engine_radii_scale_flt                    = 0.4;
+        bool        explore_for_map                           = true;
+        std::string explosion_animation                       = "explosion_orange.ani";
+        bool        explosion_face_player                     = true;
+        double      explosion_force_dbl                       = 0.5;
+        float       explosion_force_flt                       = 0.5;
+        double      explosion_size_dbl                        = 3.0;
+        float       explosion_size_flt                        = 3.0;
+        double      explosion_torque_dbl                      = 0.001;
+        float       explosion_torque_flt                      = 0.001;
+        bool        ext_clamp_to_border                       = true;
+        bool        ext_clamp_to_edge                         = true;
+        bool        faction_dependent_textures                = true;
+        double      far_stars_sprite_size_dbl                 = 2.0;
+        float       far_stars_sprite_size_flt                 = 2.0;
+        std::string far_stars_sprite_texture                  = "";
+        bool        flash_behind_hud                          = true;
+        bool        fog                                       = false;
+        int         fog_detail                                = 2;
+        double      fog_fade_in_percent_dbl                   = 0.5;
+        float       fog_fade_in_percent_flt                   = 0.5;
+        double      fog_time_dbl                              = 0.01;
+        float       fog_time_flt                              = 0.01;
+        std::string font                                      = "helvetica12";
+        bool        font_antialias                            = false;
+        double      font_point_dbl                            = 16.0;
+        float       font_point_flt                            = 16.0;
+        double      font_width_hack_dbl                       = 0.925;
+        float       font_width_hack_flt                       = 0.925;
+        bool        force_glowmap_restore_write_to_depthmap   = true;
+        bool        force_lighting                            = true;
+        bool        force_one_one_shield_blend                = true;
+        double      fov_dbl                                   = 37.5;
+        float       fov_flt                                   = 37.5;
+        bool        framerate_changes_shader                  = false;
         // Frame-rate limiting: vsync mode, and a software cap when it is below what
         // the GPU would otherwise produce.
-        std::string vsync = "on";                    // "off" | "on" | "adaptive"
-        std::string frame_limit_mode = "unlimited";   // "unlimited" | "half" | "fixed"
-        int max_framerate = 0;                        // fixed cap, frames per second
-        bool show_fps = true;
-        bool full_screen = false;
-        std::string gauge_static = "static.ani";
-        double generic_cargo_rotation_speed_dbl = 1.0;
-        float generic_cargo_rotation_speed_flt = 1.0;
-        bool gl_accelerated_visual = true;
-        bool glow_ambient_star_light = false;
-        bool glow_diffuse_star_light = false;
-        bool glut_stencil = true;
-        double gui_font_scale_dbl = 0.75;
-        float gui_font_scale_flt = 0.75;
-        bool halo_far_draw = false;
-        double halo_offset_dbl = 0.5;
-        float halo_offset_flt = 0.5;
-        double halo_sparkle_rate_dbl = 20.0;
-        float halo_sparkle_rate_flt = 20.0;
-        double halo_sparkle_scale_dbl = 6.0;
-        float halo_sparkle_scale_flt = 6.0;
-        double halo_sparkle_speed_dbl = 0.5;
-        float halo_sparkle_speed_flt = 0.5;
-        bool halos_by_velocity = false;
-        int head_lag = 3;
-        bool high_quality_font = false;
-        bool high_quality_font_computer = false;
-        bool high_quality_sprites = true;
-        std::string hull_flash_animation = "armorflash.ani";
-        double in_system_jump_ani_second_ahead_dbl = 4.0;
-        float in_system_jump_ani_second_ahead_flt = 4.0;
-        double in_system_jump_ani_second_ahead_end_dbl = 0.03;
-        float in_system_jump_ani_second_ahead_end_flt = 0.03;
-        std::string in_system_jump_animation = "warp.ani";
-        double in_system_jump_animation_growth_dbl = 0.99;
-        float in_system_jump_animation_growth_flt = 0.99;
-        double in_system_jump_animation_size_dbl = 4.0;
-        float in_system_jump_animation_size_flt = 4.0;
-        std::string initial_boot_message = "Loading...";
-        double initial_zoom_factor_dbl = 2.25;
-        float initial_zoom_factor_flt = 2.25;
-        double jump_animation_shrink_dbl = 0.95;
-        float jump_animation_shrink_flt = 0.95;
-        std::string jump_gate = "blackclear.ani";
-        double jump_gate_size_dbl = 1.75;
-        float jump_gate_size_flt = 1.75;
-        double last_message_time_dbl = 60.0;
-        float last_message_time_flt = 60.0;
-        double light_cutoff_dbl = 0.06;
-        float light_cutoff_flt = 0.06;
-        double light_optimal_intensity_dbl = 0.06;
-        float light_optimal_intensity_flt = 0.06;
-        double light_saturation_dbl = 0.95;
-        float light_saturation_flt = 0.95;
-        bool lock_significant_target_box = true;
-        bool lock_vertex_arrays = false;
-        double locklight_time_dbl = 1.0;
-        float locklight_time_flt = 1.0;
-        double logo_offset_dbl = -4.0;
-        float logo_offset_flt = -4.0;
-        double logo_offset_scale_dbl = -30.8;
-        float logo_offset_scale_flt = -30.8;
-        std::string mac_shader_name = "mac";
-        bool main_menu = false;
-        int max_cubemap_size = 1024;
-        int max_map_nodes = 256000;
-        int max_movie_dimension = 1024;
-        int max_texture_dimension = 65536;
-        double mesh_animation_max_frames_skipped_dbl = 3.0;
-        float mesh_animation_max_frames_skipped_flt = 3.0;
-        double mesh_far_percent_dbl = 0.8;
-        float mesh_far_percent_flt = 0.8;
-        int mipmap_detail = 3;
-        double missile_explosion_radius_mult_dbl = 1.0;
-        float missile_explosion_radius_mult_flt = 1.0;
-        bool missile_sparkle = false;
-        double model_detail_dbl = 1.0;
-        float model_detail_flt = 1.0;
-        bool multi_texture_glow_maps = true;
-        bool near_stars_alpha = false;
-        bool near_stars_alpha_blend = false;
-        double near_stars_sprite_size_dbl = 2.0;
-        float near_stars_sprite_size_flt = 2.0;
-        std::string near_stars_sprite_texture = "";
-        int num_far_stars = 2000;
-        int num_lights = 4;
-        int num_messages = 10;
-        int num_near_stars = 1000;
-        int num_times_to_draw_shine = 2;
-        bool offset_sprites_by_pos = true;
-        bool only_scanner_modes_static = true;
-        bool only_stretch_in_warp = true;
-        bool open_picker_categories = false;
-        bool optimize_vertex_arrays = false;
-        double optimize_vertex_condition_dbl = 4.0;
-        float optimize_vertex_condition_flt = 4.0;
-        bool pan_on_auto = false;
-        bool panel_smooth_texture = true;
-        double percent_afterburner_color_change_dbl = 0.5;
-        float percent_afterburner_color_change_flt = 0.5;
-        double percent_halo_fade_in_dbl = 0.5;
-        float percent_halo_fade_in_flt = 0.5;
-        double percent_shockwave_dbl = 0.5;
-        float percent_shockwave_flt = 0.5;
-        bool per_pixel_lighting = true;
-        int planet_detail_level = 24;
-        bool pot_video_textures = false;
-        double precull_dist_dbl = 500000000.0;
-        float precull_dist_flt = 500000000.0;
-        bool print_ecm_status = true;
-        bool rect_textures = false;
-        double reduced_vdus_width_dbl = 0.0;
-        float reduced_vdus_width_flt = 0.0;
-        double reduced_vdus_height_dbl = 0.0;
-        float reduced_vdus_height_flt = 0.0;
-        bool reflection = true;
-        double reflectivity_dbl = 0.8;
-        float reflectivity_flt = 0.8;
-        int resolution_x = 1280;
-        int resolution_y = 960;
-        std::string rgb_pixel_format = "undefined";
-        int screen = 0;
-        bool s3tc = true;
-        bool sector_map_ortho_view = false;
-        bool separate_specular_color = false;
-        bool set_raster_text_color = true;
-        std::string shader_name = "default";
-        double shake_limit_dbl = 25.0;
-        float shake_limit_flt = 25.0;
-        double shake_magnitude_dbl = 0.3;
-        float shake_magnitude_flt = 0.3;
-        double shake_reduction_dbl = 8.0;
-        float shake_reduction_flt = 8.0;
-        double shake_speed_dbl = 50.0;
-        float shake_speed_flt = 50.0;
-        bool shared_vertex_arrays = true;
-        int shield_detail_level = 24;
-        std::string shield_flash_animation = "";
-        std::string shield_technique = "";
-        std::string shield_texture = "shield.bmp";
-        std::string shockwave_animation = "explosion_wave.ani";
-        double shockwave_growth_dbl = 1.05;
-        float shockwave_growth_flt = 1.05;
-        double shove_camera_down_dbl = 0.3;
-        float shove_camera_down_flt = 0.3;
-        bool show_respawn_text = false;
-        bool show_stardate = true;
-        bool smart_targetting_key = true;
-        bool smooth_lines = false;
-        bool smooth_points = true;
-        bool smooth_shade = true;
-        double sparkle_absolute_speed_dbl = 0.02;
-        float sparkle_absolute_speed_flt = 0.02;
-        double sparkle_engine_size_relative_to_ship_dbl = 0.1875;
-        float sparkle_engine_size_relative_to_ship_flt = 0.1875;
-        double sparkle_rate_dbl = 5.0;
-        float sparkle_rate_flt = 5.0;
-        bool specmap_with_reflection = true;
-        std::string splash_audio = "../music/aerapeace.ogg ../music/news1.ogg ../music/isopeace.ogg ../music/asteroids.ogg ../music/militarybase_p.ogg ../music/terranpeace.ogg ../music/industrialmixed.ogg ../music/snow.ogg ../music/terranpeace2.ogg ../music/terranbattle.ogg ../music/galacticbattle.ogg ../music/peace4.ogg ../music/aerathemebattle.ogg ../music/peace3.ogg ../music/battle5_p.ogg ../music/alienrockalectro.ogg ../music/cosmostation_crowded.ogg";
-        std::string splash_screen = "load_splash.ani";
-        bool split_dead_subunits = true;
-        std::string star_allowable_sectors = "Vega Sol";
-        bool star_blend = true;
-        double star_color_average_dbl = 0.6;
-        float star_color_average_flt = 0.6;
-        double star_color_cutoff_dbl = 0.1;
-        float star_color_cutoff_flt = 0.1;
-        double star_color_increment_dbl = 100.0;
-        float star_color_increment_flt = 100.0;
-        double star_color_power_dbl = 0.25;
-        float star_color_power_flt = 0.25;
-        double star_body_radius_dbl = 0.33;
-        float star_body_radius_flt = 0.33;
-        double star_glow_radius_dbl = 1.33;
-        float star_glow_radius_flt = 1.33;
-        double star_lumin_scale_dbl = 0.001;
-        float star_lumin_scale_flt = 0.001;
-        double star_minimum_color_value_dbl = 0.3;
-        float star_minimum_color_value_flt = 0.3;
-        double star_overlap_dbl = 1.0;
-        float star_overlap_flt = 1.0;
+        std::string vsync                                    = "on";         // "off" | "on" | "adaptive"
+        std::string frame_limit_mode                         = "unlimited";  // "unlimited" | "half" | "fixed"
+        int         max_framerate                            = 0;            // fixed cap, frames per second
+        bool        show_fps                                 = true;
+        bool        full_screen                              = false;
+        std::string gauge_static                             = "static.ani";
+        double      generic_cargo_rotation_speed_dbl         = 1.0;
+        float       generic_cargo_rotation_speed_flt         = 1.0;
+        bool        gl_accelerated_visual                    = true;
+        bool        glow_ambient_star_light                  = false;
+        bool        glow_diffuse_star_light                  = false;
+        bool        glut_stencil                             = true;
+        double      gui_font_scale_dbl                       = 0.75;
+        float       gui_font_scale_flt                       = 0.75;
+        bool        halo_far_draw                            = false;
+        double      halo_offset_dbl                          = 0.5;
+        float       halo_offset_flt                          = 0.5;
+        double      halo_sparkle_rate_dbl                    = 20.0;
+        float       halo_sparkle_rate_flt                    = 20.0;
+        double      halo_sparkle_scale_dbl                   = 6.0;
+        float       halo_sparkle_scale_flt                   = 6.0;
+        double      halo_sparkle_speed_dbl                   = 0.5;
+        float       halo_sparkle_speed_flt                   = 0.5;
+        bool        halos_by_velocity                        = false;
+        int         head_lag                                 = 3;
+        bool        high_quality_font                        = false;
+        bool        high_quality_font_computer               = false;
+        bool        high_quality_sprites                     = true;
+        std::string hull_flash_animation                     = "armorflash.ani";
+        double      in_system_jump_ani_second_ahead_dbl      = 4.0;
+        float       in_system_jump_ani_second_ahead_flt      = 4.0;
+        double      in_system_jump_ani_second_ahead_end_dbl  = 0.03;
+        float       in_system_jump_ani_second_ahead_end_flt  = 0.03;
+        std::string in_system_jump_animation                 = "warp.ani";
+        double      in_system_jump_animation_growth_dbl      = 0.99;
+        float       in_system_jump_animation_growth_flt      = 0.99;
+        double      in_system_jump_animation_size_dbl        = 4.0;
+        float       in_system_jump_animation_size_flt        = 4.0;
+        std::string initial_boot_message                     = "Loading...";
+        double      initial_zoom_factor_dbl                  = 2.25;
+        float       initial_zoom_factor_flt                  = 2.25;
+        double      jump_animation_shrink_dbl                = 0.95;
+        float       jump_animation_shrink_flt                = 0.95;
+        std::string jump_gate                                = "blackclear.ani";
+        double      jump_gate_size_dbl                       = 1.75;
+        float       jump_gate_size_flt                       = 1.75;
+        double      last_message_time_dbl                    = 60.0;
+        float       last_message_time_flt                    = 60.0;
+        double      light_cutoff_dbl                         = 0.06;
+        float       light_cutoff_flt                         = 0.06;
+        double      light_optimal_intensity_dbl              = 0.06;
+        float       light_optimal_intensity_flt              = 0.06;
+        double      light_saturation_dbl                     = 0.95;
+        float       light_saturation_flt                     = 0.95;
+        bool        lock_significant_target_box              = true;
+        bool        lock_vertex_arrays                       = false;
+        double      locklight_time_dbl                       = 1.0;
+        float       locklight_time_flt                       = 1.0;
+        double      logo_offset_dbl                          = -4.0;
+        float       logo_offset_flt                          = -4.0;
+        double      logo_offset_scale_dbl                    = -30.8;
+        float       logo_offset_scale_flt                    = -30.8;
+        std::string mac_shader_name                          = "mac";
+        bool        main_menu                                = false;
+        int         max_cubemap_size                         = 1'024;
+        int         max_map_nodes                            = 256'000;
+        int         max_movie_dimension                      = 1'024;
+        int         max_texture_dimension                    = 65'536;
+        double      mesh_animation_max_frames_skipped_dbl    = 3.0;
+        float       mesh_animation_max_frames_skipped_flt    = 3.0;
+        double      mesh_far_percent_dbl                     = 0.8;
+        float       mesh_far_percent_flt                     = 0.8;
+        int         mipmap_detail                            = 3;
+        double      missile_explosion_radius_mult_dbl        = 1.0;
+        float       missile_explosion_radius_mult_flt        = 1.0;
+        bool        missile_sparkle                          = false;
+        double      model_detail_dbl                         = 1.0;
+        float       model_detail_flt                         = 1.0;
+        bool        multi_texture_glow_maps                  = true;
+        bool        near_stars_alpha                         = false;
+        bool        near_stars_alpha_blend                   = false;
+        double      near_stars_sprite_size_dbl               = 2.0;
+        float       near_stars_sprite_size_flt               = 2.0;
+        std::string near_stars_sprite_texture                = "";
+        int         num_far_stars                            = 2'000;
+        int         num_lights                               = 4;
+        int         num_messages                             = 10;
+        int         num_near_stars                           = 1'000;
+        int         num_times_to_draw_shine                  = 2;
+        bool        offset_sprites_by_pos                    = true;
+        bool        only_scanner_modes_static                = true;
+        bool        only_stretch_in_warp                     = true;
+        bool        open_picker_categories                   = false;
+        bool        optimize_vertex_arrays                   = false;
+        double      optimize_vertex_condition_dbl            = 4.0;
+        float       optimize_vertex_condition_flt            = 4.0;
+        bool        pan_on_auto                              = false;
+        bool        panel_smooth_texture                     = true;
+        double      percent_afterburner_color_change_dbl     = 0.5;
+        float       percent_afterburner_color_change_flt     = 0.5;
+        double      percent_halo_fade_in_dbl                 = 0.5;
+        float       percent_halo_fade_in_flt                 = 0.5;
+        double      percent_shockwave_dbl                    = 0.5;
+        float       percent_shockwave_flt                    = 0.5;
+        bool        per_pixel_lighting                       = true;
+        int         planet_detail_level                      = 24;
+        bool        pot_video_textures                       = false;
+        double      precull_dist_dbl                         = 500000000.0;
+        float       precull_dist_flt                         = 500000000.0;
+        bool        print_ecm_status                         = true;
+        bool        rect_textures                            = false;
+        double      reduced_vdus_width_dbl                   = 0.0;
+        float       reduced_vdus_width_flt                   = 0.0;
+        double      reduced_vdus_height_dbl                  = 0.0;
+        float       reduced_vdus_height_flt                  = 0.0;
+        bool        reflection                               = true;
+        double      reflectivity_dbl                         = 0.8;
+        float       reflectivity_flt                         = 0.8;
+        int         resolution_x                             = 1'280;
+        int         resolution_y                             = 960;
+        std::string rgb_pixel_format                         = "undefined";
+        int         screen                                   = 0;
+        bool        s3tc                                     = true;
+        bool        sector_map_ortho_view                    = false;
+        bool        separate_specular_color                  = false;
+        bool        set_raster_text_color                    = true;
+        std::string shader_name                              = "default";
+        double      shake_limit_dbl                          = 25.0;
+        float       shake_limit_flt                          = 25.0;
+        double      shake_magnitude_dbl                      = 0.3;
+        float       shake_magnitude_flt                      = 0.3;
+        double      shake_reduction_dbl                      = 8.0;
+        float       shake_reduction_flt                      = 8.0;
+        double      shake_speed_dbl                          = 50.0;
+        float       shake_speed_flt                          = 50.0;
+        bool        shared_vertex_arrays                     = true;
+        int         shield_detail_level                      = 24;
+        std::string shield_flash_animation                   = "";
+        std::string shield_technique                         = "";
+        std::string shield_texture                           = "shield.bmp";
+        std::string shockwave_animation                      = "explosion_wave.ani";
+        double      shockwave_growth_dbl                     = 1.05;
+        float       shockwave_growth_flt                     = 1.05;
+        double      shove_camera_down_dbl                    = 0.3;
+        float       shove_camera_down_flt                    = 0.3;
+        bool        show_respawn_text                        = false;
+        bool        show_stardate                            = true;
+        bool        smart_targetting_key                     = true;
+        bool        smooth_lines                             = false;
+        bool        smooth_points                            = true;
+        bool        smooth_shade                             = true;
+        double      sparkle_absolute_speed_dbl               = 0.02;
+        float       sparkle_absolute_speed_flt               = 0.02;
+        double      sparkle_engine_size_relative_to_ship_dbl = 0.1875;
+        float       sparkle_engine_size_relative_to_ship_flt = 0.1875;
+        double      sparkle_rate_dbl                         = 5.0;
+        float       sparkle_rate_flt                         = 5.0;
+        bool        specmap_with_reflection                  = true;
+        std::string splash_audio =
+                "../music/aerapeace.ogg ../music/news1.ogg ../music/isopeace.ogg ../music/asteroids.ogg "
+                "../music/militarybase_p.ogg ../music/terranpeace.ogg ../music/industrialmixed.ogg ../music/snow.ogg "
+                "../music/terranpeace2.ogg ../music/terranbattle.ogg ../music/galacticbattle.ogg ../music/peace4.ogg "
+                "../music/aerathemebattle.ogg ../music/peace3.ogg ../music/battle5_p.ogg ../music/alienrockalectro.ogg "
+                "../music/cosmostation_crowded.ogg";
+        std::string splash_screen                = "load_splash.ani";
+        bool        split_dead_subunits          = true;
+        std::string star_allowable_sectors       = "Vega Sol";
+        bool        star_blend                   = true;
+        double      star_color_average_dbl       = 0.6;
+        float       star_color_average_flt       = 0.6;
+        double      star_color_cutoff_dbl        = 0.1;
+        float       star_color_cutoff_flt        = 0.1;
+        double      star_color_increment_dbl     = 100.0;
+        float       star_color_increment_flt     = 100.0;
+        double      star_color_power_dbl         = 0.25;
+        float       star_color_power_flt         = 0.25;
+        double      star_body_radius_dbl         = 0.33;
+        float       star_body_radius_flt         = 0.33;
+        double      star_glow_radius_dbl         = 1.33;
+        float       star_glow_radius_flt         = 1.33;
+        double      star_lumin_scale_dbl         = 0.001;
+        float       star_lumin_scale_flt         = 0.001;
+        double      star_minimum_color_value_dbl = 0.3;
+        float       star_minimum_color_value_flt = 0.3;
+        double      star_overlap_dbl             = 1.0;
+        float       star_overlap_flt             = 1.0;
         std::string star_shine = "shine.ani flare1.ani flare2.ani flare3.ani flare4.ani flare5.ani flare6.ani";
-        double star_spread_attenuation_dbl = 0.4;
-        float star_spread_attenuation_flt = 0.4;
-        double star_spreading_dbl = 30000.0;
-        float star_spreading_flt = 30000.0;
-        bool star_streaks = true;
-        double stars_alpha_test_cutoff_dbl = 0.2;
-        float stars_alpha_test_cutoff_flt = 0.2;
-        bool stars_dont_move = true;
-        std::string startup_cockpit_view = "front";
-        double stretch_bolts_dbl = 0.5;
-        float stretch_bolts_flt = 0.5;
-        bool switch_cockpit_to_default_on_unit_switch = true;
-        bool system_map_ortho_view = false;
-        bool target_null_if_no_unit = false;
-        std::string technique_set = "6_ps4.0";
-        double text_delay_dbl = 0.05;
-        float text_delay_flt = 0.05;
-        bool text_display_lists = true;
-        double text_speed_dbl = 0.025;
-        float text_speed_flt = 0.025;
-        std::string texture = "supernova.bmp";
-        int texture_compression = 0;
-        double torque_star_streak_scale_dbl = 1.0;
-        float torque_star_streak_scale_flt = 1.0;
-        bool unit_switch_cockpit_change = false;
-        std::string unprintable_faction_extension = "citizen";
-        std::string unprintable_factions = "";
-        bool update_nav_after_jump = false;
-        bool use_animations = true;
-        bool use_detail_texture = true;
-        bool use_faction_gui_background_color = true;
-        bool use_logos = true;
-        bool use_planet_atmosphere = true;
-        bool use_planet_fog = true;
-        bool use_star_coords = true;
-        bool use_textures = true;
-        bool use_planet_textures = true;
-        bool use_ship_textures = true;
-        bool use_videos = true;
-        bool use_vs_sprites = true;
-        bool use_wireframe = false;
-        bool vbo = true;
-        bool vdu_builtin_shields = false;
-        double velocity_star_streak_max_dbl = 5.0;
-        float velocity_star_streak_max_flt = 5.0;
-        double velocity_star_streak_min_dbl = 1.0;
-        float velocity_star_streak_min_flt = 1.0;
-        double velocity_star_streak_scale_dbl = 0.01;
-        float velocity_star_streak_scale_flt = 0.01;
-        bool vista_draw_stars = false;
-        double warp_shake_magnitude_dbl = 0.125;
-        float warp_shake_magnitude_flt = 0.125;
-        double warp_shake_ref_dbl = 2000.0;
-        float warp_shake_ref_flt = 2000.0;
-        double warp_shake_speed_dbl = 70.0;
-        float warp_shake_speed_flt = 70.0;
-        double warp_stretch_cutoff_dbl = 50000.0;
-        float warp_stretch_cutoff_flt = 50000.0;
-        double warp_stretch_max_dbl = 2.0;
-        float warp_stretch_max_flt = 2.0;
-        double warp_stretch_max_region0_speed_dbl = 240000.0;
-        float warp_stretch_max_region0_speed_flt = 240000.0;
-        double warp_stretch_max_speed_dbl = 300000000.0;
-        float warp_stretch_max_speed_flt = 300000000.0;
-        double warp_stretch_region0_max_dbl = 1.0;
-        float warp_stretch_region0_max_flt = 1.0;
-        bool warp_trail = true;
-        double warp_trail_stretch_dbl = 300.0;
-        float warp_trail_stretch_flt = 300.0;
-        double warp_trail_time_dbl = 20.0;
-        float warp_trail_time_flt = 20.0;
-        double weapon_gamma_dbl = 1.35;
-        float weapon_gamma_flt = 1.35;
-        double weapon_xyscale_dbl = 1.0;
-        float weapon_xyscale_flt = 1.0;
-        double weapon_zscale_dbl = 1.0;
-        float weapon_zscale_flt = 1.0;
-        double wheel_zoom_amount_dbl = 0.1;
-        float wheel_zoom_amount_flt = 0.1;
-        std::string wormhole_unit = "wormhole";
-        int z_pixel_format = 24;
-        double zfar_dbl = 100000.0;
-        float zfar_flt = 100000.0;
-        double znear_dbl = 1.0;
-        float znear_flt = 1.0;
+        double      star_spread_attenuation_dbl              = 0.4;
+        float       star_spread_attenuation_flt              = 0.4;
+        double      star_spreading_dbl                       = 30000.0;
+        float       star_spreading_flt                       = 30000.0;
+        bool        star_streaks                             = true;
+        double      stars_alpha_test_cutoff_dbl              = 0.2;
+        float       stars_alpha_test_cutoff_flt              = 0.2;
+        bool        stars_dont_move                          = true;
+        std::string startup_cockpit_view                     = "front";
+        double      stretch_bolts_dbl                        = 0.5;
+        float       stretch_bolts_flt                        = 0.5;
+        bool        switch_cockpit_to_default_on_unit_switch = true;
+        bool        system_map_ortho_view                    = false;
+        bool        target_null_if_no_unit                   = false;
+        std::string technique_set                            = "6_ps4.0";
+        double      text_delay_dbl                           = 0.05;
+        float       text_delay_flt                           = 0.05;
+        bool        text_display_lists                       = true;
+        double      text_speed_dbl                           = 0.025;
+        float       text_speed_flt                           = 0.025;
+        std::string texture                                  = "supernova.bmp";
+        int         texture_compression                      = 0;
+        double      torque_star_streak_scale_dbl             = 1.0;
+        float       torque_star_streak_scale_flt             = 1.0;
+        bool        unit_switch_cockpit_change               = false;
+        std::string unprintable_faction_extension            = "citizen";
+        std::string unprintable_factions                     = "";
+        bool        update_nav_after_jump                    = false;
+        bool        use_animations                           = true;
+        bool        use_detail_texture                       = true;
+        bool        use_faction_gui_background_color         = true;
+        bool        use_logos                                = true;
+        bool        use_planet_atmosphere                    = true;
+        bool        use_planet_fog                           = true;
+        bool        use_star_coords                          = true;
+        bool        use_textures                             = true;
+        bool        use_planet_textures                      = true;
+        bool        use_ship_textures                        = true;
+        bool        use_videos                               = true;
+        bool        use_vs_sprites                           = true;
+        bool        use_wireframe                            = false;
+        bool        vbo                                      = true;
+        bool        vdu_builtin_shields                      = false;
+        double      velocity_star_streak_max_dbl             = 5.0;
+        float       velocity_star_streak_max_flt             = 5.0;
+        double      velocity_star_streak_min_dbl             = 1.0;
+        float       velocity_star_streak_min_flt             = 1.0;
+        double      velocity_star_streak_scale_dbl           = 0.01;
+        float       velocity_star_streak_scale_flt           = 0.01;
+        bool        vista_draw_stars                         = false;
+        double      warp_shake_magnitude_dbl                 = 0.125;
+        float       warp_shake_magnitude_flt                 = 0.125;
+        double      warp_shake_ref_dbl                       = 2000.0;
+        float       warp_shake_ref_flt                       = 2000.0;
+        double      warp_shake_speed_dbl                     = 70.0;
+        float       warp_shake_speed_flt                     = 70.0;
+        double      warp_stretch_cutoff_dbl                  = 50000.0;
+        float       warp_stretch_cutoff_flt                  = 50000.0;
+        double      warp_stretch_max_dbl                     = 2.0;
+        float       warp_stretch_max_flt                     = 2.0;
+        double      warp_stretch_max_region0_speed_dbl       = 240000.0;
+        float       warp_stretch_max_region0_speed_flt       = 240000.0;
+        double      warp_stretch_max_speed_dbl               = 300000000.0;
+        float       warp_stretch_max_speed_flt               = 300000000.0;
+        double      warp_stretch_region0_max_dbl             = 1.0;
+        float       warp_stretch_region0_max_flt             = 1.0;
+        bool        warp_trail                               = true;
+        double      warp_trail_stretch_dbl                   = 300.0;
+        float       warp_trail_stretch_flt                   = 300.0;
+        double      warp_trail_time_dbl                      = 20.0;
+        float       warp_trail_time_flt                      = 20.0;
+        double      weapon_gamma_dbl                         = 1.35;
+        float       weapon_gamma_flt                         = 1.35;
+        double      weapon_xyscale_dbl                       = 1.0;
+        float       weapon_xyscale_flt                       = 1.0;
+        double      weapon_zscale_dbl                        = 1.0;
+        float       weapon_zscale_flt                        = 1.0;
+        double      wheel_zoom_amount_dbl                    = 0.1;
+        float       wheel_zoom_amount_flt                    = 0.1;
+        std::string wormhole_unit                            = "wormhole";
+        int         z_pixel_format                           = 24;
+        double      zfar_dbl                                 = 100000.0;
+        float       zfar_flt                                 = 100000.0;
+        double      znear_dbl                                = 1.0;
+        float       znear_flt                                = 1.0;
 
         struct {
-            double alpha_test_cutoff_dbl = 0.0;
-        float alpha_test_cutoff_flt = 0.0;
-            bool draw_location_borders = false;
-            bool draw_location_text = true;
-            bool enable_debug_markers = false;
-            bool enable_location_markers = true;
-            bool include_base_name_on_dock = true;
-            double location_marker_distance_dbl = 0.5;
-        float location_marker_distance_flt = 0.5;
-            bool location_marker_draw_always = false;
-            std::string location_marker_sprite = "";
-            double location_marker_text_color_r_dbl = 1.0;
-        float location_marker_text_color_r_flt = 1.0;
-            double location_marker_text_color_g_dbl = 1.0;
-        float location_marker_text_color_g_flt = 1.0;
-            double location_marker_text_color_b_dbl = 1.0;
-        float location_marker_text_color_b_flt = 1.0;
-            double location_marker_text_offset_x_dbl = 0.0;
-        float location_marker_text_offset_x_flt = 0.0;
-            double location_marker_text_offset_y_dbl = 0.0;
-        float location_marker_text_offset_y_flt = 0.0;
-            std::string font = "helvetica12";
-            double fov_dbl = 60.0;
-        float fov_flt = 60.0;
-            int max_width = 1440;
-            int max_height = 1080;
-            bool print_cargo_volume = true;
-            double text_background_alpha_dbl = 0.0625;
-        float text_background_alpha_flt = 0.0625;
-            bool blur_bases = true;
+            double      alpha_test_cutoff_dbl             = 0.0;
+            float       alpha_test_cutoff_flt             = 0.0;
+            bool        draw_location_borders             = false;
+            bool        draw_location_text                = true;
+            bool        enable_debug_markers              = false;
+            bool        enable_location_markers           = true;
+            bool        include_base_name_on_dock         = true;
+            double      location_marker_distance_dbl      = 0.5;
+            float       location_marker_distance_flt      = 0.5;
+            bool        location_marker_draw_always       = false;
+            std::string location_marker_sprite            = "";
+            double      location_marker_text_color_r_dbl  = 1.0;
+            float       location_marker_text_color_r_flt  = 1.0;
+            double      location_marker_text_color_g_dbl  = 1.0;
+            float       location_marker_text_color_g_flt  = 1.0;
+            double      location_marker_text_color_b_dbl  = 1.0;
+            float       location_marker_text_color_b_flt  = 1.0;
+            double      location_marker_text_offset_x_dbl = 0.0;
+            float       location_marker_text_offset_x_flt = 0.0;
+            double      location_marker_text_offset_y_dbl = 0.0;
+            float       location_marker_text_offset_y_flt = 0.0;
+            std::string font                              = "helvetica12";
+            double      fov_dbl                           = 60.0;
+            float       fov_flt                           = 60.0;
+            int         max_width                         = 1'440;
+            int         max_height                        = 1'080;
+            bool        print_cargo_volume                = true;
+            double      text_background_alpha_dbl         = 0.0625;
+            float       text_background_alpha_flt         = 0.0625;
+            bool        blur_bases                        = true;
 
         } bases;
 
         struct {
-            double flicker_time_dbl = 30.0;
-        float flicker_time_flt = 30.0;
-            double flicker_off_time_dbl = 2.0;
-        float flicker_off_time_flt = 2.0;
-            double min_flicker_cycle_dbl = 2.0;
-        float min_flicker_cycle_flt = 2.0;
+            double flicker_time_dbl            = 30.0;
+            float  flicker_time_flt            = 30.0;
+            double flicker_off_time_dbl        = 2.0;
+            float  flicker_off_time_flt        = 2.0;
+            double min_flicker_cycle_dbl       = 2.0;
+            float  min_flicker_cycle_flt       = 2.0;
             double num_times_per_second_on_dbl = 0.66;
-        float num_times_per_second_on_flt = 0.66;
-            double hull_for_total_dark_dbl = 0.04;
-        float hull_for_total_dark_flt = 0.04;
+            float  num_times_per_second_on_flt = 0.66;
+            double hull_for_total_dark_dbl     = 0.04;
+            float  hull_for_total_dark_flt     = 0.04;
 
         } glow_flicker;
 
         struct {
-            std::string already_near_message = "#ff0000Already Near#000000";
-            double armor_hull_size_dbl = 0.55;
-        float armor_hull_size_flt = 0.55;
-            std::string asteroids_near_message = "#ff0000Asteroids Near#000000";
-            bool basename_colon_basename = true;
-            double box_line_thickness_dbl = 1.0;
-        float box_line_thickness_flt = 1.0;
-            bool completed_objectives_last = true;
-            bool crosshairs_on_chase_cam = false;
-            bool crosshairs_on_padlock = false;
-            std::string damage_report_heading = "#00ff00DAMAGE REPORT";
-            bool debug_position = false;
-            double diamond_line_thickness_dbl = 1.0;
-        float diamond_line_thickness_flt = 1.0;
-            double diamond_rotation_speed_dbl = 1.0;
-        float diamond_rotation_speed_flt = 1.0;
-            double diamond_size_dbl = 2.05;
-        float diamond_size_flt = 2.05;
-            bool display_relative_velocity = true;
-            bool display_warp_energy_if_no_jump_drive = true;
-            bool draw_all_target_boxes = false;
-            bool draw_always_itts = false;
-            bool draw_arrow_on_chase_cam = true;
-            bool draw_arrow_on_pan_cam = false;
-            bool draw_arrow_on_pan_target = false;
-            bool draw_arrow_to_target = true;
-            bool draw_blips_on_both_radar = false;
-            bool draw_rendered_crosshairs = true;
-            bool draw_damage_sprite = true;
-            bool draw_gravitational_objects = true;
-            bool draw_line_to_itts = false;
-            bool draw_line_to_target = false;
-            bool draw_line_to_targets_target = false;
-            bool draw_nav_grid = true;
-            bool draw_nav_symbol = false;
-            bool draw_tactical_target = false;
-            bool draw_targetting_boxes = true;
-            bool draw_targetting_boxes_inside = true;
-            bool draw_significant_blips = true;
-            bool draw_star_direction = true;
-            bool draw_unit_on_chase_cam = true;
-            bool draw_vdu_view_shields = true;
-            bool draw_weapon_sprite = false;
-            std::string enemy_near_message = "#ff0000Enemy Near#000000";
-            int gun_list_columns = 1;
-            bool invert_friendly_shields = false;
-            bool invert_friendly_sprite = false;
-            bool invert_target_shields = false;
-            bool invert_target_sprite = false;
-            bool invert_view_shields = false;
-            bool itts_for_beams = false;
-            bool itts_for_lockable = false;
-            double itts_line_to_mark_alpha_dbl = 0.1;
-        float itts_line_to_mark_alpha_flt = 0.1;
-            bool itts_use_average_gun_speed = true;
-            bool lock_center_crosshair = false;
-            double lock_confirm_line_length_dbl = 1.5;
-        float lock_confirm_line_length_flt = 1.5;
-            std::string manifest_heading = "Manifest\n";
-            double max_missile_bracket_size_dbl = 2.05;
-        float max_missile_bracket_size_flt = 2.05;
-            std::string message_prefix = "";
-            double min_missile_bracket_size_dbl = 1.05;
-        float min_missile_bracket_size_flt = 1.05;
-            double min_lock_box_size_dbl = 0.001;
-        float min_lock_box_size_flt = 0.001;
-            double min_radar_blip_size_dbl = 0.0;
-        float min_radar_blip_size_flt = 0.0;
-            double min_target_box_size_dbl = 0.01;
-        float min_target_box_size_flt = 0.01;
-            std::string mounts_list_empty = "";
-            double nav_cross_line_thickness_dbl = 1.0;
-        float nav_cross_line_thickness_flt = 1.0;
-            std::string not_included_in_damage_report = "plasteel_hull tungsten_hull isometal_hull";
-            bool out_of_cone_distance = false;
-            double padlock_view_lag_dbl = 1.5;
-        float padlock_view_lag_flt = 1.5;
-            double padlock_view_lag_fix_zone_dbl = 0.0872;
-        float padlock_view_lag_fix_zone_flt = 0.0872;
-            std::string planet_near_message = "#ff0000Planetary Hazard Near#000000";
-            bool print_damage_percent = true;
-            bool print_faction = true;
-            bool print_fg_name = true;
-            bool print_fg_sub_id = false;
-            bool print_request_docking = true;
-            bool print_ship_type = true;
-            bool projectile_means_missile = false;
-            std::string radar_type = "WC";
-            double radar_search_extra_radius_dbl = 1000.0;
-        float radar_search_extra_radius_flt = 1000.0;
-            bool rotating_bracket_inner = true;
-            double rotating_bracket_size_dbl = 0.58;
-        float rotating_bracket_size_flt = 0.58;
-            double rotating_bracket_width_dbl = 0.1;
-        float rotating_bracket_width_flt = 0.1;
-            double scale_relationship_color_dbl = 10.0;
-        float scale_relationship_color_flt = 10.0;
-            bool shield_vdu_fade = true;
-            double shield_vdu_thresh0_dbl = 0.25;
-        float shield_vdu_thresh0_flt = 0.25;
-            double shield_vdu_thresh1_dbl = 0.5;
-        float shield_vdu_thresh1_flt = 0.5;
-            double shield_vdu_thresh2_dbl = 0.75;
-        float shield_vdu_thresh2_flt = 0.75;
-            bool show_negative_blips_as_positive = true;
-            bool simple_manifest = false;
-            std::string starship_near_message = "#ff0000Starship Near#000000";
-            bool switch_to_target_mode_on_key = true;
-            bool switch_back_from_comms = true;
-            double tac_target_foci_dbl = 0.5;
-        float tac_target_foci_flt = 0.5;
-            double tac_target_length_dbl = 0.1;
-        float tac_target_length_flt = 0.1;
-            double tac_target_thickness_dbl = 1.0;
-        float tac_target_thickness_flt = 1.0;
-            double text_background_alpha_dbl = 0.0625;
-        float text_background_alpha_flt = 0.0625;
-            bool top_view = false;
-            bool untarget_beyond_cone = false;
+            std::string already_near_message                 = "#ff0000Already Near#000000";
+            double      armor_hull_size_dbl                  = 0.55;
+            float       armor_hull_size_flt                  = 0.55;
+            std::string asteroids_near_message               = "#ff0000Asteroids Near#000000";
+            bool        basename_colon_basename              = true;
+            double      box_line_thickness_dbl               = 1.0;
+            float       box_line_thickness_flt               = 1.0;
+            bool        completed_objectives_last            = true;
+            bool        crosshairs_on_chase_cam              = false;
+            bool        crosshairs_on_padlock                = false;
+            std::string damage_report_heading                = "#00ff00DAMAGE REPORT";
+            bool        debug_position                       = false;
+            double      diamond_line_thickness_dbl           = 1.0;
+            float       diamond_line_thickness_flt           = 1.0;
+            double      diamond_rotation_speed_dbl           = 1.0;
+            float       diamond_rotation_speed_flt           = 1.0;
+            double      diamond_size_dbl                     = 2.05;
+            float       diamond_size_flt                     = 2.05;
+            bool        display_relative_velocity            = true;
+            bool        display_warp_energy_if_no_jump_drive = true;
+            bool        draw_all_target_boxes                = false;
+            bool        draw_always_itts                     = false;
+            bool        draw_arrow_on_chase_cam              = true;
+            bool        draw_arrow_on_pan_cam                = false;
+            bool        draw_arrow_on_pan_target             = false;
+            bool        draw_arrow_to_target                 = true;
+            bool        draw_blips_on_both_radar             = false;
+            bool        draw_rendered_crosshairs             = true;
+            bool        draw_damage_sprite                   = true;
+            bool        draw_gravitational_objects           = true;
+            bool        draw_line_to_itts                    = false;
+            bool        draw_line_to_target                  = false;
+            bool        draw_line_to_targets_target          = false;
+            bool        draw_nav_grid                        = true;
+            bool        draw_nav_symbol                      = false;
+            bool        draw_tactical_target                 = false;
+            bool        draw_targetting_boxes                = true;
+            bool        draw_targetting_boxes_inside         = true;
+            bool        draw_significant_blips               = true;
+            bool        draw_star_direction                  = true;
+            bool        draw_unit_on_chase_cam               = true;
+            bool        draw_vdu_view_shields                = true;
+            bool        draw_weapon_sprite                   = false;
+            std::string enemy_near_message                   = "#ff0000Enemy Near#000000";
+            int         gun_list_columns                     = 1;
+            bool        invert_friendly_shields              = false;
+            bool        invert_friendly_sprite               = false;
+            bool        invert_target_shields                = false;
+            bool        invert_target_sprite                 = false;
+            bool        invert_view_shields                  = false;
+            bool        itts_for_beams                       = false;
+            bool        itts_for_lockable                    = false;
+            double      itts_line_to_mark_alpha_dbl          = 0.1;
+            float       itts_line_to_mark_alpha_flt          = 0.1;
+            bool        itts_use_average_gun_speed           = true;
+            bool        lock_center_crosshair                = false;
+            double      lock_confirm_line_length_dbl         = 1.5;
+            float       lock_confirm_line_length_flt         = 1.5;
+            std::string manifest_heading                     = "Manifest\n";
+            double      max_missile_bracket_size_dbl         = 2.05;
+            float       max_missile_bracket_size_flt         = 2.05;
+            std::string message_prefix                       = "";
+            double      min_missile_bracket_size_dbl         = 1.05;
+            float       min_missile_bracket_size_flt         = 1.05;
+            double      min_lock_box_size_dbl                = 0.001;
+            float       min_lock_box_size_flt                = 0.001;
+            double      min_radar_blip_size_dbl              = 0.0;
+            float       min_radar_blip_size_flt              = 0.0;
+            double      min_target_box_size_dbl              = 0.01;
+            float       min_target_box_size_flt              = 0.01;
+            std::string mounts_list_empty                    = "";
+            double      nav_cross_line_thickness_dbl         = 1.0;
+            float       nav_cross_line_thickness_flt         = 1.0;
+            std::string not_included_in_damage_report        = "plasteel_hull tungsten_hull isometal_hull";
+            bool        out_of_cone_distance                 = false;
+            double      padlock_view_lag_dbl                 = 1.5;
+            float       padlock_view_lag_flt                 = 1.5;
+            double      padlock_view_lag_fix_zone_dbl        = 0.0872;
+            float       padlock_view_lag_fix_zone_flt        = 0.0872;
+            std::string planet_near_message                  = "#ff0000Planetary Hazard Near#000000";
+            bool        print_damage_percent                 = true;
+            bool        print_faction                        = true;
+            bool        print_fg_name                        = true;
+            bool        print_fg_sub_id                      = false;
+            bool        print_request_docking                = true;
+            bool        print_ship_type                      = true;
+            bool        projectile_means_missile             = false;
+            std::string radar_type                           = "WC";
+            double      radar_search_extra_radius_dbl        = 1000.0;
+            float       radar_search_extra_radius_flt        = 1000.0;
+            bool        rotating_bracket_inner               = true;
+            double      rotating_bracket_size_dbl            = 0.58;
+            float       rotating_bracket_size_flt            = 0.58;
+            double      rotating_bracket_width_dbl           = 0.1;
+            float       rotating_bracket_width_flt           = 0.1;
+            double      scale_relationship_color_dbl         = 10.0;
+            float       scale_relationship_color_flt         = 10.0;
+            bool        shield_vdu_fade                      = true;
+            double      shield_vdu_thresh0_dbl               = 0.25;
+            float       shield_vdu_thresh0_flt               = 0.25;
+            double      shield_vdu_thresh1_dbl               = 0.5;
+            float       shield_vdu_thresh1_flt               = 0.5;
+            double      shield_vdu_thresh2_dbl               = 0.75;
+            float       shield_vdu_thresh2_flt               = 0.75;
+            bool        show_negative_blips_as_positive      = true;
+            bool        simple_manifest                      = false;
+            std::string starship_near_message                = "#ff0000Starship Near#000000";
+            bool        switch_to_target_mode_on_key         = true;
+            bool        switch_back_from_comms               = true;
+            double      tac_target_foci_dbl                  = 0.5;
+            float       tac_target_foci_flt                  = 0.5;
+            double      tac_target_length_dbl                = 0.1;
+            float       tac_target_length_flt                = 0.1;
+            double      tac_target_thickness_dbl             = 1.0;
+            float       tac_target_thickness_flt             = 1.0;
+            double      text_background_alpha_dbl            = 0.0625;
+            float       text_background_alpha_flt            = 0.0625;
+            bool        top_view                             = false;
+            bool        untarget_beyond_cone                 = false;
 
         } hud;
 
         struct {
-            int max_search_size = 16384;
-            bool modern_mouse_cursor = true;
+            int         max_search_size     = 16'384;
+            bool        modern_mouse_cursor = true;
             std::string mouse_cursor_sprite = "mouse.spr";
-            double symbol_size_dbl = 0.25;
-        float symbol_size_flt = 0.25;
+            double      symbol_size_dbl     = 0.25;
+            float       symbol_size_flt     = 0.25;
 
         } nav;
 
     } graphics;
 
     struct {
-        int debug_level = 0;
-        bool start_game = true;
-        bool trace = false;
+        int  debug_level = 0;
+        bool start_game  = true;
+        bool trace       = false;
 
     } interpreter;
 
     struct {
-        bool enabled = true;
-        bool throttle = false;
-        bool hat_enabled = false;
-        bool clamp_axes = true;
-        double deadband_dbl = 0.05;
-        float deadband_flt = 0.05;
-        bool debug_digital_hatswitch = false;
-        int double_mouse_position = 1280;
-        double double_mouse_factor_dbl = 2.0;
-        float double_mouse_factor_flt = 2.0;
-        int ff_device = 0;
-        bool force_feedback = false;
-        bool force_use_of_joystick = false;
-        std::string initial_mode = "normal";
-        double joystick_exponent_dbl = 1.0;
-        float joystick_exponent_flt = 1.0;
-        double mouse_blur_dbl = 0.025;
-        float mouse_blur_flt = 0.025;
-        std::string mouse_crosshair = "crosshairs.spr";
-        bool mouse_cursor = false;
-        bool mouse_cursor_chasecam = true;
-        bool mouse_cursor_pancam = false;
-        bool mouse_cursor_pantgt = false;
-        double mouse_deadband_dbl = 0.025;
-        float mouse_deadband_flt = 0.025;
-        double mouse_exponent_dbl = 3.0;
-        float mouse_exponent_flt = 3.0;
-        double mouse_sensitivity_dbl = 50.0;
-        float mouse_sensitivity_flt = 50.0;
-        double nonlinear_expamount_combat_dbl = 1.0;
-        float nonlinear_expamount_combat_flt = 1.0;
-        double nonlinear_expamount_nav_dbl = 1.0;
-        float nonlinear_expamount_nav_flt = 1.0;
-        double nonlinear_expfactor_combat_dbl = 6.0;
-        float nonlinear_expfactor_combat_flt = 6.0;
-        double nonlinear_expfactor_nav_dbl = 6.0;
-        float nonlinear_expfactor_nav_flt = 6.0;
-        double nonlinear_pamount_combat_dbl = 0.0;
-        float nonlinear_pamount_combat_flt = 0.0;
-        double nonlinear_pamount_nav_dbl = 0.0;
-        float nonlinear_pamount_nav_flt = 0.0;
-        double nonlinear_pfactor_combat_dbl = 2.0;
-        float nonlinear_pfactor_combat_flt = 2.0;
-        double nonlinear_pfactor_nav_dbl = 2.0;
-        float nonlinear_pfactor_nav_flt = 2.0;
-        bool nonlinear_throttle_combat = false;
-        bool nonlinear_throttle_nav = true;
-        int polling_rate = 0;
-        bool reverse_mouse_spr = true;
-        bool warp_mouse = false;
-        int warp_mouse_zone = 100;
+        bool        enabled                        = true;
+        bool        throttle                       = false;
+        bool        hat_enabled                    = false;
+        bool        clamp_axes                     = true;
+        double      deadband_dbl                   = 0.05;
+        float       deadband_flt                   = 0.05;
+        bool        debug_digital_hatswitch        = false;
+        int         double_mouse_position          = 1'280;
+        double      double_mouse_factor_dbl        = 2.0;
+        float       double_mouse_factor_flt        = 2.0;
+        int         ff_device                      = 0;
+        bool        force_feedback                 = false;
+        bool        force_use_of_joystick          = false;
+        std::string initial_mode                   = "normal";
+        double      joystick_exponent_dbl          = 1.0;
+        float       joystick_exponent_flt          = 1.0;
+        double      mouse_blur_dbl                 = 0.025;
+        float       mouse_blur_flt                 = 0.025;
+        std::string mouse_crosshair                = "crosshairs.spr";
+        bool        mouse_cursor                   = false;
+        bool        mouse_cursor_chasecam          = true;
+        bool        mouse_cursor_pancam            = false;
+        bool        mouse_cursor_pantgt            = false;
+        double      mouse_deadband_dbl             = 0.025;
+        float       mouse_deadband_flt             = 0.025;
+        double      mouse_exponent_dbl             = 3.0;
+        float       mouse_exponent_flt             = 3.0;
+        double      mouse_sensitivity_dbl          = 50.0;
+        float       mouse_sensitivity_flt          = 50.0;
+        double      nonlinear_expamount_combat_dbl = 1.0;
+        float       nonlinear_expamount_combat_flt = 1.0;
+        double      nonlinear_expamount_nav_dbl    = 1.0;
+        float       nonlinear_expamount_nav_flt    = 1.0;
+        double      nonlinear_expfactor_combat_dbl = 6.0;
+        float       nonlinear_expfactor_combat_flt = 6.0;
+        double      nonlinear_expfactor_nav_dbl    = 6.0;
+        float       nonlinear_expfactor_nav_flt    = 6.0;
+        double      nonlinear_pamount_combat_dbl   = 0.0;
+        float       nonlinear_pamount_combat_flt   = 0.0;
+        double      nonlinear_pamount_nav_dbl      = 0.0;
+        float       nonlinear_pamount_nav_flt      = 0.0;
+        double      nonlinear_pfactor_combat_dbl   = 2.0;
+        float       nonlinear_pfactor_combat_flt   = 2.0;
+        double      nonlinear_pfactor_nav_dbl      = 2.0;
+        float       nonlinear_pfactor_nav_flt      = 2.0;
+        bool        nonlinear_throttle_combat      = false;
+        bool        nonlinear_throttle_nav         = true;
+        int         polling_rate                   = 0;
+        bool        reverse_mouse_spr              = true;
+        bool        warp_mouse                     = false;
+        int         warp_mouse_zone                = 100;
 
     } joystick;
 
@@ -2241,465 +2253,465 @@ namespace vega_config {
     // behavior-preset selectors. The mouse/joystick/keyboard sub-structs above
     // are populated from input.mouse / input.joystick / input.keyboard.
     struct {
-        std::string device = "keyboard";        // "keyboard" | "mouse" | "joystick"
-        std::string mouse_preset = "glide_mouse";
+        std::string device          = "keyboard";  // "keyboard" | "mouse" | "joystick"
+        std::string mouse_preset    = "glide_mouse";
         std::string joystick_preset = "joy_normal";
 
     } input;
 
     struct {
-        int vsdebug = 0;
+        int  vsdebug       = 0;
         bool verbose_debug = false;
 
     } logging;
 
     struct {
-        std::string account_server_url = "http://vegastrike.sourceforge.net/cgi-bin/accountserver.py";
-        bool chat_only_in_network = false;
-        bool force_client_connect = false;
-        std::string server_ip = "localhost";
-        std::string server_port = "6777";
-        bool use_account_server = true;
+        std::string account_server_url   = "http://vegastrike.sourceforge.net/cgi-bin/accountserver.py";
+        bool        chat_only_in_network = false;
+        bool        force_client_connect = false;
+        std::string server_ip            = "localhost";
+        std::string server_port          = "6777";
+        bool        use_account_server   = true;
 
     } network;
 
     struct {
-        bool ai_lock_cheat = true;
-        bool ai_pilot_when_in_turret = false;
-        bool allow_mission_abort = true;
-        bool allow_special_and_normal_gun_combo = true;
-        double asteroid_difficulty_dbl = 0.1;
-        float asteroid_difficulty_flt = 0.1;
-        bool asteroid_weapon_collision = false;
-        double auto_docking_speed_boost_dbl = 20.0;
-        float auto_docking_speed_boost_flt = 20.0;
-        double auto_landing_displace_distance_dbl = 50.0;
-        float auto_landing_displace_distance_flt = 50.0;
-        double auto_landing_dock_distance_dbl = 50.0;
-        float auto_landing_dock_distance_flt = 50.0;
-        bool auto_landing_enable = false;
-        double auto_landing_move_distance_dbl = 50.0;
-        float auto_landing_move_distance_flt = 50.0;
-        double auto_landing_port_unclamped_seconds_dbl = 120.0;
-        float auto_landing_port_unclamped_seconds_flt = 120.0;
-        double auto_landing_warning_distance_dbl = 350.0;
-        float auto_landing_warning_distance_flt = 350.0;
-        bool auto_pilot_compensate_for_interdiction = false;
-        double auto_pilot_no_enemies_distance_multiplier_dbl = 4.0;
-        float auto_pilot_no_enemies_distance_multiplier_flt = 4.0;
-        double auto_pilot_planet_radius_percent_dbl = 0.495;
-        float auto_pilot_planet_radius_percent_flt = 0.495;
-        bool auto_pilot_terminate = true;
-        double auto_pilot_termination_distance_dbl = 2500.0;
-        float auto_pilot_termination_distance_flt = 2500.0;
-        double auto_pilot_termination_distance_enemy_dbl = 24000.0;
-        float auto_pilot_termination_distance_enemy_flt = 24000.0;
-        double auto_pilot_termination_distance_no_enemies_dbl = 6000.0;
-        float auto_pilot_termination_distance_no_enemies_flt = 6000.0;
-        bool auto_pilot_ramp_warp_down = true;
-        std::string auto_landing_exclude_list = "";
-        std::string auto_landing_exclude_warning_list = "";
-        double auto_time_in_seconds_dbl = 10.0;
-        float auto_time_in_seconds_flt = 10.0;
-        bool auto_turn_towards = true;
-        bool auto_undock = true;
-        double autogen_compactness_dbl = 1.0;
-        float autogen_compactness_flt = 1.0;
-        bool automatic_undock = true;
-        double autotracking_dbl = 0.93;
-        float autotracking_flt = 0.93;
-        bool can_auto_through_planets = true;
-        double capship_size_dbl = 500.0;
-        float capship_size_flt = 500.0;
-        bool car_control = false;
-        double cargo_live_time_dbl = 600.0;
-        float cargo_live_time_flt = 600.0;
-        bool cargo_wingmen_only_with_dockport = false;
-        bool change_docking_orientation = false;
-        double close_enough_to_autotrack_dbl = 4.0;
-        float close_enough_to_autotrack_flt = 4.0;
-        bool collidemap_sanity_check = false;
-        double collision_inertial_time_dbl = 1.25;
-        float collision_inertial_time_flt = 1.25;
-        double collision_scale_factor_dbl = 1.0;
-        float collision_scale_factor_flt = 1.0;
-        bool component_based_upgrades = true;
-        double computer_warp_ramp_up_time_dbl = 10.0;
-        float computer_warp_ramp_up_time_flt = 10.0;
-        double contraband_assist_range_dbl = 50000.0;
-        float contraband_assist_range_flt = 50000.0;
-        double damage_chance_dbl = 0.005;
-        float damage_chance_flt = 0.005;
-        double damage_player_chance_dbl = 0.5;
-        float damage_player_chance_flt = 0.5;
-        double debris_mass_dbl = 1e-05;
-        float debris_mass_flt = 1e-05;
-        double debris_time_dbl = 500.0;
-        float debris_time_flt = 500.0;
-        double default_interdiction_dbl = 0.01;
-        float default_interdiction_flt = 0.01;
-        double default_shield_tightness_dbl = 0.0;
-        float default_shield_tightness_flt = 0.0;
-        double definite_damage_chance_dbl = 0.1;
-        float definite_damage_chance_flt = 0.1;
-        double density_of_jump_point_dbl = 100000.0;
-        float density_of_jump_point_flt = 100000.0;
-        double density_of_rock_dbl = 3.0;
-        float density_of_rock_flt = 3.0;
-        bool difficulty_based_enemy_damage = true;
-        double difficulty_speed_exponent_dbl = 0.2;
-        float difficulty_speed_exponent_flt = 0.2;
-        bool difficulty_based_shield_recharge = true;
-        bool direct_interstellar_journey = true;
-        bool display_in_meters = true;
-        double distance_to_warp_dbl = 1000000000000.0;
-        float distance_to_warp_flt = 1000000000000.0;
-        bool dock_with_clear_planets = true;
-        bool dock_within_base_shield = false;
-        double docking_time_dbl = 20.0;
-        float docking_time_flt = 20.0;
-        bool dockport_allows_upgrade_storage = false;
-        bool does_missile_bounce = false;
-        std::string drone = "beholder";
-        int eject_cargo_on_blowup = 0;
-        double eject_cargo_speed_dbl = 1.0;
-        float eject_cargo_speed_flt = 1.0;
-        double eject_distance_dbl = 20.0;
-        float eject_distance_flt = 20.0;
-        double eject_live_time_dbl = 0.0;
-        float eject_live_time_flt = 0.0;
-        bool engine_energy_takes_priority = true;
-        double enough_warp_for_cruise_dbl = 2000.0;
-        float enough_warp_for_cruise_flt = 2000.0;
-        double explosion_damage_center_dbl = 1.0;
-        float explosion_damage_center_flt = 1.0;
-        double explosion_damage_edge_dbl = 0.125;
-        float explosion_damage_edge_flt = 0.125;
-        double extra_space_drag_for_cargo_dbl = 0.005;
-        float extra_space_drag_for_cargo_flt = 0.005;
-        bool face_target_on_auto = false;
-        bool fire_missing_autotrackers = true;
-        double flt_orthogonal_thrust_smoothing_time_dbl = 1.0;
-        float flt_orthogonal_thrust_smoothing_time_flt = 1.0;
-        double flt_orthogonal_thrust_speed_reduce_factor_dbl = 1.0;
-        float flt_orthogonal_thrust_speed_reduce_factor_flt = 1.0;
-        double friendly_auto_radius_dbl = 0.0;
-        float friendly_auto_radius_flt = 0.0;
-        double game_accel_dbl = 1.0;
-        float game_accel_flt = 1.0;
-        double game_speed_dbl = 1.0;
-        float game_speed_flt = 1.0;
-        bool game_speed_affects_autogen_systems = false;
-        bool game_speed_lying = false;
-        double gun_speed_dbl = 1.0;
-        float gun_speed_flt = 1.0;
-        bool gun_speed_adjusted_game_speed = true;
-        bool hardware_cursor = false;
-        double hostile_auto_radius_dbl = 1000.0;
-        float hostile_auto_radius_flt = 1000.0;
-        double hud_repair_unit_dbl = 0.25;
-        float hud_repair_unit_flt = 0.25;
-        bool in_system_jump_or_timeless_auto_pilot = false;
-        double inactive_system_time_dbl = 0.3;
-        float inactive_system_time_flt = 0.3;
-        std::string indestructible_cargo_items = "";
-        double indiscriminate_system_destruction_dbl = 0.25;
-        float indiscriminate_system_destruction_flt = 0.25;
-        double inelastic_scale_dbl = 0.8;
-        float inelastic_scale_flt = 0.8;
-        double jump_damage_multiplier_dbl = 0.1;
-        float jump_damage_multiplier_flt = 0.1;
-        bool jump_disables_shields = true;
-        double jump_mesh_radius_scale_dbl = 0.5;
-        float jump_mesh_radius_scale_flt = 0.5;
-        double jump_radius_scale_dbl = 2.0;
-        float jump_radius_scale_flt = 2.0;
-        bool jump_weapon_collision = false;
-        double launch_speed_dbl = -1.0;
-        float launch_speed_flt = -1.0;
-        double lock_cone_dbl = 0.8;
-        float lock_cone_flt = 0.8;
-        bool match_speed_with_target = true;
-        double max_accel_for_smooth_autopilot_dbl = 10.0;
-        float max_accel_for_smooth_autopilot_flt = 10.0;
-        int max_collide_trees = 16384;
-        double max_damage_dbl = 0.999;
-        float max_damage_flt = 0.999;
-        int max_ecm = 4;
-        double max_force_multiplier_dbl = 5.0;
-        float max_force_multiplier_flt = 5.0;
-        double max_jump_damage_dbl = 100.0;
-        float max_jump_damage_flt = 100.0;
-        double max_lost_target_live_time_dbl = 30.0;
-        float max_lost_target_live_time_flt = 30.0;
-        int max_missions = 4;
-        double max_non_player_rotation_rate_dbl = 360.0;
-        float max_non_player_rotation_rate_flt = 360.0;
-        double max_over_combat_speed_for_smooth_autopilot_dbl = 2.0;
-        float max_over_combat_speed_for_smooth_autopilot_flt = 2.0;
-        double max_player_rotation_rate_dbl = 24.0;
-        float max_player_rotation_rate_flt = 24.0;
-        double max_radar_cone_damage_dbl = 0.9;
-        float max_radar_cone_damage_flt = 0.9;
-        double max_radar_lock_cone_damage_dbl = 0.95;
-        float max_radar_lock_cone_damage_flt = 0.95;
-        double max_radar_track_cone_damage_dbl = 0.98;
-        float max_radar_track_cone_damage_flt = 0.98;
-        bool max_shield_lowers_capacitance = false;
-        double max_torque_multiplier_dbl = 0.67;
-        float max_torque_multiplier_flt = 0.67;
-        double max_warp_effect_size_dbl = 3000.0;
-        float max_warp_effect_size_flt = 3000.0;
-        double min_asteroid_distance_dbl = -100.0;
-        float min_asteroid_distance_flt = -100.0;
-        double min_damage_dbl = 0.001;
-        float min_damage_flt = 0.001;
-        double min_maxenergy_shot_damage_dbl = 0.2;
-        float min_maxenergy_shot_damage_flt = 0.2;
-        double min_shield_speeding_discharge_dbl = 0.1;
-        float min_shield_speeding_discharge_flt = 0.1;
-        double min_spec_interdiction_for_jittery_autopilot_dbl = 0.05;
-        float min_spec_interdiction_for_jittery_autopilot_flt = 0.05;
-        double min_warp_effect_size_dbl = 100.0;
-        float min_warp_effect_size_flt = 100.0;
-        double min_warp_orbit_radius_dbl = 100000000.0;
-        float min_warp_orbit_radius_flt = 100000000.0;
-        double minimum_mass_dbl = 1e-06;
-        float minimum_mass_flt = 1e-06;
-        double minimum_time_dbl = 0.1;
-        float minimum_time_flt = 0.1;
-        double mount_repair_unit_dbl = 0.25;
-        float mount_repair_unit_flt = 0.25;
-        bool must_lock_to_autotrack = true;
-        bool must_repair_to_sell = true;
-        double near_autotrack_cone_dbl = 0.9;
-        float near_autotrack_cone_flt = 0.9;
-        double nebula_shield_recharge_dbl = 0.5;
-        float nebula_shield_recharge_flt = 0.5;
-        double nebula_space_drag_dbl = 0.01;
-        float nebula_space_drag_flt = 0.01;
-        double neutral_auto_radius_dbl = 0.0;
-        float neutral_auto_radius_flt = 0.0;
-        bool no_ai_jump_points = false;
-        double no_auto_light_below_dbl = 2000.0;
-        float no_auto_light_below_flt = 2000.0;
-        bool no_damage_to_docked_ships = true;
-        bool no_spec_jump = true;
-        bool no_unit_collisions = false;
-        int num_running_systems = 4;
-        int num_times_to_simulate_new_star_system = 20;
-        bool only_show_best_downgrade = true;
-        double orbit_averaging_dbl = 16.0;
-        float orbit_averaging_flt = 16.0;
-        bool out_of_arc_fire_disrupts_lock = false;
-        double percent_missile_match_target_velocity_dbl = 1.0;
-        float percent_missile_match_target_velocity_flt = 1.0;
-        bool persistent_on_load = true;
-        double planet_ejection_stophack_dbl = 100000.0;
-        float planet_ejection_stophack_flt = 100000.0;
-        bool planets_always_neutral = true;
-        bool planets_can_have_subunits = false;
-        double player_godliness_dbl = 0.0;
-        float player_godliness_flt = 0.0;
-        double player_survival_chance_on_base_death_dbl = 1.0;
-        float player_survival_chance_on_base_death_flt = 1.0;
-        std::string player_tractorability_mask = "p";
-        bool reduce_beam_ammo = false;
-        double refire_difficulty_scaling_dbl = 3.0;
-        float refire_difficulty_scaling_flt = 3.0;
-        double repair_droid_check_time_dbl = 5.0;
-        float repair_droid_check_time_flt = 5.0;
-        double repair_droid_time_dbl = 120.0;
-        float repair_droid_time_flt = 120.0;
-        double respawn_unit_size_dbl = 400.0;
-        float respawn_unit_size_flt = 400.0;
-        double reverse_speed_limit_dbl = 0.1;
-        float reverse_speed_limit_flt = 0.1;
-        double runtime_compactness_dbl = 1.0;
-        float runtime_compactness_flt = 1.0;
-        double seconds_per_parsec_dbl = 10.0;
-        float seconds_per_parsec_flt = 10.0;
-        bool separate_system_flakiness_component = false;
-        double shield_energy_capacitance_dbl = 0.2;
-        float shield_energy_capacitance_flt = 0.2;
-        double shield_maintenance_charge_dbl = 0.25;
-        float shield_maintenance_charge_flt = 0.25;
-        bool shields_in_spec = false;
-        bool simulate_while_docked = false;
-        int slide_end = 0;
-        int slide_start = 2;
-        double smallest_subunit_to_collide_dbl = 0.2;
-        float smallest_subunit_to_collide_flt = 0.2;
-        double speeding_discharge_dbl = 0.25;
-        float speeding_discharge_flt = 0.25;
-        bool sphere_collision = true;
-        double star_system_scale_dbl = 1.0;
-        float star_system_scale_flt = 1.0;
-        bool starships_as_cargo = true;
-        bool steady_itts = false;
-        double survival_chance_on_base_death_dbl = 0.1;
-        float survival_chance_on_base_death_flt = 0.1;
-        bool system_damage_on_armor = false;
-        double target_distance_to_warp_bonus_dbl = 1.33;
-        float target_distance_to_warp_bonus_flt = 1.33;
-        bool teleport_autopilot = true;
-        double thruster_hit_chance_dbl = 0.25;
-        float thruster_hit_chance_flt = 0.25;
-        double un_docking_time_dbl = 10.0;
-        float un_docking_time_flt = 10.0;
-        bool undock_turn_away = true;
-        double unit_default_autodock_radius_dbl = 0.0;
-        float unit_default_autodock_radius_flt = 0.0;
-        double unit_space_drag_dbl = 0.0;
-        float unit_space_drag_flt = 0.0;
-        bool use_cargo_mass = true;
-        bool use_hidden_cargo_space = true;
-        bool use_unit_autodock_radius = false;
-        bool use_upgrade_template_maxrange = true;
-        bool use_max_shield_energy_usage = false;
-        double velocity_max_dbl = 10000.0;
-        float velocity_max_flt = 10000.0;
-        double warp_behind_angle_dbl = 150.0;
-        float warp_behind_angle_flt = 150.0;
-        double warp_cruise_mult_dbl = 15000.0;
-        float warp_cruise_mult_flt = 15000.0;
-        double warp_curve_degree_dbl = 1.3;
-        float warp_curve_degree_flt = 1.3;
-        bool warp_is_interstellar = false;
-        double warp_orbit_multiplier_dbl = 20.0;
-        float warp_orbit_multiplier_flt = 20.0;
-        double warp_perpendicular_dbl = 80.0;
-        float warp_perpendicular_flt = 80.0;
-        double warp_ramp_down_time_dbl = 0.1;
-        float warp_ramp_down_time_flt = 0.1;
-        double warp_region0_dbl = 1.0;
-        float warp_region0_flt = 1.0;
-        double warp_region1_dbl = 5000000.0;
-        float warp_region1_flt = 5000000.0;
-        double weapon_damage_efficiency_dbl = 1.0;
-        float weapon_damage_efficiency_flt = 1.0;
-        double year_scale_dbl = 16.0;
-        float year_scale_flt = 16.0;
+        bool        ai_lock_cheat                                   = true;
+        bool        ai_pilot_when_in_turret                         = false;
+        bool        allow_mission_abort                             = true;
+        bool        allow_special_and_normal_gun_combo              = true;
+        double      asteroid_difficulty_dbl                         = 0.1;
+        float       asteroid_difficulty_flt                         = 0.1;
+        bool        asteroid_weapon_collision                       = false;
+        double      auto_docking_speed_boost_dbl                    = 20.0;
+        float       auto_docking_speed_boost_flt                    = 20.0;
+        double      auto_landing_displace_distance_dbl              = 50.0;
+        float       auto_landing_displace_distance_flt              = 50.0;
+        double      auto_landing_dock_distance_dbl                  = 50.0;
+        float       auto_landing_dock_distance_flt                  = 50.0;
+        bool        auto_landing_enable                             = false;
+        double      auto_landing_move_distance_dbl                  = 50.0;
+        float       auto_landing_move_distance_flt                  = 50.0;
+        double      auto_landing_port_unclamped_seconds_dbl         = 120.0;
+        float       auto_landing_port_unclamped_seconds_flt         = 120.0;
+        double      auto_landing_warning_distance_dbl               = 350.0;
+        float       auto_landing_warning_distance_flt               = 350.0;
+        bool        auto_pilot_compensate_for_interdiction          = false;
+        double      auto_pilot_no_enemies_distance_multiplier_dbl   = 4.0;
+        float       auto_pilot_no_enemies_distance_multiplier_flt   = 4.0;
+        double      auto_pilot_planet_radius_percent_dbl            = 0.495;
+        float       auto_pilot_planet_radius_percent_flt            = 0.495;
+        bool        auto_pilot_terminate                            = true;
+        double      auto_pilot_termination_distance_dbl             = 2500.0;
+        float       auto_pilot_termination_distance_flt             = 2500.0;
+        double      auto_pilot_termination_distance_enemy_dbl       = 24000.0;
+        float       auto_pilot_termination_distance_enemy_flt       = 24000.0;
+        double      auto_pilot_termination_distance_no_enemies_dbl  = 6000.0;
+        float       auto_pilot_termination_distance_no_enemies_flt  = 6000.0;
+        bool        auto_pilot_ramp_warp_down                       = true;
+        std::string auto_landing_exclude_list                       = "";
+        std::string auto_landing_exclude_warning_list               = "";
+        double      auto_time_in_seconds_dbl                        = 10.0;
+        float       auto_time_in_seconds_flt                        = 10.0;
+        bool        auto_turn_towards                               = true;
+        bool        auto_undock                                     = true;
+        double      autogen_compactness_dbl                         = 1.0;
+        float       autogen_compactness_flt                         = 1.0;
+        bool        automatic_undock                                = true;
+        double      autotracking_dbl                                = 0.93;
+        float       autotracking_flt                                = 0.93;
+        bool        can_auto_through_planets                        = true;
+        double      capship_size_dbl                                = 500.0;
+        float       capship_size_flt                                = 500.0;
+        bool        car_control                                     = false;
+        double      cargo_live_time_dbl                             = 600.0;
+        float       cargo_live_time_flt                             = 600.0;
+        bool        cargo_wingmen_only_with_dockport                = false;
+        bool        change_docking_orientation                      = false;
+        double      close_enough_to_autotrack_dbl                   = 4.0;
+        float       close_enough_to_autotrack_flt                   = 4.0;
+        bool        collidemap_sanity_check                         = false;
+        double      collision_inertial_time_dbl                     = 1.25;
+        float       collision_inertial_time_flt                     = 1.25;
+        double      collision_scale_factor_dbl                      = 1.0;
+        float       collision_scale_factor_flt                      = 1.0;
+        bool        component_based_upgrades                        = true;
+        double      computer_warp_ramp_up_time_dbl                  = 10.0;
+        float       computer_warp_ramp_up_time_flt                  = 10.0;
+        double      contraband_assist_range_dbl                     = 50000.0;
+        float       contraband_assist_range_flt                     = 50000.0;
+        double      damage_chance_dbl                               = 0.005;
+        float       damage_chance_flt                               = 0.005;
+        double      damage_player_chance_dbl                        = 0.5;
+        float       damage_player_chance_flt                        = 0.5;
+        double      debris_mass_dbl                                 = 1e-05;
+        float       debris_mass_flt                                 = 1e-05;
+        double      debris_time_dbl                                 = 500.0;
+        float       debris_time_flt                                 = 500.0;
+        double      default_interdiction_dbl                        = 0.01;
+        float       default_interdiction_flt                        = 0.01;
+        double      default_shield_tightness_dbl                    = 0.0;
+        float       default_shield_tightness_flt                    = 0.0;
+        double      definite_damage_chance_dbl                      = 0.1;
+        float       definite_damage_chance_flt                      = 0.1;
+        double      density_of_jump_point_dbl                       = 100000.0;
+        float       density_of_jump_point_flt                       = 100000.0;
+        double      density_of_rock_dbl                             = 3.0;
+        float       density_of_rock_flt                             = 3.0;
+        bool        difficulty_based_enemy_damage                   = true;
+        double      difficulty_speed_exponent_dbl                   = 0.2;
+        float       difficulty_speed_exponent_flt                   = 0.2;
+        bool        difficulty_based_shield_recharge                = true;
+        bool        direct_interstellar_journey                     = true;
+        bool        display_in_meters                               = true;
+        double      distance_to_warp_dbl                            = 1000000000000.0;
+        float       distance_to_warp_flt                            = 1000000000000.0;
+        bool        dock_with_clear_planets                         = true;
+        bool        dock_within_base_shield                         = false;
+        double      docking_time_dbl                                = 20.0;
+        float       docking_time_flt                                = 20.0;
+        bool        dockport_allows_upgrade_storage                 = false;
+        bool        does_missile_bounce                             = false;
+        std::string drone                                           = "beholder";
+        int         eject_cargo_on_blowup                           = 0;
+        double      eject_cargo_speed_dbl                           = 1.0;
+        float       eject_cargo_speed_flt                           = 1.0;
+        double      eject_distance_dbl                              = 20.0;
+        float       eject_distance_flt                              = 20.0;
+        double      eject_live_time_dbl                             = 0.0;
+        float       eject_live_time_flt                             = 0.0;
+        bool        engine_energy_takes_priority                    = true;
+        double      enough_warp_for_cruise_dbl                      = 2000.0;
+        float       enough_warp_for_cruise_flt                      = 2000.0;
+        double      explosion_damage_center_dbl                     = 1.0;
+        float       explosion_damage_center_flt                     = 1.0;
+        double      explosion_damage_edge_dbl                       = 0.125;
+        float       explosion_damage_edge_flt                       = 0.125;
+        double      extra_space_drag_for_cargo_dbl                  = 0.005;
+        float       extra_space_drag_for_cargo_flt                  = 0.005;
+        bool        face_target_on_auto                             = false;
+        bool        fire_missing_autotrackers                       = true;
+        double      flt_orthogonal_thrust_smoothing_time_dbl        = 1.0;
+        float       flt_orthogonal_thrust_smoothing_time_flt        = 1.0;
+        double      flt_orthogonal_thrust_speed_reduce_factor_dbl   = 1.0;
+        float       flt_orthogonal_thrust_speed_reduce_factor_flt   = 1.0;
+        double      friendly_auto_radius_dbl                        = 0.0;
+        float       friendly_auto_radius_flt                        = 0.0;
+        double      game_accel_dbl                                  = 1.0;
+        float       game_accel_flt                                  = 1.0;
+        double      game_speed_dbl                                  = 1.0;
+        float       game_speed_flt                                  = 1.0;
+        bool        game_speed_affects_autogen_systems              = false;
+        bool        game_speed_lying                                = false;
+        double      gun_speed_dbl                                   = 1.0;
+        float       gun_speed_flt                                   = 1.0;
+        bool        gun_speed_adjusted_game_speed                   = true;
+        bool        hardware_cursor                                 = false;
+        double      hostile_auto_radius_dbl                         = 1000.0;
+        float       hostile_auto_radius_flt                         = 1000.0;
+        double      hud_repair_unit_dbl                             = 0.25;
+        float       hud_repair_unit_flt                             = 0.25;
+        bool        in_system_jump_or_timeless_auto_pilot           = false;
+        double      inactive_system_time_dbl                        = 0.3;
+        float       inactive_system_time_flt                        = 0.3;
+        std::string indestructible_cargo_items                      = "";
+        double      indiscriminate_system_destruction_dbl           = 0.25;
+        float       indiscriminate_system_destruction_flt           = 0.25;
+        double      inelastic_scale_dbl                             = 0.8;
+        float       inelastic_scale_flt                             = 0.8;
+        double      jump_damage_multiplier_dbl                      = 0.1;
+        float       jump_damage_multiplier_flt                      = 0.1;
+        bool        jump_disables_shields                           = true;
+        double      jump_mesh_radius_scale_dbl                      = 0.5;
+        float       jump_mesh_radius_scale_flt                      = 0.5;
+        double      jump_radius_scale_dbl                           = 2.0;
+        float       jump_radius_scale_flt                           = 2.0;
+        bool        jump_weapon_collision                           = false;
+        double      launch_speed_dbl                                = -1.0;
+        float       launch_speed_flt                                = -1.0;
+        double      lock_cone_dbl                                   = 0.8;
+        float       lock_cone_flt                                   = 0.8;
+        bool        match_speed_with_target                         = true;
+        double      max_accel_for_smooth_autopilot_dbl              = 10.0;
+        float       max_accel_for_smooth_autopilot_flt              = 10.0;
+        int         max_collide_trees                               = 16'384;
+        double      max_damage_dbl                                  = 0.999;
+        float       max_damage_flt                                  = 0.999;
+        int         max_ecm                                         = 4;
+        double      max_force_multiplier_dbl                        = 5.0;
+        float       max_force_multiplier_flt                        = 5.0;
+        double      max_jump_damage_dbl                             = 100.0;
+        float       max_jump_damage_flt                             = 100.0;
+        double      max_lost_target_live_time_dbl                   = 30.0;
+        float       max_lost_target_live_time_flt                   = 30.0;
+        int         max_missions                                    = 4;
+        double      max_non_player_rotation_rate_dbl                = 360.0;
+        float       max_non_player_rotation_rate_flt                = 360.0;
+        double      max_over_combat_speed_for_smooth_autopilot_dbl  = 2.0;
+        float       max_over_combat_speed_for_smooth_autopilot_flt  = 2.0;
+        double      max_player_rotation_rate_dbl                    = 24.0;
+        float       max_player_rotation_rate_flt                    = 24.0;
+        double      max_radar_cone_damage_dbl                       = 0.9;
+        float       max_radar_cone_damage_flt                       = 0.9;
+        double      max_radar_lock_cone_damage_dbl                  = 0.95;
+        float       max_radar_lock_cone_damage_flt                  = 0.95;
+        double      max_radar_track_cone_damage_dbl                 = 0.98;
+        float       max_radar_track_cone_damage_flt                 = 0.98;
+        bool        max_shield_lowers_capacitance                   = false;
+        double      max_torque_multiplier_dbl                       = 0.67;
+        float       max_torque_multiplier_flt                       = 0.67;
+        double      max_warp_effect_size_dbl                        = 3000.0;
+        float       max_warp_effect_size_flt                        = 3000.0;
+        double      min_asteroid_distance_dbl                       = -100.0;
+        float       min_asteroid_distance_flt                       = -100.0;
+        double      min_damage_dbl                                  = 0.001;
+        float       min_damage_flt                                  = 0.001;
+        double      min_maxenergy_shot_damage_dbl                   = 0.2;
+        float       min_maxenergy_shot_damage_flt                   = 0.2;
+        double      min_shield_speeding_discharge_dbl               = 0.1;
+        float       min_shield_speeding_discharge_flt               = 0.1;
+        double      min_spec_interdiction_for_jittery_autopilot_dbl = 0.05;
+        float       min_spec_interdiction_for_jittery_autopilot_flt = 0.05;
+        double      min_warp_effect_size_dbl                        = 100.0;
+        float       min_warp_effect_size_flt                        = 100.0;
+        double      min_warp_orbit_radius_dbl                       = 100000000.0;
+        float       min_warp_orbit_radius_flt                       = 100000000.0;
+        double      minimum_mass_dbl                                = 1e-06;
+        float       minimum_mass_flt                                = 1e-06;
+        double      minimum_time_dbl                                = 0.1;
+        float       minimum_time_flt                                = 0.1;
+        double      mount_repair_unit_dbl                           = 0.25;
+        float       mount_repair_unit_flt                           = 0.25;
+        bool        must_lock_to_autotrack                          = true;
+        bool        must_repair_to_sell                             = true;
+        double      near_autotrack_cone_dbl                         = 0.9;
+        float       near_autotrack_cone_flt                         = 0.9;
+        double      nebula_shield_recharge_dbl                      = 0.5;
+        float       nebula_shield_recharge_flt                      = 0.5;
+        double      nebula_space_drag_dbl                           = 0.01;
+        float       nebula_space_drag_flt                           = 0.01;
+        double      neutral_auto_radius_dbl                         = 0.0;
+        float       neutral_auto_radius_flt                         = 0.0;
+        bool        no_ai_jump_points                               = false;
+        double      no_auto_light_below_dbl                         = 2000.0;
+        float       no_auto_light_below_flt                         = 2000.0;
+        bool        no_damage_to_docked_ships                       = true;
+        bool        no_spec_jump                                    = true;
+        bool        no_unit_collisions                              = false;
+        int         num_running_systems                             = 4;
+        int         num_times_to_simulate_new_star_system           = 20;
+        bool        only_show_best_downgrade                        = true;
+        double      orbit_averaging_dbl                             = 16.0;
+        float       orbit_averaging_flt                             = 16.0;
+        bool        out_of_arc_fire_disrupts_lock                   = false;
+        double      percent_missile_match_target_velocity_dbl       = 1.0;
+        float       percent_missile_match_target_velocity_flt       = 1.0;
+        bool        persistent_on_load                              = true;
+        double      planet_ejection_stophack_dbl                    = 100000.0;
+        float       planet_ejection_stophack_flt                    = 100000.0;
+        bool        planets_always_neutral                          = true;
+        bool        planets_can_have_subunits                       = false;
+        double      player_godliness_dbl                            = 0.0;
+        float       player_godliness_flt                            = 0.0;
+        double      player_survival_chance_on_base_death_dbl        = 1.0;
+        float       player_survival_chance_on_base_death_flt        = 1.0;
+        std::string player_tractorability_mask                      = "p";
+        bool        reduce_beam_ammo                                = false;
+        double      refire_difficulty_scaling_dbl                   = 3.0;
+        float       refire_difficulty_scaling_flt                   = 3.0;
+        double      repair_droid_check_time_dbl                     = 5.0;
+        float       repair_droid_check_time_flt                     = 5.0;
+        double      repair_droid_time_dbl                           = 120.0;
+        float       repair_droid_time_flt                           = 120.0;
+        double      respawn_unit_size_dbl                           = 400.0;
+        float       respawn_unit_size_flt                           = 400.0;
+        double      reverse_speed_limit_dbl                         = 0.1;
+        float       reverse_speed_limit_flt                         = 0.1;
+        double      runtime_compactness_dbl                         = 1.0;
+        float       runtime_compactness_flt                         = 1.0;
+        double      seconds_per_parsec_dbl                          = 10.0;
+        float       seconds_per_parsec_flt                          = 10.0;
+        bool        separate_system_flakiness_component             = false;
+        double      shield_energy_capacitance_dbl                   = 0.2;
+        float       shield_energy_capacitance_flt                   = 0.2;
+        double      shield_maintenance_charge_dbl                   = 0.25;
+        float       shield_maintenance_charge_flt                   = 0.25;
+        bool        shields_in_spec                                 = false;
+        bool        simulate_while_docked                           = false;
+        int         slide_end                                       = 0;
+        int         slide_start                                     = 2;
+        double      smallest_subunit_to_collide_dbl                 = 0.2;
+        float       smallest_subunit_to_collide_flt                 = 0.2;
+        double      speeding_discharge_dbl                          = 0.25;
+        float       speeding_discharge_flt                          = 0.25;
+        bool        sphere_collision                                = true;
+        double      star_system_scale_dbl                           = 1.0;
+        float       star_system_scale_flt                           = 1.0;
+        bool        starships_as_cargo                              = true;
+        bool        steady_itts                                     = false;
+        double      survival_chance_on_base_death_dbl               = 0.1;
+        float       survival_chance_on_base_death_flt               = 0.1;
+        bool        system_damage_on_armor                          = false;
+        double      target_distance_to_warp_bonus_dbl               = 1.33;
+        float       target_distance_to_warp_bonus_flt               = 1.33;
+        bool        teleport_autopilot                              = true;
+        double      thruster_hit_chance_dbl                         = 0.25;
+        float       thruster_hit_chance_flt                         = 0.25;
+        double      un_docking_time_dbl                             = 10.0;
+        float       un_docking_time_flt                             = 10.0;
+        bool        undock_turn_away                                = true;
+        double      unit_default_autodock_radius_dbl                = 0.0;
+        float       unit_default_autodock_radius_flt                = 0.0;
+        double      unit_space_drag_dbl                             = 0.0;
+        float       unit_space_drag_flt                             = 0.0;
+        bool        use_cargo_mass                                  = true;
+        bool        use_hidden_cargo_space                          = true;
+        bool        use_unit_autodock_radius                        = false;
+        bool        use_upgrade_template_maxrange                   = true;
+        bool        use_max_shield_energy_usage                     = false;
+        double      velocity_max_dbl                                = 10000.0;
+        float       velocity_max_flt                                = 10000.0;
+        double      warp_behind_angle_dbl                           = 150.0;
+        float       warp_behind_angle_flt                           = 150.0;
+        double      warp_cruise_mult_dbl                            = 15000.0;
+        float       warp_cruise_mult_flt                            = 15000.0;
+        double      warp_curve_degree_dbl                           = 1.3;
+        float       warp_curve_degree_flt                           = 1.3;
+        bool        warp_is_interstellar                            = false;
+        double      warp_orbit_multiplier_dbl                       = 20.0;
+        float       warp_orbit_multiplier_flt                       = 20.0;
+        double      warp_perpendicular_dbl                          = 80.0;
+        float       warp_perpendicular_flt                          = 80.0;
+        double      warp_ramp_down_time_dbl                         = 0.1;
+        float       warp_ramp_down_time_flt                         = 0.1;
+        double      warp_region0_dbl                                = 1.0;
+        float       warp_region0_flt                                = 1.0;
+        double      warp_region1_dbl                                = 5000000.0;
+        float       warp_region1_flt                                = 5000000.0;
+        double      weapon_damage_efficiency_dbl                    = 1.0;
+        float       weapon_damage_efficiency_flt                    = 1.0;
+        double      year_scale_dbl                                  = 16.0;
+        float       year_scale_flt                                  = 16.0;
 
         struct {
-            double auto_eject_percent_dbl = 0.5;
-        float auto_eject_percent_flt = 0.5;
-            double eject_cargo_percent_dbl = 1.0;
-        float eject_cargo_percent_flt = 1.0;
-            int max_dumped_cargo = 15;
+            double auto_eject_percent_dbl   = 0.5;
+            float  auto_eject_percent_flt   = 0.5;
+            double eject_cargo_percent_dbl  = 1.0;
+            float  eject_cargo_percent_flt  = 1.0;
+            int    max_dumped_cargo         = 15;
             double hull_damage_to_eject_dbl = 100.0;
-        float hull_damage_to_eject_flt = 100.0;
-            bool player_auto_eject = true;
+            float  hull_damage_to_eject_flt = 100.0;
+            bool   player_auto_eject        = true;
 
         } ejection;
 
         struct {
-            int asteroid_high = 2;
-            int asteroid_low = 32;
-            int asteroid_parent = 1;
-            int dockable = 1;
-            bool force_top_priority = false;
-            int high = 2;
-            int inert = 64;
-            int low = 32;
-            int medium = 8;
-            int medium_high = 4;
-            std::string min_asteroid_distance = "none";
-            int missile = 1;
-            int no_enemies = 64;
-            int not_visible_combat_high = 10;
-            int not_visible_combat_low = 40;
-            int not_visible_combat_medium = 20;
-            int player = 1;
-            double player_threat_distance_factor_dbl = 2.0;
-        float player_threat_distance_factor_flt = 2.0;
-            double threat_distance_factor_dbl = 1.0;
-        float threat_distance_factor_flt = 1.0;
-            int system_installation = 3;
+            int         asteroid_high                     = 2;
+            int         asteroid_low                      = 32;
+            int         asteroid_parent                   = 1;
+            int         dockable                          = 1;
+            bool        force_top_priority                = false;
+            int         high                              = 2;
+            int         inert                             = 64;
+            int         low                               = 32;
+            int         medium                            = 8;
+            int         medium_high                       = 4;
+            std::string min_asteroid_distance             = "none";
+            int         missile                           = 1;
+            int         no_enemies                        = 64;
+            int         not_visible_combat_high           = 10;
+            int         not_visible_combat_low            = 40;
+            int         not_visible_combat_medium         = 20;
+            int         player                            = 1;
+            double      player_threat_distance_factor_dbl = 2.0;
+            float       player_threat_distance_factor_flt = 2.0;
+            double      threat_distance_factor_dbl        = 1.0;
+            float       threat_distance_factor_flt        = 1.0;
+            int         system_installation               = 3;
 
             struct {
                 double max_distance_factor_dbl = 4.0;
-        float max_distance_factor_flt = 4.0;
+                float  max_distance_factor_flt = 4.0;
                 double min_distance_factor_dbl = 0.25;
-        float min_distance_factor_flt = 0.25;
-                double target_fps_dbl = 30.0;
-        float target_fps_flt = 30.0;
+                float  min_distance_factor_flt = 0.25;
+                double target_fps_dbl          = 30.0;
+                float  target_fps_flt          = 30.0;
 
             } dynamic_throttle;
 
         } priorities;
 
         struct {
-            int max_relative_speed = 150;
-            double percent_to_tractor_dbl = 0.1;
-        float percent_to_tractor_flt = 0.1;
-            bool scoop = false;
+            int    max_relative_speed         = 150;
+            double percent_to_tractor_dbl     = 0.1;
+            float  percent_to_tractor_flt     = 0.1;
+            bool   scoop                      = false;
             double scoop_alpha_multiplier_dbl = 2.5;
-        float scoop_alpha_multiplier_flt = 2.5;
-            double scoop_angle_dbl = 0.5;
-        float scoop_angle_flt = 0.5;
-            double scoop_fov_dbl = 0.5;
-        float scoop_fov_flt = 0.5;
-            int scoop_long_slices = 10;
-            int scoop_rad_slices = 10;
+            float  scoop_alpha_multiplier_flt = 2.5;
+            double scoop_angle_dbl            = 0.5;
+            float  scoop_angle_flt            = 0.5;
+            double scoop_fov_dbl              = 0.5;
+            float  scoop_fov_flt              = 0.5;
+            int    scoop_long_slices          = 10;
+            int    scoop_rad_slices           = 10;
 
             struct {
-                double distance_dbl = 0.0;
-        float distance_flt = 0.0;
+                double distance_dbl           = 0.0;
+                float  distance_flt           = 0.0;
                 double distance_own_rsize_dbl = 1.5;
-        float distance_own_rsize_flt = 1.5;
+                float  distance_own_rsize_flt = 1.5;
                 double distance_tgt_rsize_dbl = 1.1;
-        float distance_tgt_rsize_flt = 1.1;
-                bool force_push = true;
-                bool force_in = true;
+                float  distance_tgt_rsize_flt = 1.1;
+                bool   force_push             = true;
+                bool   force_in               = true;
 
             } cargo;
 
             struct {
-                double distance_dbl = 0.0;
-        float distance_flt = 0.0;
+                double distance_dbl           = 0.0;
+                float  distance_flt           = 0.0;
                 double distance_own_rsize_dbl = 1.5;
-        float distance_own_rsize_flt = 1.5;
+                float  distance_own_rsize_flt = 1.5;
                 double distance_tgt_rsize_dbl = 1.1;
-        float distance_tgt_rsize_flt = 1.1;
-                bool force_push = true;
-                bool force_in = true;
+                float  distance_tgt_rsize_flt = 1.1;
+                bool   force_push             = true;
+                bool   force_in               = true;
 
             } disabled;
 
             struct {
-                double distance_dbl = 0.0;
-        float distance_flt = 0.0;
+                double distance_dbl           = 0.0;
+                float  distance_flt           = 0.0;
                 double distance_own_rsize_dbl = 2.2;
-        float distance_own_rsize_flt = 2.2;
+                float  distance_own_rsize_flt = 2.2;
                 double distance_tgt_rsize_dbl = 2.2;
-        float distance_tgt_rsize_flt = 2.2;
-                bool force_push = true;
-                bool force_in = true;
+                float  distance_tgt_rsize_flt = 2.2;
+                bool   force_push             = true;
+                bool   force_in               = true;
 
             } faction;
 
             struct {
-                double distance_dbl = 0.0;
-        float distance_flt = 0.0;
+                double distance_dbl           = 0.0;
+                float  distance_flt           = 0.0;
                 double distance_own_rsize_dbl = 1.5;
-        float distance_own_rsize_flt = 1.5;
+                float  distance_own_rsize_flt = 1.5;
                 double distance_tgt_rsize_dbl = 1.1;
-        float distance_tgt_rsize_flt = 1.1;
-                bool force_push = true;
-                bool force_in = true;
+                float  distance_tgt_rsize_flt = 1.1;
+                bool   force_push             = true;
+                bool   force_in               = true;
 
             } upgrade;
 
             struct {
-                double distance_dbl = 0.0;
-        float distance_flt = 0.0;
+                double distance_dbl           = 0.0;
+                float  distance_flt           = 0.0;
                 double distance_own_rsize_dbl = 1.1;
-        float distance_own_rsize_flt = 1.1;
+                float  distance_own_rsize_flt = 1.1;
                 double distance_tgt_rsize_dbl = 1.1;
-        float distance_tgt_rsize_flt = 1.1;
-                bool force_push = false;
-                bool force_in = false;
+                float  distance_tgt_rsize_flt = 1.1;
+                bool   force_push             = false;
+                bool   force_in               = false;
 
             } others;
 
@@ -2714,23 +2726,23 @@ namespace vega_config {
     } player;
 
     struct {
-        bool auto_hide = true;
-        std::string loading_sprite = "load_screen.ani";
+        bool        auto_hide       = true;
+        std::string loading_sprite  = "load_screen.ani";
         std::string loading_message = "Loading...";
 
     } splash;
 
     struct {
-        double mass_dbl = 100.0;
-        float mass_flt = 100.0;
+        double mass_dbl   = 100.0;
+        float  mass_flt   = 100.0;
         double radius_dbl = 10000.0;
-        float radius_flt = 10000.0;
+        float  radius_flt = 10000.0;
         double xscale_dbl = 1.0;
-        float xscale_flt = 1.0;
+        float  xscale_flt = 1.0;
         double yscale_dbl = 1.0;
-        float yscale_flt = 1.0;
+        float  yscale_flt = 1.0;
         double zscale_dbl = 1.0;
-        float zscale_flt = 1.0;
+        float  zscale_flt = 1.0;
 
     } terrain;
 
@@ -2741,104 +2753,104 @@ namespace vega_config {
 
     struct {
         double default_aggressivity_dbl = 2.01;
-        float default_aggressivity_flt = 2.01;
+        float  default_aggressivity_flt = 2.01;
 
     } unit;
 
     struct {
-        double bleed_factor_dbl = 2.0;
-        float bleed_factor_flt = 2.0;
-        double computer_warp_ramp_up_time_dbl = 10.0;
-        float computer_warp_ramp_up_time_flt = 10.0;
-        double in_system_jump_cost_dbl = 0.1;
-        float in_system_jump_cost_flt = 0.1;
-        double max_effective_velocity_dbl = 29202000000.0;
-        float max_effective_velocity_flt = 29202000000.0;
+        double bleed_factor_dbl                  = 2.0;
+        float  bleed_factor_flt                  = 2.0;
+        double computer_warp_ramp_up_time_dbl    = 10.0;
+        float  computer_warp_ramp_up_time_flt    = 10.0;
+        double in_system_jump_cost_dbl           = 0.1;
+        float  in_system_jump_cost_flt           = 0.1;
+        double max_effective_velocity_dbl        = 29202000000.0;
+        float  max_effective_velocity_flt        = 29202000000.0;
         double player_warp_energy_multiplier_dbl = 0.12;
-        float player_warp_energy_multiplier_flt = 0.12;
-        bool use_warp_energy_for_cloak = true;
-        double warp_energy_multiplier_dbl = 0.12;
-        float warp_energy_multiplier_flt = 0.12;
-        double warp_memory_effect_dbl = 0.5;
-        float warp_memory_effect_flt = 0.5;
-        double warp_multiplier_max_dbl = 300000000.0;
-        float warp_multiplier_max_flt = 300000000.0;
-        double warp_multiplier_min_dbl = 1.5;
-        float warp_multiplier_min_flt = 1.5;
-        double warp_ramp_down_time_dbl = 0.1;
-        float warp_ramp_down_time_flt = 0.1;
-        double warp_ramp_up_time_dbl = 5.0;
-        float warp_ramp_up_time_flt = 5.0;
-        double warp_stretch_cutoff_dbl = 500000.0;
-        float warp_stretch_cutoff_flt = 500000.0;
-        double warp_stretch_decel_cutoff_dbl = 2500000.0;
-        float warp_stretch_decel_cutoff_flt = 2500000.0;
+        float  player_warp_energy_multiplier_flt = 0.12;
+        bool   use_warp_energy_for_cloak         = true;
+        double warp_energy_multiplier_dbl        = 0.12;
+        float  warp_energy_multiplier_flt        = 0.12;
+        double warp_memory_effect_dbl            = 0.5;
+        float  warp_memory_effect_flt            = 0.5;
+        double warp_multiplier_max_dbl           = 300000000.0;
+        float  warp_multiplier_max_flt           = 300000000.0;
+        double warp_multiplier_min_dbl           = 1.5;
+        float  warp_multiplier_min_flt           = 1.5;
+        double warp_ramp_down_time_dbl           = 0.1;
+        float  warp_ramp_down_time_flt           = 0.1;
+        double warp_ramp_up_time_dbl             = 5.0;
+        float  warp_ramp_up_time_flt             = 5.0;
+        double warp_stretch_cutoff_dbl           = 500000.0;
+        float  warp_stretch_cutoff_flt           = 500000.0;
+        double warp_stretch_decel_cutoff_dbl     = 2500000.0;
+        float  warp_stretch_decel_cutoff_flt     = 2500000.0;
 
         struct {
             double reference_kps_dbl = 0.0;
-        float reference_kps_flt = 0.0;
-            double smoothing_dbl = 0.4;
-        float smoothing_flt = 0.4;
+            float  reference_kps_flt = 0.0;
+            double smoothing_dbl     = 0.4;
+            float  smoothing_flt     = 0.4;
 
             struct {
-                bool asymptotic = true;
-                double exp_dbl = 1.5;
-        float exp_flt = 1.5;
+                bool   asymptotic   = true;
+                double exp_dbl      = 1.5;
+                float  exp_flt      = 1.5;
                 double high_ref_dbl = 200000.0;
-        float high_ref_flt = 200000.0;
-                double low_ref_dbl = 10000.0;
-        float low_ref_flt = 10000.0;
-                double speed_dbl = 10.0;
-        float speed_flt = 10.0;
+                float  high_ref_flt = 200000.0;
+                double low_ref_dbl  = 10000.0;
+                float  low_ref_flt  = 10000.0;
+                double speed_dbl    = 10.0;
+                float  speed_flt    = 10.0;
 
                 struct {
-                    double back_dbl = 0.0;
-        float back_flt = 0.0;
-                    double front_dbl = 0.0;
-        float front_flt = 0.0;
+                    double back_dbl          = 0.0;
+                    float  back_flt          = 0.0;
+                    double front_dbl         = 0.0;
+                    float  front_flt         = 0.0;
                     double perpendicular_dbl = 0.0;
-        float perpendicular_flt = 0.0;
+                    float  perpendicular_flt = 0.0;
 
                 } offset;
 
                 struct {
-                    double back_dbl = 0.0;
-        float back_flt = 0.0;
-                    double front_dbl = 0.0;
-        float front_flt = 0.0;
+                    double back_dbl          = 0.0;
+                    float  back_flt          = 0.0;
+                    double front_dbl         = 0.0;
+                    float  front_flt         = 0.0;
                     double perpendicular_dbl = 0.0;
-        float perpendicular_flt = 0.0;
+                    float  perpendicular_flt = 0.0;
 
                 } multiplier;
 
             } shake;
 
             struct {
-                bool asymptotic = true;
-                double exp_dbl = 0.5;
-        float exp_flt = 0.5;
+                bool   asymptotic   = true;
+                double exp_dbl      = 0.5;
+                float  exp_flt      = 0.5;
                 double high_ref_dbl = 100000.0;
-        float high_ref_flt = 100000.0;
-                double low_ref_dbl = 1.0;
-        float low_ref_flt = 1.0;
+                float  high_ref_flt = 100000.0;
+                double low_ref_dbl  = 1.0;
+                float  low_ref_flt  = 1.0;
 
                 struct {
-                    double back_dbl = 0.0;
-        float back_flt = 0.0;
-                    double front_dbl = 0.0;
-        float front_flt = 0.0;
+                    double back_dbl          = 0.0;
+                    float  back_flt          = 0.0;
+                    double front_dbl         = 0.0;
+                    float  front_flt         = 0.0;
                     double perpendicular_dbl = 0.0;
-        float perpendicular_flt = 0.0;
+                    float  perpendicular_flt = 0.0;
 
                 } offset;
 
                 struct {
-                    double back_dbl = 1.5;
-        float back_flt = 1.5;
-                    double front_dbl = 0.85;
-        float front_flt = 0.85;
+                    double back_dbl          = 1.5;
+                    float  back_flt          = 1.5;
+                    double front_dbl         = 0.85;
+                    float  front_flt         = 0.85;
                     double perpendicular_dbl = 1.25;
-        float perpendicular_flt = 1.25;
+                    float  perpendicular_flt = 1.25;
 
                 } multiplier;
 
@@ -2850,7 +2862,7 @@ namespace vega_config {
 
     struct {
         bool can_fire_in_cloak = false;
-        bool can_fire_in_spec = false;
+        bool can_fire_in_spec  = false;
 
     } weapons;
 
@@ -2869,10 +2881,9 @@ namespace vega_config {
     //     ...
     //   }
     std::map<std::string, std::map<std::string, std::vector<float>>> colors;
-
-    };
-}
+};
+}  // namespace vega_config
 
 extern vega_config::Configuration& configuration();
 
-#endif //VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H
+#endif  // VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H

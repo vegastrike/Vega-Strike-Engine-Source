@@ -26,21 +26,22 @@
  */
 // NO HEADER GUARD
 
-#include "gfx_generic/vec.h"
 #include "gfx/animation.h"
+#include "gfx_generic/vec.h"
 #include "src/in_mouse.h"
 
 class CoordinateSelect {
 protected:
-    float CrosshairSize;
+    float     CrosshairSize;
     Animation LocSelAni;
-    QVector LocalPosition;
-    void UpdateMouse();
+    QVector   LocalPosition;
+    void      UpdateMouse();
+
 public:
     static void MouseMoveHandle(KBSTATE, int, int, int, int, int);
-    CoordinateSelect(QVector); //wish I could warp mouse pointer there
-    ~CoordinateSelect() {
-    }
+    CoordinateSelect(QVector);  // wish I could warp mouse pointer there
+
+    ~CoordinateSelect() {}
 
     inline QVector GetVector() {
         return LocalPosition;
@@ -48,4 +49,3 @@ public:
 
     void Draw();
 };
-

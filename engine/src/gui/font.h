@@ -29,17 +29,17 @@
 
 #include <string>
 
-//Some pre-defined weights for the outline stroke font.
-static const float LIGHT_STROKE = 0.6;
+// Some pre-defined weights for the outline stroke font.
+static const float LIGHT_STROKE  = 0.6;
 static const float NORMAL_STROKE = 1.0;
-static const float BOLD_STROKE = 1.5;
+static const float BOLD_STROKE   = 1.5;
 
-//Font object.
-//Right now, this only supports the GLUT outline font.
-//We try to choose the best options for a given Font size.  May or may not do
-//antialiasing.  The line width goes up as the font size goes up.  You can
-//add extra line width to make a bolder look, or use negative line width to give it
-//a lighter look.
+// Font object.
+// Right now, this only supports the GLUT outline font.
+// We try to choose the best options for a given Font size.  May or may not do
+// antialiasing.  The line width goes up as the font size goes up.  You can
+// add extra line width to make a bolder look, or use negative line width to give it
+// a lighter look.
 class Font {
 public:
     float size(void) const {
@@ -50,7 +50,7 @@ public:
         m_size = s;
     }
 
-//The "boldness" of the font.  See predefined weights above for examples.
+    // The "boldness" of the font.  See predefined weights above for examples.
     float strokeWeight(void) const {
         return m_strokeWeight;
     }
@@ -59,15 +59,12 @@ public:
         m_strokeWeight = w;
     }
 
-//CONSTRUCTION
-    Font(float newsize = .1, float weight = NORMAL_STROKE) :
-            m_size(newsize),
-            m_strokeWeight(weight) {
-    }
+    // CONSTRUCTION
+    Font(float newsize = .1, float weight = NORMAL_STROKE) : m_size(newsize), m_strokeWeight(weight) {}
 
-//VARIABLES
+    // VARIABLES
     float m_size;          // Font size, as a fraction of the screen height.
     float m_strokeWeight;  //"Look" of stroke font.  Weight of stroke in characters.
 };
 
-#endif   //VEGA_STRIKE_ENGINE_GUI_FONT_H
+#endif                     // VEGA_STRIKE_ENGINE_GUI_FONT_H

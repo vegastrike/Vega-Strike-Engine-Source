@@ -28,77 +28,75 @@
 #ifndef VEGA_STRIKE_ENGINE_GFXLIB_STRUCT_H
 #define VEGA_STRIKE_ENGINE_GFXLIB_STRUCT_H
 
+#include <cstdint>
+#include <functional>
+#include <iterator>
+#include <vector>
+
 #include "gfx_generic/vec.h"
 #include "src/endianness.h"
-
-#include <vector>
-#include <iterator>
-#include <functional>
-
-#include <cstdint>
 using ImU32 = std::uint32_t;
 
 #ifndef GFXBOOL
-#define GFXBOOL unsigned char
-#endif //GFXBOOL
+#    define GFXBOOL unsigned char
+#endif  // GFXBOOL
 
-#define GFXTRUE 1
+#define GFXTRUE  1
 #define GFXFALSE 0
 
-const int INDEX_BYTE = sizeof(unsigned char);
-const int INDEX_SHORT = sizeof(unsigned short);
-const int INDEX_INT = sizeof(unsigned int);
+const int INDEX_BYTE     = sizeof(unsigned char);
+const int INDEX_SHORT    = sizeof(unsigned short);
+const int INDEX_INT      = sizeof(unsigned int);
 const int CHANGE_MUTABLE = (sizeof(unsigned int) * 2);
-const int CHANGE_CHANGE = (sizeof(unsigned int) * 4);
-const int HAS_COLOR = (sizeof(unsigned int) * 8);
+const int CHANGE_CHANGE  = (sizeof(unsigned int) * 4);
+const int HAS_COLOR      = (sizeof(unsigned int) * 8);
 #define USE_DISPLAY_LISTS
 const int HAS_INDEX = sizeof(unsigned char) | sizeof(unsigned short) | sizeof(unsigned int);
 
-///Creates a Display list. 0 is returned if no memory is avail for a display list
+/// Creates a Display list. 0 is returned if no memory is avail for a display list
 extern int /*GFXDRVAPI*/ GFXCreateList();
-///Ends the display list call.  Returns false if unsuccessful
+/// Ends the display list call.  Returns false if unsuccessful
 extern GFXBOOL /*GFXDRVAPI*/ GFXEndList();
-///Removes a display list from application memory
+/// Removes a display list from application memory
 extern void /*GFXDRVAPI*/ GFXDeleteList(int list);
 
 /// Vertex, Normal, Texture, and (deprecated) Environment Mapping T2F_N3F_V3F format
 struct GFXVertex {
-    //Texcoord
+    // Texcoord
     float s;
     float t;
 
-    //Normal
+    // Normal
     float i;
     float j;
     float k;
 
-    //Position
+    // Position
     float x;
     float y;
     float z;
 
-    //Tangent
+    // Tangent
     float tx;
     float ty;
     float tz;
     float tw;
 
-    GFXVertex(): s(0), t(0), i(0), j(0), k(0), x(0), y(0), z(0), tx(0), ty(0), tz(0), tw(0) {
-    }
+    GFXVertex() : s(0), t(0), i(0), j(0), k(0), x(0), y(0), z(0), tx(0), ty(0), tz(0), tw(0) {}
 
-    GFXVertex(const QVector &vert, const Vector &norm, float s, float t): tx(0), ty(0), tz(0), tw(0) {
+    GFXVertex(const QVector &vert, const Vector &norm, float s, float t) : tx(0), ty(0), tz(0), tw(0) {
         SetVertex(vert.Cast());
         SetNormal(norm);
         SetTexCoord(s, t);
     }
 
-    GFXVertex(const Vector &vert, const Vector &norm, float s, float t): tx(0), ty(0), tz(0), tw(0) {
+    GFXVertex(const Vector &vert, const Vector &norm, float s, float t) : tx(0), ty(0), tz(0), tw(0) {
         SetVertex(vert);
         SetNormal(norm);
         SetTexCoord(s, t);
     }
 
-    GFXVertex(float x, float y, float z, float i, float j, float k, float s, float t): tx(0), ty(0), tz(0), tw(0) {
+    GFXVertex(float x, float y, float z, float i, float j, float k, float s, float t) : tx(0), ty(0), tz(0), tw(0) {
         this->x = x;
         this->y = y;
         this->z = z;
@@ -142,7 +140,7 @@ struct GFXVertex {
     }
 
     const Vector &GetConstVertex() const {
-        return *((Vector *) &x);
+        return *((Vector *)&x);
     }
 
     Vector GetNormal() const {
@@ -162,15 +160,14 @@ struct GFXVertex {
     }
 };
 
-///Stores a color
+/// Stores a color
 struct GFXColor {
     float r = 0;
     float g = 0;
     float b = 0;
     float a = 0;
 
-    GFXColor() {
-    }
+    GFXColor() {}
 
     GFXColor(float r, float g, float b) {
         this->r = r;
@@ -195,7 +192,7 @@ struct GFXColor {
 
     GFXColor clamp() const {
         return GFXColor(((r < 0) ? 0 : ((r > 1) ? 1 : r)), ((g < 0) ? 0 : ((g > 1) ? 1 : g)),
-                ((b < 0) ? 0 : ((b > 1) ? 1 : b)), ((a < 0) ? 0 : ((a > 1) ? 1 : a)));
+                        ((b < 0) ? 0 : ((b > 1) ? 1 : b)), ((a < 0) ? 0 : ((a > 1) ? 1 : a)));
     }
 
     // Implicit conversion FROM ImU32
@@ -231,89 +228,79 @@ inline bool operator==(const GFXColor &c0, const GFXColor &c1) {
 
 inline GFXColor colLerp(GFXColor a, GFXColor b, float bweight) {
     float aweight = 1.0f - bweight;
-    return GFXColor(a.r * aweight + b.r * bweight,
-            a.g * aweight + b.g * bweight,
-            a.b * aweight + b.b * bweight,
-            a.a * aweight + b.a * bweight);
+    return GFXColor(a.r * aweight + b.r * bweight, a.g * aweight + b.g * bweight, a.b * aweight + b.b * bweight,
+                    a.a * aweight + b.a * bweight);
 }
 
-///This vertex is used for the interleaved array argument for color based arrays T2F_C4F_N3F_V3F
+/// This vertex is used for the interleaved array argument for color based arrays T2F_C4F_N3F_V3F
 struct GFXColorVertex {
-    //Texcoord
+    // Texcoord
     float s;
     float t;
 
-    //Color
+    // Color
     float r;
     float g;
     float b;
     float a;
 
-    //Normal
+    // Normal
     float i;
     float j;
     float k;
 
-    //Position
+    // Position
     float x;
     float y;
     float z;
 
-    //Tangent
+    // Tangent
     float tx;
     float ty;
     float tz;
     float tw;
 
     GFXColorVertex() {
-        this->x = 0.f;
-        this->y = 0.f;
-        this->z = 0.f;
-        this->i = 0.f;
-        this->j = 0.f;
-        this->k = 0.f;
-        this->r = 0.f;
-        this->g = 0.f;
-        this->b = 0.f;
-        this->a = 0.f;
-        this->s = 0.f;
-        this->t = 0.f;
+        this->x  = 0.f;
+        this->y  = 0.f;
+        this->z  = 0.f;
+        this->i  = 0.f;
+        this->j  = 0.f;
+        this->k  = 0.f;
+        this->r  = 0.f;
+        this->g  = 0.f;
+        this->b  = 0.f;
+        this->a  = 0.f;
+        this->s  = 0.f;
+        this->t  = 0.f;
         this->tx = 0.f;
         this->ty = 0.f;
         this->tz = 0.f;
         this->tw = 1.f;
     }
 
-    GFXColorVertex(const Vector &vert, const Vector &norm, const GFXColor &rgba, float s, float t): tx(0), ty(0), tz(0), tw(0) {
+    GFXColorVertex(const Vector &vert, const Vector &norm, const GFXColor &rgba, float s, float t)
+        : tx(0), ty(0), tz(0), tw(0) {
         SetVertex(vert);
         SetNormal(norm);
         SetColor(rgba);
         SetTexCoord(s, t);
     }
 
-    GFXColorVertex(const Vector &vert, const GFXColor &rgba, float s, float t): tx(0), ty(0), tz(0), tw(0) {
+    GFXColorVertex(const Vector &vert, const GFXColor &rgba, float s, float t) : tx(0), ty(0), tz(0), tw(0) {
         SetVertex(vert);
         SetColor(rgba);
         SetTexCoord(s, t);
     }
 
-    GFXColorVertex(const Vector &vert, const GFXColor &rgba): tx(0), ty(0), tz(0), tw(0) {
+    GFXColorVertex(const Vector &vert, const GFXColor &rgba) : tx(0), ty(0), tz(0), tw(0) {
         SetVertex(vert);
         SetColor(rgba);
     }
 
-    GFXColorVertex(float x,
-            float y,
-            float z,
-            float i,
-            float j,
-            float k,
-            float r,
-            float g,
-            float b,
-            float a,
-            float s,
-            float t): tx(0), ty(0), tz(0), tw(0) {
+    GFXColorVertex(float x, float y, float z, float i, float j, float k, float r, float g, float b, float a, float s,
+                   float t)
+        : tx(0), ty(0), tz(0), tw(0) {
         this->x = x;
         this->y = y;
         this->z = z;
@@ -392,32 +379,29 @@ struct GFXColorVertex {
     }
 };
 
-template<typename ELEM=float, int VSIZE = 3, int NSIZE = 0, int CSIZE = 0, int TSIZE0 = 0, int TSIZE1 = 0>
+template <typename ELEM = float, int VSIZE = 3, int NSIZE = 0, int CSIZE = 0, int TSIZE0 = 0, int TSIZE1 = 0>
 class VertexBuilder {
-
 public:
-    typedef ELEM ElementType;
-    typedef std::vector<ElementType> BufferType;
-    typedef typename BufferType::iterator iterator;
+    typedef ELEM                                ElementType;
+    typedef std::vector<ElementType>            BufferType;
+    typedef typename BufferType::iterator       iterator;
     typedef typename BufferType::const_iterator const_iterator;
-    typedef typename BufferType::size_type size_type;
+    typedef typename BufferType::size_type      size_type;
 
     static const int ESIZE = VSIZE + NSIZE + CSIZE + TSIZE0 + TSIZE1;
 
     class back_insert_iterator {
         friend class VertexBuilder<ELEM, VSIZE, NSIZE, CSIZE, TSIZE0, TSIZE1>;
 
-        BufferType &buffer;
+        BufferType                    &buffer;
         typename BufferType::size_type where;
 
         back_insert_iterator(BufferType &_buffer, typename BufferType::size_type _where)
-                : buffer(_buffer), where(_where) {
-        }
+            : buffer(_buffer), where(_where) {}
 
-        back_insert_iterator(const back_insert_iterator &other) : buffer(other.buffer), where(other.where) {
-        }
+        back_insert_iterator(const back_insert_iterator &other) : buffer(other.buffer), where(other.where) {}
 
-        template<typename IT>
+        template <typename IT>
         void _set_at(const GFXVertex &vtx, IT where) {
             if (VSIZE >= 1) {
                 *where = vtx.x;
@@ -489,7 +473,7 @@ public:
             }
         }
 
-        template<typename IT>
+        template <typename IT>
         void _set_at(const GFXColorVertex &vtx, IT where) {
             if (VSIZE >= 1) {
                 *where = vtx.x;
@@ -602,8 +586,7 @@ private:
     BufferType buffer;
 
 public:
-    VertexBuilder() {
-    };
+    VertexBuilder() {};
 
     explicit VertexBuilder(size_type size) {
         reserve(size);
@@ -692,23 +675,23 @@ public:
     }
 };
 
-///important ATTENUATE const STAYS AT ONE...for w compat.
+/// important ATTENUATE const STAYS AT ONE...for w compat.
 enum LIGHT_TARGET {
     ATTENUATE = 1,
-    DIFFUSE = 2,
-    SPECULAR = 4,
-    AMBIENT = 8,
-    POSITION = 16,
-    EMISSION = 32
+    DIFFUSE   = 2,
+    SPECULAR  = 4,
+    AMBIENT   = 8,
+    POSITION  = 16,
+    EMISSION  = 32
 };
 
-///Holds all information for a single light object
+/// Holds all information for a single light object
 class GFXLight {
 public:
-///physical GL light its saved in
+    /// physical GL light its saved in
     int target;
-///last is w for positional, otherwise 3 for spec
-    int options;
+    /// last is w for positional, otherwise 3 for spec
+    int   options;
     float vect[3]{};
     float diffuse[4]{};
     float specular[4]{};
@@ -722,69 +705,64 @@ public:
 
 public:
     GFXLight() {
-        //vect[0]=vect[1]=vect[2]=vect[3]=0;
+        // vect[0]=vect[1]=vect[2]=vect[3]=0;
         vect[0] = vect[1] = vect[2] = 0;
-        attenuate[0] = 1;
+        attenuate[0]                = 1;
         attenuate[1] = attenuate[2] = 0;
-        diffuse[0] = diffuse[1] = diffuse[2] = 0; //openGL defaults
-        specular[0] = specular[1] = specular[2] = 0; //openGL defaults
+        diffuse[0] = diffuse[1] = diffuse[2] = 0;     // openGL defaults
+        specular[0] = specular[1] = specular[2] = 0;  // openGL defaults
         ambient[0] = ambient[1] = ambient[2] = 0;
         diffuse[3] = specular[3] = ambient[3] = 1;
-        target = -1; //physical GL light its saved in
+        target                                = -1;   // physical GL light its saved in
 
         direction[0] = direction[1] = direction[2] = 0.0;
-        exp = 0.0f;
-        cutoff = 180.0f;
-        size = 0.0f;
-        occlusion = 1.f;
-        options = 0;
+        exp                                        = 0.0f;
+        cutoff                                     = 180.0f;
+        size                                       = 0.0f;
+        occlusion                                  = 1.f;
+        options                                    = 0;
         apply_attenuate(attenuated());
     }
 
-    GFXLight(const bool enabled, const GFXColor &vect,
-            const GFXColor &diffuse = GFXColor(0, 0, 0, 1),
-            const GFXColor &specular = GFXColor(0, 0, 0, 1),
-            const GFXColor &ambient = GFXColor(0, 0, 0, 1),
-            const GFXColor &attenuate = GFXColor(1, 0, 0),
-            const GFXColor &direction = GFXColor(0, 0, 0),
-            float exp = 0.0f,
-            float cutoff = 180.0f,
-            float size = 0.0f);
+    GFXLight(const bool enabled, const GFXColor &vect, const GFXColor &diffuse = GFXColor(0, 0, 0, 1),
+             const GFXColor &specular = GFXColor(0, 0, 0, 1), const GFXColor &ambient = GFXColor(0, 0, 0, 1),
+             const GFXColor &attenuate = GFXColor(1, 0, 0), const GFXColor &direction = GFXColor(0, 0, 0),
+             float exp = 0.0f, float cutoff = 180.0f, float size = 0.0f);
 
     GFXLight(const GFXLight &other) {
-        vect[0] = other.vect[0];
-        vect[1] = other.vect[1];
-        vect[2] = other.vect[2];
+        vect[0]      = other.vect[0];
+        vect[1]      = other.vect[1];
+        vect[2]      = other.vect[2];
         attenuate[0] = other.attenuate[0];
         attenuate[1] = other.attenuate[1];
         attenuate[2] = other.attenuate[2];
-        diffuse[0] = other.diffuse[0];
-        diffuse[1] = other.diffuse[1];
-        diffuse[2] = other.diffuse[2];
-        diffuse[3] = other.diffuse[3];
-        specular[0] = other.specular[0];
-        specular[1] = other.specular[1];
-        specular[2] = other.specular[2];
-        specular[3] = other.specular[3];
-        ambient[0] = other.ambient[0];
-        ambient[1] = other.ambient[1];
-        ambient[2] = other.ambient[2];
-        ambient[3] = other.ambient[3];
-        target = other.target;
+        diffuse[0]   = other.diffuse[0];
+        diffuse[1]   = other.diffuse[1];
+        diffuse[2]   = other.diffuse[2];
+        diffuse[3]   = other.diffuse[3];
+        specular[0]  = other.specular[0];
+        specular[1]  = other.specular[1];
+        specular[2]  = other.specular[2];
+        specular[3]  = other.specular[3];
+        ambient[0]   = other.ambient[0];
+        ambient[1]   = other.ambient[1];
+        ambient[2]   = other.ambient[2];
+        ambient[3]   = other.ambient[3];
+        target       = other.target;
         direction[0] = other.direction[0];
         direction[1] = other.direction[1];
         direction[2] = other.direction[2];
-        exp = other.exp;
-        cutoff = other.cutoff;
-        size = other.size;
-        occlusion = other.occlusion;
-        options = other.options;
+        exp          = other.exp;
+        cutoff       = other.cutoff;
+        size         = other.size;
+        occlusion    = other.occlusion;
+        options      = other.options;
     };
 
     virtual ~GFXLight() = default;
 
-    void SetProperties(enum LIGHT_TARGET light_target, const GFXColor &color);
-    void SetProperties(enum LIGHT_TARGET light_target, const Vector &vector);
+    void     SetProperties(enum LIGHT_TARGET light_target, const GFXColor &color);
+    void     SetProperties(enum LIGHT_TARGET light_target, const Vector &vector);
     GFXColor GetProperties(enum LIGHT_TARGET) const;
 
     void setSize(float size_) {
@@ -804,23 +782,24 @@ public:
     bool attenuated() const;
     void apply_attenuate(bool attenuated);
 };
-///Contains 4 texture coordinates (deprecated)
-struct GFXTVertex //transformed vertex
+
+/// Contains 4 texture coordinates (deprecated)
+struct GFXTVertex  // transformed vertex
 {
     float x;
     float y;
     float z;
     /// reciprocal homogenous w
     float rhw;
-    int diffuse;
-    int specular;
+    int   diffuse;
+    int   specular;
     float s, t;
     float u, v;
 };
 
 struct GFXLightLocal {
     GFXLight ligh;
-    bool islocal;
+    bool     islocal;
 };
 
 enum POLYTYPE {
@@ -852,34 +831,36 @@ enum POLYFACE {
  *   that need to be resizable, etc all to be drawn at once.... nice on GL :-)
  */
 class /*GFXDRVAPI*/ GFXQuadList {
-///Num vertices currently _allocated_ on quad list
+    /// Num vertices currently _allocated_ on quad list
     int numVertices;
-///Number of quads to be drawn packed first numQuads*4 vertices
+    /// Number of quads to be drawn packed first numQuads*4 vertices
     int numQuads;
-///Assignments to packed data for quad modification
+    /// Assignments to packed data for quad modification
     int *quadassignments;
-///all numVertices allocated vertices and color
+
+    /// all numVertices allocated vertices and color
     union VCDAT {
-        GFXVertex *vertices;
+        GFXVertex      *vertices;
         GFXColorVertex *colors;
-    }
-            data;
-///Is color in this quad list
+    } data;
+
+    /// Is color in this quad list
     GFXBOOL isColor;
-///number of "dirty" quads, hence gaps in quadassignments that must be assigned before more are allocated
+    /// number of "dirty" quads, hence gaps in quadassignments that must be assigned before more are allocated
     int Dirty;
+
 public:
-    ///Creates an initial Quad List
+    /// Creates an initial Quad List
     explicit GFXQuadList(GFXBOOL color = GFXFALSE);
-    ///Trashes given quad list
+    /// Trashes given quad list
     ~GFXQuadList();
-    ///Draws all quads contained in quad list
+    /// Draws all quads contained in quad list
     void Draw();
-    ///Adds quad to quad list, an integer indicating number that should be used to henceforth Mod it or delete it
+    /// Adds quad to quad list, an integer indicating number that should be used to henceforth Mod it or delete it
     int AddQuad(const GFXVertex *vertices, const GFXColorVertex *colors = nullptr);
-    ///Removes quad from Quad list
+    /// Removes quad from Quad list
     void DelQuad(int which);
-    ///modifies quad in quad list to contain new vertices and color information
+    /// modifies quad in quad list to contain new vertices and color information
     void ModQuad(int which, const GFXVertex *vertices, float alpha = -1);
     void ModQuad(int which, const GFXColorVertex *vertices);
 };
@@ -891,176 +872,160 @@ public:
  */
 class /*GFXDRVAPI*/ GFXVertexList {
     friend class GFXSphereVertexList;
+
 protected:
-///Num vertices allocated
-    const GFXVertex *GetVertex(int index) const;
+    /// Num vertices allocated
+    const GFXVertex      *GetVertex(int index) const;
     const GFXColorVertex *GetColorVertex(int index) const;
-    int numVertices{};
-///Vertices and colors stored
+    int                   numVertices{};
+
+    /// Vertices and colors stored
     union VDAT {
-        ///The data either does not have color data
+        /// The data either does not have color data
         GFXVertex *vertices;
-        ///Or has color data
+        /// Or has color data
         GFXColorVertex *colors;
 
-        VDAT() : vertices(nullptr) {
-        };
-    }
-            data;
+        VDAT() : vertices(nullptr) {};
+    } data;
+
     union INDEX {
-        unsigned char *b; //stride 1
-        unsigned short *s; //stride 2
-        unsigned int *i; //stride 4
-        INDEX() : i(nullptr) {
-        };
-    }
-            index;
-///Array of modes that vertices will be drawn with
+        unsigned char  *b;  // stride 1
+        unsigned short *s;  // stride 2
+        unsigned int   *i;  // stride 4
+        INDEX() : i(nullptr) {};
+    } index;
+
+    /// Array of modes that vertices will be drawn with
     enum POLYTYPE *mode{};
-    bool unique_mode{}; //See Draw()
-///Display list number if list is indeed active. 0 otherwise
-    int display_list{};
+
+    bool unique_mode{};  // See Draw()
+    /// Display list number if list is indeed active. 0 otherwise
+    int           display_list{};
     unsigned int *vbo_elements{};
-    int vbo_data{};
-///number of different mode, drawn lists
+    int           vbo_data{};
+    /// number of different mode, drawn lists
     int numlists{};
-/**
- * number of vertices in each individual mode.
- * 2 triangles 3 quads and 2 lines would be {6,12,4} as the offsets
- */
+    /**
+     * number of vertices in each individual mode.
+     * 2 triangles 3 quads and 2 lines would be {6,12,4} as the offsets
+     */
     int *offsets{};
-///If vertex list has been mutated since last draw.  Low 3 bits store the stride of the index list (if avail). another bit for if color is presnet
+    /// If vertex list has been mutated since last draw.  Low 3 bits store the stride of the index list (if avail).
+    /// another bit for if color is presnet
     char changed{};
-///copies nonindexed vertices to dst vertex array
+    /// copies nonindexed vertices to dst vertex array
     static void VtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany);
-///Copies nonindex colored vertices to dst vertex array
+    /// Copies nonindex colored vertices to dst vertex array
     static void ColVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany);
-///Copies indexed colored vertices to dst vertex array
+    /// Copies indexed colored vertices to dst vertex array
     static void ColIndVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany);
-///Copies indexed vertices to dst vertex array
+    /// Copies indexed vertices to dst vertex array
     static void IndVtxCopy(GFXVertexList *thus, GFXVertex *dst, int offset, int howmany);
-///Init function (call from construtor)
-    void Init(enum POLYTYPE *poly,
-            int numVertices,
-            const GFXVertex *vert,
-            const GFXColorVertex *colors,
-            int numlists,
-            int *offsets,
-            bool Mutable,
-            unsigned int *indices);
-///Propagates modifications to the display list
+    /// Init function (call from construtor)
+    void Init(enum POLYTYPE *poly, int numVertices, const GFXVertex *vert, const GFXColorVertex *colors, int numlists,
+              int *offsets, bool Mutable, unsigned int *indices);
+    /// Propagates modifications to the display list
 public:
     void RefreshDisplayList();
+
 protected:
     virtual void Draw(enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets);
-    void RenormalizeNormals();
+    void         RenormalizeNormals();
     GFXVertexList();
+
 public:
-///creates a vertex list with 1 polytype and a given number of vertices
-    inline GFXVertexList(enum POLYTYPE poly,
-            int numVertices,
-            const GFXVertex *vertices,
-            int numindices,
-            bool Mutable = false,
-            unsigned int *index = 0) {
+    /// creates a vertex list with 1 polytype and a given number of vertices
+    inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices, int numindices,
+                         bool Mutable = false, unsigned int *index = 0) {
         Init(&poly, numVertices, vertices, 0, 1, &numindices, Mutable, index);
     }
 
-///Creates a vertex list with an arbitrary number of poly types and given vertices, num list and offsets (see above)
-    inline GFXVertexList(enum POLYTYPE *poly,
-            int numVertices,
-            const GFXVertex *vertices,
-            int numlists,
-            int *offsets,
-            bool Mutable = false,
-            unsigned int *index = nullptr) {
+    /// Creates a vertex list with an arbitrary number of poly types and given vertices, num list and offsets (see
+    /// above)
+    inline GFXVertexList(enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, int numlists, int *offsets,
+                         bool Mutable = false, unsigned int *index = nullptr) {
         Init(poly, numVertices, vertices, nullptr, numlists, offsets, Mutable, index);
     }
 
-///Creates a vertex list with 1 poly type and color information to boot
-    inline GFXVertexList(enum POLYTYPE poly,
-            int numVertices,
-            const GFXColorVertex *colors,
-            int numindices,
-            bool Mutable = false,
-            unsigned int *index = nullptr) {
+    /// Creates a vertex list with 1 poly type and color information to boot
+    inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXColorVertex *colors, int numindices,
+                         bool Mutable = false, unsigned int *index = nullptr) {
         Init(&poly, numVertices, nullptr, colors, 1, &numindices, Mutable, index);
     }
 
-///Creates a vertex list with an arbitrary number of poly types and color
-    inline GFXVertexList(enum POLYTYPE *poly,
-            int numVertices,
-            const GFXColorVertex *colors,
-            int numlists,
-            int *offsets,
-            bool Mutable = false,
-            unsigned int *index = nullptr) {
+    /// Creates a vertex list with an arbitrary number of poly types and color
+    inline GFXVertexList(enum POLYTYPE *poly, int numVertices, const GFXColorVertex *colors, int numlists, int *offsets,
+                         bool Mutable = false, unsigned int *index = nullptr) {
         Init(poly, numVertices, nullptr, colors, numlists, offsets, Mutable, index);
     }
 
     virtual ~GFXVertexList();
-///Returns number of Triangles in vertex list (counts tri strips)
+    /// Returns number of Triangles in vertex list (counts tri strips)
     virtual int numTris() const;
-///Returns number of Quads in vertex list (counts quad strips)
+    /// Returns number of Quads in vertex list (counts quad strips)
     virtual int numQuads() const;
-///Looks up the index in the appropriate short, char or int array
+    /// Looks up the index in the appropriate short, char or int array
     unsigned int GetIndex(int offset) const;
-    POLYTYPE *GetPolyType() const;
-    int *GetOffsets() const;
-    int GetNumLists() const;
-    bool hasColor() const;
+    POLYTYPE    *GetPolyType() const;
+    int         *GetOffsets() const;
+    int          GetNumLists() const;
+    bool         hasColor() const;
 
     int GetNumVertices() const {
         return numVertices;
     }
 
     virtual VDAT *Map(bool read, bool write);
-    void UnMap();
-///Returns the array of vertices to be mutated
+    void          UnMap();
+    /// Returns the array of vertices to be mutated
     virtual VDAT *BeginMutate(int offset);
-///Ends mutation and refreshes display list
+    /// Ends mutation and refreshes display list
     virtual void EndMutate(int newsize = 0);
-///Loads the draw state (what is active) of a given vlist for mass drawing
+    /// Loads the draw state (what is active) of a given vlist for mass drawing
     void LoadDrawState();
-///Specifies array pointers and loads the draw state of a given vlist for mass drawing
+    /// Specifies array pointers and loads the draw state of a given vlist for mass drawing
     virtual void BeginDrawState(GFXBOOL lock = GFXTRUE);
-///Draws a single copy of the mass-loaded vlist
+    /// Draws a single copy of the mass-loaded vlist
     virtual void Draw();
-    void Draw(enum POLYTYPE poly, int numV);
-    void Draw(enum POLYTYPE poly, int numV, unsigned char *index);
-    void Draw(enum POLYTYPE poly, int numV, unsigned short *index);
-    void Draw(enum POLYTYPE poly, int numV, unsigned int *index);
-///Loads draw state and prepares to draw only once
-    void DrawOnce();
+    void         Draw(enum POLYTYPE poly, int numV);
+    void         Draw(enum POLYTYPE poly, int numV, unsigned char *index);
+    void         Draw(enum POLYTYPE poly, int numV, unsigned short *index);
+    void         Draw(enum POLYTYPE poly, int numV, unsigned int *index);
+    /// Loads draw state and prepares to draw only once
+    void         DrawOnce();
     virtual void EndDrawState(GFXBOOL lock = GFXTRUE);
-///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
+    /// returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting
+    /// vertex info from a mesh
     virtual void GetPolys(GFXVertex **vert, int *numPolys, int *numTris);
 };
 
 class /*GFXDRVAPI*/ GFXSphereVertexList : public GFXVertexList {
-///Num vertices allocated
+    /// Num vertices allocated
 protected:
-    float radius;
+    float          radius;
     GFXVertexList *sphere;
-    void Draw(enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets) override;
+    void           Draw(enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets) override;
+
 public:
-///creates a vertex list with 1 polytype and a given number of vertices
+    /// creates a vertex list with 1 polytype and a given number of vertices
     GFXSphereVertexList(float radius, int detail, bool insideout, bool reverse_normals);
     ~GFXSphereVertexList() override;
 
-///Returns the array of vertices to be mutated
+    /// Returns the array of vertices to be mutated
     VDAT *BeginMutate(int offset) override;
-///Ends mutation and refreshes display list
+    /// Ends mutation and refreshes display list
     void EndMutate(int newsize = 0) override;
-///Loads the draw state (what is active) of a given vlist for mass drawing
-///Specifies array pointers and loads the draw state of a given vlist for mass drawing
+    /// Loads the draw state (what is active) of a given vlist for mass drawing
+    /// Specifies array pointers and loads the draw state of a given vlist for mass drawing
     void BeginDrawState(GFXBOOL lock = GFXTRUE) override;
-///Draws a single copy of the mass-loaded vlist
+    /// Draws a single copy of the mass-loaded vlist
     void Draw() override;
     void EndDrawState(GFXBOOL lock = GFXTRUE) override;
-    ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
+    /// returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting
+    /// vertex info from a mesh
     void GetPolys(GFXVertex **vert, int *numPolys, int *numTris) override;
-    ///generates procedural planetdata to the actual detaillevel with the "plasma method"
+    /// generates procedural planetdata to the actual detaillevel with the "plasma method"
     virtual void ProceduralModification();
 };
 
@@ -1185,7 +1150,7 @@ inline GFXColor getMaterialEmissive(const GFXMaterial &mat) {
     return GFXColor(mat.er, mat.eg, mat.eb, mat.ea);
 }
 
-//Textures may only be cube maps, Texture1d, Texture2d or Texture3d
+// Textures may only be cube maps, Texture1d, Texture2d or Texture3d
 enum TEXTURE_TARGET {
     TEXTURE1D,
     TEXTURE2D,
@@ -1193,7 +1158,8 @@ enum TEXTURE_TARGET {
     CUBEMAP,
     TEXTURERECT
 };
-///Textures may only be cube maps, Texture1d, Texture2d or Texture3d
+
+/// Textures may only be cube maps, Texture1d, Texture2d or Texture3d
 enum TEXTURE_IMAGE_TARGET {
     TEXTURE_1D,
     TEXTURE_2D,
@@ -1219,21 +1185,22 @@ enum MATRIXMODE {
 };
 
 enum TEXTUREFORMAT {
-    DUMMY = 0,
-    PALETTE8 = 1,
-    RGB16 = 2,
-    RGBA16 = 3,
-    RGB24 = 4,
-    RGBA32 = 5,
-    RGB32 = 6,
-    DXT1 = 7,
-    DXT1RGBA = 8,
-    DXT3 = 9,
-    DXT5 = 10,
+    DUMMY       = 0,
+    PALETTE8    = 1,
+    RGB16       = 2,
+    RGBA16      = 3,
+    RGB24       = 4,
+    RGBA32      = 5,
+    RGB32       = 6,
+    DXT1        = 7,
+    DXT1RGBA    = 8,
+    DXT3        = 9,
+    DXT5        = 10,
     PNGPALETTE8 = 11,
-    PNGRGB24 = 12,
-    PNGRGBA32 = 13
+    PNGRGB24    = 12,
+    PNGRGBA32   = 13
 };
+
 /**
  * The following state may be activated/deactivated
  * LIGHTING, DEPTHTEST,DEPTHWRITE, TEXTURE0, and TEXTURE1.  Future support
@@ -1274,24 +1241,25 @@ enum FOGMODE {
     FOG_EXP2,
     FOG_LINEAR
 };
+
 /**
  * Blend functions that a blendmode may have Not all work for all systems
  */
 enum BLENDFUNC {
-    ZERO = 1,
-    ONE = 2,
-    SRCCOLOR = 3,
-    INVSRCCOLOR = 4,
-    SRCALPHA = 5,
-    INVSRCALPHA = 6,
-    DESTALPHA = 7,
-    INVDESTALPHA = 8,
-    DESTCOLOR = 9,
-    INVDESTCOLOR = 10,
-    SRCALPHASAT = 11,
-    CONSTALPHA = 12,
+    ZERO          = 1,
+    ONE           = 2,
+    SRCCOLOR      = 3,
+    INVSRCCOLOR   = 4,
+    SRCALPHA      = 5,
+    INVSRCALPHA   = 6,
+    DESTALPHA     = 7,
+    INVDESTALPHA  = 8,
+    DESTCOLOR     = 9,
+    INVDESTCOLOR  = 10,
+    SRCALPHASAT   = 11,
+    CONSTALPHA    = 12,
     INVCONSTALPHA = 13,
-    CONSTCOLOR = 14,
+    CONSTCOLOR    = 14,
     INVCONSTCOLOR = 15
 };
 
@@ -1300,9 +1268,9 @@ enum BLENDFUNC {
  * Bilinear and mipmap are independent params (hence powers of two)
  */
 enum FILTER {
-    NEAREST = 0x0,
-    BILINEAR = 0x1,
-    MIPMAP = 0x2,
+    NEAREST   = 0x0,
+    BILINEAR  = 0x1,
+    MIPMAP    = 0x2,
     TRILINEAR = 0x4
 };
 
@@ -1310,24 +1278,35 @@ enum FILTER {
  * Used for depth and alpha comparisons
  */
 enum DEPTHFUNC {
-    NEVER, LESS, EQUAL, LEQUAL, GREATER, NEQUAL, GEQUAL, ALWAYS
+    NEVER,
+    LESS,
+    EQUAL,
+    LEQUAL,
+    GREATER,
+    NEQUAL,
+    GEQUAL,
+    ALWAYS
 };
 
 /**
  * Used for stencil writes
  */
 enum STENCILOP {
-    KEEP, CLEAR, REPLACE, INCR, DECR, INVERT
+    KEEP,
+    CLEAR,
+    REPLACE,
+    INCR,
+    DECR,
+    INVERT
 };
 
-///Pick data structures
+/// Pick data structures
 struct PickData {
     int name;
     int zmin;
     int zmax;
 
-    PickData(int name, int zmin, int zmax) : name(name), zmin(zmin), zmax(zmax) {
-    }
+    PickData(int name, int zmin, int zmax) : name(name), zmin(zmin), zmax(zmax) {}
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFXLIB_STRUCT_H
+#endif  // VEGA_STRIKE_ENGINE_GFXLIB_STRUCT_H

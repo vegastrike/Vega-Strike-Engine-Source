@@ -29,6 +29,7 @@
 
 #include "order.h"
 #include "root_generic/vs_globals.h"
+
 namespace Orders {
 /**
  * This class attempts to match a given
@@ -38,20 +39,20 @@ namespace Orders {
  */
 class MatchLinearVelocity : public Order {
 protected:
-///werld space... generally r*speed or local space
+    /// werld space... generally r*speed or local space
     Vector desired_velocity;
-///specified in Local or World coordinates
+    /// specified in Local or World coordinates
     bool LocalVelocity;
     bool willfinish;
     bool afterburn;
+
 public:
-    MatchLinearVelocity(const Vector &desired, bool Local, bool afterburner, bool fini = true) : Order(MOVEMENT,
-            SLOCATION),
-            desired_velocity(
-                    desired),
-            LocalVelocity(Local),
-            willfinish(fini),
-            afterburn(afterburner) {
+    MatchLinearVelocity(const Vector &desired, bool Local, bool afterburner, bool fini = true)
+        : Order(MOVEMENT, SLOCATION),
+          desired_velocity(desired),
+          LocalVelocity(Local),
+          willfinish(fini),
+          afterburn(afterburner) {
         done = false;
     }
 
@@ -59,7 +60,7 @@ public:
 
     void SetDesiredVelocity(const Vector &desired, bool Local) {
         desired_velocity = desired;
-        LocalVelocity = Local;
+        LocalVelocity    = Local;
     }
 
     void SetAfterburn(bool use_afterburn) {
@@ -78,17 +79,16 @@ public:
  */
 class MatchAngularVelocity : public Order {
 protected:
-///werld space or local space (pitch = 1 on the x axis)
+    /// werld space or local space (pitch = 1 on the x axis)
     Vector desired_ang_velocity;
-///specified in Local or World coordinates
+    /// specified in Local or World coordinates
     bool LocalAng;
-///Whether this script should terminate upon reaching desired angular velocity
+    /// Whether this script should terminate upon reaching desired angular velocity
     bool willfinish;
+
 public:
-    MatchAngularVelocity(const Vector &desired, bool Local, bool fini = true) : Order(FACING, SLOCATION),
-            desired_ang_velocity(desired),
-            LocalAng(Local),
-            willfinish(fini) {
+    MatchAngularVelocity(const Vector &desired, bool Local, bool fini = true)
+        : Order(FACING, SLOCATION), desired_ang_velocity(desired), LocalAng(Local), willfinish(fini) {
         done = false;
     }
 
@@ -96,7 +96,7 @@ public:
 
     void SetDesiredAngularVelocity(const Vector &desired, bool Local) {
         desired_ang_velocity = desired;
-        LocalAng = Local;
+        LocalAng             = Local;
     }
 
     virtual ~MatchAngularVelocity();
@@ -105,14 +105,15 @@ public:
         return "mav";
     }
 };
+
 class MatchRoll : public Order {
     float desired_roll;
-    bool willfinish;
+    bool  willfinish;
 
 public:
     MatchRoll(float desired, bool finish) : Order(Order::CLOAKING, SLOCATION) {
         this->desired_roll = desired;
-        this->willfinish = finish;
+        this->willfinish   = finish;
     }
 
     virtual void Execute();
@@ -129,6 +130,7 @@ public:
         return "roll";
     }
 };
+
 /**
  * This class matches both angular and linear velocity.
  * It cannot have multiple inheritance because
@@ -137,21 +139,20 @@ public:
  */
 class MatchVelocity : public MatchAngularVelocity {
 protected:
-///werld space... generally r*speed or local space
+    /// werld space... generally r*speed or local space
     Vector desired_velocity;
-///Is the above in world space?
+    /// Is the above in world space?
     bool LocalVelocity;
     bool afterburn;
+
 public:
-    MatchVelocity(const Vector &desired,
-            const Vector &desired_ang,
-            const bool Local,
-            const bool afterburner,
-            const bool fini = true) : MatchAngularVelocity(desired_ang, Local, fini),
-            desired_velocity(desired),
-            LocalVelocity(Local),
-            afterburn(afterburner) {
-        type = FACING | MOVEMENT;
+    MatchVelocity(const Vector &desired, const Vector &desired_ang, const bool Local, const bool afterburner,
+                  const bool fini = true)
+        : MatchAngularVelocity(desired_ang, Local, fini),
+          desired_velocity(desired),
+          LocalVelocity(Local),
+          afterburn(afterburner) {
+        type    = FACING | MOVEMENT;
         subtype = SLOCATION;
     }
 
@@ -159,7 +160,7 @@ public:
 
     void SetDesiredVelocity(const Vector &desired, const bool Local) {
         desired_velocity = desired;
-        LocalVelocity = Local;
+        LocalVelocity    = Local;
     }
 
     void SetAfterburn(bool use_afterburn) {
@@ -172,7 +173,8 @@ public:
         return "mv";
     }
 };
-}
+}  // namespace Orders
+
 /**
  * This class uses a parent's computer struct
  * to set the appropriate desired linear
@@ -183,13 +185,14 @@ class FlyByWire : public Orders::MatchVelocity {
 protected:
     Vector DesiredShiftVelocity;
     Vector DirectThrust;
-///If shelton slide, do not have the computer match linear
-    bool sheltonslide;
-    bool controltype; //false for car
-    bool inertial_flight_model; //true doesn't match speed vector, but allows manual thrust.
-    bool inertial_flight_enable; //overrides inertial_flight_model if false - useful for AI, you know.
-    bool stolen_setspeed;
+    /// If shelton slide, do not have the computer match linear
+    bool  sheltonslide;
+    bool  controltype;             // false for car
+    bool  inertial_flight_model;   // true doesn't match speed vector, but allows manual thrust.
+    bool  inertial_flight_enable;  // overrides inertial_flight_model if false - useful for AI, you know.
+    bool  stolen_setspeed;
     float stolen_setspeed_value;
+
 public:
     FlyByWire();
     ~FlyByWire();
@@ -198,29 +201,29 @@ public:
         controltype = !controltype;
     }
 
-///Turns on or off velocity resolution
+    /// Turns on or off velocity resolution
     void ThrustRight(float percent);
     void ThrustUp(float percent);
     void ThrustFront(float percent);
-    void DirectThrustRight(float percent); //Not disabled by shelton slide
-    void DirectThrustUp(float percent); //Not disabled by shelton slide
-    void DirectThrustFront(float percent); //Not disabled by shelton slide
+    void DirectThrustRight(float percent);  // Not disabled by shelton slide
+    void DirectThrustUp(float percent);     // Not disabled by shelton slide
+    void DirectThrustFront(float percent);  // Not disabled by shelton slide
     void SheltonSlide(bool onoff);
     void InertialFlight(bool onoff);
     bool InertialFlight() const;
     bool InertialFlightEnable() const;
-///Stops... sets desired velocity to 0
+    /// Stops... sets desired velocity to 0
     void Stop(float percentage);
-///pass in the percentage of the turn they were turnin right.  -%age indicates left
+    /// pass in the percentage of the turn they were turnin right.  -%age indicates left
     void Right(float percentage);
-///pass in the percentage of the turn they were turning up
+    /// pass in the percentage of the turn they were turning up
     void Up(float percentage);
     void RollRight(float percentage);
-///Specifies match speed to use afterbuner and gives in higher velocity
+    /// Specifies match speed to use afterbuner and gives in higher velocity
     void Afterburn(float percentage);
-///matches set_speed to this velocity's magnitude
+    /// matches set_speed to this velocity's magnitude
     void MatchSpeed(const Vector &velocity);
-///negative is decel... 0 = nothing
+    /// negative is decel... 0 = nothing
     void Accel(float percentage);
     void Execute();
 
@@ -233,4 +236,4 @@ private:
     FlyByWire &operator=(const FlyByWire &);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_FLY_BY_WIRE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_FLY_BY_WIRE_H

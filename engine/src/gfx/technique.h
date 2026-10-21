@@ -27,12 +27,12 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_TECHNIQUE_H
 #define VEGA_STRIKE_ENGINE_GFX_TECHNIQUE_H
 
-#include "pass.h"
-
 #include <string>
 #include <vector>
 
 #include <boost/property_tree/ptree.hpp>
+
+#include "pass.h"
 
 class Texture;
 class Technique;
@@ -46,13 +46,12 @@ void createTechnique(const string &name);
 class Technique {
     string name;
     string fallback;
-    bool compiled;
-    int programVersion;
+    bool   compiled;
+    int    programVersion;
 
-    //friend createTechnique;
+    // friend createTechnique;
 
 public:
-
 protected:
     vector<Pass> passes;
 
@@ -85,7 +84,7 @@ public:
         return compiled && this->programVersion == programVersion;
     }
 
-    void compile(); //Throws on error
+    void compile();  // Throws on error
 
     int getNumPasses() const {
         return passes.size();
@@ -103,4 +102,4 @@ public:
     static TechniquePtr getTechnique(const string &name);
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_TECHNIQUE_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_TECHNIQUE_H

@@ -31,7 +31,6 @@
 
 class Nebula : public Unit {
 public:
-
     // Constructors
     Nebula(const char *unitfile, bool SubU, int faction, Flightgroup *fg = NULL, int fg_snumber = 0);
 
@@ -45,21 +44,21 @@ public:
 
 protected:
     // Method
-    static void beginElement(void *Userdata, const XML_Char *name, const XML_Char **atts);
-    GFXColor color;
-    float Density;
-    float fognear;
-    float fogfar;
-    int index;
-    float explosiontime;
-    enum FOGMODE fogmode;     //0=OFF (I won't use this), 1=EXP, 2=EXP2, 3=LINEAR
-    bool fogme;
-    void LoadXML(const char *filename);
-    void beginElem(const std::string &, const AttributeList &);
-    float lastfadein;
-    float fadeinvalue;
-public:
+    static void  beginElement(void *Userdata, const XML_Char *name, const XML_Char **atts);
+    GFXColor     color;
+    float        Density;
+    float        fognear;
+    float        fogfar;
+    int          index;
+    float        explosiontime;
+    enum FOGMODE fogmode;  // 0=OFF (I won't use this), 1=EXP, 2=EXP2, 3=LINEAR
+    bool         fogme;
+    void         LoadXML(const char *filename);
+    void         beginElem(const std::string &, const AttributeList &);
+    float        lastfadein;
+    float        fadeinvalue;
 
+public:
     float getFade() {
         return fadeinvalue;
     }
@@ -68,14 +67,9 @@ public:
 
     void InitNebula(const char *unitfile, bool SubU, int faction, Flightgroup *fg, int fg_snumber);
 
-    void UpdatePhysics2(const Transformation &trans,
-            const Transformation &old_physical_state,
-            const Vector &accel,
-            float difficulty,
-            const Matrix &transmat,
-            const Vector &CumulativeVelocity,
-            bool ResolveLast,
-            UnitCollection *uc = NULL) override;
+    void UpdatePhysics2(const Transformation &trans, const Transformation &old_physical_state, const Vector &accel,
+                        float difficulty, const Matrix &transmat, const Vector &CumulativeVelocity, bool ResolveLast,
+                        UnitCollection *uc = NULL) override;
 
     void SetFogState() const;
 
@@ -108,6 +102,7 @@ enum Names {
     EXPLOSIONTIME,
     FOGTHIS
 };
+
 const unsigned short int MAXENAMES = 4;
 const unsigned short int MAXANAMES = 11;
 
@@ -118,21 +113,15 @@ const XMLSupport::EnumMap::Pair element_names[MAXENAMES] = {
         XMLSupport::EnumMap::Pair("Limits", LIMITS),
 };
 const XMLSupport::EnumMap::Pair attribute_names[MAXANAMES] = {
-        XMLSupport::EnumMap::Pair("UNKNOWN", UNKNOWN),
-        XMLSupport::EnumMap::Pair("Red", RED),
-        XMLSupport::EnumMap::Pair("Green", GREEN),
-        XMLSupport::EnumMap::Pair("Blue", BLUE),
-        XMLSupport::EnumMap::Pair("Near", NEBNEAR),
-        XMLSupport::EnumMap::Pair("Far", NEBFAR),
-        XMLSupport::EnumMap::Pair("Density", DENSITY),
-        XMLSupport::EnumMap::Pair("Mode", MODE),
-        XMLSupport::EnumMap::Pair("Index", INDEX),
-        XMLSupport::EnumMap::Pair("ExplosionTime", EXPLOSIONTIME),
-        XMLSupport::EnumMap::Pair("FogThis", FOGTHIS)
-};
+        XMLSupport::EnumMap::Pair("UNKNOWN", UNKNOWN), XMLSupport::EnumMap::Pair("Red", RED),
+        XMLSupport::EnumMap::Pair("Green", GREEN),     XMLSupport::EnumMap::Pair("Blue", BLUE),
+        XMLSupport::EnumMap::Pair("Near", NEBNEAR),    XMLSupport::EnumMap::Pair("Far", NEBFAR),
+        XMLSupport::EnumMap::Pair("Density", DENSITY), XMLSupport::EnumMap::Pair("Mode", MODE),
+        XMLSupport::EnumMap::Pair("Index", INDEX),     XMLSupport::EnumMap::Pair("ExplosionTime", EXPLOSIONTIME),
+        XMLSupport::EnumMap::Pair("FogThis", FOGTHIS)};
 
 const XMLSupport::EnumMap element_map(element_names, MAXENAMES);
 const XMLSupport::EnumMap attribute_map(attribute_names, MAXANAMES);
-}
+}  // namespace NebulaXML
 
-#endif //VEGA_STRIKE_ENGINE_CMD_NEBULA_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_NEBULA_H

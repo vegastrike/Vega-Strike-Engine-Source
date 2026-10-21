@@ -32,9 +32,9 @@
 //
 
 #include "Exceptions.h"
-#include "Types.h"
 #include "Format.h"
 #include "RenderableSource.h"
+#include "Types.h"
 
 namespace Audio {
 
@@ -61,29 +61,29 @@ class SourceListener;
  */
 class Source {
 private:
-    SharedPtr<Sound> soundPtr;
+    SharedPtr<Sound>            soundPtr;
     SharedPtr<RenderableSource> rendererDataPtr;
-    SharedPtr<UserData> userDataPtr;
-    long userDataLong;
-    SharedPtr<SourceListener> sourceListenerPtr;
+    SharedPtr<UserData>         userDataPtr;
+    long                        userDataLong;
+    SharedPtr<SourceListener>   sourceListenerPtr;
 
 protected:
     LVector3 position;
-    Vector3 direction;
-    Vector3 velocity;
+    Vector3  direction;
+    Vector3  velocity;
 
     Range<Scalar> cosAngleRange;
 
-    Scalar radius;
+    Scalar               radius;
     PerFrequency<Scalar> pfRadiusRatios;
     PerFrequency<Scalar> referenceFreqs;
 
     Scalar gain;
 
     struct {
-        int looping: 1;
-        int attenuated: 1;
-        int relative: 1;
+        int looping : 1;
+        int attenuated : 1;
+        int relative : 1;
     } flags;
 
     Timestamp lastKnownPlayingTime;
@@ -95,32 +95,32 @@ protected:
      */
     struct {
         /** position, velocity & direction */
-        int location: 1;
+        int location : 1;
 
         /** min/max angle, radius, pf radius ratios, reference freqs, attenuation */
-        int attributes: 1;
+        int attributes : 1;
 
         /** gain */
-        int gain: 1;
+        int gain : 1;
 
         /** soundPtr */
-        int soundPtr: 1;
+        int soundPtr : 1;
 
         /** looping */
-        int soundAttributes: 1;
+        int soundAttributes : 1;
 
         void reset() {
-            location = 0;
-            attributes = 0;
-            gain = 0;
-            soundPtr = 0;
+            location        = 0;
+            attributes      = 0;
+            gain            = 0;
+            soundPtr        = 0;
             soundAttributes = 0;
         }
 
         void setAll() {
-            location = 1;
-            attributes = 1;
-            gain = 1;
+            location        = 1;
+            attributes      = 1;
+            gain            = 1;
             soundAttributes = 1;
         }
     } dirty;
@@ -139,7 +139,7 @@ public:
 
     /** Set the source's central position in 3D space */
     void setPosition(LVector3 x) {
-        position = x;
+        position       = x;
         dirty.location = 1;
     }
 
@@ -150,7 +150,7 @@ public:
 
     /** Set the source's main propagation direction */
     void setDirection(Vector3 x) {
-        direction = x;
+        direction      = x;
         dirty.location = 1;
     }
 
@@ -161,7 +161,7 @@ public:
 
     /** Set the source's velocity */
     void setVelocity(Vector3 x) {
-        velocity = x;
+        velocity       = x;
         dirty.location = 1;
     }
 
@@ -182,7 +182,7 @@ public:
 
     /** @see getAngleRange @remarks This version takes cosine-angles rather than radians, much quicker */
     void setCosAngleRange(Range<Scalar> r) {
-        cosAngleRange = r;
+        cosAngleRange    = r;
         dirty.attributes = 1;
     }
 
@@ -193,7 +193,7 @@ public:
 
     /** Set the source's radius */
     void setRadius(Scalar r) {
-        radius = r;
+        radius           = r;
         dirty.attributes = 1;
     }
 
@@ -211,7 +211,7 @@ public:
      * @see getRadiusRatios
      */
     void setPerFrequencyRadiusRatios(PerFrequency<Scalar> val) {
-        pfRadiusRatios = val;
+        pfRadiusRatios   = val;
         dirty.attributes = 1;
     }
 
@@ -222,7 +222,7 @@ public:
 
     /** Set the source's reference frequencies */
     void setReferenceFreqs(PerFrequency<Scalar> val) {
-        referenceFreqs = val;
+        referenceFreqs   = val;
         dirty.attributes = 1;
     }
 
@@ -233,7 +233,7 @@ public:
 
     /** Set the source's main gain */
     void setGain(Scalar g) {
-        gain = g;
+        gain       = g;
         dirty.gain = 1;
     }
 
@@ -244,7 +244,7 @@ public:
 
     /** Set the source's looping mode */
     void setLooping(bool loop) {
-        flags.looping = loop ? 1 : 0;
+        flags.looping         = loop ? 1 : 0;
         dirty.soundAttributes = 1;
     }
 
@@ -270,7 +270,7 @@ public:
 
     /** Set whether the source's position is always relative to the root listener. */
     void setRelative(bool relative) {
-        flags.relative = relative ? 1 : 0;
+        flags.relative   = relative ? 1 : 0;
         dirty.attributes = 1;
     }
 
@@ -362,7 +362,7 @@ public:
 
     /** Set the associated sound stream - Only for SceneManagers to call */
     void setSound(SharedPtr<Sound> ptr) {
-        soundPtr = ptr;
+        soundPtr       = ptr;
         dirty.soundPtr = 1;
     }
 
@@ -392,7 +392,6 @@ protected:
     // by a concrete Sound class. All are protected, so the stream interface is independent
     // of implementations.
 protected:
-
     /** @see startPlaying
      * @param start The starting position.
      */
@@ -407,7 +406,6 @@ protected:
     // The following section contains package-private stuff
     // They're intended for plugin developers, and not end users
 public:
-
     /**
      * Notifies source listeners (if any) that the source
      * has begun actually playing.
@@ -423,6 +421,6 @@ public:
     void _notifyPlaying();
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_SOURCE_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_SOURCE_H

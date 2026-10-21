@@ -27,31 +27,27 @@
 #ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_ERRORS_H
 #define VEGA_STRIKE_ENGINE_CUBE_MAP_ERRORS_H
 
-#include <ostream>
-#include <fstream>
 #include <exception>
+#include <fstream>
+#include <ostream>
 
 class error {
 public:
 };
 
-//copied from mesh_gfx for inspiration:
+// copied from mesh_gfx for inspiration:
 class Exception : public std::exception {
 private:
     std::string _message;
 
 public:
-    Exception() {
-    }
+    Exception() {}
 
-    Exception(const Exception &other) : _message(other._message) {
-    }
+    Exception(const Exception &other) : _message(other._message) {}
 
-    explicit Exception(const std::string &message) : _message(message) {
-    }
+    explicit Exception(const std::string &message) : _message(message) {}
 
-    virtual ~Exception() {
-    }
+    virtual ~Exception() {}
 
     virtual const char *what() const noexcept {
         return _message.c_str();
@@ -60,11 +56,9 @@ public:
 
 class MissingTexture : public Exception {
 public:
-    explicit MissingTexture(const string &msg) : Exception(msg) {
-    }
+    explicit MissingTexture(const string &msg) : Exception(msg) {}
 
-    MissingTexture() {
-    }
+    MissingTexture() {}
 };
 
-#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_ERRORS_H
+#endif  // VEGA_STRIKE_ENGINE_CUBE_MAP_ERRORS_H

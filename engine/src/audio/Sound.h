@@ -32,8 +32,8 @@
 //
 
 #include "Exceptions.h"
-#include "Types.h"
 #include "Format.h"
+#include "Types.h"
 
 namespace Audio {
 
@@ -50,24 +50,24 @@ class Stream;
 class Sound {
 private:
     std::string name;
-    Format format;
+    Format      format;
 
 protected:
     /** @note Accessible to derived classes to support external unloading (ie: memory-short events) */
     struct Flags {
         /** Loaded state of the resource.
-        */
-        int loaded: 1;
+         */
+        int loaded : 1;
 
         /** Background loading state of the resource.
-        * @note Accessible to derived classes to support easier and safer threading
-        */
-        int loading: 1;
+         * @note Accessible to derived classes to support easier and safer threading
+         */
+        int loading : 1;
 
         /** Sound is a streaming resource
-        * @note Accessible to derived classes to support easier and safer threading
+         * @note Accessible to derived classes to support easier and safer threading
          */
-        int streaming: 1;
+        int streaming : 1;
     } flags;
 
 protected:
@@ -129,7 +129,6 @@ public:
     // by a concrete Sound class. All are protected, so the stream interface is independent
     // of implementations.
 protected:
-
     /** loadImpl should call this upon process termination
      * @remarks Either from the foreground thread or the background thread,
      *      whichever is performing the actual load.
@@ -161,9 +160,8 @@ protected:
      * @note Assume it is loaded
      */
     virtual void unloadImpl() = 0;
-
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_SOUND_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_SOUND_H

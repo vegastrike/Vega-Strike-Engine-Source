@@ -27,12 +27,11 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_OCCUPIED_H
 #define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_OCCUPIED_H
 
-//#include "masks.h"
+// #include "masks.h"
 
 class navscreenoccupied {
 private:
-
-//bits are down. sectors across. starting at top left of navscreen area
+    // bits are down. sectors across. starting at top left of navscreen area
     int sector0;
     int sector1;
     int sector2;
@@ -45,15 +44,15 @@ private:
     int sector9;
 
     float screenskipby4[4];
-    bool markreturned;
+    bool  markreturned;
 
 public:
     navscreenoccupied();
     navscreenoccupied(float x_small, float x_large, float y_small, float y_large, bool _markreturned);
 
-    void reset();
+    void  reset();
     float findfreesector(float x, float y);
     float findfreefloat(int &sector, float &y);
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_OCCUPIED_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_NAV_NAV_SCREEN_OCCUPIED_H

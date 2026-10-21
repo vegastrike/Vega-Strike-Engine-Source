@@ -29,7 +29,9 @@
 #define VEGA_STRIKE_ENGINE_CMD_AI_AUTO_DOCKING_H
 
 #include <deque>
+
 #include <boost/shared_ptr.hpp>
+
 #include "cmd/ai/order.h"
 #include "gfx_generic/vec.h"
 
@@ -110,6 +112,6 @@ private:
     DockingPath dockingPath;
 };
 
-} // namespace Orders
+}  // namespace Orders
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_AUTO_DOCKING_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_AUTO_DOCKING_H

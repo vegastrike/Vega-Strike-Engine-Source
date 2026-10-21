@@ -36,7 +36,7 @@
  * done automatically.
  */
 
-template<typename T>
+template <typename T>
 class Resource {
 protected:
     T value_;
@@ -46,30 +46,32 @@ protected:
 
     // TODO: make this const
     bool no_max_;
+
 public:
     Resource(const T &value = 0, const T &min_value = 0, const T &max_value = -1);
     Resource(const std::string input, const T modifier = 1.0, const T minimum_functionality = 0.0);
 
     const std::string Serialize(const T modifier = 1.0) const;
 
-    //const T operator=(Resource<T> value) const;
+    // const T operator=(Resource<T> value) const;
     Resource<T> operator=(const T &value);
     Resource<T> operator+=(const T &value);
     Resource<T> operator-=(const T &value);
 
-    //Resource<T> operator=(T &value);
+    // Resource<T> operator=(T &value);
     Resource<T> operator+=(T &value);
     Resource<T> operator-=(T &value);
 
     // Declare prefix and postfix increment operators.
     // TODO: actually implement pre/postfix increment. Right now both implementations are the same!!!
     // Prefix increment operator.
-    Resource<T>& operator++(){
+    Resource<T> &operator++() {
         T tmp_value = value_;
         tmp_value++;
         this->Set(tmp_value);
         return *this;
     }
+
     // Postfix increment operator.
     Resource<T> operator++(int) {
         T tmp_value = value_;
@@ -80,12 +82,13 @@ public:
 
     // Declare prefix and postfix decrement operators.
     // Prefix decrement operator.
-    Resource<T>& operator--() {
+    Resource<T> &operator--() {
         T tmp_value = value_;
         tmp_value--;
         this->Set(tmp_value);
         return *this;
     }
+
     // Postfix decrement operator.
     Resource<T> operator--(int) {
         T tmp_value = value_;
@@ -94,18 +97,18 @@ public:
         return *this;
     }
 
-    operator T() { return value_; }
-
-    
+    operator T() {
+        return value_;
+    }
 
     double Percent() const;
-    void ResetMaxValue();       // adjusted_max_value_ = max_value_;
-    void Set(const T &value);
-    void SetToMax();            // value_ = adjusted_max_value_ = max_value_
-    void SetMaxValue(const T &value);       // value_ = adjusted_max_value_ = max_value_ = value;
-    void SetAdjustedMaxValue(const T &value); // New adjusted max value
-    
-    void Zero();    // value_ = adjusted_max_value_ = min_value_;
+    void   ResetMaxValue();                      // adjusted_max_value_ = max_value_;
+    void   Set(const T &value);
+    void   SetToMax();                           // value_ = adjusted_max_value_ = max_value_
+    void   SetMaxValue(const T &value);          // value_ = adjusted_max_value_ = max_value_ = value;
+    void   SetAdjustedMaxValue(const T &value);  // New adjusted max value
+
+    void Zero();                                 // value_ = adjusted_max_value_ = min_value_;
 
     T Value() const;
     T MaxValue() const;
@@ -113,7 +116,7 @@ public:
     T AdjustedValue() const;
 
     // Damage & Repair
-    void Destroy(); // value_ = adjusted_max_value_ = min_value_;
+    void Destroy();  // value_ = adjusted_max_value_ = min_value_;
     bool Destroyed() const;
     void RandomDamage();
     void DamageByValue(const T &value);
@@ -123,36 +126,44 @@ public:
     void RepairByValue(const T &value);
     void RepairByPercent(const T &value);
 
-    T* ValuePtr() { return &value_; }
-    T* AdjustedMaxValuePtr() { return &adjusted_max_value_; }
-    T* MaxValuePtr() { return &max_value_; }
+    T *ValuePtr() {
+        return &value_;
+    }
+
+    T *AdjustedMaxValuePtr() {
+        return &adjusted_max_value_;
+    }
+
+    T *MaxValuePtr() {
+        return &max_value_;
+    }
 };
 
-template<typename T>
+template <typename T>
 bool operator==(const Resource<T> &lhs, const Resource<T> &rhs);
-template<typename T>
+template <typename T>
 bool operator==(const Resource<T> &lhs, const T &rhs);
-template<typename T>
+template <typename T>
 bool operator==(const T &lhs, const Resource<T> &rhs);
-template<typename T>
+template <typename T>
 bool operator>(const Resource<T> &lhs, const T &rhs);
-template<typename T>
+template <typename T>
 bool operator<(const Resource<T> &lhs, const T &rhs);
-template<typename T>
+template <typename T>
 bool operator<=(const Resource<T> &lhs, const T &rhs);
-template<typename T>
+template <typename T>
 bool operator>=(const Resource<T> &lhs, const T &rhs);
-template<typename T>
+template <typename T>
 bool operator>(const T &lhs, const Resource<T> &rhs);
-template<typename T>
+template <typename T>
 bool operator<(const T &lhs, const Resource<T> &rhs);
-template<typename T>
+template <typename T>
 bool operator<=(const T &lhs, const Resource<T> &rhs);
-template<typename T>
+template <typename T>
 bool operator>=(const T &lhs, const Resource<T> &rhs);
-template<typename T>
+template <typename T>
 T operator/(const Resource<T> &lhs, const T &rhs);
-template<typename T>
+template <typename T>
 T operator/(const T &lhs, const Resource<T> &rhs);
 
-#endif //VEGA_STRIKE_ENGINE_RESOURCE_RESOURCE_H
+#endif  // VEGA_STRIKE_ENGINE_RESOURCE_RESOURCE_H

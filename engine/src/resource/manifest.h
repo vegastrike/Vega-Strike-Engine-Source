@@ -28,8 +28,8 @@
 #ifndef MANIFEST_H
 #define MANIFEST_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "resource/cargo.h"
 
@@ -51,22 +51,22 @@ protected:
     std::vector<Cargo> _items;
 
 private:
-    Manifest(int dummy); // Create the MPL singleton.
+    Manifest(int dummy);  // Create the MPL singleton.
 public:
     Manifest();
-    
-    void AddManifest(const std::vector<Cargo>& cargo_items); // For testing
 
-    static Manifest& MPL(); // Get the master part list singleton
-    Cargo GetCargoByName(const std::string name) const;
-    Cargo GetRandomCargo(int quantity = 0) const;
-    Cargo GetRandomCargoFromCategory(std::string category, int quantity = 0) const;
-    Manifest GetCategoryManifest(std::string category) const;
-    Manifest GetMissionManifest() const;
-    
+    void AddManifest(const std::vector<Cargo>& cargo_items);  // For testing
+
+    static Manifest& MPL();                                   // Get the master part list singleton
+    Cargo            GetCargoByName(const std::string name) const;
+    Cargo            GetRandomCargo(int quantity = 0) const;
+    Cargo            GetRandomCargoFromCategory(std::string category, int quantity = 0) const;
+    Manifest         GetCategoryManifest(std::string category) const;
+    Manifest         GetMissionManifest() const;
+
     std::vector<Cargo> GetItems() const;
-    bool Empty() const;
-    size_t Size() const;
+    bool               Empty() const;
+    size_t             Size() const;
 
     int GetIndex(const Cargo& cargo) const;
     int GetIndex(const std::string& name, const std::string& category = "") const;
@@ -74,5 +74,4 @@ public:
     bool HasCargo(const std::string& name) const;
 };
 
-#endif //MANIFEST_H
-
+#endif  // MANIFEST_H

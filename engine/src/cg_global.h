@@ -27,55 +27,55 @@
 #ifndef VEGA_STRIKE_ENGINE_CG_GLOBAL_H
 #define VEGA_STRIKE_ENGINE_CG_GLOBAL_H
 
-#if defined (CG_SUPPORT)
+#if defined(CG_SUPPORT)
 
-#if defined(__APPLE__) && defined (__MACH__)
-#define MACOS 1
-#elif !defined (WIN32)
-#define UNIX 1
+#    if defined(__APPLE__) && defined(__MACH__)
+#        define MACOS 1
+#    elif !defined(WIN32)
+#        define UNIX 1
 
-#endif
+#    endif
 
-#include "gldrv/gl_globals.h"
+#    include "gldrv/gl_globals.h"
 
-#if defined (UNIX)
+#    if defined(UNIX)
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#define GLX_GLXEXT_PROTOTYPES 1
-#include <glx.h>
-#include "gldrv/glx_undefined_extensions.h"
-#include <glxext.h>
+#        define GLX_GLXEXT_PROTOTYPES 1
+#        include <glx.h>
+#        include <glxext.h>
 
-#endif //defined (UNIX)
+#        include "gldrv/glx_undefined_extensions.h"
 
-#include <string>
+#    endif  // defined (UNIX)
 
-#include <Cg/cg.h>
-#include <Cg/cgGL.h>
+#    include <string>
 
-#define CG_REQUIRED_EXTENSIONS \
-    "GL_ARB_multitexture "     \
-    "GL_NV_texture_shader "    \
-    "GL_ARB_vertex_program "   \
-    "GL_SGIS_generate_mipmap "
+#    include <Cg/cg.h>
+#    include <Cg/cgGL.h>
 
-#include <glh/glh_extensions.h>
-#include <glh/glh_obs.h>
-#include <glh/glh_cube_map.h>
+#    define CG_REQUIRED_EXTENSIONS \
+        "GL_ARB_multitexture "     \
+        "GL_NV_texture_shader "    \
+        "GL_ARB_vertex_program "   \
+        "GL_SGIS_generate_mipmap "
+
+#    include <glh/glh_cube_map.h>
+#    include <glh/glh_extensions.h>
+#    include <glh/glh_obs.h>
 
 // using namespace glh; DONT DO THIS IN HEADERS
 
-class CG_Cloak
-{
+class CG_Cloak {
 public:
-    CGprogram   vertexProgram;
-    CGcontext   shaderContext;
-    CGprofile   vertexProfile;
-//float4x4
+    CGprogram vertexProgram;
+    CGcontext shaderContext;
+    CGprofile vertexProfile;
+    // float4x4
     CGparameter ModelViewProj;
     CGparameter ModelViewIT;
     CGparameter ModelView;
-//float4
+    // float4
     CGparameter MaterialDiffuse;
     CGparameter MaterialAmbient;
     CGparameter MaterialSpecular;
@@ -86,12 +86,14 @@ public:
     CGparameter VecLightDir;
     CGparameter VecEye;
     CGparameter VecTime;
+
     CG_Cloak() {}
-    void cgLoadMedia( std::string pathname, std::string filename );
+
+    void cgLoadMedia(std::string pathname, std::string filename);
 };
 
 extern CG_Cloak *cloak_cg;
 
-#endif //defined (CG_SUPPORT)
+#endif  // defined (CG_SUPPORT)
 
-#endif //VEGA_STRIKE_ENGINE_CG_GLOBAL_H
+#endif  // VEGA_STRIKE_ENGINE_CG_GLOBAL_H

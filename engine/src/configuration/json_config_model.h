@@ -37,11 +37,12 @@
 // This has no SDL/ImGui dependency, so it is unit-testable independently of the
 // in-game config screen.
 
-#include <boost/json.hpp>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <boost/json.hpp>
 
 namespace vs_settings {
 
@@ -63,10 +64,11 @@ public:
 
 class JsonConfigLeaf : public JsonConfigNode {
 public:
-    JsonConfigLeaf(const boost::json::value& original, const boost::json::value& current,
-                   bool forced_dirty = false)
+    JsonConfigLeaf(const boost::json::value& original, const boost::json::value& current, bool forced_dirty = false)
         : original_(original), current_(current), dirty_(forced_dirty) {
-        if (!forced_dirty) dirty_ = (current_ != original_);
+        if (!forced_dirty) {
+            dirty_ = (current_ != original_);
+        }
     }
 
     bool is_dirty() const override {
@@ -77,14 +79,25 @@ public:
         current_ = v;
         // If there is a real original (from assets) and the value returns to it, the leaf
         // is clean again. If this leaf had no asset counterpart (user-defined), keep it dirty.
-        if (has_original_) dirty_ = (v != original_);
-        else dirty_ = true;
+        if (has_original_) {
+            dirty_ = (v != original_);
+        } else {
+            dirty_ = true;
+        }
     }
 
-    void mark_user_defined() { has_original_ = false; dirty_ = true; }
+    void mark_user_defined() {
+        has_original_ = false;
+        dirty_        = true;
+    }
 
-    boost::json::value value() const { return current_; }
-    boost::json::value original_value() const { return original_; }
+    boost::json::value value() const {
+        return current_;
+    }
+
+    boost::json::value original_value() const {
+        return original_;
+    }
 
     boost::json::value merged_value() const override {
         return current_;
@@ -97,8 +110,8 @@ public:
 private:
     boost::json::value original_;
     boost::json::value current_;
-    bool dirty_ = false;
-    bool has_original_ = true;   // true if there is an assets value to revert to
+    bool               dirty_        = false;
+    bool               has_original_ = true;  // true if there is an assets value to revert to
 };
 
 // A dictionary node. Children are JsonConfigLeaf or JsonConfigBranch.
@@ -107,25 +120,23 @@ public:
     // Build a branch from an assets dict and (optional) user dict. Children that
     // appear only in assets are clean leaves; children present in user too get
     // the user's value (marked dirty if it differs).
-    JsonConfigBranch(const boost::json::object& assets,
-                     const boost::json::object* user);
+    JsonConfigBranch(const boost::json::object& assets, const boost::json::object* user);
 
     // Build an array node. Children are indexed "0".."n-1".
-    JsonConfigBranch(const boost::json::array& assets,
-                     const boost::json::array* user);
+    JsonConfigBranch(const boost::json::array& assets, const boost::json::array* user);
 
     // Mark this branch and all descendants as user-defined (no asset counterpart).
     // Used for whole subtrees present only in the user config, which must always
     // be written back.
     void mark_user_defined();
 
-    bool is_dirty() const override;
+    bool               is_dirty() const override;
     boost::json::value merged_value() const override;
     boost::json::value user_value() const override;
 
     // Get the node at a dotted path like "graphics.resolution_x". Returns null if absent.
     const JsonConfigNode* get_node(const std::vector<std::string>& path) const;
-    JsonConfigNode* get_node(const std::vector<std::string>& path);
+    JsonConfigNode*       get_node(const std::vector<std::string>& path);
 
     // Set a leaf value at a dotted path. Creates intermediate branches as needed
     // (so a user can set a key the assets config doesn't define).
@@ -136,8 +147,8 @@ public:
     boost::json::value changes_dictionary() const;
 
     std::vector<std::pair<std::string, std::shared_ptr<JsonConfigNode>>> children;
-    bool user_defined_ = false;
-    bool is_array_ = false;   // true if this node represents a JSON array (children indexed 0..n)
+    bool                                                                 user_defined_ = false;
+    bool is_array_ = false;  // true if this node represents a JSON array (children indexed 0..n)
 };
 
 // Top-level config: an assets file (defaults) + a user file (overrides).
@@ -145,11 +156,10 @@ class JsonConfigModel {
 public:
     // assets_json and user_json are JSON object documents. user_json may be null
     // (no user overrides yet).
-    JsonConfigModel(const boost::json::value& assets_json,
-                    const boost::json::value* user_json);
+    JsonConfigModel(const boost::json::value& assets_json, const boost::json::value* user_json);
 
     const JsonConfigNode* get(const std::vector<std::string>& path) const;
-    void set(const std::vector<std::string>& path, const boost::json::value& v);
+    void                  set(const std::vector<std::string>& path, const boost::json::value& v);
 
     // The sparse overlay to write to the user config file.
     boost::json::value changes_dictionary() const;
@@ -158,6 +168,6 @@ private:
     std::shared_ptr<JsonConfigNode> root_;
 };
 
-} // namespace vs_settings
+}  // namespace vs_settings
 
-#endif // VEGA_STRIKE_ENGINE_CONFIG_JSON_CONFIG_MODEL_H
+#endif  // VEGA_STRIKE_ENGINE_CONFIG_JSON_CONFIG_MODEL_H

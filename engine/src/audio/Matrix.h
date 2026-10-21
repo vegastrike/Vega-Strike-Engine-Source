@@ -32,17 +32,17 @@
 //
 
 #include <math.h>
+
 #include "Vector.h"
 
 namespace Audio {
 
-template<typename T>
+template <typename T>
 class TMatrix3 {
 public:
     T m[3][3];
 
-    TMatrix3() {
-    }
+    TMatrix3() {}
 
     TMatrix3(T m11, T m12, T m13, T m21, T m22, T m23, T m31, T m32, T m33) {
         m[0][0] = m11;
@@ -68,7 +68,7 @@ public:
         m[2][2] = s;
     }
 
-    template<typename Y>
+    template <typename Y>
     TMatrix3(const TMatrix3<Y> &o) {
         m[0][0] = o.m[0][0];
         m[0][1] = o.m[0][1];
@@ -81,7 +81,7 @@ public:
         m[2][2] = o.m[2][2];
     }
 
-    template<typename Y>
+    template <typename Y>
     TMatrix3(const TVector3<Y> &c1, const TVector3<Y> &c2, const TVector3<Y> &c3) {
         m[0][0] = c1.x;
         m[0][1] = c2.x;
@@ -94,7 +94,7 @@ public:
         m[2][2] = c3.z;
     }
 
-    template<typename Y>
+    template <typename Y>
     TMatrix3<T> &operator=(const TMatrix3<Y> &o) {
         m[0][0] = o.m[0][0];
         m[0][1] = o.m[0][1];
@@ -135,7 +135,7 @@ public:
     }
 
     TMatrix3<T> &operator*=(const TMatrix3<T> &o) {
-        #define DOT(m, om, r, c) (m[r][0]*om[0][c] + m[r][1]*om[1][c] + m[r][2]*om[2][c])
+#define DOT(m, om, r, c) (m[r][0] * om[0][c] + m[r][1] * om[1][c] + m[r][2] * om[2][c])
         TMatrix3<T> rv;
         rv.m[0][0] = DOT(m, o.m, 0, 0);
         rv.m[0][1] = DOT(m, o.m, 0, 1);
@@ -146,7 +146,7 @@ public:
         rv.m[2][0] = DOT(m, o.m, 2, 0);
         rv.m[2][1] = DOT(m, o.m, 2, 1);
         rv.m[2][2] = DOT(m, o.m, 2, 2);
-        #undef DOT
+#undef DOT
         return *this;
     }
 
@@ -174,29 +174,23 @@ public:
     }
 
     TMatrix3<T> operator+(const TMatrix3<T> &o) const {
-        return TMatrix3<T>(
-                m[0][0] + o.m[0][0], m[0][1] + o.m[0][1], m[0][2] + o.m[0][2],
-                m[1][0] + o.m[1][0], m[1][1] + o.m[1][1], m[1][2] + o.m[1][2],
-                m[2][0] + o.m[2][0], m[2][1] + o.m[2][1], m[2][2] + o.m[2][2]
-        );
+        return TMatrix3<T>(m[0][0] + o.m[0][0], m[0][1] + o.m[0][1], m[0][2] + o.m[0][2], m[1][0] + o.m[1][0],
+                           m[1][1] + o.m[1][1], m[1][2] + o.m[1][2], m[2][0] + o.m[2][0], m[2][1] + o.m[2][1],
+                           m[2][2] + o.m[2][2]);
     }
 
     TMatrix3<T> operator-(const TMatrix3<T> &o) const {
-        return TMatrix3<T>(
-                m[0][0] - o.m[0][0], m[0][1] - o.m[0][1], m[0][2] - o.m[0][2],
-                m[1][0] - o.m[1][0], m[1][1] - o.m[1][1], m[1][2] - o.m[1][2],
-                m[2][0] - o.m[2][0], m[2][1] - o.m[2][1], m[2][2] - o.m[2][2]
-        );
+        return TMatrix3<T>(m[0][0] - o.m[0][0], m[0][1] - o.m[0][1], m[0][2] - o.m[0][2], m[1][0] - o.m[1][0],
+                           m[1][1] - o.m[1][1], m[1][2] - o.m[1][2], m[2][0] - o.m[2][0], m[2][1] - o.m[2][1],
+                           m[2][2] - o.m[2][2]);
     }
 
     TMatrix3<T> operator*(const TMatrix3<T> &o) const {
-        #define DOT(m, om, r, c) (m[r][0]*om[0][c] + m[r][1]*om[1][c] + m[r][2]*om[2][c])
-        return TMatrix3<T>(
-                DOT(m, o.m, 0, 0), DOT(m, o.m, 0, 1), DOT(m, o.m, 0, 2),
-                DOT(m, o.m, 1, 0), DOT(m, o.m, 1, 1), DOT(m, o.m, 1, 2),
-                DOT(m, o.m, 2, 0), DOT(m, o.m, 2, 1), DOT(m, o.m, 2, 2)
-        );
-        #undef DOT
+#define DOT(m, om, r, c) (m[r][0] * om[0][c] + m[r][1] * om[1][c] + m[r][2] * om[2][c])
+        return TMatrix3<T>(DOT(m, o.m, 0, 0), DOT(m, o.m, 0, 1), DOT(m, o.m, 0, 2), DOT(m, o.m, 1, 0),
+                           DOT(m, o.m, 1, 1), DOT(m, o.m, 1, 2), DOT(m, o.m, 2, 0), DOT(m, o.m, 2, 1),
+                           DOT(m, o.m, 2, 2));
+#undef DOT
     }
 
     TMatrix3<T> operator/(const TMatrix3<T> &other) const {
@@ -204,24 +198,18 @@ public:
     }
 
     TMatrix3<T> operator*(T t) const {
-        return TMatrix3<T>(
-                m[0][0] * t, m[0][1] * t, m[0][2] * t,
-                m[1][0] * t, m[1][1] * t, m[1][2] * t,
-                m[2][0] * t, m[2][1] * t, m[2][2] * t
-        );
+        return TMatrix3<T>(m[0][0] * t, m[0][1] * t, m[0][2] * t, m[1][0] * t, m[1][1] * t, m[1][2] * t, m[2][0] * t,
+                           m[2][1] * t, m[2][2] * t);
     }
 
     TMatrix3<T> operator/(T t) const {
         return (*this) * (T(1) / t);
     }
 
-    template<typename Y>
+    template <typename Y>
     TVector3<Y> operator*(const TVector3<Y> &t) const {
-        return TVector3<Y>(
-                m[0][0] * t.x + m[0][1] * t.y + m[0][2] * t.z,
-                m[1][0] * t.x + m[1][1] * t.y + m[1][2] * t.z,
-                m[2][0] * t.x + m[2][1] * t.y + m[2][2] * t.z
-        );
+        return TVector3<Y>(m[0][0] * t.x + m[0][1] * t.y + m[0][2] * t.z, m[1][0] * t.x + m[1][1] * t.y + m[1][2] * t.z,
+                           m[2][0] * t.x + m[2][1] * t.y + m[2][2] * t.z);
     }
 
     TMatrix3<T> inverse() const {
@@ -232,15 +220,10 @@ public:
         then divide by the determinant
         */
 
-        //determinant
-        float det =
-                +m[0][0] * m[1][1] * m[2][2]
-                        + m[1][0] * m[2][1] * m[0][2]
-                        + m[2][0] * m[0][1] * m[1][2]
+        // determinant
+        float det = +m[0][0] * m[1][1] * m[2][2] + m[1][0] * m[2][1] * m[0][2] + m[2][0] * m[0][1] * m[1][2]
 
-                        - m[0][2] * m[1][1] * m[2][0]
-                        - m[1][2] * m[2][1] * m[0][0]
-                        - m[2][2] * m[0][1] * m[1][0];
+                    - m[0][2] * m[1][1] * m[2][0] - m[1][2] * m[2][1] * m[0][0] - m[2][2] * m[0][1] * m[1][0];
         float idet = T(1) / det;
 
         rv.m[0][0] = +(m[1][1] * m[2][2] - m[1][2] * m[2][1]) * idet;
@@ -259,14 +242,10 @@ public:
     }
 
     TMatrix3<T> transpose() const {
-        return TMatrix3<T>(
-                m[0][0], m[1][0], m[2][0],
-                m[0][1], m[1][1], m[2][1],
-                m[0][2], m[1][2], m[2][2]
-        );
+        return TMatrix3<T>(m[0][0], m[1][0], m[2][0], m[0][1], m[1][1], m[2][1], m[0][2], m[1][2], m[2][2]);
     }
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_MATRIX_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_MATRIX_H

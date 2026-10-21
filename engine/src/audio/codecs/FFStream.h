@@ -33,62 +33,59 @@
 
 #ifdef HAVE_FFMPEG
 
-#include "../Stream.h"
-
-#include "vegadisk/vsfilesystem.h"
+#    include "../Stream.h"
+#    include "vegadisk/vsfilesystem.h"
 
 namespace Audio {
 
-    namespace __impl {
-        struct FFData;
-    };
-
-    /**
-     * FFStream class, used by the FFCodec to decode various audio streams
-     *
-     * @remarks Container formats with multiple embedded streams are supported by
-     *      using the special path form "[path]|[stream number]". By default, the
-     *      first audio stream is opened.
-     *
-     * @see Stream, CodecRegistry.
-     *
-     */
-    class FFStream : public Stream
-    {
-    private:
-        __impl::FFData *ffData;
-
-    public:
-        /** Open the specified OGG file, or whine about it
-         * @param path the file path
-         * @param streamIndex the substream index (for multiple stream containing formats). By
-         *      default, the first audio stream is opened.
-         * @param type the file type, used by resource management APIs
-         */
-        FFStream(const std::string& path, int streamIndex = 0, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
-
-        virtual ~FFStream();
-
-    protected:
-
-        /** @see Stream::getLengthImpl */
-        virtual double getLengthImpl() const;
-
-        /** @see Stream::getPositionImpl */
-        virtual double getPositionImpl() const;
-
-        /** @see Stream::seekImpl */
-        virtual void seekImpl(double position);
-
-        /** @see Stream::getBufferImpl */
-        virtual void getBufferImpl(void *&buffer, unsigned int &bufferSize);
-
-        /** @see Stream::nextBufferImpl */
-        virtual void nextBufferImpl();
-    };
-
+namespace __impl {
+struct FFData;
 };
 
-#endif //HAVE_FFMPEG
+/**
+ * FFStream class, used by the FFCodec to decode various audio streams
+ *
+ * @remarks Container formats with multiple embedded streams are supported by
+ *      using the special path form "[path]|[stream number]". By default, the
+ *      first audio stream is opened.
+ *
+ * @see Stream, CodecRegistry.
+ *
+ */
+class FFStream : public Stream {
+private:
+    __impl::FFData *ffData;
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_FF_STREAM_H
+public:
+    /** Open the specified OGG file, or whine about it
+     * @param path the file path
+     * @param streamIndex the substream index (for multiple stream containing formats). By
+     *      default, the first audio stream is opened.
+     * @param type the file type, used by resource management APIs
+     */
+    FFStream(const std::string &path, int streamIndex = 0, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
+
+    virtual ~FFStream();
+
+protected:
+    /** @see Stream::getLengthImpl */
+    virtual double getLengthImpl() const;
+
+    /** @see Stream::getPositionImpl */
+    virtual double getPositionImpl() const;
+
+    /** @see Stream::seekImpl */
+    virtual void seekImpl(double position);
+
+    /** @see Stream::getBufferImpl */
+    virtual void getBufferImpl(void *&buffer, unsigned int &bufferSize);
+
+    /** @see Stream::nextBufferImpl */
+    virtual void nextBufferImpl();
+};
+
+};  // namespace Audio
+
+#endif  // HAVE_FFMPEG
+
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_FF_STREAM_H

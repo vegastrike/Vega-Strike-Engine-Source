@@ -38,7 +38,7 @@ class Afterburner : public Component, public EnergyConsumer {
 public:
     ~Afterburner() override;
 
-    //after burner acceleration max
+    // after burner acceleration max
     Resource<double> thrust;
 
     Resource<double> speed;
@@ -55,7 +55,7 @@ public:
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
     bool Downgrade() override;
@@ -71,4 +71,4 @@ public:
     // TODO: virtual void Destroy(); and other functions
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_H

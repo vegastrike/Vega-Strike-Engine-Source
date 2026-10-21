@@ -27,8 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_AUDIO_VIRTUALITERATOR_H
 #define VEGA_STRIKE_ENGINE_AUDIO_VIRTUALITERATOR_H
 
-#include "Types.h"
 #include <iterator>
+
+#include "Types.h"
 
 namespace Audio {
 
@@ -40,22 +41,20 @@ namespace Audio {
     By necessity, due to design constraints, no postfix increment/decrement operators
     are defined: those don't get along with virtuality.
 */
-template<class _T, class _Rt = _T &, class _Pt = _T *>
+template <class _T, class _Rt = _T &, class _Pt = _T *>
 class VirtualIterator : public std::iterator<std::bidirectional_iterator_tag, _T> {
 public:
-    typedef _T value_type;
-    typedef _Rt reference_type;
-    typedef _Pt pointer_type;
+    typedef _T                            value_type;
+    typedef _Rt                           reference_type;
+    typedef _Pt                           pointer_type;
     typedef VirtualIterator<_T, _Rt, _Pt> iterator_type;
 
-    VirtualIterator() {
-    }
+    VirtualIterator() {}
 
-    virtual ~VirtualIterator() {
-    }
+    virtual ~VirtualIterator() {}
 
-    virtual reference_type operator*() = 0;
-    virtual pointer_type operator->() = 0;
+    virtual reference_type operator*()  = 0;
+    virtual pointer_type   operator->() = 0;
 
     virtual iterator_type &operator++() = 0;
     virtual iterator_type &operator--() = 0;
@@ -91,29 +90,24 @@ public:
     }
 };
 
-template<typename _It>
-class VirtualStandardIterator :
-        public VirtualIterator<
-                typename std::iterator_traits<_It>::value_type,
-                typename std::iterator_traits<_It>::reference,
-                typename std::iterator_traits<_It>::pointer
-        > {
+template <typename _It>
+class VirtualStandardIterator : public VirtualIterator<typename std::iterator_traits<_It>::value_type,
+                                                       typename std::iterator_traits<_It>::reference,
+                                                       typename std::iterator_traits<_It>::pointer> {
     _It begin;
     _It end;
     _It cur;
 
 public:
     // They should be inherited, but somehow gcc 4.1.0 doesn't understand that >:9
-    typedef typename std::iterator_traits<_It>::value_type value_type;
-    typedef typename std::iterator_traits<_It>::reference reference_type;
-    typedef typename std::iterator_traits<_It>::pointer pointer_type;
+    typedef typename std::iterator_traits<_It>::value_type            value_type;
+    typedef typename std::iterator_traits<_It>::reference             reference_type;
+    typedef typename std::iterator_traits<_It>::pointer               pointer_type;
     typedef VirtualIterator<value_type, reference_type, pointer_type> iterator_type;
 
-    VirtualStandardIterator(const _It &_begin, const _It &_end) : begin(_begin), end(_end), cur(_begin) {
-    }
+    VirtualStandardIterator(const _It &_begin, const _It &_end) : begin(_begin), end(_end), cur(_begin) {}
 
-    VirtualStandardIterator(const VirtualStandardIterator<_It> &o) : begin(o.begin), end(o.end), cur(o.cur) {
-    }
+    VirtualStandardIterator(const VirtualStandardIterator<_It> &o) : begin(o.begin), end(o.end), cur(o.cur) {}
 
     virtual reference_type operator*() {
         return *cur;
@@ -146,30 +140,23 @@ public:
     };
 };
 
-template<typename _It, typename _T, typename _Rt=_T &, typename _Pt=_T *>
-class VirtualMappingIterator :
-        public VirtualIterator<_T, _Rt, _Pt> {
+template <typename _It, typename _T, typename _Rt = _T &, typename _Pt = _T *>
+class VirtualMappingIterator : public VirtualIterator<_T, _Rt, _Pt> {
 protected:
     VirtualStandardIterator<_It> it;
 
 public:
     // They should be inherited, but somehow gcc 4.1.0 doesn't understand that >:9
-    typedef _T value_type;
-    typedef _Rt reference_type;
-    typedef _Pt pointer_type;
+    typedef _T                            value_type;
+    typedef _Rt                           reference_type;
+    typedef _Pt                           pointer_type;
     typedef VirtualIterator<_T, _Rt, _Pt> iterator_type;
 
-    VirtualMappingIterator(const _It &_begin, const _It &_end) :
-            it(_begin, _end) {
-    }
+    VirtualMappingIterator(const _It &_begin, const _It &_end) : it(_begin, _end) {}
 
-    VirtualMappingIterator(const iterator_type &o) :
-            it(o.it) {
-    }
+    VirtualMappingIterator(const iterator_type &o) : it(o.it) {}
 
-    VirtualMappingIterator(const VirtualStandardIterator<_It> &o) :
-            it(o) {
-    }
+    VirtualMappingIterator(const VirtualStandardIterator<_It> &o) : it(o) {}
 
     virtual iterator_type &operator++() {
         ++it;
@@ -190,27 +177,20 @@ public:
     };
 };
 
-template<typename _It>
-class VirtualValuesIterator :
-        public VirtualMappingIterator<_It, typename _It::value_type::second_type> {
+template <typename _It>
+class VirtualValuesIterator : public VirtualMappingIterator<_It, typename _It::value_type::second_type> {
 public:
     // They should be inherited, but somehow gcc 4.1.0 doesn't understand that >:9
-    typedef typename _It::value_type::second_type value_type;
-    typedef value_type &reference_type;
-    typedef value_type *pointer_type;
+    typedef typename _It::value_type::second_type                     value_type;
+    typedef value_type                                               &reference_type;
+    typedef value_type                                               *pointer_type;
     typedef VirtualIterator<value_type, reference_type, pointer_type> iterator_type;
 
-    VirtualValuesIterator(const _It &_begin, const _It &_end) :
-            VirtualMappingIterator<_It, value_type>(_begin, _end) {
-    }
+    VirtualValuesIterator(const _It &_begin, const _It &_end) : VirtualMappingIterator<_It, value_type>(_begin, _end) {}
 
-    VirtualValuesIterator(const VirtualValuesIterator<_It> &o) :
-            VirtualMappingIterator<_It, value_type>(o.it) {
-    }
+    VirtualValuesIterator(const VirtualValuesIterator<_It> &o) : VirtualMappingIterator<_It, value_type>(o.it) {}
 
-    VirtualValuesIterator(const VirtualStandardIterator<_It> &o) :
-            VirtualMappingIterator<_It, value_type>(o) {
-    }
+    VirtualValuesIterator(const VirtualStandardIterator<_It> &o) : VirtualMappingIterator<_It, value_type>(o) {}
 
     virtual reference_type operator*() {
         return VirtualMappingIterator<_It, value_type>::it->second;
@@ -225,27 +205,20 @@ public:
     }
 };
 
-template<typename _It>
-class VirtualKeysIterator :
-        public VirtualMappingIterator<_It, typename _It::value_type::first_type> {
+template <typename _It>
+class VirtualKeysIterator : public VirtualMappingIterator<_It, typename _It::value_type::first_type> {
 public:
     // They should be inherited, but somehow gcc 4.1.0 doesn't understand that >:9
-    typedef typename _It::value_type::first_type value_type;
-    typedef value_type &reference_type;
-    typedef value_type *pointer_type;
+    typedef typename _It::value_type::first_type                      value_type;
+    typedef value_type                                               &reference_type;
+    typedef value_type                                               *pointer_type;
     typedef VirtualIterator<value_type, reference_type, pointer_type> iterator_type;
 
-    VirtualKeysIterator(const _It &_begin, const _It &_end) :
-            VirtualMappingIterator<_It, value_type>(_begin, _end) {
-    }
+    VirtualKeysIterator(const _It &_begin, const _It &_end) : VirtualMappingIterator<_It, value_type>(_begin, _end) {}
 
-    VirtualKeysIterator(const VirtualKeysIterator<_It> &o) :
-            VirtualMappingIterator<_It, value_type>(o.it) {
-    }
+    VirtualKeysIterator(const VirtualKeysIterator<_It> &o) : VirtualMappingIterator<_It, value_type>(o.it) {}
 
-    VirtualKeysIterator(const VirtualStandardIterator<_It> &o) :
-            VirtualMappingIterator<_It, value_type>(o) {
-    }
+    VirtualKeysIterator(const VirtualStandardIterator<_It> &o) : VirtualMappingIterator<_It, value_type>(o) {}
 
     virtual reference_type operator*() {
         return VirtualMappingIterator<_It, value_type>::it->first;
@@ -260,34 +233,26 @@ public:
     }
 };
 
-template<typename _It1, typename _It2=_It1>
-class ChainingIterator :
-        public VirtualIterator<
-                typename _It1::value_type,
-                typename _It1::reference_type,
-                typename _It1::pointer_type
-        > {
+template <typename _It1, typename _It2 = _It1>
+class ChainingIterator
+    : public VirtualIterator<typename _It1::value_type, typename _It1::reference_type, typename _It1::pointer_type> {
     _It1 it1;
     _It2 it2;
 
 public:
     // They should be inherited, but somehow gcc 4.1.0 doesn't understand that >:9
-    typedef typename _It1::value_type value_type;
-    typedef typename _It1::reference_type reference_type;
-    typedef typename _It1::pointer_type pointer_type;
+    typedef typename _It1::value_type                                 value_type;
+    typedef typename _It1::reference_type                             reference_type;
+    typedef typename _It1::pointer_type                               pointer_type;
     typedef VirtualIterator<value_type, reference_type, pointer_type> iterator_type;
 
-    ChainingIterator() {
-    }
+    ChainingIterator() {}
 
-    ChainingIterator(const ChainingIterator<_It1, _It2> &o) : it1(o.it1), it2(o.it2) {
-    }
+    ChainingIterator(const ChainingIterator<_It1, _It2> &o) : it1(o.it1), it2(o.it2) {}
 
-    ChainingIterator(_It1 _it1, _It2 _it2) : it1(_it1), it2(_it2) {
-    }
+    ChainingIterator(_It1 _it1, _It2 _it2) : it1(_it1), it2(_it2) {}
 
-    virtual ~ChainingIterator() {
-    }
+    virtual ~ChainingIterator() {}
 
     virtual reference_type operator*() {
         return (it1.eos() ? *it2 : *it1);
@@ -328,6 +293,6 @@ public:
     }
 };
 
-}
+}  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_VIRTUALITERATOR_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_VIRTUALITERATOR_H

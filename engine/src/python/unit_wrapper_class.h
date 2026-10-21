@@ -29,173 +29,206 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
+
 #include "src/vs_logging.h"
 using std::string;
-//WARNING: Macro City ahead.  Please skip this section if you don't like macros.
+// WARNING: Macro City ahead.  Please skip this section if you don't like macros.
 static const char *kNullUnitErrorMsg = "\nERROR: NULL Unit used in Python script; returning default value...";
-#define CHECKME \
-    }           \
-    Unit *me = GetUnit(); if (!me) {VS_LOG_AND_FLUSH(error, (boost::format("%1%: %2%") % __FUNCTION__ % kNullUnitErrorMsg)); return
+#define CHECKME                                                                                  \
+    }                                                                                            \
+    Unit *me = GetUnit();                                                                        \
+    if (!me) {                                                                                   \
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: %2%") % __FUNCTION__ % kNullUnitErrorMsg)); \
+    return
 #define WRAPPED0(type, name, def) \
-    type name() {                   \
-        {CHECKME def; }             \
-        return me->name(); }
+    type name() {                 \
+        {                         \
+            CHECKME def;          \
+        }                         \
+        return me->name();        \
+    }
 #define WRAPPED1(type, name, atype, a, def) \
-    type name( atype a ) {                    \
-        {CHECKME def; }                       \
-        return me->name( a ); }
+    type name(atype a) {                    \
+        {                                   \
+            CHECKME def;                    \
+        }                                   \
+        return me->name(a);                 \
+    }
 #define WRAPPED2(type, name, atype, a, btype, b, def) \
-    type name( atype a, btype b ) {                     \
-        {CHECKME def; }                                 \
-        return me->name( a, b ); }
+    type name(atype a, btype b) {                     \
+        {                                             \
+            CHECKME def;                              \
+        }                                             \
+        return me->name(a, b);                        \
+    }
 #define WRAPPED3(type, name, atype, a, btype, b, ctype, c, def) \
-    type name( atype a, btype b, ctype c ) {                      \
-        {CHECKME def; }                                           \
-        return me->name( a, b, c ); }
+    type name(atype a, btype b, ctype c) {                      \
+        {                                                       \
+            CHECKME def;                                        \
+        }                                                       \
+        return me->name(a, b, c);                               \
+    }
 #define WRAPPED4(type, name, atype, a, btype, b, ctype, c, dtype, d, def) \
-    type name( atype a, btype b, ctype c, dtype d ) {                       \
-        {CHECKME def; }                                                     \
-        return me->name( a, b, c, d ); }
+    type name(atype a, btype b, ctype c, dtype d) {                       \
+        {                                                                 \
+            CHECKME def;                                                  \
+        }                                                                 \
+        return me->name(a, b, c, d);                                      \
+    }
 #define voidWRAPPED0(name) \
-    void name() {            \
-        {CHECKME; }          \
-        me->name(); }
+    void name() {          \
+        {                  \
+            CHECKME;       \
+        }                  \
+        me->name();        \
+    }
 #define voidWRAPPED1(name, atype, a) \
-    void name( atype a ) {             \
-        {CHECKME; }                    \
-        me->name( a ); }
+    void name(atype a) {             \
+        {                            \
+            CHECKME;                 \
+        }                            \
+        me->name(a);                 \
+    }
 #define voidWRAPPED2(name, atype, a, btype, b) \
-    void name( atype a, btype b ) {              \
-        {CHECKME; }                              \
-        me->name( a, b ); }
+    void name(atype a, btype b) {              \
+        {                                      \
+            CHECKME;                           \
+        }                                      \
+        me->name(a, b);                        \
+    }
 #define voidWRAPPED3(name, atype, a, btype, b, ctype, c) \
-    void name( atype a, btype b, ctype c ) {               \
-        {CHECKME; }                                        \
-        me->name( a, b, c ); }
+    void name(atype a, btype b, ctype c) {               \
+        {                                                \
+            CHECKME;                                     \
+        }                                                \
+        me->name(a, b, c);                               \
+    }
 #define voidWRAPPED5(name, atype, a, btype, b, ctype, c, dtype, d, etype, e) \
-    void name( atype a,                                                        \
-               btype b,                                                        \
-               ctype c,                                                        \
-               dtype d,                                                        \
-               etype e ) {                                                     \
-        {CHECKME; }                                                            \
-        me->name( a, b, c, d, e ); }
+    void name(atype a, btype b, ctype c, dtype d, etype e) {                 \
+        {                                                                    \
+            CHECKME;                                                         \
+        }                                                                    \
+        me->name(a, b, c, d, e);                                             \
+    }
 
-#define EXPORT_UTIL0(type, name) type name() {return UnitUtil::name( GetUnit() ); }
-#define EXPORT_UTIL1(type, name, atype, a) type name( atype a ) {return UnitUtil::name( GetUnit(), a ); }
-#define EXPORT_UTIL2(type, name, atype, a, btype, b) type name( atype a, btype b ) {return UnitUtil::name( GetUnit(), a, b ); }
-#define EXPORT_UTIL3(type, name, atype, a, btype, b, ctype, c)   \
-    type name( atype a, btype b, ctype c ) {return UnitUtil::name( \
-                                                       GetUnit(),  \
-                                                       a,          \
-                                                       b,          \
-                                                       c ); }
+#define EXPORT_UTIL0(type, name)          \
+    type name() {                         \
+        return UnitUtil::name(GetUnit()); \
+    }
+#define EXPORT_UTIL1(type, name, atype, a)   \
+    type name(atype a) {                     \
+        return UnitUtil::name(GetUnit(), a); \
+    }
+#define EXPORT_UTIL2(type, name, atype, a, btype, b) \
+    type name(atype a, btype b) {                    \
+        return UnitUtil::name(GetUnit(), a, b);      \
+    }
+#define EXPORT_UTIL3(type, name, atype, a, btype, b, ctype, c) \
+    type name(atype a, btype b, ctype c) {                     \
+        return UnitUtil::name(GetUnit(), a, b, c);             \
+    }
 #define EXPORT_UTIL5(type, name, atype, a, btype, b, ctype, c, dtype, d, etype, e) \
-    type name( atype a,                                                              \
-               btype b,                                                              \
-               ctype c,                                                              \
-               dtype d,                                                              \
-               etype e ) {return UnitUtil::                                          \
-                                 name( GetUnit(                                      \
-                                              ), a, b, c, d, e ); }
-#define voidEXPORT_UTIL0(name) void name() {UnitUtil::name( GetUnit() ); }
-#define voidEXPORT_UTIL1(name, atype, a) void name( atype a ) {UnitUtil::name( GetUnit(), a ); }
-#define voidEXPORT_UTIL2(name, atype, a, btype, b) void name( atype a, btype b ) {UnitUtil::name( GetUnit(), a, b ); }
+    type name(atype a, btype b, ctype c, dtype d, etype e) {                       \
+        return UnitUtil::name(GetUnit(), a, b, c, d, e);                           \
+    }
+#define voidEXPORT_UTIL0(name)     \
+    void name() {                  \
+        UnitUtil::name(GetUnit()); \
+    }
+#define voidEXPORT_UTIL1(name, atype, a) \
+    void name(atype a) {                 \
+        UnitUtil::name(GetUnit(), a);    \
+    }
+#define voidEXPORT_UTIL2(name, atype, a, btype, b) \
+    void name(atype a, btype b) {                  \
+        UnitUtil::name(GetUnit(), a, b);           \
+    }
 #define voidEXPORT_UTIL3(name, atype, a, btype, b, ctype, c) \
-    void name( atype a, btype b, ctype c ) {UnitUtil::name(    \
-                                                GetUnit(), a, b, c ); }
+    void name(atype a, btype b, ctype c) {                   \
+        UnitUtil::name(GetUnit(), a, b, c);                  \
+    }
 #define voidEXPORT_UTIL5(name, atype, a, btype, b, ctype, c, dtype, d, etype, e) \
-    void name( atype a,                                                            \
-               btype b,                                                            \
-               ctype c,                                                            \
-               dtype d,                                                            \
-               etype e ) {UnitUtil::name(                                          \
-                              GetUnit(),                                           \
-                              a,                                                   \
-                              b,                                                   \
-                              c,                                                   \
-                              d,                                                   \
-                              e ); }
-//#define EXPORT_UTIL(name,aff)
-//#define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
-//End of Macro City
+    void name(atype a, btype b, ctype c, dtype d, etype e) {                     \
+        UnitUtil::name(GetUnit(), a, b, c, d, e);                                \
+    }
+
+// #define EXPORT_UTIL(name,aff)
+// #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
+// End of Macro City
 class UnitWrapper : public UnitContainer {
 public:
 #include "src/python/python_unit_wrap.h"
 
-///////////////////////////////MANUAL WRAP//////
-//WRAPPED0(UnitCollection::UnitIterator, getSubUnits,0)
+    ///////////////////////////////MANUAL WRAP//////
+    // WRAPPED0(UnitCollection::UnitIterator, getSubUnits,0)
     UniverseUtil::PythonUnitIter getSubUnits() {
         {
-        CHECKME UniverseUtil::PythonUnitIter();
+            CHECKME UniverseUtil::PythonUnitIter();
         }
         return unit->getSubUnits();
     }
 
     void Kill() {
         {
-        CHECKME;
+            CHECKME;
         }
         unit->Kill(true);
     }
 
     UnitWrapper GetTarget() {
         {
-        CHECKME 0;
+            CHECKME 0;
         }
         return unit->Target();
     }
 
     UnitWrapper GetVelocityReference() {
         {
-        CHECKME 0;
+            CHECKME 0;
         }
         return unit->VelocityReference();
     }
 
     void SetVelocityReference(UnitWrapper targ) {
         {
-        CHECKME;
+            CHECKME;
         }
         unit->VelocityReference(targ);
     }
 
     void SetTarget(UnitWrapper targ) {
         {
-        CHECKME;
+            CHECKME;
         }
         unit->Target(targ);
     }
 
     boost::python::tuple GetOrientation() {
         {
-        CHECKME VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0,
-                                                                                                                    0,
-                                                                                                                    0));
+            CHECKME VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0, 0, 0),
+                                        VS_BOOST_MAKE_TUPLE(0, 0, 0));
         }
         Vector p, q, r;
         unit->GetOrientation(p, q, r);
-        return VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(p.i, p.j, p.k), VS_BOOST_MAKE_TUPLE(q.i,
-                                                                                           q.j,
-                                                                                           q.k),
+        return VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(p.i, p.j, p.k), VS_BOOST_MAKE_TUPLE(q.i, q.j, q.k),
                                    VS_BOOST_MAKE_TUPLE(r.i, r.j, r.k));
     }
 
     boost::python::tuple rayCollide(QVector st, QVector en) {
         {
-        CHECKME VS_BOOST_MAKE_TUPLE(0, VS_BOOST_MAKE_TUPLE(0, 0, 1), 0);
+            CHECKME VS_BOOST_MAKE_TUPLE(0, VS_BOOST_MAKE_TUPLE(0, 0, 1), 0);
         }
-        float dist;
+        float       dist;
         UnitWrapper un;
-        Vector nml;
-        un = unit->rayCollide(st, en, nml, dist);
+        Vector      nml;
+        un                       = unit->rayCollide(st, en, nml, dist);
         boost::python::tuple ret = VS_BOOST_MAKE_TUPLE(un, nml, dist);
         return ret;
     }
 
     boost::python::tuple cosAngleToITTS(UnitWrapper target, float speed, float range) {
         {
-        CHECKME VS_BOOST_MAKE_TUPLE_2(0, 0);
+            CHECKME VS_BOOST_MAKE_TUPLE_2(0, 0);
         }
         float dist;
         float ret = unit->cosAngleTo(target, dist, speed, range);
@@ -204,7 +237,7 @@ public:
 
     boost::python::tuple cosAngleTo(UnitWrapper target) {
         {
-        CHECKME VS_BOOST_MAKE_TUPLE_2(0, 0);
+            CHECKME VS_BOOST_MAKE_TUPLE_2(0, 0);
         }
         float dist;
         float ret = unit->cosAngleTo(target, dist);
@@ -213,7 +246,7 @@ public:
 
     boost::python::tuple cosAngleFromMountTo(UnitWrapper target) {
         {
-        CHECKME VS_BOOST_MAKE_TUPLE_2(0, 0);
+            CHECKME VS_BOOST_MAKE_TUPLE_2(0, 0);
         }
         float dist;
         float ret = unit->cosAngleFromMountTo(target, dist);
@@ -222,7 +255,7 @@ public:
 
     boost::python::tuple getAverageGunSpeed() {
         {
-        CHECKME VS_BOOST_MAKE_TUPLE(1, 0, 0);
+            CHECKME VS_BOOST_MAKE_TUPLE(1, 0, 0);
         }
         float speed, range, missilespeed;
         unit->getAverageGunSpeed(speed, range, missilespeed);
@@ -231,32 +264,19 @@ public:
 
     boost::python::tuple InsideCollideTree(UnitWrapper smaller) {
         {
-        CHECKME VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(
-                    0,
-                    0,
-                    0), VS_BOOST_MAKE_TUPLE(0, 0, 0));
+            CHECKME VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0, 0, 0),
+                                          VS_BOOST_MAKE_TUPLE(0, 0, 0), VS_BOOST_MAKE_TUPLE(0, 0, 0));
         }
         QVector bigpos, smallpos;
-        Vector bigNormal, smallNormal;
+        Vector  bigNormal, smallNormal;
         if (!unit->InsideCollideTree(smaller, bigpos, bigNormal, smallpos, smallNormal)) {
-            bigpos = smallpos = QVector(0,
-                                        0,
-                                        0);
+            bigpos = smallpos = QVector(0, 0, 0);
         }
-        boost::python::tuple tup = VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(bigpos.i,
-                                                                             bigpos.j,
-                                                                             bigpos.k),
-                                                         VS_BOOST_MAKE_TUPLE(bigNormal.i,
-                                                                             bigNormal.j,
-                                                                             bigNormal.k),
-                                                         VS_BOOST_MAKE_TUPLE(smallpos.i,
-                                                                             smallpos
-                                                                                     .j,
-                                                                             smallpos
-                                                                                     .k),
-                                                         VS_BOOST_MAKE_TUPLE(smallNormal.i,
-                                                                             smallNormal.j,
-                                                                             smallNormal.k));
+        boost::python::tuple tup =
+                VS_BOOST_MAKE_TUPLE_4(VS_BOOST_MAKE_TUPLE(bigpos.i, bigpos.j, bigpos.k),
+                                      VS_BOOST_MAKE_TUPLE(bigNormal.i, bigNormal.j, bigNormal.k),
+                                      VS_BOOST_MAKE_TUPLE(smallpos.i, smallpos.j, smallpos.k),
+                                      VS_BOOST_MAKE_TUPLE(smallNormal.i, smallNormal.j, smallNormal.k));
         return tup;
     }
 
@@ -264,7 +284,7 @@ public:
 
     float GetVelocityDifficultyMult() {
         {
-        CHECKME 0;
+            CHECKME 0;
         }
         float diff = 1;
         unit->GetVelocityDifficultyMult(diff);
@@ -273,94 +293,108 @@ public:
 
     int GetJumpStatus() {
         {
-        CHECKME -1;
+            CHECKME - 1;
         }
 
         // Here is the last vestige of the old code
         // -2 is no jump drive
         // -1 is jump drive but no destination
         // 0 and above is set destination
-        if(!unit->jump_drive.Installed()) {
+        if (!unit->jump_drive.Installed()) {
             return -2;
         }
 
         return unit->jump_drive.Destination();
     }
 
-    void ApplyDamage(Vector pnt,
-                     Vector normal,
-                     float amt,
-                     UnitWrapper dealer,
-                     float r,
-                     float g,
-                     float b,
-                     float a) {
+    void ApplyDamage(Vector pnt, Vector normal, float amt, UnitWrapper dealer, float r, float g, float b, float a) {
         {
-        CHECKME;
+            CHECKME;
         }
         Damage damage(amt);
         unit->ApplyDamage(pnt, normal, damage, unit, GFXColor(r, g, b, a), dealer.GetUnit());
     }
 
     double FShieldData() {
-        {CHECKME 0.0;}
+        {
+            CHECKME 0.0;
+        }
         return me->shield.Percent(Shield::front);
     }
 
     double BShieldData() {
-        {CHECKME 0.0;}
+        {
+            CHECKME 0.0;
+        }
         return me->shield.Percent(Shield::back);
     }
 
     double LShieldData() {
-        {CHECKME 0.0;}
+        {
+            CHECKME 0.0;
+        }
         return me->shield.Percent(Shield::left);
     }
 
     double RShieldData() {
-        {CHECKME 0.0;}
+        {
+            CHECKME 0.0;
+        }
         return me->shield.Percent(Shield::right);
     }
 
     float fuelData() {
-        {CHECKME 0.0;}
+        {
+            CHECKME 0.0;
+        }
         return me->fuel.Level();
     }
 
     float energyData() {
-        {CHECKME 0.0;}
+        {
+            CHECKME 0.0;
+        }
         return me->energy.Percent();
     }
 
     float GetHull() {
-        {CHECKME 0.0;}
+        {
+            CHECKME 0.0;
+        }
         return me->hull.Get();
     }
 
     float GetHullPercent() {
-        {CHECKME 0.0;}
+        {
+            CHECKME 0.0;
+        }
         return me->hull.Percent();
     }
 
     float rSize() {
-        {CHECKME 0.0;}
+        {
+            CHECKME 0.0;
+        }
         return me->rSize();
     }
 
+    /////////////////////////////MANUAL WRAP//////
+    /*
+     *  WRAPPED1(bool,TransferUnitToSystem,class StarSystem *,NewSystem,false)
+     *  bool InCorrectStarSystem (StarSystem *active)
+     *  //  PYTHON_DEFINE_METHOD(Class,&TransferUnitToSystem(unsigned int whichJumpQueue, class StarSystem *
+     * previouslyActiveStarSystem, bool DoSightAndSound) {{CHECKME 0;}class StarSystem *
+     * othActiveStarSystem=previouslyActiveStarSystem;
+     * unit->TransferUnitToSystem(whichJumpQueue,othActiveStarSystem,DoSightAndSound); return othActiveStarSystem;}
+     *  //  class StarSystem * TransferUnitToSystem(unsigned int whichJumpQueue, class StarSystem *
+     * previouslyActiveStarSystem, bool DoSightAndSound) {{CHECKME 0;}class StarSystem *
+     * othActiveStarSystem=previouslyActiveStarSystem;
+     * unit->TransferUnitToSystem(whichJumpQueue,othActiveStarSystem,DoSightAndSound); return othActiveStarSystem;}
+     */
+    /////////////////////////////////NO WRAP//////
+    UnitWrapper(UnitContainer cont) : UnitContainer(cont) {}
 
-/////////////////////////////MANUAL WRAP//////
-/*
- *  WRAPPED1(bool,TransferUnitToSystem,class StarSystem *,NewSystem,false)
- *  bool InCorrectStarSystem (StarSystem *active)
- *  //  PYTHON_DEFINE_METHOD(Class,&TransferUnitToSystem(unsigned int whichJumpQueue, class StarSystem * previouslyActiveStarSystem, bool DoSightAndSound) {{CHECKME 0;}class StarSystem * othActiveStarSystem=previouslyActiveStarSystem; unit->TransferUnitToSystem(whichJumpQueue,othActiveStarSystem,DoSightAndSound); return othActiveStarSystem;}
- *  //  class StarSystem * TransferUnitToSystem(unsigned int whichJumpQueue, class StarSystem * previouslyActiveStarSystem, bool DoSightAndSound) {{CHECKME 0;}class StarSystem * othActiveStarSystem=previouslyActiveStarSystem; unit->TransferUnitToSystem(whichJumpQueue,othActiveStarSystem,DoSightAndSound); return othActiveStarSystem;}
- */
-/////////////////////////////////NO WRAP//////
-    UnitWrapper(UnitContainer cont) : UnitContainer(cont) {
-    }
-
-    UnitWrapper(Unit *un = 0) : UnitContainer(un) {
-    }
+    UnitWrapper(Unit *un = 0) : UnitContainer(un) {}
 
     operator Unit *() {
         return GetUnit();
@@ -390,6 +424,7 @@ public:
         return this->operator!=(oth);
     }
 };
+
 #undef CHECKME
 #undef WRAPPED0
 #undef WRAPPED1
@@ -411,4 +446,3 @@ public:
 #undef voidEXPORT_UTIL2
 #undef voidEXPORT_UTIL3
 #undef voidEXPORT_UTIL5
-

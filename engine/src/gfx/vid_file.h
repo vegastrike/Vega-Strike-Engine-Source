@@ -27,12 +27,13 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_VID_FILE_H
 #define VEGA_STRIKE_ENGINE_GFX_VID_FILE_H
 //
-//C++ Interface: vid_file
+// C++ Interface: vid_file
 //
 
-#include <string>
-#include "vegadisk/vsfilesystem.h"
 #include <exception>
+#include <string>
+
+#include "vegadisk/vsfilesystem.h"
 
 class VidFileImpl;
 
@@ -43,17 +44,13 @@ public:
         std::string _message;
 
     public:
-        Exception() {
-        }
+        Exception() {}
 
-        Exception(const Exception &other) : _message(other._message) {
-        }
+        Exception(const Exception &other) : _message(other._message) {}
 
-        explicit Exception(const std::string &message) : _message(message) {
-        }
+        explicit Exception(const std::string &message) : _message(message) {}
 
-        virtual ~Exception() {
-        }
+        virtual ~Exception() {}
 
         virtual const char *what() const noexcept {
             return _message.c_str();
@@ -62,50 +59,38 @@ public:
 
     class UnsupportedCodecException : public Exception {
     public:
-        UnsupportedCodecException() {
-        }
+        UnsupportedCodecException() {}
 
-        UnsupportedCodecException(const UnsupportedCodecException &other) : Exception(other) {
-        }
+        UnsupportedCodecException(const UnsupportedCodecException &other) : Exception(other) {}
 
-        explicit UnsupportedCodecException(const std::string &message) : Exception(message) {
-        }
+        explicit UnsupportedCodecException(const std::string &message) : Exception(message) {}
     };
 
     class FileOpenException : public Exception {
     public:
-        FileOpenException() {
-        }
+        FileOpenException() {}
 
-        FileOpenException(const FileOpenException &other) : Exception(other) {
-        }
+        FileOpenException(const FileOpenException &other) : Exception(other) {}
 
-        explicit FileOpenException(const std::string &message) : Exception(message) {
-        }
+        explicit FileOpenException(const std::string &message) : Exception(message) {}
     };
 
     class FrameDecodeException : public Exception {
     public:
-        FrameDecodeException() {
-        }
+        FrameDecodeException() {}
 
-        FrameDecodeException(const FrameDecodeException &other) : Exception(other) {
-        }
+        FrameDecodeException(const FrameDecodeException &other) : Exception(other) {}
 
-        explicit FrameDecodeException(const std::string &message) : Exception(message) {
-        }
+        explicit FrameDecodeException(const std::string &message) : Exception(message) {}
     };
 
     class EndOfStreamException : public Exception {
     public:
-        EndOfStreamException() {
-        }
+        EndOfStreamException() {}
 
-        EndOfStreamException(const EndOfStreamException &other) : Exception(other) {
-        }
+        EndOfStreamException(const EndOfStreamException &other) : Exception(other) {}
 
-        explicit EndOfStreamException(const std::string &message) : Exception(message) {
-        }
+        explicit EndOfStreamException(const std::string &message) : Exception(message) {}
     };
 
 public:
@@ -114,25 +99,25 @@ public:
 
     bool isOpen() const;
 
-    void open(const std::string &path, size_t maxDimension = 65535, bool forcePOT = false);
+    void open(const std::string &path, size_t maxDimension = 65'535, bool forcePOT = false);
     void close();
 
-/** Seeks to the specified time
- * @Returns true if frame changed, false otherwise.
- * @Throws EndOfStreamException when time lays past the end.
- * @Throws FrameDecodeException when an error occurs during frame decode.
- */
+    /** Seeks to the specified time
+     * @Returns true if frame changed, false otherwise.
+     * @Throws EndOfStreamException when time lays past the end.
+     * @Throws FrameDecodeException when an error occurs during frame decode.
+     */
     bool seek(float time);
 
     float getFrameRate() const;
     float getDuration() const;
-    int getWidth() const;
-    int getHeight() const;
+    int   getWidth() const;
+    int   getHeight() const;
     void *getFrameBuffer() const;
-    int getFrameBufferStride() const;
+    int   getFrameBufferStride() const;
 
 private:
     VidFileImpl *impl;
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_VID_FILE_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_VID_FILE_H

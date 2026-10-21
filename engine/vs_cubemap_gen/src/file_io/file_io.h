@@ -28,15 +28,8 @@
 #define VEGA_STRIKE_ENGINE_CUBE_MAP_FILE_IO_H
 
 mem_texture &load_texture_png(std::string filename);
-mem_texture &load_texture_set_png
-        (
-                std::string fn_front,
-                std::string fn_back,
-                std::string fn_left,
-                std::string fn_right,
-                std::string fn_up,
-                std::string fn_down
-        );
+mem_texture &load_texture_set_png(std::string fn_front, std::string fn_back, std::string fn_left, std::string fn_right,
+                                  std::string fn_up, std::string fn_down);
 
 void save_texture_png(...);
 void save_texture_set_png(...);
@@ -46,4 +39,4 @@ void nvcompress_set_png(...);
 void pack_dds_mip(...);
 void pack_dds_all(...);
 
-#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_FILE_IO_H
+#endif  // VEGA_STRIKE_ENGINE_CUBE_MAP_FILE_IO_H

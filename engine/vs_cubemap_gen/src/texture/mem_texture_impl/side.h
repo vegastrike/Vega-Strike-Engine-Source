@@ -27,32 +27,42 @@
 #ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_SIDE_H
 #define VEGA_STRIKE_ENGINE_CUBE_MAP_SIDE_H
 
-//this file presents:
-enum eSides { eLeft = 0, eRight, eUp, eDown, eFront, eBack };
+// this file presents:
+enum eSides {
+    eLeft = 0,
+    eRight,
+    eUp,
+    eDown,
+    eFront,
+    eBack
+};
 
-template<eSides>
+template <eSides>
 struct side;
 
-template<> side<eLeft> left_side;
-template<> side<eRight> left_side;
-template<> side<eUp> left_side;
-template<> side<eDown> left_side;
-template<> side<eFront> left_side;
-template<> side<eBack> left_side;
+template <>
+side<eLeft> left_side;
+template <>
+side<eRight> left_side;
+template <>
+side<eUp> left_side;
+template <>
+side<eDown> left_side;
+template <>
+side<eFront> left_side;
+template <>
+side<eBack> left_side;
+
+// this file references:
 
 
-//this file references:
+// cube side:
 
-
-//cube side:
-
-template<eSides S>
+template <eSides S>
 struct side {
     static char const *name_;
-    static
-public:
-    side(char const *name) : name_(name) {
-    }
+
+static public : side(char const *name) : name_(name) {}
 
     static eSides get_eSide() {
         return S;
@@ -67,4 +77,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_SIDE_H
+#endif  // VEGA_STRIKE_ENGINE_CUBE_MAP_SIDE_H

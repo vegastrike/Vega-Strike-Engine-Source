@@ -27,22 +27,21 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_CARGO_COLOR_H
 #define VEGA_STRIKE_ENGINE_CMD_CARGO_COLOR_H
 
-#include "src/gfxlib_struct.h"
 #include "resource/cargo.h"
+#include "src/gfxlib_struct.h"
 
 // TODO: remove this. That's what std::pair is for.
 // A stupid struct that is only for grouping 2 different types of variables together in one return value
 class CargoColor {
 public:
-    Cargo cargo;
+    Cargo    cargo;
     GFXColor color;
 
-    CargoColor() : cargo(), color(1, 1, 1, 1) {
-    }
+    CargoColor() : cargo(), color(1, 1, 1, 1) {}
 
-    CargoColor(const CargoColor& other) = default;
-    CargoColor(CargoColor&& other) = default;
+    CargoColor(const CargoColor& other)       = default;
+    CargoColor(CargoColor&& other)            = default;
     CargoColor& operator=(CargoColor&& other) = default;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_CARGO_COLOR_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_CARGO_COLOR_H

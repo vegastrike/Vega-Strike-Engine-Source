@@ -27,8 +27,8 @@
 #ifndef VEGA_STRIKE_ENGINE_MAIN_LOOP_H
 #define VEGA_STRIKE_ENGINE_MAIN_LOOP_H
 
-#include "src/in.h"
 #include "cmd/unit_generic.h"
+#include "src/in.h"
 void bootstrap_draw(const std::string &message, Animation *SplashScreen = NULL);
 
 namespace CockpitKeys {
@@ -75,17 +75,15 @@ void OutsideTarget(const KBData &, KBSTATE newState);
 void Quit(const KBData &, KBSTATE newState);
 void TextMessageKey(const KBData &, KBSTATE newState);
 void QuitNow();
-}
+}  // namespace CockpitKeys
 
 struct SavedUnits;
 void AddUnitToSystem(const SavedUnits *su);
-void createObjects(std::vector<std::string> &playersaveunit,
-        std::vector<StarSystem *> &ssys,
-        std::vector<QVector> &savedloc,
-        vector<vector<string> > &savefiles);
+void createObjects(std::vector<std::string> &playersaveunit, std::vector<StarSystem *> &ssys,
+                   std::vector<QVector> &savedloc, vector<vector<string>> &savefiles);
 void destroyObjects();
 void InitializeInput();
 void main_loop();
 void restore_main_loop();
 
-#endif //VEGA_STRIKE_ENGINE_MAIN_LOOP_H
+#endif  // VEGA_STRIKE_ENGINE_MAIN_LOOP_H

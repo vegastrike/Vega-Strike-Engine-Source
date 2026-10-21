@@ -32,8 +32,8 @@
 //
 
 #include "Exceptions.h"
-#include "Types.h"
 #include "RenderableSource.h"
+#include "Types.h"
 
 namespace Audio {
 
@@ -50,21 +50,18 @@ class Source;
 class SourceListener {
 protected:
     struct {
-        int attach: 1;
-        int play: 1;
-        int update: 1;
+        int attach : 1;
+        int play : 1;
+        int update : 1;
     } events;
 
     SourceListener() {
         // Want everything
-        events.attach =
-                events.update =
-                        events.play = 1;
+        events.attach = events.update = events.play = 1;
     }
 
 public:
-    virtual ~SourceListener() {
-    }
+    virtual ~SourceListener() {}
 
     bool wantAttachEvents() const {
         return events.attach != 0;
@@ -145,9 +142,8 @@ class UpdateSourceListener : public SourceListener {
 public:
     UpdateSourceListener() {
         // Just updates
-        events.attach =
-                events.play = 0;
-        events.update = 1;
+        events.attach = events.play = 0;
+        events.update               = 1;
     }
 
     /**
@@ -155,42 +151,37 @@ public:
      * @remarks This will never be called since attach events will be
      *      disabled by the constructor.
      */
-    virtual void onPreAttach(Source &source, bool detach) {
-    };
+    virtual void onPreAttach(Source &source, bool detach) {};
 
     /**
      * No-op implementation to apease the compiler.
      * @remarks This will never be called since attach events will be
      *      disabled by the constructor.
      */
-    virtual void onPostAttach(Source &source, bool detach) {
-    };
+    virtual void onPostAttach(Source &source, bool detach) {};
 
     /**
      * No-op implementation to apease the compiler.
      * @remarks This will never be called since play events will be
      *      disabled by the constructor.
      */
-    virtual void onPrePlay(Source &source, bool stop) {
-    };
+    virtual void onPrePlay(Source &source, bool stop) {};
 
     /**
      * No-op implementation to apease the compiler.
      * @remarks This will never be called since play events will be
      *      disabled by the constructor.
      */
-    virtual void onPostPlay(Source &source, bool stop) {
-    };
+    virtual void onPostPlay(Source &source, bool stop) {};
 
     /**
      * No-op implementation to apease the compiler.
      * @remarks This will never be called since play events will be
      *      disabled by the constructor.
      */
-    virtual void onEndOfStream(Source &source) {
-    };
+    virtual void onEndOfStream(Source &source) {};
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_SOURCELISTENER_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_SOURCELISTENER_H

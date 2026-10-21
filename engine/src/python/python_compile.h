@@ -31,31 +31,38 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
-#include "src/hashtable.h"
-#include <string>
-#include <compile.h>
 
-extern Hashtable<std::string, PyObject, 1023> compiled_python;
+#include <compile.h>
+#include <string>
+
+#include "src/hashtable.h"
+
+extern Hashtable<std::string, PyObject, 1'023> compiled_python;
 
 class PythonBasicType {
 public:
     std::string objects;
-    long objecti;
-    double objectd;
-    enum { MYSTRING, MYLONG, MYDOUBLE } type;
+    long        objecti;
+    double      objectd;
+
+    enum {
+        MYSTRING,
+        MYLONG,
+        MYDOUBLE
+    } type;
 
     PythonBasicType(const std::string &mystr) {
-        type = MYSTRING;
+        type    = MYSTRING;
         objects = mystr;
     }
 
     PythonBasicType(const long mystr) {
-        type = MYLONG;
+        type    = MYLONG;
         objecti = mystr;
     }
 
     PythonBasicType(const float mystr) {
-        type = MYDOUBLE;
+        type    = MYDOUBLE;
         objectd = mystr;
     }
 
@@ -74,17 +81,18 @@ public:
     }
 };
 
-void InterpretPython(const std::string &filename);
+void      InterpretPython(const std::string &filename);
 PyObject *CompilePython(const std::string &filename);
-void CompileRunPython(const std::string &filename);
+void      CompileRunPython(const std::string &filename);
 PyObject *CreateTuple(const std::vector<PythonBasicType> &values);
 
-///Warning: The basic pointer class does NOTHING for the user.
-///NO Refcounts...if python holds onto this for longer than it can...
-///CRASH!!
-template<class T>
+/// Warning: The basic pointer class does NOTHING for the user.
+/// NO Refcounts...if python holds onto this for longer than it can...
+/// CRASH!!
+template <class T>
 class BasicPointer {
     T *myitem;
+
 public:
     BasicPointer(T *myitem) {
         this->myitem = myitem;
@@ -95,4 +103,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_PYTHON_PYTHON_COMPILE_H
+#endif  // VEGA_STRIKE_ENGINE_PYTHON_PYTHON_COMPILE_H

@@ -27,22 +27,24 @@
 #ifndef VEGA_STRIKE_ENGINE_GUI_TEXT_INPUT_DISPLAY_H
 #define VEGA_STRIKE_ENGINE_GUI_TEXT_INPUT_DISPLAY_H
 
-#include "staticdisplay.h"
 #include <vector>
 
-//See cpp file for detailed descriptions of classes, functions, etc.
+#include "staticdisplay.h"
 
-//The TextInputDisplay class is used to get text input from the user.
+// See cpp file for detailed descriptions of classes, functions, etc.
+
+// The TextInputDisplay class is used to get text input from the user.
 
 class TextInputDisplay : public StaticDisplay {
-    std::vector<unsigned int> local_keyboard_queue;
+    std::vector<unsigned int>  local_keyboard_queue;
     std::vector<unsigned int> *keyboard_queue;
-    char *disallowed;
-    bool isFocused;
-    char passwordChar;
+    char                      *disallowed;
+    bool                       isFocused;
+    char                       passwordChar;
+
 public:
     TextInputDisplay(std::vector<unsigned int> *keyboard_input_queue, const char *disallowed);
-//OVERRIDES - used for focusing input.
+    // OVERRIDES - used for focusing input.
     virtual void processUnfocus(const InputEvent &event);
     virtual bool processMouseDown(const InputEvent &event);
     virtual bool processKeypress(unsigned int pressedKey);
@@ -55,4 +57,4 @@ public:
     virtual void draw();
 };
 
-#endif   //VEGA_STRIKE_ENGINE_GUI_TEXT_INPUT_DISPLAY_H
+#endif  // VEGA_STRIKE_ENGINE_GUI_TEXT_INPUT_DISPLAY_H

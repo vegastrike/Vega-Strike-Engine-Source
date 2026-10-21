@@ -4,8 +4,8 @@
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2026 The Vega Strike Contributors:
  * Project creator: Daniel Horn
- * Original development team: As listed in the AUTHORS file. Specifically: ace123, surfdargent, klaussfreire, jacks, dan_w, ashieh, griwodz, pyramid3d
- * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ * Original development team: As listed in the AUTHORS file. Specifically: ace123, surfdargent, klaussfreire, jacks,
+ * dan_w, ashieh, griwodz, pyramid3d Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,47 +27,40 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_LOGO_H
 #define VEGA_STRIKE_ENGINE_GFX_LOGO_H
 
-#include "gfx_generic/matrix.h"
-#include "src/gfxlib.h"
-#include "src/hashtable.h"
-#include "gfx_generic/vec.h"
-
 #include <vector>
 
-//struct glVertex;
+#include "gfx_generic/matrix.h"
+#include "gfx_generic/vec.h"
+#include "src/gfxlib.h"
+#include "src/hashtable.h"
+
+// struct glVertex;
 class Mesh;
 
 class Texture;
 
 class Logo {
     int numlogos;
-//glVertex **LogoCorner;
-    GFXVertexList *vlist;
-    Texture *Decal;
+    // glVertex **LogoCorner;
+    GFXVertexList                   *vlist;
+    Texture                         *Decal;
     static Hashtable<int, Logo, 257> decalHash;
 
-    Logo() {
-    }
+    Logo() {}
 
 protected:
     friend class Mesh;
 
-    int refcount;   //number of references to draw_queue
-    Logo *owner_of_draw_queue;     //owner of the draw_queue
+    int                  refcount;             // number of references to draw_queue
+    Logo                *owner_of_draw_queue;  // owner of the draw_queue
     vector<DrawContext> *draw_queue;
-    bool will_be_drawn;
+    bool                 will_be_drawn;
 
     void ProcessDrawQueue();
 
 public:
-    Logo(int numberlogos,
-            Vector *center,
-            Vector *normal,
-            float *sizes,
-            float *rotations,
-            float offset,
-            Texture *Dec,
-            Vector *Ref);
+    Logo(int numberlogos, Vector *center, Vector *normal, float *sizes, float *rotations, float offset, Texture *Dec,
+         Vector *Ref);
 
     Logo(const Logo &rval) {
         *this = rval;
@@ -80,4 +73,4 @@ public:
     void Draw(const Matrix &m);
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_LOGO_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_LOGO_H

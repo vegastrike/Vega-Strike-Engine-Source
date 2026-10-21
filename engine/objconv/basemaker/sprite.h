@@ -27,29 +27,29 @@
 #ifndef VEGA_STRIKE_ENGINE_OBJCONV_SPRITE_H
 #define VEGA_STRIKE_ENGINE_OBJCONV_SPRITE_H
 
+#include "gfx/hud.h"
+#include "gfx_generic/matrix.h"
 #include "gfx_generic/quaternion.h"
 #include "gfx_generic/vec.h"
-#include "gfx_generic/matrix.h"
-#include "gfx/hud.h"
 #include "root_generic/vs_globals.h"
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#include <glut.h>
 #include <glext.h>
-
+#include <glut.h>
 #include <iostream>
-//#include <stdlib>
+// #include <stdlib>
 
 class Texture;
 
 class VSSprite {
-    float xcenter;
-    float ycenter;
-    float widtho2;
-    float heighto2;
-    float maxs, maxt;
-    float rotation;
+    float    xcenter;
+    float    ycenter;
+    float    widtho2;
+    float    heighto2;
+    float    maxs, maxt;
+    float    rotation;
     Texture *surface;
+
 public:
     VSSprite(const char *file, enum FILTER texturefilter = BILINEAR, GFXBOOL force = GFXFALSE);
     virtual ~VSSprite();
@@ -74,10 +74,10 @@ public:
     void GetRotation(float &rot);
     void ReadTexture(FILE *f);
 
-    //float &Rotation(){return rotation;};
+    // float &Rotation(){return rotation;};
     Texture *getTexture() {
         return surface;
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_OBJCONV_SPRITE_H
+#endif  // VEGA_STRIKE_ENGINE_OBJCONV_SPRITE_H

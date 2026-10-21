@@ -34,20 +34,19 @@ class Unit;
 
 #define TERRAINRENDER 1
 #define TERRAINUPDATE 2
+
 class Terrain : public QuadTree {
 public:
     updateparity *updatetransform;
-    float TotalSizeX;
-    float TotalSizeZ;
-    float mass;
-    int whichstage;
-    char draw;
-    void ApplyForce(Unit *un, const Vector &norm, float distance);
+    float         TotalSizeX;
+    float         TotalSizeZ;
+    float         mass;
+    int           whichstage;
+    char          draw;
+    void          ApplyForce(Unit *un, const Vector &norm, float distance);
+
 public:
-    Terrain(const char *filename,
-            const Vector &Scales,
-            const float mass,
-            const float radius,
+    Terrain(const char *filename, const Vector &Scales, const float mass, const float radius,
             updateparity *updatetransform = identityparity);
 
     void SetTotalSize(float X, float Z) {
@@ -56,19 +55,19 @@ public:
     }
 
     ~Terrain();
-    void Collide(Unit *un, const Matrix &t);
-    void Collide(Unit *un);
-    void Collide();
-    void SetTransformation(const Matrix &mat);
+    void        Collide(Unit *un, const Matrix &t);
+    void        Collide(Unit *un);
+    void        Collide();
+    void        SetTransformation(const Matrix &mat);
     static void CollideAll();
     static void DeleteAll();
-    void Render();
+    void        Render();
     static void RenderAll();
     static void UpdateAll(int resolution);
-    void DisableDraw();
-    void EnableDraw();
-    void DisableUpdate();
-    void EnableUpdate();
-    Vector GetUpVector(const Vector &pos);
+    void        DisableDraw();
+    void        EnableDraw();
+    void        DisableUpdate();
+    void        EnableUpdate();
+    Vector      GetUpVector(const Vector &pos);
 };
-#endif //VEGA_STRIKE_ENGINE_CMD_TERRAIN_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_TERRAIN_H

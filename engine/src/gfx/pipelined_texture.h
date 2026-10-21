@@ -32,8 +32,9 @@
 class PipelinedTexture : public Texture {
     int current;
     int last;
-//clone==2 means both current and last are clones 1 means last is a clone
+    // clone==2 means both current and last are clones 1 means last is a clone
     char clone;
+
 public:
     bool operator==(const Texture &b) {
         return false;
@@ -49,11 +50,11 @@ public:
     PipelinedTexture(unsigned int width, unsigned int height, unsigned char *current, unsigned char *last);
     ~PipelinedTexture() override;
     unsigned char *beginMutate();
-    void Swap();
-    void endMutate(int xoffset, int yoffset, int width, int height);
-    void MakeBothActive();
-    void MakeActive();
-    void MakeLastActive();
+    void           Swap();
+    void           endMutate(int xoffset, int yoffset, int width, int height);
+    void           MakeBothActive();
+    void           MakeActive();
+    void           MakeLastActive();
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_PIPELINED_TEXTURE_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_PIPELINED_TEXTURE_H

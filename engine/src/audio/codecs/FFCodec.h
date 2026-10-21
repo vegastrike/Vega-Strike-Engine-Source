@@ -46,14 +46,13 @@ public:
     virtual ~FFCodec();
 
     /** @see Codec::canHandle */
-    virtual bool canHandle(const std::string &path,
-            bool canOpen,
-            VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
+    virtual bool canHandle(const std::string &path, bool canOpen,
+                           VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
 
     /** @see Codec::open */
     virtual Stream *open(const std::string &path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile);
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_FFCODEC_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_FFCODEC_H

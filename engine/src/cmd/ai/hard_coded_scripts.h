@@ -81,4 +81,4 @@ CCScript RollFacePerpendicularFast;
 CCScript RollFacePerpendicular;
 CCScript RollFacePerpendicularSlow;
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_HARD_CODED_SCRIPTS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_HARD_CODED_SCRIPTS_H

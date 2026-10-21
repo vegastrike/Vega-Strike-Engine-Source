@@ -28,74 +28,74 @@
 #define VEGA_STRIKE_ENGINE_VEGASTRIKE_H
 
 #ifdef __cplusplus
-#include <assert.h>
-#endif //__cplusplus
+#    include <assert.h>
+#endif  //__cplusplus
 
 extern float simulation_atom_var;
 extern float audio_atom_var;
-//#define SIMULATION_ATOM (simulation_atom_var)
-//#define AUDIO_ATOM (audio_atom_var)
+// #define SIMULATION_ATOM (simulation_atom_var)
+// #define AUDIO_ATOM (audio_atom_var)
 
 // Why do we need two variables to reflect the same thing ?
 extern float SIMULATION_ATOM;
 extern float AUDIO_ATOM;
 
-#include "src/vs_math.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <time.h>
 #include <ctype.h>
-
-#include <string.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
 #include "src/debug_vs.h"
+#include "src/vs_math.h"
 
 #if !defined(_WIN32)
-#   define GL_GLEXT_PROTOTYPES 1
+#    define GL_GLEXT_PROTOTYPES 1
 #endif
 
-#if defined (WIN32) || defined (__CYGWIN__)
+#if defined(WIN32) || defined(__CYGWIN__)
 /* Note that this will define WIN32 for us, if it isn't defined already
  */
-#ifndef NOMINMAX
-    #define NOMINMAX
-#endif //tells VCC not to generate min/max macros
-    #include <windows.h>
- //#include <wingdi.h>
-    #include <time.h>
-#else //defined (WIN32) || defined (__CYGWIN__)
-    #include <sys/time.h>
-    #include <sys/stat.h>
-    #include <unistd.h>
-#endif //defined (WIN32) || defined (__CYGWIN__)
+#    ifndef NOMINMAX
+#        define NOMINMAX
+#    endif  // tells VCC not to generate min/max macros
+#    include <windows.h>
+// #include <wingdi.h>
+#    include <time.h>
+#else  // defined (WIN32) || defined (__CYGWIN__)
+#    include <unistd.h>
+
+#    include <sys/stat.h>
+#    include <sys/time.h>
+#endif  // defined (WIN32) || defined (__CYGWIN__)
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#if !defined (NO_GFX)
-#   if defined(__APPLE__) && defined(__MACH__)
-#       define GL_GLEXT_FUNCTION_POINTERS 1
-#       include <GL/gl.h>
-#       include <GL/glu.h>
-#       include <GL/glut.h>
-#   else //defined(__APPLE__) && defined(__MACH__)
-#       define __glext_h_
-#       include <GL/gl.h>
-#       include <GL/glu.h>
-#       include <GL/glut.h>
-#       undef __glext_h_
-#   endif //defined(__APPLE__) && defined(__MACH__)
-#endif //NO_GFX
+#if !defined(NO_GFX)
+#    if defined(__APPLE__) && defined(__MACH__)
+#        define GL_GLEXT_FUNCTION_POINTERS 1
+#        include <GL/gl.h>
+#        include <GL/glu.h>
+#        include <GL/glut.h>
+#    else  // defined(__APPLE__) && defined(__MACH__)
+#        define __glext_h_
+#        include <GL/gl.h>
+#        include <GL/glu.h>
+#        include <GL/glut.h>
+#        undef __glext_h_
+#    endif  // defined(__APPLE__) && defined(__MACH__)
+#endif      // NO_GFX
 
 #define PROG_NAME "vegastrike"
 
 #define BUFF_LEN 512
 
-//#define RANDOMIZE_SIM_ATOMS 1
+// #define RANDOMIZE_SIM_ATOMS 1
 
 #ifdef __cplusplus
 
-#endif //__cplusplus
+#endif  //__cplusplus
 
-#endif //VEGA_STRIKE_ENGINE_VEGASTRIKE_H
+#endif  // VEGA_STRIKE_ENGINE_VEGASTRIKE_H

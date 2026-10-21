@@ -43,32 +43,32 @@ class DriveUpgrade : public Component {
 public:
     Drive *drive;
 
-// Limits
-    //max ypr--both pos/neg are symmetrical
+    // Limits
+    // max ypr--both pos/neg are symmetrical
     double yaw;
     double pitch;
     double roll;
 
-    //side-side engine thrust max
+    // side-side engine thrust max
     double lateral;
 
-    //vertical engine thrust max
+    // vertical engine thrust max
     double vertical;
 
-    //forward engine thrust max
+    // forward engine thrust max
     double forward;
 
-    //reverse engine thrust max
+    // reverse engine thrust max
     double retro;
 
-    //after burner acceleration max
+    // after burner acceleration max
     double afterburn;
 
-// Computer
-    //Computers limitation of speed
+    // Computer
+    // Computers limitation of speed
     double speed;
 
-    //Computer's restrictions of YPR to limit space combat maneuvers
+    // Computer's restrictions of YPR to limit space combat maneuvers
     double max_yaw_left;
     double max_yaw_right;
     double max_pitch_down;
@@ -78,13 +78,13 @@ public:
 
     double fuel_consumption;
 
-// Constructors
+    // Constructors
     explicit DriveUpgrade(Drive *drive = nullptr);
 
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -97,4 +97,4 @@ public:
     ~DriveUpgrade() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_DRIVE_UPGRADE_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_DRIVE_UPGRADE_H

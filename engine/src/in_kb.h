@@ -33,61 +33,61 @@
 #include "src/in.h"
 #include "src/in_kb_data.h"
 
-//#ifdef HAVE_SDL
+// #ifdef HAVE_SDL
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_keycode.h>
-//const int KEYMAP_SIZE =SDLK_LAST;
-//const int KEY_SPECIAL_OFFSET=0;
-//#else //HAVE_SDL
 
-static void DefaultKBHandler(const KBData &, KBSTATE newState) // FIXME ?
+// const int KEYMAP_SIZE =SDLK_LAST;
+// const int KEY_SPECIAL_OFFSET=0;
+// #else //HAVE_SDL
+
+static void DefaultKBHandler(const KBData &, KBSTATE newState)  // FIXME ?
 {
-    //do nothing
+    // do nothing
 }
 
 struct HandlerCall {
     KBHandler function;
-    KBData data;
-    KBSTATE state;
+    KBData    data;
+    KBSTATE   state;
 
     HandlerCall() : state{} {
         function = DefaultKBHandler;
     }
 };
 
-
 enum KB_MODIFIER_ENUM {
-    KB_MOD_ALT = 1,
-    KB_MOD_CTRL = 2,
+    KB_MOD_ALT   = 1,
+    KB_MOD_CTRL  = 2,
     KB_MOD_SHIFT = 4,
-    KB_MOD_MASK = 7
+    KB_MOD_MASK  = 7
 };
 
 #ifndef NO_GFX
-#include "gldrv/winsys.h"
-const int KEYMAP_SIZE = WSK_LAST;
+#    include "gldrv/winsys.h"
+const int KEYMAP_SIZE   = WSK_LAST;
 const int LAST_MODIFIER = KB_MOD_MASK + 1;
-#else //NO_GFX
+#else   // NO_GFX
 const int KEYMAP_SIZE   = 0;
 const int LAST_MODIFIER = 0;
-#endif //NO_GFX
+#endif  // NO_GFX
 
-//#endif //HAVE_SDL
+// #endif //HAVE_SDL
 
 #include "src/in.h"
 
 unsigned int getActiveModifiers();
 unsigned int pullActiveModifiers();
-void setActiveModifiers(unsigned int mask);
+void         setActiveModifiers(unsigned int mask);
 
 unsigned int getModifier(const std::string modifier);
-int getModifier(bool alton, bool cntrlon, bool shifton);
-bool HandleGlobalKey(unsigned int ch, unsigned int mod, bool down, int x, int y);
-void ProcessKB();
-void BindKey(int key, unsigned int modifiers, unsigned int player, KBHandler handler, const KBData &data);
-void UnbindKey(int key, unsigned int modifiers);
-void ClearKeyBindings();
-void InitKB();
-void RestoreKB();
+int          getModifier(bool alton, bool cntrlon, bool shifton);
+bool         HandleGlobalKey(unsigned int ch, unsigned int mod, bool down, int x, int y);
+void         ProcessKB();
+void         BindKey(int key, unsigned int modifiers, unsigned int player, KBHandler handler, const KBData &data);
+void         UnbindKey(int key, unsigned int modifiers);
+void         ClearKeyBindings();
+void         InitKB();
+void         RestoreKB();
 
-#endif //VEGA_STRIKE_ENGINE_IN_KB_H
+#endif  // VEGA_STRIKE_ENGINE_IN_KB_H

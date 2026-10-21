@@ -27,10 +27,10 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_MASKS_H
 #define VEGA_STRIKE_ENGINE_GFX_MASKS_H
 
-bool checkbit(int &, int);
-void dosetbit(int &, int);
-void unsetbit(int &, int);
-void flipbit(int &, int);
+bool  checkbit(int &, int);
+void  dosetbit(int &, int);
+void  unsetbit(int &, int);
+void  flipbit(int &, int);
 float Delta(float a, float b);
 
-#endif //VEGA_STRIKE_ENGINE_GFX_MASKS_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_MASKS_H

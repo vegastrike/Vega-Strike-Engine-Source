@@ -27,9 +27,10 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_VECTORIZABLE_H
 #define VEGA_STRIKE_ENGINE_GFX_VECTORIZABLE_H
 
+#include <vector>
+
 #include <boost/static_assert.hpp>
 
-#include <vector>
 #include "aligned.h"
 
 /**
@@ -37,14 +38,14 @@
  * The default implementation makes all classes non-vectorizable, so vectorizable
  * classes must be defined as such.
  */
-template<typename T>
+template <typename T>
 class vectorizable_traits {
 public:
-    static const bool vectorizable = false;
+    static const bool   vectorizable           = false;
     static const size_t components_per_element = 1;
-    typedef T component_type;
-    typedef T element_type;
-    typedef T vector_type;
+    typedef T           component_type;
+    typedef T           element_type;
+    typedef T           vector_type;
 
     /**
      * Returns the number of elements a vectorizable instance has.
@@ -92,14 +93,14 @@ public:
 /**
  * All primitive types are trivially vectorizable
  */
-template<typename T>
+template <typename T>
 class primitive_vectorizable_traits {
 public:
-    static const bool vectorizable = true;
+    static const bool   vectorizable           = true;
     static const size_t components_per_element = 1;
-    typedef T component_type;
-    typedef T element_type;
-    typedef T vector_type;
+    typedef T           component_type;
+    typedef T           element_type;
+    typedef T           vector_type;
 
     /**
      * Returns the number of elements a vectorizable instance has.
@@ -147,20 +148,19 @@ public:
 /**
  * Helper base class for struct-based vectorizables
  */
-template<typename E, typename T, int COMPS>
+template <typename E, typename T, int COMPS>
 class struct_vectorizable_traits {
 public:
-    static const bool vectorizable = true;
+    static const bool   vectorizable           = true;
     static const size_t components_per_element = COMPS;
-    typedef T component_type;
-    typedef E element_type;
-    typedef E vector_type;
+    typedef T           component_type;
+    typedef E           element_type;
+    typedef E           vector_type;
 
 private:
     BOOST_STATIC_ASSERT(sizeof(element_type) == (sizeof(component_type) * COMPS));
 
 public:
-
     /**
      * Returns the number of elements a vectorizable instance has.
      * Each element has components_per_element components.
@@ -204,37 +204,46 @@ public:
     }
 };
 
-template<>
+template <>
 class vectorizable_traits<unsigned char> : public primitive_vectorizable_traits<unsigned char> {};
-template<>
+
+template <>
 class vectorizable_traits<char> : public primitive_vectorizable_traits<char> {};
-template<>
+
+template <>
 class vectorizable_traits<unsigned short> : public primitive_vectorizable_traits<unsigned short> {};
-template<>
+
+template <>
 class vectorizable_traits<short> : public primitive_vectorizable_traits<short> {};
-template<>
+
+template <>
 class vectorizable_traits<unsigned int> : public primitive_vectorizable_traits<unsigned int> {};
-template<>
+
+template <>
 class vectorizable_traits<int> : public primitive_vectorizable_traits<int> {};
-template<>
+
+template <>
 class vectorizable_traits<unsigned long> : public primitive_vectorizable_traits<unsigned long> {};
-template<>
+
+template <>
 class vectorizable_traits<long> : public primitive_vectorizable_traits<long> {};
-template<>
+
+template <>
 class vectorizable_traits<float> : public primitive_vectorizable_traits<float> {};
-template<>
+
+template <>
 class vectorizable_traits<double> : public primitive_vectorizable_traits<double> {};
 
 /**
  * All vectors of vectorizable types are vectorizable
  */
-template<typename T, typename A>
-class vectorizable_traits<std::vector<T, A> > {
+template <typename T, typename A>
+class vectorizable_traits<std::vector<T, A>> {
 public:
-    static const bool vectorizable = true;
-    static const size_t components_per_element = 1;
-    typedef T element_type;
-    typedef std::vector<T, A> vector_type;
+    static const bool                                       vectorizable           = true;
+    static const size_t                                     components_per_element = 1;
+    typedef T                                               element_type;
+    typedef std::vector<T, A>                               vector_type;
     typedef typename vectorizable_traits<T>::component_type component_type;
 
     /**
@@ -251,7 +260,7 @@ public:
      * consecutive elements.
      */
     static component_type *begin(vector_type &v) {
-        return (component_type *) coll_start_pointer(v);
+        return (component_type *)coll_start_pointer(v);
     }
 
     /**
@@ -260,7 +269,7 @@ public:
      * consecutive elements.
      */
     static const component_type *begin(const vector_type &v) {
-        return (component_type *) coll_start_pointer(v);
+        return (component_type *)coll_start_pointer(v);
     }
 
     /**
@@ -280,4 +289,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_VECTORIZABLE_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_VECTORIZABLE_H

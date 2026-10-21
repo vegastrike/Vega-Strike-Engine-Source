@@ -32,6 +32,7 @@
 //
 
 #include <string>
+
 #include "Exceptions.h"
 #include "Format.h"
 
@@ -48,7 +49,7 @@ namespace Audio {
 class Stream {
 private:
     std::string filePath;
-    Format streamFormat;
+    Format      streamFormat;
 
     void *curBufferPos;
 
@@ -63,14 +64,11 @@ protected:
      */
     class NoBufferException : public Exception {
     public:
-        NoBufferException() {
-        }
+        NoBufferException() {}
 
-        NoBufferException(const NoBufferException &other) : Exception(other) {
-        }
+        NoBufferException(const NoBufferException &other) : Exception(other) {}
 
-        explicit NoBufferException(const std::string &message) : Exception(message) {
-        }
+        explicit NoBufferException(const std::string &message) : Exception(message) {}
     };
 
 protected:
@@ -129,7 +127,6 @@ public:
     // by a concrete Stream class. All are protected, so the stream interface is independent
     // of implementations.
 protected:
-
     /** @see getLength */
     virtual double getLengthImpl() const = 0;
 
@@ -161,6 +158,6 @@ protected:
     virtual void nextBufferImpl() = 0;
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_STREAM_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_STREAM_H

@@ -27,13 +27,13 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_BOLT_H
 #define VEGA_STRIKE_ENGINE_CMD_BOLT_H
 
-#include "src/gfxlib.h"
-#include "src/gfxlib_struct.h"
+#include "cmd/collide_map.h"
 #include "cmd/weapon_info.h"
+#include "gfx/animation.h"
 #include "gfx_generic/matrix.h"
 #include "gfx_generic/quaternion.h"
-#include "cmd/collide_map.h"
-#include "gfx/animation.h"
+#include "src/gfxlib.h"
+#include "src/gfxlib_struct.h"
 
 class Unit;
 class StarSystem;
@@ -43,56 +43,50 @@ class Texture;
 
 class Bolt {
 private:
-    const WeaponInfo *type;//beam or bolt;
-    Matrix drawmat;
-    QVector cur_position;
-    Vector ShipSpeed;
-    QVector prev_position;//beams don't change heading.
-    void *owner;
-    float curdist;
-    int decal;//which image it uses
-    float bolt_size; // actually squared
-    std::string bolt_name;
+    const WeaponInfo *type;  // beam or bolt;
+    Matrix            drawmat;
+    QVector           cur_position;
+    Vector            ShipSpeed;
+    QVector           prev_position;  // beams don't change heading.
+    void             *owner;
+    float             curdist;
+    int               decal;          // which image it uses
+    float             bolt_size;      // actually squared
+    std::string       bolt_name;
 
-    float ball_size;
+    float       ball_size;
     std::string ball_name;
 
-    Texture *bolt_texture;
+    Texture  *bolt_texture;
     Animation animation;
 
 public:
-    CollideMap::iterator location;
-    static int AddTexture(BoltDrawManager *q, std::string filename);
-    static int AddAnimation(BoltDrawManager *q, std::string filename, QVector cur_position);
-    bool Collide(Unit *target);
-    static bool CollideAnon(Collidable::CollideRef bolt_name, Unit *target);
-    static Bolt *BoltFromIndex(Collidable::CollideRef bolt_name);
+    CollideMap::iterator          location;
+    static int                    AddTexture(BoltDrawManager *q, std::string filename);
+    static int                    AddAnimation(BoltDrawManager *q, std::string filename, QVector cur_position);
+    bool                          Collide(Unit *target);
+    static bool                   CollideAnon(Collidable::CollideRef bolt_name, Unit *target);
+    static Bolt                  *BoltFromIndex(Collidable::CollideRef bolt_name);
     static Collidable::CollideRef BoltIndex(int index, int decal, bool isBall);
 
     bool operator==(const Bolt &b) const {
-
-        return owner == b.owner
-                && curdist == b.curdist
-                && cur_position == b.cur_position
-                && prev_position == b.prev_position;
+        return owner == b.owner && curdist == b.curdist && cur_position == b.cur_position &&
+               prev_position == b.prev_position;
     }
 
-    Bolt(const WeaponInfo *type,
-            const Matrix &orientationpos,
-            const Vector &ShipSpeed,
-            void *owner,
-            CollideMap::iterator hint);//makes a bolt
+    Bolt(const WeaponInfo *type, const Matrix &orientationpos, const Vector &ShipSpeed, void *owner,
+         CollideMap::iterator hint);  // makes a bolt
     void Destroy(unsigned int index);
-    //static void Draw();
+    // static void Draw();
     static void DrawAllBolts();
     static void DrawAllBalls();
-    void DrawBolt(GFXVertexList *qmesh);
-    void DrawBall(float &bolt_size, Animation *cur);
-    bool Update(Collidable::CollideRef index);
-    bool Collide(Collidable::CollideRef index);
-    static void UpdatePhysics(StarSystem *ss);//updates all physics in the starsystem
-    void noop() const {
-    }
+    void        DrawBolt(GFXVertexList *qmesh);
+    void        DrawBall(float &bolt_size, Animation *cur);
+    bool        Update(Collidable::CollideRef index);
+    bool        Collide(Collidable::CollideRef index);
+    static void UpdatePhysics(StarSystem *ss);  // updates all physics in the starsystem
+
+    void noop() const {}
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_BOLT_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_BOLT_H

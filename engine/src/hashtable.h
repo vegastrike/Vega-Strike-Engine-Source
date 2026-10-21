@@ -27,28 +27,31 @@
 #ifndef VEGA_STRIKE_ENGINE_HASHTABLE_H
 #define VEGA_STRIKE_ENGINE_HASHTABLE_H
 
-#include "src/gnuhash.h"
+#include <algorithm>
 #include <math.h>
 #include <string>
-#include <vector>
-#include <algorithm>
 #include <utility>
-#define HASH_INTSIZE (sizeof (int)*8)
-#define HASH_SALT_0 0x7EF92C3B
-#define HASH_SALT_1 0x9B
+#include <vector>
+
+#include "src/gnuhash.h"
+#define HASH_INTSIZE (sizeof(int) * 8)
+#define HASH_SALT_0  0x7EF92C3B
+#define HASH_SALT_1  0x9B
 
 class Unit;
-//const int hashsize = 1001;
-//Hashtable doesn't grow
 
-template<class KEY, class VALUE, int SIZ>
+// const int hashsize = 1001;
+// Hashtable doesn't grow
+
+template <class KEY, class VALUE, int SIZ>
 class Hashtable : public vsUMap<KEY, VALUE *> {
     typedef std::pair<KEY, VALUE *> HashElement;
-    typedef vsUMap<KEY, VALUE *> supertype;
+    typedef vsUMap<KEY, VALUE *>    supertype;
+
 public:
     static size_t hash(const int key) {
-        unsigned int k = key;
-        k %= SIZ;
+        unsigned int k  = key;
+        k              %= SIZ;
         return k;
     }
 
@@ -57,7 +60,7 @@ public:
         for (const char *start = key; *start != '\0'; ++start) {
             k ^= (*start & HASH_SALT_1);
             k ^= HASH_SALT_0;
-            k = (((k >> 4) & 0xF) | (k << (HASH_INTSIZE - 4)));
+            k  = (((k >> 4) & 0xF) | (k << (HASH_INTSIZE - 4)));
             k ^= *start;
         }
         k %= SIZ;
@@ -69,7 +72,7 @@ public:
         for (typename std::string::const_iterator start = key.begin(); start != key.end(); ++start) {
             k ^= (*start & HASH_SALT_1);
             k ^= HASH_SALT_0;
-            k = (((k >> 4) & 0xF) | (k << (HASH_INTSIZE - 4)));
+            k  = (((k >> 4) & 0xF) | (k << (HASH_INTSIZE - 4)));
             k ^= *start;
         }
         k %= SIZ;
@@ -77,10 +80,10 @@ public:
     }
 
     std::vector<VALUE *> GetAll() const {
-        std::vector<VALUE *> retval(this->size());
+        std::vector<VALUE *>               retval(this->size());
         typename supertype::const_iterator iter = this->begin();
-        typename supertype::const_iterator end = this->end();
-        size_t i = 0;
+        typename supertype::const_iterator end  = this->end();
+        size_t                             i    = 0;
         for (; iter != end; ++iter, ++i) {
             retval[i] = iter->second;
         }
@@ -89,7 +92,7 @@ public:
 
     VALUE *Get(const KEY &key) const {
         typename supertype::const_iterator iter = this->find(key);
-        typename supertype::const_iterator end = this->end();
+        typename supertype::const_iterator end  = this->end();
         if (iter != end) {
             return iter->second;
         }
@@ -109,4 +112,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_HASHTABLE_H
+#endif  // VEGA_STRIKE_ENGINE_HASHTABLE_H

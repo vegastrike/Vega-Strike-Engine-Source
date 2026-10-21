@@ -32,8 +32,8 @@
 //
 
 #include "Exceptions.h"
-#include "Types.h"
 #include "RenderableListener.h"
+#include "Types.h"
 
 namespace Audio {
 
@@ -49,15 +49,15 @@ class Listener {
     Range<Scalar> cosAngleRange;
 
     LVector3 position;
-    Vector3 atDirection;
-    Vector3 upDirection;
-    Vector3 velocity;
+    Vector3  atDirection;
+    Vector3  upDirection;
+    Vector3  velocity;
 
     Scalar radius;
 
     Scalar gain;
 
-    SharedPtr<UserData> userDataPtr;
+    SharedPtr<UserData>           userDataPtr;
     SharedPtr<RenderableListener> rendererDataPtr;
 
     Matrix3 worldToLocal;
@@ -68,31 +68,27 @@ protected:
      *      track what changed and what didn't. Call reset() when synchronized.
      */
     struct Dirty {
-        Dirty()
-                : location(0),
-                attributes(0),
-                gain(0) {
-        }
+        Dirty() : location(0), attributes(0), gain(0) {}
 
         /** position, velocity & direction */
-        int location: 1;
+        int location : 1;
 
         /** min/max angle, radius, pf radius ratios, reference freqs */
-        int attributes: 1;
+        int attributes : 1;
 
         /** min/max angle, radius, pf radius ratios, reference freqs */
-        int gain: 1;
+        int gain : 1;
 
         void reset() {
-            location = 0;
+            location   = 0;
             attributes = 0;
-            gain = 0;
+            gain       = 0;
         }
 
         void setAll() {
-            location = 1;
+            location   = 1;
             attributes = 1;
-            gain = 1;
+            gain       = 1;
         }
     } dirty;
 
@@ -109,7 +105,7 @@ public:
 
     /** Set the listener's central position in 3D space */
     void setPosition(LVector3 x) {
-        position = x;
+        position       = x;
         dirty.location = 1;
     }
 
@@ -125,8 +121,8 @@ public:
 
     /** Set the listener's orientation */
     void setOrientation(Vector3 at, Vector3 up) {
-        atDirection = at;
-        upDirection = up;
+        atDirection    = at;
+        upDirection    = up;
         dirty.location = 1;
     }
 
@@ -137,7 +133,7 @@ public:
 
     /** Set the listener's velocity */
     void setVelocity(Vector3 x) {
-        velocity = x;
+        velocity       = x;
         dirty.location = 1;
     }
 
@@ -159,7 +155,7 @@ public:
 
     /** @see getAngleRange @remarks This version takes cosine-angles rather than radians, much quicker */
     void setCosAngleRange(Range<Scalar> r) {
-        cosAngleRange = r;
+        cosAngleRange    = r;
         dirty.attributes = 1;
     }
 
@@ -170,7 +166,7 @@ public:
 
     /** Set the listener's radius */
     void setRadius(Scalar r) {
-        radius = r;
+        radius           = r;
         dirty.attributes = 1;
     }
 
@@ -181,10 +177,9 @@ public:
 
     /** Set the listener's gain */
     void setGain(Scalar g) {
-        gain = g;
+        gain       = g;
         dirty.gain = 1;
     }
-
 
     /** Get renderer-specific data associated (and destroyed) with this sound source */
     SharedPtr<RenderableListener> getRenderable() const {
@@ -222,9 +217,8 @@ public:
      * @note The behavior is unspecified if there was no previous call to update().
      */
     Vector3 toLocalDirection(Vector3 dir) const;
-
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_LISTENER_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_LISTENER_H

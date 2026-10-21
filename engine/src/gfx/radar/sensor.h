@@ -31,6 +31,7 @@
 #define VEGA_STRIKE_ENGINE_GFX_RADAR_SENSOR_H
 
 #include <vector>
+
 #include "track.h"
 
 class Unit;
@@ -49,19 +50,19 @@ public:
 
     struct Capability {
         enum Value {
-            None = 0,
-            FriendFoe = 1 << 0,
-            ObjectType = 1 << 1,
+            None             = 0,
+            FriendFoe        = 1 << 0,
+            ObjectType       = 1 << 1,
             ThreatAssessment = 1 << 2
         };
     };
 
     struct ThreatLevel {
         enum Value {
-            None, // Not attacking
-            Low, // Lock
-            Medium, // Capship with lock
-            High // Missile
+            None,    // Not attacking
+            Low,     // Lock
+            Medium,  // Capship with lock
+            High     // Missile
         };
     };
 
@@ -95,12 +96,12 @@ public:
     GFXColor GetColor(const Track &) const;
 
 protected:
-    Unit *player;
-    float closeRange;
+    Unit                   *player;
+    float                   closeRange;
     mutable TrackCollection collection;
-    bool useThreatAssessment;
+    bool                    useThreatAssessment;
 };
 
-} // namespace Radar
+}  // namespace Radar
 
-#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_SENSOR_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_RADAR_SENSOR_H

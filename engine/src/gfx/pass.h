@@ -30,15 +30,15 @@
 #include <string>
 #include <vector>
 
-#include <boost/smart_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/smart_ptr.hpp>
 
 namespace pt = boost::property_tree;
 
+using pt::ptree;
 using std::string;
 using std::vector;
-using pt::ptree;
 
 class Texture;
 
@@ -58,8 +58,8 @@ class Pass {
 public:
     enum Tristate {
         False = 0,
-        True = 1,
-        Auto = 2
+        True  = 1,
+        Auto  = 2
     };
 
     enum Type {
@@ -175,7 +175,7 @@ public:
 
         /** For shader passes, the associated sampler uniform */
         string targetParamName;
-        int targetParamId;
+        int    targetParamId;
 
         string sourcePath;
         string defaultPath;
@@ -241,11 +241,11 @@ public:
             ApparentLightSizeArray
         };
 
-        string name;
-        int id;
+        string   name;
+        int      id;
         Semantic semantic;
-        bool optional;
-        float value[4];
+        bool     optional;
+        float    value[4];
     };
 
 private:
@@ -261,13 +261,13 @@ private:
     void parseParam(ptree tree);
     void parseAutoParam(ptree tree);
 
-    void setType(string typeString);
-    void setZWrite(string zWriteString);
-    void setPerLightIteration(ptree tree, string iterationString);
-    void setBlendMode(string blendModeString);
-    void setDepthFunction(string depthString);
-    void setCullMode(string cullModeString);
-    void setPolyMode(string polyModeString);
+    void                  setType(string typeString);
+    void                  setZWrite(string zWriteString);
+    void                  setPerLightIteration(ptree tree, string iterationString);
+    void                  setBlendMode(string blendModeString);
+    void                  setDepthFunction(string depthString);
+    void                  setCullMode(string cullModeString);
+    void                  setPolyMode(string polyModeString);
     ShaderParam::Semantic getShaderParam(const string &shaderString);
 
 public:
@@ -319,7 +319,7 @@ public:
     Pass();
     ~Pass();
 
-    void parsePass(ptree tree, string techniqueName, int &nextSequence);
+    void        parsePass(ptree tree, string techniqueName, int &nextSequence);
     static Pass parsePass(ptree tree);
 
     /** Set the vertex and fragment programs - throw on error */
@@ -341,11 +341,8 @@ public:
      *      bound to this texture unit.
      * @remarks [type] may be either Decal or File, mapping to equally named SourceType s
      */
-    void addTextureUnit(const string &source,
-            int target,
-            const string &deflt,
-            const string &paramName,
-            Pass::TextureUnit::Kind texKind);
+    void addTextureUnit(const string &source, int target, const string &deflt, const string &paramName,
+                        Pass::TextureUnit::Kind texKind);
 
     /** Add a constant shader param
      * @param name A string defining the shader's parameter name.
@@ -403,4 +400,4 @@ public:
     bool isCompiled(int programVersion) const;
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_PASS_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_PASS_H

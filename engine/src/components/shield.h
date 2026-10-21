@@ -37,22 +37,23 @@ class Cloak;
 
 /** Shield component */
 class Shield : public Component, public EnergyConsumer, public DamageableLayer {
-    const FtlDrive *ftl_drive;
-    const Cloak *cloak;
-    Resource<double> regeneration; // The current capability of a potentially damaged part
-    Resource<double> max_power; // Used to manually throttle shield
+    const FtlDrive  *ftl_drive;
+    const Cloak     *cloak;
+    Resource<double> regeneration;  // The current capability of a potentially damaged part
+    Resource<double> max_power;     // Used to manually throttle shield
 public:
     static int front;
     static int back;
     static int left;
     static int right;
 
-    Shield(EnergyContainer *source, FtlDrive *ftl_drive, Cloak *cloak, FacetConfiguration configuration = FacetConfiguration::four);
+    Shield(EnergyContainer *source, FtlDrive *ftl_drive, Cloak *cloak,
+           FacetConfiguration configuration = FacetConfiguration::four);
     ~Shield() override;
 
     // Component Methods
     void Load(std::string unit_key) override;
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
     bool Downgrade() override;
@@ -60,7 +61,7 @@ public:
     bool Upgrade(const std::string upgrade_key) override;
 
     double PercentOperational() const override;
-    void CalculatePercentOperational();
+    void   CalculatePercentOperational();
 
     void Damage() override;
     void DamageByPercent(double percent) override;
@@ -79,4 +80,4 @@ public:
     double Consume() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_SHIELD_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_SHIELD_H

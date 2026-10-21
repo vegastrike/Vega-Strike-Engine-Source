@@ -28,18 +28,18 @@
 #ifndef VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_UTILS_H
 #define VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_UTILS_H
 
+#include <string>
+
 #include "component.h"
 #include "components/energy_consumer.h"
 #include "components/energy_container.h"
 #include "resource/resource.h"
 
-#include <string>
-
 /** A collection of utility functions for lib component. */
 const ComponentType GetComponentTypeFromName(const std::string name);
 
-EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel,
-                           EnergyContainer* energy, EnergyContainer* ftl_energy);
+EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel, EnergyContainer* energy,
+                           EnergyContainer* ftl_energy);
 
 EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, EnergyContainer* fuel,
                                             EnergyContainer* energy, EnergyContainer* ftl_energy);
@@ -48,21 +48,20 @@ EnergyContainer* GetSourceFromConfiguration(const std::string& energy_source, En
                                             EnergyContainer* energy, EnergyContainer* ftl_energy);
 
 enum class YPR {
-    Yaw, Pitch, Roll
+    Yaw,
+    Pitch,
+    Roll
 };
 
 
-void DoubleYawPitchRollParser(std::string unit_key, const YPR ypr,
-                        double &right_value, double &left_value);
+void DoubleYawPitchRollParser(std::string unit_key, const YPR ypr, double& right_value, double& left_value);
 
- void ResourceYawPitchRollParser(std::string unit_key, const YPR ypr,
-                        Resource<double> &right_value, Resource<double> &left_value,
-                        const double minimum_functionality = 0.0);
+void ResourceYawPitchRollParser(std::string unit_key, const YPR ypr, Resource<double>& right_value,
+                                Resource<double>& left_value, const double minimum_functionality = 0.0);
 
 /* This function is used by vdu.cpp to print the component
     with the color showing damage */
-std::string PrintFormattedComponentInHud(double percent, std::string component_name,
-                                         bool damageable,
+std::string PrintFormattedComponentInHud(double percent, std::string component_name, bool damageable,
                                          std::string GetDamageColor(double));
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_UTILS_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_UTILS_H

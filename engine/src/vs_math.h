@@ -29,31 +29,31 @@
 #ifndef VEGA_STRIKE_ENGINE_VS_MATH_H
 #define VEGA_STRIKE_ENGINE_VS_MATH_H
 
+#include <cmath>
 #include <config.h>
+#include <float.h>
+#include <math.h>
 
 #include "root_generic/macosx_math.h"
-#include <math.h>
-#include <float.h>
-#include <cmath>
 
 #ifdef HAVE_IEEEFP_H
-    #include <ieeefp.h>
-#endif //HAVE_IEEEFP_H
+#    include <ieeefp.h>
+#endif  // HAVE_IEEEFP_H
 
 #ifndef M_PI
-    #define M_PI 3.14159265358979323846
-#endif //M_PI
+#    define M_PI 3.14159265358979323846
+#endif  // M_PI
 
 #ifndef PI
-    #define PI M_PI
-#endif //PI
+#    define PI M_PI
+#endif  // PI
 
 #ifndef M_1_PI
-    #define M_1_PI (1/M_PI)
-#endif //M_1_PI
+#    define M_1_PI (1 / M_PI)
+#endif  // M_1_PI
 
-#define FINITE(x) ( std::isfinite( x ) )
-#define ISNAN(x) ( std:: isnan( x ) )
+#define FINITE(x) (std::isfinite(x))
+#define ISNAN(x)  (std::isnan(x))
 
 
-#endif //VEGA_STRIKE_ENGINE_VS_MATH_H
+#endif  // VEGA_STRIKE_ENGINE_VS_MATH_H

@@ -27,38 +27,30 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CUSTOMIZE_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_CUSTOMIZE_H
 
-#include "cmd/images.h"
-#include "src/universe.h"
-#include "src/vegastrike.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "cmd/images.h"
+#include "cmd/unit_const_cache.h"
 #include "gfx/cockpit.h"
-#include "vegadisk/savegame.h"
-#include "src/config_xml.h"
+#include "root_generic/vs_globals.h"
 #include "root_generic/xml_serializer.h"
 #include "src/audiolib.h"
-#include "root_generic/vs_globals.h"
-#include "cmd/unit_const_cache.h"
+#include "src/config_xml.h"
+#include "src/universe.h"
+#include "src/vegastrike.h"
+#include "vegadisk/savegame.h"
 #ifdef _MSC_VER
-#define strcasecmp stricmp
+#    define strcasecmp stricmp
 #endif
 extern int GetModeFromName(const char *);
 
 extern Unit *CreateGameTurret(std::string tur, int faction);
 
-bool Unit::UpgradeSubUnits(const Unit *up,
-        int subunitoffset,
-        bool touchme,
-        bool downgrade,
-        int &numave,
-        double &percentage) {
-    bool bl = this->UpgradeSubUnitsWithFactory(up,
-            subunitoffset,
-            touchme,
-            downgrade,
-            numave,
-            percentage,
-            &CreateGameTurret);
+bool Unit::UpgradeSubUnits(const Unit *up, int subunitoffset, bool touchme, bool downgrade, int &numave,
+                           double &percentage) {
+    bool bl = this->UpgradeSubUnitsWithFactory(up, subunitoffset, touchme, downgrade, numave, percentage,
+                                               &CreateGameTurret);
     if (!up->SubUnits.empty()) {
         this->DisableTurretAI();
     }
@@ -67,4 +59,4 @@ bool Unit::UpgradeSubUnits(const Unit *up,
 
 extern char *GetUnitDir(const char *);
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_CUSTOMIZE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_CUSTOMIZE_H

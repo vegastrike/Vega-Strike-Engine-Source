@@ -30,8 +30,8 @@
 #ifndef VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H
 #define VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "resource/resource.h"
 
@@ -73,29 +73,25 @@ enum class ComponentType {
     // TODO: all the rest of the upgrades, shady or not...
 };
 
-class Component
-{
+class Component {
 protected:
-    std::string upgrade_name;   // Isometal Armor
-    std::string upgrade_key;    // armor03__upgrades
-    std::string description;    // Long text and picture. Taken from master_parts_list
+    std::string upgrade_name;  // Isometal Armor
+    std::string upgrade_key;   // armor03__upgrades
+    std::string description;   // Long text and picture. Taken from master_parts_list
 
-    double price = 0;
-    double mass = 0;
+    double price  = 0;
+    double mass   = 0;
     double volume = 0;
 
-    Resource<double> operational; // Percent operational
+    Resource<double> operational;  // Percent operational
 
     bool installed = false;
-    bool integral = false; // Part of the ship. Can't be upgraded/downgraded
+    bool integral  = false;        // Part of the ship. Can't be upgraded/downgraded
 public:
     virtual ~Component();
     ComponentType type = ComponentType::NoComponent;
 
-    Component(double mass = 0,
-              double volume = 0,
-              bool installed = false,
-              bool integral = false);
+    Component(double mass = 0, double volume = 0, bool installed = false, bool integral = false);
 
     // Load from units dictionary
     // TODO: we should really switch the two parameters around.
@@ -104,8 +100,7 @@ public:
     virtual void SaveToCSV(std::map<std::string, std::string>& unit) const = 0;
 
     // Handle the four cases of CanUpgrade/Upgrade/CanDowngrade/Downgrade
-    bool CanWillUpDowngrade(const std::string upgrade_key,
-                                           bool upgrade, bool apply);
+    bool CanWillUpDowngrade(const std::string upgrade_key, bool upgrade, bool apply);
 
     virtual bool CanDowngrade() const = 0;
 
@@ -120,11 +115,11 @@ public:
     virtual void Repair();
     virtual void Destroy();
 
-    virtual bool Damaged() const;
-    bool Destroyed() const;
+    virtual bool   Damaged() const;
+    bool           Destroyed() const;
     virtual double PercentOperational() const;
-    virtual bool Installed() const;
-    bool Operational() const;
+    virtual bool   Installed() const;
+    bool           Operational() const;
 
     void SetIntegral(bool integral);
 
@@ -140,4 +135,4 @@ public:
 
     const bool Integral() const;
 };
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_COMPONENT_H

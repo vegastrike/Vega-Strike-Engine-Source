@@ -29,19 +29,20 @@
 #define VEGA_STRIKE_ENGINE_PYTHON_UNIT_FROM_TO_PYTHON_H
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
 
-#if BOOST_VERSION != 102800
-//#include <boost/python/converter/arg_from_python.hpp>
+#include <boost/version.hpp>
 
-#include "src/python/init.h"
-BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE BOOST_PYTHON_TO_PYTHON_BY_VALUE(Unit*,
-        ::boost::python::to_python_value<UnitWrapper>()(
-                UnitWrapper(x)));
-template<>
+#if BOOST_VERSION != 102'800
+// #include <boost/python/converter/arg_from_python.hpp>
+
+#    include "src/python/init.h"
+BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE BOOST_PYTHON_TO_PYTHON_BY_VALUE(
+        Unit *, ::boost::python::to_python_value<UnitWrapper>()(UnitWrapper(x)));
+
+template <>
 struct default_result_converter::apply<Unit *> {
-//typedef boost::python::to_python_value<Unit *> type;
+    // typedef boost::python::to_python_value<Unit *> type;
     typedef ::boost::python::default_result_converter::apply<UnitWrapper>::type type;
 };
 
@@ -93,22 +94,23 @@ struct default_result_converter::apply<Unit *> {
  */
 
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
-#else //BOOST_VERSION != 102800
-TO_PYTHON_SMART_POINTER( UnitWrapper );
-TO_PYTHON_SMART_POINTER( Cargo );
+#else   // BOOST_VERSION != 102800
+TO_PYTHON_SMART_POINTER(UnitWrapper);
+TO_PYTHON_SMART_POINTER(Cargo);
 
-PYTHON_INIT_GLOBALS( Unit, UnitWrapper )
+PYTHON_INIT_GLOBALS(Unit, UnitWrapper)
+
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
-inline PyObject*to_python( Unit*un )
-{
-    return to_python( UnitWrapper( un ) );
+inline PyObject* to_python(Unit* un) {
+    return to_python(UnitWrapper(un));
 }
-inline Unit * from_python( PyObject *p, boost::python::type< Unit* >)
-{
-    UnitWrapper uw = ( from_python( p, boost::python::type< UnitWrapper& > () ) );
+
+inline Unit* from_python(PyObject* p, boost::python::type<Unit*>) {
+    UnitWrapper uw = (from_python(p, boost::python::type<UnitWrapper&>()));
     return uw.GetUnit();
 }
-BOOST_PYTHON_END_CONVERSION_NAMESPACE
-#endif //BOOST_VERSION != 102800
 
-#endif //VEGA_STRIKE_ENGINE_PYTHON_UNIT_FROM_TO_PYTHON_H
+BOOST_PYTHON_END_CONVERSION_NAMESPACE
+#endif  // BOOST_VERSION != 102800
+
+#endif  // VEGA_STRIKE_ENGINE_PYTHON_UNIT_FROM_TO_PYTHON_H

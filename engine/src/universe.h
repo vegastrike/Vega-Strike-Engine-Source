@@ -28,11 +28,11 @@
 #define VEGA_STRIKE_ENGINE_UNIVERSE_H
 
 #include "gfx/camera.h"
-#include "src/star_system.h"
 #include "gfx/cockpit.h"
 #include "root_generic/faction_generic.h"
 #include "root_generic/galaxy_xml.h"
 #include "root_generic/stardate.h"
+#include "src/star_system.h"
 
 /**
  * Class Universe Deals with universal constants. It is a global,
@@ -45,16 +45,16 @@
  */
 class Universe {
     // Fields
-    bool paused = false;
+    bool paused        = false;
     bool optionsActive = false;  // in-game config screen overlay is open (non-blocking pause)
 
 public:
-    StarDate current_stardate;
+    StarDate             current_stardate;
     vector<StarSystem *> star_system;
 
 protected:
     std::unique_ptr<GalaxyXML::Galaxy> galaxy;
-    Camera hud_camera; // a generic camera facing the HUD
+    Camera                             hud_camera;  // a generic camera facing the HUD
 
     // Constructors
 public:
@@ -62,92 +62,96 @@ public:
     Universe();
     void Init(int argc, char **argv, const char *galaxy);
     ~Universe();
-    class StarSystem *Init(string systemfile,
-            const Vector &centroid = Vector(0, 0, 0),
-            const string planetname = string()); // Should load the Universe data file. Now just inits system with test.xml
-    friend void bootstrap_main_loop(); //so it can get all cockpits
+    class StarSystem *Init(string systemfile, const Vector &centroid = Vector(0, 0, 0),
+                           const string planetname = string());  // Should load the Universe data file. Now just inits
+                                                                 // system with test.xml
+    friend void bootstrap_main_loop();                           // so it can get all cockpits
     friend class Faction;
 
     // Methods
 public:
-// Gameplay Methods
+    // Gameplay Methods
     void Loop(void main_loop());
     void WriteSaveGame(bool auto_save);
     // Graphic Methods
-    void StartDraw(); // Begin a scene
-    void StartGFX(); // Loads Defaults in Graphics Drivers
-    void StartGL(); // init proc
+    void StartDraw();  // Begin a scene
+    void StartGFX();   // Loads Defaults in Graphics Drivers
+    void StartGL();    // init proc
+
     void SetViewport() {
         AccessCockpit()->SetViewport();
     }
 
     void TogglePause();
     void ToggleOptionsActive();
-    bool isOptionsActive() const { return optionsActive; }
 
-    //Update starsystems (for server side)
+    bool isOptionsActive() const {
+        return optionsActive;
+    }
+
+    // Update starsystems (for server side)
     void Update();
 
-// Camera
+    // Camera
     Camera *AccessCamera(int num);
     Camera *AccessCamera();
     Camera *AccessHudCamera();
-    void SelectCamera(int cam);
+    void    SelectCamera(int cam);
 
-// Cockpits
-    void SetupCockpits(vector<string> players);
-    Cockpit *AccessCockpit();
-    Cockpit *AccessCockpit(int i);
+    // Cockpits
+    void         SetupCockpits(vector<string> players);
+    Cockpit     *AccessCockpit();
+    Cockpit     *AccessCockpit(int i);
     unsigned int CurrentCockpit();
-    void SetActiveCockpit(int whichcockpit);
-    void SetActiveCockpit(Cockpit *which);
-    Cockpit *createCockpit(std::string player);
+    void         SetActiveCockpit(int whichcockpit);
+    void         SetActiveCockpit(Cockpit *which);
+    Cockpit     *createCockpit(std::string player);
 
-// Galaxy
-    void getJumpPath(const string &from, const string &to, vector<string> &path) const;
+    // Galaxy
+    void                  getJumpPath(const string &from, const string &to, vector<string> &path) const;
     const vector<string> &getAdjacentStarSystems(const string &ss) const;
-    string getGalaxyProperty(const string &sys, const string &prop);
-    string getGalaxyPropertyDefault(const string &sys, const string &prop, const string def = "");
-    GalaxyXML::Galaxy *getGalaxy();
+    string                getGalaxyProperty(const string &sys, const string &prop);
+    string                getGalaxyPropertyDefault(const string &sys, const string &prop, const string def = "");
+    GalaxyXML::Galaxy    *getGalaxy();
 
-// Light Map
-    void activateLightMap(int stage = 1);
+    // Light Map
+    void     activateLightMap(int stage = 1);
     Texture *getLightMap();
 
-// Player Ship
+    // Player Ship
     Cockpit *isPlayerStarship(const Unit *fighter);
 
     Cockpit *isPlayerStarshipVoid(const void *pointercompare) {
-        return isPlayerStarship((const Unit *) pointercompare);
+        return isPlayerStarship((const Unit *)pointercompare);
     }
 
     int whichPlayerStarship(const Unit *fighter);
 
-// Script System - whatever that is
+    // Script System - whatever that is
     StarSystem *scriptStarSystem();
-    bool setScriptSystem(string name);
+    bool        setScriptSystem(string name);
 
-// Star Systems
-    StarSystem *activeStarSystem();
-    bool StillExists(StarSystem *ss);
-    void setActiveStarSystem(StarSystem *ss);
-    void pushActiveStarSystem(StarSystem *ss);
-    void popActiveStarSystem();
-    StarSystem *GenerateStarSystem(const char *file, const char *jumpback, Vector origin);
-    void LoadStarSystem(StarSystem *ss);
-    void UnloadStarSystem(StarSystem *ss);
-    void Generate1(const char *file, const char *jumpback);
-    void Generate2(StarSystem *ss);
-    void clearAllSystems();
-    StarSystem *getActiveStarSystem(unsigned int size);
+    // Star Systems
+    StarSystem  *activeStarSystem();
+    bool         StillExists(StarSystem *ss);
+    void         setActiveStarSystem(StarSystem *ss);
+    void         pushActiveStarSystem(StarSystem *ss);
+    void         popActiveStarSystem();
+    StarSystem  *GenerateStarSystem(const char *file, const char *jumpback, Vector origin);
+    void         LoadStarSystem(StarSystem *ss);
+    void         UnloadStarSystem(StarSystem *ss);
+    void         Generate1(const char *file, const char *jumpback);
+    void         Generate2(StarSystem *ss);
+    void         clearAllSystems();
+    StarSystem  *getActiveStarSystem(unsigned int size);
     unsigned int getNumActiveStarSystem();
-    StarSystem *getStarSystem(string name);
-    int StarSystemIndex(StarSystem *ss);
+    StarSystem  *getStarSystem(string name);
+    int          StarSystemIndex(StarSystem *ss);
 
-// Misc. Methods
-    void LoadFactionXML(const char *factfile);
+    // Misc. Methods
+    void            LoadFactionXML(const char *factfile);
     UnitCollection &getActiveStarSystemUnitList();
-    unsigned int numPlayers();
+    unsigned int    numPlayers();
 };
 
 // Draw the in-game config overlay (transparent, on top) when optionsActive.
@@ -155,4 +159,4 @@ public:
 // base loop (base_main_loop) so it shows in any context.
 void DrawConfigOverlay();
 
-#endif //VEGA_STRIKE_ENGINE_UNIVERSE_H
+#endif  // VEGA_STRIKE_ENGINE_UNIVERSE_H

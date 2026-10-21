@@ -27,12 +27,12 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_ASTEROID_H
 #define VEGA_STRIKE_ENGINE_CMD_ASTEROID_H
 
+#include "cmd/collection.h"
+#include "cmd/script/flightgroup.h"
+#include "cmd/unit_generic.h"
+#include "gfx_generic/matrix.h"
 #include "gfx_generic/quaternion.h"
 #include "gfx_generic/vec.h"
-#include "gfx_generic/matrix.h"
-#include "cmd/script/flightgroup.h"
-#include "cmd/collection.h"
-#include "cmd/unit_generic.h"
 
 class Asteroid : public Unit {
 private:
@@ -50,9 +50,7 @@ public:
     }
 
 private:
-
-    Asteroid(std::vector<Mesh *> m, bool b, int i) : Unit(m, b, i) {
-    }
+    Asteroid(std::vector<Mesh *> m, bool b, int i) : Unit(m, b, i) {}
 
 public:
     /// default constructor forbidden
@@ -67,4 +65,4 @@ public:
     ~Asteroid() override;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_ASTEROID_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_ASTEROID_H

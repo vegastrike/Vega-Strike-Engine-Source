@@ -28,8 +28,8 @@
 #ifndef VEGA_STRIKE_ENGINE_COMPONENTS_CLOAK_H
 #define VEGA_STRIKE_ENGINE_COMPONENTS_CLOAK_H
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "components/energy_consumer.h"
 
@@ -45,8 +45,7 @@ enum class CloakingStatus {
     decloaking
 };
 
-class Cloak : public Component, public EnergyConsumer
-{
+class Cloak : public Component, public EnergyConsumer {
     friend class Unit;
 
     CloakingStatus status;
@@ -68,7 +67,7 @@ public:
     Cloak();
     ~Cloak() override;
 
-// Component Methods
+    // Component Methods
     void Load(std::string unit_key) override;
 
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
@@ -88,10 +87,10 @@ public:
     bool Damaged() const override;
     bool Installed() const override;
 
-// Cloak Methods
+    // Cloak Methods
 
     void Update();
-    void Toggle(); // Toggle cloak on/off
+    void Toggle();  // Toggle cloak on/off
 
     bool Capable() const {
         return (status != CloakingStatus::disabled);
@@ -107,8 +106,7 @@ public:
 
     // Active is cloaking, cloaked or decloaking
     bool Active() const {
-        return (status == CloakingStatus::cloaking ||
-                status == CloakingStatus::cloaked ||
+        return (status == CloakingStatus::cloaking || status == CloakingStatus::cloaked ||
                 status == CloakingStatus::decloaking);
     }
 
@@ -120,8 +118,6 @@ public:
         return glass;
     }
 
-
-
     // Is the ship visible
     bool Visible() const {
         return !Cloaked();
@@ -131,18 +127,18 @@ public:
         return current;
     }
 
-    //how visible the ship is from 0 to 1
+    // how visible the ship is from 0 to 1
     double Visibility() const {
-        return 1-current;
+        return 1 - current;
     }
 
     void Disable() {
-        status = CloakingStatus::disabled;
+        status  = CloakingStatus::disabled;
         current = 0;
     }
 
     void Enable() {
-        status = CloakingStatus::ready;
+        status  = CloakingStatus::ready;
         current = 0;
     }
 
@@ -154,4 +150,4 @@ public:
     double Consume() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_CLOAK_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_CLOAK_H

@@ -28,6 +28,7 @@
 #define VEGA_STRIKE_ENGINE_CMD_FACTION_FACTORY_H
 
 #include <string>
+
 #include <boost/property_tree/ptree.hpp>
 
 class FactionFactory {
@@ -38,4 +39,4 @@ private:
     void parse(boost::property_tree::ptree tree);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_FACTION_FACTORY_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_FACTION_FACTORY_H

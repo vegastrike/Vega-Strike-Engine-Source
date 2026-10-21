@@ -28,35 +28,35 @@
 #define VEGA_STRIKE_ENGINE_GUI_GUI_TEXTURE_H
 
 #include <string>
+
 #include "guidefs.h"
+#include "src/vegastrike.h"  //For OpenGL/gl.h -> GLuint.
 
-#include "src/vegastrike.h"                 //For OpenGL/gl.h -> GLuint.
-
-//The GuiTexture class encapsulates an OpenGL 2D texture.
-//There is a cache so that a texture is only read and bound once.
+// The GuiTexture class encapsulates an OpenGL 2D texture.
+// There is a cache so that a texture is only read and bound once.
 class GuiTexture {
 public:
-//Read a texture from a file and bind it.
+    // Read a texture from a file and bind it.
     bool read(const std::string &fileName);
 
-//Draw this texture, stretching to fit the rect.
+    // Draw this texture, stretching to fit the rect.
     void draw(const Rect &rect) const;
 
-//CONSTRUCTION
+    // CONSTRUCTION
     GuiTexture(void);
     ~GuiTexture(void);
 
 protected:
-//INTERNAL IMPLEMENTATION
+    // INTERNAL IMPLEMENTATION
 
 protected:
-//VARIABLES
+    // VARIABLES
     class Texture *m_texture;
-/*
- *  GLuint m_glName;		// Unique ID for this texture used in OpenGL.
- *  std::string m_fileName;	// Name of the file this came from.
- *  int m_width, m_height;	// Original size of image.
- */
+    /*
+     *  GLuint m_glName;		// Unique ID for this texture used in OpenGL.
+     *  std::string m_fileName;	// Name of the file this came from.
+     *  int m_width, m_height;	// Original size of image.
+     */
 };
 
-#endif   //VEGA_STRIKE_ENGINE_GUI_GUI_TEXTURE_H
+#endif  // VEGA_STRIKE_ENGINE_GUI_GUI_TEXTURE_H

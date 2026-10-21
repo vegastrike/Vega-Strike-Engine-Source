@@ -27,17 +27,18 @@
 #ifndef VEGA_STRIKE_ENGINE_TOOLS_VSR_H
 #define VEGA_STRIKE_ENGINE_TOOLS_VSR_H
 #include <stdint.h>
+
 /** The standard header found in all Vega Strike resource package files. */
 struct VSRHeader {
-    char magic[4];  ///Must always be 'V' 'S' 'R' '\0'
-    uint32_t entries; ///The number of files in this package.
-    uint32_t entryTableOffset;  ///The offset of the entry table in this file.
+    char     magic[4];          /// Must always be 'V' 'S' 'R' '\0'
+    uint32_t entries;           /// The number of files in this package.
+    uint32_t entryTableOffset;  /// The offset of the entry table in this file.
 };
 
 /// A single entry in the Vega Strike resource package file table of entries.
 struct VSRPEntry {
-    uint32_t fileLength; ///The total length of this file.
-    uint32_t offset;    ///The offset this file starts in the package.
-    char filename[256];    ///The complete path to the file, terminating with '\0'.
+    uint32_t fileLength;     /// The total length of this file.
+    uint32_t offset;         /// The offset this file starts in the package.
+    char     filename[256];  /// The complete path to the file, terminating with '\0'.
 };
-#endif //VEGA_STRIKE_ENGINE_TOOLS_VSR_H
+#endif                       // VEGA_STRIKE_ENGINE_TOOLS_VSR_H

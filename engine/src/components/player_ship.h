@@ -43,47 +43,40 @@ public:
 
 class NoActiveShipNotFoundException : public std::runtime_error {
 public:
-    explicit NoActiveShipNotFoundException()
-        : std::runtime_error("No active ship found in player fleet.") {}
+    explicit NoActiveShipNotFoundException() : std::runtime_error("No active ship found in player fleet.") {}
 };
 
 struct PlayerShip {
-    bool active;        // The ship we're flying
-    
-    ComponentsManager* unit; // Pointer to the unit
-    Cargo cargo;            // The cargo representation of the unit, for display by the ship dealer
-    std::string system;     // The system the ship is in
-    std::string base;       // The planet/station the ship is docked at
-    double transfer_price;
+    bool active;                // The ship we're flying
 
-    PlayerShip(bool active,
-               ComponentsManager* unit,
-               const Cargo& cargo,
-               const std::string& system = "", 
+    ComponentsManager* unit;    // Pointer to the unit
+    Cargo              cargo;   // The cargo representation of the unit, for display by the ship dealer
+    std::string        system;  // The system the ship is in
+    std::string        base;    // The planet/station the ship is docked at
+    double             transfer_price;
+
+    PlayerShip(bool active, ComponentsManager* unit, const Cargo& cargo, const std::string& system = "",
                const std::string& base = "");
 
     static PlayerShip& GetActiveShip();
-    static int GetActiveShipIndex();
-    std::string GetName();
-    std::string GetPurchaseHeader();
+    static int         GetActiveShipIndex();
+    std::string        GetName();
+    std::string        GetPurchaseHeader();
     static PlayerShip& GetShipByIndex(int index);
     // Caution! Will return first ship to match ship_name
     static PlayerShip& GetShipByName(const std::string ship_name);
 
-    bool IsShipInSameBase(const std::string& destination_system, 
-                          const std::string& destination_base);
+    bool IsShipInSameBase(const std::string& destination_system, const std::string& destination_base);
 
     static Cargo RemoveShip(int index);
-    static void SwitchShips(int index);
+    static void  SwitchShips(int index);
 
-    void UpdateLocation(const std::string& system, 
-                        const std::string& base);
+    void UpdateLocation(const std::string& system, const std::string& base);
 
-    void UpdateTransportPrice(const std::string& destination_system, 
-                             const std::string& destination_base,
-                             const int jumps);
+    void UpdateTransportPrice(const std::string& destination_system, const std::string& destination_base,
+                              const int jumps);
 };
 
 extern std::vector<PlayerShip> player_fleet;
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_PLAYER_SHIP_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_PLAYER_SHIP_H

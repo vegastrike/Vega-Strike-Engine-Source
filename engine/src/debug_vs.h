@@ -27,76 +27,80 @@
 #ifndef VEGA_STRIKE_ENGINE_DEBUG_VS_H
 #define VEGA_STRIKE_ENGINE_DEBUG_VS_H
 
-//#define VS_DEBUG
-//#define VS_DEBUG1
-//#define VS_DEBUG2
-//#define VS_DEBUG3
+// #define VS_DEBUG
+// #define VS_DEBUG1
+// #define VS_DEBUG2
+// #define VS_DEBUG3
 
 #ifndef VS_DEBUG
 
-inline void VS_DEBUG_ERROR() {
-}
+inline void VS_DEBUG_ERROR() {}
 
-#define VSCONSTRUCT1(a)
-#define VSDESTRUCT1
-#define VSCONSTRUCT2(a)
-#define VSDESTRUCT2
-#define VSCONSTRUCT3(a)
-#define VSDESTRUCT3
+#    define VSCONSTRUCT1(a)
+#    define VSDESTRUCT1
+#    define VSCONSTRUCT2(a)
+#    define VSDESTRUCT2
+#    define VSCONSTRUCT3(a)
+#    define VSDESTRUCT3
 
-#else //VS_DEBUG
-void VS_DEBUG_ERROR();
+#else  // VS_DEBUG
+void                                 VS_DEBUG_ERROR();
 
-#error
-#include "src/hashtable.h"
-extern Hashtable< long, char, 65535 >constructed;
-extern Hashtable< long, char, 65535 >destructed;
-#define VSCONST( a )                                                                  \
-    do {                                                                              \
-        if (constructed.Get( (long) this ) != NULL) VS_DEBUG_ERROR();                 \
-        if (destructed.Get( (long) this ) != NULL) destructed.Delete( (long) this );  \
-        if (destructed.Get( (long) this ) != NULL) VS_DEBUG_ERROR();                  \
-        constructed.Put( (long) this, (char*) a );                                    \
-    }                                                                                 \
-    while (0)
+#    error
+#    include "src/hashtable.h"
+extern Hashtable<long, char, 65'535> constructed;
+extern Hashtable<long, char, 65'535> destructed;
+#    define VSCONST(a)                               \
+        do {                                         \
+            if (constructed.Get((long)this) != NULL) \
+                VS_DEBUG_ERROR();                    \
+            if (destructed.Get((long)this) != NULL)  \
+                destructed.Delete((long)this);       \
+            if (destructed.Get((long)this) != NULL)  \
+                VS_DEBUG_ERROR();                    \
+            constructed.Put((long)this, (char *)a);  \
+        } while (0)
 
-#define VSDEST                                                         \
-    do {                                                               \
-        if (constructed.Get( (long) this ) == NULL) VS_DEBUG_ERROR();  \
-        else constructed.Delete( (long) this );                        \
-        if (constructed.Get( (long) this ) != NULL) VS_DEBUG_ERROR();  \
-        if (destructed.Get( (long) this ) != NULL) VS_DEBUG_ERROR();   \
-        destructed.Put( (long) this, (char*) this );                   \
-    }                                                                  \
-    while (0)
+#    define VSDEST                                    \
+        do {                                          \
+            if (constructed.Get((long)this) == NULL)  \
+                VS_DEBUG_ERROR();                     \
+            else                                      \
+                constructed.Delete((long)this);       \
+            if (constructed.Get((long)this) != NULL)  \
+                VS_DEBUG_ERROR();                     \
+            if (destructed.Get((long)this) != NULL)   \
+                VS_DEBUG_ERROR();                     \
+            destructed.Put((long)this, (char *)this); \
+        } while (0)
 
-#define VSCONSTRUCT1( a ) VSCONST( a )
-#define VSDESTRUCT1 VSDEST
+#    define VSCONSTRUCT1(a) VSCONST(a)
+#    define VSDESTRUCT1     VSDEST
 
-#ifdef VS_DEBUG2
-#define VSCONSTRUCT2( a ) VSCONST( a )
-#define VSDESTRUCT2 VSDEST
+#    ifdef VS_DEBUG2
+#        define VSCONSTRUCT2(a) VSCONST(a)
+#        define VSDESTRUCT2     VSDEST
 
-#ifdef VS_DEBUG3
-#define VSCONSTRUCT3( a ) VSCONST( a )
-#define VSDESTRUCT3 VSDEST
-#else //VS_DEBUG3
-#define VSCONSTRUCT2( a )
-#define VSDESTRUCT2
-#define VSCONSTRUCT3( a )
-#define VSDESTRUCT3
-#endif //VS_DEBUG3
+#        ifdef VS_DEBUG3
+#            define VSCONSTRUCT3(a) VSCONST(a)
+#            define VSDESTRUCT3     VSDEST
+#        else  // VS_DEBUG3
+#            define VSCONSTRUCT2(a)
+#            define VSDESTRUCT2
+#            define VSCONSTRUCT3(a)
+#            define VSDESTRUCT3
+#        endif  // VS_DEBUG3
 
-#else //VS_DEBUG2
-#define VSCONSTRUCT1( a )
-#define VSDESCRUCT1
-#define VSCONSTRUCT2( a )
-#define VSDESCRUCT2
-#define VSCONSTRUCT3( a )
-#define VSDESCRUCT3
+#    else       // VS_DEBUG2
+#        define VSCONSTRUCT1(a)
+#        define VSDESCRUCT1
+#        define VSCONSTRUCT2(a)
+#        define VSDESCRUCT2
+#        define VSCONSTRUCT3(a)
+#        define VSDESCRUCT3
 
-#endif //VS_DEBUG2
+#    endif  // VS_DEBUG2
 
-#endif //VS_DEBUG
+#endif      // VS_DEBUG
 
-#endif //VEGA_STRIKE_ENGINE_DEBUG_VS_H
+#endif      // VEGA_STRIKE_ENGINE_DEBUG_VS_H

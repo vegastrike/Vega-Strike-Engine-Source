@@ -32,7 +32,11 @@
 #include "resource/resource.h"
 
 enum class Function {
-    cockpit, communications, fire_control, life_support, ftl_interdiction
+    cockpit,
+    communications,
+    fire_control,
+    life_support,
+    ftl_interdiction
 };
 
 /** A catch-all component for anything not part of another component.
@@ -42,7 +46,7 @@ class ShipFunctions : public Component {
     Resource<double> communications;
     Resource<double> fire_control;
     Resource<double> life_support;
-    double ftl_interdiction = 0;
+    double           ftl_interdiction = 0;
 
 public:
     ShipFunctions();
@@ -75,4 +79,4 @@ public:
     ~ShipFunctions() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_SHIP_FUNCTIONS_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_SHIP_FUNCTIONS_H

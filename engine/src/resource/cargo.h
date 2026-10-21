@@ -28,12 +28,12 @@
 #ifndef VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H
 #define VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H
 
-#include "resource/resource.h"
-
 #include <string>
 #include <vector>
+
 #include <boost/json.hpp>
 
+#include "resource/resource.h"
 
 class Cargo {
 protected:
@@ -44,47 +44,46 @@ protected:
     Resource<int> quantity = 0;
 
     // TODO: move to int and not deal with cents.
-    double price = 0.0;          // Price per one of quantity
+    double      price    = 0.0;  // Price per one of quantity
     std::string category = "";   // TODO: move to product
 
-    double mass = 0.0;
-    double volume = 0.0;
-    bool mission = false;
-    bool component = false;
-    bool installed = false; 
-    bool integral = false;
-    bool weapon = false;
-    bool passenger = false;
-    bool slave = false;
+    double mass      = 0.0;
+    double volume    = 0.0;
+    bool   mission   = false;
+    bool   component = false;
+    bool   installed = false;
+    bool   integral  = false;
+    bool   weapon    = false;
+    bool   passenger = false;
+    bool   slave     = false;
 
-    Resource<double> functionality = Resource<double>(1.0,0.0,1.0);
+    Resource<double> functionality = Resource<double>(1.0, 0.0, 1.0);
 
     friend class Manifest;
     friend class CargoHold;
+
 public:
-// Constructors
+    // Constructors
     Cargo();
-    Cargo(std::string name, std::string description, int quantity, double price, std::string category, 
-          double mass, double volume, bool mission = false, 
-          bool component = false, bool installed = false, bool integral = false, bool weapon = false, 
-          bool passenger = false, bool slave = false, double functionality = 1.0);
-    Cargo(std::string name, std::string category, double price, int quantity, 
-          double mass, double volume);
+    Cargo(std::string name, std::string description, int quantity, double price, std::string category, double mass,
+          double volume, bool mission = false, bool component = false, bool installed = false, bool integral = false,
+          bool weapon = false, bool passenger = false, bool slave = false, double functionality = 1.0);
+    Cargo(std::string name, std::string category, double price, int quantity, double mass, double volume);
 
     // Parse string from save file
     Cargo(std::string& cargo_text);
     Cargo(boost::json::object json);
 
-// Getters
+    // Getters
     std::string GetName() const;
     std::string GetDescription() const;
-    int GetQuantity() const;
-    double GetPrice() const;
-    double GetTotalValue() const;
+    int         GetQuantity() const;
+    double      GetPrice() const;
+    double      GetTotalValue() const;
     std::string GetCategory() const;
-    double GetVolume() const;
-    double GetMass() const; 
-    
+    double      GetVolume() const;
+    double      GetMass() const;
+
     bool IsMissionFlag() const;
     bool IsComponent() const;
     bool IsInstalled() const;
@@ -103,9 +102,9 @@ public:
     std::string* GetNameAddress();
     std::string* GetCategoryAddress();
 
-// Setters
+    // Setters
     void SetName(const std::string& name);
-    void SetDescription(const std::string &description);
+    void SetDescription(const std::string& description);
     void SetQuantity(const int quantity);
     void SetPrice(const double price);
     void SetCategory(const std::string& category);
@@ -116,26 +115,26 @@ public:
     void SetComponent(bool component);
     void SetInstalled(bool installed);
     void SetIntegral(bool integral);
-    // Intentionally did not define SetWeapon and SetPassenger, 
+    // Intentionally did not define SetWeapon and SetPassenger,
     // as they are set by the Manifest and shouldn't be changed by the engine.
     void SetSlave(bool slave);
     void SetFunctionality(double func);
 
-// Other methods
+    // Other methods
     void Add(int quantity);
     bool CanSell(bool ship_damaged = false) const;
 
-    bool Damaged() const;
-    void RandomDamage();
+    bool   Damaged() const;
+    void   RandomDamage();
     double RepairPrice() const;
 
     std::string Serialize() const;
-    
-    bool operator==(const Cargo &other) const;
-    bool operator<(const Cargo &other) const;
+
+    bool operator==(const Cargo& other) const;
+    bool operator<(const Cargo& other) const;
 
     // For use by PlayerShip
     int index = 0;
 };
 
-#endif //VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H
+#endif  // VEGA_STRIKE_ENGINE_RESOURCE_CARGO_H

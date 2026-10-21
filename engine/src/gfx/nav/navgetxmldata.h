@@ -29,8 +29,8 @@
 
 #include <string>
 
-//using std::string; NO!, don't use any using whatsoever in header files; not kosher.
+// using std::string; NO!, don't use any using whatsoever in header files; not kosher.
 
 std::string retrievedata(std::string data, std::string type);
 
-#endif //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_GET_XML_DATA_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_NAV_NAV_GET_XML_DATA_H

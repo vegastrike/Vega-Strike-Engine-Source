@@ -27,35 +27,36 @@
 // NO HEADER GUARD
 
 #define PY_SSIZE_T_CLEAN
-#include "src/python/python_class.h"
+#include <boost/python.hpp>
 
-#include "cmd/container.h"
 #include <string>
-#include "src/python/init.h"
-#include "gfx_generic/vec.h"
-#include "cmd/unit_generic.h"
+
 #include <boost/version.hpp>
 
-#include <boost/python.hpp>
-#if BOOST_VERSION != 102800
+#include "cmd/container.h"
+#include "cmd/unit_generic.h"
+#include "gfx_generic/vec.h"
+#include "src/python/init.h"
+#include "src/python/python_class.h"
+#if BOOST_VERSION != 102'800
 typedef boost::python::dict BoostPythonDictionary;
-#else //BOOST_VERSION != 102800
-#include <boost/python/objects.hpp>
+#else   // BOOST_VERSION != 102800
+#    include <boost/python/objects.hpp>
 typedef boost::python::dictionary BoostPythonDictionary;
-#endif //BOOST_VERSION != 102800
+#endif  // BOOST_VERSION != 102800
 
-#include "src/universe_util.h"
+#include "cmd/ai/fire.h"
 #include "cmd/unit_util.h"
 #include "root_generic/faction_generic.h"
-#include "cmd/ai/fire.h"
-
-#include "src/python/unit_wrapper_class.h"
 #include "src/python/unit_from_to_python.h"
-//void ExportUnit (boost::python::class_builder <UnitWrapper> &Class) {
-//ExportUnit1(Class);
-//ExportUnit2(Class);
-//ExportUnit3(Class);
-//}
+#include "src/python/unit_wrapper_class.h"
+#include "src/universe_util.h"
+
+// void ExportUnit (boost::python::class_builder <UnitWrapper> &Class) {
+// ExportUnit1(Class);
+// ExportUnit2(Class);
+// ExportUnit3(Class);
+// }
 
 void EXP_UN(boost::python::class_builder<UnitWrapper> &Class) {
 #undef CHECKME
@@ -79,26 +80,26 @@ void EXP_UN(boost::python::class_builder<UnitWrapper> &Class) {
 #undef voidEXPORT_UTIL2
 #undef voidEXPORT_UTIL3
 #undef voidEXPORT_UTIL5
-#define WRAPPED0(type, name, nada) PYTHON_DEFINE_METHOD( Class, &UnitWrapper::name, #name );
-#define WRAPPED1(type, name, atype, a, def) WRAPPED0( type, name, def )
-#define WRAPPED2(type, name, atype, a, btype, b, def) WRAPPED0( type, name, def )
-#define WRAPPED3(type, name, atype, a, btype, b, ctype, c, def) WRAPPED0( type, name, def )
-#define WRAPPED4(type, name, atype, a, btype, b, ctype, c, dtype, d, def) WRAPPED0( type, name, def )
-#define voidWRAPPED0(name) WRAPPED0( void, name, 0 )
-#define voidWRAPPED1(name, atype, a) WRAPPED0( void, name, 0 )
-#define voidWRAPPED2(name, atype, a, btype, b) WRAPPED0( void, name, 0 )
-#define voidWRAPPED3(name, atype, a, btype, b, ctype, c) WRAPPED0( void, name, 0 )
-#define voidWRAPPED5(name, atype, a, btype, b, ctype, c, dtype, d, etype, e) WRAPPED0( void, name, 0 )
-#define EXPORT_UTIL0(type, name) WRAPPED0( type, name, 0 )
-#define EXPORT_UTIL1(type, name, atype, a) WRAPPED0( type, name, 0 )
-#define EXPORT_UTIL2(type, name, atype, a, btype, b) WRAPPED0( type, name, 0 )
-#define EXPORT_UTIL3(type, name, atype, a, btype, b, ctype, c) WRAPPED0( type, name, 0 )
-#define EXPORT_UTIL5(type, name, atype, a, btype, b, ctype, c, dtype, d, etype, e) WRAPPED0( type, name, 0 )
-#define voidEXPORT_UTIL0(name) WRAPPED0( void, name, 0 )
-#define voidEXPORT_UTIL1(name, atype, a) WRAPPED0( void, name, 0 )
-#define voidEXPORT_UTIL2(name, atype, a, btype, b) WRAPPED0( void, name, 0 )
-#define voidEXPORT_UTIL3(name, atype, a, btype, b, ctype, c) WRAPPED0( void, name, 0 )
-#define voidEXPORT_UTIL5(name, atype, a, btype, b, ctype, c, dtype, d, etype, e) WRAPPED0( void, name, 0 )
+#define WRAPPED0(type, name, nada)                                                 PYTHON_DEFINE_METHOD(Class, &UnitWrapper::name, #name);
+#define WRAPPED1(type, name, atype, a, def)                                        WRAPPED0(type, name, def)
+#define WRAPPED2(type, name, atype, a, btype, b, def)                              WRAPPED0(type, name, def)
+#define WRAPPED3(type, name, atype, a, btype, b, ctype, c, def)                    WRAPPED0(type, name, def)
+#define WRAPPED4(type, name, atype, a, btype, b, ctype, c, dtype, d, def)          WRAPPED0(type, name, def)
+#define voidWRAPPED0(name)                                                         WRAPPED0(void, name, 0)
+#define voidWRAPPED1(name, atype, a)                                               WRAPPED0(void, name, 0)
+#define voidWRAPPED2(name, atype, a, btype, b)                                     WRAPPED0(void, name, 0)
+#define voidWRAPPED3(name, atype, a, btype, b, ctype, c)                           WRAPPED0(void, name, 0)
+#define voidWRAPPED5(name, atype, a, btype, b, ctype, c, dtype, d, etype, e)       WRAPPED0(void, name, 0)
+#define EXPORT_UTIL0(type, name)                                                   WRAPPED0(type, name, 0)
+#define EXPORT_UTIL1(type, name, atype, a)                                         WRAPPED0(type, name, 0)
+#define EXPORT_UTIL2(type, name, atype, a, btype, b)                               WRAPPED0(type, name, 0)
+#define EXPORT_UTIL3(type, name, atype, a, btype, b, ctype, c)                     WRAPPED0(type, name, 0)
+#define EXPORT_UTIL5(type, name, atype, a, btype, b, ctype, c, dtype, d, etype, e) WRAPPED0(type, name, 0)
+#define voidEXPORT_UTIL0(name)                                                     WRAPPED0(void, name, 0)
+#define voidEXPORT_UTIL1(name, atype, a)                                           WRAPPED0(void, name, 0)
+#define voidEXPORT_UTIL2(name, atype, a, btype, b)                                 WRAPPED0(void, name, 0)
+#define voidEXPORT_UTIL3(name, atype, a, btype, b, ctype, c)                       WRAPPED0(void, name, 0)
+#define voidEXPORT_UTIL5(name, atype, a, btype, b, ctype, c, dtype, d, etype, e)   WRAPPED0(void, name, 0)
 #include "src/python/python_unit_wrap.h"
 #undef WRAPPED0
 #undef WRAPPED1
@@ -119,4 +120,3 @@ void EXP_UN(boost::python::class_builder<UnitWrapper> &Class) {
 #undef voidEXPORT_UTIL2
 #undef voidEXPORT_UTIL3
 }
-

@@ -28,19 +28,20 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_CONTROLS_FACTORY_H
 #define VEGA_STRIKE_ENGINE_CMD_CONTROLS_FACTORY_H
 
-#include <string>
 #include <map>
+#include <string>
 
-#include "vegadisk/vsfilesystem.h"
-#include "gui/window.h"
 #include "gui/control.h"
+#include "gui/window.h"
+#include "vegadisk/vsfilesystem.h"
 
-std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(VSFileSystem::VSFile &file, // parse controls from a given VSFile
-    std::vector<unsigned int>* base_keyboard_queue); // the keyboard queue
-Control* getControl(const std::map<std::string, std::string>& attributes); // construct a single control elenment
-bool getControls( // reads a controls.json file and returns all control groups
-    const std::string& filename, // the file name of the JSON data 
-        Window* window, // the window the group controls will be added to
-        std::vector<unsigned int>* base_keyboard_queue // the keyboard queue
+std::map<std::string, std::map<std::string, std::string>> parseControlsJSON(
+        VSFileSystem::VSFile&      file,                                    // parse controls from a given VSFile
+        std::vector<unsigned int>* base_keyboard_queue);                    // the keyboard queue
+Control* getControl(const std::map<std::string, std::string>& attributes);  // construct a single control elenment
+bool     getControls(                                       // reads a controls.json file and returns all control groups
+        const std::string&         filename,            // the file name of the JSON data
+        Window*                    window,              // the window the group controls will be added to
+        std::vector<unsigned int>* base_keyboard_queue  // the keyboard queue
 );
-#endif // VEGA_STRIKE_ENGINE_CMD_CONTROLS_FACTORY_H
+#endif                                                      // VEGA_STRIKE_ENGINE_CMD_CONTROLS_FACTORY_H

@@ -32,11 +32,10 @@
 //
 
 #include "Exceptions.h"
-#include "Types.h"
 #include "Format.h"
 #include "Sound.h"
 #include "SoundBuffer.h"
-
+#include "Types.h"
 #include "vegadisk/vsfilesystem.h"
 
 namespace Audio {
@@ -61,14 +60,13 @@ class Stream;
  */
 class SimpleSound : public Sound {
 private:
-    SharedPtr<Stream> stream;
+    SharedPtr<Stream>        stream;
     VSFileSystem::VSFileType type;
 
 protected:
     /** Internal constructor used by derived classes */
-    SimpleSound(const std::string &name,
-            VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
-            bool streaming = false);
+    SimpleSound(const std::string &name, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
+                bool streaming = false);
 
 public:
     virtual ~SimpleSound();
@@ -82,7 +80,6 @@ public:
     // Subclasses need not bother with actual stream management, they need only worry
     // about sending the samples to where they're needed.
 protected:
-
     /** Do we have an open stream? */
     bool isStreamLoaded() const {
         return stream.get() != 0;
@@ -117,9 +114,8 @@ protected:
 protected:
     /** @copydoc Sound::abortLoad */
     virtual void abortLoad();
-
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_SIMPLESOUND_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_SIMPLESOUND_H

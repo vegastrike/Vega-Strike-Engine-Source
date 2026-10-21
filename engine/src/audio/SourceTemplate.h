@@ -32,9 +32,9 @@
 //
 
 #include <string>
+
 #include "Exceptions.h"
 #include "Types.h"
-
 #include "vegadisk/vsfilesystem.h"
 
 namespace Audio {
@@ -58,7 +58,7 @@ namespace Audio {
  */
 class SourceTemplate {
 private:
-    std::string soundName;
+    std::string              soundName;
     VSFileSystem::VSFileType soundType;
 
     Range<Scalar> cosAngleRange;
@@ -69,20 +69,18 @@ private:
     Scalar gain;
 
     struct {
-        int looping: 1;
-        int streaming: 1;
-        int attenuated: 1;
-        int relative: 1;
+        int looping : 1;
+        int streaming : 1;
+        int attenuated : 1;
+        int relative : 1;
     } flags;
 
 public:
     /** Construct a template
      * @see SceneManager::createSource, Renderer::getSound,
      */
-    SourceTemplate(
-            const std::string &soundName,
-            VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
-            bool looping = false);
+    SourceTemplate(const std::string &soundName, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
+                   bool looping = false);
 
     ~SourceTemplate();
 
@@ -204,9 +202,8 @@ public:
     void setStreaming(bool stream) {
         flags.streaming = stream ? 1 : 0;
     }
-
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_SOURCETEMPLATE_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_SOURCETEMPLATE_H

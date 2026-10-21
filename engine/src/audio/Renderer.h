@@ -31,14 +31,14 @@
 // C++ Interface: Audio::SceneManager
 //
 
-#include <string>
 #include <map>
 #include <set>
+#include <string>
+
 #include "Exceptions.h"
+#include "Format.h"
 #include "Singleton.h"
 #include "Types.h"
-#include "Format.h"
-
 #include "vegadisk/vsfilesystem.h"
 
 namespace Audio {
@@ -86,10 +86,9 @@ public:
      *      form.
      * @see CodecRegistry
      */
-    virtual SharedPtr<Sound> getSound(
-            const std::string &name,
-            VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
-            bool streaming = false) = 0;
+    virtual SharedPtr<Sound> getSound(const std::string       &name,
+                                      VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
+                                      bool streaming                = false) = 0;
 
     /** Return whether the specified sound has been created using this renderer or not */
     virtual bool owns(SharedPtr<Sound> sound) = 0;
@@ -172,6 +171,6 @@ public:
     virtual void commitTransaction();
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERER_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_RENDERER_H

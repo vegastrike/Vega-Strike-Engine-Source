@@ -27,18 +27,15 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_ENHANCER_H
 #define VEGA_STRIKE_ENGINE_CMD_ENHANCER_H
 
-#include "vegadisk/savegame.h"
-#include "src/universe.h"
 #include "cmd/unit_generic.h"
+#include "src/universe.h"
+#include "vegadisk/savegame.h"
 
 class Enhancement : public Unit {
 public:
-    Enhancement(const char *filename,
-            int faction,
-            const string &modifications,
-            Flightgroup *flightgrp = NULL,
-            int fg_subnumber = 0) :
-            Unit(filename, false, faction, modifications, flightgrp, fg_subnumber) {
+    Enhancement(const char *filename, int faction, const string &modifications, Flightgroup *flightgrp = NULL,
+                int fg_subnumber = 0)
+        : Unit(filename, false, faction, modifications, flightgrp, fg_subnumber) {
         string file(filename);
         this->filename = filename;
     }
@@ -65,4 +62,4 @@ public:
     ~Enhancement() override = default;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_ENHANCER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_ENHANCER_H

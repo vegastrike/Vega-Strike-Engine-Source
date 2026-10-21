@@ -29,11 +29,11 @@
 
 #include <stdio.h>
 #include <string.h>
-//#include "gfxlib.h"
+// #include "gfxlib.h"
 #include "src/endianness.h"
 #include "vegadisk/vsfilesystem.h"
 using VSFileSystem::VSFile;
-//using namespace VSFileSystem;
+// using namespace VSFileSystem;
 extern VSFile fpread;
 
 /*File utility functions*/
@@ -47,21 +47,21 @@ inline void CloseFile() {
 
 inline float readf(VSFileSystem::VSFile &f) {
     union {
-        float fval;
+        float        fval;
         unsigned int ival;
-    }
-            t;
+    } t;
+
     f.Read(&t.fval, sizeof t.fval);
     t.ival = le32_to_cpu(t.ival);
     return t.fval;
 }
 
 inline size_t readf(VSFileSystem::VSFile &f, float *b, int n) {
-    int i;
+    int    i;
     size_t rode = f.Read(b, sizeof(*b) * n);
 #ifndef NATURAL_ENDIANNESS
     for (i = 0; i < n; i++) {
-        ((unsigned int *) b)[i] = le32_to_cpu(((unsigned int *) b)[i]);
+        ((unsigned int *)b)[i] = le32_to_cpu(((unsigned int *)b)[i]);
     }
 #endif
     return (rode > 0) ? (rode / sizeof(*b)) : rode;
@@ -80,7 +80,7 @@ inline int readi(VSFileSystem::VSFile &f) {
 }
 
 inline size_t readi(VSFileSystem::VSFile &f, int *b, int n) {
-    int i;
+    int    i;
     size_t rode = f.Read(b, sizeof(*b) * n);
 #ifndef NATURAL_ENDIANNESS
     for (i = 0; i < n; i++) {
@@ -104,7 +104,7 @@ inline void ReadInt(int &integer) {
 
 inline void ReadFloat(float &num) {
     fpread.Read(&num, sizeof(float));
-    *((int *) &num) = le32_to_cpu(*((int *) &num));
+    *((int *)&num) = le32_to_cpu(*((int *)&num));
 }
 
 inline void ReadString(char *string) {
@@ -158,4 +158,4 @@ inline void SetPosition(long position) {
     fpread.GoTo(position);
 }
 
-#endif //VEGA_STRIKE_ENGINE_FILE_MAIN_H
+#endif  // VEGA_STRIKE_ENGINE_FILE_MAIN_H

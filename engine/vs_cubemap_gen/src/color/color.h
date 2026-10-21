@@ -42,44 +42,40 @@ BOOST_STRONG_TYPEDEF(unsigned char, cchannel);
 BOOST_STRONG_TYPEDEF(float, fcchannel);
 BOOST_STRONG_TYPEDEF(double, dcchannel);
 
-//char precision color is used only for input and output; and so only needs conversion to/from float color
+// char precision color is used only for input and output; and so only needs conversion to/from float color
 struct RGBAcol {
     cchannel red;
     cchannel grn;
     cchannel blu;
     cchannel alp;
 
-    explicit RGBAcol(fRGBAcol const &f) : red(f.red), grn(f.grn), blu(f.blu), alp(f.alp) {
-    }
+    explicit RGBAcol(fRGBAcol const &f) : red(f.red), grn(f.grn), blu(f.blu), alp(f.alp) {}
 };
 
-//float precision color is our workhorse: All internal color computations (except accumulation) are done in
-//ieee 32-bit floating point precision. Lottsa operators to come...
+// float precision color is our workhorse: All internal color computations (except accumulation) are done in
+// ieee 32-bit floating point precision. Lottsa operators to come...
 struct fRGBAcol {
     fcchannel red;
     fcchannel grn;
     fcchannel blu;
     fcchannel alp;
 
-    explicit fRGBAcol(RGBAcol const &c) : red(c.red), grn(c.grn), blu(c.blu), alp(c.alp) {
-    }
+    explicit fRGBAcol(RGBAcol const &c) : red(c.red), grn(c.grn), blu(c.blu), alp(c.alp) {}
 
-    explicit fRGBAcol(dRGBAcol const &d) : red(d.red), grn(d.grn), blu(d.blu), alp(d.alp) {
-    }
+    explicit fRGBAcol(dRGBAcol const &d) : red(d.red), grn(d.grn), blu(d.blu), alp(d.alp) {}
 };
 
-//double precision color is only used for the filter accumulator; thus, it only has a default constructor
-//that initializes all channels to zero, and a += operator, so it can accumulate :). Well, no; it also has
-//a /= operator, so that the accumulator can be divided by the accumulated weights. Make that the alpha
-//channel. divByAlpha(). That way we can streamline the return of color and weight, and their accumulation.
+// double precision color is only used for the filter accumulator; thus, it only has a default constructor
+// that initializes all channels to zero, and a += operator, so it can accumulate :). Well, no; it also has
+// a /= operator, so that the accumulator can be divided by the accumulated weights. Make that the alpha
+// channel. divByAlpha(). That way we can streamline the return of color and weight, and their accumulation.
 struct dRGBAcol {
     dcchannel red;
     dcchannel grn;
     dcchannel blu;
     dcchannel alp;
 
-    dRGBAcol() : red(0.0), grn(0.0), blu(0.0), alp(0.0) {
-    }
+    dRGBAcol() : red(0.0), grn(0.0), blu(0.0), alp(0.0) {}
 
     dRGBAcol const &operator+=(fRGBcol const &fc) {
         red += fc.red;
@@ -90,11 +86,11 @@ struct dRGBAcol {
     }
 
     void div_by_alpha() {
-        tmp = 1.0 / alp;
+        tmp  = 1.0 / alp;
         red *= tmp;
         grn *= tmp;
         blu *= tmp;
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_COLOR_H
+#endif  // VEGA_STRIKE_ENGINE_CUBE_MAP_COLOR_H

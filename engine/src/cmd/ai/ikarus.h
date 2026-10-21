@@ -29,11 +29,12 @@
 
 namespace Orders {
 class Ikarus : public AggressiveAI {
-    void ExecuteStrategy(Unit *target);
-    void DecideTarget();
-    void WillFire(Unit *target);
+    void   ExecuteStrategy(Unit *target);
+    void   DecideTarget();
+    void   WillFire(Unit *target);
     double last_time;
     double cur_time;
+
 public:
     Ikarus();
     virtual void Execute();
@@ -42,6 +43,6 @@ public:
         return "ikarus";
     }
 };
-}
+}  // namespace Orders
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_IKARUS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_IKARUS_H

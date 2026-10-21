@@ -32,18 +32,17 @@
  */
 
 
-#include "order.h"
-#include "navigation.h"
-#include "flybywire.h"
-
 #include "cmd/script/mission.h"
+#include "flybywire.h"
+#include "navigation.h"
+#include "order.h"
 
 class AImissionScript : public FlyByWire {
 public:
-///saves scriptname in the filename var
+    /// saves scriptname in the filename var
     AImissionScript(string modulename);
     ~AImissionScript();
-///Loads the AI script from the hard drive, or executes if loaded
+    /// Loads the AI script from the hard drive, or executes if loaded
     void Execute();
 
     virtual string getOrderDescription() {
@@ -53,10 +52,9 @@ public:
     }
 
 protected:
-
-    string modulename;
+    string       modulename;
     unsigned int classid;
-    bool first_run;
+    bool         first_run;
 };
 
 class AIFlyToWaypoint : public AImissionScript {
@@ -64,18 +62,19 @@ public:
     AIFlyToWaypoint(const QVector &waypoint, float vel, bool afburn, float range);
 
     QVector waypoint;
-    float vel;
-    float range;
-    bool aburn;
+    float   vel;
+    float   range;
+    bool    aburn;
 };
+
 class AIFlyToWaypointDefend : public AImissionScript {
 public:
     AIFlyToWaypointDefend(const QVector &waypoint, float vel, bool afburn, float range, float defend_range);
 
     QVector waypoint;
-    float vel;
-    float range;
-    bool aburn;
+    float   vel;
+    float   range;
+    bool    aburn;
 };
 
 class AIFlyToJumppoint : public AImissionScript {
@@ -110,4 +109,4 @@ private:
     olist_t *my_orderlist;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_MISSION_SCRIPT_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_MISSION_SCRIPT_H

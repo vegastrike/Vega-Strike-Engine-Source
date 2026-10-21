@@ -65,11 +65,11 @@ public:
     virtual ~RenderableListener();
 
     enum UpdateFlags {
-        UPDATE_ALL = 0x0F,
-        UPDATE_LOCATION = 0x01,
+        UPDATE_ALL        = 0x0F,
+        UPDATE_LOCATION   = 0x01,
         UPDATE_ATTRIBUTES = 0x02,
-        UPDATE_EFFECTS = 0x04,
-        UPDATE_GAIN = 0x08
+        UPDATE_EFFECTS    = 0x04,
+        UPDATE_GAIN       = 0x08
     };
 
     /** Get the attached listener */
@@ -91,11 +91,10 @@ public:
     // by a concrete class. All are protected, so the interface is independent
     // of implementations.
 protected:
-
     /** @see update. */
     virtual void updateImpl(int flags) = 0;
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERABLELISTENER_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_RENDERABLELISTENER_H

@@ -31,8 +31,8 @@
 // C++ Interface: Audio::SceneManager
 //
 
-#include "OpenALRenderer.h"
 #include "al.h"
+#include "OpenALRenderer.h"
 
 namespace Audio {
 
@@ -70,6 +70,6 @@ protected:
     virtual void checkContext();
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_BORROWED_OPENAL_RENDERER_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_BORROWED_OPENAL_RENDERER_H

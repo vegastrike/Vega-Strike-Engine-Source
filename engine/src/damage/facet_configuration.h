@@ -27,9 +27,10 @@
 #ifndef VEGA_STRIKE_ENGINE_DAMAGE_FACET_CONFIGURATION_H
 #define VEGA_STRIKE_ENGINE_DAMAGE_FACET_CONFIGURATION_H
 
-#include "damage/core_vector.h"
 #include <float.h>
 #include <string>
+
+#include "damage/core_vector.h"
 
 /**
  * @brief The FacetConfiguration enum represents how many facets a layer has and it what configuration.
@@ -39,10 +40,10 @@
  * However, I disabled all facets except 1,2 and 4 due to complexity.
  */
 enum class FacetConfiguration {
-    one = 1,    // A single facet covering all directions
-    two = 2,    // Front and back
-    four = 4,   // Front, back, left and right
+    one  = 1,  // A single facet covering all directions
+    two  = 2,  // Front and back
+    four = 4,  // Front, back, left and right
 };
 
 
-#endif //VEGA_STRIKE_ENGINE_DAMAGE_FACET_CONFIGURATION_H
+#endif  // VEGA_STRIKE_ENGINE_DAMAGE_FACET_CONFIGURATION_H

@@ -32,9 +32,9 @@
 //
 
 #include "../../Exceptions.h"
-#include "../../Types.h"
-#include "../../Renderer.h"
 #include "../../Format.h"
+#include "../../Renderer.h"
+#include "../../Types.h"
 
 namespace Audio {
 
@@ -43,9 +43,9 @@ namespace __impl {
 namespace OpenAL {
 // Forward declaration of internal renderer data
 struct RendererData;
-};
+};  // namespace OpenAL
 
-};
+};  // namespace __impl
 
 /**
  * OpenAL Renderer implementation
@@ -64,10 +64,9 @@ public:
     virtual ~OpenALRenderer();
 
     /** @copydoc Renderer::getSound */
-    virtual SharedPtr<Sound> getSound(
-            const std::string &name,
-            VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
-            bool streaming = false);
+    virtual SharedPtr<Sound> getSound(const std::string       &name,
+                                      VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
+                                      bool streaming                = false);
 
     /** @copydoc Renderer::owns */
     virtual bool owns(SharedPtr<Sound> sound);
@@ -98,8 +97,8 @@ public:
 
     /** @copydoc Renderer::commitTransaction */
     virtual void commitTransaction();
-protected:
 
+protected:
     /** Makes sure the AL context is valid, creating one if necessary */
     virtual void checkContext();
 
@@ -110,6 +109,6 @@ protected:
     void setupDopplerEffect();
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERER_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERER_H

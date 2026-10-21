@@ -28,61 +28,60 @@
 #define VEGA_STRIKE_ENGINE_GLDRV_GL_INIT_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-// Re-initialize the graphics runtime state from the (already-updated) in-memory
-// configuration(). The game historically assumed the config never changes in-game,
-// so config->runtime copies (g_game feature flags, gl_options, GL viewport) ran
-// only once at bootstrap. The in-game settings screen (Alt+C / --configure) can now
-// change any setting and Save them; call this after Save to re-bind those copies so
-// the change takes effect without a restart. Reuses the same copy code as bootstrap
-// (initfov + the gl_options config copies). Does NOT recreate the window/GL context.
-// A brief re-orient pause is acceptable (and expected) while it re-binds.
-extern void GFXReinitConfig();
+    // Re-initialize the graphics runtime state from the (already-updated) in-memory
+    // configuration(). The game historically assumed the config never changes in-game,
+    // so config->runtime copies (g_game feature flags, gl_options, GL viewport) ran
+    // only once at bootstrap. The in-game settings screen (Alt+C / --configure) can now
+    // change any setting and Save them; call this after Save to re-bind those copies so
+    // the change takes effect without a restart. Reuses the same copy code as bootstrap
+    // (initfov + the gl_options config copies). Does NOT recreate the window/GL context.
+    // A brief re-orient pause is acceptable (and expected) while it re-binds.
+    extern void GFXReinitConfig();
 
-//#include "src/vegastrike.h"
+    // #include "src/vegastrike.h"
 
-/* Hack to fix compiling problem with old gl.h's, reported by Steve
- *  Baker <sjbaker1@airmail.net>.  Some old gl.h's don't include glext.h, but
- *  do this:
- *
- * #define GL_EXT_compiled_vertex_array    1
- *
- *  since they do define the glLockArraysEXT/glUnlockArraysEXT
- *  functions.  However, this prevents PFNGLLOCKARRAYSEXTPROC /
- *  PFNGLUNLOCKARRAYSEXTPROC from being defined in glext.h.  So, we do
- *  the following, which at worst results in a warning (and is awfully
- *  ugly):
- *
- * #undef GL_EXT_compiled_vertex_array
- *
- *  The *correct* thing to do would be for gl.h to #include glext.h, as
- *  recent gl.h's do.  However, versions of Mesa as recent as 3.2.1
- *  don't do this, so we have to work around it.
- */
-//#undef GL_EXT_compiled_vertex_array
+    /* Hack to fix compiling problem with old gl.h's, reported by Steve
+     *  Baker <sjbaker1@airmail.net>.  Some old gl.h's don't include glext.h, but
+     *  do this:
+     *
+     * #define GL_EXT_compiled_vertex_array    1
+     *
+     *  since they do define the glLockArraysEXT/glUnlockArraysEXT
+     *  functions.  However, this prevents PFNGLLOCKARRAYSEXTPROC /
+     *  PFNGLUNLOCKARRAYSEXTPROC from being defined in glext.h.  So, we do
+     *  the following, which at worst results in a warning (and is awfully
+     *  ugly):
+     *
+     * #undef GL_EXT_compiled_vertex_array
+     *
+     *  The *correct* thing to do would be for gl.h to #include glext.h, as
+     *  recent gl.h's do.  However, versions of Mesa as recent as 3.2.1
+     *  don't do this, so we have to work around it.
+     */
+    // #undef GL_EXT_compiled_vertex_array
 
-/* Shouldn't need to include glext.h if gl.h is recent, but alas we can't
- * count on that...  */
+    /* Shouldn't need to include glext.h if gl.h is recent, but alas we can't
+     * count on that...  */
 
-#if !defined (_WIN32)
+#if !defined(_WIN32)
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#include <glut.h>
-#include <glext.h>
+#    include <glext.h>
+#    include <glut.h>
 
-#if !defined (GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6
-#   error "*** You need a more recent copy of glext.h.  You can get one at http: //oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"
+#    if !defined(GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6
+#        error "*** You need a more recent copy of glext.h.  You can get one at http: //oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"
+#    endif
 #endif
-#endif
-#if defined (PFNGLLOCKARRAYSEXTPROC) && defined (PFNGLUNLOCKARRAYSEXTPROC)
-extern PFNGLLOCKARRAYSEXTPROC   glLockArraysEXT_p;
-extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
+#if defined(PFNGLLOCKARRAYSEXTPROC) && defined(PFNGLUNLOCKARRAYSEXTPROC)
+    extern PFNGLLOCKARRAYSEXTPROC   glLockArraysEXT_p;
+    extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 #endif
 
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
 
-#endif //VEGA_STRIKE_ENGINE_GLDRV_GL_INIT_H
+#endif  // VEGA_STRIKE_ENGINE_GLDRV_GL_INIT_H

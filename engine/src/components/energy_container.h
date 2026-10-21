@@ -30,23 +30,22 @@
 #ifndef VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONTAINER_H
 #define VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONTAINER_H
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
-#include "resource/resource.h"
 #include "component.h"
+#include "resource/resource.h"
 
 /* Discussion of FTL - yes, it isn't really faster. However,
-* it would be easier for a new developer or someone from WC
-* to figure what it means.
-*/
+ * it would be easier for a new developer or someone from WC
+ * to figure what it means.
+ */
 
 
 /**
  * @brief The EnergyContainer class models the fuel cell, capacitor and SPEC capacitor
  */
-class EnergyContainer: public Component
-{
+class EnergyContainer : public Component {
 private:
     Resource<double> level;
 
@@ -58,14 +57,14 @@ public:
 
     // Partial - can power consumer with less energy than requested
     double Deplete(bool partial, const double quantity);
-    bool Depleted() const;
+    bool   Depleted() const;
 
-    void SetCapacity(const double capacity, bool refill = true);
+    void   SetCapacity(const double capacity, bool refill = true);
     double Level() const;
-    void SetLevel(double new_level);
+    void   SetLevel(double new_level);
     double MaxLevel() const;
     double Percent() const;
-    void Refill();
+    void   Refill();
 
     void Zero();
 
@@ -93,4 +92,4 @@ public:
     ~EnergyContainer() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONTAINER_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_ENERGYCONTAINER_H

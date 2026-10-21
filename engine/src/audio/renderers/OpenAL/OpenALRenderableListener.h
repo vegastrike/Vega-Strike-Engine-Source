@@ -31,9 +31,8 @@
 // C++ Interface: Audio::OpenALRenderableListener
 //
 
-#include "../../RenderableListener.h"
-
 #include "../../Exceptions.h"
+#include "../../RenderableListener.h"
 #include "../../Types.h"
 
 namespace Audio {
@@ -56,6 +55,6 @@ protected:
     virtual void updateImpl(int flags);
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERABLE_LISTENER_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERABLE_LISTENER_H

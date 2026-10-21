@@ -29,4 +29,4 @@
 
 extern void VSExit(int code);
 
-#endif //VEGA_STRIKE_ENGINE_VS_EXIT_H
+#endif  // VEGA_STRIKE_ENGINE_VS_EXIT_H

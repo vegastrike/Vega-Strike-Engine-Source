@@ -28,36 +28,38 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
 #define VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
 
+#include <list>
+#include <vector>
+
 #include "gfx_generic/cockpit_generic.h"
 #include "src/gfxlib.h"
 #include "src/gfxlib_struct.h"
-#include <vector>
-#include <list>
 
 class TextPlane;
 class VSSprite;
 class Gauge;
 class Unit;
 class NavigationSystem;
-#include "gfx/radar/radar.h"
-#include "radar/sensor.h"
-#include "gfx/vdu.h"
 #include "gfx/camera.h"
-#include "src/physics.h"
-#include "nav/navscreen.h"
+#include "gfx/radar/radar.h"
+#include "gfx/vdu.h"
 #include "nav/navigation_system.h"
+#include "nav/navscreen.h"
+#include "radar/sensor.h"
+#include "src/physics.h"
 
-using namespace XMLSupport; // DONT PUT THIS ABOVE HEADERS
+using namespace XMLSupport;  // DONT PUT THIS ABOVE HEADERS
 #define NUM_CAM CP_NUMVIEWS
+
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
  * Gauges are used to indicate analog controls, and some diagital ones
  * The ones starting from KPS are digital with text readout
  */
 
-struct soundContainer //used to contain static sounds that will only be
+struct soundContainer  // used to contain static sounds that will only be
 {
-    //created once and will get deleted automatically
+    // created once and will get deleted automatically
     int sound;
 
     soundContainer() {
@@ -102,41 +104,41 @@ class GameCockpit : public Cockpit {
     float insidePanYawSpeed, insidePanPitchSpeed;
 
     float vdu_time[MAXVDUS];
-    ///saved values to compare with current values (might need more for damage)
-    std::list<Matrix> headtrans;
-    float shake_time;
-    int shake_type;
-    Vector oaccel;
-    float smooth_fov;
-    float last_locktime;
-    float last_mlocktime;
-    std::vector<class Mesh *> mesh;
-    int soundfile;
-    VSSprite *Pit[4];
-    VSSprite *radarSprites[2];
+    /// saved values to compare with current values (might need more for damage)
+    std::list<Matrix>               headtrans;
+    float                           shake_time;
+    int                             shake_type;
+    Vector                          oaccel;
+    float                           smooth_fov;
+    float                           last_locktime;
+    float                           last_mlocktime;
+    std::vector<class Mesh *>       mesh;
+    int                             soundfile;
+    VSSprite                       *Pit[4];
+    VSSprite                       *radarSprites[2];
     std::unique_ptr<Radar::Display> radarDisplay;
-    ///Video Display Units (may need more than 2 in future)
+    /// Video Display Units (may need more than 2 in future)
     std::vector<VDU *> vdu;
     /// An information string displayed in the VDU.
     std::string targetLabel;
     /// Comparison pointer to clear the label when the target changes.
     void *labeledTargetUnit;
-    ///Color of cockpit default text
+    /// Color of cockpit default text
     GFXColor textcol;
-    ///The font that the entire cockpit will use. Currently without color
+    /// The font that the entire cockpit will use. Currently without color
     TextPlane *text;
-    Gauge *gauges[UnitImages<void>::NUMGAUGES];
-    ///holds misc panels.  Panel[0] is always crosshairs (and adjusted to be in center of view screen, not cockpit)
+    Gauge     *gauges[UnitImages<void>::NUMGAUGES];
+    /// holds misc panels.  Panel[0] is always crosshairs (and adjusted to be in center of view screen, not cockpit)
     std::vector<VSSprite *> Panel;
-    ///flag to decide whether to draw all target boxes
+    /// flag to decide whether to draw all target boxes
     bool draw_all_boxes;
     bool draw_line_to_target, draw_line_to_targets_target;
     bool draw_line_to_itts;
-    ///flag to tell wheter to draw the itts, even if the ship has none
+    /// flag to tell wheter to draw the itts, even if the ship has none
     bool always_itts;
-    ///flag controlling whether to use old school, less jumpy (and less accurate) itts // ** jay
+    /// flag controlling whether to use old school, less jumpy (and less accurate) itts // ** jay
     bool steady_itts;
-    //colors of blips/targetting boxes
+    // colors of blips/targetting boxes
     GFXColor friendly, enemy, neutral, targeted, targetting, planet;
 
     void NextTurret();
@@ -144,28 +146,28 @@ class GameCockpit : public Cockpit {
     // Last observed values for edge-triggered events
     struct LastState {
         double processing_time;
-        int warplooplevel;
-        int warpskiplevel;
+        int    warplooplevel;
+        int    warpskiplevel;
 
-        bool jumpok: 1, jumpnotok: 1;
-        bool specon: 1, specoff: 1;
-        bool asapon: 1, asapoff: 1;
-        bool asap_dockon: 1, asap_dockoff: 1;
-        bool asap_dock_avail: 1;
-        bool dock: 1;
-        bool dock_avail: 1;
-        bool lock: 1, missilelock: 1;
-        bool eject: 1;
-        bool flightcompon: 1, flightcompoff: 1;
-        bool warpready: 1, warpunready: 1;
+        bool jumpok : 1, jumpnotok : 1;
+        bool specon : 1, specoff : 1;
+        bool asapon : 1, asapoff : 1;
+        bool asap_dockon : 1, asap_dockoff : 1;
+        bool asap_dock_avail : 1;
+        bool dock : 1;
+        bool dock_avail : 1;
+        bool lock : 1, missilelock : 1;
+        bool eject : 1;
+        bool flightcompon : 1, flightcompoff : 1;
+        bool warpready : 1, warpunready : 1;
 
         LastState();
     } last;
 
     /// Used to display the arrow pointing to the currently selected target.
     float projection_limit_x, projection_limit_y;
-    float inv_screen_aspect_ratio; //Precomputed division 1 / configuration().graphics.aspect.
-    void SetParent(Unit *unit, const QVector &startloc) override;
+    float inv_screen_aspect_ratio;  // Precomputed division 1 / configuration().graphics.aspect.
+    void  SetParent(Unit *unit, const QVector &startloc) override;
 
     void LoadXML(const char *file) override;
 
@@ -175,10 +177,10 @@ class GameCockpit : public Cockpit {
 
     void endElement(const string &name) override;
 
-    ///Destructs cockpit info for new loading
+    /// Destructs cockpit info for new loading
     void Delete() override;
 
-    ///Trigger scripted events
+    /// Trigger scripted events
     void TriggerEvents(Unit *un);
 
     NavigationSystem ThisNav;
@@ -187,9 +189,9 @@ class GameCockpit : public Cockpit {
 
 public:
     std::string textMessage;
-    bool editingTextMessage;
+    bool        editingTextMessage;
     std::string autoMessage;
-    float autoMessageTime;
+    float       autoMessageTime;
 
     void setTargetLabel(const string &msg) override;
 
@@ -197,7 +199,7 @@ public:
 
     void ReceivedTargetInfo() override;
 
-    static void NavScreen(const KBData &, KBSTATE k); //scheherazade
+    static void   NavScreen(const KBData &, KBSTATE k);  // scheherazade
     static string getsoundending(int which = 0);
 
     static string getsoundfile(string filename);
@@ -208,26 +210,26 @@ public:
 
     int Autopilot(Unit *target) override;
 
-    ///Restores the view from the IDentity Matrix needed to draw sprites
+    /// Restores the view from the IDentity Matrix needed to draw sprites
     void RestoreViewPort() override;
 
     GameCockpit(const char *file, Unit *parent, const std::string &pilotname);
 
     ~GameCockpit() override;
 
-    ///Looks up a particular Gauge stat on unit
+    /// Looks up a particular Gauge stat on unit
     float LookupUnitStat(int stat, Unit *target);
 
-    ///Loads cockpit info...just as constructor
+    /// Loads cockpit info...just as constructor
     void Init(const char *file, bool defaultCockpit = false);
 
-    ///Draws Cockpit then restores viewport
+    /// Draws Cockpit then restores viewport
     void Draw() override;
 
-    //void Update();//respawns and the like.
+    // void Update();//respawns and the like.
     void UpdAutoPilot() override;
 
-    ///Sets up the world for rendering...call before draw
+    /// Sets up the world for rendering...call before draw
     void SetupViewPort(bool clip = true) override;
 
     int getVDUMode(int vdunum) override;
@@ -264,25 +266,25 @@ public:
 
     void SetStaticAnimation() override;
 
-    ///Accesses the current navigationsystem
+    /// Accesses the current navigationsystem
     NavigationSystem *AccessNavSystem() override {
         return &ThisNav;
     }
 
     std::string GetNavSelectedSystem() override;
 
-    ///Accesses the current camera
+    /// Accesses the current camera
     Camera *AccessCamera() override {
         return &cam[currentcamera];
     }
 
-    ///Returns the passed in cam
+    /// Returns the passed in cam
     Camera *AccessCamera(int) override;
 
-    ///Changes current camera to selected camera
+    /// Changes current camera to selected camera
     void SelectCamera(int) override;
 
-    ///GFXLoadMatrix proper camera
+    /// GFXLoadMatrix proper camera
     void SetViewport() override {
         cam[currentcamera].UpdateGFX();
     }
@@ -323,4 +325,4 @@ protected:
     SoundContainer *soundImpl(const SoundContainer &specs) override;
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_COCKPIT_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_COCKPIT_H

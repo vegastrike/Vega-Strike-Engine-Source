@@ -27,13 +27,12 @@
 #ifndef VEGA_STRIKE_ENGINE_OBJCONV_PRECOMPILED_STANDARD_H
 #define VEGA_STRIKE_ENGINE_OBJCONV_PRECOMPILED_STANDARD_H
 
-#include <string>
-#include <vector>
+#include <assert.h>
+#include <iomanip>
+#include <iostream>
 #include <map>
 #include <set>
-#include <assert.h>
+#include <string>
+#include <vector>
 
-#include <iostream>
-#include <iomanip>
-
-#endif //VEGA_STRIKE_ENGINE_OBJCONV_PRECOMPILED_STANDARD_H
+#endif  // VEGA_STRIKE_ENGINE_OBJCONV_PRECOMPILED_STANDARD_H

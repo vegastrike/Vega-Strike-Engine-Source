@@ -33,56 +33,65 @@
 /// Enumerates functions for python modules
 ///
 
-#include <gnuhash.h>
-
-#include <string>
 #include <fstream>
+#include <gnuhash.h>
+#include <string>
 
 #include "root_generic/easydom.h"
 
 #ifndef VS_MIS_SEL
-#include "src/vegastrike.h"
-#include "src/vs_logging.h"
-#include "root_generic/vs_globals.h"
-#include "msgcenter.h"
-#include "cmd/container.h"
-#include "cmd/unit_type.h"
+#    include "cmd/container.h"
+#    include "cmd/unit_type.h"
+#    include "msgcenter.h"
+#    include "root_generic/vs_globals.h"
+#    include "src/vegastrike.h"
+#    include "src/vs_logging.h"
 class Unit;
 class Order;
 class MessageCenter;
 #endif
 
-#include "src/star_system.h"
-
 #include <assert.h>
 
-#define qu(x) ("\""+x+"\"")
+#include "src/star_system.h"
+
+#define qu(x) ("\"" + x + "\"")
 
 /* *********************************************************** */
 
 #ifdef VS_MIS_SEL
-#define missionNode easyDomNode
+#    define missionNode easyDomNode
 #endif
 
 class varInst;
 
-typedef std::vector<varInst *> olist_t;
+typedef std::vector<varInst *>         olist_t;
 typedef vsUMap<std::string, varInst *> omap_t;
-std::string varToString(varInst *s);
+std::string                            varToString(varInst *s);
 class Flightgroup;
 #ifndef VS_MIS_SEL
 
 /* *********************************************************** */
 
-#define SCRIPT_PARSE 0
-#define SCRIPT_RUN 1
-#define SCRIPT_PARSE_DECL 2
+#    define SCRIPT_PARSE      0
+#    define SCRIPT_RUN        1
+#    define SCRIPT_PARSE_DECL 2
 
-enum parsemode_type { PARSE_FULL, PARSE_DECL };
+enum parsemode_type {
+    PARSE_FULL,
+    PARSE_DECL
+};
 
 enum callback_module_type {
     CMT_UNKNOWN = 0,
-    CMT_IO, CMT_STD, CMT_STRING, CMT_OLIST, CMT_OMAP, CMT_ORDER, CMT_UNIT, CMT_BRIEFING
+    CMT_IO,
+    CMT_STD,
+    CMT_STRING,
+    CMT_OLIST,
+    CMT_OMAP,
+    CMT_ORDER,
+    CMT_UNIT,
+    CMT_BRIEFING
 };
 
 enum callback_module_std_type {
@@ -90,7 +99,7 @@ enum callback_module_std_type {
     CMT_STD_Rnd,
     CMT_STD_getGameTime,
     CMT_STD_ResetTimeCompression,
-    CMT_STD_getSystemFile,     //useful when comparing _jumps_
+    CMT_STD_getSystemFile,  // useful when comparing _jumps_
     CMT_STD_getNumAdjacentSystems,
     CMT_STD_getAdjacentSystem,
     CMT_STD_getCurrentAIUnit,
@@ -111,6 +120,7 @@ enum callback_module_std_type {
     CMT_STD_musicPlayList,
     CMT_STD_terminateMission
 };
+
 enum callback_module_briefing_type {
     CMT_BRIEFING_UNKNOWN = 0,
     CMT_BRIEFING_addShip,
@@ -124,6 +134,7 @@ enum callback_module_briefing_type {
     CMT_BRIEFING_setCamOrientation,
     CMT_BRIEFING_setCloak
 };
+
 enum callback_module_olist_type {
     CMT_OLIST_UNKNOWN = 0,
     CMT_OLIST_new,
@@ -193,7 +204,7 @@ enum callback_module_string_type {
 
 enum callback_module_unit_type {
     CMT_UNIT_UNKNOWN = 0,
-    CMT_UNIT_equal,     //checks for sameness
+    CMT_UNIT_equal,  // checks for sameness
     CMT_UNIT_getContainer,
     CMT_UNIT_getUnitFromContainer,
     CMT_UNIT_deleteContainer,
@@ -203,7 +214,7 @@ enum callback_module_unit_type {
     CMT_UNIT_getPlayerX,
     CMT_UNIT_getRandCargo,
     CMT_UNIT_getCredits,
-    CMT_UNIT_getSaveData,     //gets saved data for this unit
+    CMT_UNIT_getSaveData,  // gets saved data for this unit
     CMT_UNIT_addCredits,
     CMT_UNIT_launch,
     CMT_UNIT_launchNebula,
@@ -259,7 +270,7 @@ enum callback_module_unit_type {
     CMT_UNIT_scannerNearestEnemyDist,
     CMT_UNIT_scannerNearestFriendDist,
     CMT_UNIT_scannerNearestShipDist,
-    CMT_UNIT_correctStarSystem,     //useful when comparing _jumps_
+    CMT_UNIT_correctStarSystem,  // useful when comparing _jumps_
     CMT_UNIT_getFgId,
     CMT_UNIT_frameOfReference,
     CMT_UNIT_communicateTo,
@@ -271,35 +282,76 @@ enum callback_module_unit_type {
 enum tag_type {
     DTAG_UNKNOWN,
     DTAG_MISSION,
-    DTAG_SETTINGS, DTAG_ORIGIN, DTAG_VARIABLES, DTAG_FLIGHTGROUPS,
-    DTAG_ROT, DTAG_POS, DTAG_ORDER,
-    DTAG_MODULE, DTAG_SCRIPT, DTAG_IF, DTAG_BLOCK,
-    DTAG_SETVAR, DTAG_EXEC, DTAG_CALL, DTAG_WHILE,
-    DTAG_AND_EXPR, DTAG_OR_EXPR, DTAG_NOT_EXPR, DTAG_TEST_EXPR,
-    DTAG_FMATH, DTAG_VMATH,
-    DTAG_VAR_EXPR, DTAG_DEFVAR,
+    DTAG_SETTINGS,
+    DTAG_ORIGIN,
+    DTAG_VARIABLES,
+    DTAG_FLIGHTGROUPS,
+    DTAG_ROT,
+    DTAG_POS,
+    DTAG_ORDER,
+    DTAG_MODULE,
+    DTAG_SCRIPT,
+    DTAG_IF,
+    DTAG_BLOCK,
+    DTAG_SETVAR,
+    DTAG_EXEC,
+    DTAG_CALL,
+    DTAG_WHILE,
+    DTAG_AND_EXPR,
+    DTAG_OR_EXPR,
+    DTAG_NOT_EXPR,
+    DTAG_TEST_EXPR,
+    DTAG_FMATH,
+    DTAG_VMATH,
+    DTAG_VAR_EXPR,
+    DTAG_DEFVAR,
     DTAG_CONST,
     DTAG_ARGUMENTS,
     DTAG_GLOBALS,
     DTAG_RETURN,
     DTAG_IMPORT
 };
-enum var_type { VAR_FAILURE, VAR_BOOL, VAR_FLOAT, VAR_INT, VAR_OBJECT, VAR_VOID, VAR_ANY };
 
-enum tester_type { TEST_GT, TEST_LT, TEST_EQ, TEST_NE, TEST_GE, TEST_LE };
+enum var_type {
+    VAR_FAILURE,
+    VAR_BOOL,
+    VAR_FLOAT,
+    VAR_INT,
+    VAR_OBJECT,
+    VAR_VOID,
+    VAR_ANY
+};
+
+enum tester_type {
+    TEST_GT,
+    TEST_LT,
+    TEST_EQ,
+    TEST_NE,
+    TEST_GE,
+    TEST_LE
+};
 
 /* *********************************************************** */
 
 class missionNode;
 
-enum scope_type { VI_GLOBAL, VI_MODULE, VI_LOCAL, VI_TEMP, VI_IN_OBJECT, VI_ERROR, VI_CONST, VI_CLASSVAR };
+enum scope_type {
+    VI_GLOBAL,
+    VI_MODULE,
+    VI_LOCAL,
+    VI_TEMP,
+    VI_IN_OBJECT,
+    VI_ERROR,
+    VI_CONST,
+    VI_CLASSVAR
+};
 
 class varInst {
 public:
     varInst(scope_type sctype) {
-        scopetype = sctype;
+        scopetype  = sctype;
         objectname = std::string();
-        object = NULL;
+        object     = NULL;
     }
 
     varInst() {
@@ -308,16 +360,16 @@ public:
     }
 
     std::string name;
-    var_type type;
+    var_type    type;
 
-    scope_type scopetype;
-    double float_val;
-    bool bool_val;
-    int int_val;
+    scope_type  scopetype;
+    double      float_val;
+    bool        bool_val;
+    int         int_val;
     std::string string_val;
 
     std::string objectname;
-    void *object;
+    void       *object;
 
     missionNode *defvar_node;
     missionNode *block_node;
@@ -336,6 +388,7 @@ public:
         return index;
     }
 };
+
 class varInstMap : public vsUMap<std::string, varInst *> {
 public:
     varInstVec varVec;
@@ -345,11 +398,11 @@ public:
 
 class scriptContext {
 public:
-    varInstMap *varinsts;
+    varInstMap  *varinsts;
     missionNode *block_node;
 
     scriptContext() {
-        varinsts = NULL;
+        varinsts   = NULL;
         block_node = NULL;
     }
 };
@@ -359,7 +412,7 @@ public:
 class contextStack {
 public:
     std::vector<scriptContext *> contexts;
-    varInst *return_value;
+    varInst                     *return_value;
 };
 
 /* *********************************************************** */
@@ -370,15 +423,15 @@ class NopeNadaNothingYoureLettingYourImaginationRunWild {
 public:
     int i;
 };
+
 class missionThread {
 protected:
 public:
-    virtual ~missionThread() {
-    }
+    virtual ~missionThread() {}
 
     std::vector<contextStack *> exec_stack;
-    std::vector<missionNode *> module_stack;
-    std::vector<unsigned int> classid_stack;
+    std::vector<missionNode *>  module_stack;
+    std::vector<unsigned int>   classid_stack;
 };
 
 /* *********************************************************** */
@@ -386,47 +439,52 @@ public:
 class missionNode : public tagDomNode {
 public:
     struct script_t {
-        std::string name; //script,defvar,module
-        varInstMap variables; //script,module
-        std::vector<varInstMap *> classvars;  //module
-        varInst *varinst; //defvar,const
-        missionNode *if_block[3]; //if
-        missionNode *while_arg[2]; //while
-        int tester; //test
-        missionNode *test_arg[2]; //test
-        enum var_type vartype; //defvar,script
-        std::string initval;
-        missionNode *context_block_node; //defvar
-        vsUMap<std::string, missionNode *> scripts; //module
-        missionNode *exec_node; //exec, return
-        int nr_arguments; //script
-        missionNode *argument_node; //script
-        missionNode *module_node; //exec
-        unsigned int classinst_counter;
-        int context_id;
-        int varId;
-        callback_module_type callback_module_id;
-        int method_id;
-    }
-            script;
+        std::string                        name;                // script,defvar,module
+        varInstMap                         variables;           // script,module
+        std::vector<varInstMap *>          classvars;           // module
+        varInst                           *varinst;             // defvar,const
+        missionNode                       *if_block[3];         // if
+        missionNode                       *while_arg[2];        // while
+        int                                tester;              // test
+        missionNode                       *test_arg[2];         // test
+        enum var_type                      vartype;             // defvar,script
+        std::string                        initval;
+        missionNode                       *context_block_node;  // defvar
+        vsUMap<std::string, missionNode *> scripts;             // module
+        missionNode                       *exec_node;           // exec, return
+        int                                nr_arguments;        // script
+        missionNode                       *argument_node;       // script
+        missionNode                       *module_node;         // exec
+        unsigned int                       classinst_counter;
+        int                                context_id;
+        int                                varId;
+        callback_module_type               callback_module_id;
+        int                                method_id;
+    } script;
 };
 
 /* *********************************************************** */
 
 class pythonMission;
 class PythonMissionBaseClass;
-#endif //VS_MIS_SEL
+#endif  // VS_MIS_SEL
 
 class Mission {
 public:
-    enum MISSION_AUTO { AUTO_OFF = -1, AUTO_NORMAL = 0, AUTO_ON = 1 };
+    enum MISSION_AUTO {
+        AUTO_OFF    = -1,
+        AUTO_NORMAL = 0,
+        AUTO_ON     = 1
+    };
+
     unsigned int player_num;
     MISSION_AUTO player_autopilot;
     MISSION_AUTO global_autopilot;
+
     struct Objective {
-        float completeness;
+        float       completeness;
         std::string objective;
-        Unit *getOwner();
+        Unit       *getOwner();
 
         void setOwner(Unit *u) {
             Owner.SetUnit(u);
@@ -440,9 +498,10 @@ public:
 
         Objective(float complete, std::string obj) {
             completeness = complete;
-            objective = obj;
+            objective    = obj;
         }
     };
+
     std::vector<Objective> objectives;
 
     void SetUnpickleData(std::string dat) {
@@ -450,27 +509,28 @@ public:
     }
 
     class Briefing *briefing;
-    static double gametime;
-    std::string mission_name;
-    void terminateMission();
-    Unit *call_unit_launch(class CreateFlightgroup *fg, Vega_UnitType type /*Vega_UnitType type*/, const std::string &destinations);
+    static double   gametime;
+    std::string     mission_name;
+    void            terminateMission();
+    Unit           *call_unit_launch(class CreateFlightgroup *fg, Vega_UnitType type /*Vega_UnitType type*/,
+                                     const std::string &destinations);
 
     Mission(const char *configfile, bool loadscripts = true);
     Mission(const char *filename, const std::string &pythonscript, bool loadscripts = true);
-    std::string Pickle(); //returns filename\npickleddata
-    void UnPickle(std::string pickled); //takes in pickeddata
-    void AddFlightgroup(Flightgroup *fg);
-    void initMission(bool loadscripts = true);
+    std::string Pickle();                       // returns filename\npickleddata
+    void        UnPickle(std::string pickled);  // takes in pickeddata
+    void        AddFlightgroup(Flightgroup *fg);
+    void        initMission(bool loadscripts = true);
 
-    int getPlayerMissionNumber(); //-1 if not found or invalid player_num.
+    int             getPlayerMissionNumber();  //-1 if not found or invalid player_num.
     static Mission *getNthPlayerMission(int cp, int num);
 
-///alex Please help me make this function...this is called between mission loops
+    /// alex Please help me make this function...this is called between mission loops
     ~Mission();
-//deletes missions pushed back onto a delete queue at a *safe time*
+    // deletes missions pushed back onto a delete queue at a *safe time*
     static void wipeDeletedMissions();
-    static int number_of_flightgroups;
-    static int number_of_ships;
+    static int  number_of_flightgroups;
+    static int  number_of_ships;
 
     static std::vector<Flightgroup *> flightgroups;
 
@@ -489,20 +549,20 @@ public:
     void DirectorBenchmark();
     void DirectorShipDestroyed(Unit *unit);
     void BriefingStart();
-//clobbers the cam view & renders btw 0,0, and 1,1
+    // clobbers the cam view & renders btw 0,0, and 1,1
     class TextPlane *BriefingRender();
-    void BriefingLoop();
-    void BriefingUpdate();
-    void BriefingEnd();
-    bool BriefingInProgress();
-    double getGametime();
+    void             BriefingLoop();
+    void             BriefingUpdate();
+    void             BriefingEnd();
+    bool             BriefingInProgress();
+    double           getGametime();
 
-    void loadMissionModules();
-    void loadModule(std::string modulename);
-    void addModule(std::string modulename);
-    bool runScript(std::string modulename, const std::string &scriptname, unsigned int classid = 0);
-    bool runScript(missionNode *, const std::string &scriptname, unsigned int classid = 0);
-    void RunDirectorScript(const std::string &);
+    void         loadMissionModules();
+    void         loadModule(std::string modulename);
+    void         addModule(std::string modulename);
+    bool         runScript(std::string modulename, const std::string &scriptname, unsigned int classid = 0);
+    bool         runScript(missionNode *, const std::string &scriptname, unsigned int classid = 0);
+    void         RunDirectorScript(const std::string &);
     unsigned int createClassInstance(std::string modulename);
 
     void setCurrentAIUnit(Unit *unit) {
@@ -514,77 +574,78 @@ public:
     }
 
     varInst *lookupClassVariable(std::string modulename, std::string varname, unsigned int classid);
-    void destroyClassInstance(std::string modulename, unsigned int classid);
+    void     destroyClassInstance(std::string modulename, unsigned int classid);
 
     static MessageCenter *msgcenter;
 
     void call_vector_into_olist(varInst *vec_vi, QVector vec3);
     void deleteVarInst(varInst *vi, bool del_local = false);
-#endif //VS_MIS_SEL
+#endif  // VS_MIS_SEL
 
 private:
-//std::string getVariable(easyDomNode *section, std::string name, std::string defaultval);
-    void ConstructMission(const char *configfile, const std::string &pythonscript, bool loadscripts = true);
+    // std::string getVariable(easyDomNode *section, std::string name, std::string defaultval);
+    void         ConstructMission(const char *configfile, const std::string &pythonscript, bool loadscripts = true);
     missionNode *top;
 
     easyDomNode *variables;
     easyDomNode *origin_node;
 
 #ifndef VS_MIS_SEL
-    Unit *current_ai_unit;
+    Unit  *current_ai_unit;
     Order *current_ai_order;
 
-    int debuglevel;
+    int  debuglevel;
     bool start_game;
     bool do_trace;
-    int tracelevel; //unusued
+    int  tracelevel;  // unusued
 
     static int total_nr_frames;
 
-//ofstream var_out;
+    // ofstream var_out;
 
     parsemode_type parsemode;
 
-    missionNode *director;
+    missionNode                 *director;
     easyDomFactory<missionNode> *importf;
 
-    tagMap tagmap;
-    char *nextpythonmission;
+    tagMap      tagmap;
+    char       *nextpythonmission;
     std::string unpickleData;
+
 public:
     struct Runtime {
-        std::vector<missionThread *> threads;
-        PythonMissionBaseClass *pymissions;
+        std::vector<missionThread *>       threads;
+        PythonMissionBaseClass            *pymissions;
         vsUMap<std::string, missionNode *> modules;
-        int thread_nr;
-        missionThread *cur_thread;
+        int                                thread_nr;
+        missionThread                     *cur_thread;
         vsUMap<std::string, missionNode *> global_variables;
-        varInstVec global_varvec;
-        //std::vector<const void *()> callbacks;
-    }
-            runtime;
+        varInstVec                         global_varvec;
+        // std::vector<const void *()> callbacks;
+    } runtime;
+
 private:
     friend void UnpickleMission(std::string pickled);
-//used only for parsing
+    // used only for parsing
     std::vector<missionNode *> scope_stack;
-    missionNode *current_module;
-    missionNode *current_script;
+    missionNode               *current_module;
+    missionNode               *current_script;
 
-    std::vector<std::string> import_stack;
-    vsUMap<std::string, callback_module_string_type> module_string_map;
-    vsUMap<std::string, callback_module_omap_type> module_omap_map;
-    vsUMap<std::string, callback_module_olist_type> module_olist_map;
-    vsUMap<std::string, callback_module_order_type> module_order_map;
-    vsUMap<std::string, callback_module_unit_type> module_unit_map;
-    vsUMap<std::string, callback_module_std_type> module_std_map;
+    std::vector<std::string>                           import_stack;
+    vsUMap<std::string, callback_module_string_type>   module_string_map;
+    vsUMap<std::string, callback_module_omap_type>     module_omap_map;
+    vsUMap<std::string, callback_module_olist_type>    module_olist_map;
+    vsUMap<std::string, callback_module_order_type>    module_order_map;
+    vsUMap<std::string, callback_module_unit_type>     module_unit_map;
+    vsUMap<std::string, callback_module_std_type>      module_std_map;
     vsUMap<std::string, callback_module_briefing_type> module_briefing_map;
-    vsUMap<std::string, callback_module_type> module_map;
+    vsUMap<std::string, callback_module_type>          module_map;
 
     void saveVariables(const std::ostream &out);
     void initTagMap();
 
     void initCallbackMaps();
-#endif //VS_MIS_SEL
+#endif  // VS_MIS_SEL
 
     bool checkMission(easyDomNode *node, bool loadscripts);
     void doVariables(easyDomNode *node);
@@ -593,7 +654,7 @@ private:
     void doOrder(easyDomNode *node, Flightgroup *fg);
     void checkFlightgroup(easyDomNode *node);
     bool doPosition(easyDomNode *node, double pos[3], class CreateFlightgroup *);
-//    bool doRotation( easyDomNode*node, float rot[3], class CreateFlightgroup* );
+    //    bool doRotation( easyDomNode*node, float rot[3], class CreateFlightgroup* );
     void doOrigin(easyDomNode *node);
     void doSettings(easyDomNode *node);
 
@@ -601,46 +662,46 @@ private:
     void doModule(missionNode *node, int mode);
 
     scriptContext *addContext(missionNode *node);
-    void removeContext();
-    void removeContextStack();
-    void addContextStack(missionNode *node);
+    void           removeContext();
+    void           removeContextStack();
+    void           addContextStack(missionNode *node);
 
     void trace(missionNode *node, int mode);
 
     varInst *doScript(missionNode *node, int mode, varInstMap *varmap = NULL);
-    void doBlock(missionNode *node, int mode);
-    bool doBooleanVar(missionNode *node, int mode);
+    void     doBlock(missionNode *node, int mode);
+    bool     doBooleanVar(missionNode *node, int mode);
     varInst *lookupLocalVariable(missionNode *asknode);
     varInst *lookupModuleVariable(std::string mname, missionNode *asknode);
     varInst *lookupModuleVariable(missionNode *asknode);
     varInst *lookupClassVariable(missionNode *asknode);
     varInst *lookupGlobalVariable(missionNode *asknode);
     varInst *doVariable(missionNode *node, int mode);
-    void checkStatement(missionNode *node, int mode);
-    void doIf(missionNode *node, int mode);
-    void doWhile(missionNode *node, int mode);
-    bool checkBoolExpr(missionNode *node, int mode);
-    bool doAndOr(missionNode *node, int mode);
-    bool doNot(missionNode *node, int mode);
-    bool doTest(missionNode *node, int mode);
-    void doDefVar(missionNode *node, int mode, bool global_var = false);
-    void doSetVar(missionNode *node, int mode);
+    void     checkStatement(missionNode *node, int mode);
+    void     doIf(missionNode *node, int mode);
+    void     doWhile(missionNode *node, int mode);
+    bool     checkBoolExpr(missionNode *node, int mode);
+    bool     doAndOr(missionNode *node, int mode);
+    bool     doNot(missionNode *node, int mode);
+    bool     doTest(missionNode *node, int mode);
+    void     doDefVar(missionNode *node, int mode, bool global_var = false);
+    void     doSetVar(missionNode *node, int mode);
     varInst *doCall(missionNode *node, int mode);
     varInst *doExec(missionNode *node, int mode);
     varInst *doConst(missionNode *node, int mode);
 
-    int doIntVar(missionNode *node, int mode);
-    int checkIntExpr(missionNode *node, int mode);
-    int doIMath(missionNode *node, int mode);
+    int      doIntVar(missionNode *node, int mode);
+    int      checkIntExpr(missionNode *node, int mode);
+    int      doIMath(missionNode *node, int mode);
     varInst *doMath(missionNode *node, int mode);
-    int intMath(std::string mathname, int res1, int res2);
-    double floatMath(std::string mathname, double res1, double res2);
+    int      intMath(std::string mathname, int res1, int res2);
+    double   floatMath(std::string mathname, double res1, double res2);
     varInst *checkExpression(missionNode *node, int mode);
 
     void assignVariable(varInst *v1, varInst *v2);
 
     scriptContext *makeContext(missionNode *node);
-    bool checkVarType(varInst *var, enum var_type check_type);
+    bool           checkVarType(varInst *var, enum var_type check_type);
 
     double checkFloatExpr(missionNode *node, int mode);
     double doFloatVar(missionNode *node, int mode);
@@ -651,7 +712,7 @@ private:
     void doGlobals(missionNode *node, int mode);
     void doImport(missionNode *node, int mode);
 
-    bool have_return(int mode);
+    bool         have_return(int mode);
     missionNode *lookupScript(std::string scriptname, std::string modulename);
 
     var_type vartypeFromString(std::string type);
@@ -701,71 +762,72 @@ private:
     varInst *call_int_cast(missionNode *node, int mode);
     varInst *call_float_cast(missionNode *node, int mode);
 
-    varInst *call_io_sprintf(missionNode *node, int mode);
-    varInst *call_io_printf(missionNode *node, int mode);
+    varInst    *call_io_sprintf(missionNode *node, int mode);
+    varInst    *call_io_printf(missionNode *node, int mode);
     std::string replaceNewline(std::string origstr);
 
     varInst *call_io_message(missionNode *node, int mode);
     varInst *call_io_printmsglist(missionNode *node, int mode);
 
-    std::string method_str(missionNode *node);
+    std::string  method_str(missionNode *node);
     missionNode *getArgument(missionNode *node, int mode, int arg_nr);
 
     varInst *call_olist(missionNode *node, int mode);
     olist_t *getOListObject(missionNode *node, int mode, varInst *ovi);
     varInst *call_olist_new(missionNode *node, int mode);
-    void call_olist_pop_back(missionNode *node, int mode, varInst *ovi);
-    void call_olist_push_back(missionNode *node, int mode, varInst *ovi, varInst *push);
+    void     call_olist_pop_back(missionNode *node, int mode, varInst *ovi);
+    void     call_olist_push_back(missionNode *node, int mode, varInst *ovi, varInst *push);
     varInst *call_olist_at(missionNode *node, int mode, varInst *ovi, int index);
     varInst *call_olist_back(missionNode *node, int mode, varInst *ovi);
-    void call_olist_toxml(missionNode *node, int mode, varInst *ovi);
-    QVector call_olist_tovector(missionNode *node, int mode, varInst *ovi);
-    void call_olist_set(missionNode *node, int mode, varInst *ovi, int index, varInst *new_vi);
+    void     call_olist_toxml(missionNode *node, int mode, varInst *ovi);
+    QVector  call_olist_tovector(missionNode *node, int mode, varInst *ovi);
+    void     call_olist_set(missionNode *node, int mode, varInst *ovi, int index, varInst *new_vi);
 
     varInst *call_omap(missionNode *node, int mode);
-    omap_t *getOMapObject(missionNode *node, int mode, varInst *ovi);
+    omap_t  *getOMapObject(missionNode *node, int mode, varInst *ovi);
     varInst *call_omap_new(missionNode *node, int mode);
 
     varInst *getObjectArg(missionNode *node, int mode);
 
     varInst *call_unit(missionNode *node, int mode);
     varInst *call_briefing(missionNode *node, int mode);
-    Unit *getUnitObject(missionNode *node, int mode, varInst *ovi);
+    Unit    *getUnitObject(missionNode *node, int mode, varInst *ovi);
 
-//void call_unit_launch(missionNode *node, int mode, std::string name, std::string faction, std::string type, std::string ainame, int nr_ships, Vector &pos);
+    // void call_unit_launch(missionNode *node, int mode, std::string name, std::string faction, std::string type,
+    // std::string ainame, int nr_ships, Vector &pos);
 
     void call_unit_toxml(missionNode *node, int mode, varInst *ovi);
 
-    varInst *call_string(missionNode *node, int mode);
-    void call_string_print(missionNode *node, int mode, varInst *ovi);
-    varInst *call_string_new(missionNode *node, int mode, std::string initstring);
+    varInst     *call_string(missionNode *node, int mode);
+    void         call_string_print(missionNode *node, int mode, varInst *ovi);
+    varInst     *call_string_new(missionNode *node, int mode, std::string initstring);
     std::string *getStringObject(missionNode *node, int mode, varInst *ovi);
-    std::string call_string_getstring(missionNode *node, int mode, varInst *ovi);
-    std::string getStringArgument(missionNode *node, int mode, int arg_nr);
+    std::string  call_string_getstring(missionNode *node, int mode, varInst *ovi);
+    std::string  getStringArgument(missionNode *node, int mode, int arg_nr);
 
     void findNextEnemyTarget(Unit *my_unit);
 
     varInst *doCall(missionNode *node, int mode, std::string module, std::string method);
-    void doCall_toxml(std::string module, varInst *ovi);
+    void     doCall_toxml(std::string module, varInst *ovi);
 
     varInst *newVarInst(scope_type scopetype);
-    int vi_counter, old_vi_counter;
-    int olist_counter, old_olist_counter;
-    int string_counter, old_string_counter;
+    int      vi_counter, old_vi_counter;
+    int      olist_counter, old_olist_counter;
+    int      string_counter, old_string_counter;
 
     void deleteVarMap(varInstMap *vmap);
-//pushes this mission onto a destruct queue for future destruction and removes from activeMission
+    // pushes this mission onto a destruct queue for future destruction and removes from activeMission
     varInst *call_terminateMission(missionNode *node, int mode);
 
     varInst *call_order(missionNode *node, int mode);
-    Order *getOrderObject(missionNode *node, int mode, varInst *ovi);
+    Order   *getOrderObject(missionNode *node, int mode, varInst *ovi);
 
     QVector getVec3Arg(missionNode *node, int mode, int arg_nr);
-    double getFloatArg(missionNode *node, int mode, int arg_nr);
-    int getIntArg(missionNode *node, int mode, int arg_nr);
-    bool getBoolArg(missionNode *node, int mode, int arg_nr);
-    Unit *getUnitArg(missionNode *node, int mode, int arg_nr);
-#endif //VS_MIS_SEL
+    double  getFloatArg(missionNode *node, int mode, int arg_nr);
+    int     getIntArg(missionNode *node, int mode, int arg_nr);
+    bool    getBoolArg(missionNode *node, int mode, int arg_nr);
+    Unit   *getUnitArg(missionNode *node, int mode, int arg_nr);
+#endif  // VS_MIS_SEL
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_SCRIPT_MISSION_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_SCRIPT_MISSION_H

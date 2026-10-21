@@ -27,21 +27,25 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_NAV_NAV_PATH_H
 #define VEGA_STRIKE_ENGINE_GFX_NAV_NAV_PATH_H
 
-#include <vector>
 #include <deque>
 #include <list>
-#include <set>
 #include <map>
+#include <set>
 #include <string>
-#include "criteria.h"
+#include <vector>
 
+#include "criteria.h"
 #include "src/gfxlib.h"
 
-enum TopoColor { TOPO_WHITE, TOPO_GRAY, TOPO_BLACK };
+enum TopoColor {
+    TOPO_WHITE,
+    TOPO_GRAY,
+    TOPO_BLACK
+};
 
 //*******************************************************************//
 ////
-//NavPath Class                          //
+// NavPath Class                          //
 ////
 //*******************************************************************//
 
@@ -63,11 +67,11 @@ public:
 
     std::string getDescription() const;
 
-    void setVisible(bool vis);
-    void setColor(GFXColor col);
-    void setName(std::string n);
-    bool getVisible() const;
-    GFXColor getColor() const;
+    void        setVisible(bool vis);
+    void        setColor(GFXColor col);
+    void        setName(std::string n);
+    bool        getVisible() const;
+    GFXColor    getColor() const;
     std::string getName() const;
 
     bool setSourceNode(PathNode *node);
@@ -89,22 +93,22 @@ public:
         return destination;
     }
 
-    unsigned getAbsoluteSource() const;
-    unsigned getAbsoluteDestination() const;
+    unsigned                   getAbsoluteSource() const;
+    unsigned                   getAbsoluteDestination() const;
     const std::list<unsigned> *getAllPoints() const;
-    std::list<unsigned> *getAllPoints();
+    std::list<unsigned>       *getAllPoints();
 
-    void addDependant(NavPath *dependant);
-    void removeDependant(NavPath *dependant);
+    void                       addDependant(NavPath *dependant);
+    void                       removeDependant(NavPath *dependant);
     const std::set<NavPath *> *getDependants() const;
-    std::set<NavPath *> *getDependants();
+    std::set<NavPath *>       *getDependants();
 
     std::vector<NavPath *> getRequiredPaths() const;
-    bool checkForCycles() const;
-    bool evaluate();
-    void removeOldPath();
-    void addNewPath();
-    bool update();
+    bool                   checkForCycles() const;
+    bool                   evaluate();
+    void                   removeOldPath();
+    void                   addNewPath();
+    bool                   update();
 
     bool isNeighborPath(unsigned system, unsigned neighbor);
 
@@ -114,23 +118,23 @@ public:
 protected:
     friend class PathManager;
 
-    bool visible;
-    std::string name;
-    GFXColor color;
-    PathNode *source;
-    PathNode *destination;
-    std::list<unsigned> path;
-    std::map<unsigned, std::pair<unsigned, unsigned> > pathNeighbors;
-    std::set<NavPath *> dependants;
+    bool                                              visible;
+    std::string                                       name;
+    GFXColor                                          color;
+    PathNode                                         *source;
+    PathNode                                         *destination;
+    std::list<unsigned>                               path;
+    std::map<unsigned, std::pair<unsigned, unsigned>> pathNeighbors;
+    std::set<NavPath *>                               dependants;
 
     TopoColor topoColor;
-    unsigned topoTime;
-    bool updated;
+    unsigned  topoTime;
+    bool      updated;
 };
 
 //*******************************************************************//
 ////
-//PathManager Class                         //
+// PathManager Class                         //
 ////
 //*******************************************************************//
 
@@ -141,7 +145,12 @@ public:
     void showAll();
     void showNone();
 
-    enum UpdateType { ALL, CURRENT, TARGET };
+    enum UpdateType {
+        ALL,
+        CURRENT,
+        TARGET
+    };
+
     bool updateSpecificPath(NavPath *path);
     void updatePaths(UpdateType type = ALL);
     void updateDependants(NavPath *parent);
@@ -154,25 +163,26 @@ protected:
     friend class NavComputer;
 
     std::vector<NavPath *> paths;
-    std::list<NavPath *> topoOrder;
+    std::list<NavPath *>   topoOrder;
 
-    void DFS();
-    void dfsVisit(NavPath *path);
+    void     DFS();
+    void     dfsVisit(NavPath *path);
     unsigned topoTime;
 };
 
 //*******************************************************************//
 ////
-//PathNode Class                         //
+// PathNode Class                         //
 ////
 //*******************************************************************//
 
 class PathNode {
 public:
     virtual bool isAbsolute() const = 0;
-//Desc: True IFF this node can dereference into one absolute system.
+    // Desc: True IFF this node can dereference into one absolute system.
     virtual bool isSourceable() const = 0;
-//Desc True IFF this node can be used as a source in a path finding algorithm
+
+    // Desc True IFF this node can be used as a source in a path finding algorithm
 
     virtual bool isCurrentDependant() const {
         return false;
@@ -186,28 +196,26 @@ public:
         return NULL;
     }
 
-//Desc: Returns the list of paths this node is dependant on.
+    // Desc: Returns the list of paths this node is dependant on.
     virtual std::string getDescription() const = 0;
-//Desc: Returns a textual description of the node
+    // Desc: Returns a textual description of the node
 
     virtual std::deque<unsigned> initSearchQueue() const = 0;
-//Desc: Returns a deque that may be used to start a search
+    // Desc: Returns a deque that may be used to start a search
     virtual bool isDestination(unsigned index) const = 0;
-//Desc: True IFF the system index is equivalent to the system
-//specified in the node
+    // Desc: True IFF the system index is equivalent to the system
+    // specified in the node
 
     virtual PathNode *clone() const = 0;
 
-    PathNode() {
-    }
+    PathNode() {}
 
-    virtual ~PathNode() {
-    }
+    virtual ~PathNode() {}
 };
 
 //*******************************************************************//
 ////
-//AbsolutePathNode Class                        //
+// AbsolutePathNode Class                        //
 ////
 //*******************************************************************//
 
@@ -232,7 +240,8 @@ public:
     unsigned getSystemIndex() {
         return system;
     }
-//Desc: Gets the system referenced by this node
+
+    // Desc: Gets the system referenced by this node
 
     PathNode *clone() const {
         return new AbsolutePathNode(system);
@@ -242,8 +251,7 @@ public:
         system = index;
     }
 
-    ~AbsolutePathNode() {
-    }
+    ~AbsolutePathNode() {}
 
 protected:
     unsigned system;
@@ -251,7 +259,7 @@ protected:
 
 //*******************************************************************//
 ////
-//CurrentPathNode Class                         //
+// CurrentPathNode Class                         //
 ////
 //*******************************************************************//
 
@@ -274,22 +282,20 @@ public:
     }
 
     std::deque<unsigned> initSearchQueue() const;
-    bool isDestination(unsigned index) const;
+    bool                 isDestination(unsigned index) const;
 
     PathNode *clone() const {
         return new CurrentPathNode();
     }
 
-    CurrentPathNode() {
-    }
+    CurrentPathNode() {}
 
-    ~CurrentPathNode() {
-    }
+    ~CurrentPathNode() {}
 };
 
 //*******************************************************************//
 ////
-//TargetPathNode Class                        //
+// TargetPathNode Class                        //
 ////
 //*******************************************************************//
 
@@ -312,22 +318,20 @@ public:
     }
 
     std::deque<unsigned> initSearchQueue() const;
-    bool isDestination(unsigned index) const;
+    bool                 isDestination(unsigned index) const;
 
     PathNode *clone() const {
         return new TargetPathNode();
     }
 
-    TargetPathNode() {
-    }
+    TargetPathNode() {}
 
-    ~TargetPathNode() {
-    }
+    ~TargetPathNode() {}
 };
 
 //*******************************************************************//
 ////
-//CriteriaPathNode Class                        //
+// CriteriaPathNode Class                        //
 ////
 //*******************************************************************//
 
@@ -364,7 +368,7 @@ private:
 
 //*******************************************************************//
 ////
-//ChainPathNode Class                       //
+// ChainPathNode Class                       //
 ////
 //*******************************************************************//
 
@@ -385,7 +389,7 @@ public:
     }
 
     std::deque<unsigned> initSearchQueue() const;
-    bool isDestination(unsigned index) const;
+    bool                 isDestination(unsigned index) const;
 
     void setSupplierPath(NavPath *supplier) {
         supplierPath = supplier;
@@ -395,7 +399,11 @@ public:
         return supplierPath;
     }
 
-    enum PartType { SOURCE, DESTINATION, ALL_POINTS };
+    enum PartType {
+        SOURCE,
+        DESTINATION,
+        ALL_POINTS
+    };
 
     void setPartType(PartType part) {
         type = part;
@@ -415,15 +423,14 @@ public:
 
     ChainPathNode(NavPath *supplier, PartType part) {
         supplierPath = supplier;
-        type = part;
+        type         = part;
     }
 
-    ~ChainPathNode() {
-    }
+    ~ChainPathNode() {}
 
 private:
     NavPath *supplierPath;
     PartType type;
 };
 
-#endif   //VEGA_STRIKE_ENGINE_GFX_NAV_NAV_PATH_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_NAV_NAV_PATH_H

@@ -33,10 +33,11 @@
 #define VEGA_STRIKE_ENGINE_MISSION_EASYDOM_H
 
 #include <expat.h>
+#include <map>
+#include <stack>
 #include <string>
 #include <vector>
-#include <stack>
-#include <map>
+
 #include "mission/include/xml_support.h"
 #include "vs_logging.h"
 
@@ -67,17 +68,17 @@ public:
         attribute_map[name] = value;
     };
 
-    string attr_value(string attr_name);
+    string                attr_value(string attr_name);
     vector<easyDomNode *> subnodes;
 
 private:
-    easyDomNode *parent;
+    easyDomNode   *parent;
     AttributeList *attributes;
 
     map<string, string> attribute_map;
 
-    //vector<string> att_name;
-    //vector<string> att_value;
+    // vector<string> att_name;
+    // vector<string> att_value;
 
     string name;
 };
@@ -97,19 +98,18 @@ public:
         vector<easyDomNode *>::const_iterator siter;
 
         for (siter = subnodes.begin(); siter != subnodes.end(); siter++) {
-            tagDomNode *tnode = (tagDomNode *) (*siter);
+            tagDomNode *tnode = (tagDomNode *)(*siter);
             tnode->Tag(tagmap);
         }
     };
 };
 
-template<class domNodeType>
+template <class domNodeType>
 class easyDomFactory {
 public:
-    easyDomFactory() {
-    };
+    easyDomFactory() {};
 
-    void getColor(char *name, float color[4]);
+    void  getColor(char *name, float color[4]);
     char *getVariable(char *section, char *name);
 
     void c_alike_to_xml(const char *filename);
@@ -118,13 +118,12 @@ public:
     } *xml;
 
     domNodeType *LoadXML(const char *filename) {
-
-        const int chunk_size = 16384;
+        const int chunk_size = 16'384;
 
         FILE *inFile = fopen(filename, "r");
         if (!inFile) {
-            //BOOST_LOG_TRIVIAL(trace) << "warning: could not open file: " << filename << endl;
-            //    assert(0);
+            // BOOST_LOG_TRIVIAL(trace) << "warning: could not open file: " << filename << endl;
+            //     assert(0);
             return NULL;
         }
 
@@ -136,34 +135,33 @@ public:
         XML_SetCharacterDataHandler(parser, &easyDomFactory::charHandler);
 
         do {
-            char *buf = (XML_Char *) XML_GetBuffer(parser, chunk_size);
-            int length;
+            char *buf = (XML_Char *)XML_GetBuffer(parser, chunk_size);
+            int   length;
 
             length = fread(buf, 1, chunk_size, inFile);
-            //length = inFile.gcount();
+            // length = inFile.gcount();
             XML_ParseBuffer(parser, length, feof(inFile));
         } while (!feof(inFile));
 
         fclose(inFile);
         XML_ParserFree(parser);
 
-        return (domNodeType *) topnode;
+        return (domNodeType *)topnode;
     };
 
     static void charHandler(void *userData, const XML_Char *s, int len) {
-        char buffer[2048];
+        char buffer[2'048];
         strncpy(buffer, s, len);
         // printf("XML-text: %s\n",buffer);
     };
 
     domNodeType *LoadCalike(const char *filename) {
-
-        const int chunk_size = 16384;
+        const int chunk_size = 16'384;
 
         string module_str = parseCalike(filename);
         if (module_str.empty()) {
-            //BOOST_LOG_TRIVIAL(trace) << "warning: could not open file: " << filename << endl;
-            //    assert(0);
+            // BOOST_LOG_TRIVIAL(trace) << "warning: could not open file: " << filename << endl;
+            //     assert(0);
             return NULL;
         }
 
@@ -174,28 +172,28 @@ public:
         XML_SetElementHandler(parser, &easyDomFactory::beginElement, &easyDomFactory::endElement);
         XML_SetCharacterDataHandler(parser, &easyDomFactory::charHandler);
 
-        int index = 0;
+        int index       = 0;
         int string_size = module_str.size();
-        int incr = chunk_size - 2;
-        int is_final = false;
+        int incr        = chunk_size - 2;
+        int is_final    = false;
 
         do {
-            char *buf = (XML_Char *) XML_GetBuffer(parser, chunk_size);
+            char *buf = (XML_Char *)XML_GetBuffer(parser, chunk_size);
 
             int max_index = index + incr;
-            int newlen = incr;
+            int newlen    = incr;
 
             printf("max_index=%d,string_size=%d\n", max_index, string_size);
             if (max_index >= string_size) {
                 newlen = module_str.size() - index;
                 printf("getting string from %d length %d\n", index, newlen);
                 const string substr1 = module_str.substr(index, newlen);
-                const char *strbuf = substr1.c_str();
+                const char  *strbuf  = substr1.c_str();
                 strncpy(buf, strbuf, newlen);
             } else {
                 printf("getting string from %d length %d\n", index, incr);
                 const string substr2 = module_str.substr(index, incr);
-                const char *strbuf = substr2.c_str();
+                const char  *strbuf  = substr2.c_str();
                 strncpy(buf, strbuf, incr);
                 newlen = incr;
             }
@@ -211,15 +209,15 @@ public:
 
         XML_ParserFree(parser);
 
-        return (domNodeType *) topnode;
+        return (domNodeType *)topnode;
     };
 
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-        ((easyDomFactory *) userData)->beginElement(name, AttributeList(atts));
+        ((easyDomFactory *)userData)->beginElement(name, AttributeList(atts));
     };
 
     static void endElement(void *userData, const XML_Char *name) {
-        ((easyDomFactory *) userData)->endElement(name);
+        ((easyDomFactory *)userData)->endElement(name);
     };
 
     void beginElement(const string &name, const AttributeList &attributes) {
@@ -234,10 +232,10 @@ public:
         }
 
         domNodeType *thisnode = new domNodeType();
-        thisnode->set(parent, name, (AttributeList *) &attributes);
+        thisnode->set(parent, name, (AttributeList *)&attributes);
 
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
-            //BOOST_LOG_TRIVIAL(trace) <<  name << "::" << (*iter).name << endl;
+            // BOOST_LOG_TRIVIAL(trace) <<  name << "::" << (*iter).name << endl;
         }
 
         if (parent == NULL) {
@@ -249,7 +247,6 @@ public:
     };
 
     void endElement(const string &name) {
-
         domNodeType *stacktop = nodestack.top();
 
         if (stacktop->Name() != name) {
@@ -265,4 +262,4 @@ public:
     domNodeType *topnode;
 };
 
-#endif //VEGA_STRIKE_ENGINE_MISSION_EASYDOM_H
+#endif  // VEGA_STRIKE_ENGINE_MISSION_EASYDOM_H

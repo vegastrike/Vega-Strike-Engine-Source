@@ -37,30 +37,20 @@ class Building : public Unit {
     // Fields
 protected:
     union Buildingparent {
-        Terrain *terrain;
+        Terrain           *terrain;
         ContinuousTerrain *plane;
-    }
-            parent;
+    } parent;
+
     bool continuous;
     bool vehicle;
 
     // Constructors
 public:
-    Building(ContinuousTerrain *parent,
-            bool vehicle,
-            const char *filename,
-            bool SubUnit,
-            int faction,
-            const std::string &unitModifications = std::string(""),
-            Flightgroup *fg = NULL);
+    Building(ContinuousTerrain *parent, bool vehicle, const char *filename, bool SubUnit, int faction,
+             const std::string &unitModifications = std::string(""), Flightgroup *fg = NULL);
 
-    Building(Terrain *parent,
-            bool vehicle,
-            const char *filename,
-            bool SubUnit,
-            int faction,
-            const std::string &unitModifications = std::string(""),
-            Flightgroup *fg = NULL);
+    Building(Terrain *parent, bool vehicle, const char *filename, bool SubUnit, int faction,
+             const std::string &unitModifications = std::string(""), Flightgroup *fg = NULL);
 
     enum Vega_UnitType isUnit() const override {
         return Vega_UnitType::building;
@@ -70,17 +60,12 @@ public:
         return Vega_UnitType::building;
     }
 
-    void UpdatePhysics2(const Transformation &trans,
-                        const Transformation &old_physical_state,
-                        const Vector &accel,
-                        float difficulty,
-                        const Matrix &transmat,
-                        const Vector &CumulativeVelocity,
-                        bool ResolveLast,
+    void UpdatePhysics2(const Transformation &trans, const Transformation &old_physical_state, const Vector &accel,
+                        float difficulty, const Matrix &transmat, const Vector &CumulativeVelocity, bool ResolveLast,
                         UnitCollection *uc = NULL) override;
 
     bool ownz(void *parent) {
-        return this->parent.terrain == (Terrain *) parent;
+        return this->parent.terrain == (Terrain *)parent;
     }
 
     /// default constructor forbidden
@@ -93,4 +78,4 @@ public:
     ~Building() override;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_BUILDING_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_BUILDING_H

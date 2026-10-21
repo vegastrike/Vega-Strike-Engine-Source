@@ -34,7 +34,7 @@
 class EnergyContainer;
 
 class JumpDrive : public Component, public EnergyConsumer {
-    int destination{};    // 0 is probably some kind of /dev/null
+    int    destination{};  // 0 is probably some kind of /dev/null
     double delay;
 
 public:
@@ -42,20 +42,20 @@ public:
     explicit JumpDrive(EnergyContainer *source);
     ~JumpDrive() override;
 
-    int Destination() const;
+    int  Destination() const;
     bool IsDestinationSet() const;
     void SetDestination(int destination);
     void UnsetDestination();
 
     double Delay() const;
-    void SetDelay(double delay);
+    void   SetDelay(double delay);
 
     bool Enabled() const;
 
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -69,4 +69,4 @@ public:
     double Consume() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_JUMP_DRIVE_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_JUMP_DRIVE_H

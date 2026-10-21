@@ -51,4 +51,4 @@ public:
     ~DummyComponent() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_DUMMY_COMPONENT_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_DUMMY_COMPONENT_H

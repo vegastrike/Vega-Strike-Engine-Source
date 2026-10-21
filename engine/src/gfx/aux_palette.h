@@ -29,4 +29,4 @@
 
 void ShiftPalette(unsigned char[], double, double, double, double, double, double);
 
-#endif //VEGA_STRIKE_ENGINE_GFX_PALETTE_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_PALETTE_H

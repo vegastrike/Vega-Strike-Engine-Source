@@ -26,9 +26,10 @@
  */
 #ifndef VEGA_STRIKE_ENGINE_TOOLS_COMMON_H
 #define VEGA_STRIKE_ENGINE_TOOLS_COMMON_H
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string>
+
 #include "vsrtools.h"
 
 class FILEHandle {
@@ -41,7 +42,7 @@ public:
         }
     }
 
-    operator FILE *const(void) const {
+    operator FILE * const(void) const {
         return file;
     }
 
@@ -51,31 +52,25 @@ private:
 
 struct VSRMember {
     std::string filename;
-    uint32_t fileLength;
-    uint32_t offset;
+    uint32_t    fileLength;
+    uint32_t    offset;
 
     friend bool operator<(const VSRMember &a, const VSRMember &b) {
         return a.filename < b.filename;
     }
 
-    VSRMember() {
-    }
+    VSRMember() {}
 
     VSRMember &operator=(const VSRPEntry &entry) {
-        filename = entry.filename;
+        filename   = entry.filename;
         fileLength = entry.fileLength;
-        offset = entry.offset;
+        offset     = entry.offset;
         return *this;
     }
 
-    VSRMember(const VSRPEntry &entry)
-            : filename(entry.filename), fileLength(entry.fileLength),
-            offset(entry.offset) {
-    }
+    VSRMember(const VSRPEntry &entry) : filename(entry.filename), fileLength(entry.fileLength), offset(entry.offset) {}
 
-    VSRMember(std::string nam, uint32_t len, uint32_t offs)
-            : filename(nam), fileLength(len), offset(offs) {
-    }
+    VSRMember(std::string nam, uint32_t len, uint32_t offs) : filename(nam), fileLength(len), offset(offs) {}
 };
 
-#endif //VEGA_STRIKE_ENGINE_TOOLS_COMMON_H
+#endif  // VEGA_STRIKE_ENGINE_TOOLS_COMMON_H
