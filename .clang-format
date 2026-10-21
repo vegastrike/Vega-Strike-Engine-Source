@@ -69,10 +69,10 @@ IncludeCategories:
     Priority: 9
   - Regex: '^"collide2/[[:alnum:]./_]+"$'
     Priority: 10
-  - Regex: '^"unit_wrapper_class\.h"$'
+  - Regex: '^"(src/python/)?unit_wrapper_class\.h"$'
     Priority: 11
     SortPriority: 12
-  - Regex: '^"unit_from_to_python\.h"$'
+  - Regex: '^"src/python/unit_from_to_python\.h"$'
     Priority: 12
     SortPriority: 13
   - Regex: '^"[[:alnum:]./_]+"$'
