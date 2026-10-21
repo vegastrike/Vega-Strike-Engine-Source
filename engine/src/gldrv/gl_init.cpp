@@ -77,9 +77,9 @@
 #if !defined(WIN32) && !defined(__HAIKU__) && !defined(__APPLE__) && !defined(MACOSX)
 #    define GLX_GLXEXT_PROTOTYPES 1
 #    define GLX_GLXEXT_LEGACY     1
-#    include <GL/glext.h>
-
 #    include <GL/glx.h>
+
+#    include <GL/glext.h>
 #endif
 
 #include <stdio.h>
