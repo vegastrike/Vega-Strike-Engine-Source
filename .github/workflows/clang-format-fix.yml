@@ -1,0 +1,38 @@
+name: clang-format Fix
+permissions:
+  contents: write
+  pull-requests: write
+
+# Controls when the action will run.
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    #inputs:
+    #  output_branch_name:
+    #    description: The name of the branch to which to push the formatting fixes
+    #    default:
+
+jobs:
+  formatting-fix:
+    name: Formatting Fix
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1                 # v7.0.1
+      - name: clang-format lint
+        uses: DoozyX/clang-format-lint-action@bcb4eb2cb0d707ee4f3e5cc3b456eb075f12cf73  # v0.20
+        with:
+          clangFormatVersion: '19'
+          style: 'file'
+          source: '.'
+          exclude: 'libraries/imgui'
+          inplace: 'True'
+      - uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8            # v11.1.1
+        with:
+          default_author: 'Clang Robot'
+          author_name: 'Clang Robot'
+          author_email: clang_robot@example.com
+          message: 'Committing clang-format changes'
+          dry_run: 'true'
+          #new_branch: ${{ inputs.output_branch_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
