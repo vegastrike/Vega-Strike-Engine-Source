@@ -26,9 +26,10 @@
  */
 // NO HEADER GUARD
 
+#include "collide2/Opcode.h"
+
 #include "cmd/terrain.h"
 #include "collide2/CSopcodecollider.h"
-#include "collide2/Opcode.h"
 
 class StarSystem;
 const int numcontterr = 4;
