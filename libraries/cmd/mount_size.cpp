@@ -30,39 +30,43 @@
 
 #include <map>
 #include <vector>
+
 #include <boost/algorithm/string.hpp>
 
 // TODO: introduce using enum MOUNT_SIZE; when we migrate to C++20 (P1099R5)
 
 
-static const std::map<std::string, MOUNT_SIZE> mount_map = {
-        {"LIGHT", MOUNT_SIZE::LIGHT},
-        {"MEDIUM", MOUNT_SIZE::MEDIUM},
-        {"HEAVY", MOUNT_SIZE::HEAVY},
-        {"CAPSHIP-LIGHT", MOUNT_SIZE::CAPSHIPLIGHT},
-        {"CAPSHIP-HEAVY", MOUNT_SIZE::CAPSHIPHEAVY},
-        {"SPECIAL", MOUNT_SIZE::SPECIAL},
-        {"LIGHT-MISSILE", MOUNT_SIZE::LIGHTMISSILE},
-        {"MEDIUM-MISSILE", MOUNT_SIZE::MEDIUMMISSILE},
-        {"HEAVY-MISSILE", MOUNT_SIZE::HEAVYMISSILE},
-        {"LIGHT-CAPSHIP-MISSILE", MOUNT_SIZE::CAPSHIPLIGHTMISSILE},
-        {"HEAVY-CAPSHIP-MISSILE", MOUNT_SIZE::CAPSHIPHEAVYMISSILE},
-        {"SPECIAL-MISSILE", MOUNT_SIZE::SPECIALMISSILE},
-        {"AUTOTRACKING", MOUNT_SIZE::AUTOTRACKING}
-};
+static const std::map<std::string, MOUNT_SIZE> mount_map = {{"LIGHT", MOUNT_SIZE::LIGHT},
+                                                            {"MEDIUM", MOUNT_SIZE::MEDIUM},
+                                                            {"HEAVY", MOUNT_SIZE::HEAVY},
+                                                            {"CAPSHIP-LIGHT", MOUNT_SIZE::CAPSHIPLIGHT},
+                                                            {"CAPSHIP-HEAVY", MOUNT_SIZE::CAPSHIPHEAVY},
+                                                            {"SPECIAL", MOUNT_SIZE::SPECIAL},
+                                                            {"LIGHT-MISSILE", MOUNT_SIZE::LIGHTMISSILE},
+                                                            {"MEDIUM-MISSILE", MOUNT_SIZE::MEDIUMMISSILE},
+                                                            {"HEAVY-MISSILE", MOUNT_SIZE::HEAVYMISSILE},
+                                                            {"LIGHT-CAPSHIP-MISSILE", MOUNT_SIZE::CAPSHIPLIGHTMISSILE},
+                                                            {"HEAVY-CAPSHIP-MISSILE", MOUNT_SIZE::CAPSHIPHEAVYMISSILE},
+                                                            {"SPECIAL-MISSILE", MOUNT_SIZE::SPECIALMISSILE},
+                                                            {"AUTOTRACKING", MOUNT_SIZE::AUTOTRACKING}};
 
-MountSize::MountSize() {
-
-}
+MountSize::MountSize() {}
 
 MOUNT_SIZE getMountSizeFromItsValue(int value) {
     MOUNT_SIZE mount_sizes[] = {MOUNT_SIZE::NOWEAP,
-            MOUNT_SIZE::LIGHT, MOUNT_SIZE::MEDIUM, MOUNT_SIZE::HEAVY,
-            MOUNT_SIZE::CAPSHIPLIGHT, MOUNT_SIZE::CAPSHIPHEAVY, MOUNT_SIZE::SPECIAL,
-            MOUNT_SIZE::LIGHTMISSILE, MOUNT_SIZE::MEDIUMMISSILE, MOUNT_SIZE::HEAVYMISSILE,
-            MOUNT_SIZE::CAPSHIPLIGHTMISSILE, MOUNT_SIZE::CAPSHIPHEAVYMISSILE,
-            MOUNT_SIZE::SPECIALMISSILE,
-            MOUNT_SIZE::AUTOTRACKING};
+                                MOUNT_SIZE::LIGHT,
+                                MOUNT_SIZE::MEDIUM,
+                                MOUNT_SIZE::HEAVY,
+                                MOUNT_SIZE::CAPSHIPLIGHT,
+                                MOUNT_SIZE::CAPSHIPHEAVY,
+                                MOUNT_SIZE::SPECIAL,
+                                MOUNT_SIZE::LIGHTMISSILE,
+                                MOUNT_SIZE::MEDIUMMISSILE,
+                                MOUNT_SIZE::HEAVYMISSILE,
+                                MOUNT_SIZE::CAPSHIPLIGHTMISSILE,
+                                MOUNT_SIZE::CAPSHIPHEAVYMISSILE,
+                                MOUNT_SIZE::SPECIALMISSILE,
+                                MOUNT_SIZE::AUTOTRACKING};
 
     for (auto &&mount_size : mount_sizes) {
         if (value == as_integer(mount_size)) {
@@ -111,21 +115,14 @@ std::string getMountSizeString(const int mount) {
 }
 
 bool isNormalGunMount(const int mount) {
-    return (mount & (
-            as_integer(MOUNT_SIZE::LIGHT) |
-                    as_integer(MOUNT_SIZE::MEDIUM) |
-                    as_integer(MOUNT_SIZE::HEAVY) |
-                    as_integer(MOUNT_SIZE::CAPSHIPLIGHT) |
-                    as_integer(MOUNT_SIZE::CAPSHIPHEAVY))) != 0;
+    return (mount & (as_integer(MOUNT_SIZE::LIGHT) | as_integer(MOUNT_SIZE::MEDIUM) | as_integer(MOUNT_SIZE::HEAVY) |
+                     as_integer(MOUNT_SIZE::CAPSHIPLIGHT) | as_integer(MOUNT_SIZE::CAPSHIPHEAVY))) != 0;
 }
 
 bool isNormalMissileMount(const int mount) {
-    return (mount & (
-            as_integer(MOUNT_SIZE::LIGHTMISSILE) |
-                    as_integer(MOUNT_SIZE::MEDIUMMISSILE) |
-                    as_integer(MOUNT_SIZE::HEAVYMISSILE) |
-                    as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE) |
-                    as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE))) != 0;
+    return (mount & (as_integer(MOUNT_SIZE::LIGHTMISSILE) | as_integer(MOUNT_SIZE::MEDIUMMISSILE) |
+                     as_integer(MOUNT_SIZE::HEAVYMISSILE) | as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE) |
+                     as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE))) != 0;
 }
 
 bool isNormalMount(const int mount) {
@@ -133,8 +130,7 @@ bool isNormalMount(const int mount) {
 }
 
 bool isSpecialMount(const int mount) {
-    return mount & (as_integer(MOUNT_SIZE::SPECIAL) ||
-            as_integer(MOUNT_SIZE::SPECIALMISSILE));
+    return mount & (as_integer(MOUNT_SIZE::SPECIAL) || as_integer(MOUNT_SIZE::SPECIALMISSILE));
 }
 
 bool isSpecialGunMount(const int mount) {
@@ -150,14 +146,7 @@ bool isAutoTrackingMount(const int mount) {
 }
 
 bool isGunMount(const int mount) {
-    return (mount & (
-            as_integer(MOUNT_SIZE::LIGHT) |
-                    as_integer(MOUNT_SIZE::MEDIUM) |
-                    as_integer(MOUNT_SIZE::HEAVY) |
-                    as_integer(MOUNT_SIZE::CAPSHIPLIGHT) |
-                    as_integer(MOUNT_SIZE::CAPSHIPHEAVY) |
-                    as_integer(MOUNT_SIZE::SPECIAL))) != 0;
+    return (mount & (as_integer(MOUNT_SIZE::LIGHT) | as_integer(MOUNT_SIZE::MEDIUM) | as_integer(MOUNT_SIZE::HEAVY) |
+                     as_integer(MOUNT_SIZE::CAPSHIPLIGHT) | as_integer(MOUNT_SIZE::CAPSHIPHEAVY) |
+                     as_integer(MOUNT_SIZE::SPECIAL))) != 0;
 }
-
-
-

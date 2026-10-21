@@ -30,8 +30,8 @@
 #include <boost/python.hpp>
 
 #include "cmd/engineVersion.h"
-#include "src/python/python_class.h"
 
+#include "src/python/python_class.h"
 #include "version.h"
 
 using namespace VegaStrike;
@@ -52,19 +52,13 @@ EngineVersionData::EngineVersionData() {
     // if we can though...just let the compiler do it since it's already a C Macro the
     // compiler knows about
     const wchar_t *convertedBytes = L"" VEGASTRIKE_VERSION_TWEAK;
-    this->hash = convertedBytes;
+    this->hash                    = convertedBytes;
 }
 
-EngineVersionData::~EngineVersionData() {
-}
+EngineVersionData::~EngineVersionData() {}
 
 boost::python::tuple EngineVersionData::GetVersion() const {
-    return VS_BOOST_MAKE_TUPLE_4(
-            this->major,
-            this->minor,
-            this->patch,
-            this->hash
-    );
+    return VS_BOOST_MAKE_TUPLE_4(this->major, this->minor, this->patch, this->hash);
 }
 
 uint16_t EngineVersionData::GetAssetAPIVersion() const {

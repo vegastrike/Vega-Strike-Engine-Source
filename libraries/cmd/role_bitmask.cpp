@@ -27,19 +27,21 @@
 
 
 #include "cmd/role_bitmask.h"
-#include "root_generic/xml_support.h"
+
 #include <gnuhash.h>
 
-#include "root_generic/vs_globals.h"
-#include "src/config_xml.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
 #include "cmd/csv.h"
 #include "configuration/configuration.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
 #include "src/vs_exit.h"
-using std::string;
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 using std::pair;
-using namespace VSFileSystem;   // FIXME -- Shouldn't import an entire namespace like this, at least according to Google Style Guide
+using std::string;
+using namespace VSFileSystem;  // FIXME -- Shouldn't import an entire namespace like this, at least according to Google
+                               // Style Guide
 
 namespace ROLES {
 
@@ -56,7 +58,7 @@ int discreteLog(int bitmask) {
 std::vector<std::vector<char>> buildroles();
 
 std::vector<std::vector<char>> &getAllRolePriorities() {
-    static std::vector<std::vector<char> > allrolepriority = buildroles();
+    static std::vector<std::vector<char>> allrolepriority = buildroles();
     return allrolepriority;
 }
 
@@ -89,25 +91,24 @@ const std::string &InternalGetStrRole(unsigned char c) {
     return rolemap.size() ? rolemap.begin()->first : empty;
 }
 
-std::vector<std::vector<std::string> > buildscripts() {
-    std::vector<std::vector<std::string> > scripts;
+std::vector<std::vector<std::string>> buildscripts() {
+    std::vector<std::vector<std::string>> scripts;
     getAllRolePriorities();
 
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly("VegaEvents.csv", AiFile);
     if (err <= Ok) {
-        int len = f.Size();
-        char *temp = (char *) malloc(len + 1);
+        int   len  = f.Size();
+        char *temp = (char *)malloc(len + 1);
         memset(temp, 0, len + 1);
         f.ReadLine(temp, len);
         size_t siz = getAllRolePriorities().size();
 
         std::vector<std::string> vec = readCSV(temp);
         if (siz && getAllRolePriorities()[0].size() != vec.size()) {
-            VS_LOG_AND_FLUSH(fatal,
-                    (boost::format(
-                            "FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
-                            % ((unsigned int) vec.size())));
+            VS_LOG_AND_FLUSH(fatal, (boost::format("FATAL error in hash map... column %1% in ai/VegaEvents.csv does "
+                                                   "not line up with that item in ai/VegaPriorities.csv\n") %
+                                     ((unsigned int)vec.size())));
             VSExit(-5);
         }
         if (vec.size()) {
@@ -115,10 +116,9 @@ std::vector<std::vector<std::string> > buildscripts() {
         }
         for (unsigned int j = 0; j < vec.size(); j++) {
             if (getRole(vec[j]) != j) {
-                VS_LOG_AND_FLUSH(fatal,
-                        (boost::format(
-                                "FATAL error in hash map... column %1% in ai/VegaEvents.csv does not line up with that item in ai/VegaPriorities.csv\n")
-                                % j));
+                VS_LOG_AND_FLUSH(fatal, (boost::format("FATAL error in hash map... column %1% in ai/VegaEvents.csv "
+                                                       "does not line up with that item in ai/VegaPriorities.csv\n") %
+                                         j));
                 VSExit(-5);
             }
         }
@@ -133,7 +133,7 @@ std::vector<std::vector<std::string> > buildscripts() {
             f.ReadLine(temp, len);
             std::vector<std::string> strs = readCSV(temp);
             if (strs.size()) {
-                string front = strs.front();
+                string       front     = strs.front();
                 unsigned int scriptind = getRole(front);
                 while (scripts.size() <= scriptind) {
                     scripts.push_back(std::vector<std::string>());
@@ -154,8 +154,8 @@ std::vector<std::vector<std::string> > buildscripts() {
 }
 
 const std::string &getRoleEvents(unsigned char ourrole, unsigned char theirs) {
-    static std::vector<std::vector<std::string> > script = buildscripts();
-    const static std::string def = "default";
+    static std::vector<std::vector<std::string>> script = buildscripts();
+    const static std::string                     def    = "default";
     if (ourrole >= script.size()) {
         VS_LOG(error, "bad error with getRoleEvents (no event specified)");
         return def;
@@ -167,23 +167,23 @@ const std::string &getRoleEvents(unsigned char ourrole, unsigned char theirs) {
     return script[ourrole][theirs];
 }
 
-std::vector<std::vector<char> > buildroles() {
-    std::vector<std::vector<char> > rolePriorities;
-    VSFile f;
-    VSError err = f.OpenReadOnly("VegaPriorities.csv", AiFile);
+std::vector<std::vector<char>> buildroles() {
+    std::vector<std::vector<char>> rolePriorities;
+    VSFile                         f;
+    VSError                        err = f.OpenReadOnly("VegaPriorities.csv", AiFile);
     if (err <= Ok) {
-        int len = f.Size();
-        char *temp = (char *) malloc(len + 1);
+        int   len  = f.Size();
+        char *temp = (char *)malloc(len + 1);
         memset(temp, 0, len + 1);
         f.ReadLine(temp, len);
         std::vector<std::string> vec = readCSV(temp);
-        unsigned int i;
+        unsigned int             i;
         for (i = 1; i < vec.size(); i++) {
             rolemap.insert(pair<string, int>(strtoupper(vec[i]), i - 1));
             irolemap.insert(pair<int, string>(i - 1, strtoupper(vec[i])));
         }
-        std::vector<std::vector<char> > tmprolepriorities;
-        std::vector<std::string> tmpnamelist;
+        std::vector<std::vector<char>> tmprolepriorities;
+        std::vector<std::string>       tmpnamelist;
         while (f.ReadLine(temp, len) == Ok) {
             std::vector<std::string> priority = readCSV(temp);
             if (priority.size() > 0) {
@@ -200,22 +200,22 @@ std::vector<std::vector<char> > buildroles() {
         for (int k = 0; k < 2; ++k) {
             for (i = 0; i < tmpnamelist.size(); ++i) {
                 vsUMap<string, int>::iterator iter = rolemap.find(tmpnamelist[i]);
-                int j = -1;
+                int                           j    = -1;
                 if (iter != rolemap.end()) {
                     if (k == 0) {
                         j = iter->second;
                     }
                 } else if (k == 1) {
-                    for (j = 0; j < (int) rolePriorities.size(); ++j) {
+                    for (j = 0; j < (int)rolePriorities.size(); ++j) {
                         if (rolePriorities[j].size() == 0) {
                             break;
                         }
                     }
                     rolemap[tmpnamelist[i]] = j;
-                    irolemap[j] = tmpnamelist[i];
+                    irolemap[j]             = tmpnamelist[i];
                 }
                 if (j != -1) {
-                    while (rolePriorities.size() <= (unsigned int) j) {
+                    while (rolePriorities.size() <= (unsigned int)j) {
                         rolePriorities.push_back(std::vector<char>());
                     }
                     rolePriorities[j].swap(tmprolepriorities[i]);
@@ -234,7 +234,7 @@ std::vector<std::vector<char> > buildroles() {
                     rolePriorities[i].resize(a);
                 }
             }
-            //this is just to square out the table and make it safe to access with *any * input string
+            // this is just to square out the table and make it safe to access with *any * input string
         }
         free(temp);
         f.Close();
@@ -255,11 +255,11 @@ const std::string &getRole(unsigned char c) {
 
 // TODO: remove and examine entire file
 unsigned int readBitmask(const std::string &ss) {
-    string s = ss;
+    string                 s   = ss;
     std::string::size_type loc = string::npos;
-    int ans = 0;
+    int                    ans = 0;
     do {
-        loc = s.find(" ");
+        loc  = s.find(" ");
         ans |= (1 << getRole(s.substr(0, loc)));
         if (loc != string::npos) {
             s = s.substr(loc + 1);
@@ -269,12 +269,12 @@ unsigned int readBitmask(const std::string &ss) {
 }
 
 unsigned int getCapitalRoles() {
-    std::string defaultcapshipvalues = configuration().data.capship_roles;
-    unsigned int retval = 0;
-    string inp = defaultcapshipvalues;
+    std::string       defaultcapshipvalues = configuration().data.capship_roles;
+    unsigned int      retval               = 0;
+    string            inp                  = defaultcapshipvalues;
     string::size_type where;
     while ((where = inp.find(" ")) != string::npos) {
-        string tmp = inp.substr(0, where);
+        string        tmp     = inp.substr(0, where);
         unsigned char logrole = getRole(tmp);
         if (tmp == getRole(logrole)) {
             retval |= (1 << logrole);
@@ -283,12 +283,11 @@ unsigned int getCapitalRoles() {
     }
     if (inp.length()) {
         unsigned char logrole = getRole(inp);
-        string tmp = getRole(logrole);
+        string        tmp     = getRole(logrole);
         if (tmp == inp) {
             retval |= (1 << logrole);
         }
     }
     return retval;
 }
-}
-
+}  // namespace ROLES

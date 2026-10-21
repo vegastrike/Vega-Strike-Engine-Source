@@ -28,20 +28,18 @@
 
 #include "cmd/weapon_factory.h"
 
-#include "cmd/weapon_info.h"
-#include "cmd/role_bitmask.h"
-#include "src/audiolib.h"
-
-#include "src/hashtable.h"
-
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
-#include <boost/json.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/json.hpp>
 
+#include "cmd/role_bitmask.h"
+#include "cmd/weapon_info.h"
 #include "resource/json_utils.h"
+#include "src/audiolib.h"
+#include "src/hashtable.h"
 
 extern Hashtable<std::string, WeaponInfo, 257> lookuptable;
 
@@ -60,8 +58,8 @@ void ParseWeapon(const boost::json::object& weapon) {
 
     // Weapon Type
     const std::string weapon_type = JsonGetWithDefault(weapon, "type", std::string());
-    wi.type = getWeaponTypeFromString(weapon_type);
-    wi.file = getFilenameFromWeaponType(wi.type);
+    wi.type                       = getWeaponTypeFromString(weapon_type);
+    wi.file                       = getFilenameFromWeaponType(wi.type);
 
     // Name
     wi.name = JsonGetStringWithDefault(weapon, "name", "Unknown");
@@ -71,35 +69,35 @@ void ParseWeapon(const boost::json::object& weapon) {
 
     // Energy
     wi.energy_rate = JsonGetWithDefault(weapon, "Energy.rate", wi.energy_rate);
-    wi.stability = JsonGetWithDefault(weapon, "Energy.stability", wi.stability);
+    wi.stability   = JsonGetWithDefault(weapon, "Energy.stability", wi.stability);
     wi.refire_rate = JsonGetWithDefault(weapon, "Energy.refire", wi.refire_rate);
-    wi.lock_time = JsonGetWithDefault(weapon, "Energy.locktime", wi.lock_time);
+    wi.lock_time   = JsonGetWithDefault(weapon, "Energy.locktime", wi.lock_time);
 
 
     // Damage
     // TODO: weapon_list.xml laser has damage. Everything else has rate. Correct.
-    wi.damage = JsonGetWithDefault(weapon, "Damage.rate", wi.damage);
+    wi.damage       = JsonGetWithDefault(weapon, "Damage.rate", wi.damage);
     wi.phase_damage = JsonGetWithDefault(weapon, "Damage.phasedamage", wi.phase_damage);
-    wi.radius = JsonGetWithDefault(weapon, "Damage.radius", wi.radius);
+    wi.radius       = JsonGetWithDefault(weapon, "Damage.radius", wi.radius);
     wi.radial_speed = JsonGetWithDefault(weapon, "Damage.radialspeed", wi.radial_speed);
-    wi.long_range = JsonGetWithDefault(weapon, "Damage.longrange", wi.long_range);
+    wi.long_range   = JsonGetWithDefault(weapon, "Damage.longrange", wi.long_range);
 
 
     // Distance
-    wi.volume = JsonGetWithDefault(weapon, "Distance.volume", wi.volume);
-    wi.speed = JsonGetWithDefault(weapon, "Distance.speed", wi.speed);
+    wi.volume      = JsonGetWithDefault(weapon, "Distance.volume", wi.volume);
+    wi.speed       = JsonGetWithDefault(weapon, "Distance.speed", wi.speed);
     wi.pulse_speed = JsonGetWithDefault(weapon, "Distance.pulsespeed", wi.pulse_speed);
-    wi.range = JsonGetWithDefault(weapon, "Distance.range", wi.range);
-    wi.length = JsonGetWithDefault(weapon, "Distance.length", wi.length);
+    wi.range       = JsonGetWithDefault(weapon, "Distance.range", wi.range);
+    wi.length      = JsonGetWithDefault(weapon, "Distance.length", wi.length);
 
 
     // TODO: this is a bug. It gets parsed into the same radius and radial_speed variables.
-    wi.radius = JsonGetWithDefault(weapon, "Distance.radius", wi.radius);
+    wi.radius       = JsonGetWithDefault(weapon, "Distance.radius", wi.radius);
     wi.radial_speed = JsonGetWithDefault(weapon, "Distance.radialspeed", wi.radial_speed);
 
 
     // TODO: detonation range not implemented. Incorrectly assigns to pulse_speed...
-    //wi.bug = inner.get( "Energy.<xmlattr>.detonationrange", wi.bug );
+    // wi.bug = inner.get( "Energy.<xmlattr>.detonationrange", wi.bug );
 
     // TODO: is this really necessary???
     /*if(configuration().physics.gun_speed_adjusted_game_speed) {
@@ -116,10 +114,10 @@ void ParseWeapon(const boost::json::object& weapon) {
 
     // Appearance
     wi.file = JsonGetWithDefault(weapon, "Appearance.file", wi.file);
-    wi.r = JsonGetWithDefault(weapon, "Appearance.r", wi.r);
-    wi.g = JsonGetWithDefault(weapon, "Appearance.g", wi.g);
-    wi.b = JsonGetWithDefault(weapon, "Appearance.b", wi.b);
-    wi.a = JsonGetWithDefault(weapon, "Appearance.a", wi.a);
+    wi.r    = JsonGetWithDefault(weapon, "Appearance.r", wi.r);
+    wi.g    = JsonGetWithDefault(weapon, "Appearance.g", wi.g);
+    wi.b    = JsonGetWithDefault(weapon, "Appearance.b", wi.b);
+    wi.a    = JsonGetWithDefault(weapon, "Appearance.a", wi.a);
 
     // TODO: reenable? No idea why or what this is...
     /*if ( (gamma > 0) && gamma_needed( gamma, counts, 32 ) ) {
@@ -146,9 +144,8 @@ void ParseWeapon(const boost::json::object& weapon) {
     lookuptable.Put(boost::to_upper_copy(wi.name), new WeaponInfo(wi));
 }
 
-
 WeaponFactory::WeaponFactory(std::string filename) {
-    std::ifstream ifs(filename, std::ifstream::in);
+    std::ifstream     ifs(filename, std::ifstream::in);
     std::stringstream buffer;
     buffer << ifs.rdbuf();
 
@@ -157,12 +154,8 @@ WeaponFactory::WeaponFactory(std::string filename) {
     boost::json::value json_value = boost::json::parse(json_text);
     boost::json::array root_array = json_value.get_array();
 
-    for(boost::json::value& weapon_value : root_array) {
+    for (boost::json::value& weapon_value : root_array) {
         boost::json::object weapon = weapon_value.get_object();
         ParseWeapon(weapon);
     }
 }
-
-
-
-

@@ -35,21 +35,21 @@
 
 #include "cmd/intelligent.h"
 
-#include "cmd/ai/order.h"
-#include "src/python/python_class.h"
-#include "cmd/script/mission.h"
+#include <string>
+
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/ikarus.h"
 #include "cmd/ai/missionscript.h"
-#include "cmd/unit_generic.h"
-#include "cmd/pilot.h"
-#include "gfx_generic/mesh.h"
+#include "cmd/ai/order.h"
 #include "cmd/ai/turretai.h"
+#include "cmd/pilot.h"
+#include "cmd/script/mission.h"
+#include "cmd/unit_generic.h"
 #include "collide2/CSopcodecollider.h"
-#include "src/vega_cast_utils.h"
+#include "gfx_generic/mesh.h"
 #include "root_generic/configxml.h"
-
-#include <string>
+#include "src/python/python_class.h"
+#include "src/vega_cast_utils.h"
 
 using std::string;
 
@@ -59,9 +59,7 @@ extern bool CheckAccessory(Unit *tur);
 // TODO: remove
 using namespace Orders;
 
-Intelligent::Intelligent() {
-
-}
+Intelligent::Intelligent() {}
 
 void Intelligent::LoadAIScript(const std::string &s) {
     if (s.find(".py") != string::npos) {
@@ -135,7 +133,7 @@ void Intelligent::PrimeOrders() {
         aistate->Destroy();
         aistate = nullptr;
     }
-    aistate = new Order;                 //get 'er ready for enqueueing
+    aistate = new Order;  // get 'er ready for enqueueing
     aistate->SetParent(unit);
 }
 
@@ -146,11 +144,9 @@ void Intelligent::PrimeOrdersLaunched() {
         aistate->Destroy();
         aistate = nullptr;
     }
-    Vector vec(0, 0, 10000);
-    aistate = new ExecuteFor(new Orders::MatchVelocity(unit->ClampVelocity(vec, true), Vector(0,
-                    0,
-                    0), true, true,
-            false), 4.0f);
+    Vector vec(0, 0, 10'000);
+    aistate = new ExecuteFor(
+            new Orders::MatchVelocity(unit->ClampVelocity(vec, true), Vector(0, 0, 0), true, true, false), 4.0f);
     aistate->SetParent(unit);
 }
 
@@ -188,13 +184,13 @@ void Intelligent::EnqueueAIFirst(Order *newAI) {
 }
 
 void Intelligent::ExecuteAI() {
-    Unit *unit = static_cast<Unit *>(this);
+    Unit        *unit        = static_cast<Unit *>(this);
     Flightgroup *flightgroup = unit->flightgroup;
     if (flightgroup) {
         Unit *leader = flightgroup->leader.GetUnit();
-        //no heirarchy in flight group
+        // no heirarchy in flight group
         if (leader ? (flightgroup->leader_decision > -1) && (leader->getFgSubnumber() >= unit->getFgSubnumber())
-                : true) {
+                   : true) {
             if (!leader) {
                 flightgroup->leader_decision = flightgroup->nr_ships;
             }
@@ -207,9 +203,9 @@ void Intelligent::ExecuteAI() {
     }
     if (!unit->SubUnits.empty()) {
         un_iter iter = unit->getSubUnits();
-        Unit *un;
+        Unit   *un;
         while ((un = *iter)) {
-            un->ExecuteAI();                     //like dubya
+            un->ExecuteAI();  // like dubya
             ++iter;
         }
     }
@@ -234,21 +230,21 @@ float Intelligent::getRelation(const Unit *targ) const {
 double Intelligent::getMinDis(const QVector &pnt) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
-    float minsofar = 1e+10;
-    float tmpvar;
+    float        minsofar = 1e+10;
+    float        tmpvar;
     unsigned int i;
-    Vector TargetPoint(unit->cumulative_transformation_matrix.getP());
+    Vector       TargetPoint(unit->cumulative_transformation_matrix.getP());
 
 #ifdef VARIABLE_LENGTH_PQR
-    //the scale factor of the current UNIT
-    float SizeScaleFactor = sqrtf( TargetPoint.Dot( TargetPoint ) );
+    // the scale factor of the current UNIT
+    float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));
 #endif
     for (i = 0; i < unit->nummesh(); ++i) {
         TargetPoint =
                 (Transform(unit->cumulative_transformation_matrix, unit->meshdata[i]->Position()).Cast() - pnt).Cast();
         tmpvar = sqrtf(TargetPoint.Dot(TargetPoint)) - unit->meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
-            *SizeScaleFactor
+                                                               * SizeScaleFactor
 #endif
                 ;
         if (tmpvar < minsofar) {
@@ -267,7 +263,7 @@ double Intelligent::getMinDis(const QVector &pnt) const {
 void Intelligent::SetTurretAI() {
     Unit *unit = static_cast<Unit *>(this);
 
-    unit->turretstatus = 2;
+    unit->turretstatus       = 2;
     const bool talkinturrets = configuration().ai.independent_turrets;
     if (talkinturrets) {
         Unit *un;
@@ -302,7 +298,7 @@ void Intelligent::DisableTurretAI() {
         if (un->aistate) {
             un->aistate->Destroy();
         }
-        un->aistate = new Order;         //get 'er ready for enqueueing
+        un->aistate = new Order;  // get 'er ready for enqueueing
         un->aistate->SetParent(un);
         un->UnFire();
         un->DisableTurretAI();

@@ -28,22 +28,21 @@
 
 #include "cmd/weapon_info.h"
 
-#include "root_generic/vs_globals.h"
-#include "root_generic/options.h"
 #include "cmd/unit_const_cache.h"
+#include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
 
 // TODO: this should not be here
-#include "vegadisk/vsfilesystem.h"
-#include "gfx_generic/mesh.h"
-
 #include <boost/algorithm/string.hpp>
+
+#include "gfx_generic/mesh.h"
+#include "vegadisk/vsfilesystem.h"
 
 namespace alg = boost::algorithm;
 
 Hashtable<std::string, WeaponInfo, 257> lookuptable;
 
-WeaponInfo::WeaponInfo() {
-}
+WeaponInfo::WeaponInfo() {}
 
 WeaponInfo::WeaponInfo(WEAPON_TYPE type) {
     this->type = type;
@@ -56,13 +55,14 @@ WeaponInfo::WeaponInfo(const WeaponInfo &tmp) {
 float WeaponInfo::Refire() const {
     unsigned int len = name.length();
     // TODO: what is this???
-    if (g_game.difficulty > .98 || len < 9 || name[len - 8] != 'C' || name[len - 9] != '_' || name[len - 7]
-            != 'o' || name[len - 6] != 'm' || name[len - 5] != 'p' || name[len - 4] != 'u' || name[len - 3]
-            != 't' || name[len - 2] != 'e' || name[len - 1] != 'r') {
+    if (g_game.difficulty > .98 || len < 9 || name[len - 8] != 'C' || name[len - 9] != '_' || name[len - 7] != 'o' ||
+        name[len - 6] != 'm' || name[len - 5] != 'p' || name[len - 4] != 'u' || name[len - 3] != 't' ||
+        name[len - 2] != 'e' || name[len - 1] != 'r') {
         return refire_rate;
     }
-    return this->refire_rate * (configuration().physics.refire_difficulty_scaling_flt
-            / (1.0f + (configuration().physics.refire_difficulty_scaling_flt - 1.0f) * g_game.difficulty));
+    return this->refire_rate *
+           (configuration().physics.refire_difficulty_scaling_flt /
+            (1.0f + (configuration().physics.refire_difficulty_scaling_flt - 1.0f) * g_game.difficulty));
 }
 
 bool WeaponInfo::isMissile() const {
@@ -83,12 +83,12 @@ WeaponInfo *getWeapon(const std::string &key) {
     if (wi) {
         if (!WeaponMeshCache::getCachedMutable(wi->name)) {
             static FileLookupCache lookup_cache;
-            string meshname = boost::to_lower_copy(key) + ".bfxm";
+            string                 meshname = boost::to_lower_copy(key) + ".bfxm";
             if (CachedFileLookup(lookup_cache, meshname, MeshFile) <= Ok) {
-                WeaponMeshCache::setCachedMutable(wi->name, wi->gun =
-                        Mesh::LoadMesh(meshname.c_str(), Vector(1, 1, 1), 0, NULL));
-                WeaponMeshCache::setCachedMutable(wi->name + "_flare", wi->gun1 =
-                        Mesh::LoadMesh(meshname.c_str(), Vector(1, 1, 1), 0, NULL));
+                WeaponMeshCache::setCachedMutable(wi->name,
+                                                  wi->gun = Mesh::LoadMesh(meshname.c_str(), Vector(1, 1, 1), 0, NULL));
+                WeaponMeshCache::setCachedMutable(
+                        wi->name + "_flare", wi->gun1 = Mesh::LoadMesh(meshname.c_str(), Vector(1, 1, 1), 0, NULL));
             }
         }
     }
@@ -96,29 +96,29 @@ WeaponInfo *getWeapon(const std::string &key) {
 }
 
 void WeaponInfo::netswap() {
-    //Enum elements are the size of an int
-    //byte order swap doesn't work with ENUM - MAY NEED TO FIND A WORKAROUND SOMEDAY
-    //type = VSSwapHostIntToLittle( type);
-    //size = VSSwapHostIntToLittle( size);
+    // Enum elements are the size of an int
+    // byte order swap doesn't work with ENUM - MAY NEED TO FIND A WORKAROUND SOMEDAY
+    // type = VSSwapHostIntToLittle( type);
+    // size = VSSwapHostIntToLittle( size);
 
-    damage = VSSwapHostFloatToLittle(damage);
+    damage      = VSSwapHostFloatToLittle(damage);
     energy_rate = VSSwapHostFloatToLittle(energy_rate);
-    length = VSSwapHostFloatToLittle(length);
-    lock_time = VSSwapHostFloatToLittle(lock_time);
-    long_range = VSSwapHostFloatToLittle(long_range);
+    length      = VSSwapHostFloatToLittle(length);
+    lock_time   = VSSwapHostFloatToLittle(lock_time);
+    long_range  = VSSwapHostFloatToLittle(long_range);
     offset.netswap();
     phase_damage = VSSwapHostFloatToLittle(phase_damage);
-    pulse_speed = VSSwapHostFloatToLittle(pulse_speed);
+    pulse_speed  = VSSwapHostFloatToLittle(pulse_speed);
     radial_speed = VSSwapHostFloatToLittle(radial_speed);
-    radius = VSSwapHostFloatToLittle(radius);
-    range = VSSwapHostFloatToLittle(range);
-    refire_rate = VSSwapHostFloatToLittle(refire_rate);
-    //role_bits         = VSSwapHostIntToLittle( role_bits );
-    stability = VSSwapHostFloatToLittle(stability);
-    sound = VSSwapHostIntToLittle(sound);
-    speed = VSSwapHostFloatToLittle(speed);
+    radius       = VSSwapHostFloatToLittle(radius);
+    range        = VSSwapHostFloatToLittle(range);
+    refire_rate  = VSSwapHostFloatToLittle(refire_rate);
+    // role_bits         = VSSwapHostIntToLittle( role_bits );
+    stability       = VSSwapHostFloatToLittle(stability);
+    sound           = VSSwapHostIntToLittle(sound);
+    speed           = VSSwapHostFloatToLittle(speed);
     texture_stretch = VSSwapHostFloatToLittle(texture_stretch);
-    volume = VSSwapHostFloatToLittle(volume);
+    volume          = VSSwapHostFloatToLittle(volume);
 
     r = VSSwapHostFloatToLittle(r);
     g = VSSwapHostFloatToLittle(g);

@@ -27,27 +27,23 @@
 
 #include "cmd/energetic.h"
 
-#include "configuration/game_config.h"
-#include "configuration/configuration.h"
-#include "cmd/damageable.h"
-#include "src/vegastrike.h"
-#include "cmd/unit_generic.h"
-#include "src/universe.h"
-#include "resource/resource.h"
-#include "src/vega_cast_utils.h"
-
 #include <algorithm>
+
+#include "cmd/damageable.h"
+#include "cmd/unit_generic.h"
+#include "configuration/configuration.h"
+#include "configuration/game_config.h"
+#include "resource/resource.h"
+#include "src/universe.h"
+#include "src/vega_cast_utils.h"
+#include "src/vegastrike.h"
 
 /* This class provides all energy generation methods to unit types -
  * ships, space installations, missiles, drones, etc. */
 
 
-Energetic::Energetic() :
-        constrained_charge_to_shields(0.0f),
-        sufficient_energy_to_recharge_shields(true),
-        afterburntype(0) {
-}
-
+Energetic::Energetic()
+    : constrained_charge_to_shields(0.0f), sufficient_energy_to_recharge_shields(true), afterburntype(0) {}
 
 void Energetic::DecreaseWarpEnergyInWarp() {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
@@ -56,15 +52,13 @@ void Energetic::DecreaseWarpEnergyInWarp() {
         return;
     }
 
-    if(unit->ftl_drive.CanConsume()) {
+    if (unit->ftl_drive.CanConsume()) {
         unit->ftl_drive.Consume();
     } else {
         unit->ftl_drive.Disable();
         unit->graphicOptions.WarpRamping = 1;
     }
 }
-
-
 
 float Energetic::getFuelUsage(bool afterburner) {
     if (afterburner) {
@@ -73,12 +67,10 @@ float Energetic::getFuelUsage(bool afterburner) {
     return configuration().components.fuel.normal_fuel_usage_flt;
 }
 
-
 void Energetic::setEnergyRecharge(float enrech) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     unit->reactor.SetCapacity(enrech);
 }
-
 
 float Energetic::VSDPercent() {
     return configuration().components.fuel.vsd_mj_yield_flt / 100.0F;

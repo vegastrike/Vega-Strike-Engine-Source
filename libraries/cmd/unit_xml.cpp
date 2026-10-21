@@ -27,20 +27,22 @@
 
 
 #include "cmd/unit_xml.h"
-#include "src/audiolib.h"
-#include "root_generic/xml_support.h"
+
+#include <assert.h>
 #include <float.h>
 #include <limits.h>
-#include "root_generic/configxml.h"
-#include "root_generic/vs_globals.h"
-#include "src/vegastrike.h"
-#include "root_generic/vega_random.h"
-#include <assert.h>
-#include "root_generic/xml_serializer.h"
+
 #include "cmd/unit_collide.h"
 #include "cmd/unit_generic.h"
-#include "collide2/Opcode.h"
 #include "collide2/CSopcodecollider.h"
+#include "collide2/Opcode.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vega_random.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_serializer.h"
+#include "root_generic/xml_support.h"
+#include "src/audiolib.h"
+#include "src/vegastrike.h"
 
 using namespace XMLSupport;
 
@@ -58,9 +60,9 @@ string KillQuadZeros(string inp) {
 string MakeUnitXMLPretty(string str, Unit *un) {
     string writestr;
     if (un) {
-        writestr += "Name: " + un->name;
-        writestr += " " + un->getFullname();
-        Flightgroup *fg = un->getFlightgroup();
+        writestr        += "Name: " + un->name;
+        writestr        += " " + un->getFullname();
+        Flightgroup *fg  = un->getFlightgroup();
         if (fg) {
             writestr += " Designation " + fg->name + " " + XMLSupport::tostring(un->getFgSubnumber());
         }
@@ -70,18 +72,18 @@ string MakeUnitXMLPretty(string str, Unit *un) {
     if (lookfor.empty()) {
         lookfor.insert("Shie");
         lookfor.insert("Armo");
-//lookfor.insert ("Hull");
+        // lookfor.insert ("Hull");
         lookfor.insert("Reac");
         lookfor.insert("Moun");
         lookfor.insert("Comp");
-//lookfor.insert ("Desc");
+        // lookfor.insert ("Desc");
         lookfor.insert("Engi");
         lookfor.insert("Mane");
         lookfor.insert("Jump");
-//lookfor.insert ("Defe");
+        // lookfor.insert ("Defe");
         lookfor.insert("Stat");
         lookfor.insert("Engi");
-//lookfor.insert ("Hold");
+        // lookfor.insert ("Hold");
         lookfor.insert("Rada");
     }
     std::string::size_type foundpos;
@@ -110,14 +112,10 @@ string MakeUnitXMLPretty(string str, Unit *un) {
 // We no longer support add/mul modes of upgrades
 int GetModeFromName(const char *input_buffer) {
     if (strlen(input_buffer) > 3) {
-        if (input_buffer[0] == 'a'
-                && input_buffer[1] == 'd'
-                && input_buffer[2] == 'd') {
+        if (input_buffer[0] == 'a' && input_buffer[1] == 'd' && input_buffer[2] == 'd') {
             return 1;
         }
-        if (input_buffer[0] == 'm'
-                && input_buffer[1] == 'u'
-                && input_buffer[2] == 'l') {
+        if (input_buffer[0] == 'm' && input_buffer[1] == 'u' && input_buffer[2] == 'l') {
             return 2;
         }
     }
@@ -128,7 +126,7 @@ extern bool CheckAccessory(Unit *);
 
 void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg) {
     const bool forceit = configuration().graphics.force_one_one_shield_blend;
-    xml->shieldmesh = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
+    xml->shieldmesh    = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
     if (xml->shieldmesh && forceit) {
         xml->shieldmesh->SetBlendMode(ONE, ONE, true);
         xml->shieldmesh->setEnvMap(false, true);
@@ -140,15 +138,8 @@ void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int f
     xml->rapidmesh = Mesh::LoadMesh(filename, Vector(scale, scale, scale), faction, fg);
 }
 
-void pushMesh(std::vector<Mesh *> &meshes,
-        float &randomstartframe,
-        float &randomstartseconds,
-        const char *filename,
-        const float scale,
-        int faction,
-        class Flightgroup *fg,
-        int startframe,
-        double texturestarttime) {
+void pushMesh(std::vector<Mesh *> &meshes, float &randomstartframe, float &randomstartseconds, const char *filename,
+              const float scale, int faction, class Flightgroup *fg, int startframe, double texturestarttime) {
     vector<Mesh *> m = Mesh::LoadMeshes(filename, Vector(scale, scale, scale), faction, fg);
     for (unsigned int i = 0; i < m.size(); ++i) {
         meshes.push_back(m[i]);
@@ -167,13 +158,13 @@ void pushMesh(std::vector<Mesh *> &meshes,
         if (texturestarttime > 0) {
             meshes.back()->setTextureCumulativeTime(texturestarttime);
         } else {
-            float fps = meshes.back()->getTextureFramesPerSecond();
-            int frames = meshes.back()->getNumTextureFrames();
-            double ran = randomstartframe;
+            float  fps    = meshes.back()->getTextureFramesPerSecond();
+            int    frames = meshes.back()->getNumTextureFrames();
+            double ran    = randomstartframe;
             if (fps > 0 && frames > 1) {
                 ran *= frames / fps;
             } else {
-                ran *= 1000;
+                ran *= 1'000;
             }
             meshes.back()->setTextureCumulativeTime(ran);
         }

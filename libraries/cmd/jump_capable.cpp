@@ -27,36 +27,37 @@
 
 
 #include "cmd/jump_capable.h"
-#include "cmd/dock_utils.h"
+
 #include "cmd/ai/order.h"
+#include "cmd/dock_utils.h"
 #include "cmd/unit_find.h"
+#include "gfx/warptrail.h"
+#include "root_generic/configxml.h"
 #include "src/universe.h"
 #include "src/universe_util.h"
-#include "gfx/warptrail.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_exit.h"
 #include "src/vega_cast_utils.h"
-#include "root_generic/configxml.h"
+#include "src/vs_exit.h"
+#include "vegadisk/vsfilesystem.h"
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);
-extern float getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false);
-extern float globQueryShell(QVector st, QVector dir, float radius);
+extern float   getAutoRSize(Unit *orig, Unit *un, bool ignore_friend = false);
+extern float   globQueryShell(QVector st, QVector dir, float radius);
 
 static QVector AutoSafeEntrancePoint(const QVector start, float rsize, const Unit *goal) {
-    QVector def = UniverseUtil::SafeEntrancePoint(start, rsize);
-    double bdis = (def - RealPosition(goal)).MagnitudeSquared();
+    QVector def  = UniverseUtil::SafeEntrancePoint(start, rsize);
+    double  bdis = (def - RealPosition(goal)).MagnitudeSquared();
     for (int i = -1; i <= 1; ++i) {
         for (int j = -1; j <= 1; ++j) {
             for (int k = -1; k <= 1; k += 2) {
                 QVector delta(i, j, k);
                 delta.Normalize();
                 QVector tmp = RealPosition(goal) + delta * (goal->rSize() + rsize);
-                tmp = UniverseUtil::SafeEntrancePoint(tmp, rsize);
+                tmp         = UniverseUtil::SafeEntrancePoint(tmp, rsize);
                 double tmag = (tmp - RealPosition(goal)).MagnitudeSquared();
                 if (tmag < bdis) {
                     bdis = tmag;
-                    def = tmp;
+                    def  = tmp;
                 }
             }
         }
@@ -66,7 +67,7 @@ static QVector AutoSafeEntrancePoint(const QVector start, float rsize, const Uni
 
 signed char ComputeAutoGuarantee(Unit *un) {
     Cockpit *cp;
-    size_t cpnum = 0;
+    size_t   cpnum = 0;
     if ((cp = _Universe->isPlayerStarship(un))) {
         cpnum = cp - _Universe->AccessCockpit(0);
     } else {
@@ -105,8 +106,7 @@ std::string GenerateAutoError(Unit *me, Unit *targ) {
 
 JumpCapable::~JumpCapable() = default;
 
-JumpCapable::JumpCapable() : activeStarSystem(nullptr) {
-};
+JumpCapable::JumpCapable() : activeStarSystem(nullptr) {};
 
 void JumpCapable::ActivateJumpDrive(int destination) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
@@ -125,17 +125,15 @@ bool JumpCapable::AutoPilotTo(Unit *un, bool automaticenergyrealloc) {
     return AutoPilotToErrorMessage(un, automaticenergyrealloc, tmp);
 }
 
-bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
-        bool ignore_energy_requirements,
-        std::string &failuremessage,
-        int recursive_level) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+bool JumpCapable::AutoPilotToErrorMessage(const Unit *target, bool ignore_energy_requirements,
+                                          std::string &failuremessage, int recursive_level) {
+    Unit       *unit       = vega_dynamic_cast_ptr<Unit>(this);
     const Unit *const_unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     const bool auto_valid = configuration().physics.in_system_jump_or_timeless_auto_pilot;
     if (!auto_valid) {
         static std::string err = "No Insystem Jump";
-        failuremessage = err;
+        failuremessage         = err;
         return false;
     }
     if (target->getUnitType() == Vega_UnitType::planet) {
@@ -157,8 +155,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     const float autopilot_no_enemies_multiplier = configuration().physics.auto_pilot_no_enemies_distance_multiplier_flt;
     if (unit->isSubUnit()) {
         static std::string err = "Return To Cockpit for Auto";
-        failuremessage = err;
-        return false;                            //we can't auto here;
+        failuremessage         = err;
+        return false;  // we can't auto here;
     }
     StarSystem *ss = activeStarSystem;
     if (ss == nullptr) {
@@ -166,14 +164,14 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     }
     QVector start(unit->Position());
     QVector end(RealPosition(target));
-    float totallength = (start - end).Magnitude();
-    bool nanspace = false;
+    float   totallength = (start - end).Magnitude();
+    bool    nanspace    = false;
     if (!FINITE(totallength)) {
-        nanspace = true;
-        start = QVector(100000000.0, 100000000.0, 10000000000000.0);
+        nanspace    = true;
+        start       = QVector(100000000.0, 100000000.0, 10000000000000.0);
         totallength = (start - end).Magnitude();
         if (!FINITE(totallength)) {
-            end = QVector(200000000.0, 100000000.0, 10000000000000.0);
+            end         = QVector(200000000.0, 100000000.0, 10000000000000.0);
             totallength = (start - end).Magnitude();
         }
     }
@@ -184,9 +182,9 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         // The arrival is the docking distance itself, and aptne is the no-enemies one, which stands
         // off further when nothing is watching. percent / percentne turn them into the point along
         // the path the ship flies to.
-        float apt = static_cast<float>(DockingDistance(target));
-        float aptne = atd_no_enemies + static_cast<float>(DockingDistance(target));
-        float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
+        float apt       = static_cast<float>(DockingDistance(target));
+        float aptne     = atd_no_enemies + static_cast<float>(DockingDistance(target));
+        float percent   = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
         float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
         if (percentne > 1) {
             endne = start;
@@ -194,72 +192,70 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             endne = start * percentne + end * (1 - percentne);
         }
         if (percent > 1) {
-            end = start;
+            end        = start;
             totpercent = 0;
         } else {
             totpercent *= (1 - percent);
-            end = start * percent + end * (1 - percent);
+            end         = start * percent + end * (1 - percent);
         }
     }
     bool ok = true;
 
     const bool teleport_autopilot = configuration().physics.teleport_autopilot;
-    bool unsafe = false;
+    bool       unsafe             = false;
     if ((!teleport_autopilot) && (!nanspace)) {
         if (Guaranteed == Mission::AUTO_NORMAL && unit->cloak.Cloaked()) {
             Unit *un = nullptr;
             for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != nullptr; ++i) {
                 const bool canflythruplanets = configuration().physics.can_auto_through_planets;
-                if ((!(un->getUnitType() == Vega_UnitType::planet
-                        && canflythruplanets)) && un->getUnitType() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
+                if ((!(un->getUnitType() == Vega_UnitType::planet && canflythruplanets)) &&
+                    un->getUnitType() != Vega_UnitType::nebula && (!UnitUtil::isSun(un))) {
                     if (un != this && un != target) {
-                        bool ignore_friendlies = true;
-                        float tdis = (start - un->Position()).Magnitude() - unit->rSize() - un->rSize();
-                        float nedis = (end - un->Position()).Magnitude() - unit->rSize() - un->rSize();
+                        bool  ignore_friendlies = true;
+                        float tdis              = (start - un->Position()).Magnitude() - unit->rSize() - un->rSize();
+                        float nedis             = (end - un->Position()).Magnitude() - unit->rSize() - un->rSize();
                         float trad =
                                 getAutoRSize(unit, un, ignore_friendlies) + getAutoRSize(unit, unit, ignore_friendlies);
                         if (tdis <= trad) {
                             failuremessage = GenerateAutoError(unit, un);
                             return false;
                         }
-                        if ((nedis < trad * autopilot_no_enemies_multiplier
-                                || tdis <= trad * autopilot_no_enemies_multiplier) && un->getRelation(unit) < 0) {
-                            unsafe = true;
+                        if ((nedis < trad * autopilot_no_enemies_multiplier ||
+                             tdis <= trad * autopilot_no_enemies_multiplier) &&
+                            un->getRelation(unit) < 0) {
+                            unsafe         = true;
                             failuremessage = GenerateAutoError(unit, un);
                         }
-                        float intersection =
-                                globQueryShell(start - un->Position(), end - start, getAutoRSize(unit,
-                                        un,
-                                        ignore_friendlies)
-                                        + un->rSize());
+                        float intersection = globQueryShell(start - un->Position(), end - start,
+                                                            getAutoRSize(unit, un, ignore_friendlies) + un->rSize());
                         if (intersection > 0) {
-                            unsafe = true;
-                            end = start + (end - start) * intersection;
-                            totpercent *= intersection;
-                            ok = false;
-                            failuremessage = GenerateAutoError(unit, un);
+                            unsafe          = true;
+                            end             = start + (end - start) * intersection;
+                            totpercent     *= intersection;
+                            ok              = false;
+                            failuremessage  = GenerateAutoError(unit, un);
                         }
                     }
                 }
             }
         }
     } else if (!nanspace) {
-        //just make sure we aren't in an asteroid field
+        // just make sure we aren't in an asteroid field
         Unit *un;
         for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != nullptr; ++i) {
             if (UnitUtil::isAsteroid(un)) {
                 const float minasteroiddistance = configuration().physics.min_asteroid_distance_flt;
                 if (UnitUtil::getDistance(unit, un) < minasteroiddistance) {
                     failuremessage = GenerateAutoError(unit, un);
-                    return false;                     //no auto in roid field
+                    return false;  // no auto in roid field
                 }
             }
         }
     }
     if (this != target) {
         bool nowhere = false;
-        if ((end - start).MagnitudeSquared()
-            < (static_cast<double>(unit->rSize()) * static_cast<double>(unit->rSize()))) {
+        if ((end - start).MagnitudeSquared() <
+            (static_cast<double>(unit->rSize()) * static_cast<double>(unit->rSize()))) {
             failuremessage = configuration().graphics.hud.already_near_message;
             return false;
         }
@@ -268,14 +264,15 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
             end = endne;
         }
         QVector sep(UniverseUtil::SafeEntrancePoint(end, unit->rSize()));
-        if ((sep - end).MagnitudeSquared()
-                > (16.0 * static_cast<double>(unit->rSize()) * static_cast<double>(unit->rSize()))) {
-            //DOn't understand why rsize is so bigsep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
+        if ((sep - end).MagnitudeSquared() >
+            (16.0 * static_cast<double>(unit->rSize()) * static_cast<double>(unit->rSize()))) {
+            // DOn't understand why rsize is so bigsep = AutoSafeEntrancePoint
+            // (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
             sep = AutoSafeEntrancePoint(end, unit->rSize(), target);
         }
-        if ((sep - RealPosition(target)).MagnitudeSquared()
-                > (RealPosition(unit) - RealPosition(target)).MagnitudeSquared()) {
-            sep = RealPosition(unit);
+        if ((sep - RealPosition(target)).MagnitudeSquared() >
+            (RealPosition(unit) - RealPosition(target)).MagnitudeSquared()) {
+            sep     = RealPosition(unit);
             nowhere = true;
         }
         const bool auto_turn_towards = configuration().physics.auto_turn_towards;
@@ -285,7 +282,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                 methem.Normalize();
                 Vector p, q, r;
                 unit->GetOrientation(p, q, r);
-                p = methem.Cross(r);
+                p           = methem.Cross(r);
                 float theta = p.Magnitude();
                 if (theta * theta > .00001) {
                     p *= (asin(theta) / theta);
@@ -305,25 +302,21 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                 UniverseUtil::cacheAnimation(insys_jump_ani);
                 docache = false;
             }
-            const float insys_jump_ani_size = configuration().graphics.in_system_jump_animation_size_flt;
+            const float insys_jump_ani_size   = configuration().graphics.in_system_jump_animation_size_flt;
             const float insys_jump_ani_growth = configuration().graphics.in_system_jump_animation_growth_flt;
-            UniverseUtil::playAnimationGrow(insys_jump_ani, RealPosition(unit),
-                    unit->rSize() * insys_jump_ani_size, insys_jump_ani_growth);
+            UniverseUtil::playAnimationGrow(insys_jump_ani, RealPosition(unit), unit->rSize() * insys_jump_ani_size,
+                                            insys_jump_ani_growth);
 
             Vector v(unit->GetVelocity());
             v.Normalize();
             Vector p, q, r;
             unit->GetOrientation(p, q, r);
             const float sec = configuration().graphics.in_system_jump_ani_second_ahead_flt;
-            UniverseUtil::playAnimationGrow(insys_jump_ani,
-                    sep + unit->GetVelocity() * sec + v * unit->rSize(),
-                    unit->rSize() * 8,
-                    .97);
-            UniverseUtil::playAnimationGrow(insys_jump_ani,
-                    sep + unit->GetVelocity() * sec + 2 * v * unit->rSize()
-                            + r * 4 * unit->rSize(),
-                    unit->rSize() * 16,
-                    .97);
+            UniverseUtil::playAnimationGrow(insys_jump_ani, sep + unit->GetVelocity() * sec + v * unit->rSize(),
+                                            unit->rSize() * 8, .97);
+            UniverseUtil::playAnimationGrow(
+                    insys_jump_ani, sep + unit->GetVelocity() * sec + 2 * v * unit->rSize() + r * 4 * unit->rSize(),
+                    unit->rSize() * 16, .97);
         }
         const bool warptrail = configuration().graphics.warp_trail;
         if (warptrail && (!nowhere)) {
@@ -336,11 +329,11 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         if (_Universe->isPlayerStarship(const_unit) != nullptr) {
             if (unit->getFlightgroup() != nullptr) {
                 if (recursive_level > 0) {
-                    Unit *other = nullptr;
+                    Unit       *other = nullptr;
                     std::string follower_message;
                     for (un_iter ui = ss->getUnitList().createIterator(); nullptr != (other = *ui); ++ui) {
-                        Flightgroup *ff = other->getFlightgroup();
-                        bool leadah = (ff == unit->getFlightgroup());
+                        Flightgroup *ff     = other->getFlightgroup();
+                        bool         leadah = (ff == unit->getFlightgroup());
                         if (ff) {
                             if (ff->leader.GetUnit() == this) {
                                 leadah = true;
@@ -349,15 +342,12 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
                         Order *otherord = other->getAIState();
                         if (otherord) {
                             if (otherord->PursueTarget(unit, leadah)) {
-                                other->AutoPilotToErrorMessage(unit,
-                                        ignore_energy_requirements,
-                                        follower_message,
-                                        recursive_level - 1);
+                                other->AutoPilotToErrorMessage(unit, ignore_energy_requirements, follower_message,
+                                                               recursive_level - 1);
                                 if (leadah) {
                                     if (other->IsPlayerShip()) {
                                         other->SetPosition(AutoSafeEntrancePoint(unit->LocalPosition(),
-                                                other->rSize() * 1.5,
-                                                other));
+                                                                                 other->rSize() * 1.5, other));
                                     }
                                 }
                             }
@@ -370,40 +360,37 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     return ok;
 }
 
-float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
-        Unit **nearest_unit,
-        bool count_negative_warp_units) const {
+float JumpCapable::CalculateNearestWarpUnit(float minmultiplier, Unit **nearest_unit,
+                                            bool count_negative_warp_units) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     const float smallwarphack = configuration().physics.min_warp_effect_size_flt;
-    const float bigwarphack = configuration().physics.max_warp_effect_size_flt;
-    //Boundary between multiplier regions 1&2. 2 is "high" mult
+    const float bigwarphack   = configuration().physics.max_warp_effect_size_flt;
+    // Boundary between multiplier regions 1&2. 2 is "high" mult
     const double warpregion1 = configuration().physics.warp_region1_dbl;
-    //Boundary between multiplier regions 0&1 0 is mult=1
+    // Boundary between multiplier regions 0&1 0 is mult=1
     const double warpregion0 = configuration().physics.warp_region0_dbl;
-    //Mult at 1-2 boundary
+    // Mult at 1-2 boundary
     const double warpcruisemult = configuration().physics.warp_cruise_mult_dbl;
-    //degree of curve
+    // degree of curve
     const double curvedegree = configuration().physics.warp_curve_degree_dbl;
-    //coefficient so as to agree with above
+    // coefficient so as to agree with above
     const double upcurvek = warpcruisemult / std::pow((warpregion1 - warpregion0), curvedegree);
-    //inverse fractional effect of ship vs real big object
+    // inverse fractional effect of ship vs real big object
     const float def_inv_interdiction = 1.0 / configuration().physics.default_interdiction_flt;
-    Unit *planet;
-    Unit *testthis = nullptr;
+    Unit       *planet;
+    Unit       *testthis = nullptr;
     {
         NearestUnitLocator locatespec;
-        findObjects(_Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY],
-                unit->location[Unit::UNIT_ONLY],
-                &locatespec);
+        findObjects(_Universe->activeStarSystem()->collide_map[Unit::UNIT_ONLY], unit->location[Unit::UNIT_ONLY],
+                    &locatespec);
         testthis = locatespec.retval.unit;
     }
     for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
-            (planet = *iter) || testthis;
-            ++iter) {
+         (planet = *iter) || testthis; ++iter) {
         if (!planet || !planet->Killed()) {
             if (planet == nullptr) {
-                planet = testthis;
+                planet   = testthis;
                 testthis = nullptr;
             }
             if (planet == this) {
@@ -411,29 +398,31 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
             }
             float shiphack = 1;
             if (planet->getUnitType() != Vega_UnitType::planet) {
-                shiphack = def_inv_interdiction;
+                shiphack                 = def_inv_interdiction;
                 double spec_interdiction = planet->ship_functions.Value(Function::ftl_interdiction);
-                if (spec_interdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
-                        && (spec_interdiction > 0 || count_negative_warp_units)) {
+                if (spec_interdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0 &&
+                    (spec_interdiction > 0 || count_negative_warp_units)) {
                     shiphack = 1 / fabs(spec_interdiction);
-                    if (unit->ship_functions.Value(Function::ftl_interdiction) != 0 && unit->graphicOptions.specInterdictionOnline != 0) {
-                        //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or
-                        // expensive ones should counter planets...this is safe now, for gameplay
+                    if (unit->ship_functions.Value(Function::ftl_interdiction) != 0 &&
+                        unit->graphicOptions.specInterdictionOnline != 0) {
+                        // only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive
+                        // ones!? or
+                        //  expensive ones should counter planets...this is safe now, for gameplay
                         shiphack *= fabs(spec_interdiction);
                     }
                 }
             }
             float multipliertemp = 1;
-            float minsizeeffect = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
-            float effectiverad = minsizeeffect * (1.0f + UniverseUtil::getPlanetRadiusPercent()) + unit->rSize();
+            float minsizeeffect  = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
+            float effectiverad   = minsizeeffect * (1.0f + UniverseUtil::getPlanetRadiusPercent()) + unit->rSize();
             if (effectiverad > bigwarphack) {
                 effectiverad = bigwarphack;
             }
-            QVector dir = unit->Position() - planet->Position();
-            double udist = dir.Magnitude();
-            float sigdist = UnitUtil::getSignificantDistance(unit, planet);
+            QVector dir     = unit->Position() - planet->Position();
+            double  udist   = dir.Magnitude();
+            float   sigdist = UnitUtil::getSignificantDistance(unit, planet);
             if (planet->isPlanet() && udist < (1 << 28)) {
-                //If distance is viable as a float approximation and it's an actual celestial body
+                // If distance is viable as a float approximation and it's an actual celestial body
                 udist = sigdist;
             }
             do {
@@ -450,14 +439,14 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 if (multipliertemp < minmultiplier) {
                     minmultiplier = multipliertemp;
                     *nearest_unit = planet;
-                    //eventually use new multiplier to compute
+                    // eventually use new multiplier to compute
                 } else {
                     break;
                 }
             } while (false);
             if (!testthis) {
                 break;
-            } //don't want the ++
+            }  // don't want the ++
         }
     }
     return minmultiplier;
@@ -515,7 +504,7 @@ const StarSystem *JumpCapable::getStarSystem() const {
 Vector JumpCapable::GetWarpRefVelocity() const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
-    //Velocity
+    // Velocity
     Vector VelocityRef(0, 0, 0);
     {
         const Unit *vr = unit->VelocityReference();
@@ -523,10 +512,10 @@ Vector JumpCapable::GetWarpRefVelocity() const {
             VelocityRef = vr->cumulative_velocity;
         }
     }
-    Vector v = unit->Velocity - VelocityRef;
-    float len = v.Magnitude();
+    Vector v   = unit->Velocity - VelocityRef;
+    float  len = v.Magnitude();
     if (len > .01) {
-        //only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
+        // only get velocity going in DIRECTIOn of cumulative transformation for warp calc...
         v = v * (unit->cumulative_transformation_matrix.getR().Dot(v * (1. / len)));
     }
     return v;
@@ -547,15 +536,15 @@ Vector JumpCapable::GetWarpVelocity() const {
             }
         }
 
-        //return(cumulative_velocity*graphicOptions.WarpFieldStrength);
-        Vector vel = unit->cumulative_velocity - VelocityRef;
-        float speed = vel.Magnitude();
-        //return vel*graphicOptions.WarpFieldStrength;
+        // return(cumulative_velocity*graphicOptions.WarpFieldStrength);
+        Vector vel   = unit->cumulative_velocity - VelocityRef;
+        float  speed = vel.Magnitude();
+        // return vel*graphicOptions.WarpFieldStrength;
         if (speed > 0) {
-            Vector veldir = vel * (1. / speed);
-            Vector facing = unit->cumulative_transformation_matrix.getR();
-            float ang = facing.Dot(veldir);
-            float warpfield = unit->graphicOptions.WarpFieldStrength;
+            Vector veldir    = vel * (1. / speed);
+            Vector facing    = unit->cumulative_transformation_matrix.getR();
+            float  ang       = facing.Dot(veldir);
+            float  warpfield = unit->graphicOptions.WarpFieldStrength;
             if (ang < 0) {
                 warpfield = 1. / warpfield;
             }
@@ -591,9 +580,7 @@ bool JumpCapable::TransferUnitToSystem(StarSystem *new_system) {
     return false;
 }
 
-bool JumpCapable::TransferUnitToSystem(unsigned int whichJumpQueue,
-        class StarSystem *&previouslyActiveStarSystem,
-        bool DoSightAndSound) {
+bool JumpCapable::TransferUnitToSystem(unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem,
+                                       bool DoSightAndSound) {
     return false;
 }
-

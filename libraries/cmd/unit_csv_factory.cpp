@@ -29,8 +29,8 @@
 #include "cmd/unit_csv_factory.h"
 
 #include <iostream>
-#include <vector>
 #include <string>
+#include <vector>
 
 // Required definition of static variable
 std::map<std::string, std::map<std::string, std::string>> UnitCSVFactory::units;
@@ -38,23 +38,21 @@ std::map<std::string, std::map<std::string, std::string>> UnitCSVFactory::units;
 // This is probably unique enough to ensure no collision
 std::string UnitCSVFactory::DEFAULT_ERROR_VALUE = "UnitCSVFactory::_GetVariable DEFAULT_ERROR_VALUE";
 
-
 // TODO: place this somewhere else with similar code from unit_csv
 std::string GetUnitKeyFromNameAndFaction(const std::string unit_name, const std::string unit_faction) {
     std::string hash_name = unit_name + "__" + unit_faction;
 
-    if(UnitCSVFactory::HasUnit(hash_name)) {
+    if (UnitCSVFactory::HasUnit(hash_name)) {
         return hash_name;
     }
 
-    if(UnitCSVFactory::HasUnit(unit_name)) {
+    if (UnitCSVFactory::HasUnit(unit_name)) {
         return unit_name;
     }
 
     return std::string();
 }
 
-void UnitCSVFactory::LoadUnit(std::string key,
-                              std::map<std::string,std::string> unit_map) {
+void UnitCSVFactory::LoadUnit(std::string key, std::map<std::string, std::string> unit_map) {
     UnitCSVFactory::units[key] = unit_map;
 }

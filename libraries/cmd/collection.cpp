@@ -28,25 +28,26 @@
 
 #include "cmd/collection.h"
 
-#if defined (USE_OLD_COLLECTION)
-#include "oldcollection.cpp"
-#elif defined (USE_STL_COLLECTION)
+#if defined(USE_OLD_COLLECTION)
+#    include "oldcollection.cpp"
+#elif defined(USE_STL_COLLECTION)
 
-#include <list>
-#include <vector>
-#ifndef LIST_TESTING
-#include "cmd/unit_util.h"
-#include "cmd/unit_generic.h"
+#    include <list>
+#    include <vector>
+#    ifndef LIST_TESTING
+#        include "cmd/unit_generic.h"
+#        include "cmd/unit_util.h"
 
-#else
-#include "testcollection/unit.h"
-#endif
+#    else
+#        include "testcollection/unit.h"
+#    endif
 
-#include "src/vs_logging.h"
+#    include "src/vs_logging.h"
 
 using std::list;
 using std::vector;
-//UnitIterator  BEGIN:
+
+// UnitIterator  BEGIN:
 
 UnitCollection::UnitIterator &UnitCollection::UnitIterator::operator=(const UnitCollection::UnitIterator &orig) {
     if (col != orig.col) {
@@ -64,7 +65,7 @@ UnitCollection::UnitIterator &UnitCollection::UnitIterator::operator=(const Unit
 
 UnitCollection::UnitIterator::UnitIterator(const UnitIterator &orig) {
     col = orig.col;
-    it = orig.it;
+    it  = orig.it;
     if (col) {
         col->reg(this);
     }
@@ -72,7 +73,7 @@ UnitCollection::UnitIterator::UnitIterator(const UnitIterator &orig) {
 
 UnitCollection::UnitIterator::UnitIterator(UnitCollection *orig) {
     col = orig;
-    it = col->u.begin();
+    it  = col->u.begin();
     col->reg(this);
     while (it != col->u.end()) {
         if ((*it) == NULL) {
@@ -143,19 +144,19 @@ Unit *UnitCollection::UnitIterator::next() {
     return *it;
 }
 
-//UnitIterator END:
+// UnitIterator END:
 
-//ConstIterator Begin:
+// ConstIterator Begin:
 
 UnitCollection::ConstIterator &UnitCollection::ConstIterator::operator=(const UnitCollection::ConstIterator &orig) {
     col = orig.col;
-    it = orig.it;
+    it  = orig.it;
     return *this;
 }
 
 UnitCollection::ConstIterator::ConstIterator(const ConstIterator &orig) {
     col = orig.col;
-    it = orig.it;
+    it  = orig.it;
 }
 
 UnitCollection::ConstIterator::ConstIterator(const UnitCollection *orig) {
@@ -167,8 +168,7 @@ UnitCollection::ConstIterator::ConstIterator(const UnitCollection *orig) {
     }
 }
 
-UnitCollection::ConstIterator::~ConstIterator() {
-}
+UnitCollection::ConstIterator::~ConstIterator() {}
 
 Unit *UnitCollection::ConstIterator::next() {
     advance();
@@ -207,9 +207,9 @@ const UnitCollection::ConstIterator UnitCollection::ConstIterator::operator++(in
     return tmp;
 }
 
-//ConstIterator  END:
+// ConstIterator  END:
 
-//UnitCollection  BEGIN:
+// UnitCollection  BEGIN:
 
 UnitCollection::UnitCollection() {
     activeIters.reserve(20);
@@ -325,7 +325,7 @@ inline void UnitCollection::erase(list<Unit *>::iterator &it2) {
         ++it2;
         return;
     }
-    //If we have more than 4 iterators, just push node onto vector.
+    // If we have more than 4 iterators, just push node onto vector.
     if (activeIters.size() > 3) {
         removedIters.push_back(it2);
         (*it2)->UnRef();
@@ -333,10 +333,10 @@ inline void UnitCollection::erase(list<Unit *>::iterator &it2) {
         ++it2;
         return;
     }
-    //If we have between 2 and 4 iterators, see if any are actually
-    //on the node we want to remove, if so, just push onto vector.
-    //Purpose : This special case is to reduce the size of the list in the
-    //situation where removedIters isn't being processed.
+    // If we have between 2 and 4 iterators, see if any are actually
+    // on the node we want to remove, if so, just push onto vector.
+    // Purpose : This special case is to reduce the size of the list in the
+    // situation where removedIters isn't being processed.
     if (activeIters.size() > 1) {
         for (vector<UnitCollection::UnitIterator *>::size_type i = 0; i < activeIters.size(); ++i) {
             if (activeIters[i]->it == it2) {
@@ -348,11 +348,11 @@ inline void UnitCollection::erase(list<Unit *>::iterator &it2) {
             }
         }
     }
-    //If we have 1 iterator, or none of the iterators are currently on the
-    //requested node to be removed, then remove it right away.
+    // If we have 1 iterator, or none of the iterators are currently on the
+    // requested node to be removed, then remove it right away.
     (*it2)->UnRef();
     (*it2) = NULL;
-    it2 = u.erase(it2);
+    it2    = u.erase(it2);
 }
 
 bool UnitCollection::remove(const Unit *unit) {
@@ -389,8 +389,8 @@ inline void UnitCollection::unreg(un_iter *iter) {
             break;
         }
     }
-    if (activeIters.empty()
-            || (activeIters.size() == 1 && (activeIters[0]->it == u.end() || (*(activeIters[0]->it))))) {
+    if (activeIters.empty() ||
+        (activeIters.size() == 1 && (activeIters[0]->it == u.end() || (*(activeIters[0]->it))))) {
         while (!removedIters.empty()) {
             u.erase(removedIters.back());
             removedIters.pop_back();
@@ -398,7 +398,6 @@ inline void UnitCollection::unreg(un_iter *iter) {
     }
 }
 
-//UnitCollection END:
+// UnitCollection END:
 
-#endif //USE_STL_COLLECTION
-
+#endif  // USE_STL_COLLECTION

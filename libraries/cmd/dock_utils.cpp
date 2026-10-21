@@ -27,13 +27,14 @@
 
 #include "dock_utils.h"
 
-#include "unit_generic.h"
-#include "universe_util.h"
-#include "configuration/configuration.h"
-#include "physics.h"
+#include <algorithm>
 
 #include <boost/format.hpp>
-#include <algorithm>
+
+#include "configuration/configuration.h"
+#include "physics.h"
+#include "unit_generic.h"
+#include "universe_util.h"
 
 // Which docking rule applies: the simple "dock when close" test, or the docking zones you fly the
 // ship into. An empty mode means the setting is not in the config yet, in which case the older
@@ -67,18 +68,18 @@ Matrix PhysicsTransform(const Unit *unit) {
     return m;
 }
 
-} // anonymous namespace
+}  // anonymous namespace
 
 double DistanceTwoTargets(Unit *first_unit, Unit *second_unit) {
     // LocalPosition, not Position: the latter is the renderer's cumulative transform, which is only
     // written while the unit is being drawn and starts as the identity.
     double distance = (first_unit->LocalPosition() - second_unit->LocalPosition()).Magnitude();
 
-    if(first_unit->getUnitType() == Vega_UnitType::planet) {
+    if (first_unit->getUnitType() == Vega_UnitType::planet) {
         distance -= first_unit->rSize();
     }
 
-    if(second_unit->getUnitType() == Vega_UnitType::planet) {
+    if (second_unit->getUnitType() == Vega_UnitType::planet) {
         distance -= second_unit->rSize();
     }
 
@@ -110,12 +111,12 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
     constexpr double kDefinitelyTooFar = 20000.0;
 
     // Nowhere to dock. Exit
-    if(dock->pImage->dockingports.empty()) {
+    if (dock->pImage->dockingports.empty()) {
         return -1;
     }
 
     // Jump point. Exit
-    if(!dock->pImage->destination.empty()) {
+    if (!dock->pImage->destination.empty()) {
         return -1;
     }
 
@@ -139,7 +140,7 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         return -1;
     }
 
-    //don't need to check relation: already cleared.
+    // don't need to check relation: already cleared.
 
     // If your unit has docking ports then we check if any of our docking
     // ports overlap with any of the station's docking ports.
@@ -149,19 +150,21 @@ int CanDock(Unit *dock, Unit *ship, const bool ignore_occupancy) {
         if (!ship->pImage->dockingports.empty()) {
             for (unsigned int j = 0; j < ship->pImage->dockingports.size(); ++j) {
                 if (inside_usable_dock(dock->pImage->dockingports[i],
-                        InvTransform(PhysicsTransform(dock),
-                                Transform(PhysicsTransform(ship),
-                                        ship->pImage->dockingports[j].GetPosition().Cast())),
-                        ship->pImage->dockingports[j].GetRadius(), ignore_occupancy)) {
+                                       InvTransform(PhysicsTransform(dock),
+                                                    Transform(PhysicsTransform(ship),
+                                                              ship->pImage->dockingports[j].GetPosition().Cast())),
+                                       ship->pImage->dockingports[j].GetRadius(), ignore_occupancy)) {
                     // We cannot dock if we are already docked
-                    if (((ship->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED)) == 0) && (!(dock->docked & Unit::DOCKED_INSIDE))) {
+                    if (((ship->docked & (Unit::DOCKED_INSIDE | Unit::DOCKED)) == 0) &&
+                        (!(dock->docked & Unit::DOCKED_INSIDE))) {
                         return i;
                     }
                 }
             }
         }
         if (inside_usable_dock(dock->pImage->dockingports[i],
-                InvTransform(PhysicsTransform(dock), ship->LocalPosition()), ship->rSize(), ignore_occupancy)) {
+                               InvTransform(PhysicsTransform(dock), ship->LocalPosition()), ship->rSize(),
+                               ignore_occupancy)) {
             return i;
         }
     }
@@ -179,10 +182,10 @@ double NearestPortDistance(const Unit *unit, const Unit *dock) {
         return -1.0;
     }
     const Matrix dock_tf = PhysicsTransform(dock);
-    double nearest = -1.0;
+    double       nearest = -1.0;
     for (const DockingPorts &port : dock->pImage->dockingports) {
-        const QVector world = Transform(dock_tf, port.GetPosition().Cast());
-        const double distance = (world - unit->LocalPosition()).Magnitude();
+        const QVector world    = Transform(dock_tf, port.GetPosition().Cast());
+        const double  distance = (world - unit->LocalPosition()).Magnitude();
         if (nearest < 0.0 || distance < nearest) {
             nearest = distance;
         }
@@ -190,7 +193,7 @@ double NearestPortDistance(const Unit *unit, const Unit *dock) {
     return nearest;
 }
 
-} // anonymous namespace
+}  // anonymous namespace
 
 std::string GetDockingText(Unit *unit, Unit *target, double range) {
     // Nowhere to dock. Exit
@@ -216,15 +219,15 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
             unit->hull.Destroy();
         }
 
-        const double docking_distance = DockingDistance(target);
-        range -= docking_distance;
+        const double docking_distance  = DockingDistance(target);
+        range                         -= docking_distance;
         if (range < 0) {
             return std::string("Docking: Ready");
         } else if (range < target->rSize()) {
             return std::string("Docking: ") + PrettyDistanceString(range);
         }
     } else if (DockIsSimple() && !target->pImage->dockingports.empty() &&
-        range < configuration().dock.count_to_dock_range_dbl) {
+               range < configuration().dock.count_to_dock_range_dbl) {
         if (range <= DockingDistance(target)) {
             return std::string("Docking: Ready");
         } else {
@@ -246,7 +249,6 @@ std::string GetDockingText(Unit *unit, Unit *target, double range) {
     return std::string();
 }
 
-
 std::string PrettyDistanceString(double distance) {
     if (configuration().physics.game_speed_lying) {
         distance /= configuration().physics.game_speed_dbl;
@@ -255,23 +257,23 @@ std::string PrettyDistanceString(double distance) {
     // Distance in km
     static const double light_second = c;
     static const double light_minute = light_second * 60;
-    static const double light_hour = light_minute * 60;
-    static const double light_day = light_hour * 24;
-    static const double light_year = light_day * 365;
+    static const double light_hour   = light_minute * 60;
+    static const double light_day    = light_hour * 24;
+    static const double light_year   = light_day * 365;
 
     // Use meters up to 20,000 m
-    if (distance < 20000) {
+    if (distance < 20'000) {
         return (boost::format("%.0lf meters") % distance).str();
     }
 
     // Use kilometers with two decimals up to 100 km
-    if (distance < 100000) {
-        return (boost::format("%.2lf kilometers") % (distance / 1000)).str();
+    if (distance < 100'000) {
+        return (boost::format("%.2lf kilometers") % (distance / 1'000)).str();
     }
 
     // Use kilometers without decimals up to a light second
     if (distance < light_second) {
-        return (boost::format("%.0lf kilometers") % (distance / 1000)).str();
+        return (boost::format("%.0lf kilometers") % (distance / 1'000)).str();
     }
 
     // Use light seconds up to 2 light minutes
@@ -284,7 +286,7 @@ std::string PrettyDistanceString(double distance) {
         return (boost::format("%.2lf light minutes") % (distance / light_minute)).str();
     }
 
-    //use light hours up to 48
+    // use light hours up to 48
     if (distance < (48 * light_hour)) {
         return (boost::format("%.2lf light hours") % (distance / light_hour)).str();
     }

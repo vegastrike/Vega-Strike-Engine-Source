@@ -27,60 +27,50 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "cmd/unit_generic.h"
-#include "cmd/csv.h"
-#include "vegadisk/savegame.h"
-#include "root_generic/xml_serializer.h"
-#include "gfx_generic/sphere.h"
-#include "cmd/unit_collide.h"
-#include "collide2/Opcode.h"
-#include "collide2/CSopcodecollider.h"
-#include "src/audiolib.h"
-#include "cmd/unit_xml.h"
-#include "gfx_generic/quaternion.h"
-#include "cmd/role_bitmask.h"
 #include "cmd/unit_csv.h"
+
 #include <algorithm>
+
 #include <boost/json/array.hpp>
-#include <boost/json/value_from.hpp>
 #include <boost/json/serialize.hpp>
+#include <boost/json/value_from.hpp>
 
-#include "root_generic/lin_time.h"
-#include "cmd/unit_const_cache.h"
-#include "src/vs_math.h"
-#include "root_generic/vega_random.h"
-#include "src/universe.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
+#include "cmd/csv.h"
 #include "cmd/mount_size.h"
-#include "cmd/weapon_info.h"
-#include "resource/resource.h"
+#include "cmd/role_bitmask.h"
+#include "cmd/unit_collide.h"
+#include "cmd/unit_const_cache.h"
 #include "cmd/unit_csv_factory.h"
+#include "cmd/unit_generic.h"
+#include "cmd/unit_xml.h"
 #include "cmd/upgradeable_unit.h"
-#include "resource/manifest.h"
+#include "cmd/weapon_info.h"
+#include "collide2/CSopcodecollider.h"
+#include "collide2/Opcode.h"
 #include "components/component_utils.h"
+#include "gfx_generic/quaternion.h"
+#include "gfx_generic/sphere.h"
+#include "resource/manifest.h"
+#include "resource/resource.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/vega_random.h"
+#include "root_generic/xml_serializer.h"
+#include "src/audiolib.h"
+#include "src/universe.h"
+#include "src/vs_logging.h"
+#include "src/vs_math.h"
+#include "vegadisk/savegame.h"
+#include "vegadisk/vsfilesystem.h"
 
-extern int GetModeFromName(const char *input_buffer);
-extern void pushMesh(std::vector<Mesh *> &mesh,
-        float &randomstartframe,
-        float &randomstartseconds,
-        const char *filename,
-        const float scale,
-        int faction,
-        class Flightgroup *fg,
-        int startframe,
-        double texturestarttime);
-void addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
-void addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
+extern int  GetModeFromName(const char *input_buffer);
+extern void pushMesh(std::vector<Mesh *> &mesh, float &randomstartframe, float &randomstartseconds,
+                     const char *filename, const float scale, int faction, class Flightgroup *fg, int startframe,
+                     double texturestarttime);
+void        addShieldMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
+void        addRapidMesh(Unit::XML *xml, const char *filename, const float scale, int faction, class Flightgroup *fg);
 
-void AddMeshes(std::vector<Mesh *> &xmeshes,
-               float &randomstartframe,
-               float &randomstartseconds,
-               float unitscale,
-               const std::string &meshes,
-               int faction,
-               Flightgroup *fg,
-               vector<unsigned int> *counts) {
+void AddMeshes(std::vector<Mesh *> &xmeshes, float &randomstartframe, float &randomstartseconds, float unitscale,
+               const std::string &meshes, int faction, Flightgroup *fg, vector<unsigned int> *counts) {
     string::size_type where, when, wheresf, wherest, ofs = 0;
 
     // Clear counts vector
@@ -99,45 +89,37 @@ void AddMeshes(std::vector<Mesh *> &xmeshes,
         xmeshes.reserve(number_of_elements);
     }
     while ((where = meshes.find('{', ofs)) != string::npos) {
-        when = meshes.find('}', where + 1);         //matching closing brace
+        when        = meshes.find('}', where + 1);  // matching closing brace
         string mesh = meshes.substr(where + 1, ((when == string::npos) ? string::npos : when - where - 1));
-        ofs = ((when == string::npos) ? string::npos : when + 1);
+        ofs         = ((when == string::npos) ? string::npos : when + 1);
 
-        wheresf = mesh.find(';');
+        wheresf       = mesh.find(';');
         string startf = "0";
         string startt = "0";
         if (wheresf != string::npos) {
-            startf = mesh.substr(wheresf + 1);
-            mesh = mesh.substr(0, wheresf);
+            startf  = mesh.substr(wheresf + 1);
+            mesh    = mesh.substr(0, wheresf);
             wherest = startf.find(';');
             if (wherest != string::npos) {
                 startt = startf.substr(wherest + 1);
                 startf = startf.substr(0, wherest);
             }
         }
-        int startframe = startf == "RANDOM" ? -1 : (startf == "ASYNC" ? -1 : atoi(startf.c_str()));
-        float starttime = startt == "RANDOM" ? -1.0f : atof(startt.c_str());
-        unsigned int s = xmeshes.size();
-        pushMesh(xmeshes,
-                randomstartframe,
-                randomstartseconds,
-                mesh.c_str(),
-                unitscale,
-                faction,
-                fg,
-                startframe,
-                starttime);
+        int          startframe = startf == "RANDOM" ? -1 : (startf == "ASYNC" ? -1 : atoi(startf.c_str()));
+        float        starttime  = startt == "RANDOM" ? -1.0f : atof(startt.c_str());
+        unsigned int s          = xmeshes.size();
+        pushMesh(xmeshes, randomstartframe, randomstartseconds, mesh.c_str(), unitscale, faction, fg, startframe,
+                 starttime);
         if (counts) {
             counts->push_back(xmeshes.size() - s);
         }
     }
 }
 
-static std::pair<string::size_type, string::size_type> nextElementRange(const string &inp,
-        string::size_type &start,
-        string::size_type end) {
+static std::pair<string::size_type, string::size_type> nextElementRange(const string &inp, string::size_type &start,
+                                                                        string::size_type end) {
     string::size_type ostart = start;
-    start = inp.find(';', start);
+    start                    = inp.find(';', start);
     if (start != string::npos && (start != end && (end == string::npos || start < end))) {
         ++start;
         return std::pair<string::size_type, string::size_type>(ostart, start - 1);
@@ -192,14 +174,12 @@ static double nextElementBool(const string &inp, string::size_type &start, strin
 }
 
 static string nextElement(string &inp) {
-    string::size_type start = 0;
-    std::pair<string::size_type, string::size_type> rng = nextElementRange(inp, start, string::npos);
+    string::size_type                               start = 0;
+    std::pair<string::size_type, string::size_type> rng   = nextElementRange(inp, start, string::npos);
     string ret = inp.substr(rng.first, ((rng.second == string::npos) ? string::npos : (rng.second - rng.first)));
     inp.erase(0, ((rng.second == string::npos) ? string::npos : (rng.second + 1)));
     return ret;
 }
-
-
 
 extern bool CheckAccessory(Unit *);
 
@@ -207,7 +187,7 @@ extern int parseMountSizes(const char *str);
 
 static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
     string::size_type where, when, ofs = 0;
-    unsigned int first_new_mount = thus->mounts.size();
+    unsigned int      first_new_mount = thus->mounts.size();
     {
         int nmountz = 0;
         while ((ofs = mounts.find('{', ofs)) != string::npos) {
@@ -222,28 +202,28 @@ static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
             ofs = when + 1;
 
             QVector P;
-            QVector Q = QVector(0, 1, 0);
-            QVector R = QVector(0, 0, 1);
+            QVector Q   = QVector(0, 1, 0);
+            QVector R   = QVector(0, 0, 1);
             QVector pos = QVector(0, 0, 0);
 
-            string filename = nextElementString(mounts, elemstart, elemend);
-            int ammo = nextElementInt(mounts, elemstart, elemend, -1);
-            int volume = nextElementInt(mounts, elemstart, elemend);
+            string filename  = nextElementString(mounts, elemstart, elemend);
+            int    ammo      = nextElementInt(mounts, elemstart, elemend, -1);
+            int    volume    = nextElementInt(mounts, elemstart, elemend);
             string mountsize = nextElementString(mounts, elemstart, elemend);
-            pos.i = nextElementFloat(mounts, elemstart, elemend);
-            pos.j = nextElementFloat(mounts, elemstart, elemend);
-            pos.k = nextElementFloat(mounts, elemstart, elemend);
-            double xyscale = nextElementFloat(mounts, elemstart, elemend);
-            double zscale = nextElementFloat(mounts, elemstart, elemend);
-            R.i = nextElementFloat(mounts, elemstart, elemend);
-            R.j = nextElementFloat(mounts, elemstart, elemend);
-            R.k = nextElementFloat(mounts, elemstart, elemend, 1);
-            Q.i = nextElementFloat(mounts, elemstart, elemend);
-            Q.j = nextElementFloat(mounts, elemstart, elemend, 1);
-            Q.k = nextElementFloat(mounts, elemstart, elemend);
-            float func = nextElementFloat(mounts, elemstart, elemend, 1);
-            float maxfunc = nextElementFloat(mounts, elemstart, elemend, 1);
-            bool banked = nextElementBool(mounts, elemstart, elemend, false);
+            pos.i            = nextElementFloat(mounts, elemstart, elemend);
+            pos.j            = nextElementFloat(mounts, elemstart, elemend);
+            pos.k            = nextElementFloat(mounts, elemstart, elemend);
+            double xyscale   = nextElementFloat(mounts, elemstart, elemend);
+            double zscale    = nextElementFloat(mounts, elemstart, elemend);
+            R.i              = nextElementFloat(mounts, elemstart, elemend);
+            R.j              = nextElementFloat(mounts, elemstart, elemend);
+            R.k              = nextElementFloat(mounts, elemstart, elemend, 1);
+            Q.i              = nextElementFloat(mounts, elemstart, elemend);
+            Q.j              = nextElementFloat(mounts, elemstart, elemend, 1);
+            Q.k              = nextElementFloat(mounts, elemstart, elemend);
+            float func       = nextElementFloat(mounts, elemstart, elemend, 1);
+            float maxfunc    = nextElementFloat(mounts, elemstart, elemend, 1);
+            bool  banked     = nextElementBool(mounts, elemstart, elemend, false);
             Q.Normalize();
             if (fabs(Q.i) == fabs(R.i) && fabs(Q.j) == fabs(R.j) && fabs(Q.k) == fabs(R.k)) {
                 Q.i = -1;
@@ -260,7 +240,7 @@ static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
             mnt.SetMountPosition(xml.unitscale * pos.Cast());
             int mntsiz = as_integer(MOUNT_SIZE::NOWEAP);
             if (mountsize.length()) {
-                mntsiz = parseMountSizes(mountsize.c_str());
+                mntsiz   = parseMountSizes(mountsize.c_str());
                 mnt.size = mntsiz;
             } else {
                 mnt.size = as_integer(mnt.type->size);
@@ -270,14 +250,14 @@ static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
             ofs = string::npos;
         }
     }
-    unsigned char parity = 0;
-    bool half_sounds = configuration().audio.every_other_mount;
+    unsigned char parity      = 0;
+    bool          half_sounds = configuration().audio.every_other_mount;
     for (unsigned int a = first_new_mount; a < thus->mounts.size(); ++a) {
         if ((a & 1) == parity) {
             int b = a;
-            if ((a & 3) == 2 && (int) a < (thus->getNumMounts() - 1)) {
-                if (thus->mounts[a].type->type != WEAPON_TYPE::PROJECTILE
-                        && thus->mounts[a + 1].type->type != WEAPON_TYPE::PROJECTILE) {
+            if ((a & 3) == 2 && (int)a < (thus->getNumMounts() - 1)) {
+                if (thus->mounts[a].type->type != WEAPON_TYPE::PROJECTILE &&
+                    thus->mounts[a + 1].type->type != WEAPON_TYPE::PROJECTILE) {
                     b = a + 1;
                 }
             }
@@ -294,23 +274,23 @@ static void AddMounts(Unit *thus, Unit::XML &xml, const std::string &mounts) {
 }
 
 struct SubUnitStruct {
-    string filename;
+    string  filename;
     QVector pos;
     QVector Q;
     QVector R;
-    double restricted;
+    double  restricted;
 
     SubUnitStruct(string fn, QVector POS, QVector q, QVector r, double res) {
-        filename = fn;
-        pos = POS;
-        Q = q;
-        R = r;
+        filename   = fn;
+        pos        = POS;
+        Q          = q;
+        R          = r;
         restricted = res;
     }
 };
 
 static vector<SubUnitStruct> GetSubUnits(const std::string &subunits) {
-    string::size_type where, when, ofs = 0;
+    string::size_type     where, when, ofs = 0;
     vector<SubUnitStruct> ret;
     {
         int nelem = 0;
@@ -327,16 +307,16 @@ static vector<SubUnitStruct> GetSubUnits(const std::string &subunits) {
 
             QVector pos, Q, R;
 
-            string filename = nextElementString(subunits, elemstart, elemend);
-            pos.i = nextElementFloat(subunits, elemstart, elemend);
-            pos.j = nextElementFloat(subunits, elemstart, elemend);
-            pos.k = nextElementFloat(subunits, elemstart, elemend);
-            R.i = nextElementFloat(subunits, elemstart, elemend);
-            R.j = nextElementFloat(subunits, elemstart, elemend);
-            R.k = nextElementFloat(subunits, elemstart, elemend);
-            Q.i = nextElementFloat(subunits, elemstart, elemend);
-            Q.j = nextElementFloat(subunits, elemstart, elemend);
-            Q.k = nextElementFloat(subunits, elemstart, elemend);
+            string filename   = nextElementString(subunits, elemstart, elemend);
+            pos.i             = nextElementFloat(subunits, elemstart, elemend);
+            pos.j             = nextElementFloat(subunits, elemstart, elemend);
+            pos.k             = nextElementFloat(subunits, elemstart, elemend);
+            R.i               = nextElementFloat(subunits, elemstart, elemend);
+            R.j               = nextElementFloat(subunits, elemstart, elemend);
+            R.k               = nextElementFloat(subunits, elemstart, elemend);
+            Q.i               = nextElementFloat(subunits, elemstart, elemend);
+            Q.j               = nextElementFloat(subunits, elemstart, elemend);
+            Q.k               = nextElementFloat(subunits, elemstart, elemend);
             double restricted = cos(nextElementFloat(subunits, elemstart, elemend, 180) * M_PI / 180.0);
 
             ret.push_back(SubUnitStruct(filename, pos, Q, R, restricted));
@@ -347,27 +327,20 @@ static vector<SubUnitStruct> GetSubUnits(const std::string &subunits) {
     return ret;
 }
 
-static void AddSubUnits(Unit *thus,
-        Unit::XML &xml,
-        const std::string &subunits,
-        int faction,
-        const std::string &modification) {
+static void AddSubUnits(Unit *thus, Unit::XML &xml, const std::string &subunits, int faction,
+                        const std::string &modification) {
     vector<SubUnitStruct> su = GetSubUnits(subunits);
     xml.units.reserve(subunits.size() + xml.units.size());
     for (vector<SubUnitStruct>::iterator i = su.begin(); i != su.end(); ++i) {
-        string filename = (*i).filename;
-        QVector pos = (*i).pos;
-        QVector Q = (*i).Q;
-        QVector R = (*i).R;
-        double restricted = (*i).restricted;
-        xml.units
-                .push_back(new Unit(filename.c_str(),
-                        true,
-                        faction,
-                        modification,
-                        NULL));         //I set here the fg arg to NULL
+        string  filename   = (*i).filename;
+        QVector pos        = (*i).pos;
+        QVector Q          = (*i).Q;
+        QVector R          = (*i).R;
+        double  restricted = (*i).restricted;
+        xml.units.push_back(new Unit(filename.c_str(), true, faction, modification,
+                                     NULL));  // I set here the fg arg to NULL
 
-        if (!thus->isSubUnit()) {         //Useless to set recursive owner in subunits - as parent will do the same
+        if (!thus->isSubUnit()) {             // Useless to set recursive owner in subunits - as parent will do the same
             xml.units.back()->SetRecursiveOwner(thus);
         }
         xml.units.back()->SetOrientation(Q, R);
@@ -377,13 +350,13 @@ static void AddSubUnits(Unit *thus,
 
         // Subunit movement restrictions
         xml.units.back()->structure_limits = R.Cast();
-        xml.units.back()->limit_min = restricted;
+        xml.units.back()->limit_min        = restricted;
 
         xml.units.back()->name = filename;
         if (xml.units.back()->pImage->unitwriter != NULL) {
             xml.units.back()->pImage->unitwriter->setName(filename);
         }
-        CheckAccessory(xml.units.back());         //turns on the ceerazy rotation for the turr
+        CheckAccessory(xml.units.back());  // turns on the ceerazy rotation for the turr
     }
     for (int a = xml.units.size() - 1; a >= 0; a--) {
         const bool random_spawn = xml.units[a]->name.get().find("randomspawn") != string::npos;
@@ -402,8 +375,8 @@ static void AddSubUnits(Unit *thus,
 
 void AddDocks(Unit *thus, Unit::XML &xml, const string &docks) {
     string::size_type where, when;
-    string::size_type ofs = 0;
-    int overlap = 1;
+    string::size_type ofs     = 0;
+    int               overlap = 1;
 
     // TODO: Someone should check blame here. It doesn't look right.
     {
@@ -419,18 +392,16 @@ void AddDocks(Unit *thus, Unit::XML &xml, const string &docks) {
             string::size_type elemstart = where + 1, elemend = when;
             ofs = when + 1;
 
-            QVector pos = QVector(0, 0, 0);
-            int type = nextElementInt(docks, elemstart, elemend);
-            pos.i = nextElementFloat(docks, elemstart, elemend);
-            pos.j = nextElementFloat(docks, elemstart, elemend);
-            pos.k = nextElementFloat(docks, elemstart, elemend);
-            double size = nextElementFloat(docks, elemstart, elemend);
+            QVector pos    = QVector(0, 0, 0);
+            int     type   = nextElementInt(docks, elemstart, elemend);
+            pos.i          = nextElementFloat(docks, elemstart, elemend);
+            pos.j          = nextElementFloat(docks, elemstart, elemend);
+            pos.k          = nextElementFloat(docks, elemstart, elemend);
+            double size    = nextElementFloat(docks, elemstart, elemend);
             double minsize = nextElementFloat(docks, elemstart, elemend);
             for (int i = 0; i < overlap; i++) {
-                thus->pImage
-                        ->dockingports
-                        .emplace_back(pos.Cast() * xml.unitscale, size * xml.unitscale, minsize
-                                * xml.unitscale, DockingPorts::Type::Value(type));
+                thus->pImage->dockingports.emplace_back(pos.Cast() * xml.unitscale, size * xml.unitscale,
+                                                        minsize * xml.unitscale, DockingPorts::Type::Value(type));
             }
         } else {
             ofs = string::npos;
@@ -439,7 +410,7 @@ void AddDocks(Unit *thus, Unit::XML &xml, const string &docks) {
 }
 
 void AddLights(Unit *thus, Unit::XML &xml, const string &lights) {
-    const float default_halo_activation = configuration().graphics.default_engine_activation_flt;
+    const float       default_halo_activation = configuration().graphics.default_engine_activation_flt;
     string::size_type where, when;
     string::size_type ofs = 0;
     while ((where = lights.find('{', ofs)) != string::npos) {
@@ -447,26 +418,26 @@ void AddLights(Unit *thus, Unit::XML &xml, const string &lights) {
             string::size_type elemstart = where + 1, elemend = when;
             ofs = when + 1;
 
-            string filename = nextElementString(lights, elemstart, elemend);
-            QVector pos, scale;
+            string   filename = nextElementString(lights, elemstart, elemend);
+            QVector  pos, scale;
             GFXColor halocolor;
-            QVector P(1, 0, 0), Q(0, 1, 0), R(0, 0, 1);
-            pos.i = nextElementFloat(lights, elemstart, elemend);
-            pos.j = nextElementFloat(lights, elemstart, elemend);
-            pos.k = nextElementFloat(lights, elemstart, elemend);
+            QVector  P(1, 0, 0), Q(0, 1, 0), R(0, 0, 1);
+            pos.i   = nextElementFloat(lights, elemstart, elemend);
+            pos.j   = nextElementFloat(lights, elemstart, elemend);
+            pos.k   = nextElementFloat(lights, elemstart, elemend);
             scale.i = xml.unitscale * nextElementFloat(lights, elemstart, elemend, 1);
             scale.j = scale.k = scale.i;
-            halocolor.r = nextElementFloat(lights, elemstart, elemend, 1);
-            halocolor.g = nextElementFloat(lights, elemstart, elemend, 1);
-            halocolor.b = nextElementFloat(lights, elemstart, elemend, 1);
-            halocolor.a = nextElementFloat(lights, elemstart, elemend, 1);
-            double act_speed = nextElementFloat(lights, elemstart, elemend, default_halo_activation);
-            R.i = nextElementFloat(lights, elemstart, elemend);
-            R.j = nextElementFloat(lights, elemstart, elemend);
-            R.k = nextElementFloat(lights, elemstart, elemend, 1);
-            Q.i = nextElementFloat(lights, elemstart, elemend);
-            Q.j = nextElementFloat(lights, elemstart, elemend, 1);
-            Q.k = nextElementFloat(lights, elemstart, elemend);
+            halocolor.r       = nextElementFloat(lights, elemstart, elemend, 1);
+            halocolor.g       = nextElementFloat(lights, elemstart, elemend, 1);
+            halocolor.b       = nextElementFloat(lights, elemstart, elemend, 1);
+            halocolor.a       = nextElementFloat(lights, elemstart, elemend, 1);
+            double act_speed  = nextElementFloat(lights, elemstart, elemend, default_halo_activation);
+            R.i               = nextElementFloat(lights, elemstart, elemend);
+            R.j               = nextElementFloat(lights, elemstart, elemend);
+            R.k               = nextElementFloat(lights, elemstart, elemend, 1);
+            Q.i               = nextElementFloat(lights, elemstart, elemend);
+            Q.j               = nextElementFloat(lights, elemstart, elemend, 1);
+            Q.k               = nextElementFloat(lights, elemstart, elemend);
 
             Q.Normalize();
             if (fabs(Q.i) == fabs(R.i) && fabs(Q.j) == fabs(R.j) && fabs(Q.k) == fabs(R.k)) {
@@ -487,30 +458,36 @@ void AddLights(Unit *thus, Unit::XML &xml, const string &lights) {
 
 static void ImportCargo(Unit *thus, const string &imports) {
     // Use boost::split and STL to parse imports string
-    if (imports.empty() || imports.size() < 5)
+    if (imports.empty() || imports.size() < 5) {
         return;
+    }
 
     // Remove outer braces if present
     std::string trimmed_imports = imports;
-    if (trimmed_imports.front() == '{' && trimmed_imports.back() == '}')
+    if (trimmed_imports.front() == '{' && trimmed_imports.back() == '}') {
         trimmed_imports = trimmed_imports.substr(1, trimmed_imports.size() - 2);
+    }
 
     std::vector<std::string> import_elements;
     boost::split(import_elements, trimmed_imports, boost::is_any_of("}{"), boost::token_compress_on);
 
-    for (const std::string& elem : import_elements) {
-        if (elem.size() < 3) continue; // skip empty or dummy
+    for (const std::string &elem : import_elements) {
+        if (elem.size() < 3) {
+            continue;  // skip empty or dummy
+        }
 
         std::vector<std::string> fields;
         boost::split(fields, elem, boost::is_any_of(";"));
 
-        if (fields.size() < 1) continue;
+        if (fields.size() < 1) {
+            continue;
+        }
 
-        std::string filename = fields[0];
-        double price = fields.size() > 1 ? atof(fields[1].c_str()) : 1;
-        double pricestddev = fields.size() > 2 ? atof(fields[2].c_str()) : 0;
-        double quant = fields.size() > 3 ? atof(fields[3].c_str()) : 1;
-        double quantstddev = fields.size() > 4 ? atof(fields[4].c_str()) : 0;
+        std::string filename    = fields[0];
+        double      price       = fields.size() > 1 ? atof(fields[1].c_str()) : 1;
+        double      pricestddev = fields.size() > 2 ? atof(fields[2].c_str()) : 0;
+        double      quant       = fields.size() > 3 ? atof(fields[3].c_str()) : 1;
+        double      quantstddev = fields.size() > 4 ? atof(fields[4].c_str()) : 0;
 
         thus->ImportPartList(filename, price, pricestddev, quant, quantstddev);
     }
@@ -518,17 +495,17 @@ static void ImportCargo(Unit *thus, const string &imports) {
 
 static void AddCarg(Unit *thus, const string &cargo_text) {
     // Don't bother parsing if the cargo_text is too short.
-    if(cargo_text.size() < 10) {
+    if (cargo_text.size() < 10) {
         return;
     }
 
     // Trim the prefix { and suffix }
-    std::string trimmed_cargo_text = cargo_text.substr(1, cargo_text.size() - 2);
+    std::string              trimmed_cargo_text = cargo_text.substr(1, cargo_text.size() - 2);
     std::vector<std::string> cargo_text_elements;
-    boost::split(cargo_text_elements,trimmed_cargo_text,boost::is_any_of("}{"));
+    boost::split(cargo_text_elements, trimmed_cargo_text, boost::is_any_of("}{"));
 
-    for(std::string& cargo_text_element : cargo_text_elements) {
-        if(cargo_text_element.size()<10) {
+    for (std::string &cargo_text_element : cargo_text_elements) {
+        if (cargo_text_element.size() < 10) {
             // There's probably a better minimum size, but it should be good enough
             // This is used to identify text that created a dummy cargo with defaults
             // probably at the beginning or end of the cargo_text_elements vector.
@@ -536,12 +513,12 @@ static void AddCarg(Unit *thus, const string &cargo_text) {
         }
         try {
             Cargo c(cargo_text_element);
-            if(c.IsInstalled()) {
+            if (c.IsInstalled()) {
                 thus->upgrade_space.AddCargo(thus, c, false);
             } else {
                 thus->cargo_hold.AddCargo(thus, c, false);
             }
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Error parsing cargo: " << e.what() << std::endl;
         }
     }
@@ -556,15 +533,13 @@ void HudDamage(float *dam, const string &damages) {
     }
 }
 
-
 void LoadCockpit(Unit *thus, const string &cockpit) {
     string::size_type elemstart = 0, elemend = string::npos;
-    thus->pImage->cockpitImage = nextElementString(cockpit, elemstart, elemend);
+    thus->pImage->cockpitImage    = nextElementString(cockpit, elemstart, elemend);
     thus->pImage->CockpitCenter.i = nextElementFloat(cockpit, elemstart, elemend);
     thus->pImage->CockpitCenter.j = nextElementFloat(cockpit, elemstart, elemend);
     thus->pImage->CockpitCenter.k = nextElementFloat(cockpit, elemstart, elemend);
 }
-
 
 const std::string EMPTY_STRING("");
 
@@ -572,48 +547,47 @@ extern std::string getDamageColor(double);
 
 void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_game) {
     Unit::XML xml;
-    xml.unitModifications = modification.c_str();
-    xml.randomstartframe = VegaRandom::Instance().RandomFloat();
+    xml.unitModifications  = modification.c_str();
+    xml.randomstartframe   = VegaRandom::Instance().RandomFloat();
     xml.randomstartseconds = 0;
-    xml.calculated_role = false;
-    xml.damageiterator = 0;
-    xml.shieldmesh = NULL;
-    xml.rapidmesh = NULL;
-    xml.hasColTree = true;
-    xml.unitlevel = 0;
-    xml.unitscale = 1;
-    xml.data = xml.shieldmesh = xml.rapidmesh = NULL;     //was uninitialized memory
+    xml.calculated_role    = false;
+    xml.damageiterator     = 0;
+    xml.shieldmesh         = NULL;
+    xml.rapidmesh          = NULL;
+    xml.hasColTree         = true;
+    xml.unitlevel          = 0;
+    xml.unitscale          = 1;
+    xml.data = xml.shieldmesh = xml.rapidmesh = NULL;  // was uninitialized memory
     string tmpstr;
     csvRow = unit_identifier;
 
     // Textual Descriptions
     this->setUnitKey(unit_identifier);
     this->unit_name = UnitCSVFactory::GetVariable(unit_key, "Name", std::string());
-    if(Manifest::MPL().HasCargo(unit_identifier)) {
+    if (Manifest::MPL().HasCargo(unit_identifier)) {
         try {
             this->unit_description = Manifest::MPL().GetCargoByName(unit_identifier).GetDescription();
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             this->unit_description = "";
             VS_LOG(trace,
-                (boost::format("Error getting unit description for '%1%': %2%") % unit_identifier
-                        % e.what()));
+                   (boost::format("Error getting unit description for '%1%': %2%") % unit_identifier % e.what()));
         }
     } else {
         this->unit_description = "";
     }
-    
-    
+
+
     // This shadows the unit variable, making it possible to have:
     // this->unit_key = "Llama.begin"   - Stores appropriate key
     // unit_key = "player_ship_0"       - Add support for multiships and legacy save game
     std::string unit_key = unit_identifier;
 
     // Add support for legacy save game player ships
-    if(saved_game && !SaveGame::new_save_game_format) {
+    if (saved_game && !SaveGame::new_save_game_format) {
         unit_key = "player_ship";
     }
 
-    if(saved_game) {
+    if (saved_game) {
         SetPlayerShip();
     }
 
@@ -622,10 +596,10 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     tmpstr = UnitCSVFactory::GetVariable(unit_key, "Hud_image", std::string());
 
     if (!tmpstr.empty()) {
-        std::string fac = FactionUtil::GetFaction(faction);
-        fac += "_";
-        fac += tmpstr;
-        pImage->pHudImage = createVSSprite(fac.c_str());
+        std::string fac    = FactionUtil::GetFaction(faction);
+        fac               += "_";
+        fac               += tmpstr;
+        pImage->pHudImage  = createVSSprite(fac.c_str());
         if (!isVSSpriteLoaded(pImage->pHudImage)) {
             deleteVSSprite(pImage->pHudImage);
             pImage->pHudImage = createVSSprite(tmpstr.c_str());
@@ -655,7 +629,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     }
 
     graphicOptions.NumAnimationPoints = UnitCSVFactory::GetVariable(unit_key, "Num_Animation_Stages", 0);
-    graphicOptions.NoDamageParticles = UnitCSVFactory::GetVariable(unit_key, "NoDamageParticles", 0);
+    graphicOptions.NoDamageParticles  = UnitCSVFactory::GetVariable(unit_key, "NoDamageParticles", 0);
 
     if (graphicOptions.NumAnimationPoints > 0) {
         graphicOptions.Animating = 0;
@@ -667,12 +641,11 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     pImage->unitscale = xml.unitscale;
 
     std::string mesh_string = UnitCSVFactory::GetVariable(unit_key, "Mesh", std::string());
-    AddMeshes(xml.meshes, xml.randomstartframe, xml.randomstartseconds, xml.unitscale,
-            mesh_string, faction,
-            getFlightgroup());
+    AddMeshes(xml.meshes, xml.randomstartframe, xml.randomstartseconds, xml.unitscale, mesh_string, faction,
+              getFlightgroup());
 
     // Should come before cargo or upgrades
-    Load(unit_key); // ComponentsManager
+    Load(unit_key);  // ComponentsManager
 
     std::string dock_string = UnitCSVFactory::GetVariable(unit_key, "Dock", std::string());
     AddDocks(this, xml, UnitCSVFactory::GetVariable(unit_key, "Dock", std::string()));
@@ -686,14 +659,14 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
     calculate_extent(false);
     AddMounts(this, xml, UnitCSVFactory::GetVariable(unit_key, "Mounts", std::string()));
-    
+
     // Cargo
     cargo_hold.Load(unit_key);
     hidden_hold.Load(unit_key);
     upgrade_space.Load(unit_key);
 
     std::string cargo_import_string = UnitCSVFactory::GetVariable(unit_key, "Cargo_Import", std::string());
-    ImportCargo(this, cargo_import_string);     //if this changes change planet_generic.cpp
+    ImportCargo(this, cargo_import_string);  // if this changes change planet_generic.cpp
 
     std::string cargo_string = UnitCSVFactory::GetVariable(unit_key, "Cargo", std::string());
     AddCarg(this, cargo_string);
@@ -740,10 +713,11 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
 
     forcejump = UnitCSVFactory::GetVariable(unit_key, "Wormhole", false);
-    graphicOptions.RecurseIntoSubUnitsOnCollision = UnitCSVFactory::GetVariable(unit_key,
-            "Collide_Subunits",
-            graphicOptions.RecurseIntoSubUnitsOnCollision
-                    ? true : false) ? 1 : 0;
+    graphicOptions.RecurseIntoSubUnitsOnCollision =
+            UnitCSVFactory::GetVariable(unit_key, "Collide_Subunits",
+                                        graphicOptions.RecurseIntoSubUnitsOnCollision ? true : false)
+                    ? 1
+                    : 0;
 
     // End Drive Section
 
@@ -760,13 +734,13 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     ship_functions.Load(unit_key);
 
     computer.slide_start = UnitCSVFactory::GetVariable(unit_key, "Slide_Start", 0);
-    computer.slide_end = UnitCSVFactory::GetVariable(unit_key, "Slide_End", 0);
+    computer.slide_end   = UnitCSVFactory::GetVariable(unit_key, "Slide_End", 0);
 
     UpgradeUnit(UnitCSVFactory::GetVariable(unit_key, "Cargo", std::string()));
 
 
     {
-        std::string tractorability = UnitCSVFactory::GetVariable(unit_key, "Tractorability", std::string());
+        std::string   tractorability = UnitCSVFactory::GetVariable(unit_key, "Tractorability", std::string());
         unsigned char tflags;
         if (!tractorability.empty()) {
             tflags = tractorImmune;
@@ -779,7 +753,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         } else {
             tflags = tractorPush;
         }
-        setTractorability((enum tractorHow) tflags);
+        setTractorability((enum tractorHow)tflags);
     }
     this->pImage->explosion_type = UnitCSVFactory::GetVariable(unit_key, "Explosion", std::string());
     if (pImage->explosion_type.get().length()) {
@@ -794,32 +768,25 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
         addShieldMesh(&xml, xml.shieldmesh_str.c_str(), xml.unitscale, faction, getFlightgroup());
         meshdata.back() = xml.shieldmesh;
     } else {
-        const int shieldstacks = configuration().graphics.shield_detail_level;
-        const std::string& shieldtex = configuration().graphics.shield_texture;
-        const std::string& shieldtechnique = configuration().graphics.shield_technique;
-        meshdata.back() = new SphereMesh(rSize(),
-                shieldstacks,
-                shieldstacks,
-                shieldtex.c_str(),
-                shieldtechnique,
-                NULL,
-                false,
-                ONE,
-                ONE);
+        const int          shieldstacks    = configuration().graphics.shield_detail_level;
+        const std::string &shieldtex       = configuration().graphics.shield_texture;
+        const std::string &shieldtechnique = configuration().graphics.shield_technique;
+        meshdata.back() = new SphereMesh(rSize(), shieldstacks, shieldstacks, shieldtex.c_str(), shieldtechnique, NULL,
+                                         false, ONE, ONE);
     }
     meshdata.back()->EnableSpecialFX();
-    //Begin the Pow-w-w-war Zone Collide Tree Generation
+    // Begin the Pow-w-w-war Zone Collide Tree Generation
     {
         xml.rapidmesh_str = UnitCSVFactory::GetVariable(unit_key, "Rapid_Mesh", std::string());
         vector<mesh_polygon> polies;
 
         std::string collideTreeHash = VSFileSystem::GetHashName(modification + "#" + unit_identifier);
-        this->colTrees = collideTrees::Get(collideTreeHash);
+        this->colTrees              = collideTrees::Get(collideTreeHash);
         if (this->colTrees) {
             this->colTrees->Inc();
         }
         csOPCODECollider *colShield = NULL;
-        string tmpname = unit_identifier;       //key
+        string            tmpname   = unit_identifier;  // key
         if (!this->colTrees) {
             string val;
             xml.hasColTree = 1;
@@ -843,21 +810,15 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
             }
             csOPCODECollider *csrc = NULL;
             if (xml.hasColTree) {
-                csrc = getCollideTree(Vector(1, 1, 1),
-                        xml.rapidmesh
-                                ? &polies : NULL);
+                csrc = getCollideTree(Vector(1, 1, 1), xml.rapidmesh ? &polies : NULL);
             }
-            this->colTrees = new collideTrees(collideTreeHash,
-                    csrc,
-                    colShield);
+            this->colTrees = new collideTrees(collideTreeHash, csrc, colShield);
             if (xml.rapidmesh && xml.hasColTree) {
-                //if we have a special rapid mesh we need to generate things now
+                // if we have a special rapid mesh we need to generate things now
                 for (unsigned int i = 1; i < collideTreesMaxTrees; ++i) {
                     if (!this->colTrees->rapidColliders[i]) {
-                        unsigned int which = 1 << i;
-                        this->colTrees->rapidColliders[i] =
-                                getCollideTree(Vector(1, 1, which),
-                                        &polies);
+                        unsigned int which                = 1 << i;
+                        this->colTrees->rapidColliders[i] = getCollideTree(Vector(1, 1, which), &polies);
                     }
                 }
             }
@@ -867,7 +828,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
             }
         }
     }
-    CheckAccessory(this);     //turns on the ceerazy rotation for any accessories
+    CheckAccessory(this);  // turns on the ceerazy rotation for any accessories
     this->setAverageGunSpeed();
 
     // From drawable
@@ -875,9 +836,9 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     // Add integral components
     // Make this a factor of unit price
-    if(!saved_game) {
+    if (!saved_game) {
         const std::string integral_components =
-        "{hull;upgrades/integral;12000;1;0.1;0.1;1;1;@cargo/hull_patches.image@The ship's hull.;0;1}\
+                "{hull;upgrades/integral;12000;1;0.1;0.1;1;1;@cargo/hull_patches.image@The ship's hull.;0;1}\
         {afterburner;upgrades/integral;2000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency.;0;1}\
         {drive;upgrades/integral;6000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@The ship's engine.;0;1}\
         {ftl_drive;upgrades/integral;4500;1;0.1;0.1;1;1;@upgrades/jump_drive.image@The ship's faster than light engine.;0;1}";
@@ -888,16 +849,14 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     GenerateHudText(getDamageColor);
 }
 
-
 using XMLSupport::tostring;
 
-
 static string tos(double val) {
-    return XMLSupport::tostring((float) val);
+    return XMLSupport::tostring((float)val);
 }
 
 static string tos(bool val) {
-    return XMLSupport::tostring((int) val);
+    return XMLSupport::tostring((int)val);
 }
 
 static string tos(int val) {
@@ -906,70 +865,56 @@ static string tos(int val) {
 
 const std::map<std::string, std::string> Unit::UnitToMap() {
     std::map<std::string, std::string> unit = std::map<std::string, std::string>();
-    string val;
+    string                             val;
 
     // Textual Descriptions
-    unit["Key"] = unit_key;
-    unit["Name"] = unit_name;
-    unit["Textual_Description"] = unit_description; // Used in ship view
+    unit["Key"]                 = unit_key;
+    unit["Name"]                = unit_name;
+    unit["Textual_Description"] = unit_description;  // Used in ship view
     Serialize(unit);
 
     // Take some immutable stats directly from the original unit
-    const std::string immutable_stats[] = {"Directory", "STATUS", "Combat_Role", "Hud_image",
-                                           "Unit_Scale", "CockpitZ", "Mesh", "Prohibited_Upgrades",
-                                           "Light"};
+    const std::string immutable_stats[] = {"Directory", "STATUS", "Combat_Role",         "Hud_image", "Unit_Scale",
+                                           "CockpitZ",  "Mesh",   "Prohibited_Upgrades", "Light"};
 
-    for(const auto& stat : immutable_stats) {
+    for (const auto &stat : immutable_stats) {
         unit[stat] = UnitCSVFactory::GetVariable(unit_key, stat, std::string());
     }
 
-    //mutable things
-    unit["Hold_Volume"] = std::to_string(cargo_hold.MaxCapacity());
-    unit["Hidden_Hold_Volume"] = std::to_string(hidden_hold.MaxCapacity());
+    // mutable things
+    unit["Hold_Volume"]            = std::to_string(cargo_hold.MaxCapacity());
+    unit["Hidden_Hold_Volume"]     = std::to_string(hidden_hold.MaxCapacity());
     unit["Upgrade_Storage_Volume"] = std::to_string(upgrade_space.MaxCapacity());
-    
+
     string mountstr;
     double unitScale = UnitCSVFactory::GetVariable(unit_key, "Unit_Scale", 1.0f);
     {
-        //mounts
+        // mounts
         for (unsigned int j = 0; j < mounts.size(); ++j) {
-            char mnt[1024];
-            Matrix m;
-            Transformation tr(mounts[j].GetMountOrientation(),
-                              mounts[j].GetMountLocation().Cast());
+            char           mnt[1'024];
+            Matrix         m;
+            Transformation tr(mounts[j].GetMountOrientation(), mounts[j].GetMountLocation().Cast());
             tr.to_matrix(m);
             string printedname = mounts[j].type->name;
             if (mounts[j].status == Mount::DESTROYED || mounts[j].status == Mount::UNCHOSEN) {
                 printedname = "";
             }
-            mountstr += "{" + printedname + ";" + XMLSupport::tostring(mounts[j].ammo) + ";"
-                    + XMLSupport::tostring(
-                        mounts[j].volume) + ";" + getMountSizeString(mounts[j].size);
-            sprintf(mnt, ";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
-                    m.p.i / unitScale,
-                    m.p.j / unitScale,
-                    m.p.k / unitScale,
-                    (double) mounts[j].xyscale / unitScale,
-                    (double) mounts[j].zscale / unitScale,
-                    (double) m.getR().i,
-                    (double) m.getR().j,
-                    (double) m.getR().k,
-                    (double) m.getQ().i,
-                    (double) m.getQ().j,
-                    (double) m.getQ().k,
-                    (double) mounts[j].functionality,
-                    (double) mounts[j].maxfunctionality
-                    );
+            mountstr += "{" + printedname + ";" + XMLSupport::tostring(mounts[j].ammo) + ";" +
+                        XMLSupport::tostring(mounts[j].volume) + ";" + getMountSizeString(mounts[j].size);
+            sprintf(mnt, ";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}", m.p.i / unitScale, m.p.j / unitScale,
+                    m.p.k / unitScale, (double)mounts[j].xyscale / unitScale, (double)mounts[j].zscale / unitScale,
+                    (double)m.getR().i, (double)m.getR().j, (double)m.getR().k, (double)m.getQ().i, (double)m.getQ().j,
+                    (double)m.getQ().k, (double)mounts[j].functionality, (double)mounts[j].maxfunctionality);
             mountstr += mnt;
         }
         unit["Mounts"] = mountstr;
     }
     {
-        //subunits
+        // subunits
         vector<SubUnitStruct> subunits = GetSubUnits(unit["Sub_Units"]);
         if (subunits.size()) {
             unsigned int k = 0;
-            Unit *subun;
+            Unit        *subun;
             for (; k < subunits.size(); ++k) {
                 subunits[k].filename = "destroyed_blank";
             }
@@ -978,7 +923,7 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
                 unsigned int j = k;
                 for (; j < subunits.size(); ++j) {
                     if ((subun->Position() - subunits[j].pos).MagnitudeSquared() < .00000001) {
-                        //we've got a hit
+                        // we've got a hit
                         break;
                     }
                 }
@@ -991,18 +936,10 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
             }
             string str;
             for (k = 0; k < subunits.size(); ++k) {
-                char tmp[1024];
-                sprintf(tmp, ";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
-                        subunits[k].pos.i,
-                        subunits[k].pos.j,
-                        subunits[k].pos.k,
-                        subunits[k].R.i,
-                        subunits[k].R.j,
-                        subunits[k].R.k,
-                        subunits[k].Q.i,
-                        subunits[k].Q.j,
-                        subunits[k].Q.k,
-                        ((double) acos(subunits[k].restricted) * 180. / M_PI));
+                char tmp[1'024];
+                sprintf(tmp, ";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}", subunits[k].pos.i, subunits[k].pos.j,
+                        subunits[k].pos.k, subunits[k].R.i, subunits[k].R.j, subunits[k].R.k, subunits[k].Q.i,
+                        subunits[k].Q.j, subunits[k].Q.k, ((double)acos(subunits[k].restricted) * 180. / M_PI));
                 str += "{" + subunits[k].filename + tmp;
             }
             unit["Sub_Units"] = str;
@@ -1010,12 +947,12 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     }
     {
         string cargo_text;
-        cargo_text += cargo_hold.Serialize();
-        cargo_text += upgrade_space.Serialize();
-        cargo_text += hidden_hold.Serialize();
-        unit["Cargo"] = cargo_text;
+        cargo_text    += cargo_hold.Serialize();
+        cargo_text    += upgrade_space.Serialize();
+        cargo_text    += hidden_hold.Serialize();
+        unit["Cargo"]  = cargo_text;
     }
-    Serialize(unit); // ComponentsManager
+    Serialize(unit);  // ComponentsManager
 
     hull.SaveToCSV(unit);
     armor.SaveToCSV(unit);
@@ -1047,9 +984,9 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
     repair_bot.SaveToCSV(unit);
     ship_functions.SaveToCSV(unit);
 
-    unit["Slide_Start"] = tos(computer.slide_start);
-    unit["Slide_End"] = tos(computer.slide_end);
-    unit["Cargo_Import"] = unit["Upgrades"] = "";                 //make sure those are empty
+    unit["Slide_Start"]  = tos(computer.slide_start);
+    unit["Slide_End"]    = tos(computer.slide_end);
+    unit["Cargo_Import"] = unit["Upgrades"] = "";  // make sure those are empty
     {
         std::string trac;
         if (isTractorable(tractorPush)) {
@@ -1066,7 +1003,6 @@ const std::map<std::string, std::string> Unit::UnitToMap() {
 
     return unit;
 }
-
 
 string Unit::WriteUnitString() {
     std::map<std::string, std::string> unit = UnitToMap();
