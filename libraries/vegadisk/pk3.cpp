@@ -53,13 +53,15 @@
  */
 
 #include "vegadisk/pk3.h"
+
 #include <cstdlib>
 #include <iostream>
+
 #include "posh/posh.h"
 #include "root_generic/vs_globals.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
 #include "src/vs_exit.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
 using std::hex;
 
@@ -67,34 +69,35 @@ using std::hex;
 
 struct CPK3::TZipLocalHeader {
     enum {
-        SIGNATURE = 0x04034b50,
-        COMP_STORE = 0,
+        SIGNATURE   = 0x04034b50,
+        COMP_STORE  = 0,
         COMP_DEFLAT = 8,
     };
-    unsigned int sig;
+
+    unsigned int   sig;
     unsigned short version;
     unsigned short flag;
-    unsigned short compression;     //COMP_xxxx
+    unsigned short compression;  // COMP_xxxx
     unsigned short modTime;
     unsigned short modDate;
-    unsigned int crc32;
-    unsigned int cSize;
-    unsigned int ucSize;
-    unsigned short fnameLen;        //Filename string follows header.
-    unsigned short xtraLen;         //Extra field follows filename.
+    unsigned int   crc32;
+    unsigned int   cSize;
+    unsigned int   ucSize;
+    unsigned short fnameLen;  // Filename string follows header.
+    unsigned short xtraLen;   // Extra field follows filename.
 
     void correctByteOrder() {
-        sig = POSH_LittleU32(sig);
-        version = POSH_LittleU16(version);
-        flag = POSH_LittleU16(flag);
+        sig         = POSH_LittleU32(sig);
+        version     = POSH_LittleU16(version);
+        flag        = POSH_LittleU16(flag);
         compression = POSH_LittleU16(compression);
-        modTime = POSH_LittleU16(modTime);
-        modDate = POSH_LittleU16(modDate);
-        crc32 = POSH_LittleU32(crc32);
-        cSize = POSH_LittleU32(cSize);
-        ucSize = POSH_LittleU32(ucSize);
-        fnameLen = POSH_LittleU16(fnameLen);
-        xtraLen = POSH_LittleU16(xtraLen);
+        modTime     = POSH_LittleU16(modTime);
+        modDate     = POSH_LittleU16(modDate);
+        crc32       = POSH_LittleU32(crc32);
+        cSize       = POSH_LittleU32(cSize);
+        ucSize      = POSH_LittleU32(ucSize);
+        fnameLen    = POSH_LittleU16(fnameLen);
+        xtraLen     = POSH_LittleU16(xtraLen);
     }
 };
 
@@ -102,53 +105,55 @@ struct CPK3::TZipDirHeader {
     enum {
         SIGNATURE = 0x06054b50,
     };
-    unsigned int sig;
+
+    unsigned int   sig;
     unsigned short nDisk;
     unsigned short nStartDisk;
     unsigned short nDirEntries;
     unsigned short totalDirEntries;
-    unsigned int dirSize;
-    unsigned int dirOffset;
+    unsigned int   dirSize;
+    unsigned int   dirOffset;
     unsigned short cmntLen;
 
     void correctByteOrder() {
-        sig = POSH_LittleU32(sig);
-        nDisk = POSH_LittleU16(nDisk);
-        nStartDisk = POSH_LittleU16(nStartDisk);
-        nDirEntries = POSH_LittleU16(nDirEntries);
+        sig             = POSH_LittleU32(sig);
+        nDisk           = POSH_LittleU16(nDisk);
+        nStartDisk      = POSH_LittleU16(nStartDisk);
+        nDirEntries     = POSH_LittleU16(nDirEntries);
         totalDirEntries = POSH_LittleU16(totalDirEntries);
-        dirSize = POSH_LittleU32(dirSize);
-        dirOffset = POSH_LittleU32(dirOffset);
-        cmntLen = POSH_LittleU16(cmntLen);
+        dirSize         = POSH_LittleU32(dirSize);
+        dirOffset       = POSH_LittleU32(dirOffset);
+        cmntLen         = POSH_LittleU16(cmntLen);
     }
 };
 
 struct CPK3::TZipDirFileHeader {
     enum {
-        SIGNATURE = 0x02014b50,
-        COMP_STORE = 0,
+        SIGNATURE   = 0x02014b50,
+        COMP_STORE  = 0,
         COMP_DEFLAT = 8,
     };
-    unsigned int sig;
+
+    unsigned int   sig;
     unsigned short verMade;
     unsigned short verNeeded;
     unsigned short flag;
-    unsigned short compression;     //COMP_xxxx
+    unsigned short compression;  // COMP_xxxx
     unsigned short modTime;
     unsigned short modDate;
-    unsigned int crc32;
-    unsigned int cSize;           //Compressed size
-    unsigned int ucSize;          //Uncompressed size
-    unsigned short fnameLen;        //Filename string follows header.
-    unsigned short xtraLen;         //Extra field follows filename.
-    unsigned short cmntLen;         //Comment field follows extra field.
+    unsigned int   crc32;
+    unsigned int   cSize;     // Compressed size
+    unsigned int   ucSize;    // Uncompressed size
+    unsigned short fnameLen;  // Filename string follows header.
+    unsigned short xtraLen;   // Extra field follows filename.
+    unsigned short cmntLen;   // Comment field follows extra field.
     unsigned short diskStart;
     unsigned short intAttr;
-    unsigned int extAttr;
-    unsigned int hdrOffset;
+    unsigned int   extAttr;
+    unsigned int   hdrOffset;
 
     char *GetName() const {
-        return (char *) (this + 1);
+        return (char *)(this + 1);
     }
 
     char *GetExtra() const {
@@ -160,23 +165,23 @@ struct CPK3::TZipDirFileHeader {
     }
 
     void correctByteOrder() {
-        sig = POSH_LittleU32(sig);
-        verMade = POSH_LittleU16(verMade);
-        verNeeded = POSH_LittleU16(verNeeded);
-        flag = POSH_LittleU16(flag);
+        sig         = POSH_LittleU32(sig);
+        verMade     = POSH_LittleU16(verMade);
+        verNeeded   = POSH_LittleU16(verNeeded);
+        flag        = POSH_LittleU16(flag);
         compression = POSH_LittleU16(compression);
-        modTime = POSH_LittleU16(modTime);
-        modDate = POSH_LittleU16(modDate);
-        crc32 = POSH_LittleU32(crc32);
-        cSize = POSH_LittleU32(cSize);
-        ucSize = POSH_LittleU32(ucSize);
-        fnameLen = POSH_LittleU16(fnameLen);
-        xtraLen = POSH_LittleU16(xtraLen);
-        cmntLen = POSH_LittleU16(cmntLen);
-        diskStart = POSH_LittleU16(diskStart);
-        intAttr = POSH_LittleU16(intAttr);
-        extAttr = POSH_LittleU32(extAttr);
-        hdrOffset = POSH_LittleU32(hdrOffset);
+        modTime     = POSH_LittleU16(modTime);
+        modDate     = POSH_LittleU16(modDate);
+        crc32       = POSH_LittleU32(crc32);
+        cSize       = POSH_LittleU32(cSize);
+        ucSize      = POSH_LittleU32(ucSize);
+        fnameLen    = POSH_LittleU16(fnameLen);
+        xtraLen     = POSH_LittleU16(xtraLen);
+        cmntLen     = POSH_LittleU16(cmntLen);
+        diskStart   = POSH_LittleU16(diskStart);
+        intAttr     = POSH_LittleU16(intAttr);
+        extAttr     = POSH_LittleU32(extAttr);
+        hdrOffset   = POSH_LittleU32(hdrOffset);
     }
 };
 
@@ -190,7 +195,7 @@ CPK3::CPK3(const char *filename) {
     Open(filename);
 }
 
-static size_t bogus_sizet; //added by chuck_starchaser to squash some warnings
+static size_t bogus_sizet;  // added by chuck_starchaser to squash some warnings
 
 bool CPK3::CheckPK3(FILE *f) {
     if (f == NULL) {
@@ -198,23 +203,23 @@ bool CPK3::CheckPK3(FILE *f) {
     }
     TZipDirHeader dh;
 
-    fseek(f, -(int) sizeof(dh), SEEK_END);
+    fseek(f, -(int)sizeof(dh), SEEK_END);
 
     long dhOffset = ftell(f);
     memset(&dh, 0, sizeof(dh));
 
     bogus_sizet = fread(&dh, sizeof(dh), 1, f);
     dh.correctByteOrder();
-    //Check
+    // Check
     if (dh.sig != TZipDirHeader::SIGNATURE) {
         VS_LOG_AND_FLUSH(fatal, "PK3 -- BAD DIR HEADER SIGNATURE, NOT A PK3 FILE !");
         VSExit(1);
         return false;
     }
-    //Go to the beginning of the directory.
+    // Go to the beginning of the directory.
     fseek(f, dhOffset - dh.dirSize, SEEK_SET);
 
-    //Allocate the data buffer, and read the whole thing.
+    // Allocate the data buffer, and read the whole thing.
     m_pDirData = new char[dh.dirSize + dh.nDirEntries * sizeof(*m_papDir)];
     if (!m_pDirData) {
         VS_LOG_AND_FLUSH(fatal, "PK3 -- ERROR ALLOCATING DATA BUFFER !");
@@ -224,31 +229,31 @@ bool CPK3::CheckPK3(FILE *f) {
     memset(m_pDirData, 0, dh.dirSize + dh.nDirEntries * sizeof(*m_papDir));
     bogus_sizet = fread(m_pDirData, dh.dirSize, 1, f);
 
-    //Now process each entry.
+    // Now process each entry.
     char *pfh = m_pDirData;
-    m_papDir = (const TZipDirFileHeader **) (m_pDirData + dh.dirSize);
+    m_papDir  = (const TZipDirFileHeader **)(m_pDirData + dh.dirSize);
 
     bool ret = true;
     for (int i = 0; i < dh.nDirEntries && ret == true; i++) {
-        TZipDirFileHeader &fh = *(TZipDirFileHeader *) pfh;
+        TZipDirFileHeader &fh = *(TZipDirFileHeader *)pfh;
         fh.correctByteOrder();
 
-        //Store the address of nth file for quicker access.
+        // Store the address of nth file for quicker access.
         m_papDir[i] = &fh;
-        //Check the directory entry integrity.
+        // Check the directory entry integrity.
         if (fh.sig != TZipDirFileHeader::SIGNATURE) {
             VS_LOG_AND_FLUSH(fatal, "PK3 -- ERROR BAD DIRECTORY SIGNATURE !");
             VSExit(1);
             ret = false;
         } else {
             pfh += sizeof(fh);
-            //Convert UNIX slashes to DOS backlashes.
+            // Convert UNIX slashes to DOS backlashes.
             for (int j = 0; j < fh.fnameLen; j++) {
                 if (pfh[j] == '/') {
                     pfh[j] = '\\';
                 }
             }
-            //Skip name, extra and comment fields.
+            // Skip name, extra and comment fields.
             pfh += fh.fnameLen + fh.xtraLen + fh.cmntLen;
         }
     }
@@ -256,7 +261,7 @@ bool CPK3::CheckPK3(FILE *f) {
         delete[] m_pDirData;
     } else {
         m_nEntries = dh.nDirEntries;
-        this->f = f;
+        this->f    = f;
     }
     return ret;
 }
@@ -276,9 +281,9 @@ bool CPK3::ExtractFile(const char *lp_name) {
 }
 
 bool CPK3::ExtractFile(const char *lp_name, const char *new_filename) {
-    //open file tp write data
+    // open file tp write data
     FILE *new_f = NULL;
-    int size = -1;
+    int   size  = -1;
 
     char *data_content = ExtractFile(lp_name, &size);
     if (data_content) {
@@ -290,10 +295,10 @@ bool CPK3::ExtractFile(const char *lp_name, const char *new_filename) {
             return true;
         }
     }
-    return false;     //probably file not found
+    return false;  // probably file not found
 }
 
-//Compares 2 c-strings but do not take into account '/' or '\'
+// Compares 2 c-strings but do not take into account '/' or '\'
 int vsstrcmp(const char *lp, const char *str) {
     unsigned int i, ok = 1;
     unsigned int len = strlen(lp);
@@ -307,7 +312,7 @@ int vsstrcmp(const char *lp, const char *str) {
 
 int CPK3::FileExists(const char *lpname) {
     char str[PK3LENGTH];
-    int idx = -1;
+    int  idx = -1;
 
     memset(&str, 0, sizeof(str));
     for (int i = 0; idx == -1 && i < m_nEntries; i++) {
@@ -318,13 +323,13 @@ int CPK3::FileExists(const char *lpname) {
             idx = i;
         }
     }
-    //if the file isn't in the archive idx=-1
+    // if the file isn't in the archive idx=-1
     return idx;
 }
 
 char *CPK3::ExtractFile(int index, int *file_size) {
     char *buffer;
-    int flength = GetFileLen(index);
+    int   flength = GetFileLen(index);
 
     buffer = new char[flength];
     if (!buffer) {
@@ -332,10 +337,11 @@ char *CPK3::ExtractFile(int index, int *file_size) {
         return NULL;
     } else {
         if (true == ReadFile(index, buffer)) {
-            //everything went well !!!
+            // everything went well !!!
         } else {
             VS_LOG(error,
-                    "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is broken.\n");
+                   "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is "
+                   "broken.\n");
         }
     }
     *file_size = flength;
@@ -343,8 +349,8 @@ char *CPK3::ExtractFile(int index, int *file_size) {
 }
 
 char *CPK3::ExtractFile(const char *lpname, int *file_size) {
-    char str[PK3LENGTH];
-    int index = -1;
+    char  str[PK3LENGTH];
+    int   index = -1;
     char *buffer;
 
     memset(&str, 0, sizeof(str));
@@ -355,7 +361,7 @@ char *CPK3::ExtractFile(const char *lpname, int *file_size) {
             index = i;
         }
     }
-    //if the file isn't in the archive
+    // if the file isn't in the archive
     if (index == -1) {
         return (NULL);
     }
@@ -367,10 +373,11 @@ char *CPK3::ExtractFile(const char *lpname, int *file_size) {
         return NULL;
     } else {
         if (true == ReadFile(index, buffer)) {
-            //everything went well !!!
+            // everything went well !!!
         } else {
             VS_LOG(error,
-                    "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is broken.\n");
+                   "\nThe file was found in the archive, but I was unable to extract it. Maybe the archive is "
+                   "broken.\n");
         }
     }
     *file_size = flength;
@@ -423,10 +430,10 @@ bool CPK3::ReadFile(int i, void *pBuf) {
         return false;
     }
 
-    //Quick'n dirty read, the whole file at once.
-    //Ungood if the ZIP has huge files inside
+    // Quick'n dirty read, the whole file at once.
+    // Ungood if the ZIP has huge files inside
 
-    //Go to the actual file and read the local header.
+    // Go to the actual file and read the local header.
     fseek(this->f, m_papDir[i]->hdrOffset, SEEK_SET);
     TZipLocalHeader h;
 
@@ -437,19 +444,18 @@ bool CPK3::ReadFile(int i, void *pBuf) {
         VS_LOG(error, "PK3ERROR - BAD LOCAL HEADER SIGNATURE !!!");
         return false;
     }
-    //Skip extra fields
+    // Skip extra fields
     fseek(this->f, h.fnameLen + h.xtraLen, SEEK_CUR);
     if (h.compression == TZipLocalHeader::COMP_STORE) {
-        //Simply read in raw stored data.
+        // Simply read in raw stored data.
         bogus_sizet = fread(pBuf, h.cSize, 1, this->f);
         return true;
     } else if (h.compression != TZipLocalHeader::COMP_DEFLAT) {
-        VS_LOG(error,
-                (boost::format("BAD Compression level, found=%1% - expected=%2%") % h.compression
-                        % TZipLocalHeader::COMP_DEFLAT));
+        VS_LOG(error, (boost::format("BAD Compression level, found=%1% - expected=%2%") % h.compression %
+                       TZipLocalHeader::COMP_DEFLAT));
         return false;
     }
-    //Alloc compressed data buffer and read the whole stream
+    // Alloc compressed data buffer and read the whole stream
     char *pcData = new char[h.cSize];
     if (!pcData) {
         VS_LOG(error, "PK3ERROR : Could not allocate memory buffer for decompression");
@@ -460,40 +466,44 @@ bool CPK3::ReadFile(int i, void *pBuf) {
 
     bool ret = true;
 
-    //Setup the inflate stream.
+    // Setup the inflate stream.
     z_stream stream;
-    int err, err2;
+    int      err, err2;
 
-    stream.next_in = (Bytef *) pcData;
-    stream.avail_in = (uInt) h.cSize;
-    stream.next_out = (Bytef *) pBuf;
+    stream.next_in   = (Bytef *)pcData;
+    stream.avail_in  = (uInt)h.cSize;
+    stream.next_out  = (Bytef *)pBuf;
     stream.avail_out = h.ucSize;
-    stream.zalloc = (alloc_func) 0;
-    stream.zfree = (free_func) 0;
+    stream.zalloc    = (alloc_func)0;
+    stream.zfree     = (free_func)0;
 
-    //Perform inflation. wbits < 0 indicates no zlib header inside the data.
+    // Perform inflation. wbits < 0 indicates no zlib header inside the data.
     err = inflateInit2(&stream, -MAX_WBITS);
     if (err == Z_OK) {
         err = inflate(&stream, Z_FINISH);
         if (err == Z_STREAM_END) {
             err = Z_OK;
-        } else if (err == Z_NEED_DICT)
+        } else if (err == Z_NEED_DICT) {
             VS_LOG(error, "PK3ERROR : Needed a dictionary");
-        else if (err == Z_DATA_ERROR)
+        } else if (err == Z_DATA_ERROR) {
             VS_LOG(error, "PK3ERROR : Bad data buffer");
-        else if (err == Z_STREAM_ERROR)
+        } else if (err == Z_STREAM_ERROR) {
             VS_LOG(error, "PK3ERROR : Bad parameter, stream error");
+        }
         err2 = inflateEnd(&stream);
-        if (err2 == Z_STREAM_ERROR)
+        if (err2 == Z_STREAM_ERROR) {
             VS_LOG(error, "PK3ERROR : Bad parameter, stream error");
+        }
         err2 = inflateEnd(&stream);
-        if (err2 == Z_STREAM_ERROR)
+        if (err2 == Z_STREAM_ERROR) {
             VS_LOG(error, "PK3ERROR : Bad parameter, stream error");
+        }
     } else {
-        if (err == Z_STREAM_ERROR)
+        if (err == Z_STREAM_ERROR) {
             VS_LOG(error, "PK3ERROR : Bad parameter, stream error");
-        else if (err == Z_MEM_ERROR)
+        } else if (err == Z_MEM_ERROR) {
             VS_LOG(error, "PK3ERROR : Memory error");
+        }
     }
     if (err != Z_OK) {
         VS_LOG(error, "PK3ERROR : Bad decompression return code");
@@ -502,4 +512,3 @@ bool CPK3::ReadFile(int i, void *pBuf) {
     delete[] pcData;
     return ret;
 }
-

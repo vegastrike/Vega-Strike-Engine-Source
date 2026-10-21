@@ -27,20 +27,19 @@
 
 #include "vegadisk/diskobject.h"
 
-#include "src/vs_logging.h"
-
+#include <archive.h>
+#include <archive_entry.h>
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
 
-#include <archive.h>
-#include <archive_entry.h>
+#include "src/vs_logging.h"
 
 using namespace vega_disk;
 
 bool DiskObject::record_archive_error(int archive_error, struct archive* archive_file) {
     if (archive_error != ARCHIVE_OK) {
-        error_code = archive_errno(archive_file);
+        error_code    = archive_errno(archive_file);
         error_message = archive_error_string(archive_file);
         return true;
     }
@@ -51,15 +50,15 @@ bool DiskObject::record_archive_error(int archive_error, struct archive* archive
 int DiskObject::ListEntries(std::deque<std::string>& entries) {
     if (filename.empty()) {
         error_message = "No file to open";
-        VS_LOG(error, (boost::format("Error opening file %1% - Message (%2%)") % filename % error_message ));
+        VS_LOG(error, (boost::format("Error opening file %1% - Message (%2%)") % filename % error_message));
         return DiskObject::ERROR_NO_FILE;
     }
 
     FILE* input_file = fopen(filename.c_str(), "r+b");
     if (input_file == nullptr) {
-        error_code = errno;
+        error_code    = errno;
         error_message = strerror(errno);
-        VS_LOG(error, (boost::format("Error opening file %1% - Message (%2%)") % filename % error_message ));
+        VS_LOG(error, (boost::format("Error opening file %1% - Message (%2%)") % filename % error_message));
         return DiskObject::ERROR_OPEN_READ_FAILED;
     }
 
@@ -88,10 +87,11 @@ int DiskObject::ListEntries(std::deque<std::string>& entries) {
         // but don't check the error since its already in an error state
         archive_error = archive_read_free(archive_file);
         if (archive_error != ARCHIVE_OK) {
-            VS_LOG(error, (boost::format("Error reading file %1% - Message (%2%)") % filename % archive_error_string(archive_file)));
+            VS_LOG(error, (boost::format("Error reading file %1% - Message (%2%)") % filename %
+                           archive_error_string(archive_file)));
         }
         if (fclose(input_file) != 0) {
-            VS_LOG(error, (boost::format("Error closing file %1% - Message (%2%)") % filename % strerror(errno) ));
+            VS_LOG(error, (boost::format("Error closing file %1% - Message (%2%)") % filename % strerror(errno)));
         }
 
         return DiskObject::ERROR_ARCHIVE_READ_FAILED;
@@ -99,19 +99,21 @@ int DiskObject::ListEntries(std::deque<std::string>& entries) {
 
     archive_error = archive_read_free(archive_file);
     if (record_archive_error(archive_error, archive_file)) {
-        VS_LOG(error, (boost::format("Error closing archive after reading %1% - Message (%2%)") % filename % archive_error_string(archive_file) ));
+        VS_LOG(error, (boost::format("Error closing archive after reading %1% - Message (%2%)") % filename %
+                       archive_error_string(archive_file)));
         if (fclose(input_file) != 0) {
-            VS_LOG(error, (boost::format("Error closing file after reading %1% - Message (%2%)") % filename % strerror(errno) ));
+            VS_LOG(error, (boost::format("Error closing file after reading %1% - Message (%2%)") % filename %
+                           strerror(errno)));
         }
         return DiskObject::ERROR_ARCHIVE_CLOSE_FAILED;
     }
 
     if (fclose(input_file) != 0) {
-        VS_LOG(error, (boost::format("Error closing file after reading %1% - Message (%2%)") % filename % strerror(errno) ));
+        VS_LOG(error,
+               (boost::format("Error closing file after reading %1% - Message (%2%)") % filename % strerror(errno)));
     }
     return DiskObject::ERROR_OK;
 }
-
 
 // ReadEntry opens an archive file to extract a file by the name of `entry_name`
 // parameter and return its data via the `data` parameter. If there's an error then
@@ -119,15 +121,17 @@ int DiskObject::ListEntries(std::deque<std::string>& entries) {
 int DiskObject::ReadEntry(const std::string& entry_name, std::string& data) {
     if (filename.empty()) {
         error_message = "No file to open";
-        VS_LOG(error, (boost::format("Error opening file entry %1% from %2% - Message (%3%)") % entry_name % filename % error_message ));
+        VS_LOG(error, (boost::format("Error opening file entry %1% from %2% - Message (%3%)") % entry_name % filename %
+                       error_message));
         return DiskObject::ERROR_NO_FILE;
     }
 
     FILE* input_file = fopen(filename.c_str(), "r+b");
     if (input_file == nullptr) {
-        error_code = errno;
+        error_code    = errno;
         error_message = strerror(errno);
-        VS_LOG(error, (boost::format("Error opening file entry %1% from %2% - Message (%3%)") % entry_name % filename % error_message ));
+        VS_LOG(error, (boost::format("Error opening file entry %1% from %2% - Message (%3%)") % entry_name % filename %
+                       error_message));
         return DiskObject::ERROR_OPEN_READ_FAILED;
     }
 
@@ -150,9 +154,9 @@ int DiskObject::ReadEntry(const std::string& entry_name, std::string& data) {
 
 
             while (true) {
-                const void* buffer = nullptr;
-                size_t buffer_size = 0;
-                la_int64_t archive_offset = 0;
+                const void* buffer         = nullptr;
+                size_t      buffer_size    = 0;
+                la_int64_t  archive_offset = 0;
 
                 archive_error = archive_read_data_block(archive_file, &buffer, &buffer_size, &archive_offset);
                 switch (archive_error) {
@@ -160,7 +164,9 @@ int DiskObject::ReadEntry(const std::string& entry_name, std::string& data) {
                         // warning occurred - but it is still okay to use the data
                         // okay, keep going
                         record_archive_error(archive_error, archive_file);
-                        VS_LOG(warning, (boost::format("Warning while reading file entry %1% from %2% - Archive Warning (%3%)") % entry_name % filename % error_message ));
+                        VS_LOG(warning,
+                               (boost::format("Warning while reading file entry %1% from %2% - Archive Warning (%3%)") %
+                                entry_name % filename % error_message));
                         // fall thru to ARCHIVE_OK which saves the data
                     case ARCHIVE_OK:
                         data += std::string(static_cast<const char*>(buffer), buffer_size);
@@ -182,7 +188,9 @@ int DiskObject::ReadEntry(const std::string& entry_name, std::string& data) {
 
                         // capture error data
                         record_archive_error(archive_error, archive_file);
-                        VS_LOG(error, (boost::format("Fatal error while reading file entry %1% from %2% - Message (%3%)") % entry_name % filename % error_message ));
+                        VS_LOG(error,
+                               (boost::format("Fatal error while reading file entry %1% from %2% - Message (%3%)") %
+                                entry_name % filename % error_message));
                         archive_read_free(archive_file);
                         fclose(input_file);
                         return DiskObject::ERROR_ARCHIVE_FATAL_ERROR;
@@ -197,10 +205,12 @@ end_archive_read:
         // but don't check the error since its already in an error state
         archive_error = archive_read_free(archive_file);
         if (archive_error != ARCHIVE_OK) {
-            VS_LOG(error, (boost::format("Error reading file entry %1% from %2% - Message (%3%)") % entry_name % filename % archive_error_string(archive_file)));
+            VS_LOG(error, (boost::format("Error reading file entry %1% from %2% - Message (%3%)") % entry_name %
+                           filename % archive_error_string(archive_file)));
         }
         if (fclose(input_file) != 0) {
-            VS_LOG(error, (boost::format("Error closing file while reading entry %1% from %2% - Message (%3%)") % entry_name % filename % strerror(errno) ));
+            VS_LOG(error, (boost::format("Error closing file while reading entry %1% from %2% - Message (%3%)") %
+                           entry_name % filename % strerror(errno)));
         }
 
         return DiskObject::ERROR_ARCHIVE_READ_FAILED;
@@ -208,15 +218,18 @@ end_archive_read:
 
     archive_error = archive_read_free(archive_file);
     if (record_archive_error(archive_error, archive_file)) {
-        VS_LOG(error, (boost::format("Error closing archive after reading entry %1% from %2% - Message (%3%)") % entry_name % filename % archive_error_string(archive_file) ));
+        VS_LOG(error, (boost::format("Error closing archive after reading entry %1% from %2% - Message (%3%)") %
+                       entry_name % filename % archive_error_string(archive_file)));
         if (fclose(input_file) != 0) {
-            VS_LOG(error, (boost::format("Error closing file after entry %1% from %2% - Message (%3%)") % entry_name % filename % strerror(errno) ));
+            VS_LOG(error, (boost::format("Error closing file after entry %1% from %2% - Message (%3%)") % entry_name %
+                           filename % strerror(errno)));
         }
         return DiskObject::ERROR_ARCHIVE_CLOSE_FAILED;
     }
 
     if (fclose(input_file) != 0) {
-        VS_LOG(error, (boost::format("Error closing file after entry %1% from %2% - Message (%3%)") % entry_name % filename % strerror(errno) ));
+        VS_LOG(error, (boost::format("Error closing file after entry %1% from %2% - Message (%3%)") % entry_name %
+                       filename % strerror(errno)));
     }
     return DiskObject::ERROR_OK;
 }

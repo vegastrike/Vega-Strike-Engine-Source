@@ -31,19 +31,19 @@
 #include "vegadisk/diskobject.h"
 
 class DiskObjectTestModifier : public vega_disk::DiskObject {
-    public:
-        DiskObjectTestModifier(int _error_code, std::string _filename, std::string _error_msg) {
-            error_code = _error_code;
-            filename = _filename;
-            error_message = _error_msg;
-        }
+public:
+    DiskObjectTestModifier(int _error_code, std::string _filename, std::string _error_msg) {
+        error_code    = _error_code;
+        filename      = _filename;
+        error_message = _error_msg;
+    }
 };
 
 TEST(VegaDisk, DiskObjectDefault) {
     // clean disk object; just validate it's in the expected error-free state
     vega_disk::DiskObject diskObjectDefault{};
-    int errorValue = diskObjectDefault.GetError();
-    std::string errorMessage = diskObjectDefault.GetErrorString();
+    int                   errorValue   = diskObjectDefault.GetError();
+    std::string           errorMessage = diskObjectDefault.GetErrorString();
     EXPECT_EQ(errorValue, vega_disk::DiskObject::ERROR_OK);
     EXPECT_STREQ(errorMessage.c_str(), "");
 }
@@ -51,17 +51,13 @@ TEST(VegaDisk, DiskObjectDefault) {
 TEST(VegaDisk, DiskObjectProperties) {
     // configure the disk object via the accessor class above that gives access
     // to the protected values behind the get methods.
-    int diskObjectErrorValue = vega_disk::DiskObject::ERROR_ARCHIVE_FATAL_ERROR;
-    std::string diskObjectFilename = "foobar.test";
-    std::string diskObjectErrorMessage = "test error message value for foobar.test";
-    DiskObjectTestModifier diskObjectTester(
-        diskObjectErrorValue,
-        diskObjectFilename,
-        diskObjectErrorMessage
-    );
-    int errorValue = diskObjectTester.GetError();
-    std::string errorMessage = diskObjectTester.GetErrorString();
-    std::string filename = diskObjectTester.GetFilename();
+    int                    diskObjectErrorValue   = vega_disk::DiskObject::ERROR_ARCHIVE_FATAL_ERROR;
+    std::string            diskObjectFilename     = "foobar.test";
+    std::string            diskObjectErrorMessage = "test error message value for foobar.test";
+    DiskObjectTestModifier diskObjectTester(diskObjectErrorValue, diskObjectFilename, diskObjectErrorMessage);
+    int                    errorValue   = diskObjectTester.GetError();
+    std::string            errorMessage = diskObjectTester.GetErrorString();
+    std::string            filename     = diskObjectTester.GetFilename();
     EXPECT_EQ(errorValue, diskObjectErrorValue);
     EXPECT_STREQ(errorMessage.c_str(), diskObjectErrorMessage.c_str());
     EXPECT_STREQ(filename.c_str(), diskObjectFilename.c_str());
@@ -72,7 +68,7 @@ TEST(VegaDisk, DiskObjectProperties) {
     EXPECT_STREQ(updatedFilename.c_str(), newFilename.c_str());
 
     diskObjectTester.ClearError();
-    int updatedError = diskObjectTester.GetError();
+    int         updatedError        = diskObjectTester.GetError();
     std::string updatedErrorMessage = diskObjectTester.GetErrorString();
     EXPECT_EQ(updatedError, vega_disk::DiskObject::ERROR_OK);
     EXPECT_NE(updatedError, errorValue);
