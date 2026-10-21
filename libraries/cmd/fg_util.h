@@ -44,4 +44,4 @@ bool         CheckFG(std::vector<std::string> &data);
 void         PurgeZeroShips(SaveGame *sg, unsigned int faction);
 void         PurgeZeroShips(SaveGame *sg);
 }  // namespace fg_util
-#endif // VEGA_STRIKE_LIBRARIES_CMD_FG_UTIL_H
+#endif  // VEGA_STRIKE_LIBRARIES_CMD_FG_UTIL_H
