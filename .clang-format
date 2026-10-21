@@ -42,25 +42,35 @@ ForEachMacros: [RANGES_FOR, FOREACH, BOOST_FOREACH]
 IncludeBlocks: Regroup
 IncludeCategories:
   - Regex: '^((<|")boost/python\.hpp("|>))$'
-    Priority: -2
+    Priority: -4
   - Regex: '^((<|")Python\.h("|>))$'
+    Priority: -3
+  - Regex: '^"collide2/opcodetypes\.h"$'
+    Priority: -2
+  - Regex: '^"collide2/opcodesysdef\.h"$'
     Priority: -1
   - Regex: '^<[[:alnum:]._]+>$'
     Priority: 1
   - Regex: '^((<|")boost/)'
     Priority: 2
-  - Regex: '^<[[:alnum:]./_]+>$'
+  - Regex: '^<(GL/)?gl\.h>$'
     Priority: 3
-  - Regex: '^"collide2/Opcode\.h"$'
+  - Regex: '^<(GL/)?glu\.h>$'
     Priority: 4
-  - Regex: '^"OPC_IceHook\.h"$'
+  - Regex: '^<(GL/)?glut\.h>$'
     Priority: 5
-  - Regex: '^"Ice/IcePreprocessor\.h"$'
+  - Regex: '^<(GL/)?glext\.h>$'
     Priority: 6
-  - Regex: '^"[[:alnum:]./_]+"$'
+  - Regex: '^<[[:alnum:]./_]+>$'
     Priority: 7
-  - Regex: '.*'
+  - Regex: '^"collide2/Opcode\.h"$'
     Priority: 8
+  - Regex: '^"collide2/[[:alnum:]./_]+"$'
+    Priority: 9
+  - Regex: '^"[[:alnum:]./_]+"$'
+    Priority: 10
+  - Regex: '.*'
+    Priority: 11
 IndentAccessModifiers: false
 IndentExternBlock: Indent
 IndentPPDirectives: AfterHash
