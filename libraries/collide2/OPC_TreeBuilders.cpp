@@ -34,7 +34,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		March, 20, 2001
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		March, 20, 2001
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,7 +56,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		March, 20, 2001
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "collide2/Opcode.h"
@@ -112,9 +112,8 @@ float AABBTreeOfAABBsBuilder::GetSplittingValue(uint32_t index, uint32_t axis) c
  *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTreeOfTrianglesBuilder::ComputeGlobalBox(const uint32_t *primitives,
-        uint32_t nb_prims,
-        AABB &global_box) const {
+bool AABBTreeOfTrianglesBuilder::ComputeGlobalBox(const uint32_t *primitives, uint32_t nb_prims,
+                                                  AABB &global_box) const {
     // Checkings
     if (!primitives || !nb_prims) {
         return false;
@@ -146,24 +145,22 @@ bool AABBTreeOfTrianglesBuilder::ComputeGlobalBox(const uint32_t *primitives,
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 float AABBTreeOfTrianglesBuilder::GetSplittingValue(uint32_t index, uint32_t axis) const {
-/*	// Compute center of triangle
-	Point Center;
-	mTriList[index].Center(mVerts, Center);
-	// Return value
-	return Center[axis];*/
+    /*	// Compute center of triangle
+        Point Center;
+        mTriList[index].Center(mVerts, Center);
+        // Return value
+        return Center[axis];*/
 
     // Compute correct component from center of triangle
-//	return	(mVerts[mTriList[index].mVRef[0]][axis]
-//			+mVerts[mTriList[index].mVRef[1]][axis]
-//			+mVerts[mTriList[index].mVRef[2]][axis])*INV3;
+    //	return	(mVerts[mTriList[index].mVRef[0]][axis]
+    //			+mVerts[mTriList[index].mVRef[1]][axis]
+    //			+mVerts[mTriList[index].mVRef[2]][axis])*INV3;
 
     VertexPointers VP;
     mIMesh->GetTriangle(VP, index);
 
     // Compute correct component from center of triangle
-    return ((*VP.Vertex[0])[axis]
-            + (*VP.Vertex[1])[axis]
-            + (*VP.Vertex[2])[axis]) * INV3;
+    return ((*VP.Vertex[0])[axis] + (*VP.Vertex[1])[axis] + (*VP.Vertex[2])[axis]) * INV3;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -176,13 +173,11 @@ float AABBTreeOfTrianglesBuilder::GetSplittingValue(uint32_t index, uint32_t axi
  *  \return		splitting value
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float AABBTreeOfTrianglesBuilder::GetSplittingValue(const uint32_t *primitives,
-        uint32_t nb_prims,
-        const AABB &global_box,
-        uint32_t axis) const {
+float AABBTreeOfTrianglesBuilder::GetSplittingValue(const uint32_t *primitives, uint32_t nb_prims,
+                                                    const AABB &global_box, uint32_t axis) const {
     if (mSettings.mRules & SPLIT_GEOM_CENTER) {
         // Loop through triangles
-        float SplitValue = 0.0f;
+        float          SplitValue = 0.0f;
         VertexPointers VP;
         for (uint32_t i = 0; i < nb_prims; i++) {
             // Get current triangle-vertices
@@ -207,9 +202,8 @@ float AABBTreeOfTrianglesBuilder::GetSplittingValue(const uint32_t *primitives,
  *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTreeOfVerticesBuilder::ComputeGlobalBox(const uint32_t *primitives,
-        uint32_t nb_prims,
-        AABB &global_box) const {
+bool AABBTreeOfVerticesBuilder::ComputeGlobalBox(const uint32_t *primitives, uint32_t nb_prims,
+                                                 AABB &global_box) const {
     // Checkings
     if (!primitives || !nb_prims) {
         return false;
@@ -249,10 +243,8 @@ float AABBTreeOfVerticesBuilder::GetSplittingValue(uint32_t index, uint32_t axis
  *  \return		splitting value
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-float AABBTreeOfVerticesBuilder::GetSplittingValue(const uint32_t *primitives,
-        uint32_t nb_prims,
-        const AABB &global_box,
-        uint32_t axis) const {
+float AABBTreeOfVerticesBuilder::GetSplittingValue(const uint32_t *primitives, uint32_t nb_prims,
+                                                   const AABB &global_box, uint32_t axis) const {
     if (mSettings.mRules & SPLIT_GEOM_CENTER) {
         // Loop through vertices
         float SplitValue = 0.0f;
@@ -265,4 +257,3 @@ float AABBTreeOfVerticesBuilder::GetSplittingValue(const uint32_t *primitives,
         return AABBTreeBuilder::GetSplittingValue(primitives, nb_prims, global_box, axis);
     }
 }
-

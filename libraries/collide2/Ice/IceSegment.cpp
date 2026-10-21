@@ -28,18 +28,18 @@ using namespace Opcode;
 
 float Segment::SquareDistance(const Point &point, float *t) const {
     Point Diff = point - mP0;
-    Point Dir = mP1 - mP0;
-    float fT = Diff | Dir;
+    Point Dir  = mP1 - mP0;
+    float fT   = Diff | Dir;
 
     if (fT <= 0.0f) {
         fT = 0.0f;
     } else {
         float SqrLen = Dir.SquareMagnitude();
         if (fT >= SqrLen) {
-            fT = 1.0f;
+            fT    = 1.0f;
             Diff -= Dir;
         } else {
-            fT /= SqrLen;
+            fT   /= SqrLen;
             Diff -= fT * Dir;
         }
     }
@@ -50,4 +50,3 @@ float Segment::SquareDistance(const Point &point, float *t) const {
 
     return Diff.SquareMagnitude();
 }
-

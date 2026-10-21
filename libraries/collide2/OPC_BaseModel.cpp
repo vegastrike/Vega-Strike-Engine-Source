@@ -28,7 +28,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		May, 18, 2003
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "collide2/Opcode.h"
 
@@ -40,16 +40,16 @@ using namespace Opcode;
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 OPCODECREATE::OPCODECREATE() {
-    mIMesh = nullptr;
+    mIMesh           = nullptr;
     mSettings.mRules = SPLIT_SPLATTER_POINTS | SPLIT_GEOM_CENTER;
-    mSettings.mLimit = 1;    // Mandatory for complete trees
-    mNoLeaf = true;
-    mQuantized = true;
+    mSettings.mLimit = 1;  // Mandatory for complete trees
+    mNoLeaf          = true;
+    mQuantized       = true;
 #ifdef __MESHMERIZER_H__
-    mCollisionHull		= false;
-#endif // __MESHMERIZER_H__
+    mCollisionHull = false;
+#endif  // __MESHMERIZER_H__
     mKeepOriginal = false;
-    mCanRemap = false;
+    mCanRemap     = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,8 +57,7 @@ OPCODECREATE::OPCODECREATE() {
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-BaseModel::BaseModel() : mIMesh(nullptr), mModelCode(0), mSource(nullptr), mTree(nullptr) {
-}
+BaseModel::BaseModel() : mIMesh(nullptr), mModelCode(0), mSource(nullptr), mTree(nullptr) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -134,10 +133,10 @@ bool BaseModel::Refit() {
     // Refit the optimized tree
     return mTree->Refit(mIMesh);
 
-// Old code kept for reference : refit the source tree then rebuild !
-//	if(!mSource)	return false;
-//	// Ouch...
-//	mSource->Refit(&mTB);
-//	// Ouch...
-//	return mTree->Build(mSource);
+    // Old code kept for reference : refit the source tree then rebuild !
+    //	if(!mSource)	return false;
+    //	// Ouch...
+    //	mSource->Refit(&mTB);
+    //	// Ouch...
+    //	return mTree->Build(mSource);
 }

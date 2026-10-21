@@ -171,23 +171,16 @@ bool OBB::ComputePoints(Point *pts) const {
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool OBB::ComputeVertexNormals(Point *pts) const {
-    static float VertexNormals[] =
-            {
-                    -INVSQRT3, -INVSQRT3, -INVSQRT3,
-                    INVSQRT3, -INVSQRT3, -INVSQRT3,
-                    INVSQRT3, INVSQRT3, -INVSQRT3,
-                    -INVSQRT3, INVSQRT3, -INVSQRT3,
-                    -INVSQRT3, -INVSQRT3, INVSQRT3,
-                    INVSQRT3, -INVSQRT3, INVSQRT3,
-                    INVSQRT3, INVSQRT3, INVSQRT3,
-                    -INVSQRT3, INVSQRT3, INVSQRT3
-            };
+    static float VertexNormals[] = {-INVSQRT3, -INVSQRT3, -INVSQRT3, INVSQRT3,  -INVSQRT3, -INVSQRT3,
+                                    INVSQRT3,  INVSQRT3,  -INVSQRT3, -INVSQRT3, INVSQRT3,  -INVSQRT3,
+                                    -INVSQRT3, -INVSQRT3, INVSQRT3,  INVSQRT3,  -INVSQRT3, INVSQRT3,
+                                    INVSQRT3,  INVSQRT3,  INVSQRT3,  -INVSQRT3, INVSQRT3,  INVSQRT3};
 
     if (!pts) {
         return false;
     }
 
-    const Point *VN = (const Point *) VertexNormals;
+    const Point *VN = (const Point *)VertexNormals;
     for (uint32_t i = 0; i < 8; i++) {
         pts[i] = VN[i] * mRot;
     }
@@ -202,12 +195,7 @@ bool OBB::ComputeVertexNormals(Point *pts) const {
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const uint32_t *OBB::GetEdges() const {
-    static uint32_t Indices[] = {
-            0, 1, 1, 2, 2, 3, 3, 0,
-            7, 6, 6, 5, 5, 4, 4, 7,
-            1, 5, 6, 2,
-            3, 7, 4, 0
-    };
+    static uint32_t Indices[] = {0, 1, 1, 2, 2, 3, 3, 0, 7, 6, 6, 5, 5, 4, 4, 7, 1, 5, 6, 2, 3, 7, 4, 0};
     return Indices;
 }
 
@@ -218,24 +206,23 @@ const uint32_t *OBB::GetEdges() const {
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const Point *OBB::GetLocalEdgeNormals() const {
-    static float EdgeNormals[] =
-            {
-                    0, -INVSQRT2, -INVSQRT2,    // 0-1
-                    INVSQRT2, 0, -INVSQRT2,    // 1-2
-                    0, INVSQRT2, -INVSQRT2,    // 2-3
-                    -INVSQRT2, 0, -INVSQRT2,    // 3-0
+    static float EdgeNormals[] = {
+            0,         -INVSQRT2, -INVSQRT2,  // 0-1
+            INVSQRT2,  0,         -INVSQRT2,  // 1-2
+            0,         INVSQRT2,  -INVSQRT2,  // 2-3
+            -INVSQRT2, 0,         -INVSQRT2,  // 3-0
 
-                    0, INVSQRT2, INVSQRT2,    // 7-6
-                    INVSQRT2, 0, INVSQRT2,    // 6-5
-                    0, -INVSQRT2, INVSQRT2,    // 5-4
-                    -INVSQRT2, 0, INVSQRT2,    // 4-7
+            0,         INVSQRT2,  INVSQRT2,   // 7-6
+            INVSQRT2,  0,         INVSQRT2,   // 6-5
+            0,         -INVSQRT2, INVSQRT2,   // 5-4
+            -INVSQRT2, 0,         INVSQRT2,   // 4-7
 
-                    INVSQRT2, -INVSQRT2, 0,            // 1-5
-                    INVSQRT2, INVSQRT2, 0,            // 6-2
-                    -INVSQRT2, INVSQRT2, 0,            // 3-7
-                    -INVSQRT2, -INVSQRT2, 0            // 4-0
-            };
-    return (const Point *) EdgeNormals;
+            INVSQRT2,  -INVSQRT2, 0,          // 1-5
+            INVSQRT2,  INVSQRT2,  0,          // 6-2
+            -INVSQRT2, INVSQRT2,  0,          // 3-7
+            -INVSQRT2, -INVSQRT2, 0           // 4-0
+    };
+    return (const Point *)EdgeNormals;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -264,18 +251,18 @@ void OBB::ComputeLSS(LSS &lss) const {
     switch (mExtents.LargestAxis()) {
         case 0:
             lss.mRadius = (mExtents.y + mExtents.z) * 0.5f;
-            lss.mP0 = mCenter + Axis0 * (mExtents.x - lss.mRadius);
-            lss.mP1 = mCenter - Axis0 * (mExtents.x - lss.mRadius);
+            lss.mP0     = mCenter + Axis0 * (mExtents.x - lss.mRadius);
+            lss.mP1     = mCenter - Axis0 * (mExtents.x - lss.mRadius);
             break;
         case 1:
             lss.mRadius = (mExtents.x + mExtents.z) * 0.5f;
-            lss.mP0 = mCenter + Axis1 * (mExtents.y - lss.mRadius);
-            lss.mP1 = mCenter - Axis1 * (mExtents.y - lss.mRadius);
+            lss.mP0     = mCenter + Axis1 * (mExtents.y - lss.mRadius);
+            lss.mP1     = mCenter - Axis1 * (mExtents.y - lss.mRadius);
             break;
         case 2:
             lss.mRadius = (mExtents.x + mExtents.y) * 0.5f;
-            lss.mP0 = mCenter + Axis2 * (mExtents.z - lss.mRadius);
-            lss.mP1 = mCenter - Axis2 * (mExtents.z - lss.mRadius);
+            lss.mP0     = mCenter + Axis2 * (mExtents.z - lss.mRadius);
+            lss.mP1     = mCenter - Axis2 * (mExtents.z - lss.mRadius);
             break;
         default:
             // Should not happen
@@ -311,8 +298,8 @@ bool OBB::IsInside(const OBB &box) const {
     // Create the AABB of (box1 in space of box0)
     const Matrix3x3 &mtx = _1in0.mRot;
 
-    float f = fabsf(mtx.m[0][0] * mExtents.x) + fabsf(mtx.m[1][0] * mExtents.y) + fabsf(mtx.m[2][0] * mExtents.z)
-            - box.mExtents.x;
+    float f = fabsf(mtx.m[0][0] * mExtents.x) + fabsf(mtx.m[1][0] * mExtents.y) + fabsf(mtx.m[2][0] * mExtents.z) -
+              box.mExtents.x;
     if (f > _1in0.mCenter.x) {
         return FALSE;
     }
@@ -320,8 +307,8 @@ bool OBB::IsInside(const OBB &box) const {
         return FALSE;
     }
 
-    f = fabsf(mtx.m[0][1] * mExtents.x) + fabsf(mtx.m[1][1] * mExtents.y) + fabsf(mtx.m[2][1] * mExtents.z)
-            - box.mExtents.y;
+    f = fabsf(mtx.m[0][1] * mExtents.x) + fabsf(mtx.m[1][1] * mExtents.y) + fabsf(mtx.m[2][1] * mExtents.z) -
+        box.mExtents.y;
     if (f > _1in0.mCenter.y) {
         return FALSE;
     }
@@ -329,8 +316,8 @@ bool OBB::IsInside(const OBB &box) const {
         return FALSE;
     }
 
-    f = fabsf(mtx.m[0][2] * mExtents.x) + fabsf(mtx.m[1][2] * mExtents.y) + fabsf(mtx.m[2][2] * mExtents.z)
-            - box.mExtents.z;
+    f = fabsf(mtx.m[0][2] * mExtents.x) + fabsf(mtx.m[1][2] * mExtents.y) + fabsf(mtx.m[2][2] * mExtents.z) -
+        box.mExtents.z;
     if (f > _1in0.mCenter.z) {
         return FALSE;
     }
@@ -340,4 +327,3 @@ bool OBB::IsInside(const OBB &box) const {
 
     return TRUE;
 }
-

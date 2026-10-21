@@ -38,16 +38,13 @@ inline_ void Sort(uint32_t &id0, uint32_t &id1) {
 
 class Opcode::SAP_Element {
 public:
-    inline_ SAP_Element() {
-    }
+    inline_ SAP_Element() {}
 
-    inline_ SAP_Element(uint32_t id, SAP_Element *next) : mID(id), mNext(next) {
-    }
+    inline_ SAP_Element(uint32_t id, SAP_Element *next) : mID(id), mNext(next) {}
 
-    inline_                    ~SAP_Element() {
-    }
+    inline_ ~SAP_Element() {}
 
-    uint32_t mID;
+    uint32_t     mID;
     SAP_Element *mNext;
 };
 
@@ -59,24 +56,24 @@ public:
 
 class Opcode::SAP_EndPoint {
 public:
-    float Value;        // Min or Max value
-    SAP_EndPoint *Previous;    // Previous EndPoint whose Value is smaller than ours (or nullptr)
-    SAP_EndPoint *Next;        // Next EndPoint whose Value is greater than ours (or nullptr)
-    uint32_t Data;        // Parent box ID *2 | MinMax flag
+    float         Value;     // Min or Max value
+    SAP_EndPoint *Previous;  // Previous EndPoint whose Value is smaller than ours (or nullptr)
+    SAP_EndPoint *Next;      // Next EndPoint whose Value is greater than ours (or nullptr)
+    uint32_t      Data;      // Parent box ID *2 | MinMax flag
 
-    inline_    void SetData(uint32_t box_id, bool is_max) {
+    inline_ void SetData(uint32_t box_id, bool is_max) {
         Data = (box_id << 1) | (is_max ? 1 : 0);
     }
 
-    inline_    bool IsMax() const {
+    inline_ bool IsMax() const {
         return Data & 1;
     }
 
-    inline_    uint32_t GetBoxID() const {
+    inline_ uint32_t GetBoxID() const {
         return Data >> 1;
     }
 
-    inline_    void InsertAfter(SAP_EndPoint *element) {
+    inline_ void InsertAfter(SAP_EndPoint *element) {
         if (this != element && this != element->Next) {
             // Remove
             if (Previous) {
@@ -93,11 +90,11 @@ public:
             }
 
             element->Next = this;
-            Previous = element;
+            Previous      = element;
         }
     }
 
-    inline_    void InsertBefore(SAP_EndPoint *element) {
+    inline_ void InsertBefore(SAP_EndPoint *element) {
         if (this != element && this != element->Previous) {
             // Remove
             if (Previous) {
@@ -108,7 +105,7 @@ public:
             }
 
             // Insert
-            Previous = element->Previous;
+            Previous          = element->Previous;
             element->Previous = this;
 
             Next = element;
@@ -119,28 +116,13 @@ public:
     }
 };
 
-
-
-
-
-
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SAP_PairData::SAP_PairData() :
-        mNbElements(0),
-        mNbUsedElements(0),
-        mElementPool(nullptr),
-        mFirstFree(nullptr),
-        mNbObjects(0),
-        mArray(nullptr) {
-}
+SAP_PairData::SAP_PairData()
+    : mNbElements(0), mNbUsedElements(0), mElementPool(nullptr), mFirstFree(nullptr), mNbObjects(0), mArray(nullptr) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -152,9 +134,9 @@ SAP_PairData::~SAP_PairData() {
 }
 
 void SAP_PairData::Release() {
-    mNbElements = 0;
+    mNbElements     = 0;
     mNbUsedElements = 0;
-    mNbObjects = 0;
+    mNbObjects      = 0;
     DELETEARRAY(mElementPool);
     DELETEARRAY(mArray);
 }
@@ -190,7 +172,7 @@ bool SAP_PairData::Init(uint32_t nb_objects) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ void Remap(SAP_Element *&element, uint32_t delta) {
     if (element) {
-        element = (SAP_Element *) (uintptr_t(element) + delta);
+        element = (SAP_Element *)(uintptr_t(element) + delta);
     }
 }
 
@@ -211,8 +193,8 @@ SAP_Element *SAP_PairData::GetFreeElem(uint32_t id, SAP_Element *next, uint32_t 
     SAP_Element *FreeElem;
     if (mFirstFree) {
         // Recycle
-        FreeElem = mFirstFree;
-        mFirstFree = mFirstFree->mNext;    // First free = next free (or nullptr)
+        FreeElem   = mFirstFree;
+        mFirstFree = mFirstFree->mNext;  // First free = next free (or nullptr)
     } else {
         if (mNbUsedElements == mNbElements) {
             // Resize
@@ -226,8 +208,9 @@ SAP_Element *SAP_PairData::GetFreeElem(uint32_t id, SAP_Element *next, uint32_t 
 
             // Remap everything
             {
-                ptrdiff_t Delta = uintptr_t(NewElems)
-                        - uintptr_t(mElementPool);    // Hmm. Pointer arithmetic. That might not be such a good idea
+                ptrdiff_t Delta =
+                        uintptr_t(NewElems) -
+                        uintptr_t(mElementPool);  // Hmm. Pointer arithmetic. That might not be such a good idea
 
                 uint32_t i;
                 for (i = 0; i < mNbUsedElements; i++) {
@@ -252,7 +235,7 @@ SAP_Element *SAP_PairData::GetFreeElem(uint32_t id, SAP_Element *next, uint32_t 
         FreeElem = &mElementPool[mNbUsedElements++];
     }
 
-    FreeElem->mID = id;
+    FreeElem->mID   = id;
     FreeElem->mNext = next;
 
     return FreeElem;
@@ -265,8 +248,8 @@ SAP_Element *SAP_PairData::GetFreeElem(uint32_t id, SAP_Element *next, uint32_t 
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 inline_ void SAP_PairData::FreeElem(SAP_Element *elem) {
-    elem->mNext = mFirstFree;    // Next free
-    mFirstFree = elem;
+    elem->mNext = mFirstFree;  // Next free
+    mFirstFree  = elem;
 }
 
 // Add a pair to the set.
@@ -300,10 +283,10 @@ void SAP_PairData::AddPair(uint32_t id1, uint32_t id2) {
 
         if (Current->mID == id2) {
             return;
-        }    // The pair already exists
+        }  // The pair already exists
 
-//		Current->mNext = GetFreeElem(id2, Current->mNext);
-        uint32_t Delta;
+        //		Current->mNext = GetFreeElem(id2, Current->mNext);
+        uint32_t     Delta;
         SAP_Element *E = GetFreeElem(id2, Current->mNext, &Delta);
         if (Delta) {
             Remap(Current, Delta);
@@ -345,7 +328,7 @@ void SAP_PairData::RemovePair(uint32_t id1, uint32_t id2) {
             // Otherwise, delete id2.
             if (Current->mNext->mID == id2) {
                 SAP_Element *Temp = Current->mNext;
-                Current->mNext = Temp->mNext;
+                Current->mNext    = Temp->mNext;
                 FreeElem(Temp);
                 return;
             }
@@ -386,48 +369,19 @@ void SAP_PairData::DumpPairs(PairCallback callback, void *user_data) const {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SweepAndPrune::SweepAndPrune() {
-}
+SweepAndPrune::SweepAndPrune() {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SweepAndPrune::~SweepAndPrune() {
-}
+SweepAndPrune::~SweepAndPrune() {}
 
 void SweepAndPrune::GetPairs(Pairs &pairs) const {
     mPairs.DumpPairs(pairs);
@@ -442,7 +396,7 @@ bool SweepAndPrune::Init(uint32_t nb_objects, const AABB **boxes) {
     mNbObjects = nb_objects;
 
     mBoxes = new SAP_Box[nb_objects];
-//	for(uint32_t i=0;i<nb_objects;i++)	mBoxes[i].Box = *boxes[i];
+    //	for(uint32_t i=0;i<nb_objects;i++)	mBoxes[i].Box = *boxes[i];
 
     float *Data = new float[nb_objects * 2];
 
@@ -454,25 +408,25 @@ bool SweepAndPrune::Init(uint32_t nb_objects, const AABB **boxes) {
             Data[i * 2 + 0] = boxes[i]->GetMin(Axis);
             Data[i * 2 + 1] = boxes[i]->GetMax(Axis);
         }
-        RadixSort RS;
+        RadixSort       RS;
         const uint32_t *Sorted = RS.Sort(Data, nb_objects * 2).GetRanks();
 
         SAP_EndPoint *PreviousEndPoint = nullptr;
 
         for (i = 0; i < nb_objects * 2; i++) {
             uint32_t SortedIndex = *Sorted++;
-            float SortedCoord = Data[SortedIndex];
-            uint32_t BoxIndex = SortedIndex >> 1;
+            float    SortedCoord = Data[SortedIndex];
+            uint32_t BoxIndex    = SortedIndex >> 1;
 
             OPASSERT(BoxIndex < nb_objects);
 
             SAP_EndPoint *CurrentEndPoint = &mList[Axis][SortedIndex];
-            CurrentEndPoint->Value = SortedCoord;
-//			CurrentEndPoint->IsMax		= SortedIndex&1;		// ### could be implicit ?
-//			CurrentEndPoint->ID			= BoxIndex;				// ### could be implicit ?
-            CurrentEndPoint->SetData(BoxIndex, SortedIndex & 1);    // ### could be implicit ?
+            CurrentEndPoint->Value        = SortedCoord;
+            //			CurrentEndPoint->IsMax		= SortedIndex&1;		// ### could be implicit ?
+            //			CurrentEndPoint->ID			= BoxIndex;				// ### could be implicit ?
+            CurrentEndPoint->SetData(BoxIndex, SortedIndex & 1);  // ### could be implicit ?
             CurrentEndPoint->Previous = PreviousEndPoint;
-            CurrentEndPoint->Next = nullptr;
+            CurrentEndPoint->Next     = nullptr;
             if (PreviousEndPoint) {
                 PreviousEndPoint->Next = CurrentEndPoint;
             }
@@ -506,7 +460,9 @@ bool SweepAndPrune::Init(uint32_t nb_objects, const AABB **boxes) {
 
             if (id0 != id1 && boxes[id0]->Intersect(*boxes[id1])) {
                 mPairs.AddPair(id0, id1);
-            } else OPASSERT(0);
+            } else {
+                OPASSERT(0);
+            }
         }
     }
 
@@ -540,7 +496,7 @@ bool SweepAndPrune::CheckListsIntegrity() {
             }
 
             Previous = Current;
-            Current = Current->Next;
+            Current  = Current->Next;
         }
 
         OPASSERT(Nb == mNbObjects * 2);
@@ -549,9 +505,8 @@ bool SweepAndPrune::CheckListsIntegrity() {
 }
 
 inline_ bool Intersect(const AABB &a, const SAP_Box &b) {
-    if (b.Max[0]->Value < a.GetMin(0) || a.GetMax(0) < b.Min[0]->Value
-            || b.Max[1]->Value < a.GetMin(1) || a.GetMax(1) < b.Min[1]->Value
-            || b.Max[2]->Value < a.GetMin(2) || a.GetMax(2) < b.Min[2]->Value) {
+    if (b.Max[0]->Value < a.GetMin(0) || a.GetMax(0) < b.Min[0]->Value || b.Max[1]->Value < a.GetMin(1) ||
+        a.GetMax(1) < b.Min[1]->Value || b.Max[2]->Value < a.GetMin(2) || a.GetMax(2) < b.Min[2]->Value) {
         return FALSE;
     }
 
@@ -560,7 +515,7 @@ inline_ bool Intersect(const AABB &a, const SAP_Box &b) {
 
 bool SweepAndPrune::UpdateObject(uint32_t i, const AABB &box) {
     for (uint32_t Axis = 0; Axis < 3; Axis++) {
-//		uint32_t Base = (uint32_t)&mList[Axis][0];
+        //		uint32_t Base = (uint32_t)&mList[Axis][0];
 
         // Update min
         {
@@ -582,7 +537,7 @@ bool SweepAndPrune::UpdateObject(uint32_t i, const AABB &box) {
 
                     if (NewPos->IsMax()) {
                         // Our min passed a max => start overlap
-                        //uint32_t SortedIndex = (uint32_t(CurrentMin) - Base)/sizeof(NS_EndPoint);
+                        // uint32_t SortedIndex = (uint32_t(CurrentMin) - Base)/sizeof(NS_EndPoint);
                         const uint32_t id0 = CurrentMin->GetBoxID();
                         const uint32_t id1 = NewPos->GetBoxID();
 
@@ -593,7 +548,7 @@ bool SweepAndPrune::UpdateObject(uint32_t i, const AABB &box) {
                 }
 
                 CurrentMin->InsertBefore(NewPos);
-            } else// if(Limit > CurrentMin->Value)
+            } else  // if(Limit > CurrentMin->Value)
             {
                 CurrentMin->Value = Limit;
 
@@ -650,7 +605,7 @@ bool SweepAndPrune::UpdateObject(uint32_t i, const AABB &box) {
                 }
 
                 CurrentMax->InsertAfter(NewPos);
-            } else// if(Limit < CurrentMax->Value)
+            } else  // if(Limit < CurrentMax->Value)
             {
                 CurrentMax->Value = Limit;
 
@@ -680,4 +635,3 @@ bool SweepAndPrune::UpdateObject(uint32_t i, const AABB &box) {
 
     return true;
 }
-

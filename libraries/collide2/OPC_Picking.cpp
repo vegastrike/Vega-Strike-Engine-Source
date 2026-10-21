@@ -27,18 +27,18 @@ namespace Opcode {
 #ifdef OPC_RAYHIT_CALLBACK
 
 /*
-	Possible RayCollider usages:
-	- boolean query (shadow feeler)
-	- closest hit
-	- all hits
-	- number of intersection (boolean)
+    Possible RayCollider usages:
+    - boolean query (shadow feeler)
+    - closest hit
+    - all hits
+    - number of intersection (boolean)
 
 */
 
 bool SetupAllHits(RayCollider &collider, CollisionFaces &contacts) {
     struct Local {
         static void AllContacts(const CollisionFace &hit, void *user_data) {
-            CollisionFaces *CF = (CollisionFaces *) user_data;
+            CollisionFaces *CF = (CollisionFaces *)user_data;
             CF->AddFace(hit);
         }
     };
@@ -52,7 +52,7 @@ bool SetupAllHits(RayCollider &collider, CollisionFaces &contacts) {
 bool SetupClosestHit(RayCollider &collider, CollisionFace &closest_contact) {
     struct Local {
         static void ClosestContact(const CollisionFace &hit, void *user_data) {
-            CollisionFace *CF = (CollisionFace *) user_data;
+            CollisionFace *CF = (CollisionFace *)user_data;
             if (hit.mDistance < CF->mDistance) {
                 *CF = hit;
             }
@@ -79,23 +79,21 @@ bool SetupInOutTest(RayCollider &collider) {
     return true;
 }
 
-bool Picking(
-        CollisionFace &picked_face,
-        const Ray &world_ray, const Model &model, const Matrix4x4 *world,
-        float min_dist, float max_dist, const Point &view_point, CullModeCallback callback, void *user_data) {
+bool Picking(CollisionFace &picked_face, const Ray &world_ray, const Model &model, const Matrix4x4 *world,
+             float min_dist, float max_dist, const Point &view_point, CullModeCallback callback, void *user_data) {
     struct Local {
         struct CullData {
-            CollisionFace *Closest;
-            float MinLimit;
-            CullModeCallback Callback;
-            void *UserData;
-            Point ViewPoint;
+            CollisionFace       *Closest;
+            float                MinLimit;
+            CullModeCallback     Callback;
+            void                *UserData;
+            Point                ViewPoint;
             const MeshInterface *IMesh;
         };
 
         // Called for each stabbed face
         static void RenderCullingCallback(const CollisionFace &hit, void *user_data) {
-            CullData *Data = (CullData *) user_data;
+            CullData *Data = (CullData *)user_data;
 
             // Discard face if we already have a closer hit
             if (hit.mDistance >= Data->Closest->mDistance) {
@@ -118,7 +116,7 @@ bool Picking(
             // Catch *render* cull mode for this face
             CullMode CM = (Data->Callback)(StabbedFaceIndex, Data->UserData);
 
-            if (CM != CULLMODE_NONE)    // Don't even compute culling for double-sided triangles
+            if (CM != CULLMODE_NONE)  // Don't even compute culling for double-sided triangles
             {
                 // Compute backface culling for current face
 
@@ -144,22 +142,22 @@ bool Picking(
     RayCollider RC;
     RC.SetMaxDist(max_dist);
     RC.SetTemporalCoherence(false);
-    RC.SetCulling(false);        // We need all faces since some of them can be double-sided
+    RC.SetCulling(false);  // We need all faces since some of them can be double-sided
     RC.SetFirstContact(false);
     RC.SetHitCallback(Local::RenderCullingCallback);
 
-    picked_face.mFaceID = INVALID_ID;
+    picked_face.mFaceID   = INVALID_ID;
     picked_face.mDistance = MAX_FLOAT;
-    picked_face.mU = 0.0f;
-    picked_face.mV = 0.0f;
+    picked_face.mU        = 0.0f;
+    picked_face.mV        = 0.0f;
 
     Local::CullData Data;
-    Data.Closest = &picked_face;
-    Data.MinLimit = min_dist;
-    Data.Callback = callback;
-    Data.UserData = user_data;
+    Data.Closest   = &picked_face;
+    Data.MinLimit  = min_dist;
+    Data.Callback  = callback;
+    Data.UserData  = user_data;
     Data.ViewPoint = view_point;
-    Data.IMesh = model.GetMeshInterface();
+    Data.IMesh     = model.GetMeshInterface();
 
     if (world) {
         // Get matrices
@@ -177,7 +175,6 @@ bool Picking(
     return false;
 }
 
-} // namespace Opcode
+}  // namespace Opcode
 
 #endif
-

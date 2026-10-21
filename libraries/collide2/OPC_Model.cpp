@@ -90,7 +90,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		March, 20, 2001
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "collide2/Opcode.h"
@@ -103,9 +103,9 @@ using namespace Opcode;
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Model::Model() {
-#ifdef __MESHMERIZER_H__    // Collision hulls only supported within ICE !
-    mHull	= nullptr;
-#endif // __MESHMERIZER_H__
+#ifdef __MESHMERIZER_H__  // Collision hulls only supported within ICE !
+    mHull = nullptr;
+#endif                    // __MESHMERIZER_H__
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,9 +124,9 @@ Model::~Model() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Model::Release() {
     ReleaseBase();
-#ifdef __MESHMERIZER_H__    // Collision hulls only supported within ICE !
+#ifdef __MESHMERIZER_H__  // Collision hulls only supported within ICE !
     DELETESINGLE(mHull);
-#endif // __MESHMERIZER_H__
+#endif                    // __MESHMERIZER_H__
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,7 +143,8 @@ bool Model::Build(const OPCODECREATE &create) {
     }
 
     // For this model, we only support complete trees
-//	if(create.mSettings.mLimit!=1)	return SetIceError ("OPCODE WARNING: supports complete trees only! Use mLimit = 1.", nullptr);
+    //	if(create.mSettings.mLimit!=1)	return SetIceError ("OPCODE WARNING: supports complete trees only! Use mLimit
+    //= 1.", nullptr);
     if (create.mSettings.mLimit != 1) {
         return (false);
     }
@@ -151,7 +152,7 @@ bool Model::Build(const OPCODECREATE &create) {
     create.mIMesh->CheckTopology();
     // We continue nonetheless....
 
-    Release();    // Make sure previous tree has been discarded [Opcode 1.3, thanks Adam]
+    Release();  // Make sure previous tree has been discarded [Opcode 1.3, thanks Adam]
 
     // 1-1) Setup mesh interface automatically [Opcode 1.3]
     SetMeshInterface(create.mIMesh);
@@ -173,8 +174,8 @@ bool Model::Build(const OPCODECREATE &create) {
     // so we use an AABBTreeOfTrianglesBuilder.....
     {
         AABBTreeOfTrianglesBuilder TB;
-        TB.mIMesh = create.mIMesh;
-        TB.mSettings = create.mSettings;
+        TB.mIMesh        = create.mIMesh;
+        TB.mSettings     = create.mSettings;
         TB.mNbPrimitives = NbTris;
         if (!mSource->Build(&TB)) {
             return false;
@@ -198,22 +199,21 @@ bool Model::Build(const OPCODECREATE &create) {
 
 #ifdef __MESHMERIZER_H__
     // 4) Convex hull
-    if(create.mCollisionHull)
-    {
+    if (create.mCollisionHull) {
         // Create hull
         mHull = new CollisionHull;
         CHECKALLOC(mHull);
 
         CONVEXHULLCREATE CHC;
         // ### doesn't work with strides
-        CHC.NbVerts			= create.mIMesh->GetNbVertices();
-        CHC.Vertices		= create.mIMesh->GetVerts();
-        CHC.UnifyNormals	= true;
-        CHC.ReduceVertices	= true;
-        CHC.WordFaces		= false;
+        CHC.NbVerts        = create.mIMesh->GetNbVertices();
+        CHC.Vertices       = create.mIMesh->GetVerts();
+        CHC.UnifyNormals   = true;
+        CHC.ReduceVertices = true;
+        CHC.WordFaces      = false;
         mHull->Compute(CHC);
     }
-#endif // __MESHMERIZER_H__
+#endif  // __MESHMERIZER_H__
 
     return true;
 }
@@ -230,4 +230,3 @@ size_t Model::GetUsedBytes() const {
     }
     return mTree->GetUsedBytes();
 }
-

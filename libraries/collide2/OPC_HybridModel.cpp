@@ -82,7 +82,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		May, 18, 2003
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "collide2/Opcode.h"
@@ -94,12 +94,7 @@ namespace Opcode {
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-HybridModel::HybridModel() :
-        mNbLeaves(0),
-        mTriangles(nullptr),
-        mNbPrimitives(0),
-        mIndices(nullptr) {
-}
+HybridModel::HybridModel() : mNbLeaves(0), mTriangles(nullptr), mNbPrimitives(0), mIndices(nullptr) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -119,25 +114,25 @@ void HybridModel::Release() {
     ReleaseBase();
     DELETEARRAY(mIndices);
     DELETEARRAY(mTriangles);
-    mNbLeaves = 0;
+    mNbLeaves     = 0;
     mNbPrimitives = 0;
 }
 
 struct Internal {
     Internal() {
-        mNbLeaves = 0;
-        mLeaves = nullptr;
+        mNbLeaves  = 0;
+        mLeaves    = nullptr;
         mTriangles = nullptr;
-        mBase = nullptr;
+        mBase      = nullptr;
     }
 
     ~Internal() {
         DELETEARRAY(mLeaves);
     }
 
-    uint32_t mNbLeaves;
-    AABB *mLeaves;
-    LeafTriangles *mTriangles;
+    uint32_t        mNbLeaves;
+    AABB           *mLeaves;
+    LeafTriangles  *mTriangles;
     const uint32_t *mBase;
 };
 
@@ -158,14 +153,14 @@ bool HybridModel::Build(const OPCODECREATE &create) {
     create.mIMesh->CheckTopology();
     // We continue nonetheless....
 
-    Release();    // Make sure previous tree has been discarded
+    Release();  // Make sure previous tree has been discarded
 
     // 1-1) Setup mesh interface automatically
     SetMeshInterface(create.mIMesh);
 
-    bool Status = false;
+    bool      Status   = false;
     AABBTree *LeafTree = nullptr;
-    Internal Data;
+    Internal  Data;
 
     // 2) Build a generic AABB Tree.
     mSource = new AABBTree;
@@ -175,10 +170,10 @@ bool HybridModel::Build(const OPCODECREATE &create) {
     // so we use an AABBTreeOfTrianglesBuilder.....
     {
         AABBTreeOfTrianglesBuilder TB;
-        TB.mIMesh = create.mIMesh;
-        TB.mNbPrimitives = create.mIMesh->GetNbTriangles();
-        TB.mSettings = create.mSettings;
-        TB.mSettings.mLimit = 16;    // ### Hardcoded, but maybe we could let the user choose 8 / 16 / 32 ...
+        TB.mIMesh           = create.mIMesh;
+        TB.mNbPrimitives    = create.mIMesh->GetNbTriangles();
+        TB.mSettings        = create.mSettings;
+        TB.mSettings.mLimit = 16;  // ### Hardcoded, but maybe we could let the user choose 8 / 16 / 32 ...
         if (!mSource->Build(&TB)) {
             goto FreeAndExit;
         }
@@ -189,7 +184,7 @@ bool HybridModel::Build(const OPCODECREATE &create) {
         // A callback to count leaf nodes
         static bool CountLeaves(const AABBTreeNode *current, uint32_t /*depth*/, void *user_data) {
             if (current->IsLeaf()) {
-                Internal *Data = (Internal *) user_data;
+                Internal *Data = (Internal *)user_data;
                 Data->mNbLeaves++;
             }
             return true;
@@ -198,7 +193,7 @@ bool HybridModel::Build(const OPCODECREATE &create) {
         // A callback to setup leaf nodes in our internal structures
         static bool SetupLeafData(const AABBTreeNode *current, uint32_t /*depth*/, void *user_data) {
             if (current->IsLeaf()) {
-                Internal *Data = (Internal *) user_data;
+                Internal *Data = (Internal *)user_data;
 
                 // Get current leaf's box
                 Data->mLeaves[Data->mNbLeaves] = *current->GetAABB();
@@ -216,12 +211,12 @@ bool HybridModel::Build(const OPCODECREATE &create) {
     // Walk the tree & count number of leaves
     Data.mNbLeaves = 0;
     mSource->Walk(Local::CountLeaves, &Data);
-    mNbLeaves = Data.mNbLeaves;    // Keep track of it
+    mNbLeaves = Data.mNbLeaves;  // Keep track of it
 
     // Special case for 1-leaf meshes
     if (mNbLeaves == 1) {
         mModelCode |= OPC_SINGLE_NODE;
-        Status = true;
+        Status      = true;
         goto FreeAndExit;
     }
 
@@ -233,8 +228,8 @@ bool HybridModel::Build(const OPCODECREATE &create) {
 
     // Walk the tree again & setup leaf data
     Data.mTriangles = mTriangles;
-    Data.mBase = mSource->GetIndices();
-    Data.mNbLeaves = 0;    // Reset for incoming walk
+    Data.mBase      = mSource->GetIndices();
+    Data.mNbLeaves  = 0;  // Reset for incoming walk
     mSource->Walk(Local::SetupLeafData, &Data);
 
     // Handle source indices
@@ -252,7 +247,7 @@ bool HybridModel::Build(const OPCODECREATE &create) {
         if (MustKeepIndices) {
             // Keep track of source indices (from vanilla tree)
             mNbPrimitives = mSource->GetNbPrimitives();
-            mIndices = new uint32_t[mNbPrimitives];
+            mIndices      = new uint32_t[mNbPrimitives];
             CopyMemory(mIndices, mSource->GetIndices(), mNbPrimitives * sizeof(uint32_t));
         }
     }
@@ -261,11 +256,11 @@ bool HybridModel::Build(const OPCODECREATE &create) {
     LeafTree = new AABBTree;
     CHECKALLOC(LeafTree);
     {
-        AABBTreeOfAABBsBuilder TB;    // Now using boxes !
-        TB.mSettings = create.mSettings;
+        AABBTreeOfAABBsBuilder TB;  // Now using boxes !
+        TB.mSettings        = create.mSettings;
         TB.mSettings.mLimit = 1;    // We now want a complete tree so that we can "optimize" it
-        TB.mNbPrimitives = Data.mNbLeaves;
-        TB.mAABBArray = Data.mLeaves;
+        TB.mNbPrimitives    = Data.mNbLeaves;
+        TB.mAABBArray       = Data.mLeaves;
         if (!LeafTree->Build(&TB)) {
             goto FreeAndExit;
         }
@@ -284,7 +279,7 @@ bool HybridModel::Build(const OPCODECREATE &create) {
     // Finally ok...
     Status = true;
 
-    FreeAndExit:    // Allow me this one...
+FreeAndExit:  // Allow me this one...
     DELETESINGLE(LeafTree);
 
     // 3-3) Delete generic tree if needed
@@ -307,17 +302,17 @@ size_t HybridModel::GetUsedBytes() const {
         UsedBytes += mTree->GetUsedBytes();
     }
     if (mIndices) {
-        UsedBytes += mNbPrimitives * sizeof(uint32_t);    // mIndices
+        UsedBytes += mNbPrimitives * sizeof(uint32_t);   // mIndices
     }
     if (mTriangles) {
-        UsedBytes += mNbLeaves * sizeof(LeafTriangles);    // mTriangles
+        UsedBytes += mNbLeaves * sizeof(LeafTriangles);  // mTriangles
     }
     return UsedBytes;
 }
 
 inline_ void OPComputeMinMax(Point &min, Point &max, const VertexPointers &vp) {
     // Compute triangle's AABB = a leaf box
-#ifdef OPC_USE_FCOMI    // a 15% speedup on my machine, not much
+#ifdef OPC_USE_FCOMI  // a 15% speedup on my machine, not much
     min.x = FCMin3(vp.Vertex[0]->x, vp.Vertex[1]->x, vp.Vertex[2]->x);
     max.x = FCMax3(vp.Vertex[0]->x, vp.Vertex[1]->x, vp.Vertex[2]->x);
 
@@ -359,15 +354,15 @@ bool HybridModel::Refit() {
         return false;
     }
 
-    const LeafTriangles *LT = GetLeafTriangles();
-    const uint32_t *Indices = GetIndices();
+    const LeafTriangles *LT      = GetLeafTriangles();
+    const uint32_t      *Indices = GetIndices();
 
     // Bottom-up update
-    VertexPointers VP;
-    Point Min, Max;
-    Point Min_, Max_;
-    uint32_t Index = mTree->GetNbNodes();
-    AABBNoLeafNode *Nodes = (AABBNoLeafNode *) ((AABBNoLeafTree *) mTree)->GetNodes();
+    VertexPointers  VP;
+    Point           Min, Max;
+    Point           Min_, Max_;
+    uint32_t        Index = mTree->GetNbNodes();
+    AABBNoLeafNode *Nodes = (AABBNoLeafNode *)((AABBNoLeafTree *)mTree)->GetNodes();
     while (Index--) {
         AABBNoLeafNode &Current = Nodes[Index];
 
@@ -460,6 +455,6 @@ bool HybridModel::Refit() {
     return true;
 }
 
-}
-// namespace Opcode
+}  // namespace Opcode
 
+// namespace Opcode

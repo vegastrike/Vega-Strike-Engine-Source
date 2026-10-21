@@ -22,13 +22,13 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
-	O = Origin = impact point
-	i = normalized vector along the x axis
-	j = normalized vector along the y axis = actually the normal vector in O
-	D = Direction vector, norm |D| = 1
-	N = Projection of D on y axis, norm |N| = normal reaction
-	T = Projection of D on x axis, norm |T| = tangential reaction
-	R = Reflexion vector
+    O = Origin = impact point
+    i = normalized vector along the x axis
+    j = normalized vector along the y axis = actually the normal vector in O
+    D = Direction vector, norm |D| = 1
+    N = Projection of D on y axis, norm |N| = normal reaction
+    T = Projection of D on x axis, norm |T| = tangential reaction
+    R = Reflexion vector
 
               ^y
               |
@@ -44,33 +44,33 @@
     _________\|/______*_______>x
                O    T
 
-	Let define theta = angle between D and N. Then cos(theta) = |N| / |D| = |N| since D is normalized.
+    Let define theta = angle between D and N. Then cos(theta) = |N| / |D| = |N| since D is normalized.
 
-	j|D = |j|*|D|*cos(theta) => |N| = j|D
+    j|D = |j|*|D|*cos(theta) => |N| = j|D
 
-	Then we simply have:
+    Then we simply have:
 
-	D = N + T
+    D = N + T
 
-	To compute tangential reaction :
+    To compute tangential reaction :
 
-	T = D - N
+    T = D - N
 
-	To compute reflexion vector :
+    To compute reflexion vector :
 
-	R = N - T = N - (D-N) = 2*N - D
+    R = N - T = N - (D-N) = 2*N - D
 */
 
 using namespace Opcode;
 
 float Ray::SquareDistance(const Point &point, float *t) const {
     Point Diff = point - mOrig;
-    float fT = Diff | mDir;
+    float fT   = Diff | mDir;
 
     if (fT <= 0.0f) {
         fT = 0.0f;
     } else {
-        fT /= mDir.SquareMagnitude();
+        fT   /= mDir.SquareMagnitude();
         Diff -= fT * mDir;
     }
 
@@ -80,4 +80,3 @@ float Ray::SquareDistance(const Point &point, float *t) const {
 
     return Diff.SquareMagnitude();
 }
-

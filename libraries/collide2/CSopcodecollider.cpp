@@ -29,10 +29,11 @@
 */
 
 
-#include "collide2/Opcode.h"
 #include "collide2/CSopcodecollider.h"
+
+#include "collide2/Opcode.h"
 #include "collide2/opcodeqsqrt.h"
-#define _X 1000
+#define _X 1'000
 
 #undef _X
 
@@ -42,8 +43,8 @@ static std::vector<csCollisionPair> pairs;
 
 csOPCODECollider::csOPCODECollider(const std::vector<mesh_polygon> &polygons) {
     m_pCollisionModel = nullptr;
-    vertholder = nullptr;
-    //pairs.IncRef();
+    vertholder        = nullptr;
+    // pairs.IncRef();
     TreeCollider.SetFirstContact(true);
     TreeCollider.SetFullBoxBoxTest(false);
     TreeCollider.SetTemporalCoherence(false);
@@ -51,7 +52,6 @@ csOPCODECollider::csOPCODECollider(const std::vector<mesh_polygon> &polygons) {
     GeometryInitialize(polygons);
     CollisionFace collFace;
     rCollider.SetFirstContact(true);
-
 }
 
 inline float min3(float a, float b, float c) {
@@ -63,10 +63,10 @@ inline float max3(float a, float b, float c) {
 }
 
 void csOPCODECollider::GeometryInitialize(const std::vector<mesh_polygon> &polygons) {
-    OPCODECREATE OPCC;
-    unsigned int tri_count = 0;
+    OPCODECREATE                   OPCC;
+    unsigned int                   tri_count  = 0;
     std::vector<Vector>::size_type vert_count = 0;
-    for (const auto & polygon : polygons) {
+    for (const auto &polygon : polygons) {
         vert_count += polygon.v.size();
     }
     tri_count = vert_count / 3;
@@ -83,62 +83,58 @@ void csOPCODECollider::GeometryInitialize(const std::vector<mesh_polygon> &polyg
         unsigned int last = 0;
 
         /* Copies the Vector's in mesh_polygon to Point's in vertholder.
-        * This sucks but i dont see anyway around it */
-        for (const auto & polygon : polygons) {
+         * This sucks but i dont see anyway around it */
+        for (const auto &polygon : polygons) {
             const mesh_polygon *p = (&polygon);
-            for (const auto & j : p->v) {
+            for (const auto &j : p->v) {
                 vertholder[last++].Set(j.i, j.j, j.k);
                 tmp.AddBoundingVertex(j);
             }
         }
-        radius = max3(tmp.MaxX() - tmp.MinX(), tmp.MaxY() - tmp.MinY(),
-                tmp.MaxZ() - tmp.MinZ());
+        radius = max3(tmp.MaxX() - tmp.MinX(), tmp.MaxY() - tmp.MinY(), tmp.MaxZ() - tmp.MinZ());
         opcMeshInt.SetNbTriangles(tri_count);
         opcMeshInt.SetNbVertices(last);
 
         // Mesh data
-        OPCC.mIMesh = &opcMeshInt;
+        OPCC.mIMesh           = &opcMeshInt;
         OPCC.mSettings.mRules = SPLIT_SPLATTER_POINTS | SPLIT_GEOM_CENTER;
         /* NoLeaf and quantized creates an optimized, both in organization and
-        * memory overhead, tree.*/
-        OPCC.mNoLeaf = true;
+         * memory overhead, tree.*/
+        OPCC.mNoLeaf    = true;
         OPCC.mQuantized = true;
     } else {
         return;
     }
 
-    //bool status = m_pCollisionModel->Build (OPCC);
+    // bool status = m_pCollisionModel->Build (OPCC);
     m_pCollisionModel->Build(OPCC);
 }
 
 csOPCODECollider::~csOPCODECollider() {
-
     if (m_pCollisionModel) {
         delete m_pCollisionModel;
         m_pCollisionModel = nullptr;
     }
-    //pairs.DecRef();
+    // pairs.DecRef();
     delete[] vertholder;
 }
 
-void csOPCODECollider::MeshCallback(uint32_t triangle_index,
-        VertexPointers &triangle,
-        void *user_data) {
-    csOPCODECollider *collider = (csOPCODECollider *) user_data;
-    Point *vertholder = collider->vertholder;
-    int index = 3 * triangle_index;
-    triangle.Vertex[0] = &vertholder[index];
-    triangle.Vertex[1] = &vertholder[index + 1];
-    triangle.Vertex[2] = &vertholder[index + 2];
+void csOPCODECollider::MeshCallback(uint32_t triangle_index, VertexPointers &triangle, void *user_data) {
+    csOPCODECollider *collider   = (csOPCODECollider *)user_data;
+    Point            *vertholder = collider->vertholder;
+    int               index      = 3 * triangle_index;
+    triangle.Vertex[0]           = &vertholder[index];
+    triangle.Vertex[1]           = &vertholder[index + 1];
+    triangle.Vertex[2]           = &vertholder[index + 2];
 }
 
 bool csOPCODECollider::rayCollide(const Ray &boltbeam, Vector &norm, float &distance) {
     rCollider.SetHitCallback(&csOPCODECollider::RayCallback);
     rCollider.SetUserData(this);
     rCollider.SetFirstContact(false);
-    //rCollider.SetClosestHit(true);
+    // rCollider.SetClosestHit(true);
     collFace.mDistance = FLT_MAX;
-    bool retval = rCollider.Collide(boltbeam, *m_pCollisionModel);
+    bool retval        = rCollider.Collide(boltbeam, *m_pCollisionModel);
     rCollider.SetUserData(NULL);
     if (retval) {
         retval = collFace.mDistance != FLT_MAX;
@@ -148,15 +144,16 @@ bool csOPCODECollider::rayCollide(const Ray &boltbeam, Vector &norm, float &dist
             VS_LOG(debug, (boost::format("Opcode actually reported a hit at %1$f meters!") % distance));
 #endif
         } else {
-            return true;//FIXME: buggy! this should return FALSE but the math is obviously broken with opcode, so opcode is rarely telling us about intersections
+            return true;  // FIXME: buggy! this should return FALSE but the math is obviously broken with opcode, so
+                          // opcode is rarely telling us about intersections
         }
-        //FIXME set normal
+        // FIXME set normal
     }
     return retval;
 }
 
 void csOPCODECollider::RayCallback(const CollisionFace &faceHit, void *user_data) {
-    csOPCODECollider *collider = (csOPCODECollider *) user_data;
+    csOPCODECollider *collider = (csOPCODECollider *)user_data;
     if (collider) {
         if (collider->collFace.mDistance > faceHit.mDistance) {
             collider->collFace = faceHit;
@@ -164,12 +161,11 @@ void csOPCODECollider::RayCallback(const CollisionFace &faceHit, void *user_data
     }
 }
 
-bool csOPCODECollider::Collide(csOPCODECollider &otherCollider,
-        const csReversibleTransform *trans1,
-        const csReversibleTransform *trans2) {
-    csOPCODECollider *col2 = (csOPCODECollider *) &otherCollider;
-    ColCache.Model0 = this->m_pCollisionModel;
-    ColCache.Model1 = col2->m_pCollisionModel;
+bool csOPCODECollider::Collide(csOPCODECollider &otherCollider, const csReversibleTransform *trans1,
+                               const csReversibleTransform *trans2) {
+    csOPCODECollider *col2 = (csOPCODECollider *)&otherCollider;
+    ColCache.Model0        = this->m_pCollisionModel;
+    ColCache.Model1        = col2->m_pCollisionModel;
     csMatrix3 m1;
     if (trans1) {
         m1 = trans1->GetT2O();
@@ -189,27 +185,27 @@ bool csOPCODECollider::Collide(csOPCODECollider &otherCollider,
     transform2.m[1][3] = 0;
     transform2.m[2][3] = 0;
     transform2.m[3][3] = 1;
-    u = m1.Row1();
+    u                  = m1.Row1();
     transform1.m[0][0] = u.x;
     transform1.m[1][0] = u.y;
     transform1.m[2][0] = u.z;
-    u = m2.Row1();
+    u                  = m2.Row1();
     transform2.m[0][0] = u.x;
     transform2.m[1][0] = u.y;
     transform2.m[2][0] = u.z;
-    u = m1.Row2();
+    u                  = m1.Row2();
     transform1.m[0][1] = u.x;
     transform1.m[1][1] = u.y;
     transform1.m[2][1] = u.z;
-    u = m2.Row2();
+    u                  = m2.Row2();
     transform2.m[0][1] = u.x;
     transform2.m[1][1] = u.y;
     transform2.m[2][1] = u.z;
-    u = m1.Row3();
+    u                  = m1.Row3();
     transform1.m[0][2] = u.x;
     transform1.m[1][2] = u.y;
     transform1.m[2][2] = u.z;
-    u = m2.Row3();
+    u                  = m2.Row3();
     transform2.m[0][2] = u.x;
     transform2.m[1][2] = u.y;
     transform2.m[2][2] = u.z;
@@ -266,8 +262,7 @@ Vector csOPCODECollider::getVertex(unsigned int which) const {
     return Vector(vertholder[which].x, vertholder[which].y, vertholder[which].z);
 }
 
-void csOPCODECollider::CopyCollisionPairs(csOPCODECollider *col1,
-        csOPCODECollider *col2) {
+void csOPCODECollider::CopyCollisionPairs(csOPCODECollider *col1, csOPCODECollider *col2) {
     if (!col1 || !col2) {
         return;
     }
@@ -277,24 +272,23 @@ void csOPCODECollider::CopyCollisionPairs(csOPCODECollider *col1,
         return;
     }
 
-    const Pair *colPairs = TreeCollider.GetPairs();
-    Point *vertholder0 = col1->vertholder;
-    Point *vertholder1 = col2->vertholder;
-    uint32_t j;
-    size_t oldlen = pairs.size();
-    size_t newlen = oldlen + N_pairs;
+    const Pair *colPairs    = TreeCollider.GetPairs();
+    Point      *vertholder0 = col1->vertholder;
+    Point      *vertholder1 = col2->vertholder;
+    uint32_t    j;
+    size_t      oldlen = pairs.size();
+    size_t      newlen = oldlen + N_pairs;
     pairs.resize(newlen);
 
     for (unsigned int i = 0; i < N_pairs && oldlen < newlen; ++i) {
-        j = 3 * colPairs[i].id0;
+        j                   = 3 * colPairs[i].id0;
         pairs.at(oldlen).a1 = vertholder0[j];
         pairs.at(oldlen).b1 = vertholder0[j + 1];
         pairs.at(oldlen).c1 = vertholder0[j + 2];
-        j = 3 * colPairs[i].id1;
+        j                   = 3 * colPairs[i].id1;
         pairs.at(oldlen).a2 = vertholder1[j];
         pairs.at(oldlen).b2 = vertholder1[j + 1];
         pairs.at(oldlen).c2 = vertholder1[j + 2];
         ++oldlen;
     }
-
 }
