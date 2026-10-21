@@ -1,5 +1,5 @@
 /*
- * opvector3.cpp
+* opvector3.cpp
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 1998,1999,2000 by Jorrit Tyberghein
@@ -23,15 +23,14 @@
  */
 
 
-#include "collide2/csgeom2/opvector3.h"
-
-#include "collide2/opcodeqsqrt.h"
 #include "collide2/opcodesysdef.h"
+#include "collide2/opcodeqsqrt.h"
+#include "collide2/csgeom2/opvector3.h"
 
 //---------------------------------------------------------------------------
 
 float csVector3::Norm() const {
-    return qsqrt(x * x + y * y + z * z);
+    return qsqrt (x * x + y * y + z * z);
 }
 
 void csVector3::Normalize() {
@@ -39,8 +38,9 @@ void csVector3::Normalize() {
     if (sqlen < SMALL_EPSILON) {
         return;
     }
-    float invlen  = qisqrt(sqlen);
-    *this        *= invlen;
+    float invlen = qisqrt (sqlen);
+    *this *= invlen;
 }
+
 
 //---------------------------------------------------------------------------
