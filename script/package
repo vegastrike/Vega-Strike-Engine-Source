@@ -43,7 +43,7 @@
 #
 
 echo "----------------------------"
-echo "--- package | 2026-07-12 ---"
+echo "--- package | 2026-10-20 ---"
 echo "----------------------------"
 
 #----------------------------------
@@ -78,45 +78,46 @@ ROOT_DIR=$(pwd)
 echo "ROOT_DIR: ${ROOT_DIR}"
 BUILD_DIR="${ROOT_DIR}/build/${preset_name}"
 echo "BUILD_DIR: ${BUILD_DIR}"
-BIN_DIR=$ROOT_DIR/bin
+BIN_DIR="$ROOT_DIR/bin"
 echo "BIN_DIR: ${BIN_DIR}"
-PACKAGE_DIR=$ROOT_DIR/packages
-VS_EXECUTABLE=${BUILD_DIR}/vegastrike-engine
-VS_MESH_EXECUTABLE=${BUILD_DIR}/vega-meshtool
-DEPS_LOOKUP_FILE=${BUILD_DIR}/dependency.lookup
-DEPS_FINALIZED=${BUILD_DIR}/dependency.list
+PACKAGE_DIR="$ROOT_DIR/packages"
+VS_EXECUTABLE="${BUILD_DIR}/vegastrike-engine"
+VS_MESH_EXECUTABLE="${BUILD_DIR}/vega-meshtool"
+DEPS_LOOKUP_FILE="${BUILD_DIR}/dependency.lookup"
+DEPS_FINALIZED="${BUILD_DIR}/dependency.list"
 
+# This just looks up the owning package for a given library
+# Duplicates here are okay.
 function lookUpDebianDependency()
 {
-	# This just looks up the owning package for a given library
-	# Duplicates here are okay.
 	local DEP_LIBRARY="${1}"
 	local DEP_OUTPUT_FILE="${2}"
-	local DEP_PACKAGE=`dpkg-query -S ${DEP_LIBRARY} | cut -f 1 -d ':' | grep -v 386 | sort | uniq`
+	local DEP_PACKAGE
+	DEP_PACKAGE=$(dpkg-query -S "${DEP_LIBRARY}" | cut -f 1 -d ':' | grep -v 386 | sort | uniq)
 	if [ -z "${DEP_PACKAGE}" ]; then
+		DEP_PACKAGE=$(dpkg-query -S "/usr${DEP_LIBRARY}" | cut -f 1 -d ':')
 		echo "Debian Dependency: '/usr${DEP_LIBRARY}' -> ${DEP_PACKAGE}"
-		DEP_PACKAGE=`dpkg-query -S /usr${DEP_LIBRARY} | cut -f 1 -d ':'`
 	else
 		echo "Debian Dependency: '${DEP_LIBRARY}' -> ${DEP_PACKAGE}"
 	fi
-	echo ${DEP_PACKAGE} >> ${DEP_OUTPUT_FILE}
+	echo "${DEP_PACKAGE}" >> "${DEP_OUTPUT_FILE}"
 }
 
+# This just looks up the owning package for a given library
+# Duplicates here are okay.
 function lookUpRpmDependency()
 {
-	# This just looks up the owning package for a given library
-	# Duplicates here are okay.
 	local DEP_LIBRARY="${1}"
 	local DEP_OUTPUT_FILE="${2}"
-	# TODO: Adjust this for RPM tooling
-	local DEP_PACKAGE=`dpkg-query -S ${DEP_LIBRARY} | cut -f 1 -d ':'`
+	local DEP_PACKAGE
+	DEP_PACKAGE=$(rpm --query --file "${DEP_LIBRARY}" --queryformat "%{NAME}\n")
 	if [ -z "${DEP_PACKAGE}" ]; then
+		DEP_PACKAGE=$(rpm --query --file "/usr${DEP_LIBRARY}" --queryformat "%{NAME}\n")
 		echo "RPM Dependency: '/usr${DEP_LIBRARY}' -> ${DEP_PACKAGE}"
-		DEP_PACKAGE=`dpkg-query -S /usr${DEP_LIBRARY} | cut -f 1 -d ':'`
 	else
 		echo "RPM Dependency: '${DEP_LIBRARY}' -> ${DEP_PACKAGE}"
 	fi
-	echo ${DEP_PACKAGE} >> ${DEP_OUTPUT_FILE}
+	echo "${DEP_PACKAGE}" >> "${DEP_OUTPUT_FILE}"
 }
 
 function buildDependencyList()
@@ -129,41 +130,38 @@ function buildDependencyList()
 	# binaries. This probably doesn't account for dependencies
 	# already filled by the libraries, but it's a good start
 	# for automated detection.
-	ldd ${VS_EXECUTABLE} ${VS_MESH_EXECUTABLE} > ${DEPS_INPUT_FILE}
-	cat ${DEPS_INPUT_FILE} | grep "=>" | tr -s '\t ' ';' | cut -f 4 -d ';' | sort | uniq > ${DEPS_FILTERED_FILE}
+	ldd "${VS_EXECUTABLE}" "${VS_MESH_EXECUTABLE}" > "${DEPS_INPUT_FILE}"
+	grep "=>" "${DEPS_INPUT_FILE}" | tr -s '\t ' ';' | cut -f 4 -d ';' | sort | uniq > "${DEPS_FILTERED_FILE}"
 
 	# clear the dependency file
-	echo > ${DEPS_LOOKUP_FILE}
-	for DEPENDENCY_LIBRARY in `cat ${DEPS_FILTERED_FILE}`
+	echo > "${DEPS_LOOKUP_FILE}"
+	for DEPENDENCY_LIBRARY in $(cat "${DEPS_FILTERED_FILE}")
 	do
 		echo "Looking up dependency in package system: ${DEPENDENCY_LIBRARY}"
 		# Add each dependency
-		${dependency_lookup} ${DEPENDENCY_LIBRARY} "${DEPS_LOOKUP_FILE}"
+		${dependency_lookup} "${DEPENDENCY_LIBRARY}" "${DEPS_LOOKUP_FILE}"
 	done
 
 	# Final filtering in case of duplicate packages
-	cat "${DEPS_LOOKUP_FILE}" | sort | uniq > ${DEPS_FINALIZED}
+	sort < "${DEPS_LOOKUP_FILE}" | uniq > "${DEPS_FINALIZED}"
 }
 
 function buildDependencies()
 {
-	which apt
-	if [ $? -eq 0 ]; then
+	if which apt; then
 		# Build the dependency list based on the executable
 		buildDependencyList lookUpDebianDependency
-	else
-		which rpm
-		if [ $? -eq 0 ]; then
-			# Build the dependency list based on the executable
-			buildDependencyList lookUpRpmDependency
-		fi
+	elif which rpm; then
+        # Build the dependency list based on the executable
+        buildDependencyList lookUpRpmDependency
 	fi
 }
 
 function copyDebFiles()
 {
 	# Verify that there are Debian files to copy
-	local DEB_FILES=`ls *.deb`
+	local DEB_FILES
+	DEB_FILES=$(ls ./*.deb)
 	if [[ ${#DEB_FILES} ]]; then
 		# Copy the Debian Package files
 		for DEB_FILE in ${DEB_FILES}
@@ -178,7 +176,8 @@ function copyDebFiles()
 
 function copyRpmFiles()
 {
-	local RPM_FILES=`ls *.rpm *.srpm`
+	local RPM_FILES
+	RPM_FILES=$(ls ./*.rpm ./*.srpm)
 	if [[ ${#RPM_FILES} ]]; then
 		# Copy the Red Hat RPM Package files
 		for RPM_FILE in ${RPM_FILES}
@@ -193,7 +192,8 @@ function copyRpmFiles()
 
 function copyTarballs()
 {
-	local TAR_FILES=`ls *.tar.*`
+	local TAR_FILES
+	TAR_FILES=$(ls ./*.tar.*)
 	if [[ ${#TAR_FILES} ]]; then
 		# Copy the Tarball Package files
 		for TAR_FILE in ${TAR_FILES}
@@ -235,6 +235,6 @@ fi
 buildDependencies
 buildPackages
 
-pushd "$BUILD_DIR" || exit 2
+pushd "${BUILD_DIR}" || exit 2
 copyFiles
 popd || exit 2
