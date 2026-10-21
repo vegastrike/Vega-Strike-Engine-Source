@@ -26,6 +26,7 @@
  */
 #ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_PROCESS_H
 #define VEGA_STRIKE_ENGINE_CUBE_MAP_PROCESS_H
+
 /*
  * The purpose of this is to control the general processing: reading the input
  * textures into floating point memory textures, allocating memory textures for

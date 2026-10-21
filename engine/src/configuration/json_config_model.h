@@ -64,7 +64,7 @@ public:
 
 class JsonConfigLeaf : public JsonConfigNode {
 public:
-    JsonConfigLeaf(const boost::json::value& original, const boost::json::value& current, bool forced_dirty = false)
+    JsonConfigLeaf(const boost::json::value &original, const boost::json::value &current, bool forced_dirty = false)
         : original_(original), current_(current), dirty_(forced_dirty) {
         if (!forced_dirty) {
             dirty_ = (current_ != original_);
@@ -75,7 +75,7 @@ public:
         return dirty_;
     }
 
-    void set(const boost::json::value& v) {
+    void set(const boost::json::value &v) {
         current_ = v;
         // If there is a real original (from assets) and the value returns to it, the leaf
         // is clean again. If this leaf had no asset counterpart (user-defined), keep it dirty.
@@ -120,10 +120,10 @@ public:
     // Build a branch from an assets dict and (optional) user dict. Children that
     // appear only in assets are clean leaves; children present in user too get
     // the user's value (marked dirty if it differs).
-    JsonConfigBranch(const boost::json::object& assets, const boost::json::object* user);
+    JsonConfigBranch(const boost::json::object &assets, const boost::json::object *user);
 
     // Build an array node. Children are indexed "0".."n-1".
-    JsonConfigBranch(const boost::json::array& assets, const boost::json::array* user);
+    JsonConfigBranch(const boost::json::array &assets, const boost::json::array *user);
 
     // Mark this branch and all descendants as user-defined (no asset counterpart).
     // Used for whole subtrees present only in the user config, which must always
@@ -135,12 +135,12 @@ public:
     boost::json::value user_value() const override;
 
     // Get the node at a dotted path like "graphics.resolution_x". Returns null if absent.
-    const JsonConfigNode* get_node(const std::vector<std::string>& path) const;
-    JsonConfigNode*       get_node(const std::vector<std::string>& path);
+    const JsonConfigNode *get_node(const std::vector<std::string> &path) const;
+    JsonConfigNode       *get_node(const std::vector<std::string> &path);
 
     // Set a leaf value at a dotted path. Creates intermediate branches as needed
     // (so a user can set a key the assets config doesn't define).
-    void set(const std::vector<std::string>& path, const boost::json::value& v);
+    void set(const std::vector<std::string> &path, const boost::json::value &v);
 
     // Sparse overlay containing only the dirty leaves (the file to write).
     // Returns an object (normal) or array (for array nodes).
@@ -156,10 +156,10 @@ class JsonConfigModel {
 public:
     // assets_json and user_json are JSON object documents. user_json may be null
     // (no user overrides yet).
-    JsonConfigModel(const boost::json::value& assets_json, const boost::json::value* user_json);
+    JsonConfigModel(const boost::json::value &assets_json, const boost::json::value *user_json);
 
-    const JsonConfigNode* get(const std::vector<std::string>& path) const;
-    void                  set(const std::vector<std::string>& path, const boost::json::value& v);
+    const JsonConfigNode *get(const std::vector<std::string> &path) const;
+    void                  set(const std::vector<std::string> &path, const boost::json::value &v);
 
     // The sparse overlay to write to the user config file.
     boost::json::value changes_dictionary() const;

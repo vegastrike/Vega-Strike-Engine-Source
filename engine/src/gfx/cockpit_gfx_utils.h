@@ -38,15 +38,15 @@ enum class ShapeType {
     Default
 };
 
-VertexBuilder<> GetCross(const QVector& location, const Vector& cam_p, const Vector& cam_q, const float& size);
-VertexBuilder<> GetDiamond(const QVector& location, const Vector& cam_p, const Vector& cam_q, const float& r_size);
-VertexBuilder<> GetRectangle(const QVector& location, const Vector& cam_p, const Vector& cam_q, const float& r_size);
-VertexBuilder<> GetOpenRectangle(const QVector& location, const Vector& cam_p, const Vector& cam_q,
-                                 const float& r_size);
-VertexBuilder<> GetLockingIcon(const QVector& location, const Vector& cam_p, const Vector& cam_q, const float& r_size,
-                               const float& lock_percent);
-VertexBuilder<> GetAnimatedLockingIcon(const QVector& location, const Vector& cam_p, const Vector& cam_q,
-                                       const Vector& cam_r, const float& r_size, const float& lock_percent);
+VertexBuilder<> GetCross(const QVector &location, const Vector &cam_p, const Vector &cam_q, const float &size);
+VertexBuilder<> GetDiamond(const QVector &location, const Vector &cam_p, const Vector &cam_q, const float &r_size);
+VertexBuilder<> GetRectangle(const QVector &location, const Vector &cam_p, const Vector &cam_q, const float &r_size);
+VertexBuilder<> GetOpenRectangle(const QVector &location, const Vector &cam_p, const Vector &cam_q,
+                                 const float &r_size);
+VertexBuilder<> GetLockingIcon(const QVector &location, const Vector &cam_p, const Vector &cam_q, const float &r_size,
+                               const float &lock_percent);
+VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector &cam_p, const Vector &cam_q,
+                                       const Vector &cam_r, const float &r_size, const float &lock_percent);
 
 void SetThickness(ShapeType type);
 

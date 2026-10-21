@@ -65,20 +65,20 @@ struct my_builtin_to_python {
 
 #    ifndef BOOST_PYTHON_TO_PYTHON_BY_VALUE
 
-#        define BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE(T, expr)       \
-            template <class MYTYPE>                                   \
-            struct to_python_value;                                   \
-            template <>                                               \
-            struct to_python_value<T&> : my_builtin_to_python {       \
-                inline PyObject* operator()(T const& x) const {       \
-                    return expr;                                      \
-                }                                                     \
-            };                                                        \
-            template <>                                               \
-            struct to_python_value<T const&> : my_builtin_to_python { \
-                inline PyObject* operator()(T const& x) const {       \
-                    return expr;                                      \
-                }                                                     \
+#        define BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE(T, expr)        \
+            template <class MYTYPE>                                    \
+            struct to_python_value;                                    \
+            template <>                                                \
+            struct to_python_value<T &> : my_builtin_to_python {       \
+                inline PyObject *operator()(T const &x) const {        \
+                    return expr;                                       \
+                }                                                      \
+            };                                                         \
+            template <>                                                \
+            struct to_python_value<T const &> : my_builtin_to_python { \
+                inline PyObject *operator()(T const &x) const {        \
+                    return expr;                                       \
+                }                                                      \
             };
 
 #        define BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE(T, expr)                   \
@@ -87,7 +87,7 @@ struct my_builtin_to_python {
             struct arg_to_python;                                              \
             template <>                                                        \
             struct arg_to_python<T> : ::boost::python::handle<> {              \
-                arg_to_python(T const& x) : ::boost::python::handle<>(expr) {} \
+                arg_to_python(T const &x) : ::boost::python::handle<>(expr) {} \
             };                                                                 \
             }
 
@@ -103,21 +103,21 @@ BOOST_PYTHON_TO_PYTHON_BY_VALUE(Vector, boost::python::to_python_value<boost::py
 BOOST_PYTHON_TO_PYTHON_BY_VALUE(QVector, boost::python::to_python_value<boost::python::tuple>()(
                                                  boost::python::make_tuple((double)x.i, (double)x.j, (double)x.k)));
 #else   // BOOST_VERSION != 102800
-inline PyObject* to_python(Vector vec) {
+inline PyObject *to_python(Vector vec) {
     return to_python(boost::python::tuple((double)vec.i, (double)vec.j, (double)vec.k));
 }
 
-inline PyObject* to_python(QVector vec) {
+inline PyObject *to_python(QVector vec) {
     return to_python(boost::python::tuple((double)vec.i, (double)vec.j, (double)vec.k));
 }
 
-inline Vector from_python(PyObject* p, boost::python::type<Vector>) {
+inline Vector from_python(PyObject *p, boost::python::type<Vector>) {
     Vector vec(0, 0, 0);
     PyArg_ParseTuple(p, "fff", &vec.i, &vec.j, &vec.k);
     return vec;
 }
 
-inline QVector from_python(PyObject* p, boost::python::type<QVector>) {
+inline QVector from_python(PyObject *p, boost::python::type<QVector>) {
     QVector vec(0, 0, 0);
     PyArg_ParseTuple(p, "ddd", &vec.i, &vec.j, &vec.k);
     return vec;

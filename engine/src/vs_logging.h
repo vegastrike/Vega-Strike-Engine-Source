@@ -85,7 +85,7 @@ typedef boost::log::sinks::synchronous_sink<FileLogBackEnd>    FileLogSink;
 class VegaStrikeLogger {
 private:
     boost::log::core_ptr                                     logging_core_;
-    boost::log::sources::severity_logger_mt<vega_log_level>& slg_;
+    boost::log::sources::severity_logger_mt<vega_log_level> &slg_;
     boost::shared_ptr<ConsoleLogBackEnd>                     console_log_back_end_;
     boost::shared_ptr<FileLogBackEnd>                        file_log_back_end_;
     boost::shared_ptr<ConsoleLogSink>                        console_log_sink_;
@@ -96,26 +96,26 @@ private:
     ~VegaStrikeLogger();
 
 public:
-    static VegaStrikeLogger& instance() {
+    static VegaStrikeLogger &instance() {
         static VegaStrikeLogger logger_instance;
         return logger_instance;
     }
 
-    void InitLoggingPart2(const uint8_t debug_level, const boost::filesystem::path& vega_strike_home_dir);
+    void InitLoggingPart2(const uint8_t debug_level, const boost::filesystem::path &vega_strike_home_dir);
     void FlushLogs();
     void FlushLogsProgramExiting();
-    void Log(const vega_log_level level, const std::string& message);
-    void Log(const vega_log_level level, const char* message);
-    void Log(const vega_log_level level, const boost::basic_format<char>& message);
-    void LogAndFlush(const vega_log_level level, const std::string& message);
-    void LogFlushExit(const vega_log_level level, const std::string& message, const int exit_code);
-    void LogAndFlush(const vega_log_level level, const char* message);
-    void LogFlushExit(const vega_log_level level, const char* message, const int exit_code);
-    void LogAndFlush(const vega_log_level level, const boost::basic_format<char>& message);
-    void LogFlushExit(const vega_log_level level, const boost::basic_format<char>& message, const int exit_code);
+    void Log(const vega_log_level level, const std::string &message);
+    void Log(const vega_log_level level, const char *message);
+    void Log(const vega_log_level level, const boost::basic_format<char> &message);
+    void LogAndFlush(const vega_log_level level, const std::string &message);
+    void LogFlushExit(const vega_log_level level, const std::string &message, const int exit_code);
+    void LogAndFlush(const vega_log_level level, const char *message);
+    void LogFlushExit(const vega_log_level level, const char *message, const int exit_code);
+    void LogAndFlush(const vega_log_level level, const boost::basic_format<char> &message);
+    void LogFlushExit(const vega_log_level level, const boost::basic_format<char> &message, const int exit_code);
 
-    VegaStrikeLogger(const VegaStrikeLogger&)            = delete;
-    VegaStrikeLogger& operator=(const VegaStrikeLogger&) = delete;
+    VegaStrikeLogger(const VegaStrikeLogger &)            = delete;
+    VegaStrikeLogger &operator=(const VegaStrikeLogger &) = delete;
 };
 
 }  // namespace VegaStrikeLogging

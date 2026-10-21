@@ -97,7 +97,7 @@ public:
     // TODO: we should really switch the two parameters around.
     virtual void Load(std::string unit_key);
 
-    virtual void SaveToCSV(std::map<std::string, std::string>& unit) const = 0;
+    virtual void SaveToCSV(std::map<std::string, std::string> &unit) const = 0;
 
     // Handle the four cases of CanUpgrade/Upgrade/CanDowngrade/Downgrade
     bool CanWillUpDowngrade(const std::string upgrade_key, bool upgrade, bool apply);

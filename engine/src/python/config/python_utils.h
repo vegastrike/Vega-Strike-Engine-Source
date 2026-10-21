@@ -39,7 +39,7 @@ typedef _object PyObject;
 std::string GetPythonPath();
 
 // A utility function to call a function and get a PyObject as a result
-PyObject* GetClassFromPython(std::string build_path, std::wstring path_string, std::string datadir,
+PyObject *GetClassFromPython(std::string build_path, std::wstring path_string, std::string datadir,
                              std::string module_name, std::string function_name);
 
 

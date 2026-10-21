@@ -42,7 +42,7 @@ public:
         }
     }
 
-    operator FILE * const(void) const {
+    operator FILE *const(void) const {
         return file;
     }
 

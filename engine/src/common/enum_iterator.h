@@ -32,7 +32,7 @@ class EnumIterator {
 public:
     EnumIterator(void) noexcept : iter_(RAW_VAL(beginVal)) {}
 
-    explicit EnumIterator(const ENUM_TYPE& start) noexcept : iter_{RAW_VAL(start)} {
+    explicit EnumIterator(const ENUM_TYPE &start) noexcept : iter_{RAW_VAL(start)} {
         const bool valid{iter_ >= RAW_VAL(beginVal)
                          // '*end()' is the last valid enum value for iteration
                          && iter_ <= RAW_VAL(*end())};
@@ -44,7 +44,7 @@ public:
     }
 
 private:  // Used by 'begin()' and 'end()'
-    explicit EnumIterator(const RawType& raw_start) noexcept : iter_{raw_start} {}
+    explicit EnumIterator(const RawType &raw_start) noexcept : iter_{raw_start} {}
 
 public:
     EnumIterator operator++() {
@@ -72,7 +72,7 @@ public:
         return endIter;
     }
 
-    bool operator!=(const EnumIterator& rhs) {
+    bool operator!=(const EnumIterator &rhs) {
         return iter_ != rhs.iter_;
     }
 

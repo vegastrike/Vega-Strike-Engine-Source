@@ -36,8 +36,8 @@
 #include "src/vs_exit.h"
 #include "src/vs_logging.h"
 
-inline double locale_aware_stod(const std::string& s, const double default_value = 0.0,
-                                const std::locale& loc = GetGlobalLocale()) noexcept {
+inline double locale_aware_stod(const std::string &s, const double default_value = 0.0,
+                                const std::locale &loc = GetGlobalLocale()) noexcept {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
@@ -50,8 +50,8 @@ inline double locale_aware_stod(const std::string& s, const double default_value
     }
 }
 
-inline float locale_aware_stof(const std::string& s, const float default_value = 0.0F,
-                               const std::locale& loc = GetGlobalLocale()) noexcept {
+inline float locale_aware_stof(const std::string &s, const float default_value = 0.0F,
+                               const std::locale &loc = GetGlobalLocale()) noexcept {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
@@ -64,8 +64,8 @@ inline float locale_aware_stof(const std::string& s, const float default_value =
     }
 }
 
-inline int locale_aware_stoi(const std::string& s, const int default_value = 0,
-                             const std::locale& loc = GetGlobalLocale()) noexcept {
+inline int locale_aware_stoi(const std::string &s, const int default_value = 0,
+                             const std::locale &loc = GetGlobalLocale()) noexcept {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
@@ -78,8 +78,8 @@ inline int locale_aware_stoi(const std::string& s, const int default_value = 0,
     }
 }
 
-inline long locale_aware_stol(const std::string& s, const long default_value = 0L,
-                              const std::locale& loc = GetGlobalLocale()) noexcept {
+inline long locale_aware_stol(const std::string &s, const long default_value = 0L,
+                              const std::locale &loc = GetGlobalLocale()) noexcept {
     std::istringstream iss(s);
     iss.imbue(loc);
     try {
@@ -93,11 +93,11 @@ inline long locale_aware_stol(const std::string& s, const long default_value = 0
 }
 
 template <class TargetType, class SourceType>
-inline TargetType* vega_dynamic_cast_ptr(SourceType* from, const bool allow_null = false) {
-    TargetType* ret_val = nullptr;
+inline TargetType *vega_dynamic_cast_ptr(SourceType *from, const bool allow_null = false) {
+    TargetType *ret_val = nullptr;
     try {
-        ret_val = dynamic_cast<TargetType*>(from);
-    } catch (std::bad_cast& e) {
+        ret_val = dynamic_cast<TargetType *>(from);
+    } catch (std::bad_cast &e) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Fatal Error '%1%' casting type %2%* to %3%*") % e.what() %
                                  typeid(SourceType).name() % typeid(TargetType).name()));
         VSExit(-422);
@@ -111,11 +111,11 @@ inline TargetType* vega_dynamic_cast_ptr(SourceType* from, const bool allow_null
 }
 
 template <class TargetType, class SourceType>
-inline const TargetType* vega_dynamic_const_cast_ptr(const SourceType* from) {
-    TargetType* ret_val = nullptr;
+inline const TargetType *vega_dynamic_const_cast_ptr(const SourceType *from) {
+    TargetType *ret_val = nullptr;
     try {
-        ret_val = dynamic_cast<TargetType*>(from);
-    } catch (std::bad_cast& e) {
+        ret_val = dynamic_cast<TargetType *>(from);
+    } catch (std::bad_cast &e) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Fatal Error '%1%' casting type %2%* to %3%*") % e.what() %
                                  typeid(SourceType).name() % typeid(TargetType).name()));
         VSExit(-422);

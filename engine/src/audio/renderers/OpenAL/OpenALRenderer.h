@@ -65,8 +65,8 @@ public:
 
     /** @copydoc Renderer::getSound */
     virtual SharedPtr<Sound> getSound(const std::string       &name,
-                                      VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
-                                      bool streaming                = false);
+                                      VSFileSystem::VSFileType type      = VSFileSystem::UnknownFile,
+                                      bool                     streaming = false);
 
     /** @copydoc Renderer::owns */
     virtual bool owns(SharedPtr<Sound> sound);

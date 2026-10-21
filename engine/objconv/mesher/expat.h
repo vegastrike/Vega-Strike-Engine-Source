@@ -6,21 +6,21 @@
 // NO HEADER GUARD -- 3rd Party
 
 #ifndef XmlParse_INCLUDED
-#define XmlParse_INCLUDED 1
+#    define XmlParse_INCLUDED 1
 
-#include <stdlib.h>
+#    include <stdlib.h>
 
-#ifndef XMLPARSEAPI
-#    ifdef __declspec
-#        define XMLPARSEAPI __declspec(dllimport)
-#    else
-#        define XMLPARSEAPI /* nothing */
-#    endif
-#endif                      /* not defined XMLPARSEAPI */
+#    ifndef XMLPARSEAPI
+#        ifdef __declspec
+#            define XMLPARSEAPI __declspec(dllimport)
+#        else
+#            define XMLPARSEAPI /* nothing */
+#        endif
+#    endif                      /* not defined XMLPARSEAPI */
 
-#ifdef __cplusplus
+#    ifdef __cplusplus
 extern "C" {
-#endif
+#    endif
 
     typedef void *XML_Parser;
 
@@ -417,7 +417,7 @@ extern "C" {
     void XMLPARSEAPI XML_SetUserData(XML_Parser parser, void *userData);
 
 /* Returns the last value set by XML_SetUserData or null. */
-#define XML_GetUserData(parser) (*(void **)(parser))
+#    define XML_GetUserData(parser) (*(void **)(parser))
 
     /* This is equivalent to supplying an encoding argument
      *  to XML_ParserCreate. It must not be called after XML_Parse
@@ -570,9 +570,9 @@ extern "C" {
     const char XMLPARSEAPI *XML_GetInputContext(XML_Parser parser, int *offset, int *size);
 
 /* For backwards compatibility with previous versions. */
-#define XML_GetErrorLineNumber   XML_GetCurrentLineNumber
-#define XML_GetErrorColumnNumber XML_GetCurrentColumnNumber
-#define XML_GetErrorByteIndex    XML_GetCurrentByteIndex
+#    define XML_GetErrorLineNumber   XML_GetCurrentLineNumber
+#    define XML_GetErrorColumnNumber XML_GetCurrentColumnNumber
+#    define XML_GetErrorByteIndex    XML_GetCurrentByteIndex
 
     /* Frees memory used by the parser. */
     void XMLPARSEAPI XML_ParserFree(XML_Parser parser);
@@ -583,8 +583,8 @@ extern "C" {
     /* Return a string containing the version number of this expat */
     const XML_LChar XMLPARSEAPI *XML_ExpatVersion();
 
-#ifdef __cplusplus
+#    ifdef __cplusplus
 }
-#endif
+#    endif
 
 #endif /* not XmlParse_INCLUDED */

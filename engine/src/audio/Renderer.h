@@ -87,8 +87,8 @@ public:
      * @see CodecRegistry
      */
     virtual SharedPtr<Sound> getSound(const std::string       &name,
-                                      VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
-                                      bool streaming                = false) = 0;
+                                      VSFileSystem::VSFileType type      = VSFileSystem::UnknownFile,
+                                      bool                     streaming = false) = 0;
 
     /** Return whether the specified sound has been created using this renderer or not */
     virtual bool owns(SharedPtr<Sound> sound) = 0;

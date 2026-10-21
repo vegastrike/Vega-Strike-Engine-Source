@@ -42,13 +42,13 @@ class ECM : public Component, public EnergyConsumer {
 
 public:
     ECM();
-    explicit ECM(EnergyContainer* source);
+    explicit ECM(EnergyContainer *source);
     ~ECM() override;
 
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -66,7 +66,7 @@ public:
 
     // ECM Methods
     bool Active() const;
-    bool BreakLock(void* missile) const;
+    bool BreakLock(void *missile) const;
     int  Get() const;
     void Set(int ecm);
     void Toggle();

@@ -71,7 +71,7 @@ public:
     Cargo(std::string name, std::string category, double price, int quantity, double mass, double volume);
 
     // Parse string from save file
-    Cargo(std::string& cargo_text);
+    Cargo(std::string &cargo_text);
     Cargo(boost::json::object json);
 
     // Getters
@@ -99,15 +99,15 @@ public:
     std::string GetDescriptionPython() const;
 
     // For script_call_unit_generic
-    std::string* GetNameAddress();
-    std::string* GetCategoryAddress();
+    std::string *GetNameAddress();
+    std::string *GetCategoryAddress();
 
     // Setters
-    void SetName(const std::string& name);
-    void SetDescription(const std::string& description);
+    void SetName(const std::string &name);
+    void SetDescription(const std::string &description);
     void SetQuantity(const int quantity);
     void SetPrice(const double price);
-    void SetCategory(const std::string& category);
+    void SetCategory(const std::string &category);
     void SetMass(double mass);
     void SetVolume(double volume);
 
@@ -130,8 +130,8 @@ public:
 
     std::string Serialize() const;
 
-    bool operator==(const Cargo& other) const;
-    bool operator<(const Cargo& other) const;
+    bool operator==(const Cargo &other) const;
+    bool operator<(const Cargo &other) const;
 
     // For use by PlayerShip
     int index = 0;

@@ -42,8 +42,9 @@
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #        define GLX_GLXEXT_PROTOTYPES 1
-#        include <glx.h>
 #        include <glxext.h>
+
+#        include <glx.h>
 
 #        include "gldrv/glx_undefined_extensions.h"
 

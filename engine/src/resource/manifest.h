@@ -35,7 +35,7 @@
 
 class ManifestCargoNotFoundException : public std::runtime_error {
 public:
-    explicit ManifestCargoNotFoundException(const std::string& name)
+    explicit ManifestCargoNotFoundException(const std::string &name)
         : std::runtime_error("Cargo with name '" + name + "' not found in manifest.") {}
 };
 
@@ -55,9 +55,9 @@ private:
 public:
     Manifest();
 
-    void AddManifest(const std::vector<Cargo>& cargo_items);  // For testing
+    void AddManifest(const std::vector<Cargo> &cargo_items);  // For testing
 
-    static Manifest& MPL();                                   // Get the master part list singleton
+    static Manifest &MPL();                                   // Get the master part list singleton
     Cargo            GetCargoByName(const std::string name) const;
     Cargo            GetRandomCargo(int quantity = 0) const;
     Cargo            GetRandomCargoFromCategory(std::string category, int quantity = 0) const;
@@ -68,10 +68,10 @@ public:
     bool               Empty() const;
     size_t             Size() const;
 
-    int GetIndex(const Cargo& cargo) const;
-    int GetIndex(const std::string& name, const std::string& category = "") const;
+    int GetIndex(const Cargo &cargo) const;
+    int GetIndex(const std::string &name, const std::string &category = "") const;
 
-    bool HasCargo(const std::string& name) const;
+    bool HasCargo(const std::string &name) const;
 };
 
 #endif  // MANIFEST_H

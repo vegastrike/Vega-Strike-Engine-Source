@@ -34,9 +34,11 @@
 #include "root_generic/vs_globals.h"
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#include <glext.h>
-#include <glut.h>
 #include <iostream>
+
+#include <glut.h>
+
+#include <glext.h>
 // #include <stdlib>
 
 class Texture;

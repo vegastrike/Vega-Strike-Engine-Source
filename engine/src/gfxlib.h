@@ -258,7 +258,7 @@ void /*GFXDRVAPI*/ GFXFrustum(float *mat, float *inv, float left, float right, f
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT externaltextureformat, int *handle,
                                        char *palette = 0, int texturestage = 0, enum FILTER mipmap = MIPMAP,
                                        enum TEXTURE_TARGET texture_target = TEXTURE2D,
-                                       enum ADDRESSMODE address_mode      = DEFAULT_ADDRESS_MODE);
+                                       enum ADDRESSMODE    address_mode   = DEFAULT_ADDRESS_MODE);
 
 /// Sets the priority of the texture for memory management.
 void /*GFXDRVAPI*/ GFXPrioritizeTexture(unsigned int handle, float priority);
@@ -274,7 +274,7 @@ void /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
 GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(
         unsigned char *buffer, int handle, int inWidth, int inHeight, enum TEXTUREFORMAT internalformat,
         enum TEXTURE_IMAGE_TARGET image2D = TEXTURE_2D,
-        int max_texture_dimension         = 65'536 /*make sure it's not bigger than this--usually maybe 65536*/,
+        int     max_texture_dimension     = 65'536 /*make sure it's not bigger than this--usually maybe 65536*/,
         GFXBOOL detailtexture = GFXFALSE, unsigned int pageIndex = 0);
 
 GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture(unsigned char *buffer, int handle, int x, int y, unsigned int width,

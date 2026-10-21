@@ -42,21 +42,21 @@
 namespace vega_config {
 struct Configuration {
     Configuration();
-    explicit Configuration(const std::string& json_text);
-    explicit Configuration(const boost::filesystem::path& config_file_path);
+    explicit Configuration(const std::string &json_text);
+    explicit Configuration(const boost::filesystem::path &config_file_path);
 
-    void load_config(const std::string& json_text);
-    void load_config(const boost::filesystem::path& config_file_path);
+    void load_config(const std::string &json_text);
+    void load_config(const boost::filesystem::path &config_file_path);
 
     // Parses the "colors" section (theme.json) into this->colors. Called
     // from load_config() for each merged config file.
-    void parseColors(const boost::json::object& root_object);
+    void parseColors(const boost::json::object &root_object);
 
     // Parses the "actions" section (bindings.json) into this->actions.
-    void parseActions(const boost::json::object& root_object);
+    void parseActions(const boost::json::object &root_object);
 
     // Parses the "axes" section (bindings.json) into this->axes.
-    void parseAxes(const boost::json::object& root_object);
+    void parseAxes(const boost::json::object &root_object);
 
 
     // Preset selectors from config.json's "preset" section (e.g.
@@ -2884,6 +2884,6 @@ struct Configuration {
 };
 }  // namespace vega_config
 
-extern vega_config::Configuration& configuration();
+extern vega_config::Configuration &configuration();
 
 #endif  // VEGA_STRIKE_ENGINE_CONFIG_CONFIGURATION_H

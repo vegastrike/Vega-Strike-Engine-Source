@@ -54,13 +54,13 @@ class Computer : public Component {
     CoreVector nav_point;
 
     // The target that the unit has in computer
-    ComponentsManager* target;
+    ComponentsManager *target;
     // Any target that may be attacking and has set this threat
 
-    ComponentsManager* threat;
+    ComponentsManager *threat;
 
     // Unit that it should match velocity with (not speed) if null, matches velocity with universe frame (star)
-    ComponentsManager* velocity_reference;
+    ComponentsManager *velocity_reference;
 
 public:
     bool force_velocity_ref;
@@ -91,7 +91,7 @@ public:
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
     bool Downgrade() override;

@@ -103,12 +103,12 @@ TO_PYTHON_SMART_POINTER(Cargo);
 PYTHON_INIT_GLOBALS(Unit, UnitWrapper)
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
-inline PyObject* to_python(Unit* un) {
+inline PyObject *to_python(Unit *un) {
     return to_python(UnitWrapper(un));
 }
 
-inline Unit* from_python(PyObject* p, boost::python::type<Unit*>) {
-    UnitWrapper uw = (from_python(p, boost::python::type<UnitWrapper&>()));
+inline Unit *from_python(PyObject *p, boost::python::type<Unit *>) {
+    UnitWrapper uw = (from_python(p, boost::python::type<UnitWrapper &>()));
     return uw.GetUnit();
 }
 

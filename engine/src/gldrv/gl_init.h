@@ -68,8 +68,9 @@ extern "C" {
 
 #if !defined(_WIN32)
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#    include <glext.h>
 #    include <glut.h>
+
+#    include <glext.h>
 
 #    if !defined(GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6
 #        error "*** You need a more recent copy of glext.h.  You can get one at http: //oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"

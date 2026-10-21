@@ -35,6 +35,6 @@
 
 
 const std::string GetString(const std::string function_name, const std::string module_name, const std::string file_name,
-                            const std::map<std::string, std::string>& cpp_map);
+                            const std::map<std::string, std::string> &cpp_map);
 
 #endif  // VEGA_STRIKE_ENGINE_PYTHON_BASE_COMPUTER_GET_STRING_H

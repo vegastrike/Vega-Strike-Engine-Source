@@ -102,8 +102,9 @@ struct GFXStats {
 #    ifndef NOMINMAX
 #        define NOMINMAX
 #    endif  // tells VCC not to generate min/max macros
-#    include <gl.h>
 #    include <windows.h>
+
+#    include <gl.h>
 #endif
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
