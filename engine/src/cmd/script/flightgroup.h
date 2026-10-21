@@ -46,7 +46,7 @@ public:
     int           leader_decision;  //-1 if decision is made
     Texture      *squadLogo;        // null if not there
     std::string directive;  //"a" for attack target "b" for attack at will "h" for help out "f" for form up.... missions
-                            //can get this..and set this
+                            // can get this..and set this
     std::string                      name;            // flightgroup name
     std::string                      type;
     std::string                      ainame;          //.agg.xml and .int.xml get appended to this

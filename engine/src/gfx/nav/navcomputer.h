@@ -215,11 +215,11 @@ protected:
 
     // VARIABLES
     bool                 m_visible;
-    vector<DisplayMode>  m_displayModes;                 // List of displays to provide.
-    vector<SelectorMode> m_selectorModes;                // List of selectors to provide.
-    DisplayMode          m_currentDisplay;               // The current display mode.
-    SelectorMode         m_currentSelector;              // The current selector mode.
-    Control *m_displayModeGroups[DISPLAY_MODE_COUNT];    // Array of GroupControls, one for each display mode.
+    vector<DisplayMode>  m_displayModes;                           // List of displays to provide.
+    vector<SelectorMode> m_selectorModes;                          // List of selectors to provide.
+    DisplayMode          m_currentDisplay;                         // The current display mode.
+    SelectorMode         m_currentSelector;                        // The current selector mode.
+    Control             *m_displayModeGroups[DISPLAY_MODE_COUNT];  // Array of GroupControls, one for each display mode.
     Control *m_selectorModeGroups[SELECTOR_MODE_COUNT];  // Array of GroupControls, one for each selector mode.
 };
 
