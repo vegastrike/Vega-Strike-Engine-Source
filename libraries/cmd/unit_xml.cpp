@@ -32,10 +32,12 @@
 #include <float.h>
 #include <limits.h>
 
+#include "collide2/Opcode.h"
+
+#include "collide2/CSopcodecollider.h"
+
 #include "cmd/unit_collide.h"
 #include "cmd/unit_generic.h"
-#include "collide2/CSopcodecollider.h"
-#include "collide2/Opcode.h"
 #include "root_generic/configxml.h"
 #include "root_generic/vega_random.h"
 #include "root_generic/vs_globals.h"

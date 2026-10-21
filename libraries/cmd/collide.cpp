@@ -30,13 +30,14 @@
 
 #include <string>
 
+#include "collide2/basecollider.h"
+#include "collide2/csgeom2/optransfrm.h"
+#include "collide2/CSopcodecollider.h"
+
 #include "cmd/beam.h"
 #include "cmd/bolt.h"
 #include "cmd/unit_collide.h"
 #include "cmd/unit_generic.h"
-#include "collide2/basecollider.h"
-#include "collide2/csgeom2/optransfrm.h"
-#include "collide2/CSopcodecollider.h"
 #include "gfx_generic/mesh.h"
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"

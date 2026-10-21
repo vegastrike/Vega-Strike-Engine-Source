@@ -37,6 +37,8 @@
 
 #include <string>
 
+#include "collide2/CSopcodecollider.h"
+
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/ikarus.h"
 #include "cmd/ai/missionscript.h"
@@ -45,7 +47,6 @@
 #include "cmd/pilot.h"
 #include "cmd/script/mission.h"
 #include "cmd/unit_generic.h"
-#include "collide2/CSopcodecollider.h"
 #include "gfx_generic/mesh.h"
 #include "root_generic/configxml.h"
 #include "src/python/python_class.h"

@@ -35,6 +35,10 @@
 #include <boost/json/serialize.hpp>
 #include <boost/json/value_from.hpp>
 
+#include "collide2/Opcode.h"
+
+#include "collide2/CSopcodecollider.h"
+
 #include "cmd/csv.h"
 #include "cmd/mount_size.h"
 #include "cmd/role_bitmask.h"
@@ -45,8 +49,6 @@
 #include "cmd/unit_xml.h"
 #include "cmd/upgradeable_unit.h"
 #include "cmd/weapon_info.h"
-#include "collide2/CSopcodecollider.h"
-#include "collide2/Opcode.h"
 #include "components/component_utils.h"
 #include "gfx_generic/quaternion.h"
 #include "gfx_generic/sphere.h"
