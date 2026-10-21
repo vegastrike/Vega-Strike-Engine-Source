@@ -43,7 +43,7 @@ void Cloak::Load(std::string unit_key) {
     Upgrade(unit_key);
 }
 
-void Cloak::SaveToCSV(std::map<std::string, std::string>& unit) const {
+void Cloak::SaveToCSV(std::map<std::string, std::string> &unit) const {
     unit["Cloak_Min"]    = std::to_string(minimum);
     unit["Can_Cloak"]    = std::to_string(Capable());
     unit["Cloak_Rate"]   = std::to_string(rate);

@@ -36,7 +36,7 @@
 ShipNotFoundException::ShipNotFoundException(int index)
     : std::runtime_error((boost::format("GetShipByIndex. Index %1% not found.") % index).str()) {}
 
-ShipNotFoundException::ShipNotFoundException(const std::string& name)
+ShipNotFoundException::ShipNotFoundException(const std::string &name)
     : std::runtime_error((boost::format("GetShipByIndex. Index %1% not found.") % name).str()) {}
 
 static const std::string player_fleet_category = "starships/My_Fleet";
@@ -47,14 +47,14 @@ static const std::string player_fleet_category = "starships/My_Fleet";
 // Probably make PlayerShip a subclass of Cargo.
 int counter = 1;  // We start counting from 1, as 0 is for non-player ship.
 
-PlayerShip::PlayerShip(bool active, ComponentsManager* unit, const Cargo& cargo, const std::string& system,
-                       const std::string& base)
+PlayerShip::PlayerShip(bool active, ComponentsManager *unit, const Cargo &cargo, const std::string &system,
+                       const std::string &base)
     : active(active), unit(unit), cargo(cargo), system(system), base(base) {
     this->cargo.index = counter++;
 }
 
-PlayerShip& PlayerShip::GetActiveShip() {
-    for (PlayerShip& ship : player_fleet) {
+PlayerShip &PlayerShip::GetActiveShip() {
+    for (PlayerShip &ship : player_fleet) {
         if (ship.active) {
             return ship;
         }
@@ -67,7 +67,7 @@ PlayerShip& PlayerShip::GetActiveShip() {
 // So it can't be the ship.cargo.index.
 int PlayerShip::GetActiveShipIndex() {
     int i = 0;
-    for (PlayerShip& ship : player_fleet) {
+    for (PlayerShip &ship : player_fleet) {
         if (ship.active) {
             return i;
         }
@@ -102,8 +102,8 @@ std::string PlayerShip::GetPurchaseHeader() {
     return return_value;
 }
 
-PlayerShip& PlayerShip::GetShipByIndex(int index) {
-    for (PlayerShip& ship : player_fleet) {
+PlayerShip &PlayerShip::GetShipByIndex(int index) {
+    for (PlayerShip &ship : player_fleet) {
         if (ship.cargo.index == index) {
             return ship;
         }
@@ -112,8 +112,8 @@ PlayerShip& PlayerShip::GetShipByIndex(int index) {
     throw ShipNotFoundException(index);
 }
 
-PlayerShip& PlayerShip::GetShipByName(const std::string ship_name) {
-    for (PlayerShip& ship : player_fleet) {
+PlayerShip &PlayerShip::GetShipByName(const std::string ship_name) {
+    for (PlayerShip &ship : player_fleet) {
         if (ship_name == ship.cargo.GetName()) {
             return ship;
         }
@@ -122,7 +122,7 @@ PlayerShip& PlayerShip::GetShipByName(const std::string ship_name) {
     throw ShipNotFoundException(ship_name);
 }
 
-bool PlayerShip::IsShipInSameBase(const std::string& destination_system, const std::string& destination_base) {
+bool PlayerShip::IsShipInSameBase(const std::string &destination_system, const std::string &destination_base) {
     return (destination_system == system && destination_base == base);
 }
 
@@ -150,7 +150,7 @@ Cargo PlayerShip::RemoveShip(int index) {
 }
 
 void PlayerShip::SwitchShips(int index) {
-    for (PlayerShip& ship : player_fleet) {
+    for (PlayerShip &ship : player_fleet) {
         if (ship.cargo.index == index) {
             ship.active = true;
             continue;
@@ -162,14 +162,14 @@ void PlayerShip::SwitchShips(int index) {
     }
 }
 
-void PlayerShip::UpdateLocation(const std::string& system, const std::string& base) {
+void PlayerShip::UpdateLocation(const std::string &system, const std::string &base) {
     this->system = system;
     this->base   = base;
 }
 
 // Right now we feed everything to the function and it's trivial.
 // But we could calculate transport price by parsec, risk per system, etc.
-void PlayerShip::UpdateTransportPrice(const std::string& destination_system, const std::string& destination_base,
+void PlayerShip::UpdateTransportPrice(const std::string &destination_system, const std::string &destination_base,
                                       const int jumps) {
     const float shipping_cost_base     = configuration().economics.shipping_price_base_flt;
     const float shipping_cost_insys    = configuration().economics.shipping_price_insys_flt;

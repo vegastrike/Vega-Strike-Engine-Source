@@ -42,20 +42,20 @@ TEST(Cargo, Sanity) {
     Cargo c(cargo_text_string);
 }
 
-std::vector<Cargo> init(const std::string& cargo_string) {
+std::vector<Cargo> init(const std::string &cargo_string) {
     std::vector<std::string> cargo_text_elements;
 
     std::vector<Cargo> ship_manifest;
 
     boost::split(cargo_text_elements, cargo_string, boost::is_any_of("|"));
 
-    for (std::string& cargo_text_element : cargo_text_elements) {
+    for (std::string &cargo_text_element : cargo_text_elements) {
         std::cout << cargo_text_element << std::endl;
         std::cout << cargo_text_element.size() << std::endl;
         try {
             Cargo c(cargo_text_element);
             ship_manifest.push_back(c);
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Error parsing cargo: " << e.what() << std::endl;
         }
     }
@@ -63,8 +63,8 @@ std::vector<Cargo> init(const std::string& cargo_string) {
     return ship_manifest;
 }
 
-static Cargo& get_cargo(const std::string& cargo_name, std::vector<Cargo>& ship_manifest) {
-    for (Cargo& c : ship_manifest) {
+static Cargo &get_cargo(const std::string &cargo_name, std::vector<Cargo> &ship_manifest) {
+    for (Cargo &c : ship_manifest) {
         if (c.GetName() == cargo_name) {
             return c;
         }
@@ -74,7 +74,7 @@ static Cargo& get_cargo(const std::string& cargo_name, std::vector<Cargo>& ship_
 }
 
 void print(std::vector<Cargo> ship_manifest) {
-    for (const auto& cargo : ship_manifest) {
+    for (const auto &cargo : ship_manifest) {
         std::cout << "Name: " << cargo.GetName() << ", Category: " << cargo.GetCategory()
                   << ", Quantity: " << cargo.GetQuantity() << ", Passenger: " << cargo.IsPassenger()
                   << ", Slave: " << cargo.IsSlave() << std::endl;

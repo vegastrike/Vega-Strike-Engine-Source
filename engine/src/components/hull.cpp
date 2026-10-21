@@ -47,7 +47,7 @@ void Hull::Load(std::string unit_key) {
     facets.push_back(temp_hull);
 }
 
-void Hull::SaveToCSV(std::map<std::string, std::string>& unit) const {
+void Hull::SaveToCSV(std::map<std::string, std::string> &unit) const {
     unit["Hull"] = facets[0].Serialize();
 }
 
@@ -98,7 +98,7 @@ bool Hull::Damaged() const {
 }
 
 void Hull::Repair() {
-    for (auto& facet : facets) {
+    for (auto &facet : facets) {
         facet.RepairFully();
     }
 }

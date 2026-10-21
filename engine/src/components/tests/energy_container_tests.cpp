@@ -35,7 +35,7 @@
 #include "components/energy_consumer.h"
 #include "components/energy_container.h"
 
-void printContainer(EnergyContainer& container) {
+void printContainer(EnergyContainer &container) {
     std::cout << "Max Level: " << container.MaxLevel();
     std::cout << " Level: " << container.Level();
     std::cout << " Percent: " << container.Percent() << std::endl;

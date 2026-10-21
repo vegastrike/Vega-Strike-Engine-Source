@@ -88,9 +88,9 @@ void Armor::Load(std::string unit_key) {
             // Conversion is tricky because new values are a square and old values are
             // a two layered diamond.
             int index_combinations[4][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {0, 2, 4, 6}, {1, 3, 5, 7}};
-            for (const auto& facet_indices : index_combinations) {
+            for (const auto &facet_indices : index_combinations) {
                 double facet_strength = 0.0;
-                for (const auto& facet_index : facet_indices) {
+                for (const auto &facet_index : facet_indices) {
                     facet_strength += old_armor_values[facet_index];
                 }
                 facet_strength /= 2;
@@ -104,7 +104,7 @@ void Armor::Load(std::string unit_key) {
     }
 }
 
-void Armor::SaveToCSV(std::map<std::string, std::string>& unit) const {
+void Armor::SaveToCSV(std::map<std::string, std::string> &unit) const {
     unit["armor_front"] = facets[0].Serialize();
     unit["armor_back"]  = facets[1].Serialize();
     unit["armor_left"]  = facets[2].Serialize();
@@ -156,7 +156,7 @@ bool Armor::Damaged() const {
 }
 
 void Armor::Repair() {
-    for (auto& facet : facets) {
+    for (auto &facet : facets) {
         facet.RepairFully();
     }
 }

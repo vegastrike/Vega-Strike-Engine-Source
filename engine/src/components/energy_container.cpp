@@ -147,7 +147,7 @@ void EnergyContainer::Load(std::string unit_key) {
     }
 }
 
-void EnergyContainer::SaveToCSV(std::map<std::string, std::string>& unit) const {
+void EnergyContainer::SaveToCSV(std::map<std::string, std::string> &unit) const {
     switch (type) {
         case ComponentType::Fuel:
             unit[FUEL_CAPACITY] = level.Serialize(configuration().components.fuel.factor);

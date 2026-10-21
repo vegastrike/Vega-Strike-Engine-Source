@@ -33,7 +33,7 @@
 #include "src/gfxlib.h"
 #include "src/vs_math.h"
 
-VertexBuilder<> GetCross(const QVector& location, const Vector& cam_p, const Vector& cam_q, const float& size) {
+VertexBuilder<> GetCross(const QVector &location, const Vector &cam_p, const Vector &cam_q, const float &size) {
     static VertexBuilder<> verts;
     verts.clear();
     verts.insert(location + cam_p * size);
@@ -60,7 +60,7 @@ VertexBuilder<> GetCross(const QVector& location, const Vector& cam_p, const Vec
     return verts;
 }
 
-VertexBuilder<> GetDiamond(const QVector& location, const Vector& cam_p, const Vector& cam_q, const float& r_size) {
+VertexBuilder<> GetDiamond(const QVector &location, const Vector &cam_p, const Vector &cam_q, const float &r_size) {
     static VertexBuilder<> verts;
     verts.clear();
     float size = r_size / 1.41;
@@ -77,7 +77,7 @@ VertexBuilder<> GetDiamond(const QVector& location, const Vector& cam_p, const V
     return verts;
 }
 
-VertexBuilder<> GetRectangle(const QVector& location, const Vector& cam_p, const Vector& cam_q, const float& r_size) {
+VertexBuilder<> GetRectangle(const QVector &location, const Vector &cam_p, const Vector &cam_q, const float &r_size) {
     static VertexBuilder<> verts;
     verts.clear();
     verts.insert(location + (cam_p + cam_q).Cast() * r_size);
@@ -92,8 +92,8 @@ VertexBuilder<> GetRectangle(const QVector& location, const Vector& cam_p, const
 
     └   ┘
 */
-VertexBuilder<> GetOpenRectangle(const QVector& location, const Vector& cam_p, const Vector& cam_q,
-                                 const float& r_size) {
+VertexBuilder<> GetOpenRectangle(const QVector &location, const Vector &cam_p, const Vector &cam_q,
+                                 const float &r_size) {
     static VertexBuilder<> verts;
     verts.clear();
 
@@ -133,8 +133,8 @@ VertexBuilder<> GetOpenRectangle(const QVector& location, const Vector& cam_p, c
 /*
  * The locking icon will grow and shrink as lock is achieved.
  */
-VertexBuilder<> GetLockingIcon(const QVector& location, const Vector& cam_p, const Vector& cam_q, const float& r_size,
-                               const float& lock_percent) {
+VertexBuilder<> GetLockingIcon(const QVector &location, const Vector &cam_p, const Vector &cam_q, const float &r_size,
+                               const float &lock_percent) {
     const bool  bracket_inner_or_outer = configuration().graphics.hud.rotating_bracket_inner;
     const float bracket_width          = configuration().graphics.hud.rotating_bracket_width_flt;
 
@@ -186,8 +186,8 @@ VertexBuilder<> GetLockingIcon(const QVector& location, const Vector& cam_p, con
  * The locking icon will grow and shrink as lock as achieved.
  * The animated locking icon will also move from the reticle to the target and apparently rotate.
  */
-VertexBuilder<> GetAnimatedLockingIcon(const QVector& location, const Vector& cam_p, const Vector& cam_q,
-                                       const Vector& cam_r, const float& r_size, const float& lock_percent) {
+VertexBuilder<> GetAnimatedLockingIcon(const QVector &location, const Vector &cam_p, const Vector &cam_q,
+                                       const Vector &cam_r, const float &r_size, const float &lock_percent) {
     const float  lock_line    = configuration().graphics.hud.lock_confirm_line_length_flt;
     const double diamond_size = configuration().graphics.hud.diamond_size_dbl;
     const float  theta_speed  = configuration().graphics.hud.diamond_rotation_speed_flt;

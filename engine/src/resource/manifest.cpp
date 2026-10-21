@@ -54,7 +54,7 @@ Manifest::Manifest(int dummy) {
             "master_asteroid_list.json",
     };
 
-    for (const std::string& json_filename : json_filenames) {
+    for (const std::string &json_filename : json_filenames) {
         std::ifstream ifs(json_filename, std::ifstream::in);
 
         if (ifs.fail()) {
@@ -68,7 +68,7 @@ Manifest::Manifest(int dummy) {
         boost::json::value json_value = boost::json::parse(json_text);
         boost::json::array root_array = json_value.get_array();
 
-        for (boost::json::value& item_value : root_array) {
+        for (boost::json::value &item_value : root_array) {
             try {
                 boost::json::object item = item_value.get_object();
 
@@ -82,11 +82,11 @@ Manifest::Manifest(int dummy) {
 }
 
 // For testing
-void Manifest::AddManifest(const std::vector<Cargo>& cargo_items) {
+void Manifest::AddManifest(const std::vector<Cargo> &cargo_items) {
     _items = cargo_items;
 }
 
-Manifest& Manifest::MPL() {
+Manifest &Manifest::MPL() {
     static Manifest mpl = Manifest(1);
 
     return mpl;
@@ -104,7 +104,7 @@ Cargo Manifest::GetCargoByName(const std::string name) const {
     }
 
 
-    for (const Cargo& c : _items) {
+    for (const Cargo &c : _items) {
         if (c.name == filename) {
             return c;
         }
@@ -171,7 +171,7 @@ size_t Manifest::Size() const {
 
 // This is not as efficient as a hashtable
 // TODO: think about this
-int Manifest::GetIndex(const Cargo& cargo) const {
+int Manifest::GetIndex(const Cargo &cargo) const {
     int index = 0;
     for (Cargo c : _items) {
         if (cargo.name == c.name && cargo.category == c.category) {
@@ -184,7 +184,7 @@ int Manifest::GetIndex(const Cargo& cargo) const {
     return -1;
 }
 
-int Manifest::GetIndex(const std::string& name, const std::string& category) const {
+int Manifest::GetIndex(const std::string &name, const std::string &category) const {
     int index = 0;
     for (Cargo c : _items) {
         if (name == c.name && category == c.category) {
@@ -201,8 +201,8 @@ int Manifest::GetIndex(const std::string& name, const std::string& category) con
 }
 
 // Consider deleting this. It's almost exactly the same as GetIndex
-bool Manifest::HasCargo(const std::string& name) const {
-    for (const Cargo& c : _items) {
+bool Manifest::HasCargo(const std::string &name) const {
+    for (const Cargo &c : _items) {
         if (c.name == name) {
             return true;
         }

@@ -55,8 +55,9 @@
 #include <sys/types.h>
 
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
-#include <glext.h>
 #include <glut.h>
+
+#include <glext.h>
 
 /*
  * Globals

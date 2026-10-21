@@ -40,7 +40,7 @@ void RepairBot::Load(std::string unit_key) {
     repair_bot = UnitCSVFactory::GetVariable(unit_key, "repair", 0);
 }
 
-void RepairBot::SaveToCSV(std::map<std::string, std::string>& unit) const {
+void RepairBot::SaveToCSV(std::map<std::string, std::string> &unit) const {
     unit["repair"] = std::to_string(repair_bot);
 }
 

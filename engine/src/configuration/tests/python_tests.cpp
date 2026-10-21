@@ -116,7 +116,7 @@ TEST(Python, Call_Function) {
         Py_ExitStatusException(status);
     }
 
-    PyObject* module = PyImport_ImportModule("python_tests");
+    PyObject *module = PyImport_ImportModule("python_tests");
     std::cout << "PyImport_ImportModule did not crash\n" << std::flush;
     if (!module) {
         std::cout << "PyImport_ImportModule is null\n" << std::flush;
@@ -127,7 +127,7 @@ TEST(Python, Call_Function) {
         std::cout << "PyImport_ImportModule is not null\n" << std::flush;
     }
 
-    PyObject* function = PyObject_GetAttrString(module, "append");
+    PyObject *function = PyObject_GetAttrString(module, "append");
     std::cout << "PyObject_GetAttrString did not crash\n" << std::flush;
     if (function == nullptr) {
         std::cout << "PyObject_GetAttrString is null\n" << std::flush;
@@ -138,7 +138,7 @@ TEST(Python, Call_Function) {
         std::cout << "PyObject_GetAttrString is not null\n" << std::flush;
     }
 
-    PyObject* args = PyTuple_Pack(2, PyUnicode_FromString("Hello "), PyUnicode_FromString("World\n"));
+    PyObject *args = PyTuple_Pack(2, PyUnicode_FromString("Hello "), PyUnicode_FromString("World\n"));
     std::cout << "PyTuple_Pack did not crash\n" << std::flush;
     if (args == nullptr) {
         std::cout << "PyTuple_Pack is null\n" << std::flush;
@@ -149,7 +149,7 @@ TEST(Python, Call_Function) {
         std::cout << "PyTuple_Pack is not null\n" << std::flush;
     }
 
-    PyObject* pyResult = PyObject_CallObject(function, args);
+    PyObject *pyResult = PyObject_CallObject(function, args);
     std::cout << "PyObject_CallObject\n";
     std::string result = PyUnicode_AsUTF8(pyResult);
     std::cout << result << std::endl << std::flush;

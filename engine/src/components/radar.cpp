@@ -107,7 +107,7 @@ void CRadar::Load(std::string unit_key) {
     installed     = max_range > 0;
 }
 
-void CRadar::SaveToCSV(std::map<std::string, std::string>& unit) const {
+void CRadar::SaveToCSV(std::map<std::string, std::string> &unit) const {
     unit["Can_Lock"]    = std::to_string(can_lock);
     unit["Radar_Color"] = std::to_string(capabilities);
     unit["Radar_Range"] = max_range.Serialize();

@@ -39,7 +39,7 @@ using std::string;
 using std::vector;
 
 // A small model with the shape of config.json: nested sections + scalars.
-static JsonConfigModel make_model(const value& assets, const value& user = value(nullptr)) {
+static JsonConfigModel make_model(const value &assets, const value &user = value(nullptr)) {
     return JsonConfigModel(assets, user.is_null() ? nullptr : &user);
 }
 
@@ -49,13 +49,13 @@ TEST(JsonConfigModel, MergeUserOverride) {
     JsonConfigModel m = make_model(assets, user);
 
     // Overridden leaf reflects the user value.
-    const JsonConfigNode* rx = m.get({"graphics", "resolution_x"});
+    const JsonConfigNode *rx = m.get({"graphics", "resolution_x"});
     ASSERT_NE(rx, nullptr);
     EXPECT_TRUE(rx->is_dirty());
     EXPECT_EQ(rx->merged_value(), value(1'920));
 
     // Non-overridden leaf stays at asset value and is clean.
-    const JsonConfigNode* fy = m.get({"graphics", "resolution_y"});
+    const JsonConfigNode *fy = m.get({"graphics", "resolution_y"});
     ASSERT_NE(fy, nullptr);
     EXPECT_FALSE(fy->is_dirty());
     EXPECT_EQ(fy->merged_value(), value(768));
@@ -69,7 +69,7 @@ TEST(JsonConfigModel, ChangesDictionaryIsSparse) {
     boost::json::object changes = m.changes_dictionary().as_object();
     ASSERT_EQ(changes.size(), 1u);  // only the graphics section is dirty
     ASSERT_TRUE(changes.contains("graphics"));
-    auto& g = changes["graphics"].as_object();
+    auto &g = changes["graphics"].as_object();
     ASSERT_EQ(g.size(), 1u);        // only resolution_x, not fullscreen
     EXPECT_EQ(g["resolution_x"], value(1'920));
 }
@@ -116,7 +116,7 @@ TEST(JsonConfigModel, UserOnlyKeysRoundTrip) {
     auto                  assets = parse(R"({ "graphics": {} })");
     auto                  user   = parse(R"({ "input": { "device": "joystick" } })");
     JsonConfigModel       m      = make_model(assets, user);
-    const JsonConfigNode* dev    = m.get({"input", "device"});
+    const JsonConfigNode *dev    = m.get({"input", "device"});
     ASSERT_NE(dev, nullptr);
     EXPECT_EQ(dev->merged_value(), value("joystick"));
     auto changes = m.changes_dictionary().as_object();
@@ -137,7 +137,7 @@ TEST(JsonConfigModel, BindingsActionOverlay) {
     // The dirty action is the only thing in the changes overlay.
     auto changes = m.changes_dictionary().as_object();
     ASSERT_TRUE(changes.contains("actions"));
-    auto& act = changes["actions"].as_object();
+    auto &act = changes["actions"].as_object();
     ASSERT_EQ(act.size(), 1u);
     ASSERT_TRUE(act.contains("FireKey"));
     EXPECT_EQ(act["FireKey"].as_object()["keyboard"].as_array()[0].as_object()["key"], value("x"));
@@ -154,8 +154,8 @@ TEST(JsonConfigModel, BindingsKeyboardArrayOverlayIsArray) {
     m.set({"actions", "FireKey", "keyboard", "0", "key"}, value("x"));
 
     auto  changes  = m.changes_dictionary().as_object();
-    auto& act      = changes["actions"].as_object();
-    auto& keyboard = act["FireKey"].as_object()["keyboard"];
+    auto &act      = changes["actions"].as_object();
+    auto &keyboard = act["FireKey"].as_object()["keyboard"];
     EXPECT_TRUE(keyboard.is_array()) << "keyboard overlay must be a JSON array";
     ASSERT_EQ(keyboard.as_array().size(), 1u);
     EXPECT_EQ(keyboard.as_array()[0].as_object()["key"], value("x"));

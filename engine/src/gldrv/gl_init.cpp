@@ -60,10 +60,13 @@
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #if defined(__APPLE__) && defined(__MACH__)
 #    include <dlfcn.h>
+
 #    include <gl.h>
+
 #    include <glext.h>
 #else
 #    include <gl.h>
+
 #    include <glext.h>
 #endif
 #ifdef GL_EXT_compiled_vertex_array

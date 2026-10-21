@@ -36,16 +36,16 @@
 // This generate an upgrade unit from the name and faction.
 // An upgrade unit is the unit representation of a specific upgrade.
 // e.g. Micro_Driver_ammo__upgrades in units.json
-const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0);
+const Unit *getUnitFromUpgradeName(const string &upgradeName, int myUnitFaction = 0);
 
-std::vector<Mount*> GetMountsForName(Unit* unit, const std::string& weapon_unit_name) {
-    std::vector<Mount*> mounts;
+std::vector<Mount *> GetMountsForName(Unit *unit, const std::string &weapon_unit_name) {
+    std::vector<Mount *> mounts;
 
     // We need to extract the weapon name (from weapons.json)
     // from the parameter weapon_unit_name (from units.json)
 
     // First step is to get a unit instance from the weapon_unit_name
-    const Unit* weapon = getUnitFromUpgradeName(weapon_unit_name, FactionUtil::GetUpgradeFaction());
+    const Unit *weapon = getUnitFromUpgradeName(weapon_unit_name, FactionUtil::GetUpgradeFaction());
 
     // Something went wrong
     if (!weapon) {
@@ -57,7 +57,7 @@ std::vector<Mount*> GetMountsForName(Unit* unit, const std::string& weapon_unit_
 
     // Finally we iterate over the ship mounts in order to generate a partial list
     // of mounts with the weapon's name
-    for (Mount& mount : unit->mounts) {
+    for (Mount &mount : unit->mounts) {
         if (weapon_name == mount.type->name && mount.ammo != -1) {
             mounts.push_back(&mount);
         }
@@ -66,9 +66,9 @@ std::vector<Mount*> GetMountsForName(Unit* unit, const std::string& weapon_unit_
     return mounts;
 }
 
-int getMaxAmmo(const std::string& weapon_unit_name) {
+int getMaxAmmo(const std::string &weapon_unit_name) {
     // First step is to get a unit instance from the weapon_unit_name
-    const Unit* weapon = getUnitFromUpgradeName(weapon_unit_name, FactionUtil::GetUpgradeFaction());
+    const Unit *weapon = getUnitFromUpgradeName(weapon_unit_name, FactionUtil::GetUpgradeFaction());
 
     // Something went wrong
     if (!weapon) {
@@ -82,10 +82,10 @@ int getMaxAmmo(const std::string& weapon_unit_name) {
     return weapon_mount.ammo;
 }
 
-std::vector<int> getAmmoPerGun(Unit* unit, const std::string& weapon_unit_name) {
+std::vector<int> getAmmoPerGun(Unit *unit, const std::string &weapon_unit_name) {
     std::vector<int> ammo_vector;
 
-    for (Mount* mount : GetMountsForName(unit, weapon_unit_name)) {
+    for (Mount *mount : GetMountsForName(unit, weapon_unit_name)) {
         ammo_vector.push_back(mount->ammo);
     }
 
@@ -97,14 +97,14 @@ double getReloadCost(const int ammo, const int max_ammo, const double price, con
     return ammo_percent * price * modifier;
 }
 
-std::string getReloadDescription(Unit* unit, const double price, const std::string& weapon_unit_name) {
+std::string getReloadDescription(Unit *unit, const double price, const std::string &weapon_unit_name) {
     const int   max_ammo    = getMaxAmmo(weapon_unit_name);
     std::string description = "#b#Reload cost:#-b#n1.5#";
 
     int i = 1;
 
 
-    for (Mount* mount : GetMountsForName(unit, weapon_unit_name)) {
+    for (Mount *mount : GetMountsForName(unit, weapon_unit_name)) {
         int ammo = mount->ammo;
 
         // TODO: make modifier configurable in configuration
@@ -119,13 +119,13 @@ std::string getReloadDescription(Unit* unit, const double price, const std::stri
     return description;
 }
 
-bool canReload(Unit* unit, const std::string& weapon_unit_name) {
+bool canReload(Unit *unit, const std::string &weapon_unit_name) {
     const int max_ammo = getMaxAmmo(weapon_unit_name);
     if (max_ammo == -1) {
         return false;
     }
 
-    for (Mount* mount : GetMountsForName(unit, weapon_unit_name)) {
+    for (Mount *mount : GetMountsForName(unit, weapon_unit_name)) {
         if (mount->ammo < max_ammo) {
             return true;
         }

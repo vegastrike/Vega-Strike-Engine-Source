@@ -39,7 +39,7 @@ ECM::ECM() : Component(), EnergyConsumer(nullptr, false, 0), ecm(Resource<int>(0
     type = ComponentType::ECM;
 }
 
-ECM::ECM(EnergyContainer* source)
+ECM::ECM(EnergyContainer *source)
     : Component(), EnergyConsumer(source, false, 0), ecm(Resource<int>(0, 0, 0)), active(false) {
     type = ComponentType::ECM;
 }
@@ -56,7 +56,7 @@ void ECM::Load(std::string unit_key) {
     _upgrade(upgrade_key);
 }
 
-void ECM::SaveToCSV(std::map<std::string, std::string>& unit) const {
+void ECM::SaveToCSV(std::map<std::string, std::string> &unit) const {
     // Can't use serialize. Only supports double.
     unit["ecm"] = (boost::format("%1%/%2%") % ecm.Value() % ecm.MaxValue()).str();
 }
@@ -109,7 +109,7 @@ bool ECM::Active() const {
     return active;
 }
 
-bool ECM::BreakLock(void* missile) const {
+bool ECM::BreakLock(void *missile) const {
     if (!active) {
         return false;
     }
@@ -178,10 +178,10 @@ void ECM::_upgrade(const std::string key) {
                                __FUNCTION__ % result.size()));
                 break;
         }
-    } catch (std::invalid_argument const& ex) {
+    } catch (std::invalid_argument const &ex) {
         VS_LOG(error, (boost::format("%1%: %2% trying to convert ecm_string '%3%' to int") % __FUNCTION__ % ex.what() %
                        ecm_string));
-    } catch (std::out_of_range const& ex) {
+    } catch (std::out_of_range const &ex) {
         VS_LOG(error, (boost::format("%1%: %2% trying to convert ecm_string '%3%' to int") % __FUNCTION__ % ex.what() %
                        ecm_string));
     }

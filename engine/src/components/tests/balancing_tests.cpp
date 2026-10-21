@@ -107,7 +107,7 @@ struct FuelBurnResult {
         : residue(residue), iterations(iterations), seconds(seconds) {}
 };
 
-FuelBurnResult fuelBurn(EnergyManager& manager, std::vector<EnergyConsumer>& consumers, int seconds,
+FuelBurnResult fuelBurn(EnergyManager &manager, std::vector<EnergyConsumer> &consumers, int seconds,
                         int print_every_n = 1'000) {
     simulation_atom_var = 0.1;
     int run_time        = seconds / simulation_atom_var;
@@ -129,7 +129,7 @@ FuelBurnResult fuelBurn(EnergyManager& manager, std::vector<EnergyConsumer>& con
         }
 
         manager.reactor.Generate();
-        for (EnergyConsumer& consumer : consumers) {
+        for (EnergyConsumer &consumer : consumers) {
             consumer.Consume();
         }
     }

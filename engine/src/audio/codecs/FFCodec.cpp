@@ -44,7 +44,7 @@ FFCodec::FFCodec() : Codec("ffmpeg") {}
 
 FFCodec::~FFCodec() {}
 
-bool FFCodec::canHandle(const std::string& path, bool canOpen, VSFileSystem::VSFileType type) {
+bool FFCodec::canHandle(const std::string &path, bool canOpen, VSFileSystem::VSFileType type) {
     if (canOpen) {
         // I don't really know a way to test files in ffmpeg
         // TODO: find out
@@ -55,7 +55,7 @@ bool FFCodec::canHandle(const std::string& path, bool canOpen, VSFileSystem::VSF
     }
 }
 
-Stream* FFCodec::open(const std::string& path, VSFileSystem::VSFileType type) {
+Stream *FFCodec::open(const std::string &path, VSFileSystem::VSFileType type) {
     size_t      sep         = path.find_last_of('|');
     int         streamIndex = (sep != std::string::npos) ? atoi(path.c_str() + sep + 1) : 0;
     std::string filepath    = path.substr(0, sep);

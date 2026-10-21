@@ -49,7 +49,7 @@ void Computer::Load(std::string unit_key) {
     Component::Load(unit_key);
 }
 
-void Computer::SaveToCSV(std::map<std::string, std::string>& unit) const {}
+void Computer::SaveToCSV(std::map<std::string, std::string> &unit) const {}
 
 bool Computer::CanDowngrade() const {
     return false;

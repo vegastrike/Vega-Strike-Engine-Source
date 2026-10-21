@@ -58,7 +58,7 @@ void ShipFunctions::Load(std::string unit_key) {
     ftl_interdiction = UnitCSVFactory::GetVariable(unit_key, "ftl_interdiction", 0.0);
 }
 
-void ShipFunctions::SaveToCSV(std::map<std::string, std::string>& unit) const {
+void ShipFunctions::SaveToCSV(std::map<std::string, std::string> &unit) const {
     unit["cockpit"]          = cockpit.Serialize();
     unit["communications"]   = cockpit.Serialize();
     unit["fire_control"]     = cockpit.Serialize();

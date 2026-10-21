@@ -93,8 +93,8 @@ const ComponentType GetComponentTypeFromName(const std::string name) {
     }
 }
 
-EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel, EnergyContainer* energy,
-                           EnergyContainer* ftl_energy) {
+EnergyContainer *GetSource(ComponentType component_type, EnergyContainer *fuel, EnergyContainer *energy,
+                           EnergyContainer *ftl_energy) {
     switch (component_type) {
         case ComponentType::Shield:
             return GetSourceFromConfiguration(configuration().components.shield.energy_source, fuel, energy,
@@ -125,8 +125,8 @@ EnergyContainer* GetSource(ComponentType component_type, EnergyContainer* fuel, 
 }
 
 // 0 infinite, 1 fuel, 2 energy, 3 ftl_energy, 4 disabled
-EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, EnergyContainer* fuel,
-                                            EnergyContainer* energy, EnergyContainer* ftl_energy) {
+EnergyContainer *GetSourceFromConfiguration(const EnergyConsumerSource source, EnergyContainer *fuel,
+                                            EnergyContainer *energy, EnergyContainer *ftl_energy) {
     switch (source) {
         case EnergyConsumerSource::Infinite:
             return nullptr;
@@ -141,8 +141,8 @@ EnergyContainer* GetSourceFromConfiguration(const EnergyConsumerSource source, E
     }
 }
 
-EnergyContainer* GetSourceFromConfiguration(const std::string& energy_source, EnergyContainer* fuel,
-                                            EnergyContainer* energy, EnergyContainer* ftl_energy) {
+EnergyContainer *GetSourceFromConfiguration(const std::string &energy_source, EnergyContainer *fuel,
+                                            EnergyContainer *energy, EnergyContainer *ftl_energy) {
     if (energy_source == "Infinite" || energy_source == "infinite") {
         return nullptr;
     }
@@ -163,7 +163,7 @@ const std::string yaw_governor[]   = {"Yaw_Governor", "Yaw_Governor_Right", "Yaw
 const std::string pitch_governor[] = {"Pitch_Governor", "Pitch_Governor_Up", "Pitch_Governor_Down"};
 const std::string roll_governor[]  = {"Roll_Governor", "Roll_Governor_Right", "Roll_Governor_Left"};
 
-const std::string* GetGovernor(const YPR ypr) {
+const std::string *GetGovernor(const YPR ypr) {
     switch (ypr) {
         case YPR::Yaw:
             return yaw_governor;
@@ -177,16 +177,16 @@ const std::string* GetGovernor(const YPR ypr) {
     }
 }
 
-void DoubleYawPitchRollParser(std::string unit_key, const YPR ypr, double& right_value, double& left_value) {
-    const std::string* governor = GetGovernor(ypr);
+void DoubleYawPitchRollParser(std::string unit_key, const YPR ypr, double &right_value, double &left_value) {
+    const std::string *governor = GetGovernor(ypr);
 
     const double main_value = UnitCSVFactory::GetVariable(unit_key, governor[0], 1.0);
     right_value             = UnitCSVFactory::GetVariable(unit_key, governor[1], main_value);
     left_value              = UnitCSVFactory::GetVariable(unit_key, governor[2], main_value);
 }
 
-void ResourceYawPitchRollParser(std::string unit_key, const YPR ypr, Resource<double>& right_value,
-                                Resource<double>& left_value, const double minimum_functionality) {
+void ResourceYawPitchRollParser(std::string unit_key, const YPR ypr, Resource<double> &right_value,
+                                Resource<double> &left_value, const double minimum_functionality) {
     double left, right;
     DoubleYawPitchRollParser(unit_key, ypr, right, left);
     left        *= M_PI / 180.0;

@@ -489,7 +489,7 @@ void FireAt::ChooseTargets(int numtargs, bool force) {
     int   has_target     = (current_target == nullptr) ? 0 : 1;
     // Following code exists to limit the number of craft polling for a target in a given frame - this is an expensive
     // operation, and needs to be spread out, or there will be pauses.
-    if ((UniverseUtil::GetGameTime())-target_timer >= SIMULATION_ATOM * .99) {
+    if ((UniverseUtil::GetGameTime()) - target_timer >= SIMULATION_ATOM * .99) {
         // Check if one or more physics frames have passed
         numpolled[0] = numpolled[1] = 0;  // reset counters
         prevpollindex[0]            = pollindex[0];

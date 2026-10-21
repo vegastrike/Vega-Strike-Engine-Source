@@ -41,19 +41,19 @@
 #include "winsys.h"
 
 // Mouse Cursors
-static SDL_Cursor* arrow_cursor       = nullptr;
-static SDL_Cursor* over_arrow_cursor  = nullptr;
-static SDL_Cursor* cross_hairs_cursor = nullptr;
+static SDL_Cursor *arrow_cursor       = nullptr;
+static SDL_Cursor *over_arrow_cursor  = nullptr;
+static SDL_Cursor *cross_hairs_cursor = nullptr;
 
-static SDL_Cursor* initMouseCursor(const std::string& filename, int hot_x = 0, int hot_y = 0) {
-    SDL_Surface* surface = IMG_Load(filename.c_str());
+static SDL_Cursor *initMouseCursor(const std::string &filename, int hot_x = 0, int hot_y = 0) {
+    SDL_Surface *surface = IMG_Load(filename.c_str());
     if (!surface) {
         // TODO: figure out error code
         VS_LOG_FLUSH_EXIT(fatal, (boost::format("IMG_Load failed: %1%\n") % SDL_GetError()).str(), -1);
     }
 
     // Create a color cursor with transparency support
-    SDL_Cursor* cursor = SDL_CreateColorCursor(surface, hot_x, hot_y);
+    SDL_Cursor *cursor = SDL_CreateColorCursor(surface, hot_x, hot_y);
     SDL_DestroySurface(surface);
 
     return cursor;
@@ -143,7 +143,7 @@ double GetRelativeJoystickCoordinatesForAxis(const double x, const double max_x)
 }
 
 std::pair<double, double> GetJoystickFromMouse() {
-    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_Window *current_window = SDL_GL_GetCurrentWindow();
     float       x;
     float       y;
 
@@ -155,7 +155,7 @@ std::pair<double, double> GetJoystickFromMouse() {
 }
 
 std::pair<int, int> GetMousePosition() {
-    SDL_Window* window = SDL_GL_GetCurrentWindow();
+    SDL_Window *window = SDL_GL_GetCurrentWindow();
     float       x;
     float       y;
     SDL_GetMouseState(&x, &y);

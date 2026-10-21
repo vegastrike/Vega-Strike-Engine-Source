@@ -43,7 +43,7 @@ float getFontHeight() {
     return configuration().graphics.font_point_flt / configuration().graphics.resolution_y;
 }
 
-TextPlane::TextPlane(const GFXColor& c, const GFXColor& bgcol) {
+TextPlane::TextPlane(const GFXColor &c, const GFXColor &bgcol) {
     color            = static_cast<ImU32>(c);
     background_color = static_cast<ImU32>(bgcol);
     myDims.i         = 2;
@@ -81,7 +81,7 @@ static ImU32 MakeColorU32(float r, float g, float b, float a) {
     return IM_COL32(int(r * 255.0f), int(g * 255.0f), int(b * 255.0f), int(a * 255.0f));
 }
 
-static void FlushBuffer(std::vector<TextSegment>& segments, std::string& buffer, ImU32 currentColor) {
+static void FlushBuffer(std::vector<TextSegment> &segments, std::string &buffer, ImU32 currentColor) {
     if (buffer.empty()) {
         return;
     }
@@ -91,7 +91,7 @@ static void FlushBuffer(std::vector<TextSegment>& segments, std::string& buffer,
     buffer.clear();
 }
 
-std::vector<TextLine> TextPlane::ParseText(const std::string& text, ImU32 default_color) {
+std::vector<TextLine> TextPlane::ParseText(const std::string &text, ImU32 default_color) {
     std::vector<TextLine>    lines;
     std::vector<TextSegment> segments;
 
@@ -212,17 +212,17 @@ bool isTransparent(ImU32 color) {
     DrawSquare(col, this->myDims.i, row - rowheight * .25, row + rowheight * .75);
 }*/
 
-void drawBackground(ImDrawList* draw_list, ImU32 background_color, ImVec2 position, ImVec2 size, bool automatte) {
+void drawBackground(ImDrawList *draw_list, ImU32 background_color, ImVec2 position, ImVec2 size, bool automatte) {
     // const ImVec2 pad(4.0f, 2.0f); // TODO: make this variable
 }
 
-void drawBackgroundAroundText(ImDrawList* draw_list, ImU32 background_color, ImVec2 position, std::string text,
+void drawBackgroundAroundText(ImDrawList *draw_list, ImU32 background_color, ImVec2 position, std::string text,
                               bool automatte) {
     ImVec2 text_size = ImGui::CalcTextSize(text.c_str());
     drawBackground(draw_list, background_color, position, text_size, automatte);
 }
 
-int TextPlane::Draw(const string& newText, int offset, bool start_lower, bool force_highquality, bool automatte) {
+int TextPlane::Draw(const string &newText, int offset, bool start_lower, bool force_highquality, bool automatte) {
     // Anchor: when a per-text resolution is set, map normalized coords against it and
     // shift by the letterbox offset; otherwise use the legacy native-pixel mapping.
     float anchor_x = 0.0f, anchor_y = 0.0f;
@@ -238,7 +238,7 @@ int TextPlane::Draw(const string& newText, int offset, bool start_lower, bool fo
 
     std::vector<TextLine> lines = ParseText(newText, color);
     ImVec2                text_size;
-    ImDrawList*           draw_list = ImGui::GetBackgroundDrawList();
+    ImDrawList           *draw_list = ImGui::GetBackgroundDrawList();
     const ImVec2          pad(4.0f, 2.0f);  // TODO: make this variable
 
     // Move one line up if not start_lower
@@ -254,8 +254,8 @@ int TextPlane::Draw(const string& newText, int offset, bool start_lower, bool fo
     // ImGui::GetForegroundDrawList()->AddRect(ImVec2(clipRect.x, clipRect.y), ImVec2(clipRect.z, clipRect.w),
     // IM_COL32(255, 0, 0, 255));
 
-    for (TextLine& line : lines) {
-        for (TextSegment& segment : line.segments) {
+    for (TextLine &line : lines) {
+        for (TextSegment &segment : line.segments) {
             text_size = ImGui::CalcTextSize(segment.text.c_str());
 
             // Background rectangle

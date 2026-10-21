@@ -48,7 +48,7 @@ using namespace boost::filesystem;
 // just to get the python paths.
 std::string GetPythonPath() {
     Py_Initialize();
-    wchar_t* w_path_ptr = Py_GetPath();
+    wchar_t *w_path_ptr = Py_GetPath();
     Py_Finalize();
 
     std::wstring w_path_w(w_path_ptr);
@@ -58,7 +58,7 @@ std::string GetPythonPath() {
 }
 
 // A utility function to call a function and get a PyObject as a result
-PyObject* GetClassFromPython(const std::string build_path, const std::string path_string, const std::string datadir,
+PyObject *GetClassFromPython(const std::string build_path, const std::string path_string, const std::string datadir,
                              const std::string module_name, const std::string function_name) {
     boost::filesystem::path full_path = boost::filesystem::path(path_string);
     boost::filesystem::current_path(full_path);
@@ -136,7 +136,7 @@ PyObject* GetClassFromPython(const std::string build_path, const std::string pat
         Py_ExitStatusException(status);
     }
 
-    PyObject* module = PyImport_ImportModule(module_name.c_str());
+    PyObject *module = PyImport_ImportModule(module_name.c_str());
 
     if (!module) {
         std::cerr << "Python module import failed (PyImport_ImportModule is null)" << std::endl << std::flush;
@@ -146,7 +146,7 @@ PyObject* GetClassFromPython(const std::string build_path, const std::string pat
         return nullptr;
     }
 
-    PyObject* function = PyObject_GetAttrString(module, function_name.c_str());
+    PyObject *function = PyObject_GetAttrString(module, function_name.c_str());
     if (!function) {
         std::cerr << "PyObject_GetAttrString is null" << std::endl << std::flush;
         PyErr_Print();
@@ -156,7 +156,7 @@ PyObject* GetClassFromPython(const std::string build_path, const std::string pat
     }
 
 
-    PyObject* pyResult = PyObject_CallObject(function, nullptr);
+    PyObject *pyResult = PyObject_CallObject(function, nullptr);
     Py_Finalize();
 
     return pyResult;

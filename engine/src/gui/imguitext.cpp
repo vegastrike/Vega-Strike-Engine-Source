@@ -30,7 +30,7 @@
 #include "imgui_internal.h"
 #include "src/vs_logging.h"
 
-void FormattedLayout::endLine(Line& line) {
+void FormattedLayout::endLine(Line &line) {
     // if (!line.empty()) {
     line.lineSpacing = currentLineSpacing;
     this->push_back(line);
@@ -48,7 +48,7 @@ void ImGuiText::draw(int firstLineToDraw) {
     if (ImGui::GetCurrentContext() == nullptr || ImGui::GetCurrentWindowRead() == nullptr) {
         return;  // Safe exit: No active window context
     }
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
     if (!draw_list) {
         return;
     }
@@ -86,13 +86,13 @@ void ImGuiText::draw(int firstLineToDraw) {
         if (currentY > Coordinates::normToPixelY(m_rect.origin.y)) {
             break;
         }
-        const auto& line     = m_layout[i];
+        const auto &line     = m_layout[i];
         float       currentX = pixelX;
         if (m_justification == CENTER_JUSTIFY && (pixelWidth - line.width) > 0) {
             currentX += (pixelWidth - line.width) * 0.5f;
         }
 
-        for (const auto& frag : line) {
+        for (const auto &frag : line) {
             // Glyph height comes from the user-set Text Height (font_point); no
             // resolution-derived font-height calculation here.
             float pixelFontSize = configuration().graphics.font_point_flt;
@@ -113,7 +113,7 @@ void ImGuiText::draw(int firstLineToDraw) {
 }
 
 // Helper to convert 2 hex chars to an integer (0-255)
-static int ParseHexByte(const char* hex) {
+static int ParseHexByte(const char *hex) {
     int val = 0;
     for (int i = 0; i < 2; ++i) {
         char c   = hex[i];
@@ -129,9 +129,9 @@ static int ParseHexByte(const char* hex) {
     return val;
 }
 
-void DrawVegaStrikeRichText(const std::string& text, ImVec4 defaultColor) {
-    const char* s           = text.c_str();
-    const char* end         = s + text.length();
+void DrawVegaStrikeRichText(const std::string &text, ImVec4 defaultColor) {
+    const char *s           = text.c_str();
+    const char *end         = s + text.length();
     int         colorPushes = 0;
     bool        firstChunk  = true;
 
@@ -139,7 +139,7 @@ void DrawVegaStrikeRichText(const std::string& text, ImVec4 defaultColor) {
     colorPushes++;
 
     while (s < end) {
-        const char* hash = strchr(s, '#');
+        const char *hash = strchr(s, '#');
 
         if (hash) {
             // 1. Draw any text that comes BEFORE the '#'
@@ -170,7 +170,7 @@ void DrawVegaStrikeRichText(const std::string& text, ImVec4 defaultColor) {
             // 3. Incomplete code: Typewriter effect check
             else {
                 bool isPartialHex = true;
-                for (const char* c = hash + 1; c < end; ++c) {
+                for (const char *c = hash + 1; c < end; ++c) {
                     if (!std::isxdigit(static_cast<unsigned char>(*c))) {
                         isPartialHex = false;
                         break;
@@ -206,7 +206,7 @@ void DrawVegaStrikeRichText(const std::string& text, ImVec4 defaultColor) {
 // Text processing
 
 // Set the text and parse
-void ImGuiText::setText(const std::string& text) {
+void ImGuiText::setText(const std::string &text) {
     if (text != m_text) {
         m_layout.needsProcessing = true;
     }
@@ -234,7 +234,7 @@ int ImGuiText::visibleLineCountStartingWith(int lineNumber, float vertInterval) 
 
     // 2. Iterate through m_layout starting from lineNumber
     for (size_t i = lineNumber; i < m_layout.size(); ++i) {
-        const auto& line = m_layout[i];
+        const auto &line = m_layout[i];
         // If the remaining space is less than our line height, we are done
         if (currentHeight - line.lineHeight < 0.0f) {
             break;
@@ -251,7 +251,7 @@ ImVec2 ImGuiText::getTextWidth(const std::string text) {
     // draw() renders at, so layout (wrap width, line height, centering, scroll
     // counts) agrees with what is actually drawn.
     const float pixelFontSize = configuration().graphics.font_point_flt;
-    ImFont*     font          = ImGui::GetFont();
+    ImFont     *font          = ImGui::GetFont();
     if (font && font->IsLoaded()) {
         return font->CalcTextSizeA(pixelFontSize, FLT_MAX, -1.0f, text.c_str());
     }
@@ -264,12 +264,12 @@ ImVec2 ImGuiText::getTextWidth(const std::string text) {
 // This will not accept exponential format, just num-plus-decimal.
 // The argument is optional, but must be ended with a format char.
 // Examples:  #b2.35#, #b#.  #b is not allowed.
-void ImGuiText::parseFormatFloat(const std::string& str,                // String.
+void ImGuiText::parseFormatFloat(const std::string &str,                // String.
                                  const size_t       startPos,           // First character to examine.
                                  const size_t       endPos,             // One past last char to consider.
-                                 bool*              formatSuccess,      // OUT: True = It worked.
-                                 float*             resultValue,        // OUT: Parsed value.  If no value, not changed.
-                                 size_t*            resultPos,          // OUT: One past last format char.
+                                 bool              *formatSuccess,      // OUT: True = It worked.
+                                 float             *resultValue,        // OUT: Parsed value.  If no value, not changed.
+                                 size_t            *resultPos,          // OUT: One past last format char.
                                  const char         optionalTerminator  // Another terminator besides DT_FORMAT_CHAR
 ) {
     *formatSuccess = false;
@@ -304,12 +304,12 @@ void ImGuiText::parseFormatFloat(const std::string& str,                // Strin
 // Format is R:B:G:A, where A is optional.  The numbers should be between 0 and 1.
 // This will not accept exponential format, just num-plus-decimal.
 // Examples:  #c1:.5:0.3:1.0#, #c.5:.5:.5#
-void ImGuiText::parseFormatColor(const std::string& str,            // String.
+void ImGuiText::parseFormatColor(const std::string &str,            // String.
                                  const size_t       startPos,       // First character to examine.
                                  const size_t       endPos,         // One past last char to consider.
-                                 bool*              formatSuccess,  // OUT: True = It worked.
-                                 GFXColor&          color,          // OUT: Parsed value.
-                                 size_t*            resultPos       // OUT: One past last format char.
+                                 bool              *formatSuccess,  // OUT: True = It worked.
+                                 GFXColor          &color,          // OUT: Parsed value.
+                                 size_t            *resultPos       // OUT: One past last format char.
 ) {
     *formatSuccess = false;
     size_t curPos  = startPos;
@@ -338,8 +338,8 @@ void ImGuiText::parseFormatColor(const std::string& str,            // String.
 // Parse a format string in a PaintText string.
 // The first character should be the one *after* the initial format char.
 void ImGuiText::parseFormat(std::string input, size_t startPos,  // Location of beginning of string to examine.
-                            size_t* resultPos,                   // OUT: Ptr to string past the format string.
-                            bool*   endLine                      // OUT: True = Done with current line.
+                            size_t *resultPos,                   // OUT: Ptr to string past the format string.
+                            bool   *endLine                      // OUT: True = Done with current line.
 ) {
     const size_t endPos = input.size();
     // Default return value.
@@ -432,14 +432,14 @@ void ImGuiText::parseFormat(std::string input, size_t startPos,  // Location of 
     *resultPos = curPos;
 }
 
-FormattedLayout ImGuiText::parseText(const std::string& input, const float widthInPixels) {
+FormattedLayout ImGuiText::parseText(const std::string &input, const float widthInPixels) {
     FormattedLayout layout;
     Line            currentLine;
 
     // ImU32 currentColor = ImGui::ColorConvertFloat4ToU32(ImVec4(m_color.r, m_color.g, m_color.b, m_color.a));
 
     // Helper to add fragment
-    auto addFragment = [&](const std::string& text) {
+    auto addFragment = [&](const std::string &text) {
         // if (text.empty()) return;
         ImVec2 dimensions = getTextWidth(text);
         currentLine.push_back({text, m_fontStack.back(), m_colorStack.back(),

@@ -33,7 +33,7 @@
 
 #include "resource/manifest.h"
 
-extern std::vector<Cargo> init(const std::string& cargo_string);
+extern std::vector<Cargo> init(const std::string &cargo_string);
 
 Manifest createManifest() {
     std::string cargo_string =

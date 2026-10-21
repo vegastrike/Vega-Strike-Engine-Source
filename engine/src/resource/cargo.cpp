@@ -44,7 +44,7 @@
 static const std::string default_product_name("DEFAULT_PRODUCT_NAME");
 
 // A simple utility function to parse a boolean value
-static bool _parse_bool(const std::string& value) {
+static bool _parse_bool(const std::string &value) {
     return (value == "1" || value == "true");
 }
 
@@ -96,7 +96,7 @@ Cargo::Cargo(std::string name, std::string category, double price, int quantity,
     14 passenger
     15 slave
 */
-Cargo::Cargo(std::string& cargo_text) {
+Cargo::Cargo(std::string &cargo_text) {
     std::vector<std::string> cargo_parts;
     boost::split(cargo_parts, cargo_text, boost::is_any_of(";"));
 
@@ -252,21 +252,21 @@ std::string Cargo::GetDescriptionPython() const {
 }
 
 // For script_call_unit_generic
-std::string* Cargo::GetNameAddress() {
+std::string *Cargo::GetNameAddress() {
     return &name;
 }
 
-std::string* Cargo::GetCategoryAddress() {
+std::string *Cargo::GetCategoryAddress() {
     return &category;
 }
 
 // Setters
 
-void Cargo::SetName(const std::string& name) {
+void Cargo::SetName(const std::string &name) {
     this->name = name;
 }
 
-void Cargo::SetDescription(const std::string& description) {
+void Cargo::SetDescription(const std::string &description) {
     this->description = description;
 }
 
@@ -278,7 +278,7 @@ void Cargo::SetPrice(const double price) {
     this->price = price;
 }
 
-void Cargo::SetCategory(const std::string& category) {
+void Cargo::SetCategory(const std::string &category) {
     this->category = category;
 }
 
@@ -360,10 +360,10 @@ std::string Cargo::Serialize() const {
 }
 
 // Operators
-bool Cargo::operator==(const Cargo& other) const {
+bool Cargo::operator==(const Cargo &other) const {
     return name == other.name;
 }
 
-bool Cargo::operator<(const Cargo& other) const {
+bool Cargo::operator<(const Cargo &other) const {
     return (category == other.category) ? (name < other.name) : (category < other.category);
 }
