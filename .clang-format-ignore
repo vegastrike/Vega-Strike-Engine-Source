@@ -1,1 +1,8 @@
 libraries/imgui/
+libraries/collide2/Opcode.h
+libraries/collide2/OPC_IceHook.h
+libraries/collide2/opcodesysdef.h
+libraries/collide2/opcodetypes.h
+libraries/collide2/CSopcodecollider.h
+libraries/collide2/Ice/IceContainer.h
+libraries/collide2/Ice/IcePreprocessor.h
