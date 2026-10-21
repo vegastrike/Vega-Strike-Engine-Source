@@ -27,8 +27,8 @@
 #ifndef VEGA_STRIKE_ENGINE_OPTIONS_H
 #define VEGA_STRIKE_ENGINE_OPTIONS_H
 
-#include <string>
 #include <memory>
+#include <string>
 
 #ifndef uint
 typedef unsigned int uint;
@@ -36,11 +36,9 @@ typedef unsigned int uint;
 
 class vs_options {
 public:
-    vs_options() {
-    }
+    vs_options() {}
 
-    ~vs_options() {
-    }
+    ~vs_options() {}
 
     std::string unitCSV;
 
@@ -54,4 +52,4 @@ public:
 
 extern std::shared_ptr<vs_options> game_options();
 
-#endif //VEGA_STRIKE_ENGINE_OPTIONS_H
+#endif  // VEGA_STRIKE_ENGINE_OPTIONS_H

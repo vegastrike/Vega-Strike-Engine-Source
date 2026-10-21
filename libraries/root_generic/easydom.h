@@ -32,16 +32,17 @@
  */
 
 #include <expat.h>
+#include <gnuhash.h>
+#include <stack>
+#include <stdlib.h>
 #include <string>
 #include <vector>
-#include <stack>
-#include <gnuhash.h>
-#include <stdlib.h>
-#include "vegadisk/vsfilesystem.h"
+
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
-#include "src/vs_logging.h"
 #include "src/vs_exit.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
 extern std::string parseCalike(char const *filename);
 
@@ -62,15 +63,15 @@ public:
         attribute_map[name] = value;
     }
 
-    std::string attr_value(std::string attr_name);
+    std::string                attr_value(std::string attr_name);
     std::vector<easyDomNode *> subnodes;
 
 private:
-    easyDomNode *parent;
-    XMLSupport::AttributeList *attributes;
+    easyDomNode                     *parent;
+    XMLSupport::AttributeList       *attributes;
     vsUMap<std::string, std::string> attribute_map;
-//vector<string> att_name;
-//vector<string> att_value;
+    // vector<string> att_name;
+    // vector<string> att_value;
 
     std::string name;
 };
@@ -85,42 +86,40 @@ public:
         tag = (*tagmap)[Name()];
         std::vector<easyDomNode *>::const_iterator siter;
         for (siter = subnodes.begin(); siter != subnodes.end(); siter++) {
-            tagDomNode *tnode = (tagDomNode *) (*siter);
+            tagDomNode *tnode = (tagDomNode *)(*siter);
             tnode->Tag(tagmap);
         }
     }
 };
 
-extern const char *textAttr;   //should be a static const inside easyDomFactory...
+extern const char *textAttr;  // should be a static const inside easyDomFactory...
 
-template<class domNodeType>
+template <class domNodeType>
 class easyDomFactory {
 public:
-    easyDomFactory() {
-    }
+    easyDomFactory() {}
 
-    void getColor(char *name, float color[4]);
+    void  getColor(char *name, float color[4]);
     char *getVariable(char *section, char *name);
 
     void c_alike_to_xml(const char *filename);
 
     struct easyDomFactoryXML {
-        int currentindex;
+        int   currentindex;
         char *buffer;
 
         easyDomFactoryXML() {
-            buffer = 0;
+            buffer       = 0;
             currentindex = 0;
         }
-    }
-            *xml;
+    } *xml;
 
     domNodeType *LoadXML(const char *filename) {
         topnode = nullptr;
         VS_LOG(debug, (boost::format("%1% called with filename '%2%'") % __func__ % filename));
-        //Not really nice but should do its job
-        unsigned int length = strlen(filename);
-        VSFileSystem::VSFile f;
+        // Not really nice but should do its job
+        unsigned int          length = strlen(filename);
+        VSFileSystem::VSFile  f;
         VSFileSystem::VSError err = VSFileSystem::VSError::FileNotFound;
         if (length > 8 && !memcmp((filename + length - 7), "mission", 7)) {
             err = f.OpenReadOnly(filename, VSFileSystem::MissionFile);
@@ -129,23 +128,23 @@ public:
             err = f.OpenReadOnly(filename, VSFileSystem::UnknownFile);
             if (err > VSFileSystem::VSError::Ok) {
                 std::string rootthis = std::string("/") + filename;
-                err = f.OpenReadOnly(rootthis, VSFileSystem::UnknownFile);
+                err                  = f.OpenReadOnly(rootthis, VSFileSystem::UnknownFile);
             }
         }
         if (err > VSFileSystem::VSError::Ok) {
-            std::string prefix = ("../mission/");
-            prefix += filename;
-            err = f.OpenReadOnly(prefix.c_str(), VSFileSystem::UnknownFile);
+            std::string prefix  = ("../mission/");
+            prefix             += filename;
+            err                 = f.OpenReadOnly(prefix.c_str(), VSFileSystem::UnknownFile);
         }
         if (err > VSFileSystem::VSError::Ok) {
-            std::string prefix = ("mission/");
-            prefix += filename;
-            err = f.OpenReadOnly(prefix.c_str(), VSFileSystem::UnknownFile);
+            std::string prefix  = ("mission/");
+            prefix             += filename;
+            err                 = f.OpenReadOnly(prefix.c_str(), VSFileSystem::UnknownFile);
         }
         if (err > VSFileSystem::VSError::Ok) {
-            std::string prefix = ("../");
-            prefix += filename;
-            err = f.OpenReadOnly(prefix.c_str(), VSFileSystem::UnknownFile);
+            std::string prefix  = ("../");
+            prefix             += filename;
+            err                 = f.OpenReadOnly(prefix.c_str(), VSFileSystem::UnknownFile);
         }
         if (err > VSFileSystem::VSError::Ok) {
             return nullptr;
@@ -179,22 +178,22 @@ public:
         f.Close();
         XML_ParserFree(parser);
         delete xml;
-        return (domNodeType *) topnode;
+        return (domNodeType *)topnode;
     }
 
     static void charHandler(void *userData, const XML_Char *s, int len) {
-        easyDomFactoryXML *xml = ((easyDomFactory<domNodeType> *) userData)->xml;
+        easyDomFactoryXML *xml = ((easyDomFactory<domNodeType> *)userData)->xml;
         if (!xml->buffer) {
-            xml->buffer = (char *) malloc(sizeof(char) * (len + 1));
+            xml->buffer = (char *)malloc(sizeof(char) * (len + 1));
         } else {
-            xml->buffer = (char *) realloc(xml->buffer, sizeof(char) * (len + 1 + xml->currentindex));
+            xml->buffer = (char *)realloc(xml->buffer, sizeof(char) * (len + 1 + xml->currentindex));
         }
         strncpy(xml->buffer + xml->currentindex, s, len);
         xml->currentindex += len;
     }
 
     domNodeType *LoadCalike(const char *filename) {
-        const int chunk_size = 262144;
+        const int chunk_size = 262'144;
 
         std::string module_str = parseCalike(filename);
         if (module_str.empty()) {
@@ -207,17 +206,17 @@ public:
         XML_SetElementHandler(parser, &easyDomFactory::beginElement, &easyDomFactory::endElement);
         XML_SetCharacterDataHandler(parser, &easyDomFactory::charHandler);
 
-        int index = 0;
+        int index       = 0;
         int string_size = module_str.size();
-        int incr = chunk_size - 2;
-        int is_final = false;
+        int incr        = chunk_size - 2;
+        int is_final    = false;
         do {
             char buf[chunk_size];
 
             int max_index = index + incr;
-            int newlen = incr;
+            int newlen    = incr;
             if (max_index >= string_size) {
-                newlen = module_str.size() - index;
+                newlen             = module_str.size() - index;
                 const char *strbuf = module_str.c_str();
                 memcpy(buf, strbuf + index, sizeof(char) * newlen);
             } else {
@@ -233,18 +232,18 @@ public:
         } while (!is_final);
         XML_ParserFree(parser);
         delete xml;
-        return (domNodeType *) topnode;
+        return (domNodeType *)topnode;
     }
 
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-        ((easyDomFactory *) userData)->beginElement(name, atts);
+        ((easyDomFactory *)userData)->beginElement(name, atts);
     }
 
     static void endElement(void *userData, const XML_Char *name) {
-        ((easyDomFactory *) userData)->endElement(name);
+        ((easyDomFactory *)userData)->endElement(name);
     }
 
-//void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes){
+    // void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes){
     void doTextBuffer() {
         if (!nodestack.size()) {
             return;
@@ -255,21 +254,21 @@ public:
             stacktop->set_attribute(textAttr, (stacktop->attr_value(textAttr)) + (xml->buffer));
             free(xml->buffer);
         }
-        xml->buffer = 0;
+        xml->buffer       = 0;
         xml->currentindex = 0;
     }
 
     void beginElement(const std::string &name, const XML_Char **atts) {
-        //XMLSupport::AttributeList::const_iterator iter;
+        // XMLSupport::AttributeList::const_iterator iter;
 
         doTextBuffer();
         domNodeType *parent;
-        bool hasParent = false;
+        bool         hasParent = false;
         if (nodestack.empty()) {
             parent = nullptr;
         } else {
             hasParent = true;
-            parent = nodestack.top();
+            parent    = nodestack.top();
         }
         domNodeType *thisnode = new domNodeType();
         thisnode->set(parent, name, atts);
@@ -297,4 +296,4 @@ public:
     domNodeType *topnode;
 };
 
-#endif //VEGA_STRIKE_ENGINE_EASYDOM_H
+#endif  // VEGA_STRIKE_ENGINE_EASYDOM_H

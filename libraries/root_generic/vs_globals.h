@@ -28,78 +28,80 @@
 #define VEGA_STRIKE_ENGINE_VS_GLOBALS_H
 
 #include <locale>
-#include <vector>
 #include <stddef.h>
+#include <vector>
 
-//#include "src/command.h"
+// #include "src/command.h"
 #include "src/vs_exit.h"
 
 class Universe;
 
-//extern commandI *CommandInterpretor;
+// extern commandI *CommandInterpretor;
 extern Universe *_Universe;
 
 #ifdef WIN32
-#define RESTRICT __restrict
+#    define RESTRICT __restrict
 #else
-#define RESTRICT __restrict__
+#    define RESTRICT __restrict__
 #endif
 
-extern void cleanup();
-extern bool STATIC_VARS_DESTROYED;
-extern int loop_count;
+extern void   cleanup();
+extern bool   STATIC_VARS_DESTROYED;
+extern int    loop_count;
 extern double avg_loop;
-extern int nb_checks;
+extern int    nb_checks;
 extern double last_check;
 extern double cur_check;
-extern bool cleanexit;
-extern bool run_only_player_starsystem;
+extern bool   cleanexit;
+extern bool   run_only_player_starsystem;
 
 /* All global data is stored in a variable of this type */
 
 // We will be removing all of these and using vs_options instead
 
 typedef struct {
-    char use_textures;
-    char use_animations;
-    char use_videos;
-    char use_sprites;
-    char use_logos;
-    char use_ship_textures;
-    char use_planet_textures;
-    int audio_frequency_mode;   //0==11025/8 1==22050/8 2==44100/8  3==11025/16 4==22050/16 5==44100/16
-    int sound_enabled;
-    int sound_volume;
-    int music_volume;
-    int max_sound_sources;
-    int warning_level;
-    int capture_mouse;
+    char  use_textures;
+    char  use_animations;
+    char  use_videos;
+    char  use_sprites;
+    char  use_logos;
+    char  use_ship_textures;
+    char  use_planet_textures;
+    int   audio_frequency_mode;  // 0==11025/8 1==22050/8 2==44100/8  3==11025/16 4==22050/16 5==44100/16
+    int   sound_enabled;
+    int   sound_volume;
+    int   music_volume;
+    int   max_sound_sources;
+    int   warning_level;
+    int   capture_mouse;
     float MouseSensitivityX;
     float MouseSensitivityY;
-    float detaillevel;     /*how much the LOD calculation gets multiplied by...higher="bigger" */
-    int y_resolution;
-    int x_resolution;
+    float detaillevel; /*how much the LOD calculation gets multiplied by...higher="bigger" */
+    int   y_resolution;
+    int   x_resolution;
     float znear;
     float zfar;
     float fov;
     float aspect;
     float difficulty;
-    char vsdebug;
+    char  vsdebug;
 } game_data_t;
 
 extern game_data_t g_game;
 class Music;
 extern Music *muzak;
-extern int muzak_count;
+extern int    muzak_count;
 class VegaConfig;
 extern VegaConfig *vs_config;
 
 class Mission;
 extern Mission *mission;
-template<class MyType>
+
+template <class MyType>
 class LeakVector {
 private:
     std::vector<MyType> *internal_vector_p_;
+
 public:
     bool empty() const {
         return internal_vector_p_->empty();
@@ -143,4 +145,4 @@ extern double benchmark;
 
 std::locale &GetGlobalLocale();
 
-#endif //VEGA_STRIKE_ENGINE_VS_GLOBALS_H
+#endif  // VEGA_STRIKE_ENGINE_VS_GLOBALS_H

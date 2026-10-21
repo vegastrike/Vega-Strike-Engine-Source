@@ -31,22 +31,22 @@
 
 struct AtmosphericFogMesh {
     std::string meshname;
-    double scale;
-    float er;
-    float eg;
-    float eb;
-    float ea;
-    float dr;
-    float dg;
-    float db;
-    float da;
-    double focus;
-    double concavity;
-    int tail_mode_start;
-    int tail_mode_end;
-    int min_alpha;
-    int max_alpha;
+    double      scale;
+    float       er;
+    float       eg;
+    float       eb;
+    float       ea;
+    float       dr;
+    float       dg;
+    float       db;
+    float       da;
+    double      focus;
+    double      concavity;
+    int         tail_mode_start;
+    int         tail_mode_end;
+    int         min_alpha;
+    int         max_alpha;
     AtmosphericFogMesh();
 };
 
-#endif //VEGA_STRIKE_ENGINE_ATMOSPHERIC_FOG_MESH_H
+#endif  // VEGA_STRIKE_ENGINE_ATMOSPHERIC_FOG_MESH_H

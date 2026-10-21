@@ -28,24 +28,22 @@
 #ifndef VEGA_STRIKE_VEGA_RANDOM_H
 #define VEGA_STRIKE_VEGA_RANDOM_H
 
-#include <random>
 #include <cstdint>
 #include <limits>
+#include <random>
 
-constexpr int_fast32_t kVegaIntFast32tMax = std::numeric_limits<int_fast32_t>::max();
-constexpr int_least32_t kVegaIntLeast32tMax = std::numeric_limits<int_least32_t>::max();
-constexpr unsigned long kVegaIntLeast32tMaxAsULong = std::numeric_limits<int_least32_t>::max();
-constexpr uint_fast32_t kVegaUIntFast32tMax = std::numeric_limits<uint_fast32_t>::max();
-constexpr uint_least32_t kVegaUIntLeast32tMax = std::numeric_limits<uint_least32_t>::max();
-constexpr double kVegaUInt32tMaxAsDouble = std::numeric_limits<uint_least32_t>::max();
-constexpr double kVegaUInt32tMaxAsDoublePlus1 = std::numeric_limits<uint_least32_t>::max() + 1.0;
-
+constexpr int_fast32_t   kVegaIntFast32tMax           = std::numeric_limits<int_fast32_t>::max();
+constexpr int_least32_t  kVegaIntLeast32tMax          = std::numeric_limits<int_least32_t>::max();
+constexpr unsigned long  kVegaIntLeast32tMaxAsULong   = std::numeric_limits<int_least32_t>::max();
+constexpr uint_fast32_t  kVegaUIntFast32tMax          = std::numeric_limits<uint_fast32_t>::max();
+constexpr uint_least32_t kVegaUIntLeast32tMax         = std::numeric_limits<uint_least32_t>::max();
+constexpr double         kVegaUInt32tMaxAsDouble      = std::numeric_limits<uint_least32_t>::max();
+constexpr double         kVegaUInt32tMaxAsDoublePlus1 = std::numeric_limits<uint_least32_t>::max() + 1.0;
 
 class VegaRandom {
     std::mt19937 gen;
 
 public:
-
     /// Initializes random number generator with system random_device, where available
     explicit VegaRandom() {
         std::random_device rd;
@@ -122,7 +120,7 @@ public:
     /// between min and max, inclusive
     double NormalDistribution(const double mean, const double standard_deviation, const double min, const double max) {
         std::normal_distribution<double> normal_dist(mean, standard_deviation);
-        double random_double;
+        double                           random_double;
         do {
             random_double = normal_dist(gen);
         } while (random_double < min || random_double > max);
@@ -133,7 +131,7 @@ public:
     /// between min and max, inclusive
     float NormalDistribution(const float mean, const float standard_deviation, const float min, const float max) {
         std::normal_distribution<float> normal_dist(mean, standard_deviation);
-        float random_float;
+        float                           random_float;
         do {
             random_float = normal_dist(gen);
         } while (random_float < min || random_float > max);
@@ -230,9 +228,9 @@ public:
 
     /// generates a random double between 0.0 and 1.0, at 1/10,000th increments
     double RandomDouble() {
-        constexpr double kPrecision = 10000.0;
-        std::uniform_int_distribution<uint_fast32_t> int_dist(0,kPrecision);
-        const uint_fast32_t random_int = int_dist(gen);
+        constexpr double                             kPrecision = 10000.0;
+        std::uniform_int_distribution<uint_fast32_t> int_dist(0, kPrecision);
+        const uint_fast32_t                          random_int = int_dist(gen);
         return static_cast<double>(random_int) / kPrecision;
     }
 
@@ -253,4 +251,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_VEGA_RANDOM_H
+#endif  // VEGA_STRIKE_VEGA_RANDOM_H

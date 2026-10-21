@@ -28,8 +28,9 @@
 #ifndef VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
 #define VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
 
-#include <vector>
 #include <string>
+#include <vector>
+
 #include "vegadisk/vsfilesystem.h"
 
 using std::string;
@@ -37,20 +38,20 @@ using std::vector;
 
 struct XMLType {
     union wordlength {
-        int *i;
+        int          *i;
         unsigned int *ui;
-        float *f;
-        void *p;
-        char *c;
-        //short * s;
-        bool *b;
+        float        *f;
+        void         *p;
+        char         *c;
+        // short * s;
+        bool   *b;
         double *d;
-        //unsigned short * us;
+        // unsigned short * us;
         unsigned char *uc;
-        int hardint;
-        float hardfloat;
-    }
-            w{};
+        int            hardint;
+        float          hardfloat;
+    } w{};
+
     std::string str;
 
     explicit XMLType(bool *mybool) {
@@ -89,8 +90,8 @@ struct XMLType {
         w.c = mychar;
     }
 
-    //XMLType (short * mychar) {w.s=mychar;} // removing useless shorts - use integers instead
-    //XMLType (unsigned short * mychar) {w.us=mychar;} // removing useless shorts - use integers instead
+    // XMLType (short * mychar) {w.s=mychar;} // removing useless shorts - use integers instead
+    // XMLType (unsigned short * mychar) {w.us=mychar;} // removing useless shorts - use integers instead
     explicit XMLType(unsigned char *mychar) {
         w.uc = mychar;
     }
@@ -111,13 +112,14 @@ struct XMLType {
         w.f = f;
     }
 };
-typedef std::string (XMLHandler)(const XMLType &input, void *mythis);
+
+typedef std::string(XMLHandler)(const XMLType &input, void *mythis);
 XMLHandler intHandler;
 XMLHandler floatHandler;
 XMLHandler intStarHandler;
-//XMLHandler shortStarHandler;
-//XMLHandler shortToFloatHandler;
-//XMLHandler ushortStarHandler;
+// XMLHandler shortStarHandler;
+// XMLHandler shortToFloatHandler;
+// XMLHandler ushortStarHandler;
 XMLHandler intToFloatHandler;
 XMLHandler uintStarHandler;
 XMLHandler charStarHandler;
@@ -127,7 +129,7 @@ XMLHandler ucharStarHandler;
 XMLHandler negationCharStarHandler;
 XMLHandler floatStarHandler;
 XMLHandler fabsFloatStarHandler;
-//XMLHandler absShortStarHandler;
+// XMLHandler absShortStarHandler;
 XMLHandler absIntStarHandler;
 
 XMLHandler speedStarHandler;
@@ -144,22 +146,23 @@ XMLHandler cloakHandler;
 
 struct XMLElement {
     std::string elem;
-    XMLType value;
+    XMLType     value;
     XMLHandler *handler;
 
     XMLElement(const std::string &ele, const XMLType &val, XMLHandler *hand) : value(val) {
-        elem = ele;
+        elem    = ele;
         handler = hand;
     }
 
-    void Write(VSFileSystem::VSFile &f, void *mythis);
+    void   Write(VSFileSystem::VSFile &f, void *mythis);
     string WriteString(void *mythis);
 };
+
 struct XMLnode {
-    XMLnode *up;
-    std::string val;
+    XMLnode           *up;
+    std::string        val;
     vector<XMLElement> elements;
-    vector<XMLnode> subnodes;
+    vector<XMLnode>    subnodes;
 
     XMLnode() {
         up = nullptr;
@@ -167,26 +170,28 @@ struct XMLnode {
 
     XMLnode(const std::string &val, XMLnode *newup) {
         this->val = val;
-        up = newup;
+        up        = newup;
     }
 
-    void Write(VSFileSystem::VSFile &f, void *mythis, int tablevel);
+    void   Write(VSFileSystem::VSFile &f, void *mythis, int tablevel);
     string WriteString(void *mythis, int tablevel);
 };
+
 class XMLSerializer {
     std::string filename;
     std::string savedir;
-    void *mythis;
-    XMLnode topnode;
-    XMLnode *curnode;
+    void       *mythis;
+    XMLnode     topnode;
+    XMLnode    *curnode;
+
 public:
     std::string randomdata[1];
     XMLSerializer(const char *filename, const char *modificationname, void *mythis);
-    void AddTag(const std::string &tag);
-    void AddElement(const std::string &element, XMLHandler *handler, const XMLType &input);
-    void Write(const char *modificationname = "");
+    void        AddTag(const std::string &tag);
+    void        AddElement(const std::string &element, XMLHandler *handler, const XMLType &input);
+    void        Write(const char *modificationname = "");
     std::string WriteString();
-    void EndTag(const std::string endname = string(""));
+    void        EndTag(const std::string endname = string(""));
 
     const std::string &getName() {
         return filename;
@@ -197,5 +202,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_XML_SERIALIZER_H
-
+#endif  // VEGA_STRIKE_ENGINE_XML_SERIALIZER_H

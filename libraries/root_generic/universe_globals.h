@@ -34,7 +34,7 @@ class Cockpit;
 class StarSystem;
 
 // Globals, in liueu of singletons
-extern int _current_cockpit;
+extern int               _current_cockpit;
 extern vector<Cockpit *> _cockpits;
 
 // currently only 1 star system is stored
@@ -45,4 +45,4 @@ extern vector<StarSystem *> _active_star_systems;
 // TODO: understand why we can't use active_star_system instead
 extern StarSystem *_script_system;
 
-#endif //VEGA_STRIKE_ENGINE_UNIVERSE_GLOBALS_H
+#endif  // VEGA_STRIKE_ENGINE_UNIVERSE_GLOBALS_H
