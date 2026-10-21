@@ -5,9 +5,9 @@ permissions:
 # Controls when the action will run.
 on:
   push:
-    branches: [ master, 0.11.x, 0.10.x ]
+    branches: [ master ]
   pull_request:
-    branches: [ master, 0.11.x, 0.10.x ]
+    branches: [ master ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
