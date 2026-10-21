@@ -30,8 +30,8 @@
 #include <cstdio>
 #include <string>
 
-void VegaPyRunString(char* py_snippet);
-void VegaPyRunString(const std::string& py_snippet);
-void VegaPyRunFile(FILE* fp, std::string file_path_or_description);
+void VegaPyRunString(char *py_snippet);
+void VegaPyRunString(const std::string &py_snippet);
+void VegaPyRunFile(FILE *fp, std::string file_path_or_description);
 
 #endif  // VEGA_STRIKE_ENGINE_VEGA_PY_RUN_H
