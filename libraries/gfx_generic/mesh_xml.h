@@ -152,7 +152,7 @@ struct MeshXML {
         std::string alpha_name;
         std::string animated_name;
     };
-    class Flightgroup         *fg;
+    class Flightgroup                     *fg;
     static const XMLSupport::EnumMap::Pair element_names[];
     static const XMLSupport::EnumMap::Pair attribute_names[];
     static const XMLSupport::EnumMap       element_map;
@@ -179,37 +179,37 @@ struct MeshXML {
     /// All logos on this unit
     std::vector<ZeLogo>    logos;
     std::vector<Names>     state_stack;
-    bool              sharevert;
-    bool              usenormals;
-    bool              usetangents;
-    bool              reverse;
-    bool              force_texture;
-    int               load_stage;
-    int               point_state;
-    int               vertex_state;
-    Vector            scale;
-    Vector            lodscale;
+    bool                   sharevert;
+    bool                   usenormals;
+    bool                   usetangents;
+    bool                   reverse;
+    bool                   force_texture;
+    int                    load_stage;
+    int                    point_state;
+    int                    vertex_state;
+    Vector                 scale;
+    Vector                 lodscale;
     std::vector<ZeTexture> decals;
     std::string            technique;
-    bool              recalc_norm;
-    int               num_vertices;
+    bool                   recalc_norm;
+    int                    num_vertices;
     std::vector<GFXVertex> vertices;
     /// keep count to make averaging easy
-    std::vector<int>               vertexcount;
-    std::vector<GFXVertex>         lines;
-    std::vector<GFXVertex>         tris;
-    std::vector<GFXVertex>         quads;
+    std::vector<int>                    vertexcount;
+    std::vector<GFXVertex>              lines;
+    std::vector<GFXVertex>              tris;
+    std::vector<GFXVertex>              quads;
     std::vector<std::vector<GFXVertex>> linestrips;
     std::vector<std::vector<GFXVertex>> tristrips;
     std::vector<std::vector<GFXVertex>> trifans;
     std::vector<std::vector<GFXVertex>> quadstrips;
-    int                       tstrcnt;
-    int                       tfancnt;
-    int                       qstrcnt;
-    int                       lstrcnt;
-    std::vector<int>               lineind;
-    std::vector<int>               nrmllinstrip;
-    std::vector<int>               linestripind;
+    int                                 tstrcnt;
+    int                                 tfancnt;
+    int                                 qstrcnt;
+    int                                 lstrcnt;
+    std::vector<int>                    lineind;
+    std::vector<int>                    nrmllinstrip;
+    std::vector<int>                    linestripind;
     /// for possible normal computation
     std::vector<int>        triind;
     std::vector<int>        nrmltristrip;
@@ -226,10 +226,10 @@ struct MeshXML {
     std::vector<int>       *active_ind;
     std::vector<Mesh *>     lod;
     std::vector<float>      lodsize;
-    GFXVertex          vertex;
-    GFXMaterial        material;
-    int                faction;
-    Mesh              *mesh;
+    GFXVertex               vertex;
+    GFXMaterial             material;
+    int                     faction;
+    Mesh                   *mesh;
 };
 
 #endif  // VEGA_STRIKE_ENGINE_GFX_MESH_XML_H
