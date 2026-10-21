@@ -27,6 +27,8 @@ declare -a dirs=('engine' 'libraries/cmd' 'libraries/collide2' 'libraries/gfx_ge
     'libraries/root_generic' 'libraries/vegadisk')
 for subdir in "${dirs[@]}"; do
   for file_extension in "${file_extensions[@]}"; do
+    echo "Processing .${file_extension} files in ${subdir} subdirectory"
+    find "${subdir}" -name "*.${file_extension}" -type f -print
     find "${subdir}" -name "*.${file_extension}" -type f -print0 | xargs -0 clang-format -i
     git add "${subdir}"
     git commit -m "Apply clang-format -i (in-place) to all .${file_extension} files under ${subdir}"
