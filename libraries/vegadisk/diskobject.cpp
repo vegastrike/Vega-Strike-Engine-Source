@@ -37,7 +37,7 @@
 
 using namespace vega_disk;
 
-bool DiskObject::record_archive_error(int archive_error, struct archive* archive_file) {
+bool DiskObject::record_archive_error(int archive_error, struct archive *archive_file) {
     if (archive_error != ARCHIVE_OK) {
         error_code    = archive_errno(archive_file);
         error_message = archive_error_string(archive_file);
@@ -47,14 +47,14 @@ bool DiskObject::record_archive_error(int archive_error, struct archive* archive
     return false;
 }
 
-int DiskObject::ListEntries(std::deque<std::string>& entries) {
+int DiskObject::ListEntries(std::deque<std::string> &entries) {
     if (filename.empty()) {
         error_message = "No file to open";
         VS_LOG(error, (boost::format("Error opening file %1% - Message (%2%)") % filename % error_message));
         return DiskObject::ERROR_NO_FILE;
     }
 
-    FILE* input_file = fopen(filename.c_str(), "r+b");
+    FILE *input_file = fopen(filename.c_str(), "r+b");
     if (input_file == nullptr) {
         error_code    = errno;
         error_message = strerror(errno);
@@ -62,7 +62,7 @@ int DiskObject::ListEntries(std::deque<std::string>& entries) {
         return DiskObject::ERROR_OPEN_READ_FAILED;
     }
 
-    struct archive* archive_file = archive_read_new();
+    struct archive *archive_file = archive_read_new();
     // allow the input to be any format and compression supported by libarchive
     archive_read_support_filter_all(archive_file);
     archive_read_support_format_all(archive_file);
@@ -75,7 +75,7 @@ int DiskObject::ListEntries(std::deque<std::string>& entries) {
     // reset the list
     entries.clear();
 
-    struct archive_entry* current_entry = nullptr;
+    struct archive_entry *current_entry = nullptr;
     while (archive_read_next_header(archive_file, &current_entry) == ARCHIVE_OK) {
         std::string path(archive_entry_pathname(current_entry));
 
@@ -118,7 +118,7 @@ int DiskObject::ListEntries(std::deque<std::string>& entries) {
 // ReadEntry opens an archive file to extract a file by the name of `entry_name`
 // parameter and return its data via the `data` parameter. If there's an error then
 // it returns an integer to denote the issue and records the information to the VS Logs
-int DiskObject::ReadEntry(const std::string& entry_name, std::string& data) {
+int DiskObject::ReadEntry(const std::string &entry_name, std::string &data) {
     if (filename.empty()) {
         error_message = "No file to open";
         VS_LOG(error, (boost::format("Error opening file entry %1% from %2% - Message (%3%)") % entry_name % filename %
@@ -126,7 +126,7 @@ int DiskObject::ReadEntry(const std::string& entry_name, std::string& data) {
         return DiskObject::ERROR_NO_FILE;
     }
 
-    FILE* input_file = fopen(filename.c_str(), "r+b");
+    FILE *input_file = fopen(filename.c_str(), "r+b");
     if (input_file == nullptr) {
         error_code    = errno;
         error_message = strerror(errno);
@@ -135,7 +135,7 @@ int DiskObject::ReadEntry(const std::string& entry_name, std::string& data) {
         return DiskObject::ERROR_OPEN_READ_FAILED;
     }
 
-    struct archive* archive_file = archive_read_new();
+    struct archive *archive_file = archive_read_new();
     // allow the input to be any format and compression supported by libarchive
     archive_read_support_filter_all(archive_file);
     archive_read_support_format_all(archive_file);
@@ -145,7 +145,7 @@ int DiskObject::ReadEntry(const std::string& entry_name, std::string& data) {
         return DiskObject::ERROR_ARCHIVE_READ_FAILED;
     }
 
-    struct archive_entry* current_entry = nullptr;
+    struct archive_entry *current_entry = nullptr;
     while (archive_read_next_header(archive_file, &current_entry) == ARCHIVE_OK) {
         std::string path(archive_entry_pathname(current_entry));
 
@@ -154,7 +154,7 @@ int DiskObject::ReadEntry(const std::string& entry_name, std::string& data) {
 
 
             while (true) {
-                const void* buffer         = nullptr;
+                const void *buffer         = nullptr;
                 size_t      buffer_size    = 0;
                 la_int64_t  archive_offset = 0;
 
@@ -169,7 +169,7 @@ int DiskObject::ReadEntry(const std::string& entry_name, std::string& data) {
                                 entry_name % filename % error_message));
                         // fall thru to ARCHIVE_OK which saves the data
                     case ARCHIVE_OK:
-                        data += std::string(static_cast<const char*>(buffer), buffer_size);
+                        data += std::string(static_cast<const char *>(buffer), buffer_size);
                         break;
 
                     case ARCHIVE_EOF:
@@ -234,6 +234,6 @@ end_archive_read:
     return DiskObject::ERROR_OK;
 }
 
-int DiskObject::WriteEntry(const std::string& entry_name, const std::string& data) {
+int DiskObject::WriteEntry(const std::string &entry_name, const std::string &data) {
     return -1;
 }
