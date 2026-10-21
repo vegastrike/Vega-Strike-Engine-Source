@@ -23,7 +23,7 @@
 set -euo pipefail
 
 declare -a file_extensions=('h' 'c' 'cpp')
-declare -a dirs=('engine' 'libraries/cmd' 'libraries/collide2' 'libraries/gfx_generic' 'libraries/gui' 'libraries/posh' \
+declare -a dirs=('engine' 'libraries/cmd' 'libraries/gfx_generic' 'libraries/gui' 'libraries/posh' \
     'libraries/root_generic' 'libraries/vegadisk')
 for subdir in "${dirs[@]}"; do
   for file_extension in "${file_extensions[@]}"; do
