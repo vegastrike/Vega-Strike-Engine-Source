@@ -53,7 +53,7 @@ bool gamma_needed(int gamma, int count, int depth)
                 -100);
 }*/
 
-void ParseWeapon(const boost::json::object& weapon) {
+void ParseWeapon(const boost::json::object &weapon) {
     WeaponInfo wi;
 
     // Weapon Type
@@ -154,7 +154,7 @@ WeaponFactory::WeaponFactory(std::string filename) {
     boost::json::value json_value = boost::json::parse(json_text);
     boost::json::array root_array = json_value.get_array();
 
-    for (boost::json::value& weapon_value : root_array) {
+    for (boost::json::value &weapon_value : root_array) {
         boost::json::object weapon = weapon_value.get_object();
         ParseWeapon(weapon);
     }

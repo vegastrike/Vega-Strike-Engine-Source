@@ -39,13 +39,13 @@
 
 static std::string root;
 
-void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile& file, bool player_ship) {
+void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile &file, bool player_ship) {
     const std::string json_text = file.ReadFull();
 
     boost::json::value json_value;
     try {
         json_value = boost::json::parse(json_text);
-    } catch (std::exception const& e) {
+    } catch (std::exception const &e) {
         VS_LOG_FLUSH_EXIT(fatal, (boost::format("Error parsing JSON in UnitJSONFactory::ParseJSON(): %1%") % e.what()),
                           42);
     }
@@ -53,7 +53,7 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile& file, bool player_ship) {
         boost::json::object                obj = json_value.as_object();
         std::map<std::string, std::string> unit_attributes{};
 
-        for (boost::json::key_value_pair& pair : obj) {
+        for (boost::json::key_value_pair &pair : obj) {
             const std::string value     = boost::json::value_to<std::string>(pair.value());
             unit_attributes[pair.key()] = value;
         }
@@ -69,11 +69,11 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile& file, bool player_ship) {
         }
     } else if (json_value.is_array()) {
         boost::json::array json_root = json_value.as_array();
-        for (boost::json::value& unit_value : json_root) {
+        for (boost::json::value &unit_value : json_root) {
             boost::json::object                unit_object = unit_value.get_object();
             std::map<std::string, std::string> unit_attributes{};
 
-            for (boost::json::key_value_pair& pair : unit_object) {
+            for (boost::json::key_value_pair &pair : unit_object) {
                 const std::string value     = boost::json::value_to<std::string>(pair.value());
                 unit_attributes[pair.key()] = value;
             }
@@ -97,12 +97,12 @@ void UnitJSONFactory::ParseJSON(VSFileSystem::VSFile& file, bool player_ship) {
     }
 }
 
-void UnitJSONFactory::ParseJSONArray(const std::string& json_text) {
+void UnitJSONFactory::ParseJSONArray(const std::string &json_text) {
     std::cout << json_text.substr(0, 100) << std::endl;
     boost::json::value json_value;
     try {
         json_value = boost::json::parse(json_text);
-    } catch (std::exception const& e) {
+    } catch (std::exception const &e) {
         VS_LOG_FLUSH_EXIT(
                 fatal, (boost::format("Error parsing JSON in UnitJSONFactory::ParseJSONArray(): %1%") % e.what()), 42);
     }
@@ -115,7 +115,7 @@ void UnitJSONFactory::ParseJSONArray(const std::string& json_text) {
     VS_LOG(trace, (boost::format("Parsing json array of size %1%.") % json_array.size()));
 
     int i = 0;
-    for (boost::json::value& json_value : json_array) {
+    for (boost::json::value &json_value : json_array) {
         std::cout << "Parsing " << i << std::endl;
         if (!json_value.is_object()) {
             std::cout << "Missing JSON Object in UnitJSONFactory::ParseJSONArray().\n";
@@ -125,7 +125,7 @@ void UnitJSONFactory::ParseJSONArray(const std::string& json_text) {
         boost::json::object                obj = json_value.as_object();
         std::map<std::string, std::string> unit_attributes{};
 
-        for (boost::json::key_value_pair& pair : obj) {
+        for (boost::json::key_value_pair &pair : obj) {
             const std::string value     = boost::json::value_to<std::string>(pair.value());
             unit_attributes[pair.key()] = value;
         }
