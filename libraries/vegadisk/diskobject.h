@@ -47,19 +47,19 @@ public:
 
     DiskObject() {}
 
-    DiskObject(const std::string& _filename) : filename(_filename) {}
+    DiskObject(const std::string &_filename) : filename(_filename) {}
 
     inline const std::string GetFilename() const {
         return filename;
     }
 
-    inline void SetFilename(const std::string& _filename) {
+    inline void SetFilename(const std::string &_filename) {
         filename = _filename;
     }
 
-    int ReadEntry(const std::string& entry_name, std::string& data);
-    int ListEntries(std::deque<std::string>& entries);
-    int WriteEntry(const std::string& entry_name, const std::string& data);
+    int ReadEntry(const std::string &entry_name, std::string &data);
+    int ListEntries(std::deque<std::string> &entries);
+    int WriteEntry(const std::string &entry_name, const std::string &data);
 
     inline int GetError() const {
         return error_code;
@@ -79,7 +79,7 @@ protected:
     int         error_code{0};
     std::string error_message{};
 
-    bool record_archive_error(int archive_error, struct archive* archive_file);
+    bool record_archive_error(int archive_error, struct archive *archive_file);
 };
 
 };  // namespace vega_disk
