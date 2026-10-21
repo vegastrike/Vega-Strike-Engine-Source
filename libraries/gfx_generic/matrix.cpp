@@ -25,7 +25,7 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <math.h>
 #include "gfx_generic/matrix.h"
 
+#include <math.h>
+#include <stdio.h>

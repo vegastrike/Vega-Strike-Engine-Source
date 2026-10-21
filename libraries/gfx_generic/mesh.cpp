@@ -26,40 +26,41 @@
  */
 
 
+#include "gfx_generic/mesh.h"
+
+#include <algorithm>
+#include <assert.h>
+#include <cfloat>
+#include <fstream>
+#include <list>
+#include <math.h>
 #include <memory.h>
+#include <string>
+
+#include "cmd/nebula.h"
 #include "gfx/animation.h"
 #include "gfx/aux_logo.h"
-#include "gfx_generic/mesh.h"
-#include "gfx_generic/matrix.h"
 #include "gfx/camera.h"
-#include <assert.h>
-#include <math.h>
-#include "cmd/nebula.h"
-#include <list>
-#include <string>
-#include <fstream>
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "root_generic/lin_time.h"
-#include "src/gfxlib.h"
-#include "root_generic/vs_globals.h"
+#include "gfx/technique.h"
+#include "gfx_generic/matrix.h"
+#include "gfx_generic/mesh_xml.h"
+#include "gfx_generic/sphere.h"
 #include "root_generic/configxml.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/vs_globals.h"
+#include "src/gfxlib.h"
 #include "src/hashtable.h"
 #include "src/vegastrike.h"
-#include "gfx_generic/sphere.h"
-#include "root_generic/lin_time.h"
-#include "gfx_generic/mesh_xml.h"
-#include "gfx/technique.h"
-#include <cfloat>
-#include <algorithm>
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
-#define LOD_HYSTHERESIS_DIVIDER (20)
+#define LOD_HYSTHERESIS_DIVIDER               (20)
 #define LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR (1.1)
 
 using std::list;
-Hashtable<std::string, Mesh, 503>Mesh::meshHashTable;
-Hashtable<std::string, std::vector<int>, 503>Mesh::animationSequences;
-Vector mouseline;
+Hashtable<std::string, Mesh, 503>             Mesh::meshHashTable;
+Hashtable<std::string, std::vector<int>, 503> Mesh::animationSequences;
+Vector                                        mouseline;
 
 int Mesh::getNumAnimationFrames(const string &which) const {
     if (which.empty()) {
@@ -77,37 +78,37 @@ int Mesh::getNumAnimationFrames(const string &which) const {
 }
 
 void Mesh::InitUnit() {
-    convex = false;
-    polygon_offset = 0;
+    convex          = false;
+    polygon_offset  = 0;
     framespersecond = 0;
-    numlods = 1;
-    alphatest = 0;
-    lodsize = FLT_MAX;
-    forcelogos = NULL;
-    squadlogos = NULL;
-    local_pos = Vector(0, 0, 0);
-    blendSrc = ONE;
-    blendDst = ZERO;
-    vlist = NULL;
-    mn = Vector(0, 0, 0);
-    mx = Vector(0, 0, 0);
-    radialSize = 0;
+    numlods         = 1;
+    alphatest       = 0;
+    lodsize         = FLT_MAX;
+    forcelogos      = NULL;
+    squadlogos      = NULL;
+    local_pos       = Vector(0, 0, 0);
+    blendSrc        = ONE;
+    blendDst        = ZERO;
+    vlist           = NULL;
+    mn              = Vector(0, 0, 0);
+    mx              = Vector(0, 0, 0);
+    radialSize      = 0;
     if (Decal.empty()) {
         Decal.push_back(NULL);
     }
 
-    //texturename[0] = -1;
+    // texturename[0] = -1;
     numforcelogo = numsquadlogo = 0;
-    myMatNum = 0;     //default material!
-    //scale = Vector(1.0,1.0,1.0);
-    refcount = 1;     //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
-    orig = NULL;
+    myMatNum                    = 0;  // default material!
+    // scale = Vector(1.0,1.0,1.0);
+    refcount = 1;  // FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
+    orig     = NULL;
 
     envMapAndLit = 0x3;
     setEnvMap(GFXTRUE);
     setLighting(GFXTRUE);
     detailTexture = NULL;
-    draw_queue = NULL;
+    draw_queue    = NULL;
     will_be_drawn = GFXFALSE;
     draw_sequence = 0;
 
@@ -129,10 +130,10 @@ bool Mesh::LoadExistant(const string filehash, const Vector &scale, int faction)
     Mesh *oldmesh;
 
     hash_name = VSFileSystem::GetHashName(filehash, scale, faction);
-    oldmesh = meshHashTable.Get(hash_name);
+    oldmesh   = meshHashTable.Get(hash_name);
     if (oldmesh == 0) {
         hash_name = VSFileSystem::GetSharedMeshHashName(filehash, scale, faction);
-        oldmesh = meshHashTable.Get(hash_name);
+        oldmesh   = meshHashTable.Get(hash_name);
     }
     if (0 != oldmesh) {
         return LoadExistant(oldmesh);
@@ -144,7 +145,7 @@ extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHash
 
 Mesh::Mesh(const Mesh &m) {
     VS_LOG(warning, "UNTESTED MESH COPY CONSTRUCTOR");
-    this->orig = NULL;
+    this->orig      = NULL;
     this->hash_name = m.hash_name;
     InitUnit();
     Mesh *oldmesh = meshHashTable.Get(hash_name);
@@ -159,7 +160,7 @@ Mesh::Mesh(const Mesh &m) {
         if (0 == oldmesh) {
             if (vec->size() > 1) {
                 VS_LOG(warning,
-                        (boost::format("Copy constructor %1$s used in ambiguous Situation") % hash_name.c_str()));
+                       (boost::format("Copy constructor %1$s used in ambiguous Situation") % hash_name.c_str()));
             }
             if (vec->size()) {
                 oldmesh = (*vec)[0];
@@ -183,12 +184,12 @@ extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHash
 
 Mesh::Mesh(std::string filename, const Vector &scale, int faction, Flightgroup *fg, bool orig) : hash_name(filename) {
     this->convex = false;
-    Mesh *cpy = LoadMesh(filename.c_str(), scale, faction, fg, vector<std::string>());
+    Mesh *cpy    = LoadMesh(filename.c_str(), scale, faction, fg, vector<std::string>());
     if (cpy->orig) {
         LoadExistant(cpy->orig);
-        delete cpy;         //wasteful, but hey
+        delete cpy;  // wasteful, but hey
         if (orig != false) {
-            orig = false;
+            orig                     = false;
             std::vector<Mesh *> *tmp = bfxmHashTable.Get(this->orig->hash_name);
             if (tmp && tmp->size() && (*tmp)[0] == this->orig) {
                 if (this->orig->refcount == 1) {
@@ -204,10 +205,10 @@ Mesh::Mesh(std::string filename, const Vector &scale, int faction, Flightgroup *
                 }
             }
             if (orig) {
-                Mesh *tmp = this->orig;
-                tmp->orig = this;
+                Mesh *tmp  = this->orig;
+                tmp->orig  = this;
                 this->orig = NULL;
-                refcount = 2;
+                refcount   = 2;
                 delete[] tmp;
             }
         }
@@ -217,38 +218,35 @@ Mesh::Mesh(std::string filename, const Vector &scale, int faction, Flightgroup *
     }
 }
 
-Mesh::Mesh(const char *filename,
-        const Vector &scale,
-        int faction,
-        Flightgroup *fg,
-        bool orig,
-        const vector<string> &textureOverride) : hash_name(filename) {
+Mesh::Mesh(const char *filename, const Vector &scale, int faction, Flightgroup *fg, bool orig,
+           const vector<string> &textureOverride)
+    : hash_name(filename) {
     this->convex = false;
-    this->orig = NULL;
+    this->orig   = NULL;
     InitUnit();
     Mesh *oldmesh;
     if (LoadExistant(filename, scale, faction)) {
         return;
     }
-    bool shared = false;
-    VSFile f;
+    bool    shared = false;
+    VSFile  f;
     VSError err = Unspecified;
-    err = f.OpenReadOnly(filename, MeshFile);
+    err         = f.OpenReadOnly(filename, MeshFile);
     if (err > Ok) {
         VS_LOG(error, (boost::format("Cannot Open Mesh File %1$s\n") % filename));
-//cleanexit=1;
-//winsys_exit(1);
+        // cleanexit=1;
+        // winsys_exit(1);
         return;
     }
     shared = (err == Shared);
 
     bool xml = true;
     if (xml) {
-        //LoadXML(filename,scale,faction,fg,orig);
+        // LoadXML(filename,scale,faction,fg,orig);
         LoadXML(f, scale, faction, fg, orig, textureOverride);
         oldmesh = this->orig;
     } else {
-        //This must be changed someday
+        // This must be changed someday
         LoadBinary(shared ? (VSFileSystem::sharedmeshes + "/" + (filename)).c_str() : filename, faction);
         oldmesh = new Mesh[1];
     }
@@ -257,13 +255,11 @@ Mesh::Mesh(const char *filename,
     }
     draw_queue = new vector<MeshDrawContext>[NUM_ZBUF_SEQ + 1];
     if (!orig) {
-        hash_name = shared ? VSFileSystem::GetSharedMeshHashName(filename, scale, faction) : VSFileSystem::GetHashName(
-                filename,
-                scale,
-                faction);
+        hash_name = shared ? VSFileSystem::GetSharedMeshHashName(filename, scale, faction)
+                           : VSFileSystem::GetHashName(filename, scale, faction);
         meshHashTable.Put(hash_name, oldmesh);
-        //oldmesh[0]=*this;
-        *oldmesh = *this;
+        // oldmesh[0]=*this;
+        *oldmesh      = *this;
         oldmesh->orig = NULL;
         oldmesh->refcount++;
     } else {
@@ -273,7 +269,7 @@ Mesh::Mesh(const char *filename,
 
 float const ooPI = 1.00F / 3.1415926535F;
 
-//#include "d3d_internal.h"
+// #include "d3d_internal.h"
 void Mesh::SetMaterial(const GFXMaterial &mat) {
     GFXSetMaterial(myMatNum, mat);
     if (orig) {
@@ -311,14 +307,13 @@ Mesh *Mesh::getLOD(float lod, bool bBypassDamping) {
     if (!orig) {
         return this;
     }
-    Mesh *retval = &orig[0];
+    Mesh        *retval     = &orig[0];
     vector<int> *animFrames = 0;
     if (getFramesPerSecond() > .0000001 && (animFrames = animationSequences.Get(hash_name))) {
-        //return &orig[(int)floor(fmod (getNewTime()*getFramesPerSecond(),numlods))];
-        unsigned int which = (int) float_to_int(floor(fmod(getCurrentFrame(),
-                animFrames->size())));
-        float adv = GetElapsedTime() * getFramesPerSecond();
-        const float max_frames_skipped = configuration().graphics.mesh_animation_max_frames_skipped_flt;
+        // return &orig[(int)floor(fmod (getNewTime()*getFramesPerSecond(),numlods))];
+        unsigned int which              = (int)float_to_int(floor(fmod(getCurrentFrame(), animFrames->size())));
+        float        adv                = GetElapsedTime() * getFramesPerSecond();
+        const float  max_frames_skipped = configuration().graphics.mesh_animation_max_frames_skipped_flt;
         if (adv > max_frames_skipped) {
             adv = max_frames_skipped;
         }
@@ -331,19 +326,18 @@ Mesh *Mesh::getLOD(float lod, bool bBypassDamping) {
             if (!bBypassDamping) {
                 if (lod < orig[i].lodsize) {
                     lodoffs = ((i < numlods - 1) ? (orig[i + 1].lodsize - orig[i].lodsize) / LOD_HYSTHERESIS_DIVIDER
-                            : 0.0f);
+                                                 : 0.0f);
                 } else {
                     lodoffs = ((i > 0) ? (orig[i - 1].lodsize - orig[i].lodsize) / LOD_HYSTHERESIS_DIVIDER : 0.0f);
                 }
                 float maxenlargement = ((orig[i].lodsize * LOD_HYSTHERESIS_MAXENLARGEMENT_FACTOR) - orig[i].lodsize);
                 if ((lodoffs > 0) && (lodoffs > maxenlargement)) {
-                    lodoffs =
-                            maxenlargement;
-                }                     //Avoid excessive enlargement of low-detail LOD levels, when LOD levels are far apart.
+                    lodoffs = maxenlargement;
+                }  // Avoid excessive enlargement of low-detail LOD levels, when LOD levels are far apart.
             }
             if ((lod < (orig[i].lodsize + lodoffs)) && (lod < maxlodsize)) {
                 maxlodsize = orig[i].lodsize;
-                retval = &orig[i];
+                retval     = &orig[i];
             }
         }
     }
@@ -351,8 +345,8 @@ Mesh *Mesh::getLOD(float lod, bool bBypassDamping) {
 }
 
 void Mesh::SetBlendMode(BLENDFUNC src, BLENDFUNC dst, bool lodcascade) {
-    blendSrc = src;
-    blendDst = dst;
+    blendSrc      = src;
+    blendDst      = dst;
     draw_sequence = 0;
     if (blendDst != ZERO) {
         draw_sequence++;
@@ -362,40 +356,42 @@ void Mesh::SetBlendMode(BLENDFUNC src, BLENDFUNC dst, bool lodcascade) {
     }
     if (orig) {
         orig->draw_sequence = draw_sequence;
-        orig->blendSrc = src;
-        orig->blendDst = dst;
+        orig->blendSrc      = src;
+        orig->blendDst      = dst;
         if (lodcascade) {
             for (int i = 1; i < numlods; i++) {
                 orig[i].draw_sequence = draw_sequence;
-                orig[i].blendSrc = src;
-                orig[i].blendDst = dst;
+                orig[i].blendSrc      = src;
+                orig[i].blendDst      = dst;
             }
         }
     }
 }
 
-enum EX_EXCLUSION { EX_X, EX_Y, EX_Z };
+enum EX_EXCLUSION {
+    EX_X,
+    EX_Y,
+    EX_Z
+};
 
-inline bool OpenWithin(const QVector &query,
-        const Vector &mn,
-        const Vector &mx,
-        const float err,
-        enum EX_EXCLUSION excludeWhich) {
+inline bool OpenWithin(const QVector &query, const Vector &mn, const Vector &mx, const float err,
+                       enum EX_EXCLUSION excludeWhich) {
     switch (excludeWhich) {
         case EX_X:
-            return (query.j >= mn.j - err) && (query.k >= mn.k - err) && (query.j <= mx.j + err)
-                    && (query.k <= mx.k + err);
+            return (query.j >= mn.j - err) && (query.k >= mn.k - err) && (query.j <= mx.j + err) &&
+                   (query.k <= mx.k + err);
 
         case EX_Y:
-            return (query.i >= mn.i - err) && (query.k >= mn.k - err) && (query.i <= mx.i + err)
-                    && (query.k <= mx.k + err);
+            return (query.i >= mn.i - err) && (query.k >= mn.k - err) && (query.i <= mx.i + err) &&
+                   (query.k <= mx.k + err);
 
         case EX_Z:
         default:
-            return (query.j >= mn.j - err) && (query.i >= mn.i - err) && (query.j <= mx.j + err)
-                    && (query.i <= mx.i + err);
+            return (query.j >= mn.j - err) && (query.i >= mn.i - err) && (query.j <= mx.j + err) &&
+                   (query.i <= mx.i + err);
     }
 }
+
 /*
 bool Mesh::queryBoundingBox( const QVector &eye, const QVector &end, const float err ) const
 {
