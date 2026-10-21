@@ -18,9 +18,10 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1             # v7.0.1
-      - name: Run clang-format style check for C/C++/Protobuf programs.
-        uses: jidicula/clang-format-action@654a770daa28443dd111d133e4083e21c1075674 # v4.18.0
+      - name: clang-format lint
+        uses: DoozyX/clang-format-lint-action@bcb4eb2cb0d707ee4f3e5cc3b456eb075f12cf73  # v0.20
         with:
-          clang-format-version: '19'
-          check-path: '.'
-          exclude-regex: '^\.\/libraries\/imgui'
+          clangFormatVersion: '19'
+          style: 'file'
+          source: '.'
+          exclude: 'libraries/imgui'
