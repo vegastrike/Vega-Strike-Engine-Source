@@ -28,14 +28,14 @@
 module test {
     globals {
         class int g1, g2, g5, g6;
-        float     g3;
-        object    g4;
+        float g3;
+        object g4;
     };
 
 import a1;
 
     class int aty : = 34.3;
-    int       arss  = 4.3;
+    int arss = 4.3;
 
     void t0() {
         float x = a * b + c * d + e;
@@ -47,9 +47,9 @@ import a1;
 
     void t1() {
         int blah = "whatever";
-        a        = "whatever" + "nothing" + _io.print("never", "ever");
+        a = "whatever" + "nothing" + _io.print("never", "ever");
 
-        float b1   = a * b;
+        float b1 = a * b;
         float b2 : = 3.4;
         a->push(a, b, cd);
     };
@@ -63,7 +63,6 @@ import a1;
        float ms234;
     */
     float sdm2;
-
 
     bool blah : = true;
 
@@ -120,16 +119,15 @@ import a1;
         blubb = four(a);
     };
 
-
     float second(int a1, float d3) {
-        int   hallo;
+        int hallo;
         float fasel;
 
         if (whatever == soever) {
-            int   h2;
+            int h2;
             float b3;
 
-            b3  = 13.3;
+            b3 = 13.3;
             b34 = (sowhat == nover);
 
             if (nowhat + never == 323.4) {
@@ -141,7 +139,7 @@ import a1;
 
             a3784 = 37 + 4278.54 * dh + 4.5;
         } else {
-            int   h3;
+            int h3;
             float h4;
         };
     };
