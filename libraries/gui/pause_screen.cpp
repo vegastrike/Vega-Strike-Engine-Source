@@ -25,21 +25,17 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "SDL3/SDL.h"
-#include "imgui.h"
-#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
+#include "imgui.h"
+#include "SDL3/SDL.h"
 
 
-static const ImGuiWindowFlags window_flags = 
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoScrollbar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoBackground |
-        ImGuiWindowFlags_NoDecoration;   // makes it transparent
+static const ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                                             ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+                                             ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground |
+                                             ImGuiWindowFlags_NoDecoration;  // makes it transparent
 
 void pauseGame() {
     bool done = false;
@@ -47,11 +43,11 @@ void pauseGame() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
-    
+
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL3_ProcessEvent(&event);
-            
+
             if (event.type == SDL_EVENT_KEY_DOWN && event.key.repeat == 0) {
                 done = true;
             }
@@ -59,7 +55,7 @@ void pauseGame() {
 
         ImGui::Begin("pause_window", nullptr, window_flags);
 
-        
+
         ImGui::End();
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
