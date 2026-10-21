@@ -51,12 +51,16 @@ IncludeCategories:
     Priority: 2
   - Regex: '^<[[:alnum:]./_]+>$'
     Priority: 3
-  - Regex: '^"Ice/IcePreprocessor\.h"$'
+  - Regex: '^"collide2/Opcode\.h"$'
     Priority: 4
-  - Regex: '^"[[:alnum:]./_]+"$'
+  - Regex: '^"OPC_IceHook\.h"$'
     Priority: 5
-  - Regex: '.*'
+  - Regex: '^"Ice/IcePreprocessor\.h"$'
     Priority: 6
+  - Regex: '^"[[:alnum:]./_]+"$'
+    Priority: 7
+  - Regex: '.*'
+    Priority: 8
 IndentAccessModifiers: false
 IndentExternBlock: Indent
 IndentPPDirectives: AfterHash
