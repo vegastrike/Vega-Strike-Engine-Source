@@ -34,6 +34,7 @@ jobs:
             install-nsis:    1
 
     env:
+      CMAKE_FIND_DEBUG_MODE: "OFF"
       VCPKG_DISABLE_METRICS: 'ON'
       VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
       VCPKG_ASSET_SOURCES: "${{ github.workspace }}/vcpkgAssets"
