@@ -33,6 +33,12 @@
 class Unit;
 
 double DistanceTwoTargets(Unit *parent, Unit *target);
+
+/// The distance at which a body counts as dockable, measured the way the docking test measures it:
+/// from a planet's surface, or from a ship's centre. A planet is never dockable closer than its own
+/// zone, so the configured range is a floor under it rather than the whole answer.
+double DockingDistance(const Unit *dock);
+
 int CanDock(Unit *dock, Unit *ship, bool ignore_occupancy = false);
 std::string GetDockingText(Unit *unit, Unit *target, double range);
 std::string PrettyDistanceString(double distance);

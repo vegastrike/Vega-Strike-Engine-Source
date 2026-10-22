@@ -66,6 +66,14 @@ static const char *frame_limit_vals[] = { "unlimited", "half", "fixed" };
 int  sel_frame_limit = 0;
 int  sel_max_framerate = 60;
 bool show_fps = false;
+
+// Docking: which rule the player is under, and the distances the simple rule uses. A planet keeps
+// the simple rule in both modes -- it has no docking port to fly into -- so its distance always
+// applies.
+static const char *dock_mode_opts[] = { "Simple docking", "Docking zones" };
+int  sel_dock_mode = 0;
+char dock_range_buf[16] = "5000";
+char planet_dock_buf[16] = "1.5";
 bool display_inited = false;
 
 bool rendered_crosshair = true;
@@ -345,6 +353,11 @@ static void load_display_from_config() {
     for (int i = 0; i < 3; ++i) if (g.frame_limit_mode == frame_limit_vals[i]) sel_frame_limit = i;
     sel_max_framerate = g.max_framerate > 0 ? g.max_framerate : 60;
     show_fps = g.show_fps;
+    // Docking. An unset mode predates the setting, and the older boolean says which rule applies.
+    const auto &dk = configuration().dock;
+    sel_dock_mode = (dk.mode == "zones") ? 1 : (dk.mode == "simple" ? 0 : (dk.simple_dock ? 0 : 1));
+    snprintf(dock_range_buf, sizeof(dock_range_buf), "%g", dk.simple_dock_range_dbl);
+    snprintf(planet_dock_buf, sizeof(planet_dock_buf), "%g", dk.dock_planet_radius_percent_dbl);
     display_inited = true;
 }
 
@@ -368,6 +381,27 @@ static void apply_display_to_config() {
     mark_dirty("graphics.fov");
     if (_Universe && _Universe->AccessCamera()) {
         _Universe->AccessCamera()->SetFov(g.fov_flt);
+    }
+    // Docking: the mode, and the two distances. Only the mode key is written -- the older
+    // simple_dock boolean is still read as a fallback, but nothing has to keep writing it.
+    {
+        auto &dk = configuration().dock;
+        dk.mode = (sel_dock_mode == 1) ? "zones" : "simple";
+        double range = locale_aware_stod(std::string(dock_range_buf));
+        if (range < 0.0) {
+            range = 0.0;
+        }
+        dk.simple_dock_range_dbl = range;
+        dk.simple_dock_range_flt = static_cast<float>(range);
+        double planet = locale_aware_stod(std::string(planet_dock_buf));
+        if (planet < 1.0) {
+            planet = 1.0;   // inside one radius there is nothing left to dock with
+        }
+        dk.dock_planet_radius_percent_dbl = planet;
+        dk.dock_planet_radius_percent_flt = static_cast<float>(planet);
+        mark_dirty("dock.mode");
+        mark_dirty("dock.simple_dock_range");
+        mark_dirty("dock.dock_planet_radius_percent");
     }
     // Persist the selected font ("Roboto" sentinel or a .ttf filename); only hot-apply
     // a font change when the selection actually differs from the current font, so a
@@ -440,7 +474,9 @@ void draw_display_frame() {
     float dpy_w = avail_w * 0.72f;
     float side_w = avail_w - dpy_w;
 
-    ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 8 * btn_h), ImGuiChildFlags_Borders);
+    // Let the frame measure itself: it carries more rows than a fixed eight-button height fits.
+    ImGui::BeginChild("dpyframe", ImVec2(dpy_w, 0.0f),
+            ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
     // Monitor selector.
     if (ImGui::Button("Monitor")) ImGui::OpenPopup("##pick_mon");
     ImGui::SameLine(); ImGui::TextUnformatted(monitor_text.c_str());
@@ -524,6 +560,27 @@ void draw_display_frame() {
     ImGui::SetNextItemWidth(60);
     if (ImGui::InputText("##hudfov", hud_fov_buf, sizeof(hud_fov_buf), ImGuiInputTextFlags_CharsDecimal))
         dirty = true;
+    // Docking. The mode picks how you dock -- within the range, or by putting your port on the
+    // station's -- and does not change the distance: that is the range for every body, with a
+    // planet's own zone under it as a floor, and it is also where SPEC and the autopilot stop.
+    ImGui::SeparatorText("Docking");
+    if (ImGui::Button("Mode")) ImGui::OpenPopup("##pick_dockmode");
+    ImGui::SameLine(); ImGui::TextUnformatted(dock_mode_opts[sel_dock_mode]);
+    if (ImGui::BeginPopup("##pick_dockmode")) {
+        for (int i = 0; i < 2; ++i)
+            if (ImGui::MenuItem(dock_mode_opts[i])) { sel_dock_mode = i; dirty = true; }
+        ImGui::EndPopup();
+    }
+    ImGui::Text("Docking range"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(90);
+    if (ImGui::InputText("##dockrange", dock_range_buf, sizeof(dock_range_buf), ImGuiInputTextFlags_CharsDecimal))
+        dirty = true;
+    ImGui::TextDisabled("Where docking, SPEC and the autopilot all stop, for every body.");
+    ImGui::Text("Planet zone (x radius)"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(90);
+    if (ImGui::InputText("##planetdock", planet_dock_buf, sizeof(planet_dock_buf), ImGuiInputTextFlags_CharsDecimal))
+        dirty = true;
+    ImGui::TextDisabled("A planet's own zone: its radius times this, if that is further out.");
     // Vsync (monitor sync).
     if (ImGui::Button("Vsync")) ImGui::OpenPopup("##pick_vsync");
     ImGui::SameLine(); ImGui::TextUnformatted(vsync_opts[sel_vsync]);
@@ -1759,6 +1816,12 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"input.mouse.enabled",              [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.enabled;},                 nullptr},
     {"input.mouse.inverse_x",            [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.inverse_x;},               nullptr},
     {"input.mouse.inverse_y",            [](const vega_config::Configuration&c)->boost::json::value{return c.mouse.inverse_y;},               nullptr},
+    // ---- dock ----
+    // Set by the docking group's apply function, so no preset setter. Every path a setting marks
+    // dirty also has to be readable here, or write_out_dirty() drops it.
+    {"dock.mode",                       [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.dock.mode);},        nullptr},
+    {"dock.simple_dock_range",          [](const vega_config::Configuration&c)->boost::json::value{return c.dock.simple_dock_range_dbl;},             nullptr},
+    {"dock.dock_planet_radius_percent", [](const vega_config::Configuration&c)->boost::json::value{return c.dock.dock_planet_radius_percent_dbl;},   nullptr},
     // ---- splash / test ----
     {"splash.loading_sprite",            [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.splash.loading_sprite);},          [](vega_config::Configuration&c,const std::string&v){c.splash.loading_sprite=v;}},
     {"test.autodocker",                  [](const vega_config::Configuration&c)->boost::json::value{return c.test.autodocker;},                [](vega_config::Configuration&c,const std::string&v){c.test.autodocker=(v=="true"||v=="1");}},
