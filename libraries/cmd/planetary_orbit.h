@@ -46,6 +46,7 @@ private:
     float orbiting_last_simatom;
     int current_orbit_frame;
     bool orbit_list_filled;
+    bool orbit_phase_initialized;
 protected:
 ///A vector containing all lihgts currently activated on current planet
     std::vector<int> lights;
