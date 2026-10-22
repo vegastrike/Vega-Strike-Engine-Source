@@ -117,6 +117,10 @@ PROJECT(Vega_Strike
     CXX C
 )
 
+# Force-unset or disable find debug modes globally
+SET(CMAKE_FIND_DEBUG_MODE OFF CACHE BOOL "Disable verbose find logs" FORCE)
+SET(CMAKE_VERBOSE_MAKEFILE OFF FORCE)
+
 MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_LONG_STR}")
 
 SET(CMAKE_CXX_STANDARD 14)
