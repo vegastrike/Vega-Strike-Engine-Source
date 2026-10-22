@@ -85,4 +85,3 @@ void Gauge::Draw(float percentage) {
     VSSprite::SetSize(sx, sy);
     VSSprite::SetPosition(px, py);
 }
-

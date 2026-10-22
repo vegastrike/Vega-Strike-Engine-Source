@@ -28,17 +28,15 @@
 
 #include <assert.h>
 
+#include "cmd/music.h"
+#include "cmd/unit_generic.h"
+#include "cmd/unit_util.h"
+#include "gfx/animation.h"
+#include "gfx/aux_texture.h"
+#include "root_generic/faction_generic.h"
+#include "root_generic/vega_random.h"
 #include "root_generic/vs_globals.h"
 #include "src/vs_logging.h"
-#include "cmd/unit_generic.h"
-#include "root_generic/faction_generic.h"
-#include "gfx/aux_texture.h"
-#include "cmd/unit_util.h"
-#include "cmd/unit_generic.h"
-#include "gfx/aux_texture.h"
-#include "gfx/animation.h"
-#include "cmd/music.h"
-#include "root_generic/vega_random.h"
 
 // DO NOT PUT INCLUDES AFTER using namespace
 
@@ -68,14 +66,14 @@ Texture *FactionUtil::getForceLogo(int faction) {
     return factions[faction]->logo;
 }
 
-//fixme--add squads in here
+// fixme--add squads in here
 Texture *FactionUtil::getSquadLogo(int faction) {
     boost::shared_ptr<Faction> fac = factions[faction];
     if (fac->secondaryLogo == 0) {
         if (!fac->secondaryLogoName.empty()) {
             if (!fac->secondaryLogoAlphaName.empty()) {
-                fac->secondaryLogo = FactionUtil::createTexture(
-                        fac->secondaryLogoName.c_str(), fac->secondaryLogoAlphaName.c_str(), true);
+                fac->secondaryLogo = FactionUtil::createTexture(fac->secondaryLogoName.c_str(),
+                                                                fac->secondaryLogoAlphaName.c_str(), true);
             } else {
                 fac->secondaryLogo = FactionUtil::createTexture(fac->secondaryLogoName.c_str(), true);
             }
@@ -90,7 +88,7 @@ int FactionUtil::GetNumAnimation(int faction) {
     return factions[faction]->comm_faces.size();
 }
 
-//COMES FROM FACTION_XML.CPP
+// COMES FROM FACTION_XML.CPP
 
 std::vector<Animation *> *FactionUtil::GetAnimation(int faction, int n, unsigned char &sex) {
     sex = factions[faction]->comm_face_sex[n];
@@ -99,30 +97,27 @@ std::vector<Animation *> *FactionUtil::GetAnimation(int faction, int n, unsigned
 
 std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *un, unsigned char &sex) {
     bool dockable = UnitUtil::isDockableUnit(un);
-    bool base = UnitUtil::getFlightgroupName(un) == "Base";
-    int siz = factions[faction]->comm_faces.size();
+    bool base     = UnitUtil::getFlightgroupName(un) == "Base";
+    int  siz      = factions[faction]->comm_faces.size();
     if (siz > 0) {
         for (int i = 0; i < 8 + siz; ++i) {
-            const int ind = i < 8 ? VegaRandom::Instance().RandomInt32UpTo(siz - 1) : i - 8;
+            const int             ind = i < 8 ? VegaRandom::Instance().RandomInt32UpTo(siz - 1) : i - 8;
             Faction::comm_face_t *tmp = &factions[faction]->comm_faces[ind];
-            if (tmp->dockable == Faction::comm_face_t::CEITHER
-                    || (tmp->dockable == Faction::comm_face_t::CYES && dockable)
-                    || (tmp->dockable == Faction::comm_face_t::CNO && !dockable)) {
-                if (tmp->base == Faction::comm_face_t::CEITHER
-                        || (tmp->base == Faction::comm_face_t::CYES && base)
-                        || (tmp->base == Faction::comm_face_t::CNO && !base)) {
+            if (tmp->dockable == Faction::comm_face_t::CEITHER ||
+                (tmp->dockable == Faction::comm_face_t::CYES && dockable) ||
+                (tmp->dockable == Faction::comm_face_t::CNO && !dockable)) {
+                if (tmp->base == Faction::comm_face_t::CEITHER || (tmp->base == Faction::comm_face_t::CYES && base) ||
+                    (tmp->base == Faction::comm_face_t::CNO && !base)) {
                     return GetAnimation(faction, ind, sex);
                 }
             }
             if (tmp->base == Faction::comm_face_t::CYES && base) {
-                return GetAnimation(faction,
-                        ind,
-                        sex);                  //bases may be dockable but we have set dockable_only to no
+                return GetAnimation(faction, ind,
+                                    sex);  // bases may be dockable but we have set dockable_only to no
             }
         }
-        VS_LOG(error,
-                (boost::format("Error picking comm animation for %1$d faction with base:%2$d dock:%3$d\n") % faction
-                        % static_cast<int>(base) % static_cast<int>(dockable)));
+        VS_LOG(error, (boost::format("Error picking comm animation for %1$d faction with base:%2$d dock:%3$d\n") %
+                       faction % static_cast<int>(base) % static_cast<int>(dockable)));
         return GetAnimation(faction, VegaRandom::Instance().RandomInt32UpTo(siz - 1), sex);
     } else {
         sex = 0;
@@ -133,7 +128,8 @@ std::vector<Animation *> *FactionUtil::GetRandCommAnimation(int faction, Unit *u
 Animation *FactionUtil::GetRandExplosionAnimation(int whichfaction, std::string &which) {
     if (whichfaction < static_cast<int>(factions.size())) {
         if (factions[whichfaction]->explosion_name.size()) {
-            const int which_explosion = VegaRandom::Instance().RandomInt32UpTo(factions[whichfaction]->explosion_name.size() - 1);
+            const int which_explosion =
+                    VegaRandom::Instance().RandomInt32UpTo(factions[whichfaction]->explosion_name.size() - 1);
             which = factions[whichfaction]->explosion_name[which_explosion];
             return factions[whichfaction]->explosion[which_explosion].get();
         }
@@ -143,9 +139,9 @@ Animation *FactionUtil::GetRandExplosionAnimation(int whichfaction, std::string 
 
 void FactionUtil::LoadFactionPlaylists() {
     for (unsigned int i = 0; i < factions.size(); i++) {
-        string fac = FactionUtil::GetFaction(i);
-        fac += ".m3u";
-        factions[i]->playlist = muzak->Addlist(fac.c_str());
+        string fac             = FactionUtil::GetFaction(i);
+        fac                   += ".m3u";
+        factions[i]->playlist  = muzak->Addlist(fac.c_str());
     }
 }
 
@@ -168,4 +164,3 @@ Texture *FactionUtil::createTexture(const char *tex, const char *tmp, bool force
         return new Texture(tex, tmp, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0, GFXFALSE);
     }
 }
-

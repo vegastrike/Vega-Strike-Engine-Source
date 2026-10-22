@@ -32,13 +32,13 @@
 class CloakFor : public Order {
     float time;
     float maxtime;
-    bool enable;
+    bool  enable;
+
 public:
-    CloakFor(bool enable, float seconds = 0) : Order(CLOAKING, 0), time(0), maxtime(seconds), enable(enable) {
-    }
+    CloakFor(bool enable, float seconds = 0) : Order(CLOAKING, 0), time(0), maxtime(seconds), enable(enable) {}
 
     void Execute();
     ~CloakFor();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_TACTICS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_TACTICS_H

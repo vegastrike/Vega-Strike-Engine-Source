@@ -26,37 +26,38 @@
  */
 
 #include "root_generic/vs_globals.h"
-#include "root_generic/vega_random.h"
-#include <ctime>
-#include <cstdio>
-#include <iostream>
 
-#include "src/vega_cast_utils.h"
-#include <string>
+#include <cstdio>
+#include <ctime>
+#include <iostream>
 #include <locale>
+#include <string>
+
+#include "root_generic/vega_random.h"
+#include "src/vega_cast_utils.h"
 
 /*
  * Globals
  */
-game_data_t g_game;
-ForceFeedback *forcefeedback = nullptr;
-VegaConfig *vs_config = nullptr;
-bool cleanexit = false;
-bool run_only_player_starsystem = true;
+game_data_t    g_game;
+ForceFeedback *forcefeedback              = nullptr;
+VegaConfig    *vs_config                  = nullptr;
+bool           cleanexit                  = false;
+bool           run_only_player_starsystem = true;
 
 FILE *fpread = nullptr;
 
-float     simulation_atom_var = 1.0 / 10.0;
-float     audio_atom_var      = 1.0 / 18.0;
-Mission * mission             = nullptr;
+float    simulation_atom_var = 1.0 / 10.0;
+float    audio_atom_var      = 1.0 / 18.0;
+Mission *mission             = nullptr;
 
 double benchmark = -1.0;
 
-std::locale & GetGlobalLocale() {
+std::locale &GetGlobalLocale() {
     const auto kLocaleNames = {"C.UTF-8", "C.UTF8", "C.utf8", "C", "POSIX", "en_US.UTF-8", "en_US.UTF8", "en_US.utf8"};
-    static std::locale * our_locale = nullptr;
+    static std::locale *our_locale = nullptr;
     if (our_locale == nullptr) {
-        for (const auto & kLocaleName : kLocaleNames) {
+        for (const auto &kLocaleName : kLocaleNames) {
             try {
                 our_locale = new std::locale(kLocaleName);
                 // If we get to this line, that means success! Found a locale we can use
@@ -79,12 +80,12 @@ std::locale & GetGlobalLocale() {
     return *our_locale;
 }
 
-bool STATIC_VARS_DESTROYED = false;
-const char *mission_key = "unit_to_dock_with";
+bool        STATIC_VARS_DESTROYED = false;
+const char *mission_key           = "unit_to_dock_with";
 
 /* for speed test */
-int loop_count = 0;
-double avg_loop = 0;
-int nb_checks = 1;
+int    loop_count = 0;
+double avg_loop   = 0;
+int    nb_checks  = 1;
 double last_check = 1;
-double cur_check = 1;
+double cur_check  = 1;

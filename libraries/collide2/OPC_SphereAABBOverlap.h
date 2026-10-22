@@ -33,16 +33,16 @@ inline_ bool SphereCollider::SphereAABBOverlap(const Point &center, const Point 
 
     float d = 0.0f;
 
-    //find the square of the distance
-    //from the sphere to the box
+    // find the square of the distance
+    // from the sphere to the box
 
-//	float tmp = mCenter.x - center.x;
-//	float s = tmp + extents.x;
+    //	float tmp = mCenter.x - center.x;
+    //	float s = tmp + extents.x;
 
     float tmp, s;
 
     tmp = mCenter.x - center.x;
-    s = tmp + extents.x;
+    s   = tmp + extents.x;
 
     if (s < 0.0f) {
         d += s * s;
@@ -60,7 +60,7 @@ inline_ bool SphereCollider::SphereAABBOverlap(const Point &center, const Point 
     }
 
     tmp = mCenter.y - center.y;
-    s = tmp + extents.y;
+    s   = tmp + extents.y;
 
     if (s < 0.0f) {
         d += s * s;
@@ -78,7 +78,7 @@ inline_ bool SphereCollider::SphereAABBOverlap(const Point &center, const Point 
     }
 
     tmp = mCenter.z - center.z;
-    s = tmp + extents.z;
+    s   = tmp + extents.z;
 
     if (s < 0.0f) {
         d += s * s;

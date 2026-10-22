@@ -30,38 +30,39 @@
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef WIN32
-//this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
-#include <unistd.h>
+// this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can
+// compile without it
+#    include <unistd.h>
 #endif
-#include "cmd/unit_generic.h"
 #include <expat.h>
-#include "root_generic/xml_support.h"
 
-#include "src/vegastrike.h"
-#include "cmd/collection.h"
-#include "cmd/planet.h"
 #include "cmd/ai/order.h"
-#include "mission.h"
-#include "root_generic/easydom.h"
-#include "flightgroup.h"
-#include "root_generic/vs_globals.h"
-#include "gfx_generic/cockpit_generic.h"
-#include "cmd/images.h"
-#include "vegadisk/savegame.h"
-#include "cmd/nebula.h"
-#include "src/gfxlib.h"
-#include "cmd/pilot.h"
-#include "cmd/unit_util.h"
 #include "cmd/asteroid.h"
+#include "cmd/collection.h"
+#include "cmd/images.h"
+#include "cmd/nebula.h"
+#include "cmd/pilot.h"
+#include "cmd/planet.h"
+#include "cmd/unit_generic.h"
+#include "cmd/unit_util.h"
+#include "flightgroup.h"
+#include "gfx_generic/cockpit_generic.h"
+#include "mission.h"
+#include "resource/manifest.h"
+#include "root_generic/easydom.h"
+#include "root_generic/vega_random.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/gfxlib.h"
 #include "src/star_system.h"
 #include "src/universe.h"
+#include "src/vegastrike.h"
 #include "src/vs_logging.h"
-#include "resource/manifest.h"
-#include "root_generic/vega_random.h"
+#include "vegadisk/savegame.h"
 
 extern const vector<string> &ParseDestinations(const string &value);
 
@@ -88,23 +89,23 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
     varInst *viret = NULL;
     trace(node, mode);
     if (mode == SCRIPT_PARSE) {
-        string cmd = node->attr_value("name");
+        string cmd             = node->attr_value("name");
         node->script.method_id = module_unit_map[cmd];
     }
-    callback_module_unit_type method_id = (callback_module_unit_type) node->script.method_id;
+    callback_module_unit_type method_id = (callback_module_unit_type)node->script.method_id;
     if (method_id == CMT_UNIT_getUnit) {
         missionNode *nr_node = getArgument(node, mode, 0);
-        int unit_nr = doIntVar(nr_node, mode);
-        Unit *my_unit = NULL;
+        int          unit_nr = doIntVar(nr_node, mode);
+        Unit        *my_unit = NULL;
         if (mode == SCRIPT_RUN) {
             StarSystem *ssystem = _Universe->scriptStarSystem();
-            un_iter uiter = ssystem->getUnitList().createIterator();
-            my_unit = getIthUnit(uiter, unit_nr);
+            un_iter     uiter   = ssystem->getUnitList().createIterator();
+            my_unit             = getIthUnit(uiter, unit_nr);
         }
-        viret = newVarInst(VI_TEMP);
-        viret->type = VAR_OBJECT;
+        viret             = newVarInst(VI_TEMP);
+        viret->type       = VAR_OBJECT;
         viret->objectname = "unit";
-        viret->object = (void *) my_unit;
+        viret->object     = (void *)my_unit;
         debug(3, node, mode, "unit getUnit: ");
         printVarInst(3, viret);
         return viret;
@@ -113,15 +114,15 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         if (mode == SCRIPT_RUN) {
             my_unit = _Universe->AccessCockpit()->GetParent();
         }
-        viret = newVarInst(VI_TEMP);
-        viret->type = VAR_OBJECT;
+        viret             = newVarInst(VI_TEMP);
+        viret->type       = VAR_OBJECT;
         viret->objectname = "unit";
-        viret->object = (void *) my_unit;
+        viret->object     = (void *)my_unit;
         debug(3, node, mode, "unit getUnit: ");
         printVarInst(3, viret);
         return viret;
     } else if (method_id == CMT_UNIT_getPlayerX) {
-        int which = getIntArg(node, mode, 0);
+        int   which   = getIntArg(node, mode, 0);
         Unit *my_unit = NULL;
         if (mode == SCRIPT_RUN) {
             int j = 0;
@@ -136,40 +137,38 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 }
             }
         }
-        viret = newVarInst(VI_TEMP);
-        viret->type = VAR_OBJECT;
+        viret             = newVarInst(VI_TEMP);
+        viret->type       = VAR_OBJECT;
         viret->objectname = "unit";
-        viret->object = (void *) my_unit;
+        viret->object     = (void *)my_unit;
         debug(3, node, mode, "unit getUnit: ");
         printVarInst(3, viret);
         return viret;
-    } else if (method_id == CMT_UNIT_launch || method_id == CMT_UNIT_launchNebula || method_id == CMT_UNIT_launchPlanet
-            || method_id == CMT_UNIT_launchJumppoint) {
-        missionNode *name_node = getArgument(node, mode, 0);
-        varInst *name_vi = checkObjectExpr(name_node, mode);
+    } else if (method_id == CMT_UNIT_launch || method_id == CMT_UNIT_launchNebula ||
+               method_id == CMT_UNIT_launchPlanet || method_id == CMT_UNIT_launchJumppoint) {
+        missionNode *name_node    = getArgument(node, mode, 0);
+        varInst     *name_vi      = checkObjectExpr(name_node, mode);
         missionNode *faction_node = getArgument(node, mode, 1);
-        varInst *faction_vi = checkObjectExpr(faction_node, mode);
-        missionNode *type_node = getArgument(node, mode, 2);
-        varInst *type_vi = checkObjectExpr(type_node, mode);
-        missionNode *ai_node = getArgument(node, mode, 3);
-        varInst *ai_vi = checkObjectExpr(ai_node, mode);
-        missionNode *nr_node = getArgument(node, mode, 4);
-        int nr_of_ships = checkIntExpr(nr_node, mode);
-        missionNode *nrw_node = getArgument(node, mode, 5);
-        int nr_of_waves = checkIntExpr(nrw_node, mode);
-        varInst *destination_vi;
-        string destinations;
-        string logo_tex;
-        string logo_alp;
+        varInst     *faction_vi   = checkObjectExpr(faction_node, mode);
+        missionNode *type_node    = getArgument(node, mode, 2);
+        varInst     *type_vi      = checkObjectExpr(type_node, mode);
+        missionNode *ai_node      = getArgument(node, mode, 3);
+        varInst     *ai_vi        = checkObjectExpr(ai_node, mode);
+        missionNode *nr_node      = getArgument(node, mode, 4);
+        int          nr_of_ships  = checkIntExpr(nr_node, mode);
+        missionNode *nrw_node     = getArgument(node, mode, 5);
+        int          nr_of_waves  = checkIntExpr(nrw_node, mode);
+        varInst     *destination_vi;
+        string       destinations;
+        string       logo_tex;
+        string       logo_alp;
         if (method_id == CMT_UNIT_launchJumppoint) {
             destination_vi = checkObjectExpr(faction_node, mode);
             if (mode == SCRIPT_RUN) {
-                destinations = *((string *) destination_vi->object);
+                destinations = *((string *)destination_vi->object);
             }
         }
-        QVector pos(getFloatArg(node, mode, 6),
-                getFloatArg(node, mode, 7),
-                getFloatArg(node, mode, 8));
+        QVector pos(getFloatArg(node, mode, 6), getFloatArg(node, mode, 7), getFloatArg(node, mode, 8));
         if (node->subnodes.size() > 9) {
             logo_tex = getStringArgument(node, mode, 9);
             if (node->subnodes.size() > 10) {
@@ -184,25 +183,18 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             } else if (method_id == CMT_UNIT_launchNebula) {
                 clstyp = Vega_UnitType::nebula;
             }
-            string name_string = *((string *) name_vi->object);
-            string faction_string = *((string *) faction_vi->object);
-            string type_string = *((string *) type_vi->object);
-            string ai_string = *((string *) ai_vi->object);
+            string            name_string    = *((string *)name_vi->object);
+            string            faction_string = *((string *)faction_vi->object);
+            string            type_string    = *((string *)type_vi->object);
+            string            ai_string      = *((string *)ai_vi->object);
             CreateFlightgroup cf;
-            cf.fg = Flightgroup::newFlightgroup(name_string,
-                    type_string,
-                    faction_string,
-                    ai_string,
-                    nr_of_ships,
-                    nr_of_waves,
-                    logo_tex,
-                    logo_alp,
-                    this);
+            cf.fg       = Flightgroup::newFlightgroup(name_string, type_string, faction_string, ai_string, nr_of_ships,
+                                                      nr_of_waves, logo_tex, logo_alp, this);
             cf.unittype = CreateFlightgroup::UNIT;
             cf.terrain_nr = -1;
-            cf.waves = nr_of_waves;
-            cf.nr_ships = nr_of_ships;
-            cf.fg->pos = pos;
+            cf.waves      = nr_of_waves;
+            cf.nr_ships   = nr_of_ships;
+            cf.fg->pos    = pos;
             for (int i = 0; i < 3; i++) {
                 cf.rot[i] = 0.0;
             }
@@ -222,56 +214,56 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         deleteVarInst(faction_vi);
         deleteVarInst(type_vi);
         deleteVarInst(ai_vi);
-        viret = newVarInst(VI_TEMP);
-        viret->type = VAR_OBJECT;
+        viret             = newVarInst(VI_TEMP);
+        viret->type       = VAR_OBJECT;
         viret->objectname = "unit";
-        viret->object = (void *) my_unit;
+        viret->object     = (void *)my_unit;
         debug(3, node, mode, "unit getUnit: ");
         return viret;
     } else if (method_id == CMT_UNIT_getRandCargo) {
-        int quantity = getIntArg(node, mode, 0);
+        int    quantity = getIntArg(node, mode, 0);
         string category;
         if (node->subnodes.size() > 1) {
             category = getStringArgument(node, mode, 1);
         }
         varInst *vireturn = NULL;
-        vireturn = call_olist_new(node, mode);
+        vireturn          = call_olist_new(node, mode);
         if (mode == SCRIPT_RUN) {
             Cargo c = Manifest::MPL().GetRandomCargoFromCategory(category, quantity);
 
-            viret = newVarInst(VI_IN_OBJECT);
-            viret->type = VAR_OBJECT;
+            viret             = newVarInst(VI_IN_OBJECT);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "string";
-            viret->object = c.GetNameAddress();
-            ((olist_t *) vireturn->object)->push_back(viret);
-            viret = newVarInst(VI_IN_OBJECT);
-            viret->type = VAR_OBJECT;
+            viret->object     = c.GetNameAddress();
+            ((olist_t *)vireturn->object)->push_back(viret);
+            viret             = newVarInst(VI_IN_OBJECT);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "string";
-            viret->object = const_cast<std::string*>(c.GetCategoryAddress());
-            ((olist_t *) vireturn->object)->push_back(viret);
-            viret = newVarInst(VI_IN_OBJECT);
-            viret->type = VAR_FLOAT;
+            viret->object     = const_cast<std::string *>(c.GetCategoryAddress());
+            ((olist_t *)vireturn->object)->push_back(viret);
+            viret            = newVarInst(VI_IN_OBJECT);
+            viret->type      = VAR_FLOAT;
             viret->float_val = c.GetPrice();
-            ((olist_t *) vireturn->object)->push_back(viret);
-            viret = newVarInst(VI_IN_OBJECT);
-            viret->type = VAR_INT;
+            ((olist_t *)vireturn->object)->push_back(viret);
+            viret          = newVarInst(VI_IN_OBJECT);
+            viret->type    = VAR_INT;
             viret->int_val = quantity;
-            ((olist_t *) vireturn->object)->push_back(viret);
-            viret = newVarInst(VI_IN_OBJECT);
-            viret->type = VAR_FLOAT;
+            ((olist_t *)vireturn->object)->push_back(viret);
+            viret            = newVarInst(VI_IN_OBJECT);
+            viret->type      = VAR_FLOAT;
             viret->float_val = c.GetMass();
-            ((olist_t *) vireturn->object)->push_back(viret);
-            viret = newVarInst(VI_IN_OBJECT);
-            viret->type = VAR_FLOAT;
+            ((olist_t *)vireturn->object)->push_back(viret);
+            viret            = newVarInst(VI_IN_OBJECT);
+            viret->type      = VAR_FLOAT;
             viret->float_val = c.GetVolume();
-            ((olist_t *) vireturn->object)->push_back(viret);
+            ((olist_t *)vireturn->object)->push_back(viret);
         }
         debug(3, node, mode, "unit getRandCargo: ");
         printVarInst(3, vireturn);
         return vireturn;
     } else {
-        varInst *ovi = getObjectArg(node, mode);
-        Unit *my_unit = getUnitObject(node, mode, ovi);
+        varInst *ovi     = getObjectArg(node, mode);
+        Unit    *my_unit = getUnitObject(node, mode, ovi);
         debug(3, node, mode, "unit object: ");
         printVarInst(3, ovi);
         if (method_id == CMT_UNIT_getContainer) {
@@ -279,29 +271,29 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             if (mode == SCRIPT_RUN) {
                 cont = new UnitContainer(my_unit);
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "unitContainer";
-            viret->object = cont;
+            viret->object     = cont;
         } else if (method_id == CMT_UNIT_getUnitFromContainer) {
             Unit *ret = NULL;
             if (mode == SCRIPT_RUN) {
-                ret = ((UnitContainer *) my_unit)->GetUnit();
+                ret = ((UnitContainer *)my_unit)->GetUnit();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "unit";
-            viret->object = ret;
+            viret->object     = ret;
         } else if (method_id == CMT_UNIT_deleteContainer) {
-            UnitContainer *cont = (UnitContainer *) my_unit;
+            UnitContainer *cont = (UnitContainer *)my_unit;
             if (mode == SCRIPT_RUN) {
                 delete cont;
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_getPosition) {
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "olist";
             if (mode == SCRIPT_RUN) {
                 QVector pos = my_unit->Position();
@@ -310,18 +302,18 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             }
         } else if (method_id == CMT_UNIT_getFaction) {
             if (mode == SCRIPT_RUN) {
-                string factionname = FactionUtil::GetFaction(my_unit->faction);
-                varInst *str_vi = call_string_new(node, mode, factionname);
-                viret = str_vi;
+                string   factionname = FactionUtil::GetFaction(my_unit->faction);
+                varInst *str_vi      = call_string_new(node, mode, factionname);
+                viret                = str_vi;
             } else {
                 varInst *str_vi = call_string_new(node, mode, "");
-                viret = str_vi;
+                viret           = str_vi;
             }
         } else if (method_id == CMT_UNIT_getVelocity) {
             if (mode == SCRIPT_RUN) {
                 varInst *vec3_vi = call_olist_new(node, mode);
-                float vel_mag = my_unit->GetVelocity().Magnitude();
-                Vector pos;
+                float    vel_mag = my_unit->GetVelocity().Magnitude();
+                Vector   pos;
                 printf("VELMAG:%f\n", vel_mag);
                 if (fabs(vel_mag) > 10e-6) {
                     pos = my_unit->GetVelocity() / vel_mag;
@@ -333,24 +325,24 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 }
                 varInst *pos_vi;
 
-                pos_vi = newVarInst(VI_TEMP);
-                pos_vi->type = VAR_FLOAT;
+                pos_vi            = newVarInst(VI_TEMP);
+                pos_vi->type      = VAR_FLOAT;
                 pos_vi->float_val = pos.i;
                 call_olist_push_back(node, mode, vec3_vi, pos_vi);
 
-                pos_vi = newVarInst(VI_TEMP);
-                pos_vi->type = VAR_FLOAT;
+                pos_vi            = newVarInst(VI_TEMP);
+                pos_vi->type      = VAR_FLOAT;
                 pos_vi->float_val = pos.j;
                 call_olist_push_back(node, mode, vec3_vi, pos_vi);
 
-                pos_vi = newVarInst(VI_TEMP);
-                pos_vi->type = VAR_FLOAT;
+                pos_vi            = newVarInst(VI_TEMP);
+                pos_vi->type      = VAR_FLOAT;
                 pos_vi->float_val = pos.k;
                 call_olist_push_back(node, mode, vec3_vi, pos_vi);
                 viret = vec3_vi;
             } else {
-                viret = newVarInst(VI_TEMP);
-                viret->type = VAR_OBJECT;
+                viret             = newVarInst(VI_TEMP);
+                viret->type       = VAR_OBJECT;
                 viret->objectname = "olist";
             }
         } else if (method_id == CMT_UNIT_getTarget) {
@@ -358,18 +350,18 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             if (mode == SCRIPT_RUN) {
                 res_unit = my_unit->Target();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "unit";
-            viret->object = res_unit;
+            viret->object     = res_unit;
         } else if (method_id == CMT_UNIT_getName) {
             if (mode == SCRIPT_RUN) {
                 string unit_name;
                 unit_name = my_unit->name;
-                viret = call_string_new(node, mode, unit_name);
+                viret     = call_string_new(node, mode, unit_name);
             } else {
-                viret = newVarInst(VI_TEMP);
-                viret->type = VAR_OBJECT;
+                viret             = newVarInst(VI_TEMP);
+                viret->type       = VAR_OBJECT;
                 viret->objectname = "string";
             }
         } else if (method_id == CMT_UNIT_setName) {
@@ -377,200 +369,200 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             if (mode == SCRIPT_RUN) {
                 my_unit->name = s;
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_getThreat) {
             Unit *res_unit = NULL;
             if (mode == SCRIPT_RUN) {
                 res_unit = my_unit->Threat();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "unit";
-            viret->object = res_unit;
+            viret->object     = res_unit;
         } else if (method_id == CMT_UNIT_setTarget) {
             Unit *other_unit = getUnitArg(node, mode, 1);
             if (mode == SCRIPT_RUN) {
                 my_unit->Target(other_unit);
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_equal) {
             Unit *other_unit = getUnitArg(node, mode, 1);
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_BOOL;
-            viret->bool_val = (my_unit == other_unit); //doesn't dereference anything
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_BOOL;
+            viret->bool_val  = (my_unit == other_unit);  // doesn't dereference anything
         } else if (method_id == CMT_UNIT_getDistance) {
             float dist = 0.0;
-            Unit *un = getUnitArg(node, mode, 1);
+            Unit *un   = getUnitArg(node, mode, 1);
             if (mode == SCRIPT_RUN) {
                 dist = (my_unit->Position() - un->Position()).Magnitude() - my_unit->rSize() - un->rSize();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = dist;
         } else if (method_id == CMT_UNIT_getMinDis) {
             QVector vec3 = getVec3Arg(node, mode, 1);
-            double dist = 0.0;
+            double  dist = 0.0;
             if (mode == SCRIPT_RUN) {
                 dist = (my_unit->Position() - vec3).Magnitude() - my_unit->rSize();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = dist;
         } else if (method_id == CMT_UNIT_getAngle) {
             Unit *other_unit = getUnitArg(node, mode, 1);
-            float angle = 0.0;
+            float angle      = 0.0;
             if (mode == SCRIPT_RUN) {
-                Vector p, q, r;
+                Vector  p, q, r;
                 QVector vectothem = QVector(other_unit->Position() - my_unit->Position()).Normalize();
                 my_unit->GetOrientation(p, q, r);
                 angle = acos(vectothem.Dot(r.Cast()));
                 angle = (angle / PI) * 180.0;
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = angle;
         } else if (method_id == CMT_UNIT_getAngleToPos) {
             QVector other_pos = getVec3Arg(node, mode, 1);
-            double angle = 0.0;
+            double  angle     = 0.0;
             if (mode == SCRIPT_RUN) {
-                Vector p, q, r;
+                Vector  p, q, r;
                 QVector vectothem = QVector(other_pos - my_unit->Position()).Normalize();
                 my_unit->GetOrientation(p, q, r);
                 angle = acos(vectothem.Dot(r.Cast()));
                 angle = (angle / PI) * 180.0;
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = angle;
         } else if (method_id == CMT_UNIT_getFShieldData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
                 res = my_unit->shield.Percent(Shield::front);
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = res;
         } else if (method_id == CMT_UNIT_getRShieldData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
                 res = my_unit->shield.Percent(Shield::right);
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = res;
         } else if (method_id == CMT_UNIT_getLShieldData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
                 res = my_unit->shield.Percent(Shield::left);
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = res;
         } else if (method_id == CMT_UNIT_getBShieldData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
                 res = my_unit->shield.Percent(Shield::back);
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = res;
         } else if (method_id == CMT_UNIT_getEnergyData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
                 res = my_unit->energy.Percent();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = res;
         } else if (method_id == CMT_UNIT_getHullData) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
                 res = my_unit->hull.Percent();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = res;
         } else if (method_id == CMT_UNIT_getRSize) {
             float res = 0.0;
             if (mode == SCRIPT_RUN) {
                 res = my_unit->rSize();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = res;
         } else if (method_id == CMT_UNIT_isStarShip) {
             bool res = false;
             if (mode == SCRIPT_RUN) {
                 res = my_unit->isStarShip();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_BOOL;
+            viret           = newVarInst(VI_TEMP);
+            viret->type     = VAR_BOOL;
             viret->bool_val = res;
         } else if (method_id == CMT_UNIT_isPlanet) {
             bool res = false;
             if (mode == SCRIPT_RUN) {
                 res = my_unit->isPlanet() && !UnitUtil::isSun(my_unit);
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_BOOL;
+            viret           = newVarInst(VI_TEMP);
+            viret->type     = VAR_BOOL;
             viret->bool_val = res;
         } else if (method_id == CMT_UNIT_isSignificant) {
             bool res = false;
             if (mode == SCRIPT_RUN) {
                 res = UnitUtil::isSignificant(my_unit);
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_BOOL;
+            viret           = newVarInst(VI_TEMP);
+            viret->type     = VAR_BOOL;
             viret->bool_val = res;
         } else if (method_id == CMT_UNIT_isSun) {
             bool res = false;
             if (mode == SCRIPT_RUN) {
                 res = UnitUtil::isSun(my_unit);
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_BOOL;
+            viret           = newVarInst(VI_TEMP);
+            viret->type     = VAR_BOOL;
             viret->bool_val = res;
         } else if (method_id == CMT_UNIT_isJumppoint) {
             bool res = false;
             if (mode == SCRIPT_RUN) {
                 res = my_unit->isJumppoint();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_BOOL;
+            viret           = newVarInst(VI_TEMP);
+            viret->type     = VAR_BOOL;
             viret->bool_val = res;
         } else if (method_id == CMT_UNIT_getRelation) {
-            float res = 0.0;
+            float res        = 0.0;
             Unit *other_unit = getUnitArg(node, mode, 1);
             if (mode == SCRIPT_RUN) {
                 res = my_unit->getRelation(other_unit);
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = res;
         } else if (method_id == CMT_UNIT_getCredits) {
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = 0;
             if (mode == SCRIPT_RUN) {
-                viret->float_val = my_unit->credits;  
+                viret->float_val = my_unit->credits;
             }
             return viret;
         } else if (method_id == CMT_UNIT_addCredits) {
             missionNode *nr_node = getArgument(node, mode, 1);
-            float credits = doFloatVar(nr_node, mode);
+            float        credits = doFloatVar(nr_node, mode);
             if (mode == SCRIPT_RUN) {
-               my_unit->credits += credits;
+                my_unit->credits += credits;
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
             return viret;
         } else if (method_id == CMT_UNIT_Jump) {
             if (mode == SCRIPT_RUN) {
                 my_unit->ActivateJumpDrive();
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_getOrientationP) {
 #if 0
@@ -586,27 +578,27 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             if (mode == SCRIPT_RUN) {
                 my_order = my_unit->getAIState();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "order";
-            viret->object = (void *) my_order;
+            viret->object     = (void *)my_order;
         } else if (method_id == CMT_UNIT_correctStarSystem) {
             bool ret = false;
             if (mode == SCRIPT_RUN) {
                 ret = my_unit->InCorrectStarSystem(_Universe->activeStarSystem());
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_BOOL;
+            viret           = newVarInst(VI_TEMP);
+            viret->type     = VAR_BOOL;
             viret->bool_val = ret;
         } else if (method_id == CMT_UNIT_removeFromGame) {
             if (mode == SCRIPT_RUN) {
                 my_unit->Kill();
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_getFgName) {
             if (mode == SCRIPT_RUN) {
-                string fgname;
+                string       fgname;
                 Flightgroup *fg = my_unit->getFlightgroup();
                 if (fg) {
                     fgname = fg->name;
@@ -615,10 +607,10 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                     fgname = "-none-";
                 }
                 varInst *str_vi = call_string_new(node, mode, fgname);
-                viret = str_vi;
+                viret           = str_vi;
             } else {
-                viret = newVarInst(VI_TEMP);
-                viret->type = VAR_OBJECT;
+                viret             = newVarInst(VI_TEMP);
+                viret->type       = VAR_OBJECT;
                 viret->objectname = "string";
             }
         } else if (method_id == CMT_UNIT_getFgLeader) {
@@ -629,10 +621,10 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                     ret_unit = my_unit;
                 }
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "unit";
-            viret->object = (void *) ret_unit;
+            viret->object     = (void *)ret_unit;
         } else if (method_id == CMT_UNIT_setFgLeader) {
             Unit *un = getUnitArg(node, mode, 1);
             if (mode == SCRIPT_RUN) {
@@ -640,7 +632,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                     my_unit->getFlightgroup()->leader.SetUnit(un);
                 }
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_getFgDirective) {
             string fgdir("b");
@@ -655,86 +647,94 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                     my_unit->getFlightgroup()->directive = inp;
                 }
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_getFgSubnumber) {
             int num = 0;
             if (mode == SCRIPT_RUN) {
                 num = my_unit->getFgSubnumber();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_INT;
+            viret          = newVarInst(VI_TEMP);
+            viret->type    = VAR_INT;
             viret->int_val = num;
         } else if (method_id == CMT_UNIT_scanSystem) {
-            if (mode == SCRIPT_RUN)
+            if (mode == SCRIPT_RUN) {
                 assert(0);
-            viret = newVarInst(VI_TEMP);
+            }
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_scannerNearestEnemy) {
             Unit *ret_unit = NULL;
-            if (mode == SCRIPT_RUN)
+            if (mode == SCRIPT_RUN) {
                 assert(0);
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            }
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "unit";
-            viret->object = (void *) ret_unit;
+            viret->object     = (void *)ret_unit;
         } else if (method_id == CMT_UNIT_scannerNearestFriend) {
             Unit *ret_unit = NULL;
-            if (mode == SCRIPT_RUN)
+            if (mode == SCRIPT_RUN) {
                 assert(0);
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            }
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "unit";
-            viret->object = (void *) ret_unit;
+            viret->object     = (void *)ret_unit;
         } else if (method_id == CMT_UNIT_scannerNearestShip) {
             Unit *ret_unit = NULL;
-            if (mode == SCRIPT_RUN)
+            if (mode == SCRIPT_RUN) {
                 assert(0);
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            }
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "unit";
-            viret->object = (void *) ret_unit;
+            viret->object     = (void *)ret_unit;
         } else if (method_id == CMT_UNIT_scannerLeader) {
             Unit *ret_unit = NULL;
-            if (mode == SCRIPT_RUN)
+            if (mode == SCRIPT_RUN) {
                 assert(0);
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            }
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "unit";
-            viret->object = (void *) ret_unit;
+            viret->object     = (void *)ret_unit;
         } else if (method_id == CMT_UNIT_scannerNearestEnemyDist) {
             float ret = 9999999.0;
-            if (mode == SCRIPT_RUN)
+            if (mode == SCRIPT_RUN) {
                 assert(0);
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            }
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = ret;
         } else if (method_id == CMT_UNIT_scannerNearestFriendDist) {
             float ret = 9999999.0;
-            if (mode == SCRIPT_RUN)
+            if (mode == SCRIPT_RUN) {
                 assert(0);
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            }
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = ret;
         } else if (method_id == CMT_UNIT_scannerNearestShipDist) {
             float ret = 9999999.0;
-            if (mode == SCRIPT_RUN)
+            if (mode == SCRIPT_RUN) {
                 assert(0);
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            }
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = ret;
         } else if (method_id == CMT_UNIT_getTurret) {
-            missionNode *nr_node = getArgument(node, mode, 1);
-            int unit_nr = doIntVar(nr_node, mode);
-            Unit *turret_unit = NULL;
+            missionNode *nr_node     = getArgument(node, mode, 1);
+            int          unit_nr     = doIntVar(nr_node, mode);
+            Unit        *turret_unit = NULL;
             if (mode == SCRIPT_RUN) {
                 un_iter uiter = my_unit->getSubUnits();
-                turret_unit = getIthUnit(uiter, unit_nr);
+                turret_unit   = getIthUnit(uiter, unit_nr);
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "unit";
-            viret->object = (void *) turret_unit;
+            viret->object     = (void *)turret_unit;
             debug(3, node, mode, "unit getUnit: ");
             printVarInst(3, viret);
         } else if (method_id == CMT_UNIT_getFgId) {
@@ -747,26 +747,26 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
 
                 viret = str_vi;
             } else {
-                viret = newVarInst(VI_TEMP);
-                viret->type = VAR_OBJECT;
+                viret             = newVarInst(VI_TEMP);
+                viret->type       = VAR_OBJECT;
                 viret->objectname = "string";
             }
         } else if (method_id == CMT_UNIT_removeCargo) {
             string s = getStringArgument(node, mode, 1);
 
-            int quantity = getIntArg(node, mode, 2);
+            int  quantity  = getIntArg(node, mode, 2);
             bool erasezero = getBoolArg(node, mode, 3);
             if (mode == SCRIPT_RUN) {
                 int index = my_unit->cargo_hold.GetIndex(s);
                 if (index != -1) {
                     Cargo removed_cargo = my_unit->cargo_hold.RemoveCargo(my_unit, index, quantity);
-                    quantity = removed_cargo.GetQuantity();
+                    quantity            = removed_cargo.GetQuantity();
                 } else {
                     quantity = 0;
                 }
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_INT;
+            viret          = newVarInst(VI_TEMP);
+            viret->type    = VAR_INT;
             viret->int_val = quantity;
         } else if (method_id == CMT_UNIT_addCargo) {
             Cargo carg;
@@ -788,8 +788,8 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                     carg.SetQuantity(0);
                 }
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_INT;
+            viret          = newVarInst(VI_TEMP);
+            viret->type    = VAR_INT;
             viret->int_val = carg.GetQuantity();
         } else if (method_id == CMT_UNIT_setPosition) {
             double x = getFloatArg(node, mode, 1);
@@ -798,16 +798,16 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
             if (mode == SCRIPT_RUN) {
                 my_unit->SetCurPosition(QVector(x, y, z));
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_upgrade) {
-            string file = getStringArgument(node, mode, 1);
-            double percentage = 0;
-            bool force = true;
-            bool loop_through_mounts = false;
-            int mountoffset = getIntArg(node, mode, 2);
-            int subunitoffset = getIntArg(node, mode, 3);
-            unsigned int siz = node->subnodes.size();
+            string       file                = getStringArgument(node, mode, 1);
+            double       percentage          = 0;
+            bool         force               = true;
+            bool         loop_through_mounts = false;
+            int          mountoffset         = getIntArg(node, mode, 2);
+            int          subunitoffset       = getIntArg(node, mode, 3);
+            unsigned int siz                 = node->subnodes.size();
             if (siz > 4) {
                 force = getBoolArg(node, mode, 4);
                 if (siz > 5) {
@@ -815,18 +815,18 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 }
             }
             if (mode == SCRIPT_RUN) {
-                printf("upgrading %s %s %d %d %s\n", my_unit->name.get().c_str(),
-                        file.c_str(), mountoffset, subunitoffset, loop_through_mounts ? "true" : "false");
+                printf("upgrading %s %s %d %d %s\n", my_unit->name.get().c_str(), file.c_str(), mountoffset,
+                       subunitoffset, loop_through_mounts ? "true" : "false");
                 fflush(stdout);
                 percentage = my_unit->Upgrade(file, mountoffset, subunitoffset, force, loop_through_mounts);
                 my_unit->SetTurretAI();
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_FLOAT;
+            viret            = newVarInst(VI_TEMP);
+            viret->type      = VAR_FLOAT;
             viret->float_val = percentage;
         } else if (method_id == CMT_UNIT_incrementCargo) {
             double percentage_change = getFloatArg(node, mode, 1);
-            int quantity = getIntArg(node, mode, 2);
+            int    quantity          = getIntArg(node, mode, 2);
             if (mode == SCRIPT_RUN) {
                 if (my_unit->numCargo() > 0) {
                     unsigned int index;
@@ -835,11 +835,12 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                     c.SetQuantity(quantity);
                     if (my_unit->cargo_hold.CanAddCargo(c)) {
                         my_unit->cargo_hold.AddCargo(my_unit, c);
-                        my_unit->cargo_hold.GetCargo(index).SetPrice(my_unit->cargo_hold.GetCargo(index).GetPrice() * percentage_change);
+                        my_unit->cargo_hold.GetCargo(index).SetPrice(my_unit->cargo_hold.GetCargo(index).GetPrice() *
+                                                                     percentage_change);
                     }
                 }
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_decrementCargo) {
             float percentage_change;
@@ -848,66 +849,67 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 if (my_unit->numCargo() > 0) {
                     unsigned int index;
                     index = VegaRandom::Instance().RandomSizeTLessThan(my_unit->numCargo());
-                    // FIXME: It doesn't look like this code actually decrements cargo like it's supposed to -- Stephen G. Tuggy 2026-04-26
-                    // if (my_unit->cargo_hold.RemoveCargo(index, 1, false)) {
-                    //     my_unit->cargo_hold.GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() * percentagechange);
+                    // FIXME: It doesn't look like this code actually decrements cargo like it's supposed to -- Stephen
+                    // G. Tuggy 2026-04-26 if (my_unit->cargo_hold.RemoveCargo(index, 1, false)) {
+                    //     my_unit->cargo_hold.GetCargo(index).SetPrice(my_unit->GetCargo(index).GetPrice() *
+                    //     percentagechange);
                     // }
                 }
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_getSaveData) {
             std::string magic_num;
-            void *my_obj = NULL;
-            magic_num = getStringArgument(node, mode, 1);
+            void       *my_obj = NULL;
+            magic_num          = getStringArgument(node, mode, 1);
             if (mode == SCRIPT_RUN) {
                 Cockpit *tmp;
                 if ((tmp = _Universe->isPlayerStarship(my_unit))) {
-                    my_obj = (void *) &tmp->savegame->getMissionData(magic_num);
+                    my_obj = (void *)&tmp->savegame->getMissionData(magic_num);
                 }
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_OBJECT;
+            viret             = newVarInst(VI_TEMP);
+            viret->type       = VAR_OBJECT;
             viret->objectname = "olist";
-            viret->object = my_obj;
+            viret->object     = my_obj;
         } else if (method_id == CMT_UNIT_toxml) {
             if (mode == SCRIPT_RUN) {
                 call_unit_toxml(node, mode, ovi);
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_switchFg) {
             string arg = getStringArgument(node, mode, 1);
             if (mode == SCRIPT_RUN) {
-                string type = my_unit->name;
-                int nr_waves_left = 0;
-                int nr_ships = 1;
-                string order("default");
+                string       type          = my_unit->name;
+                int          nr_waves_left = 0;
+                int          nr_ships      = 1;
+                string       order("default");
                 Flightgroup *fg = my_unit->getFlightgroup();
                 if (fg) {
-                    type = fg->type;
+                    type          = fg->type;
                     nr_waves_left = fg->nr_waves_left;
-                    nr_ships = 1;
+                    nr_ships      = 1;
                     fg->Decrement(my_unit);
                     order = fg->ainame;
                 }
-                fg = Flightgroup::newFlightgroup(arg, type, FactionUtil::GetFaction(
-                        my_unit->faction), order, nr_ships, nr_waves_left, "", "", this);
+                fg = Flightgroup::newFlightgroup(arg, type, FactionUtil::GetFaction(my_unit->faction), order, nr_ships,
+                                                 nr_waves_left, "", "", this);
                 my_unit->SetFg(fg, fg->nr_ships_left - 1);
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_frameOfReference) {
             Unit *other_unit = getUnitArg(node, mode, 1);
             if (mode == SCRIPT_RUN) {
                 my_unit->VelocityReference(other_unit);
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_UNIT_communicateTo) {
-            Unit *other_unit = getUnitArg(node, mode, 1);
-            float mood = getFloatArg(node, mode, 2);
-            unsigned char sex = 0;
+            Unit         *other_unit = getUnitArg(node, mode, 1);
+            float         mood       = getFloatArg(node, mode, 2);
+            unsigned char sex        = 0;
             if (mode == SCRIPT_RUN) {
                 Cockpit *tmp;
                 if ((tmp = _Universe->isPlayerStarship(my_unit))) {
@@ -917,8 +919,8 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                     }
                 }
             }
-            viret = newVarInst(VI_TEMP);
-            viret->type = VAR_INT;
+            viret          = newVarInst(VI_TEMP);
+            viret->type    = VAR_INT;
             viret->int_val = sex;
         } else if (method_id == CMT_UNIT_commAnimation) {
             string anim = getStringArgument(node, mode, 1);
@@ -927,7 +929,7 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
                 if ((tmp = _Universe->isPlayerStarship(my_unit))) {
                 }
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else {
             fatalError(node, mode, "no such method " + node->script.name);
@@ -941,42 +943,40 @@ varInst *Mission::call_unit(missionNode *node, int mode) {
         VS_LOG_AND_FLUSH(trace, "undel1");
 #endif
         return viret;
-    }     //else (objects)
+    }  // else (objects)
 #ifdef ORDERDEBUG
     VS_LOG_AND_FLUSH(trace, (boost::format("endcallun%1$x") % this));
 #endif
-    return NULL;     //never reach
+    return NULL;  // never reach
 }
 
 extern BLENDFUNC parse_alpha(const char *);
 
 Unit *Mission::call_unit_launch(CreateFlightgroup *fg, Vega_UnitType type, const string &destinations) {
-    int faction_nr = FactionUtil::GetFactionIndex(fg->fg->faction);
-    Unit **units = new Unit *[fg->nr_ships];
-    int u;
-    Unit *par = _Universe->AccessCockpit()->GetParent();
-    CollideMap::iterator metahint[2] = {
-            _Universe->scriptStarSystem()->collide_map[Unit::UNIT_ONLY]->begin(),
-            _Universe->scriptStarSystem()->collide_map[Unit::UNIT_BOLT]->begin()
-    };
-    CollideMap::iterator *hint = metahint;
-    if (par && !is_null(par->location[Unit::UNIT_ONLY]) && !is_null(par->location[Unit::UNIT_BOLT])
-            && par->activeStarSystem == _Universe->scriptStarSystem()) {
+    int                   faction_nr = FactionUtil::GetFactionIndex(fg->fg->faction);
+    Unit                **units      = new Unit *[fg->nr_ships];
+    int                   u;
+    Unit                 *par         = _Universe->AccessCockpit()->GetParent();
+    CollideMap::iterator  metahint[2] = {_Universe->scriptStarSystem()->collide_map[Unit::UNIT_ONLY]->begin(),
+                                         _Universe->scriptStarSystem()->collide_map[Unit::UNIT_BOLT]->begin()};
+    CollideMap::iterator *hint        = metahint;
+    if (par && !is_null(par->location[Unit::UNIT_ONLY]) && !is_null(par->location[Unit::UNIT_BOLT]) &&
+        par->activeStarSystem == _Universe->scriptStarSystem()) {
         hint = par->location;
     }
     for (u = 0; u < fg->nr_ships; u++) {
         Unit *my_unit;
         if (type == Vega_UnitType::planet) {
-            float radius = 1;
-            char *tex = strdup(fg->fg->type.c_str());
-            char *nam = strdup(fg->fg->type.c_str());
-            char *bsrc = strdup(fg->fg->type.c_str());
-            char *bdst = strdup(fg->fg->type.c_str());
+            float radius     = 1;
+            char *tex        = strdup(fg->fg->type.c_str());
+            char *nam        = strdup(fg->fg->type.c_str());
+            char *bsrc       = strdup(fg->fg->type.c_str());
+            char *bdst       = strdup(fg->fg->type.c_str());
             char *citylights = strdup(fg->fg->type.c_str());
-            tex[0] = '\0';
-            bsrc[0] = '\0';             //have at least 1 char
-            bdst[0] = '\0';
-            citylights[0] = '\0';
+            tex[0]           = '\0';
+            bsrc[0]          = '\0';  // have at least 1 char
+            bdst[0]          = '\0';
+            citylights[0]    = '\0';
             GFXMaterial mat;
             GFXGetMaterial(0, mat);
             BLENDFUNC s = ONE;
@@ -987,25 +987,21 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, Vega_UnitType type, const
             if (bsrc[0] != '\0') {
                 s = parse_alpha(bsrc);
             }
-            my_unit = new Planet(QVector(0, 0, 0), QVector(0, 0, 0), 0, Vector(0, 0, 0),
-                    0, 0, radius, tex, "", "", s,
-                    d, ParseDestinations(destinations),
-                    QVector(0, 0, 0), nullptr, mat,
-                    vector<GFXLightLocal>(), faction_nr, nam);
+            my_unit = new Planet(QVector(0, 0, 0), QVector(0, 0, 0), 0, Vector(0, 0, 0), 0, 0, radius, tex, "", "", s,
+                                 d, ParseDestinations(destinations), QVector(0, 0, 0), nullptr, mat,
+                                 vector<GFXLightLocal>(), faction_nr, nam);
             free(bsrc);
             free(bdst);
             free(tex);
             free(nam);
             free(citylights);
         } else if (type == Vega_UnitType::nebula) {
-            my_unit = new Nebula(
-                    fg->fg->type.c_str(), false, faction_nr, fg->fg, u + fg->fg->nr_ships - fg->nr_ships);
+            my_unit = new Nebula(fg->fg->type.c_str(), false, faction_nr, fg->fg, u + fg->fg->nr_ships - fg->nr_ships);
         } else if (type == Vega_UnitType::asteroid) {
-            my_unit = new Asteroid(
-                    fg->fg->type.c_str(), faction_nr, fg->fg, u + fg->fg->nr_ships - fg->nr_ships, .01);
+            my_unit = new Asteroid(fg->fg->type.c_str(), faction_nr, fg->fg, u + fg->fg->nr_ships - fg->nr_ships, .01);
         } else {
-            my_unit = new Unit(fg->fg->type.c_str(), false, faction_nr, string(
-                    ""), fg->fg, u + fg->fg->nr_ships - fg->nr_ships);
+            my_unit = new Unit(fg->fg->type.c_str(), false, faction_nr, string(""), fg->fg,
+                               u + fg->fg->nr_ships - fg->nr_ships);
         }
         units[u] = my_unit;
     }
@@ -1041,9 +1037,9 @@ Unit *Mission::call_unit_launch(CreateFlightgroup *fg, Vega_UnitType type, const
 
 void Mission::findNextEnemyTarget(Unit *my_unit) {
     StarSystem *ssystem = _Universe->scriptStarSystem();
-    un_iter uiter(ssystem->getUnitList().createIterator());
-    Unit *unit;
-    Unit *target_unit = NULL;
+    un_iter     uiter(ssystem->getUnitList().createIterator());
+    Unit       *unit;
+    Unit       *target_unit = NULL;
     for (; (unit = *uiter); ++uiter) {
         if (my_unit->getRelation(unit) < 0.0) {
             target_unit = *uiter;
@@ -1064,4 +1060,3 @@ static Unit *getIthUnit(un_iter uiter, int unit_nr) {
     }
     return NULL;
 }
-

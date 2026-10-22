@@ -25,30 +25,29 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-//#include <cassert>
+// #include <cassert>
 
 #include "cmd/drawable.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "gfx_generic/mesh.h"
-#include "gfx_generic/quaternion.h"
-#include "gfx_generic/lerp.h"
-#include "gfx/occlusion.h"
-
-#include "cmd/unit_generic.h"
-#include "root_generic/vs_globals.h"
-#include "gfx/point_to_cam.h"
-#include "gfx/halo_system.h"
-#include "root_generic/options.h"
-#include "cmd/weapon_info.h"
-#include "cmd/beam.h"
-#include "cmd/unit_csv.h"
-#include "src/universe_util.h"
 
 #include <boost/algorithm/string.hpp>
 
+#include "cmd/beam.h"
+#include "cmd/unit_csv.h"
+#include "cmd/unit_generic.h"
+#include "cmd/weapon_info.h"
+#include "gfx/halo_system.h"
+#include "gfx/occlusion.h"
+#include "gfx/point_to_cam.h"
+#include "gfx_generic/lerp.h"
+#include "gfx_generic/mesh.h"
+#include "gfx_generic/quaternion.h"
+#include "root_generic/options.h"
 #include "root_generic/vega_random.h"
+#include "root_generic/vs_globals.h"
+#include "src/universe_util.h"
 #include "src/vega_cast_utils.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
 // Required definition of static variable
 std::string Drawable::root;
@@ -63,18 +62,17 @@ inline static float perspectiveFactor(float d) {
     }
 }
 
-Drawable::Drawable() :
-        halos(new HaloSystem()),
-        animatedMesh(true),
-        activeAnimation(0),
-        timeperframe(3.0),
-        done(true),
-        activeMesh(0),
-        nextactiveMesh(1),
-        infiniteLoop(true),
-        loopCount(0),
-        curtime(0.0) {
-}
+Drawable::Drawable()
+    : halos(new HaloSystem()),
+      animatedMesh(true),
+      activeAnimation(0),
+      timeperframe(3.0),
+      done(true),
+      activeMesh(0),
+      nextactiveMesh(1),
+      infiniteLoop(true),
+      loopCount(0),
+      curtime(0.0) {}
 
 Drawable::~Drawable() {
     for (Mesh *mesh : meshdata) {
@@ -87,24 +85,23 @@ Drawable::~Drawable() {
     clear();
 }
 
-bool Drawable::DrawableInit(const char *filename, int faction,
-        Flightgroup *flightgrp, const char *animationExt) {
-    string fnam(filename);
-    string::size_type pos = fnam.find('.');
-    string anifilename = fnam.substr(0, pos);
+bool Drawable::DrawableInit(const char *filename, int faction, Flightgroup *flightgrp, const char *animationExt) {
+    string            fnam(filename);
+    string::size_type pos         = fnam.find('.');
+    string            anifilename = fnam.substr(0, pos);
 
     if (animationExt) {
         anifilename += string("_") + string(animationExt);
     }
 
-    std::vector<Mesh *> *meshes = new vector<Mesh *>();
-    int i = 1;
-    char count[30] = "1";
-    string dir = anifilename;
+    std::vector<Mesh *> *meshes    = new vector<Mesh *>();
+    int                  i         = 1;
+    char                 count[30] = "1";
+    string               dir       = anifilename;
     while (true) {
         sprintf(count, "%d", i);
         string unit_name = anifilename;
-        boost::algorithm::to_lower(unit_name); //toLowerCase(anifilename) + "_";
+        boost::algorithm::to_lower(unit_name);  // toLowerCase(anifilename) + "_";
 
         if (i < 10) {
             unit_name += "0";
@@ -112,24 +109,25 @@ bool Drawable::DrawableInit(const char *filename, int faction,
         if (i < 100) {
             unit_name += "0";
         }
-        if (i < 1000) {
+        if (i < 1'000) {
             unit_name += "0";
         }
-        if (i < 10000) {
+        if (i < 10'000) {
             unit_name += "0";
         }
-        if (i < 100000) {
+        if (i < 100'000) {
             unit_name += "0";
         }
 
-        unit_name += count;
-        string path = dir + "/" + unit_name + ".bfxm";
+        unit_name   += count;
+        string path  = dir + "/" + unit_name + ".bfxm";
         if (VSFileSystem::FileExistsData(path, VSFileSystem::MeshFile) != -1) {
             Mesh *m = Mesh::LoadMesh(path.c_str(), Vector(1, 1, 1), faction, flightgrp);
             meshes->push_back(m);
-            #ifdef DEBUG_MESH_ANI
-            VS_LOG(debug, (boost::format("Animated Mesh: %1% loaded - with: %2% vertices.") % path % m->getVertexList()->GetNumVertices()));
-            #endif
+#ifdef DEBUG_MESH_ANI
+            VS_LOG(debug, (boost::format("Animated Mesh: %1% loaded - with: %2% vertices.") % path %
+                           m->getVertexList()->GetNumVertices()));
+#endif
         } else {
             break;
         }
@@ -137,12 +135,12 @@ bool Drawable::DrawableInit(const char *filename, int faction,
     }
 
     if (!meshes->empty()) {
-        //FIXME: an animation is created only for the first submesh
+        // FIXME: an animation is created only for the first submesh
         string animationName;
         sprintf(count, "%lu", static_cast<unsigned long>(meshes->size()));
         if (!animationExt) {
-            animationName =
-                    string(count); //if there is no extension given, the animations are called by their load order, 1, 2 ,3 ....10..
+            animationName = string(count);  // if there is no extension given, the animations are called by their load
+                                            // order, 1, 2 ,3 ....10..
         } else {
             animationName = animationExt;
         }
@@ -151,11 +149,10 @@ bool Drawable::DrawableInit(const char *filename, int faction,
         int numFrames = meshes->size();
         ++Drawable::unitCount;
         sprintf(count, "%u", unitCount);
-        uniqueUnitName = drawableGetName() + string(count);
+        uniqueUnitName        = drawableGetName() + string(count);
         Units[uniqueUnitName] = vega_dynamic_cast_ptr<Unit>(this);
-        VS_LOG(info,
-                (boost::format("Animation data loaded for unit: %1%, named %2% - with: %3% frames.") % string(filename)
-                        % uniqueUnitName % numFrames));
+        VS_LOG(info, (boost::format("Animation data loaded for unit: %1%, named %2% - with: %3% frames.") %
+                      string(filename) % uniqueUnitName % numFrames));
         return true;
     } else {
         delete meshes;
@@ -165,71 +162,68 @@ bool Drawable::DrawableInit(const char *filename, int faction,
 
 extern double interpolation_blend_factor;
 extern double saved_interpolation_blend_factor;
-extern bool cam_setup_phase;
-extern int cloakVal(int cloakint, int cloakminint, int cloakrateint, bool cloakglass); //short fix?
-extern double calc_blend_factor(double frac,
-        unsigned int priority,
-        unsigned int when_it_will_be_simulated,
-        unsigned int cur_simulation_frame);
+extern bool   cam_setup_phase;
+extern int    cloakVal(int cloakint, int cloakminint, int cloakrateint, bool cloakglass);  // short fix?
+extern double calc_blend_factor(double frac, unsigned int priority, unsigned int when_it_will_be_simulated,
+                                unsigned int cur_simulation_frame);
 
 void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    //Quick shortcut for camera setup phase
+    // Quick shortcut for camera setup phase
     bool myparent = (unit == _Universe->AccessCockpit()->GetParent());
 
     Matrix invview;
 
-    unit->cumulative_transformation = linear_interpolate(unit->prev_physical_state,
-                                                         unit->curr_physical_state,
-                                                         interpolation_blend_factor);
+    unit->cumulative_transformation =
+            linear_interpolate(unit->prev_physical_state, unit->curr_physical_state, interpolation_blend_factor);
     unit->cumulative_transformation.Compose(parent, parentMatrix);
     unit->cumulative_transformation.to_matrix(unit->cumulative_transformation_matrix);
 
-    Matrix* ctm = GetCumulativeTransformationMatrix(unit, parentMatrix, invview);
-    Transformation* ct = &unit->cumulative_transformation;
+    Matrix         *ctm = GetCumulativeTransformationMatrix(unit, parentMatrix, invview);
+    Transformation *ct  = &unit->cumulative_transformation;
 
 #ifdef PERFRAMESOUND
-    AUDAdjustSound( sound.engine, cumulative_transformation.position, GetVelocity() );
+    AUDAdjustSound(sound.engine, cumulative_transformation.position, GetVelocity());
 #endif
 
     if ((unit->Destroyed()) && (!cam_setup_phase)) {
         unit->Explode(true, GetElapsedTime());
     }
 
-    float damagelevel = 1.0f;
-    unsigned char chardamage = 0;
+    float         damagelevel = 1.0f;
+    unsigned char chardamage  = 0;
 
     // We might need to scale rSize, this "average scale" takes the transform matrix into account
     float avgscale = 1.0f;
 
-    bool On_Screen = false;
-    float Apparent_Size = 0.0f;
+    bool   On_Screen     = false;
+    float  Apparent_Size = 0.0f;
     Matrix wmat;
 
     if (!cam_setup_phase) {
         // Following stuff is only needed in actual drawing phase
         if (unit->hull.Damaged()) {
             damagelevel = unit->hull.Percent();
-            chardamage = (255 - static_cast<unsigned char>(damagelevel * 255));
+            chardamage  = (255 - static_cast<unsigned char>(damagelevel * 255));
         }
         avgscale = sqrt((ctm->getP().MagnitudeSquared() + ctm->getR().MagnitudeSquared()) * 0.5);
-        wmat = unit->WarpMatrix(*ctm);
+        wmat     = unit->WarpMatrix(*ctm);
     }
 
     if ((!(unit->invisible & unit->INVISUNIT)) && ((!(unit->invisible & unit->INVISCAMERA)) || (!myparent))) {
         bool Unit_On_Screen = false;
         if (!cam_setup_phase) {
-            Camera *camera = _Universe->AccessCamera();
+            Camera *camera    = _Universe->AccessCamera();
             QVector camerapos = camera->GetPosition();
 
             float minmeshradius =
                     (camera->GetVelocity().Magnitude() + unit->Velocity.Magnitude()) * simulation_atom_var;
 
             const unsigned int numKeyFrames = unit->graphicOptions.NumAnimationPoints;
-            const unsigned int n = nummesh();
+            const unsigned int n            = nummesh();
             for (unsigned int i = 0; i <= n; ++i) {
-                //NOTE LESS THAN OR EQUALS...to cover shield mesh
+                // NOTE LESS THAN OR EQUALS...to cover shield mesh
                 if (this->meshdata[i] == nullptr) {
                     continue;
                 }
@@ -249,13 +243,14 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
                 }
                 QVector TransformedPosition = Transform(*ctm, meshdata[i]->Position().Cast());
 
-                //d can be used for level of detail shit
-                float mSize = meshdata[i]->rSize() * avgscale;
-                double d = (TransformedPosition - camerapos).Magnitude();
-                double rd = d - mSize;
-                float pixradius = Apparent_Size = mSize * perspectiveFactor(
-                        (rd < configuration().graphics.znear_flt) ? configuration().graphics.znear_flt : rd);
-                float lod = pixradius * g_game.detaillevel;
+                // d can be used for level of detail shit
+                float  mSize     = meshdata[i]->rSize() * avgscale;
+                double d         = (TransformedPosition - camerapos).Magnitude();
+                double rd        = d - mSize;
+                float  pixradius = Apparent_Size = mSize * perspectiveFactor((rd < configuration().graphics.znear_flt)
+                                                                                     ? configuration().graphics.znear_flt
+                                                                                     : rd);
+                float  lod                       = pixradius * g_game.detaillevel;
                 if (meshdata[i]->getBlendDst() == ZERO) {
                     if (unit->getUnitType() == Vega_UnitType::planet && pixradius > 10) {
                         Occlusion::addOccluder(TransformedPosition, mSize, true);
@@ -264,59 +259,59 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
                     }
                 }
                 if (lod >= 0.5 && pixradius >= 2.5) {
-                    double frustd = GFXSphereInFrustum(
-                            TransformedPosition,
-                            minmeshradius + mSize);
+                    double frustd = GFXSphereInFrustum(TransformedPosition, minmeshradius + mSize);
                     if (frustd) {
-                        //if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
+                        // if the radius is at least half a pixel at detail 1 (equivalent to pixradius >= 0.5 / detail)
                         float currentFrame = meshdata[i]->getCurrentFrame();
-                        this->meshdata[i]->Draw(lod, wmat, d, unit->cloak,
+                        this->meshdata[i]->Draw(
+                                lod, wmat, d, unit->cloak,
                                 (camera->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0,
-                                chardamage); //cloaking and nebula
-                        On_Screen = true;
-                        unsigned int numAnimFrames = 0;
+                                chardamage);  // cloaking and nebula
+                        On_Screen                         = true;
+                        unsigned int        numAnimFrames = 0;
                         static const string default_animation;
-                        if (this->meshdata[i]->getFramesPerSecond()
-                                && ((numAnimFrames = this->meshdata[i]->getNumAnimationFrames(default_animation)))) {
-                            float currentprogress = floor(
-                                    this->meshdata[i]->getCurrentFrame() * numKeyFrames / static_cast<float>(numAnimFrames));
-                            if (numKeyFrames
-                                    && floor(currentFrame * numKeyFrames / static_cast<float>(numAnimFrames)) != currentprogress) {
+                        if (this->meshdata[i]->getFramesPerSecond() &&
+                            ((numAnimFrames = this->meshdata[i]->getNumAnimationFrames(default_animation)))) {
+                            float currentprogress = floor(this->meshdata[i]->getCurrentFrame() * numKeyFrames /
+                                                          static_cast<float>(numAnimFrames));
+                            if (numKeyFrames && floor(currentFrame * numKeyFrames /
+                                                      static_cast<float>(numAnimFrames)) != currentprogress) {
                                 unit->graphicOptions.Animating = 0;
-                                meshdata[i]->setCurrentFrame(
-                                        .1 + currentprogress * numAnimFrames / static_cast<float>(numKeyFrames));
+                                meshdata[i]->setCurrentFrame(.1 + currentprogress * numAnimFrames /
+                                                                          static_cast<float>(numKeyFrames));
                             } else if (!unit->graphicOptions.Animating) {
-                                meshdata[i]->setCurrentFrame(currentFrame);                                 //dont' budge
+                                meshdata[i]->setCurrentFrame(currentFrame);  // dont' budge
                             }
                         }
                     }
                 }
             }
 
-            Unit_On_Screen = On_Screen || !!GFXSphereInFrustum(
-                    ct->position,
-                    minmeshradius + unit->rSize());
+            Unit_On_Screen = On_Screen || !!GFXSphereInFrustum(ct->position, minmeshradius + unit->rSize());
         } else {
             Unit_On_Screen = true;
         }
         if (Unit_On_Screen && unit->hasSubUnits()) {
-            Unit *un;
-            double backup = interpolation_blend_factor;
-            int cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
+            Unit  *un;
+            double backup        = interpolation_blend_factor;
+            int    cur_sim_frame = _Universe->activeStarSystem()->getCurrentSimFrame();
             for (un_iter iter = unit->getSubUnits(); (un = *iter); ++iter) {
                 const float sim_atom_backup = simulation_atom_var;
-                //if (sim_atom_backup != SIMULATION_ATOM) {
-                //    VS_LOG(debug, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): sim_atom as backed up != SIMULATION_ATOM: %1%") % sim_atom_backup));
-                //}
+                // if (sim_atom_backup != SIMULATION_ATOM) {
+                //     VS_LOG(debug, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix
+                //     &parentMatrix ): sim_atom as backed up != SIMULATION_ATOM: %1%") % sim_atom_backup));
+                // }
                 if (unit->sim_atom_multiplier && un->sim_atom_multiplier) {
-                    //VS_LOG(trace, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
-                    simulation_atom_var = simulation_atom_var * un->sim_atom_multiplier / static_cast<float>(unit->sim_atom_multiplier);
-                    //VS_LOG(trace, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix &parentMatrix ): simulation_atom_var as multiplied = %1%") % simulation_atom_var));
+                    // VS_LOG(trace, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix
+                    // &parentMatrix ): simulation_atom_var as backed up  = %1%") % simulation_atom_var));
+                    simulation_atom_var = simulation_atom_var * un->sim_atom_multiplier /
+                                          static_cast<float>(unit->sim_atom_multiplier);
+                    // VS_LOG(trace, (boost::format("void GameUnit::Draw( const Transformation &parent, const Matrix
+                    // &parentMatrix ): simulation_atom_var as multiplied = %1%") % simulation_atom_var));
                 }
-                interpolation_blend_factor = calc_blend_factor(saved_interpolation_blend_factor,
-                        un->sim_atom_multiplier,
-                        un->cur_sim_queue_slot,
-                        cur_sim_frame);
+                interpolation_blend_factor =
+                        calc_blend_factor(saved_interpolation_blend_factor, un->sim_atom_multiplier,
+                                          un->cur_sim_queue_slot, cur_sim_frame);
                 (un)->Draw(*ct, *ctm);
 
                 simulation_atom_var = sim_atom_backup;
@@ -324,8 +319,8 @@ void Drawable::Draw(const Transformation &parent, const Matrix &parentMatrix) {
             interpolation_blend_factor = backup;
         }
     } else {
-        _Universe->AccessCockpit()->SetupViewPort();         ///this is the final, smoothly calculated cam
-        //UpdateHudMatrix();
+        _Universe->AccessCockpit()->SetupViewPort();  /// this is the final, smoothly calculated cam
+        // UpdateHudMatrix();
     }
     /***DEBUGGING cosAngleFromMountTo
      *  UnitCollection *dL = _Universe->activeStarSystem()->getUnitList();
@@ -358,7 +353,7 @@ void Drawable::AnimationStep() {
     if ((!this->isContinuousLoop()) && (loopCount == 0)) {
         return;
     }
-    //copy reference to data
+    // copy reference to data
     meshdata.at(0) = vecAnimations.at(activeAnimation)->at(activeMesh);
 
     Draw();
@@ -386,40 +381,39 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
 
     static const void *rootunit = nullptr;
     if (rootunit == nullptr) {
-        rootunit = static_cast<const void*>(this);
+        rootunit = static_cast<const void *>(this);
     }
     unsigned char chardamage = 0;
     if (unit->hull.Damaged()) {
         float damagelevel = 1.0F;
-        damagelevel = unit->hull.Percent();
-        chardamage = (255 - static_cast<unsigned char>(damagelevel * 255));
+        damagelevel       = unit->hull.Percent();
+        chardamage        = (255 - static_cast<unsigned char>(damagelevel * 255));
     }
 #ifdef VARIABLE_LENGTH_PQR
-    const float  vlpqrScaleFactor = SizeScaleFactor;
+    const float vlpqrScaleFactor = SizeScaleFactor;
 #else
     constexpr float vlpqrScaleFactor = 1.0F;
 #endif
     unsigned int i;
-    Matrix mat(mato);
+    Matrix       mat(mato);
     if (unit->graphicOptions.FaceCamera) {
-        Vector p, q, r;
+        Vector  p, q, r;
         QVector pos(mato.p);
-        float wid, hei;
+        float   wid, hei;
         CalculateOrientation(pos, p, q, r, wid, hei, 0, false, &mat);
         pos = mato.p;
         VectorAndPositionToMatrix(mat, p, q, r, pos);
     }
 
     for (i = 0; i <= this->nummesh(); ++i) {
-        //NOTE LESS THAN OR EQUALS...to cover shield mesh
+        // NOTE LESS THAN OR EQUALS...to cover shield mesh
         if (this->meshdata[i] == nullptr) {
             continue;
         }
-        QVector TransformedPosition = Transform(mat,
-                this->meshdata[i]->Position().Cast());
-        float d = GFXSphereInFrustum(TransformedPosition, this->meshdata[i]->clipRadialSize() * vlpqrScaleFactor);
-        if (d) {          //d can be used for level of detail
-            //this->meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
+        QVector TransformedPosition = Transform(mat, this->meshdata[i]->Position().Cast());
+        float   d = GFXSphereInFrustum(TransformedPosition, this->meshdata[i]->clipRadialSize() * vlpqrScaleFactor);
+        if (d) {  // d can be used for level of detail
+            // this->meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
             this->meshdata[i]->Draw(lod, mat, d, unit->cloak);
         }
     }
@@ -443,9 +437,9 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     if (cmas == 0) {
         cmas = 1;
     }
-    Vector Scale(1, 1, 1);         //Now, HaloSystem handles that
+    Vector       Scale(1, 1, 1);  // Now, HaloSystem handles that
     unsigned int nummounts = unit->getNumMounts();
-    Matrix wmat = WarpMatrix(mat);
+    Matrix       wmat      = WarpMatrix(mat);
     for (i = 0; i < nummounts; ++i) {
         Mount *mahnt = &unit->mounts[i];
         if (configuration().graphics.draw_weapons) {
@@ -457,25 +451,29 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
                     Matrix mmat;
                     mountLocation.to_matrix(mmat);
                     if (GFXSphereInFrustum(mountLocation.position, gun->rSize() * vlpqrScaleFactor) > 0) {
-                        float d = (mountLocation.position - _Universe->AccessCamera()->GetPosition()).Magnitude();
-                        float lod = gun->rSize() * g_game.detaillevel * perspectiveFactor(
-                                (d - gun->rSize() < configuration().graphics.znear_flt) ? configuration().graphics.znear_flt : d - gun->rSize());
+                        float d   = (mountLocation.position - _Universe->AccessCamera()->GetPosition()).Magnitude();
+                        float lod = gun->rSize() * g_game.detaillevel *
+                                    perspectiveFactor((d - gun->rSize() < configuration().graphics.znear_flt)
+                                                              ? configuration().graphics.znear_flt
+                                                              : d - gun->rSize());
                         ScaleMatrix(mmat, Vector(mahnt->xyscale, mahnt->xyscale, mahnt->zscale));
                         gun->setCurrentFrame(unit->mounts[i].ComputeAnimatedFrame(gun));
-                        gun->Draw(lod, mmat, d, unit->cloak, (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1
-                                        : 0,
-                                chardamage,
-                                true);                                                                                                                                       //cloakign and nebula
+                        gun->Draw(lod, mmat, d, unit->cloak,
+                                  (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr)
+                                          ? -1
+                                          : 0,
+                                  chardamage,
+                                  true);  // cloakign and nebula
                         if (mahnt->type->gun1) {
                             gun = mahnt->type->gun1;
                             gun->setCurrentFrame(unit->mounts[i].ComputeAnimatedFrame(gun));
-                            gun->Draw(lod, mmat,
-                                      d,
-                                      unit->cloak,
-                                      (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula
-                                            != nullptr) ? -1 : 0,
-                                      chardamage,
-                                      true);                                                                                                                               //cloakign and nebula
+                            gun->Draw(
+                                    lod, mmat, d, unit->cloak,
+                                    (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr)
+                                            ? -1
+                                            : 0,
+                                    chardamage,
+                                    true);  // cloakign and nebula
                         }
                     }
                 }
@@ -484,22 +482,13 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
     }
     Vector linaccel = unit->GetAcceleration();
     Vector angaccel = unit->GetAngularAcceleration();
-    float maxaccel = unit->GetMaxAccelerationInDirectionOf(mat.getR(), true);
+    float  maxaccel = unit->GetMaxAccelerationInDirectionOf(mat.getR(), true);
     Vector velocity = unit->GetVelocity();
     if (!(unit->docked & (unit->DOCKED | unit->DOCKED_INSIDE))) {
-        halos->Draw(mat,
-                Scale,
-                unit->cloak.Visibility(),
-                0,
-                unit->hull.Percent(),
-                velocity,
-                linaccel,
-                angaccel,
-                maxaccel,
-                cmas,
-                unit->faction);
+        halos->Draw(mat, Scale, unit->cloak.Visibility(), 0, unit->hull.Percent(), velocity, linaccel, angaccel,
+                    maxaccel, cmas, unit->faction);
     }
-    if (rootunit == static_cast<const void*>(this)) {
+    if (rootunit == static_cast<const void *>(this)) {
         Mesh::ProcessZFarMeshes();
         Mesh::ProcessUndrawnMeshes();
         rootunit = nullptr;
@@ -507,7 +496,7 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
 }
 
 void Drawable::UpdateFrames() {
-    for (const auto & pos : Units) {
+    for (const auto &pos : Units) {
         pos.second->curtime += GetElapsedTime();
         if (pos.second->curtime >= pos.second->timePerFrame()) {
             pos.second->AnimationStep();
@@ -547,7 +536,7 @@ unsigned int Drawable::getAnimationNumber(const char *name) const {
         }
     }
 
-    return 0; //NOT FOUND!
+    return 0;  // NOT FOUND!
 }
 
 void Drawable::ChangeAnimation(const char *name) {
@@ -615,12 +604,12 @@ Matrix *GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix
     Matrix *ctm = &unit->cumulative_transformation_matrix;
 
     if (unit->graphicOptions.FaceCamera == 1) {
-        Vector p, q, r;
+        Vector  p, q, r;
         QVector pos(ctm->p);
-        float wid, hei;
-        float magr = parentMatrix.getR().Magnitude();
-        float magp = parentMatrix.getP().Magnitude();
-        float magq = parentMatrix.getQ().Magnitude();
+        float   wid, hei;
+        float   magr = parentMatrix.getR().Magnitude();
+        float   magp = parentMatrix.getP().Magnitude();
+        float   magq = parentMatrix.getQ().Magnitude();
         CalculateOrientation(pos, p, q, r, wid, hei, 0, false, ctm);
         VectorAndPositionToMatrix(invview, p * magp, q * magq, r * magr, ctm->p);
         ctm = &invview;
@@ -633,7 +622,7 @@ Matrix *GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix
  * @brief Drawable::Sparkle caused damaged units to emit sparks
  */
 void Drawable::Sparkle(const bool on_screen, const Matrix *ctm) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
+    Unit        *unit     = vega_dynamic_cast_ptr<Unit>(this);
     const Vector velocity = unit->GetVelocity();
 
     // Docked units don't sparkle
@@ -668,9 +657,9 @@ void Drawable::Sparkle(const bool on_screen, const Matrix *ctm) {
         return;
     }
 
-    double sparkle_accum = GetElapsedTime() * configuration().graphics.sparkle_rate_dbl;
-    int spawn = static_cast<int>(sparkle_accum);
-    sparkle_accum -= spawn;
+    double sparkle_accum  = GetElapsedTime() * configuration().graphics.sparkle_rate_dbl;
+    int    spawn          = static_cast<int>(sparkle_accum);
+    sparkle_accum        -= spawn;
 
 
     // Pretty sure the following is the equivalent of the commented code
@@ -689,7 +678,7 @@ void Drawable::Sparkle(const bool on_screen, const Matrix *ctm) {
             case 3:
                 seed += 61;
             case 2:
-                seed += 65537;
+                seed += 65'537;
             default:
                 seed += 257;
         }
@@ -723,7 +712,7 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak 
 
     Vector linaccel = unit->GetAcceleration();
     Vector angaccel = unit->GetAngularAcceleration();
-    float maxaccel = unit->GetMaxAccelerationInDirectionOf(wmat.getR(), true);
+    float  maxaccel = unit->GetMaxAccelerationInDirectionOf(wmat.getR(), true);
     Vector velocity = unit->GetVelocity();
 
     float cmas = unit->MaxAfterburnerSpeed() * unit->MaxAfterburnerSpeed();
@@ -731,23 +720,22 @@ void Drawable::DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak 
         cmas = 1;
     }
 
-    Vector Scale(1, 1, 1);         //Now, HaloSystem handles that
-    //WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
-    //nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
-    float nebd = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
+    Vector Scale(1, 1, 1);  // Now, HaloSystem handles that
+    // WARNING: cmas is not a valid maximum speed for the upcoming multi-direction thrusters,
+    // nor is maxaccel. Instead, each halo should have its own limits specified in units.csv
+    float nebd  = (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0;
     float hulld = unit->Destroyed() ? 1 : unit->hull.Percent();
-    halos->Draw(wmat, Scale, unit->cloak.Visibility(), nebd, hulld, velocity,
-            linaccel, angaccel, maxaccel, cmas, unit->faction);
-
+    halos->Draw(wmat, Scale, unit->cloak.Visibility(), nebd, hulld, velocity, linaccel, angaccel, maxaccel, cmas,
+                unit->faction);
 }
 
 void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float average_scale, unsigned char char_damage) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    Transformation *ct = &unit->cumulative_transformation;
+    Unit           *unit = vega_dynamic_cast_ptr<Unit>(this);
+    Transformation *ct   = &unit->cumulative_transformation;
 
     for (int i = 0; i < unit->getNumMounts(); ++i) {
         Mount *mount = &unit->mounts[i];
-        Mesh *gun = mount->type->gun;
+        Mesh  *gun   = mount->type->gun;
 
         // Has to come before check for on screen, as a fired beam can still be seen
         // even if the subunit firing it isn't on screen.
@@ -755,10 +743,11 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float aver
             // If gun is null (?)
             if (unit->mounts[i].ref.gun) {
                 unit->mounts[i].ref.gun->Draw(*ct, wmat,
-                        (isAutoTrackingMount(unit->mounts[i].size)
-                                && (unit->mounts[i].time_to_lock <= 0)
-                                && unit->TargetTracked()) ? unit->Target() : nullptr,
-                        unit->radar.GetTrackingCone());
+                                              (isAutoTrackingMount(unit->mounts[i].size) &&
+                                               (unit->mounts[i].time_to_lock <= 0) && unit->TargetTracked())
+                                                      ? unit->Target()
+                                                      : nullptr,
+                                              unit->radar.GetTrackingCone());
             }
         }
 
@@ -794,32 +783,32 @@ void Drawable::DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float aver
         Matrix mat;
         mountLocation.to_matrix(mat);
         if (GFXSphereInFrustum(mountLocation.position, gun->rSize() * average_scale) > 0) {
-            float d = (mountLocation.position - _Universe->AccessCamera()->GetPosition()).Magnitude();
-            float pixradius = gun->rSize() * perspectiveFactor(
-                    (d - gun->rSize() < configuration().graphics.znear_flt) ? configuration().graphics.znear_flt : d - gun->rSize());
-            float lod = pixradius * g_game.detaillevel;
+            float d         = (mountLocation.position - _Universe->AccessCamera()->GetPosition()).Magnitude();
+            float pixradius = gun->rSize() * perspectiveFactor((d - gun->rSize() < configuration().graphics.znear_flt)
+                                                                       ? configuration().graphics.znear_flt
+                                                                       : d - gun->rSize());
+            float lod       = pixradius * g_game.detaillevel;
             if (lod > 0.5 && pixradius > 2.5) {
                 ScaleMatrix(mat, Vector(mount->xyscale, mount->xyscale, mount->zscale));
                 gun->setCurrentFrame(unit->mounts[i].ComputeAnimatedFrame(gun));
-                gun->Draw(lod, mat, d, cloak, (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0,
-                        char_damage,
-                        true);                                                                                                                                      //cloakign and nebula
+                gun->Draw(lod, mat, d, cloak,
+                          (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1 : 0,
+                          char_damage,
+                          true);  // cloakign and nebula
             }
             if (mount->type->gun1) {
-                pixradius = gun->rSize() * perspectiveFactor(
-                        (d - gun->rSize() < configuration().graphics.znear_flt) ? configuration().graphics.znear_flt : d - gun->rSize());
-                lod = pixradius * g_game.detaillevel;
+                pixradius = gun->rSize() * perspectiveFactor((d - gun->rSize() < configuration().graphics.znear_flt)
+                                                                     ? configuration().graphics.znear_flt
+                                                                     : d - gun->rSize());
+                lod       = pixradius * g_game.detaillevel;
                 if (lod > 0.5 && pixradius > 2.5) {
                     gun = mount->type->gun1;
                     gun->setCurrentFrame(unit->mounts[i].ComputeAnimatedFrame(gun));
-                    gun->Draw(lod,
-                            mat,
-                            d,
-                            cloak,
-                            (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula
-                                    != nullptr) ? -1 : 0,
-                            char_damage,
-                            true);                                                                                                                              //cloakign and nebula
+                    gun->Draw(lod, mat, d, cloak,
+                              (_Universe->AccessCamera()->GetNebula() == unit->nebula && unit->nebula != nullptr) ? -1
+                                                                                                                  : 0,
+                              char_damage,
+                              true);  // cloakign and nebula
                 }
             }
         }
@@ -846,35 +835,35 @@ void Drawable::Split(int level) {
             this->meshdata.erase(this->meshdata.begin() + i);
         }
     }
-    int nm = this->nummesh();
+    int    nm  = this->nummesh();
     string fac = FactionUtil::GetFaction(unit->faction);
 
     if (nm <= 0 && num_chunks == 0) {
         return;
     }
-    vector<Mesh *> old = this->meshdata;
-    Mesh *shield = old.back();
+    vector<Mesh *> old    = this->meshdata;
+    Mesh          *shield = old.back();
     old.pop_back();
 
     vector<unsigned int> meshsizes;
     if (num_chunks) {
-        size_t i;
+        size_t         i;
         vector<Mesh *> nw;
-        unsigned int which_chunk = VegaRandom::Instance().RandomUInt32UpTo(num_chunks - 1);
+        unsigned int   which_chunk = VegaRandom::Instance().RandomUInt32UpTo(num_chunks - 1);
         string chunk_name = UniverseUtil::LookupUnitStat(unit->name, fac, "Chunk_" + XMLSupport::tostring(which_chunk));
-        string dir = UniverseUtil::LookupUnitStat(unit->name, fac, "Directory");
+        string dir        = UniverseUtil::LookupUnitStat(unit->name, fac, "Directory");
         VSFileSystem::current_path.push_back(root);
         VSFileSystem::current_subdirectory.push_back("/" + dir);
         VSFileSystem::current_type.push_back(VSFileSystem::UnitFile);
-        float random_start_frame = 0.0F;    // TODO: Make this value actually random?
-        float random_start_seconds = 0.0F;  // TODO: Make this value actually random?
-        string scale_str = UniverseUtil::LookupUnitStat(unit->name, fac, "Unit_Scale");
-        int scale = atoi(scale_str.c_str());
+        float  random_start_frame   = 0.0F;  // TODO: Make this value actually random?
+        float  random_start_seconds = 0.0F;  // TODO: Make this value actually random?
+        string scale_str            = UniverseUtil::LookupUnitStat(unit->name, fac, "Unit_Scale");
+        int    scale                = atoi(scale_str.c_str());
         if (scale == 0) {
             scale = 1;
         }
         AddMeshes(nw, random_start_frame, random_start_seconds, scale, chunk_name, unit->faction,
-                unit->getFlightgroup(), &meshsizes);
+                  unit->getFlightgroup(), &meshsizes);
         VSFileSystem::current_type.pop_back();
         VSFileSystem::current_subdirectory.pop_back();
         VSFileSystem::current_path.pop_back();
@@ -887,16 +876,17 @@ void Drawable::Split(int level) {
         Vector PlaneNorm;
         for (int split = 0; split < level; split++) {
             vector<Mesh *> nw;
-            size_t oldsize = old.size();
+            size_t         oldsize = old.size();
             for (size_t i = 0; i < oldsize; i++) {
-                PlaneNorm.Set(VegaRandom::Instance().RandomDoubleInRange(-kVegaIntLeast32tMax, kVegaIntLeast32tMax),
+                PlaneNorm.Set(
+                        VegaRandom::Instance().RandomDoubleInRange(-kVegaIntLeast32tMax, kVegaIntLeast32tMax),
                         VegaRandom::Instance().RandomDoubleInRange(-kVegaIntLeast32tMax, kVegaIntLeast32tMax),
                         VegaRandom::Instance().RandomDoubleInRange(-kVegaIntLeast32tMax, kVegaIntLeast32tMax) + 0.5);
                 PlaneNorm.Normalize();
                 nw.push_back(nullptr);
                 nw.push_back(nullptr);
                 old[i]->Fork(nw[nw.size() - 2], nw.back(), PlaneNorm.i, PlaneNorm.j, PlaneNorm.k,
-                        -PlaneNorm.Dot(old[i]->Position()));                                                                              //splits somehow right down the middle.
+                             -PlaneNorm.Dot(old[i]->Position()));  // splits somehow right down the middle.
                 delete old[i];
                 old[i] = nullptr;
                 if (nw[nw.size() - 2] == nullptr) {
@@ -914,13 +904,13 @@ void Drawable::Split(int level) {
             meshsizes.push_back(1);
         }
     }
-    old.push_back(nullptr);     //push back shield
+    old.push_back(nullptr);  // push back shield
     if (shield != nullptr) {
         delete shield;
         shield = nullptr;
     }
-    nm = old.size() - 1;
-    unsigned int k = 0;
+    nm               = old.size() - 1;
+    unsigned int   k = 0;
     vector<Mesh *> tempmeshes;
     for (vector<Mesh *>::size_type i = 0; i < meshsizes.size(); i++) {
         Unit *splitsub;
@@ -935,25 +925,25 @@ void Drawable::Split(int level) {
         splitsub->SetMass(configuration().physics.debris_mass_flt * splitsub->GetMass() / level);
         splitsub->pImage->timeexplode = .1;
         if (splitsub->meshdata[0]) {
-            Vector loc = splitsub->meshdata[0]->Position();
-            float locm = loc.Magnitude();
+            Vector loc  = splitsub->meshdata[0]->Position();
+            float  locm = loc.Magnitude();
             if (locm < .0001) {
                 locm = 1;
             }
-            splitsub->ApplyForce(
-                    splitsub->meshdata[0]->rSize() * configuration().graphics.explosion_force_dbl * 10.0 * splitsub->GetMass()
-                            * loc / locm);
+            splitsub->ApplyForce(splitsub->meshdata[0]->rSize() * configuration().graphics.explosion_force_dbl * 10.0 *
+                                 splitsub->GetMass() * loc / locm);
             loc.Set(VegaRandom::Instance().RandomDoubleUpTo(kVegaUInt32tMaxAsDouble),
                     VegaRandom::Instance().RandomDoubleUpTo(kVegaUInt32tMaxAsDouble),
                     VegaRandom::Instance().RandomDoubleUpTo(kVegaUInt32tMaxAsDouble) + 0.1);
             loc.Normalize();
-            splitsub->ApplyLocalTorque(loc * static_cast<float>(splitsub->GetMass()) * configuration().graphics.explosion_torque_flt
-                    * (1 + VegaRandom::Instance().RandomFloatUpTo(unit->rSize())));
+            splitsub->ApplyLocalTorque(loc * static_cast<float>(splitsub->GetMass()) *
+                                       configuration().graphics.explosion_torque_flt *
+                                       (1 + VegaRandom::Instance().RandomFloatUpTo(unit->rSize())));
         }
     }
     old.clear();
     this->meshdata.clear();
-    this->meshdata.push_back(nullptr);     //the shield
+    this->meshdata.push_back(nullptr);  // the shield
     unit->SetMass(unit->GetMass() * configuration().physics.debris_mass_flt);
 }
 
@@ -974,42 +964,49 @@ void Drawable::LightShields(const Vector &pnt, const Vector &normal, float amt, 
     }
 
     mesh->AddDamageFX(pnt, unit->shieldtight ? unit->shieldtight * normal : Vector(0, 0, 0),
-            std::min(1.0f, std::max(0.0f, amt)), color);
+                      std::min(1.0f, std::max(0.0f, amt)), color);
 }
 
 Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
-    if (unit->GetWarpVelocity().MagnitudeSquared() < (configuration().graphics.warp_stretch_cutoff_flt)
-            * configuration().graphics.warp_stretch_cutoff_flt * configuration().physics.game_speed_flt
-            || (configuration().graphics.only_stretch_in_warp && unit->ftl_drive.Enabled())) {
+    if (unit->GetWarpVelocity().MagnitudeSquared() < (configuration().graphics.warp_stretch_cutoff_flt) *
+                                                             configuration().graphics.warp_stretch_cutoff_flt *
+                                                             configuration().physics.game_speed_flt ||
+        (configuration().graphics.only_stretch_in_warp && unit->ftl_drive.Enabled())) {
         return ctm;
     } else {
         Matrix k(ctm);
 
-        float speed = unit->GetWarpVelocity().Magnitude();
-        float stretchregion0length = static_cast<float>(configuration().graphics.warp_stretch_region0_max_flt
-                * (speed - (configuration().graphics.warp_stretch_cutoff_flt * configuration().physics.game_speed_flt))
-                / ((configuration().graphics.warp_stretch_max_region0_speed_flt * configuration().physics.game_speed_flt)
-                        - (configuration().graphics.warp_stretch_cutoff_flt * configuration().physics.game_speed_flt)));
+        float speed                = unit->GetWarpVelocity().Magnitude();
+        float stretchregion0length = static_cast<float>(
+                configuration().graphics.warp_stretch_region0_max_flt *
+                (speed - (configuration().graphics.warp_stretch_cutoff_flt * configuration().physics.game_speed_flt)) /
+                ((configuration().graphics.warp_stretch_max_region0_speed_flt *
+                  configuration().physics.game_speed_flt) -
+                 (configuration().graphics.warp_stretch_cutoff_flt * configuration().physics.game_speed_flt)));
         float stretchlength =
-                static_cast<float>((configuration().graphics.warp_stretch_max_flt
-                        - configuration().graphics.warp_stretch_region0_max_flt)
-                        * (speed - (configuration().graphics.warp_stretch_max_region0_speed_flt * configuration().physics.game_speed_flt))
-                        / ((configuration().graphics.warp_stretch_max_speed_flt * configuration().physics.game_speed_flt)
-                                - (configuration().graphics.warp_stretch_max_region0_speed_flt * configuration().physics.game_speed_flt) + .06125f)
-                        + configuration().graphics.warp_stretch_region0_max_flt);
+                static_cast<float>((configuration().graphics.warp_stretch_max_flt -
+                                    configuration().graphics.warp_stretch_region0_max_flt) *
+                                           (speed - (configuration().graphics.warp_stretch_max_region0_speed_flt *
+                                                     configuration().physics.game_speed_flt)) /
+                                           ((configuration().graphics.warp_stretch_max_speed_flt *
+                                             configuration().physics.game_speed_flt) -
+                                            (configuration().graphics.warp_stretch_max_region0_speed_flt *
+                                             configuration().physics.game_speed_flt) +
+                                            .06125f) +
+                                   configuration().graphics.warp_stretch_region0_max_flt);
         if (stretchlength > configuration().graphics.warp_stretch_max_flt) {
             stretchlength = configuration().graphics.warp_stretch_max_flt;
         }
         if (stretchregion0length > configuration().graphics.warp_stretch_region0_max_flt) {
             stretchregion0length = configuration().graphics.warp_stretch_region0_max_flt;
         }
-        ScaleMatrix(k,
-                Vector(1,
-                        1,
-                        1 + (speed > (configuration().graphics.warp_stretch_max_region0_speed_flt * configuration().physics.game_speed_flt)
-                                ? stretchlength : stretchregion0length)));
+        ScaleMatrix(k, Vector(1, 1,
+                              1 + (speed > (configuration().graphics.warp_stretch_max_region0_speed_flt *
+                                            configuration().physics.game_speed_flt)
+                                           ? stretchlength
+                                           : stretchregion0length)));
         return k;
     }
 }
@@ -1025,10 +1022,8 @@ void Drawable::UpdateHudMatrix(int whichcam) {
     _Universe->AccessCamera(whichcam)->SetOrientation(tmp, q, r);
 
     QVector v = Transform(ctm, unit->pImage->CockpitCenter.Cast());
-    _Universe->AccessCamera(whichcam)->SetPosition(v,
-            unit->GetWarpVelocity(),
-            unit->GetAngularVelocity(),
-            unit->GetAcceleration());
+    _Universe->AccessCamera(whichcam)->SetPosition(v, unit->GetWarpVelocity(), unit->GetAngularVelocity(),
+                                                   unit->GetAcceleration());
 }
 
 VSSprite *Drawable::getHudImage() const {

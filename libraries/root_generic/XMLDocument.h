@@ -27,12 +27,11 @@
 #ifndef VEGA_STRIKE_ENGINE_XMLDOCUMENT_H
 #define VEGA_STRIKE_ENGINE_XMLDOCUMENT_H
 
-#include <string>
-#include <map>
-#include <vector>
 #include <iterator>
-
+#include <map>
 #include <ostream>
+#include <string>
+#include <vector>
 
 namespace XMLDOM {
 class XMLDocument;
@@ -47,27 +46,27 @@ public:
     };
 
 private:
-    Type mType;
+    Type        mType;
     std::string mTagName;
-    std::string mContents;     //for cdata elements
+    std::string mContents;  // for cdata elements
 
-    typedef std::vector<XMLElement *> ElementList;
+    typedef std::vector<XMLElement *>           ElementList;
     typedef std::map<std::string, XMLElement *> ElementMap;
-    typedef std::map<std::string, std::string> AttributeMap;
+    typedef std::map<std::string, std::string>  AttributeMap;
 
-    ElementList mChildren;
-    ElementMap mById;
-    ElementMap mByName;
+    ElementList  mChildren;
+    ElementMap   mById;
+    ElementMap   mByName;
     AttributeMap mAttributes;
 
-    XMLElement *mParent;
+    XMLElement  *mParent;
     XMLDocument *mDocument;
 
 public:
-    typedef ElementList::iterator child_iterator;
+    typedef ElementList::iterator       child_iterator;
     typedef ElementList::const_iterator const_child_iterator;
 
-    typedef AttributeMap::iterator attribute_iterator;
+    typedef AttributeMap::iterator       attribute_iterator;
     typedef AttributeMap::const_iterator const_attribute_iterator;
 
 private:
@@ -75,7 +74,7 @@ private:
     const_attribute_iterator mNameAttribute;
 
 public:
-    //Constructors
+    // Constructors
 
     /** Creates an empty cdata element */
     XMLElement();
@@ -359,15 +358,13 @@ public:
     XMLElement root;
 
 public:
-    XMLDocument() : dirty(false), root(XMLElement::XET_ROOT, std::string()) {
-    }
+    XMLDocument() : dirty(false), root(XMLElement::XET_ROOT, std::string()) {}
 
     ~XMLDocument() = default;
 
 public:
-
     //
-    //A series of handy wrappers, to mimic JavaScript.
+    // A series of handy wrappers, to mimic JavaScript.
     //(mostly for Python GUI event handlers)
     //
 
@@ -437,14 +434,15 @@ class XMLProcessor;
 class XMLSerializer {
 public:
     enum Options {
-        OPT_WANT_CDATA = 0x01,
-        OPT_WANT_COMMENTS = 0x02,
-        OPT_WANT_NAMEBINDINGS = 0x04,
+        OPT_WANT_CDATA                 = 0x01,
+        OPT_WANT_COMMENTS              = 0x02,
+        OPT_WANT_NAMEBINDINGS          = 0x04,
         OPT_WANT_NAMEBINDINGS_DEEPSCAN = 0x08,
-        OPT_WANT_ALL = OPT_WANT_CDATA | OPT_WANT_COMMENTS,
-        OPT_WANT_DEEPBINDINGS = OPT_WANT_NAMEBINDINGS | OPT_WANT_NAMEBINDINGS_DEEPSCAN,
-        OPT_DEFAULT = OPT_WANT_ALL | OPT_WANT_DEEPBINDINGS
+        OPT_WANT_ALL                   = OPT_WANT_CDATA | OPT_WANT_COMMENTS,
+        OPT_WANT_DEEPBINDINGS          = OPT_WANT_NAMEBINDINGS | OPT_WANT_NAMEBINDINGS_DEEPSCAN,
+        OPT_DEFAULT                    = OPT_WANT_ALL | OPT_WANT_DEEPBINDINGS
     };
+
     int options;
 
 private:
@@ -543,12 +541,9 @@ public:
      *  @par
      *   Return false, and the error description, to abort parsing.
      */
-    virtual std::pair<bool, std::string> execute(XMLSerializer *serializer,
-            XMLDocument *doc,
-            XMLElement *current,
-            const std::string &data) = 0;
+    virtual std::pair<bool, std::string> execute(XMLSerializer *serializer, XMLDocument *doc, XMLElement *current,
+                                                 const std::string &data) = 0;
 };
-}
+}  // namespace XMLDOM
 
-#endif //VEGA_STRIKE_ENGINE_XMLDOCUMENT_H
-
+#endif  // VEGA_STRIKE_ENGINE_XMLDOCUMENT_H

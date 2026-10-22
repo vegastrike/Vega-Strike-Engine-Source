@@ -15,27 +15,27 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_FPU_H
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_FPU_H
 
-#define    SIGN_BITMASK            0x80000000
+#define SIGN_BITMASK 0x80000000
 
 union ice_union {
-    int32_t sint32_member;
+    int32_t  sint32_member;
     uint32_t uint32_member;
-    float float_member;
+    float    float_member;
 };
 
 // 2021-07-07 SGT: It seems that the below macros cannot be converted to inline functions,
 //                 because they need to be assignable in some contexts.
 //! Integer representation of a floating-point value.
-#define IR(x)                   (static_cast<ice_union*>(const_cast<void*>(static_cast<const void*>(&(x))))->uint32_member)
+#define IR(x) (static_cast<ice_union *>(const_cast<void *>(static_cast<const void *>(&(x))))->uint32_member)
 
 //! Signed integer representation of a floating-point value.
-#define SIR(x)                  (static_cast<ice_union*>(const_cast<void*>(static_cast<const void*>(&(x))))->sint32_member)
+#define SIR(x) (static_cast<ice_union *>(const_cast<void *>(static_cast<const void *>(&(x))))->sint32_member)
 
 //! Absolute integer representation of a floating-point value
-#define AIR(x)                    (IR(x)&0x7fffffff)
+#define AIR(x) (IR(x) & 0x7fffffff)
 
 //! Floating-point representation of an integer value.
-#define FR(x)                   (static_cast<ice_union*>(const_cast<void*>(static_cast<const void*>(&(x))))->float_member)
+#define FR(x) (static_cast<ice_union *>(const_cast<void *>(static_cast<const void *>(&(x))))->float_member)
 
 //! Is the float valid ?
 inline_ bool IsNAN(float value) {
@@ -54,7 +54,7 @@ inline_ bool IsMinusInf(float value) {
     return IR(value) == 0xff800000;
 }
 
-inline_    bool IsValidFloat(float value) {
+inline_ bool IsValidFloat(float value) {
     if (IsNAN(value)) {
         return false;
     }
@@ -70,6 +70,6 @@ inline_    bool IsValidFloat(float value) {
     return true;
 }
 
-#define CHECK_VALID_FLOAT(x)    OPASSERT(IsValidFloat(x));
+#define CHECK_VALID_FLOAT(x) OPASSERT(IsValidFloat(x));
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_FPU_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_FPU_H

@@ -33,4 +33,4 @@ public:
     void save_settings() const;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_SETTINGS_H
+#endif  // VEGA_STRIKE_ENGINE_CUBE_MAP_SETTINGS_H

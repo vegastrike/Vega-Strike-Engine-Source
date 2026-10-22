@@ -35,7 +35,7 @@
  *
  * Always present and always implemented as a 4 facet DL.
  * If no armor, each facet is 0.
-*/
+ */
 class Armor : public Component, public DamageableLayer {
 public:
     static int front;
@@ -48,7 +48,7 @@ public:
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -66,4 +66,4 @@ public:
     ~Armor() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_ARMOR_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_ARMOR_H

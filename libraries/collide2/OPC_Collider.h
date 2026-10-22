@@ -26,14 +26,13 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COLLIDER_H
 
 enum CollisionFlag {
-    OPC_FIRST_CONTACT = (1 << 0),        //!< Report all contacts (false) or only first one (true)
-    OPC_TEMPORAL_COHERENCE = (1 << 1),        //!< Use temporal coherence or not
-    OPC_CONTACT = (1 << 2),        //!< Final contact status after a collision query
-    OPC_TEMPORAL_HIT = (1 << 3),        //!< There has been an early exit due to temporal coherence
-    OPC_NO_PRIMITIVE_TESTS =
-    (1 << 4),        //!< Keep or discard primitive-bv tests in leaf nodes (volume-mesh queries)
+    OPC_FIRST_CONTACT      = (1 << 0),  //!< Report all contacts (false) or only first one (true)
+    OPC_TEMPORAL_COHERENCE = (1 << 1),  //!< Use temporal coherence or not
+    OPC_CONTACT            = (1 << 2),  //!< Final contact status after a collision query
+    OPC_TEMPORAL_HIT       = (1 << 3),  //!< There has been an early exit due to temporal coherence
+    OPC_NO_PRIMITIVE_TESTS = (1 << 4),  //!< Keep or discard primitive-bv tests in leaf nodes (volume-mesh queries)
 
-    OPC_CONTACT_FOUND = OPC_FIRST_CONTACT | OPC_CONTACT,
+    OPC_CONTACT_FOUND    = OPC_FIRST_CONTACT | OPC_CONTACT,
     OPC_TEMPORAL_CONTACT = OPC_TEMPORAL_HIT | OPC_CONTACT,
 
     OPC_FORCE_DWORD = 0x7fffffff
@@ -43,7 +42,7 @@ class OPCODE_API Collider {
 public:
     // Constructor / Destructor
     Collider();
-    virtual                                ~Collider();
+    virtual ~Collider();
 
     // Collision report
 
@@ -53,7 +52,7 @@ public:
      *	\return		true if a collision occured
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                BOOL GetContactStatus() const {
+    inline_ BOOL GetContactStatus() const {
         return mFlags & OPC_CONTACT;
     }
 
@@ -63,7 +62,7 @@ public:
      *	\return		true if "first contact" mode is on
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                BOOL FirstContactEnabled() const {
+    inline_ BOOL FirstContactEnabled() const {
         return mFlags & OPC_FIRST_CONTACT;
     }
 
@@ -73,7 +72,7 @@ public:
      *	\return		true if temporal coherence is on
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                BOOL TemporalCoherenceEnabled() const {
+    inline_ BOOL TemporalCoherenceEnabled() const {
         return mFlags & OPC_TEMPORAL_COHERENCE;
     }
 
@@ -83,7 +82,7 @@ public:
      *	\return		true if a first contact has been found and we can stop a query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                BOOL ContactFound() const {
+    inline_ BOOL ContactFound() const {
         return (mFlags & OPC_CONTACT_FOUND) == OPC_CONTACT_FOUND;
     }
 
@@ -93,7 +92,7 @@ public:
      *	\return		true if a temporal hit has occured
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                BOOL TemporalHit() const {
+    inline_ BOOL TemporalHit() const {
         return mFlags & OPC_TEMPORAL_HIT;
     }
 
@@ -103,7 +102,7 @@ public:
      *	\return		true if primitive tests must be skipped
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                BOOL SkipPrimitiveTests() const {
+    inline_ BOOL SkipPrimitiveTests() const {
         return mFlags & OPC_NO_PRIMITIVE_TESTS;
     }
 
@@ -117,7 +116,7 @@ public:
      *	\see		ValidateSettings()
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetFirstContact(bool flag) {
+    inline_ void SetFirstContact(bool flag) {
         if (flag) {
             mFlags |= OPC_FIRST_CONTACT;
         } else {
@@ -133,7 +132,7 @@ public:
      *	\see		ValidateSettings()
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetTemporalCoherence(bool flag) {
+    inline_ void SetTemporalCoherence(bool flag) {
         if (flag) {
             mFlags |= OPC_TEMPORAL_COHERENCE;
         } else {
@@ -147,7 +146,7 @@ public:
      *	\param		flag		[in] true to enable primitive tests, false to discard them
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetPrimitiveTests(bool flag) {
+    inline_ void SetPrimitiveTests(bool flag) {
         if (!flag) {
             mFlags |= OPC_NO_PRIMITIVE_TESTS;
         } else {
@@ -157,17 +156,18 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     *	Validates current settings. You should call this method after all the settings / callbacks have been defined for a collider.
+     *	Validates current settings. You should call this method after all the settings / callbacks have been defined for
+     *a collider.
      *	\return		nullptr if everything is ok, else a string describing the problem
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     virtual const char *ValidateSettings() = 0;
 
 protected:
-    uint32_t mFlags;            //!< Bit flags
-    const BaseModel *mCurrentModel;    //!< Current model for collision query (owner of touched faces)
+    uint32_t         mFlags;         //!< Bit flags
+    const BaseModel *mCurrentModel;  //!< Current model for collision query (owner of touched faces)
     // User mesh interface
-    const MeshInterface *mIMesh;            //!< User-defined mesh interface
+    const MeshInterface *mIMesh;  //!< User-defined mesh interface
 
     // Internal methods
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ protected:
      *	\return		TRUE if success
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                BOOL Setup(const BaseModel *model) {
+    inline_ BOOL Setup(const BaseModel *model) {
         // Keep track of current model
         mCurrentModel = model;
         if (!mCurrentModel) {
@@ -193,9 +193,9 @@ protected:
      *	Initializes a query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    virtual inline_        void InitQuery() {
+    virtual inline_ void InitQuery() {
         mFlags &= ~OPC_TEMPORAL_CONTACT;
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COLLIDER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_COLLIDER_H

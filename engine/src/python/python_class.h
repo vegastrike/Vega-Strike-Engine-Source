@@ -32,39 +32,40 @@
 #define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
 
-#if defined (_MSC_VER) && _MSC_VER <= 1200
-#define Vector Vactor
-#endif //defined (_MSC_VER) && _MSC_VER <= 1200
+#if defined(_MSC_VER) && _MSC_VER <= 1'200
+#    define Vector Vactor
+#endif                       // defined (_MSC_VER) && _MSC_VER <= 1200
 
-#include <boost/python/object.hpp>
-#include <boost/python/class.hpp>
+#include <boost/python.hpp>  ///module.hpp>
+
 #include <boost/python/call_method.hpp>
-#include <boost/python.hpp>///module.hpp>
+#include <boost/python/class.hpp>
+#include <boost/python/object.hpp>
 
-#if defined (_MSC_VER) && _MSC_VER <= 1200
-#undef Vector
-#endif //defined (_MSC_VER) && _MSC_VER <= 1200
+#if defined(_MSC_VER) && _MSC_VER <= 1'200
+#    undef Vector
+#endif  // defined (_MSC_VER) && _MSC_VER <= 1200
 
 #define class_builder class_
 
-#include "src/python/init.h"
-#include "cmd/script/pythonmission.h"
 #include <compile.h>
 
+#include "cmd/script/pythonmission.h"
+#include "src/python/init.h"
+
 #if PY_VERSION_HEX < 0x030B0000
-#include <eval.h>
-#endif //PY_VERSION_HEX < 0x030B0000
+#    include <eval.h>
+#endif  // PY_VERSION_HEX < 0x030B0000
 
-#include "src/python/python_compile.h"
-#include "cmd/ai/fire.h"
 #include <memory>
-#include "src/vs_logging.h"
-#include "cmd/vega_py_run.h"
 
-#define PYTHONCALLBACK(rtype, ptr, str) \
-  boost::python::call_method<rtype>(ptr, str)
-#define PYTHONCALLBACK2(rtype, ptr, str, str2) \
-  boost::python::call_method<rtype>(ptr, str, str2)
+#include "cmd/ai/fire.h"
+#include "cmd/vega_py_run.h"
+#include "src/python/python_compile.h"
+#include "src/vs_logging.h"
+
+#define PYTHONCALLBACK(rtype, ptr, str)        boost::python::call_method<rtype>(ptr, str)
+#define PYTHONCALLBACK2(rtype, ptr, str, str2) boost::python::call_method<rtype>(ptr, str, str2)
 
 /*
 These following #defines will create a module for python
@@ -83,13 +84,12 @@ BOOST_PYTHON_MODULE(VS) {
        PYTHON_BEGIN_INHERIT_CLASS(VS,BaseClass,"PythonVirtualClassName")
        PYTHON_END_CLASS(VS,BaseClass)
        PYTHON_BASE_BEGIN_CLASS(VS,MyClass,"PythonClassName")
-       Class.def(boost::python::constructor<int,float,string>); //this will define a constructor that takes an int, float and a string.
-       Class.def(&MyClass::MyFunc,"FunctionName");
-       PYTHON_END_CLASS(VS,MyClass)
-       PYTHON_BEGIN_CLASS(VS,MyOtherClass,"DefaultConstructorPythonClassName") //this will automaticly define a default constructor
-       Class.def(&MyOtherClass::MyOtherFunc,"FunctionName");
-       PYTHON_END_CLASS(VS,MyOtherClass)
-       VS.def(&MyGlobalFunction,"GlobalFunc") //the global functions are easiest; you can call these in python with VS.globalfunc
+       Class.def(boost::python::constructor<int,float,string>); //this will define a constructor that takes an int,
+float and a string. Class.def(&MyClass::MyFunc,"FunctionName"); PYTHON_END_CLASS(VS,MyClass)
+       PYTHON_BEGIN_CLASS(VS,MyOtherClass,"DefaultConstructorPythonClassName") //this will automaticly define a default
+constructor Class.def(&MyOtherClass::MyOtherFunc,"FunctionName"); PYTHON_END_CLASS(VS,MyOtherClass)
+       VS.def(&MyGlobalFunction,"GlobalFunc") //the global functions are easiest; you can call these in python with
+VS.globalfunc
 }
 ...
 int main (int argc,char *argv[]) {
@@ -102,71 +102,85 @@ int main (int argc,char *argv[]) {
 */
 
 
-#define TO_PYTHON_SMART_POINTER(Pointer) \
-BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
-inline PyObject* to_python(class Pointer* x) {return boost::python::python_extension_class_converters<Pointer>::smart_ptr_to_python(x);} \
-inline PyObject* to_python(const class Pointer* p) {return to_python(const_cast<class Pointer*>(p));} \
-BOOST_PYTHON_END_CONVERSION_NAMESPACE
+#define TO_PYTHON_SMART_POINTER(Pointer)                                                          \
+    BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE                                                       \
+    inline PyObject *to_python(class Pointer *x) {                                                \
+        return boost::python::python_extension_class_converters<Pointer>::smart_ptr_to_python(x); \
+    }                                                                                             \
+    inline PyObject *to_python(const class Pointer *p) {                                          \
+        return to_python(const_cast<class Pointer *>(p));                                         \
+    }                                                                                             \
+    BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
-#define ADD_FROM_PYTHON_FUNCTION(SuperClass) \
-BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
-    SuperClass & from_python(PyObject *obj,boost::python::type<SuperClass &>) { \
-        boost::python::detail::extension_instance* self = boost::python::detail::get_extension_instance(obj); \
-        typedef std::vector<boost::python::detail::instance_holder_base*>::const_iterator iterator; \
-        for (iterator p = self->wrapped_objects().begin(); \
-             p != self->wrapped_objects().end(); ++p) \
-        { \
-            boost::python::detail::instance_holder<SuperClass>* held = dynamic_cast<boost::python::detail::instance_holder<SuperClass>*>(*p); \
-            if (held != nullptr) \
-                return *held->target(); \
-            void* target = boost::python::detail::class_registry<SuperClass>::class_object()->try_class_conversions(*p); \
-            if(target)  \
-                return *boost::python::detail::check_non_null(static_cast<SuperClass*>(target)); \
-        } \
-        boost::python::detail::report_missing_instance_data(self, boost::python::detail::class_registry<SuperClass>::class_object(), typeid(SuperClass)); \
-        boost::python::throw_argument_error(); \
-        return *((SuperClass*)0); \
-    }BOOST_PYTHON_END_CONVERSION_NAMESPACE
+#define ADD_FROM_PYTHON_FUNCTION(SuperClass)                                                                      \
+    BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE                                                                       \
+    SuperClass &from_python(PyObject *obj, boost::python::type<SuperClass &>) {                                   \
+        boost::python::detail::extension_instance *self = boost::python::detail::get_extension_instance(obj);     \
+        typedef std::vector<boost::python::detail::instance_holder_base *>::const_iterator iterator;              \
+        for (iterator p = self->wrapped_objects().begin(); p != self->wrapped_objects().end(); ++p) {             \
+            boost::python::detail::instance_holder<SuperClass> *held =                                            \
+                    dynamic_cast<boost::python::detail::instance_holder<SuperClass> *>(*p);                       \
+            if (held != nullptr)                                                                                  \
+                return *held->target();                                                                           \
+            void *target =                                                                                        \
+                    boost::python::detail::class_registry<SuperClass>::class_object()->try_class_conversions(*p); \
+            if (target)                                                                                           \
+                return *boost::python::detail::check_non_null(static_cast<SuperClass *>(target));                 \
+        }                                                                                                         \
+        boost::python::detail::report_missing_instance_data(                                                      \
+                self, boost::python::detail::class_registry<SuperClass>::class_object(), typeid(SuperClass));     \
+        boost::python::throw_argument_error();                                                                    \
+        return *((SuperClass *)0);                                                                                \
+    }                                                                                                             \
+    BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
-//non_null_from_python
+// non_null_from_python
 #ifdef FROM_PYTHON_ERRORS
-#define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) template <> PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
-    ADD_FROM_PYTHON_FUNCTION(SuperClass)
-#define PYTHON_INIT_GLOBALS(name,Class) ADD_FROM_PYTHON_FUNCTION(Class)
-#else //FROM_PYTHON_ERRORS
-#define PYTHON_INIT_INHERIT_GLOBALS(name, SuperClass) template <> PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL;
-#define PYTHON_INIT_GLOBALS(name, Class)
-#endif //FROM_PYTHON_ERRORS
+#    define PYTHON_INIT_INHERIT_GLOBALS(name, SuperClass)                       \
+        template <>                                                             \
+        PythonClass<SuperClass> *PythonClass<SuperClass>::last_instance = NULL; \
+        ADD_FROM_PYTHON_FUNCTION(SuperClass)
+#    define PYTHON_INIT_GLOBALS(name, Class) ADD_FROM_PYTHON_FUNCTION(Class)
+#else  // FROM_PYTHON_ERRORS
+#    define PYTHON_INIT_INHERIT_GLOBALS(name, SuperClass) \
+        template <>                                       \
+        PythonClass<SuperClass> *PythonClass<SuperClass>::last_instance = NULL;
+#    define PYTHON_INIT_GLOBALS(name, Class)
+#endif  // FROM_PYTHON_ERRORS
 
-//These two functions purposely have opening/closing braces that don't match up
+// These two functions purposely have opening/closing braces that don't match up
 
-#define PYTHON_DEFINE_GLOBAL(modul, fun, funname) boost::python::def (funname,fun)
-#define VS_BOOST_MAKE_TUPLE(a, b, c) boost::python::make_tuple(a,b,c)
-#define VS_BOOST_MAKE_TUPLE_2(a, b) boost::python::make_tuple(a,b)
-#define VS_BOOST_MAKE_TUPLE_4(a, b, c, d) boost::python::make_tuple(a,b,c,d)
+#define PYTHON_DEFINE_GLOBAL(modul, fun, funname) boost::python::def(funname, fun)
+#define VS_BOOST_MAKE_TUPLE(a, b, c)              boost::python::make_tuple(a, b, c)
+#define VS_BOOST_MAKE_TUPLE_2(a, b)               boost::python::make_tuple(a, b)
+#define VS_BOOST_MAKE_TUPLE_4(a, b, c, d)         boost::python::make_tuple(a, b, c, d)
 
 #if (PY_VERSION_HEX < 0x03000000)
-#define PYTHON_MODULE_INIT_FUNCTION(name) init##name
-#else // (PY_VERSION_HEX < 0x03000000)
-#define PYTHON_MODULE_INIT_FUNCTION(name) PyInit_##name
-#endif // (PY_VERSION_HEX < 0x03000000)
+#    define PYTHON_MODULE_INIT_FUNCTION(name) init##name
+#else   // (PY_VERSION_HEX < 0x03000000)
+#    define PYTHON_MODULE_INIT_FUNCTION(name) PyInit_##name
+#endif  // (PY_VERSION_HEX < 0x03000000)
 
 #define PYTHON_INIT_MODULE(name) PYTHON_MODULE_INIT_FUNCTION(name)()
 
-#define PYTHON_BASE_BEGIN_INHERIT_CLASS(name, NewClass, SuperClass, myclass) { \
+#define PYTHON_BASE_BEGIN_INHERIT_CLASS(name, NewClass, SuperClass, myclass) \
+    {                                                                        \
 boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (myclass
-#define PYTHON_BEGIN_INHERIT_CLASS(name, NewClass, SuperClass, myclass) PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) \
+#define PYTHON_BEGIN_INHERIT_CLASS(name, NewClass, SuperClass, myclass)  \
+    PYTHON_BASE_BEGIN_INHERIT_CLASS(name, NewClass, SuperClass, myclass) \
 );
 
-#define PYTHON_BASE_BEGIN_CLASS(name, CLASS, myclass) { \
+#define PYTHON_BASE_BEGIN_CLASS(name, CLASS, myclass) \
+    {                                                 \
     boost::python::class_builder <CLASS> Class (myclass
-#define PYTHON_BEGIN_CLASS(name, CLASS, myclass) PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) \
+#define PYTHON_BEGIN_CLASS(name, CLASS, myclass)  \
+    PYTHON_BASE_BEGIN_CLASS(name, CLASS, myclass) \
 );
-#define PYTHON_DEFINE_METHOD(modul, fun, funname) modul.def (funname,fun)
-#define PYTHON_DEFINE_METHOD_DEFAULT(modul, fun, funname, deflt) modul.def (funname,deflt)
-#define PYTHON_END_CLASS(name, SuperClass) }
+#define PYTHON_DEFINE_METHOD(modul, fun, funname)                modul.def(funname, fun)
+#define PYTHON_DEFINE_METHOD_DEFAULT(modul, fun, funname, deflt) modul.def(funname, deflt)
+#define PYTHON_END_CLASS(name, SuperClass)                       }
 
-template<class SuperClass>
+template <class SuperClass>
 class PythonClass : public SuperClass {
 protected:
     PyObject *self;
@@ -186,7 +200,7 @@ public:
 
     static PythonClass *LastPythonClass() {
         PythonClass *myclass = last_instance;
-        last_instance = NULL;
+        last_instance        = NULL;
         return myclass;
     }
 
@@ -211,11 +225,10 @@ public:
     }
 };
 
-template<class SuperClass>
+template <class SuperClass>
 class PythonAI : public PythonClass<SuperClass> {
 public:
-    PythonAI(PyObject *self_) : PythonClass<SuperClass>(self_) {
-    }
+    PythonAI(PyObject *self_) : PythonClass<SuperClass>(self_) {}
 
     virtual void Execute() {
         PYTHONCALLBACK(void, this->self, "Execute");
@@ -238,8 +251,7 @@ public:
         (self_).SuperClass::ChooseTarget();
     }
 
-    static void default_SetParent(SuperClass &self_, Unit *parent) {
-    }
+    static void default_SetParent(SuperClass &self_, Unit *parent) {}
 
     static PythonClass<SuperClass> *LastPythonClass() {
         return PythonClass<SuperClass>::LastPythonClass();
@@ -256,8 +268,7 @@ public:
 
 class pythonMission : public PythonClass<PythonMissionBaseClass> {
 public:
-    pythonMission(PyObject *self_) : PythonClass<PythonMissionBaseClass>(self_) {
-    }
+    pythonMission(PyObject *self_) : PythonClass<PythonMissionBaseClass>(self_) {}
 
     virtual void Execute() {
         PYTHONCALLBACK(void, self, "Execute");
@@ -298,4 +309,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_PYTHON_PYTHON_CLASS_H
+#endif  // VEGA_STRIKE_ENGINE_PYTHON_PYTHON_CLASS_H

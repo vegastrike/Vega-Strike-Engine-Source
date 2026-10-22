@@ -42,8 +42,8 @@ enum class Vega_UnitType {
     unit
 };
 
-int SerializeUnitType(Vega_UnitType type);
+int           SerializeUnitType(Vega_UnitType type);
 Vega_UnitType DeserializeUnitType(int type);
 Vega_UnitType DeserializeUnitType(std::string type);
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_TYPE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_TYPE_H

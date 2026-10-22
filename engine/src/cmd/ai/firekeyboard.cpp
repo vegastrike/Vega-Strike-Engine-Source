@@ -31,47 +31,50 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/python.hpp>
-#include <set>
+
 #include "firekeyboard.h"
-#include "flybywire.h"
-#include "navigation.h"
-#include "src/in_joystick.h"
-#include "cmd/unit_generic.h"
-#include "communication.h"
-#include "gfx/cockpit.h"
-#include "gfx/animation.h"
-#include "src/audiolib.h"
-#include "src/config_xml.h"
+
+#include <algorithm>
+#include <set>
+
 #include "cmd/images.h"
+#include "cmd/pilot.h"
 #include "cmd/planet.h"
 #include "cmd/script/flightgroup.h"
 #include "cmd/script/mission.h"
-#include "root_generic/vs_globals.h"
-#include "gfx/car_assist.h"
+#include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
-#include <algorithm>
-#include "fire.h"
+#include "communication.h"
 #include "docking.h"
-#include "cmd/pilot.h"
-//for getatmospheric
+#include "fire.h"
+#include "flybywire.h"
+#include "gfx/animation.h"
+#include "gfx/car_assist.h"
+#include "gfx/cockpit.h"
+#include "navigation.h"
+#include "root_generic/vs_globals.h"
+#include "src/audiolib.h"
+#include "src/config_xml.h"
+#include "src/in_joystick.h"
+// for getatmospheric
+#include "cmd/mount_size.h"
 #include "cmd/role_bitmask.h"
 #include "cmd/script/pythonmission.h"
-#include "src/universe_util.h"
-#include "src/universe.h"
-#include "cmd/mount_size.h"
-#include "cmd/weapon_info.h"
-#include "src/vs_logging.h"
 #include "cmd/unit_util.h"
+#include "cmd/weapon_info.h"
 #include "resource/cargo.h"
 #include "root_generic/vega_random.h"
+#include "src/universe.h"
+#include "src/universe_util.h"
+#include "src/vs_logging.h"
 
 FireKeyboard::FireKeyboard(unsigned int whichplayer, unsigned int whichjoystick) : Order(WEAPON, 0) {
     memset(savedTargets, 0, sizeof(void *) * NUMSAVEDTARGETS);
     this->autotrackingtoggle = 1;
-    this->whichjoystick = whichjoystick;
-    this->whichplayer = whichplayer;
+    this->whichjoystick      = whichjoystick;
+    this->whichplayer        = whichplayer;
     gunspeed = gunrange = .0001;
-    refresh_target = true;
+    refresh_target      = true;
 }
 
 const unsigned int NUMCOMMKEYS = 10;
@@ -83,13 +86,13 @@ struct FIREKEYBOARDTYPE {
         commKeys[3] = commKeys[4] = commKeys[5] = commKeys[6] = commKeys[7] = commKeys[8] = commKeys[9] = turretaikey =
                 UP;
         turretoffkey = turretfaw = saveTargetKeys[0] = saveTargetKeys[1] = saveTargetKeys[2] = saveTargetKeys[3] =
-                saveTargetKeys[4] = UP;
+                saveTargetKeys[4]                                                            = UP;
         saveTargetKeys[5] = saveTargetKeys[6] = saveTargetKeys[7] = saveTargetKeys[8] = saveTargetKeys[9] =
                 turretaikey = restoreTargetKeys[0] = UP;
         restoreTargetKeys[1] = restoreTargetKeys[2] = restoreTargetKeys[3] = restoreTargetKeys[4] =
                 restoreTargetKeys[5] = restoreTargetKeys[6] = UP;
         restoreTargetKeys[7] = restoreTargetKeys[8] = restoreTargetKeys[9] = turretaikey = missiontargetkey =
-                rmissiontargetkey = UP;
+                rmissiontargetkey                                                        = UP;
         ejectdock = eject = ejectcargo = ejectnonmissioncargo = firekey = missilekey = jfirekey = jtargetkey =
                 jmissilekey = weapk = misk = UP;
         rweapk = rmisk = cloakkey = neartargetkey = targetskey = targetukey = threattargetkey = picktargetkey =
@@ -100,15 +103,15 @@ struct FIREKEYBOARDTYPE {
                 rincomingmissiletargetkey = nearesthostilekey = UP;
         nearestdangeroushostilekey = missiletargetkey = rmissiletargetkey = nearestfriendlykey = nearestbasekey =
                 nearestplanetkey = nearestjumpkey = togglepausekey = UP;
-        shieldpowerstate = 1;
+        shieldpowerstate                                           = 1;
         doc = und = req = 0;
     }
 
     KBSTATE firekey;
-    float shieldpowerstate;
-    bool doc;
-    bool und;
-    bool req;
+    float   shieldpowerstate;
+    bool    doc;
+    bool    und;
+    bool    req;
     KBSTATE missiletargetkey;
     KBSTATE incomingmissiletargetkey;
     KBSTATE rmissiletargetkey;
@@ -159,7 +162,7 @@ struct FIREKEYBOARDTYPE {
     KBSTATE turrettargetkey;
     KBSTATE enslave;
     KBSTATE freeslave;
-    //Added for nearest targets keys --ch
+    // Added for nearest targets keys --ch
     KBSTATE nearesthostilekey;
     KBSTATE nearestdangeroushostilekey;
     KBSTATE nearestfriendlykey;
@@ -172,8 +175,8 @@ struct FIREKEYBOARDTYPE {
 static std::vector<FIREKEYBOARDTYPE> vectorOfKeyboardInput;
 
 static FIREKEYBOARDTYPE &g() {
-    while (vectorOfKeyboardInput.size() <= (unsigned int) _Universe->CurrentCockpit() || vectorOfKeyboardInput.size()
-            <= (unsigned int) MAX_JOYSTICKS) {
+    while (vectorOfKeyboardInput.size() <= (unsigned int)_Universe->CurrentCockpit() ||
+           vectorOfKeyboardInput.size() <= (unsigned int)MAX_JOYSTICKS) {
         vectorOfKeyboardInput.push_back(FIREKEYBOARDTYPE());
     }
     return vectorOfKeyboardInput[_Universe->CurrentCockpit()];
@@ -196,7 +199,7 @@ FIREKEYBOARDTYPE &FireKeyboard::j() {
 
 void FireKeyboard::SetShieldsOneThird(const KBData &, KBSTATE k) {
     if (k == PRESS) {
-        float pow = 1. / 3;
+        float                 pow = 1. / 3;
         static soundContainer sc;
         if (sc.sound < 0) {
             static string str = configuration().cockpit_audio.shield;
@@ -213,7 +216,7 @@ void FireKeyboard::SetShieldsOneThird(const KBData &, KBSTATE k) {
 
 void FireKeyboard::SetShieldsOff(const KBData &, KBSTATE k) {
     if (k == PRESS) {
-        float pow = 0;
+        float                 pow = 0;
         static soundContainer sc;
         if (sc.sound < 0) {
             static string str = configuration().cockpit_audio.shield;
@@ -230,7 +233,7 @@ void FireKeyboard::SetShieldsOff(const KBData &, KBSTATE k) {
 
 void FireKeyboard::SetShieldsTwoThird(const KBData &, KBSTATE k) {
     if (k == PRESS) {
-        float pow = 2. / 3;
+        float                 pow = 2. / 3;
         static soundContainer sc;
         if (sc.sound < 0) {
             static string str = configuration().cockpit_audio.shield;
@@ -489,7 +492,7 @@ void FireKeyboard::UnDockKey(const KBData &, KBSTATE k) {
 
 void FireKeyboard::EjectKey(const KBData &, KBSTATE k) {
     if (k == PRESS) {
-        LeadMe("", "I am ejecting! Record the current location of my ship.", false); //used to clear group target
+        LeadMe("", "I am ejecting! Record the current location of my ship.", false);  // used to clear group target
         LeadMe("e", "Then get over here and pick me up!", false);
         g().eject = k;
     }
@@ -498,7 +501,7 @@ void FireKeyboard::EjectKey(const KBData &, KBSTATE k) {
 void FireKeyboard::EjectDockKey(const KBData &, KBSTATE k) {
     if (k == PRESS) {
         g().ejectdock = k;
-        g().doc = true;
+        g().doc       = true;
     }
     if (k == RELEASE) {
         g().doc = false;
@@ -823,18 +826,16 @@ void FireKeyboard::ToggleConfigScreen(const KBData &, KBSTATE k) {
 }
 
 extern unsigned int DoSpeech(Unit *un, Unit *player_un, const FSM::Node &convNode);
-extern Unit *GetThreat(const Unit *par, const Unit *leader);
+extern Unit        *GetThreat(const Unit *par, const Unit *leader);
 
 void HelpOut(bool crit, std::string conv) {
     Unit *un = _Universe->AccessCockpit()->GetParent();
     if (un) {
         Unit *par = NULL;
         DoSpeech(un, NULL, FSM::Node::MakeNode(conv, .1));
-        for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
-                (par = (*ui));
-                ++ui) {
+        for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator(); (par = (*ui)); ++ui) {
             if ((crit && UnitUtil::getFactionRelation(par, un) > 0) || par->faction == un->faction) {
-                Unit *threat = GetThreat(par, un);
+                Unit                *threat = GetThreat(par, un);
                 CommunicationMessage c(par, un, NULL, 0);
                 if (threat) {
                     par->Target(threat);
@@ -931,7 +932,7 @@ void FireKeyboard::FormUp(const KBData &, KBSTATE k) {
 
 void FireKeyboard::BreakFormation(const KBData &, KBSTATE k) {
     if (k == PRESS) {
-        LeadMe("", "Break formation!", false);         //used to clear group target
+        LeadMe("", "Break formation!", false);  // used to clear group target
 
         LeadMe("b", "Pick a target and open fire!", false);
     }
@@ -1016,9 +1017,9 @@ static bool isNotTurretOwner(Unit *parent, Unit *un) {
 bool TargMission(Unit *me, Unit *target) {
     for (unsigned int i = 0; i < active_missions.size(); ++i) {
         if (active_missions[i]->runtime.pymissions) {
-            vector<UnitContainer *> *relevant = &active_missions[i]->runtime.pymissions->relevant_units;
-            vector<UnitContainer *>::iterator ir = relevant->begin();
-            vector<UnitContainer *>::iterator ie = relevant->end();
+            vector<UnitContainer *>          *relevant = &active_missions[i]->runtime.pymissions->relevant_units;
+            vector<UnitContainer *>::iterator ir       = relevant->begin();
+            vector<UnitContainer *>::iterator ie       = relevant->end();
             for (; ir != ie; ++ir) {
                 if (**ir == target) {
                     return true;
@@ -1031,21 +1032,15 @@ bool TargMission(Unit *me, Unit *target) {
 
 bool TargAll(Unit *me, Unit *target) {
     const bool can_target_sun = configuration().graphics.can_target_sun;
-    return (me->InRange(target, true,
-            false)
-            || me->InRange(target, true, true)) && (can_target_sun || !UnitUtil::isSun(target)) && isNotTurretOwner(
-            me,
-            target);
+    return (me->InRange(target, true, false) || me->InRange(target, true, true)) &&
+           (can_target_sun || !UnitUtil::isSun(target)) && isNotTurretOwner(me, target);
 }
 
 bool TargSig(Unit *me, Unit *target) {
     const bool can_target_asteroid = configuration().graphics.can_target_asteroid;
 
-    bool ret =
-            me->InRange(target, false,
-                    true) && (UnitUtil::isSignificant(target) || TargMission(me, target)) && isNotTurretOwner(
-                    me,
-                    target);
+    bool ret = me->InRange(target, false, true) && (UnitUtil::isSignificant(target) || TargMission(me, target)) &&
+               isNotTurretOwner(me, target);
     if (can_target_asteroid == false) {
         if (target->getUnitType() == Vega_UnitType::asteroid || target->name.get().find("Asteroid") == 0) {
             ret = false;
@@ -1058,22 +1053,22 @@ extern Unit *getTopLevelOwner();
 
 bool TargUn(Unit *me, Unit *target) {
     const bool can_target_cargo = configuration().graphics.can_target_cargo;
-    int up = FactionUtil::GetUpgradeFaction();
-    return me->InRange(target, true,
-            false)
-            && (target->getUnitType() == Vega_UnitType::unit
-                    || target->getUnitType() == Vega_UnitType::enhancement) && getTopLevelOwner() != target->owner
-            && (can_target_cargo || target->faction != up) && isNotTurretOwner(me, target);
+    int        up               = FactionUtil::GetUpgradeFaction();
+    return me->InRange(target, true, false) &&
+           (target->getUnitType() == Vega_UnitType::unit || target->getUnitType() == Vega_UnitType::enhancement) &&
+           getTopLevelOwner() != target->owner && (can_target_cargo || target->faction != up) &&
+           isNotTurretOwner(me, target);
 }
 
 bool TargMissile(Unit *me, Unit *target) {
-    return me->InRange(target, true, false) && (target->getUnitType() == Vega_UnitType::missile) && isNotTurretOwner(me, target);
+    return me->InRange(target, true, false) && (target->getUnitType() == Vega_UnitType::missile) &&
+           isNotTurretOwner(me, target);
 }
 
 bool TargIncomingMissile(Unit *me, Unit *target) {
     Unit *tt = target->Target();
-    return TargMissile(me, target)
-            && (tt == me || (me->isSubUnit() && tt == _Universe->AccessCockpit()->GetSaveParent()));
+    return TargMissile(me, target) &&
+           (tt == me || (me->isSubUnit() && tt == _Universe->AccessCockpit()->GetSaveParent()));
 }
 
 bool TargFront(Unit *me, Unit *target) {
@@ -1081,8 +1076,8 @@ bool TargFront(Unit *me, Unit *target) {
         return false;
     }
     QVector delta(target->Position() - me->Position());
-    double mm = delta.Magnitude();
-    double tempmm = mm - target->rSize();
+    double  mm     = delta.Magnitude();
+    double  tempmm = mm - target->rSize();
     if (tempmm > 0.0001) {
         if ((me->ToLocalCoordinates(Vector(delta.i, delta.j, delta.k)).k / tempmm) > .995) {
             return true;
@@ -1109,29 +1104,24 @@ bool TargThreat(Unit *me, Unit *target) {
 
 bool TargNear(Unit *me, Unit *target) {
     const bool can_target_sun = configuration().graphics.can_target_sun;
-    return (me->getRelation(target) < 0
-            || TargThreat(me,
-                    target)
-            || target->getRelation(me) < 0)
-            && TargAll(me,
-                    target) && target->getUnitType() != Vega_UnitType::missile
-            && (can_target_sun || !UnitUtil::isSun(target)) && isNotTurretOwner(me,
-            target);
+    return (me->getRelation(target) < 0 || TargThreat(me, target) || target->getRelation(me) < 0) &&
+           TargAll(me, target) && target->getUnitType() != Vega_UnitType::missile &&
+           (can_target_sun || !UnitUtil::isSun(target)) && isNotTurretOwner(me, target);
 }
 
-//Target the nearest unit of a specified type
-//Possible types are:
-//0 = hostile
-//1 = hostile targetting me
-//2 = friendly
-//3 = base
-//4 = planet
-//5 = jump point
+// Target the nearest unit of a specified type
+// Possible types are:
+// 0 = hostile
+// 1 = hostile targetting me
+// 2 = friendly
+// 3 = base
+// 4 = planet
+// 5 = jump point
 bool getNearestTargetUnit(Unit *me, int iType) {
     QVector pos(me->Position());
-    Unit *un = NULL;
-    Unit *targ = NULL;
-    double minrange = FLT_MAX;
+    Unit   *un       = NULL;
+    Unit   *targ     = NULL;
+    double  minrange = FLT_MAX;
     for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = (*i)); ++i) {
         if (un == me) {
             continue;
@@ -1139,46 +1129,35 @@ bool getNearestTargetUnit(Unit *me, int iType) {
         if (un->Destroyed()) {
             continue;
         }
-        if (!(me->InRange(un, true, false))
-                || !(me->InRange(un, true, true))) {
+        if (!(me->InRange(un, true, false)) || !(me->InRange(un, true, true))) {
             continue;
         }
-        if ((iType == 0)
-                && ((un->getUnitType() != Vega_UnitType::unit)
-                        || !me->isEnemy(un))) {
+        if ((iType == 0) && ((un->getUnitType() != Vega_UnitType::unit) || !me->isEnemy(un))) {
             continue;
         }
-        if ((iType == 1)
-                && ((un->getUnitType() != Vega_UnitType::unit)
-                        || (!me->isEnemy(un)
-                                && (un->Target() != me)))) {
+        if ((iType == 1) &&
+            ((un->getUnitType() != Vega_UnitType::unit) || (!me->isEnemy(un) && (un->Target() != me)))) {
             continue;
         }
-        if ((iType == 2)
-                && ((un->getUnitType() != Vega_UnitType::unit)
-                        || me->isEnemy(un)
-                        || (UnitUtil::getFlightgroupName(un) == "Base"))) {
+        if ((iType == 2) && ((un->getUnitType() != Vega_UnitType::unit) || me->isEnemy(un) ||
+                             (UnitUtil::getFlightgroupName(un) == "Base"))) {
             continue;
         }
-        if ((iType == 3)
-                && (UnitUtil::getFlightgroupName(un) != "Base")) {
+        if ((iType == 3) && (UnitUtil::getFlightgroupName(un) != "Base")) {
             continue;
         }
-        if ((iType == 4)
-                && ((!un->isPlanet())
-                        || (un->isJumppoint()))) {
+        if ((iType == 4) && ((!un->isPlanet()) || (un->isJumppoint()))) {
             continue;
         }
-        if ((iType == 5)
-                && (!un->isJumppoint())) {
+        if ((iType == 5) && (!un->isJumppoint())) {
             continue;
         }
         double temp = (un->Position() - pos).Magnitude();
         if (targ == NULL) {
-            targ = un;
+            targ     = un;
             minrange = temp;
         } else if (temp < minrange) {
-            targ = un;
+            targ     = un;
             minrange = temp;
         }
     }
@@ -1192,8 +1171,8 @@ bool getNearestTargetUnit(Unit *me, int iType) {
 
 bool ChooseTargets(Unit *me, bool (*typeofunit)(Unit *, Unit *), bool reverse) {
     UnitCollection &drawlist = _Universe->activeStarSystem()->getUnitList();
-    vector<Unit *> vec;
-    Unit *target;
+    vector<Unit *>  vec;
+    Unit           *target;
     for (un_iter iter = drawlist.createIterator(); (target = *iter) != NULL; ++iter) {
         vec.push_back(target);
     }
@@ -1292,11 +1271,9 @@ bool FireKeyboard::ShouldFire(Unit *targ) {
 }
 
 static bool UnDockNow(Unit *me, Unit *targ) {
-    bool ret = false;
+    bool  ret = false;
     Unit *un;
-    for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
-            (un = *i) != NULL;
-            ++i) {
+    for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
         if (un->isDocked(me)) {
             if (me->UnDock(un)) {
                 ret = true;
@@ -1328,7 +1305,7 @@ void PlayDockingSound(int dock) {
         }
         case 3: {
             static soundContainer reqsound;
-            std::string otherstr = configuration().audio.automatic_docking_zone;
+            std::string           otherstr = configuration().audio.automatic_docking_zone;
             if (otherstr != "" && VegaRandom::Instance().GenRandReal1() < 0.5) {
                 static int s = AUDCreateSoundWAV(otherstr, false);
                 AUDPlay(s, QVector(0, 0, 0), Vector(0, 0, 0), 1);
@@ -1386,21 +1363,21 @@ static bool SuperDock(Unit *parent, Unit *target) {
 
 static bool TryDock(Unit *parent, Unit *targ, unsigned char playa, int severity) {
     const float min_docking_relationship = configuration().ai.min_docking_relationship_flt;
-    const bool can_dock_to_enemy_base = configuration().ai.can_dock_to_enemy_base;
-    const bool nojumpinSPEC = configuration().physics.no_spec_jump;
-    bool SPEC_interference = targ && parent && nojumpinSPEC
-            && (targ->ftl_drive.Enabled() || parent->ftl_drive.Enabled());
-    unsigned char gender = 0;
-    vector<Animation *> *anim = NULL;
+    const bool  can_dock_to_enemy_base   = configuration().ai.can_dock_to_enemy_base;
+    const bool  nojumpinSPEC             = configuration().physics.no_spec_jump;
+    bool        SPEC_interference =
+            targ && parent && nojumpinSPEC && (targ->ftl_drive.Enabled() || parent->ftl_drive.Enabled());
+    unsigned char        gender = 0;
+    vector<Animation *> *anim   = NULL;
     if (SPEC_interference) {
-        //FIXME js_NUDGE -- need some indicator of non-interaction because one or both objects are in SPEC.
+        // FIXME js_NUDGE -- need some indicator of non-interaction because one or both objects are in SPEC.
         return false;
     }
     anim = targ->pilot->getCommFaces(gender);
 
     bool isDone = false;
-    if (targ->getRelation(parent) >= min_docking_relationship
-            || (can_dock_to_enemy_base && UnitUtil::getFlightgroupName(targ) == "Base")) {
+    if (targ->getRelation(parent) >= min_docking_relationship ||
+        (can_dock_to_enemy_base && UnitUtil::getFlightgroupName(targ) == "Base")) {
         bool hasDock = severity == 0 ? parent->Dock(targ) : SuperDock(parent, targ);
 
         CommunicationMessage c(targ, parent, anim, gender);
@@ -1438,19 +1415,16 @@ static bool ExecuteRequestClearenceKey(Unit *parent, Unit *endt) {
         }
         endt->ftl_drive.Disable();
         const float clearencetime = configuration().general.docking_time_flt;
-        endt->EnqueueAIFirst(new Orders::ExecuteFor(new Orders::MatchVelocity(Vector(0, 0, 0),
-                Vector(0, 0, 0),
-                true,
-                false,
-                true), clearencetime));
+        endt->EnqueueAIFirst(new Orders::ExecuteFor(
+                new Orders::MatchVelocity(Vector(0, 0, 0), Vector(0, 0, 0), true, false, true), clearencetime));
     }
     return tmp;
 }
 
 static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned char gender) {
     const int maxseverity = configuration().ai.dock_to_area ? 2 : 1;
-    Unit *endt = targ;
-    bool wasdock = vectorOfKeyboardInput[playa].doc;
+    Unit     *endt        = targ;
+    bool      wasdock     = vectorOfKeyboardInput[playa].doc;
     if (vectorOfKeyboardInput[playa].doc) {
         bool isDone = false;
         if (targ) {
@@ -1467,13 +1441,11 @@ static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned
         if (!isDone) {
             for (int severity = 0; severity < maxseverity && !isDone; ++severity) {
                 for (un_iter u = _Universe->activeStarSystem()->getUnitList().createIterator();
-                        (targ = *u) != NULL && !isDone;
-                        ++u) {
-                    //Let's make sure potentials are actually in range, and have
-                    //docking ports before we try to dock with them.
-                    if ((targ != parent)
-                            && (UnitUtil::isDockableUnit(targ))
-                            && (UnitUtil::isCloseEnoughToDock(parent, targ))) {
+                     (targ = *u) != NULL && !isDone; ++u) {
+                    // Let's make sure potentials are actually in range, and have
+                    // docking ports before we try to dock with them.
+                    if ((targ != parent) && (UnitUtil::isDockableUnit(targ)) &&
+                        (UnitUtil::isCloseEnoughToDock(parent, targ))) {
                         targ->RequestClearance(parent);
                         if (TryDock(parent, targ, playa, severity)) {
                             parent->Target(targ);
@@ -1498,8 +1470,8 @@ static void DoDockingOps(Unit *parent, Unit *targ, unsigned char playa, unsigned
     if (vectorOfKeyboardInput[playa].req && endt != NULL) {
         bool request = ExecuteRequestClearenceKey(parent, endt);
         if (!request) {
-            mission->msgcenter->add("game",
-                    "all",
+            mission->msgcenter->add(
+                    "game", "all",
                     "[Computer] Cannot dock with insubstantial object, target another object and retry.");
             PlayDockingSound(0);
             return;
@@ -1535,21 +1507,21 @@ unsigned int FireKeyboard::DoSpeechAndAni(Unit *un, Unit *parent, class Communic
 }
 
 static void MyFunction() {
-    //quit it--he's dead all ready
+    // quit it--he's dead all ready
     const string comm_static = configuration().graphics.comm_static;
-    //dead dead dead dead
+    // dead dead dead dead
     static Animation Statuc(comm_static.c_str());
-    //yep really dead
+    // yep really dead
     _Universe->AccessCockpit()->SetCommAnimation(&Statuc, NULL);
 }
 
 void FireKeyboard::ProcessCommMessage(class CommunicationMessage &c) {
-    Unit *un = c.sender.GetUnit();
-    unsigned int whichsound = 0;
-    bool foundValidMessage = false;
+    Unit        *un                = c.sender.GetUnit();
+    unsigned int whichsound        = 0;
+    bool         foundValidMessage = false;
     if (_Universe->AccessCockpit()->CheckCommAnimation(un)) {
         return;
-    }          //wait till later
+    }  // wait till later
 
     bool reallydospeech = false;
     if (un && !un->Destroyed()) {
@@ -1566,16 +1538,16 @@ void FireKeyboard::ProcessCommMessage(class CommunicationMessage &c) {
             whichsound = DoSpeechAndAni(un, parent, c);
         }
     } else if (0) {
-        //none of this happens
+        // none of this happens
         whichsound = DoSpeech(NULL, NULL, *c.getCurrentState());
-        //this is when a unit is already dead
+        // this is when a unit is already dead
         if (parent == _Universe->AccessCockpit()->GetParent()) {
             MyFunction();
         }
-        //mmhmm! Gcc-4.1 hack -- otherwise linker failure
+        // mmhmm! Gcc-4.1 hack -- otherwise linker failure
     }
     float gain;
-    int sound = c.getCurrentState()->GetSound(c.sex, whichsound, gain);
+    int   sound = c.getCurrentState()->GetSound(c.sex, whichsound, gain);
     if (reallydospeech && !AUDIsPlaying(sound)) {
         AUDPlay(sound, QVector(0, 0, 0), Vector(0, 0, 0), gain);
     }
@@ -1597,17 +1569,17 @@ static CommunicationMessage *GetTargetMessageQueue(Unit *targ, std::list<Communi
 extern std::set<Unit *> arrested_list_do_not_dereference;
 
 void Arrested(Unit *parent) {
-    std::string fac = UniverseUtil::GetGalaxyFaction(UniverseUtil::getSystemFile());
-    int own = FactionUtil::GetFactionIndex(fac);
-    std::string po = configuration().galaxy.police_faction;
-    int police = FactionUtil::GetFactionIndex(po);
-    int police2 = FactionUtil::GetFactionIndex(po + "_" + fac);
-    float ownrel = UnitUtil::getRelationFromFaction(parent, own);
-    bool attack = ownrel < 0;
+    std::string fac     = UniverseUtil::GetGalaxyFaction(UniverseUtil::getSystemFile());
+    int         own     = FactionUtil::GetFactionIndex(fac);
+    std::string po      = configuration().galaxy.police_faction;
+    int         police  = FactionUtil::GetFactionIndex(po);
+    int         police2 = FactionUtil::GetFactionIndex(po + "_" + fac);
+    float       ownrel  = UnitUtil::getRelationFromFaction(parent, own);
+    bool        attack  = ownrel < 0;
     if (!attack) {
         Unit *contra = FactionUtil::GetContraband(own);
         if (contra) {
-            for(Cargo& contraband : contra->cargo_hold.GetItems()) {
+            for (Cargo &contraband : contra->cargo_hold.GetItems()) {
                 if (parent->cargo_hold.HasCargo(contraband.GetName())) {
                     // Parent has contraband cargo
                     attack = true;
@@ -1618,9 +1590,7 @@ void Arrested(Unit *parent) {
     }
     if (!attack) {
         Unit *un;
-        for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();
-                (un = *i) != NULL;
-                ++i) {
+        for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
             if (un->faction == own || un->faction == police || un->faction == police2) {
                 if (un->Target() == parent || un->getRelation(parent) < 0) {
                     int parentCp = _Universe->whichPlayerStarship(parent);
@@ -1635,19 +1605,17 @@ void Arrested(Unit *parent) {
     }
     if (attack) {
         std::string prison_system = configuration().galaxy.prison_system;
-        std::string psys = prison_system + "_" + fac;
+        std::string psys          = prison_system + "_" + fac;
         if (UnitUtil::getUnitSystemFile(parent) != psys) {
             UnitUtil::JumpTo(parent, psys);
-            UniverseUtil::IOmessage(
-                    0,
-                    "game",
-                    "all",
-                    parent->name
-                            + ", you are under arrest!  You will be taken to the prison system and will be tried for your crimes.");
+            UniverseUtil::IOmessage(0, "game", "all",
+                                    parent->name +
+                                            ", you are under arrest!  You will be taken to the prison system and will "
+                                            "be tried for your crimes.");
         } else {
             Unit *un;
             Unit *owner = NULL;
-            Unit *base = NULL;
+            Unit *base  = NULL;
             for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = *i) != NULL; ++i) {
                 if (owner == NULL && un->getFlightgroup() && un->faction == own) {
                     if (UnitUtil::isSignificant(un) && (!un->isJumppoint())) {
@@ -1662,19 +1630,17 @@ void Arrested(Unit *parent) {
                 owner = base;
             }
             if (owner) {
-                Order *tmp = parent->aistate;
+                Order *tmp      = parent->aistate;
                 parent->aistate = NULL;
                 parent->PrimeOrders(new Orders::DockingOps(owner, tmp, true, true));
                 arrested_list_do_not_dereference.insert(parent);
                 parent->cargo_hold.Clear();
-                
+
                 UniverseUtil::IOmessage(
-                        0,
-                        "game",
-                        "all",
-                        parent->name
-                                +
-                                        ", your cargo has been confiscated and scanned. Here your ship will be kept until you complete your reintegration into society through our reprogramming pod(tm) system.");
+                        0, "game", "all",
+                        parent->name +
+                                ", your cargo has been confiscated and scanned. Here your ship will be kept until you "
+                                "complete your reintegration into society through our reprogramming pod(tm) system.");
                 int whichCp = _Universe->whichPlayerStarship(parent);
                 UniverseUtil::adjustRelationModifierInt(whichCp, own, -UnitUtil::getRelationToFaction(parent, own));
             }
@@ -1704,8 +1670,8 @@ void FireKeyboard::SetParent(Unit *parent1) {
     this->Order::SetParent(parent1);
     const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
     if (!allow_special_with_weapons) {
-        parent->ToggleWeapon(false, true /*reverse*/ );
-        parent->ToggleWeapon(false, false /*reverse*/ );
+        parent->ToggleWeapon(false, true /*reverse*/);
+        parent->ToggleWeapon(false, false /*reverse*/);
     }
 }
 
@@ -1725,7 +1691,7 @@ void FireKeyboard::Execute() {
             ForceChangeTarget(parent);
             refresh_target = true;
         } else if (false == parent->InRange(targ, mm, true, true, true) && !parent->TargetLocked()) {
-            ChooseTargets(parent, TargUn, false);                 //only go for other active units in cone
+            ChooseTargets(parent, TargUn, false);  // only go for other active units in cone
             if (parent->Target() == NULL) {
                 parent->Target(targ);
             }
@@ -1744,13 +1710,13 @@ void FireKeyboard::Execute() {
             const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
             if (!allow_special_with_weapons) {
                 bool special = false;
-                bool normal = false;
-                int nm = parent->getNumMounts();
-                int i;
+                bool normal  = false;
+                int  nm      = parent->getNumMounts();
+                int  i;
                 for (i = 0; i < nm; ++i) {
                     if (parent->mounts[i].status == Mount::ACTIVE) {
                         special = special || isSpecialGunMount(as_integer(parent->mounts[i].type->size));
-                        normal = normal || isNormalGunMount(as_integer(parent->mounts[i].type->size));
+                        normal  = normal || isNormalGunMount(as_integer(parent->mounts[i].type->size));
                     }
                 }
                 for (i = 0; i < nm; ++i) {
@@ -1777,7 +1743,7 @@ void FireKeyboard::Execute() {
             j().jmissilekey = DOWN;
         }
     } else if (f().firekey == RELEASE || j().jfirekey == RELEASE) {
-        f().firekey = UP;
+        f().firekey  = UP;
         j().jfirekey = UP;
         parent->UnFire();
     }
@@ -1791,10 +1757,11 @@ void FireKeyboard::Execute() {
     }
     if (f().ECMkey == PRESS) {
         f().ECMkey = DOWN;
-        parent->ecm.Toggle();;
+        parent->ecm.Toggle();
+        ;
     }
     if (f().targetkey == PRESS || j().jtargetkey == PRESS) {
-        f().targetkey = DOWN;
+        f().targetkey  = DOWN;
         j().jtargetkey = DOWN;
         ChooseTargets(parent, TargAll, false);
         refresh_target = true;
@@ -1821,10 +1788,10 @@ void FireKeyboard::Execute() {
         parent->radar.Lock(UnitUtil::isSignificant(parent));
     }
     if (f().targetukey == PRESS) {
-        f().targetukey = DOWN;
+        f().targetukey              = DOWN;
         const bool smart_targetting = configuration().graphics.smart_targetting_key;
-        Unit *tmp = parent->Target();
-        bool sysobj = false;
+        Unit      *tmp              = parent->Target();
+        bool       sysobj           = false;
         if (tmp) {
             if (tmp->owner == getTopLevelOwner()) {
                 sysobj = true;
@@ -1847,37 +1814,37 @@ void FireKeyboard::Execute() {
     if (f().neartargetkey == PRESS) {
         ChooseTargets(parent, TargNear, false);
         f().neartargetkey = DOWN;
-        refresh_target = true;
+        refresh_target    = true;
     }
     if (f().missiletargetkey == PRESS) {
         ChooseTargets(parent, TargMissile, false);
         f().missiletargetkey = DOWN;
-        refresh_target = true;
+        refresh_target       = true;
     }
     if (f().incomingmissiletargetkey == PRESS) {
         ChooseTargets(parent, TargIncomingMissile, false);
         f().incomingmissiletargetkey = DOWN;
-        refresh_target = true;
+        refresh_target               = true;
     }
     if (f().rmissiletargetkey == PRESS) {
         ChooseTargets(parent, TargMissile, true);
         f().rmissiletargetkey = DOWN;
-        refresh_target = true;
+        refresh_target        = true;
     }
     if (f().rincomingmissiletargetkey == PRESS) {
         ChooseTargets(parent, TargIncomingMissile, true);
         f().rincomingmissiletargetkey = DOWN;
-        refresh_target = true;
+        refresh_target                = true;
     }
     if (f().threattargetkey == PRESS) {
         ChooseTargets(parent, TargThreat, false);
         f().threattargetkey = DOWN;
-        refresh_target = true;
+        refresh_target      = true;
     }
     if (f().subtargetkey == PRESS) {
         ChooseSubTargets(parent);
         f().subtargetkey = DOWN;
-        refresh_target = true;
+        refresh_target   = true;
     }
     if (f().rpicktargetkey == PRESS) {
         f().rpicktargetkey = DOWN;
@@ -1887,12 +1854,12 @@ void FireKeyboard::Execute() {
     if (f().rneartargetkey == PRESS) {
         ChooseTargets(parent, TargNear, true);
         f().rneartargetkey = DOWN;
-        refresh_target = true;
+        refresh_target     = true;
     }
     if (f().rthreattargetkey == PRESS) {
         ChooseTargets(parent, TargThreat, true);
         f().rthreattargetkey = DOWN;
-        refresh_target = true;
+        refresh_target       = true;
     }
     if (f().rtargetskey == PRESS) {
         f().rtargetskey = DOWN;
@@ -1901,10 +1868,10 @@ void FireKeyboard::Execute() {
         parent->radar.Lock(UnitUtil::isSignificant(parent));
     }
     if (f().rtargetukey == PRESS) {
-        f().rtargetukey = DOWN;
+        f().rtargetukey             = DOWN;
         const bool smart_targetting = configuration().graphics.smart_targetting_key;
-        Unit *tmp = parent->Target();
-        bool sysobj = false;
+        Unit      *tmp              = parent->Target();
+        bool       sysobj           = false;
         if (tmp) {
             if (tmp->owner == getTopLevelOwner()) {
                 sysobj = true;
@@ -1950,53 +1917,53 @@ void FireKeyboard::Execute() {
     if (f().nearturrettargetkey == PRESS) {
         parent->TargetTurret(parent->Target());
         f().nearturrettargetkey = DOWN;
-        refresh_target = true;
+        refresh_target          = true;
     }
     if (f().threatturrettargetkey == PRESS) {
         parent->TargetTurret(parent->Target());
         f().threatturrettargetkey = DOWN;
-        refresh_target = true;
+        refresh_target            = true;
     }
-    //Added for nearest unit targeting -ch
+    // Added for nearest unit targeting -ch
     if (f().nearesthostilekey == PRESS) {
         getNearestTargetUnit(parent, 0);
         f().nearesthostilekey = DOWN;
-        refresh_target = true;
+        refresh_target        = true;
     }
     if (f().nearestdangeroushostilekey == PRESS) {
         getNearestTargetUnit(parent, 1);
         f().nearestdangeroushostilekey = DOWN;
-        refresh_target = true;
+        refresh_target                 = true;
     }
     if (f().nearestfriendlykey == PRESS) {
         getNearestTargetUnit(parent, 2);
         f().nearestfriendlykey = DOWN;
-        refresh_target = true;
+        refresh_target         = true;
     }
     if (f().nearestbasekey == PRESS) {
         getNearestTargetUnit(parent, 3);
         f().nearestbasekey = DOWN;
-        refresh_target = true;
+        refresh_target     = true;
     }
     if (f().nearestplanetkey == PRESS) {
         getNearestTargetUnit(parent, 4);
         f().nearestplanetkey = DOWN;
-        refresh_target = true;
+        refresh_target       = true;
     }
     if (f().nearestjumpkey == PRESS) {
         getNearestTargetUnit(parent, 5);
         f().nearestjumpkey = DOWN;
-        refresh_target = true;
+        refresh_target     = true;
     }
     if (f().weapk == PRESS || f().rweapk == PRESS) {
         bool forward;
         if (f().weapk == PRESS) {
             f().weapk = DOWN;
-            forward = true;
+            forward   = true;
         }
         if (f().rweapk == PRESS) {
             f().rweapk = DOWN;
-            forward = false;
+            forward    = false;
         }
         parent->UnFire();
         parent->ToggleWeapon(false, forward);
@@ -2008,13 +1975,13 @@ void FireKeyboard::Execute() {
         weapsound.playsound();
     }
     if (f().toggleanimation == PRESS) {
-        f().toggleanimation = DOWN;
+        f().toggleanimation              = DOWN;
         parent->graphicOptions.Animating = parent->graphicOptions.Animating ? 0 : 1;
     }
     if (f().toggleglow == PRESS) {
-        f().toggleglow = DOWN;
+        f().toggleglow    = DOWN;
         static bool isvis = true;
-        isvis = !isvis;
+        isvis             = !isvis;
         parent->SetGlowVisible(isvis);
     }
     if (f().togglewarpdrive == PRESS) {
@@ -2030,11 +1997,11 @@ void FireKeyboard::Execute() {
         bool forward;
         if (f().misk == PRESS) {
             f().misk = DOWN;
-            forward = true;
+            forward  = true;
         }
         if (f().rmisk == PRESS) {
             f().rmisk = DOWN;
-            forward = false;
+            forward   = false;
         }
         parent->ToggleWeapon(true, forward);
         static soundContainer missound;
@@ -2048,14 +2015,12 @@ void FireKeyboard::Execute() {
     for (i = 0; i < NUMSAVEDTARGETS; i++) {
         if (f().saveTargetKeys[i] == PRESS) {
             f().saveTargetKeys[i] = RELEASE;
-            savedTargets[i] = parent->Target();
+            savedTargets[i]       = parent->Target();
         }
         if (f().restoreTargetKeys[i] == PRESS && parent->radar.CanLock()) {
             f().restoreTargetKeys[i] = RELEASE;
             Unit *un;
-            for (un_iter u = _Universe->activeStarSystem()->getUnitList().createIterator();
-                    (un = *u) != NULL;
-                    ++u) {
+            for (un_iter u = _Universe->activeStarSystem()->getUnitList().createIterator(); (un = *u) != NULL; ++u) {
                 if (un == savedTargets[i]) {
                     parent->Target(un);
                     break;
@@ -2066,15 +2031,15 @@ void FireKeyboard::Execute() {
     for (i = 0; i < NUMCOMMKEYS; i++) {
         if (f().commKeys[i] == PRESS) {
             f().commKeys[i] = RELEASE;
-            Unit *targ = parent->Target();
+            Unit *targ      = parent->Target();
             if (targ) {
                 CommunicationMessage *mymsg = GetTargetMessageQueue(targ, resp);
-                FSM *fsm = FactionUtil::GetConversation(parent->faction, targ->faction);
+                FSM                  *fsm   = FactionUtil::GetConversation(parent->faction, targ->faction);
                 if (mymsg == NULL || mymsg->curstate >= static_cast<int>(fsm->nodes.size())) {
                     CommunicationMessage c(parent, targ, i, NULL, parent->pilot->getGender());
-                    unsigned int whichspeech = DoSpeech(targ, targ, *c.getCurrentState());
-                    float gain;
-                    int sound = c.getCurrentState()->GetSound(c.sex, whichspeech, gain);
+                    unsigned int         whichspeech = DoSpeech(targ, targ, *c.getCurrentState());
+                    float                gain;
+                    int                  sound = c.getCurrentState()->GetSound(c.sex, whichspeech, gain);
                     if (!AUDIsPlaying(sound)) {
                         AUDPlay(sound, QVector(0, 0, 0), Vector(0, 0, 0), gain);
                     }
@@ -2083,14 +2048,14 @@ void FireKeyboard::Execute() {
                         o->Communicate(c);
                     }
                 } else {
-                    FSM *tmp = mymsg->fsm;
-                    mymsg->fsm = fsm;
+                    FSM *tmp     = mymsg->fsm;
+                    mymsg->fsm   = fsm;
                     FSM::Node *n = mymsg->getCurrentState();
                     if (i < n->edges.size()) {
                         CommunicationMessage c(parent, targ, *mymsg, i, NULL, parent->pilot->getGender());
-                        unsigned int whichmessage = DoSpeech(targ, targ, *c.getCurrentState());
-                        float gain;
-                        int sound = c.getCurrentState()->GetSound(c.sex, whichmessage, gain);
+                        unsigned int         whichmessage = DoSpeech(targ, targ, *c.getCurrentState());
+                        float                gain;
+                        int                  sound = c.getCurrentState()->GetSound(c.sex, whichmessage, gain);
                         if (!AUDIsPlaying(sound)) {
                             AUDPlay(sound, QVector(0, 0, 0), Vector(0, 0, 0), gain);
                         }
@@ -2111,7 +2076,7 @@ void FireKeyboard::Execute() {
                 parent->TargetTurret(targ);
             }
             CommunicationMessage *mymsg = GetTargetMessageQueue(targ, resp);
-            FSM *fsm = FactionUtil::GetConversation(parent->faction, targ->faction);
+            FSM                  *fsm   = FactionUtil::GetConversation(parent->faction, targ->faction);
             if (mymsg == NULL) {
                 _Universe->AccessCockpit()->communication_choices =
                         fsm->GetEdgesString(fsm->getDefaultState(parent->getRelation(targ)));
@@ -2131,10 +2096,10 @@ void FireKeyboard::Execute() {
         f().freeslave = RELEASE;
     }
     if (f().ejectcargo == PRESS || f().ejectnonmissioncargo == PRESS) {
-        bool missiontoo = (f().ejectcargo == PRESS);
+        bool missiontoo          = (f().ejectcargo == PRESS);
         f().ejectnonmissioncargo = RELEASE;
-        f().ejectcargo = RELEASE;
-        int offset = _Universe->AccessCockpit()->getScrollOffset(VDU::MANIFEST);
+        f().ejectcargo           = RELEASE;
+        int offset               = _Universe->AccessCockpit()->getScrollOffset(VDU::MANIFEST);
         if (offset < 3) {
             offset = 0;
         } else {
@@ -2153,27 +2118,26 @@ void FireKeyboard::Execute() {
             f().ejectcargo = DOWN;
         }
     }
-    //i think this ejects the pilot? yep it does
+    // i think this ejects the pilot? yep it does
     if (f().eject == PRESS) {
-        f().eject = DOWN;
+        f().eject   = DOWN;
         Cockpit *cp = NULL;
         if ((parent->name != "eject") && (parent->name != "Pilot") && (cp = _Universe->isPlayerStarship(parent))) {
             cp->Eject();
         }
     }
-    //eject pilot and warp pilot to the docking screen instantly.
+    // eject pilot and warp pilot to the docking screen instantly.
     if (f().ejectdock == PRESS) {
         f().ejectdock = DOWN;
-        Unit *utdw = parent;
+        Unit    *utdw = parent;
         Cockpit *cp =
-                NULL;          //check if docking ports exist, no docking ports = no need to ejectdock so don't do anything
+                NULL;  // check if docking ports exist, no docking ports = no need to ejectdock so don't do anything
         if ((SelectDockPort(utdw, parent) > -1) && (cp = _Universe->isPlayerStarship(parent))) {
             cp->EjectDock();
-        }              //use specialized ejectdock in the future
+        }  // use specialized ejectdock in the future
     }
     const bool actually_arrest = configuration().ai.arrest_energy_zero;
     if (actually_arrest && parent->reactor.Capacity() == 0) {
         Arrested(parent);
     }
 }
-

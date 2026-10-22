@@ -27,27 +27,26 @@
 #ifndef VEGA_STRIKE_ENGINE_VEGA_STRING_UTILS_H
 #define VEGA_STRIKE_ENGINE_VEGA_STRING_UTILS_H
 
-#include "src/vs_logging.h"
 #include "src/vs_exit.h"
+#include "src/vs_logging.h"
 
 inline char *vega_str_dup(const char *string) {
-#if _XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
+#if _XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200'809L
     return strdup(string);
-#elif defined (_WINDOWS)
+#elif defined(_WINDOWS)
     return _strdup(string);
-#else //_XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
+#else   //_XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
     size_t buf_size = strlen(string) + 1;
-    char *alloc;
+    char  *alloc;
     alloc = (char *)malloc(buf_size);
-    if (alloc == nullptr)
-    {
+    if (alloc == nullptr) {
         VS_LOG_AND_FLUSH(fatal, "Out of memory");
         VSExit(-1);
     }
     strncpy(alloc, string, buf_size);
     alloc[buf_size - 1] = '\0';
     return alloc;
-#endif //_XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
+#endif  //_XOPEN_SOURCE >= 500 || _POSIX_C_SOURCE >= 200809L
 }
 
-#endif //VEGA_STRIKE_ENGINE_VEGA_STRING_UTILS_H
+#endif  // VEGA_STRIKE_ENGINE_VEGA_STRING_UTILS_H

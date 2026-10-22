@@ -27,6 +27,7 @@
 
 
 #include <string>
+
 #include "cmd/unit_generic.h"
 
 VSSprite *createVSSprite(const char *file) {
@@ -37,17 +38,13 @@ bool isVSSpriteLoaded(const VSSprite *file) {
     return true;
 }
 
-void deleteVSSprite(VSSprite *file) {
-}
+void deleteVSSprite(VSSprite *file) {}
 
-void PlayDockingSound(int) {
-}
+void PlayDockingSound(int) {}
 
-void cache_ani(std::string s) {
-}
+void cache_ani(std::string s) {}
 
-void update_ani_cache() {
-}
+void update_ani_cache() {}
 
 std::string getRandomCachedAniString() {
     return "";
@@ -56,4 +53,3 @@ std::string getRandomCachedAniString() {
 Animation *getRandomCachedAni() {
     return NULL;
 }
-

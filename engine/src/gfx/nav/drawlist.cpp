@@ -26,86 +26,75 @@
  */
 
 
-#include "gui/glut_support.h"
-
-#include "gfx/hud.h"
+#include "gfx/nav/drawlist.h"
 
 #include "cmd/unit_generic.h"
-
+#include "gfx/hud.h"
+#include "gfx/masks.h"
+#include "gfx/nav/navigation_system.h"
 #include "gui/glut_support.h"
-
+#include "src/config_xml.h"
 #include "src/universe_util.h"
 
-#include "src/config_xml.h"
-
-#include "gfx/nav/drawlist.h"
-#include "gfx/nav/navigation_system.h"
-#include "gfx/masks.h"
-
-navdrawnode::navdrawnode()      //new undefined node, check for these values if wondering if assignment didnt happen.
+navdrawnode::navdrawnode()  // new undefined node, check for these values if wondering if assignment didnt happen.
 {
-    type = -1;
-    size = 0.0;
-    x = 0;
-    y = 0;
+    type     = -1;
+    size     = 0.0;
+    x        = 0;
+    y        = 0;
     nextitem = NULL;
-    source = NULL;
+    source   = NULL;
 }
 
-navdrawnode::navdrawnode(int type_, float size_, float x_, float y_, navdrawnode *nextitem_)    //new node into list
+navdrawnode::navdrawnode(int type_, float size_, float x_, float y_, navdrawnode *nextitem_)  // new node into list
 {
-    type = type_;
-    size = size_;
-    x = x_;
-    y = y_;
+    type     = type_;
+    size     = size_;
+    x        = x_;
+    y        = y_;
     nextitem = nextitem_;
-    source = NULL;
+    source   = NULL;
 }
 
-navdrawnode::navdrawnode(int type_,
-        float size_,
-        float x_,
-        float y_,
-        Unit *source_,
-        navdrawnode *nextitem_)     //new node into list
+navdrawnode::navdrawnode(int type_, float size_, float x_, float y_, Unit *source_,
+                         navdrawnode *nextitem_)  // new node into list
 {
-    type = type_;
-    size = size_;
-    x = x_;
-    y = y_;
+    type     = type_;
+    size     = size_;
+    x        = x_;
+    y        = y_;
     nextitem = nextitem_;
-    source = source_;
+    source   = source_;
 }
 
-navdrawlist::navdrawlist(bool mouse,
-        navscreenoccupied *screenoccupation_,
-        GFXColor *factioncolours_)   //start list with a 'mouselist' flag
+navdrawlist::navdrawlist(bool mouse, navscreenoccupied *screenoccupation_,
+                         GFXColor *factioncolours_)  // start list with a 'mouselist' flag
 {
-    inmouserange = mouse;
-    head = NULL;
-    tail = NULL;
-    unselectedalpha = 0.8;
-    n_contents = 0;
+    inmouserange     = mouse;
+    head             = NULL;
+    tail             = NULL;
+    unselectedalpha  = 0.8;
+    n_contents       = 0;
     screenoccupation = screenoccupation_;
-    localcolours = 0;
-    factioncolours = factioncolours_;
+    localcolours     = 0;
+    factioncolours   = factioncolours_;
 }
 
-navdrawlist::~navdrawlist()     //destroy list
+navdrawlist::~navdrawlist()  // destroy list
 {
     inmouserange = 0;
     wipe();
-    head = NULL;
-    tail = NULL;
+    head       = NULL;
+    tail       = NULL;
     n_contents = 0;
 }
 
-int navdrawlist::get_n_contents()       //return the amount of items in the list
+int navdrawlist::get_n_contents()  // return the amount of items in the list
 {
     return n_contents;
 }
 
-void navdrawlist::insert(int type, float size, float x, float y)        //insert iteam at head of list
+void navdrawlist::insert(int type, float size, float x, float y)  // insert iteam at head of list
 {
     if (head == NULL) {
         head = new navdrawnode(type, size, x, y, NULL);
@@ -116,7 +105,7 @@ void navdrawlist::insert(int type, float size, float x, float y)        //insert
     n_contents += 1;
 }
 
-void navdrawlist::insert(int type, float size, float x, float y, Unit *source)  //insert iteam at head of list
+void navdrawlist::insert(int type, float size, float x, float y, Unit *source)  // insert iteam at head of list
 {
     if (head == NULL) {
         head = new navdrawnode(type, size, x, y, source, NULL);
@@ -127,29 +116,29 @@ void navdrawlist::insert(int type, float size, float x, float y, Unit *source)  
     n_contents += 1;
 }
 
-void navdrawlist::wipe()        //whipe the list clean
+void navdrawlist::wipe()  // whipe the list clean
 {
-    navdrawnode *temp = head;
+    navdrawnode *temp       = head;
     navdrawnode *tempdelete = NULL;
     while (temp != NULL) {
         tempdelete = temp;
-        temp = temp->nextitem;
+        temp       = temp->nextitem;
         delete tempdelete;
     }
-    head = NULL;
+    head       = NULL;
     n_contents = 0;
 }
 
-void navdrawlist::rotate()      //take the head and stick it in the back
+void navdrawlist::rotate()  // take the head and stick it in the back
 {
     if (head != NULL) {
         //|
         //|
         if (head->nextitem != NULL) {
-            //there is something there, and its not alone
+            // there is something there, and its not alone
             tail->nextitem = head;
-            tail = head;
-            head = head->nextitem;
+            tail           = head;
+            head           = head->nextitem;
             tail->nextitem = NULL;
         }
     }
@@ -157,45 +146,29 @@ void navdrawlist::rotate()      //take the head and stick it in the back
 
 string getUnitNameAndFgNoBase(Unit *target);
 
-void drawdescription(Unit *source,
-        float x_,
-        float y_,
-        float size_x,
-        float size_y,
-        bool ignore_occupied_areas,
-        navscreenoccupied *screenoccupation,
-        const GFXColor &col)                                                                                                                                     //take the head and stick it in the back
+void drawdescription(Unit *source, float x_, float y_, float size_x, float size_y, bool ignore_occupied_areas,
+                     navscreenoccupied *screenoccupation,
+                     const GFXColor    &col)  // take the head and stick it in the back
 {
     if (source == NULL) {
         return;
     }
-    drawdescription(getUnitNameAndFgNoBase(source),
-            x_,
-            y_,
-            size_x,
-            size_y,
-            ignore_occupied_areas,
-            screenoccupation,
-            col);
+    drawdescription(getUnitNameAndFgNoBase(source), x_, y_, size_x, size_y, ignore_occupied_areas, screenoccupation,
+                    col);
 }
 
-void drawdescription(string text,
-        float x_,
-        float y_,
-        float size_x,
-        float size_y,
-        bool ignore_occupied_areas,
-        navscreenoccupied *screenoccupation,
-        const GFXColor &col)                                                                                                                                     //take the head and stick it in the back
+void drawdescription(string text, float x_, float y_, float size_x, float size_y, bool ignore_occupied_areas,
+                     navscreenoccupied *screenoccupation,
+                     const GFXColor    &col)  // take the head and stick it in the back
 {
     if (text.size() == 0) {
         return;
     }
-    TextPlane displayname;      //will be used to display shits names
+    TextPlane displayname;  // will be used to display shits names
 
     displayname.color = static_cast<ImU32>(col);
 
-    int length = text.size();
+    int   length = text.size();
     float offset = (float(length) * 0.005);
     if (ignore_occupied_areas) {
         displayname.SetPos((x_ - offset), y_);
@@ -208,10 +181,10 @@ void drawdescription(string text,
         displayname.SetCharSize(size_x, size_y);
     }
     const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
-    GFXColor tpbg(displayname.background_color);
-    bool automatte = (0 == tpbg.a);
+    GFXColor    tpbg(displayname.background_color);
+    bool        automatte = (0 == tpbg.a);
     if (automatte) {
-        GFXColor temp_background_color( 0, 0, 0, background_alpha );
+        GFXColor temp_background_color(0, 0, 0, background_alpha);
         displayname.background_color = static_cast<ImU32>(temp_background_color);
     }
     displayname.Draw(text, 0, true, false, automatte);
@@ -222,7 +195,7 @@ Unit *navdrawlist::gettailunit() {
     return tail->source;
 }
 
-//#define INIT_COL_ARRAY( col, r, g, b, a ) do{ col[0] = r; col[1] = g; col[2] = b; col[3] = a; }while(0)
+// #define INIT_COL_ARRAY( col, r, g, b, a ) do{ col[0] = r; col[1] = g; col[2] = b; col[3] = a; }while(0)
 
 static GFXColor getUnitTypeColor(std::string name, bool text, GFXColor def, float unselectedalpha) {
     GFXColor col = vs_config->getColor("nav", (std::string("unhighlighted_") + name) + (text ? "_text" : ""), def);
@@ -232,7 +205,7 @@ static GFXColor getUnitTypeColor(std::string name, bool text, GFXColor def, floa
                 return getUnitTypeColor("unit", false, GFXColor(1, 1, .7, 1), unselectedalpha);
             } else {
                 GFXColor temp = getUnitTypeColor("unit", true, GFXColor(.2, 1, .5, 0), unselectedalpha);
-                temp.a = unselectedalpha;
+                temp.a        = unselectedalpha;
                 return temp;
             }
         }
@@ -241,20 +214,12 @@ static GFXColor getUnitTypeColor(std::string name, bool text, GFXColor def, floa
     return col;
 }
 
-void drawlistitem(int type,
-        float size,
-        float x,
-        float y,
-        Unit *source,
-        navscreenoccupied *screenoccupation,
-        bool inmouserange,
-        bool currentistail,
-        float unselectedalpha,
-        GFXColor *factioncolours) {
+void drawlistitem(int type, float size, float x, float y, Unit *source, navscreenoccupied *screenoccupation,
+                  bool inmouserange, bool currentistail, float unselectedalpha, GFXColor *factioncolours) {
     float relation = 0.0;
 
-    //Get a color from the config
-    static bool inited = false;
+    // Get a color from the config
+    static bool     inited = false;
     static GFXColor highlighted_tail_col;
     static GFXColor highlighted_tail_text;
     static GFXColor highlighted_untail_col;
@@ -279,37 +244,35 @@ void drawlistitem(int type,
     if (!inited) {
         inited = true;
 
-        highlighted_tail_col = vs_config->getColor("nav", "highlighted_unit_on_tail", GFXColor(1, .3, .3, .8));
-        highlighted_tail_text = vs_config->getColor("nav", "highlighted_text_on_tail", GFXColor(1, 1, .7, 1));
+        highlighted_tail_col   = vs_config->getColor("nav", "highlighted_unit_on_tail", GFXColor(1, .3, .3, .8));
+        highlighted_tail_text  = vs_config->getColor("nav", "highlighted_text_on_tail", GFXColor(1, 1, .7, 1));
         highlighted_untail_col = vs_config->getColor("nav", "highlighted_unit_off_tail", GFXColor(1, 1, 1, .8));
-        unhighlighted_sun_col = getUnitTypeColor("sun", false, GFXColor(0, 0, 0, 0), unselectedalpha);
+        unhighlighted_sun_col  = getUnitTypeColor("sun", false, GFXColor(0, 0, 0, 0), unselectedalpha);
         unhighlighted_sun_text = getUnitTypeColor("sun", true, GFXColor(0, 0, 0, 0), unselectedalpha);
 
-        //Planet color is the relation color, so is not defined here.
-        unhighlighted_planet_text = getUnitTypeColor("planet", true, GFXColor(0, 0, 0, 0), unselectedalpha);
-        unhighlighted_c_player_col = getUnitTypeColor("curplayer", false, GFXColor(.3, .3, 1, .8), .8);
+        // Planet color is the relation color, so is not defined here.
+        unhighlighted_planet_text   = getUnitTypeColor("planet", true, GFXColor(0, 0, 0, 0), unselectedalpha);
+        unhighlighted_c_player_col  = getUnitTypeColor("curplayer", false, GFXColor(.3, .3, 1, .8), .8);
         unhighlighted_c_player_text = getUnitTypeColor("curplayer", true, GFXColor(.3, .3, 1, 0), unselectedalpha);
-        unhighlighted_player_col = getUnitTypeColor("player", false, GFXColor(.3, .3, 1, .8), .8);
-        unhighlighted_player_text = getUnitTypeColor("player", true, GFXColor(.3, .3, 1, 0), unselectedalpha);
-        unhighlighted_asteroid_col = getUnitTypeColor("asteroid", false, GFXColor(1, .8, .8, .6), .6);
+        unhighlighted_player_col    = getUnitTypeColor("player", false, GFXColor(.3, .3, 1, .8), .8);
+        unhighlighted_player_text   = getUnitTypeColor("player", true, GFXColor(.3, .3, 1, 0), unselectedalpha);
+        unhighlighted_asteroid_col  = getUnitTypeColor("asteroid", false, GFXColor(1, .8, .8, .6), .6);
         unhighlighted_asteroid_text = getUnitTypeColor("asteroid", true, GFXColor(0, 0, 0, 0), unselectedalpha);
-        unhighlighted_nebula_col = getUnitTypeColor("nebula", false, GFXColor(1, .5, 1, .6), .6);
-        unhighlighted_nebula_text = getUnitTypeColor("nebula", true, GFXColor(0, 0, 0, 0), unselectedalpha);
-        unhighlighted_jump_col = getUnitTypeColor("jump", false, GFXColor(.5, .9, .9, .6), .6);
-        unhighlighted_jump_text = getUnitTypeColor("jump", true, GFXColor(.3, 1, .8, 0), unselectedalpha);
+        unhighlighted_nebula_col    = getUnitTypeColor("nebula", false, GFXColor(1, .5, 1, .6), .6);
+        unhighlighted_nebula_text   = getUnitTypeColor("nebula", true, GFXColor(0, 0, 0, 0), unselectedalpha);
+        unhighlighted_jump_col      = getUnitTypeColor("jump", false, GFXColor(.5, .9, .9, .6), .6);
+        unhighlighted_jump_text     = getUnitTypeColor("jump", true, GFXColor(.3, 1, .8, 0), unselectedalpha);
 
-        //Basic unit types:
+        // Basic unit types:
         unhighlighted_station_text = getUnitTypeColor("station", true, GFXColor(0, 0, 0, 0), unselectedalpha);
         unhighlighted_fighter_text = getUnitTypeColor("fighter", true, GFXColor(0, 0, 0, 0), unselectedalpha);
         unhighlighted_capship_text = getUnitTypeColor("capship", true, GFXColor(0, 0, 0, 0), unselectedalpha);
-        unhighlighted_unit_text = getUnitTypeColor("unit", true, GFXColor(0, 0, 0, 0), unselectedalpha);
+        unhighlighted_unit_text    = getUnitTypeColor("unit", true, GFXColor(0, 0, 0, 0), unselectedalpha);
     }
 
-    //if(source != NULL)
-    //relation =      FactionUtil::GetIntRelation( ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction ,source->faction);
-    //else
-    //relation = 0;
-    //the realtime relationship
+    // if(source != NULL)
+    // relation =      FactionUtil::GetIntRelation( ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer())
+    // )->faction ,source->faction); else relation = 0; the realtime relationship
     if (source != NULL) {
         relation = source->getRelation(UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()));
     } else {
@@ -318,9 +281,9 @@ void drawlistitem(int type,
     relation = relation * 0.5;
     relation = relation + 0.5;
 
-    //to avoid duplicate code
+    // to avoid duplicate code
     GFXColor relColor((1.0 - relation), relation, (1.0 - (2.0 * Delta(relation, 0.5))), .7);
-    //GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1)
+    // GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1)
     if (type == navsun) {
         if (!inmouserange) {
             NavigationSystem::DrawCircle(x, y, size, unhighlighted_sun_col);
@@ -384,7 +347,7 @@ void drawlistitem(int type,
             } else {
                 NavigationSystem::DrawHalfCircleTop(x, y, size, relColor);
                 GFXColor thecolor = factioncolours[source->faction];
-                thecolor.a = unselectedalpha;
+                thecolor.a        = unselectedalpha;
                 drawdescription(source, x, y, 1.0, 1.0, false, screenoccupation, thecolor);
             }
         } else {
@@ -417,9 +380,9 @@ void drawlistitem(int type,
     } else if (type == navmissile) {
         if (!inmouserange) {
             NavigationSystem::DrawMissile(x, y, size, relColor);
-//drawdescription(source, x, y, 1.0, 1.0, false, screenoccupation, GFXColor(.2, 1, .5, unselectedalpha));
+            // drawdescription(source, x, y, 1.0, 1.0, false, screenoccupation, GFXColor(.2, 1, .5, unselectedalpha));
         }
-            //NOT DRAWING NAME OF MISSILE TO MAKE ROOM FOR IMPORTANT TEXT ON SCREEN
+        // NOT DRAWING NAME OF MISSILE TO MAKE ROOM FOR IMPORTANT TEXT ON SCREEN
         else {
             if (currentistail) {
                 NavigationSystem::DrawMissile(x, y, size, highlighted_tail_col);
@@ -462,11 +425,8 @@ void drawlistitem(int type,
         }
     } else {
         if (!inmouserange) {
-            NavigationSystem::DrawCircle(x, y, size,
-                    GFXColor((1.0 - relation),
-                            relation,
-                            (1.0 - (2.0 * Delta(relation, 0.5))),
-                            .6));
+            NavigationSystem::DrawCircle(
+                    x, y, size, GFXColor((1.0 - relation), relation, (1.0 - (2.0 * Delta(relation, 0.5))), .6));
             drawdescription(source, x, y, 1.0, 1.0, false, screenoccupation, unhighlighted_unit_text);
         } else {
             if (currentistail) {
@@ -476,33 +436,24 @@ void drawlistitem(int type,
             }
         }
     }
-    //SHOW THE NAME ALL BIG AND SHIT
+    // SHOW THE NAME ALL BIG AND SHIT
     if ((currentistail) && (inmouserange == 1)) {
-        //DISPLAY THE NAME
+        // DISPLAY THE NAME
         drawdescription(source, x, y, 2.0, 2.0, false, screenoccupation, GFXColor(1, 1, .7, 1));
     }
 }
 
-void navdrawlist::draw()        //Draw the items in the list
+void navdrawlist::draw()  // Draw the items in the list
 {
     if (head == NULL) {
         return;
     } else {
         navdrawnode *current = head;
         while (current != NULL) {
-            drawlistitem(current->type,
-                    current->size,
-                    current->x,
-                    current->y,
-                    current->source,
-                    screenoccupation,
-                    inmouserange,
-                    current == tail,
-                    unselectedalpha,
-                    factioncolours);
+            drawlistitem(current->type, current->size, current->x, current->y, current->source, screenoccupation,
+                         inmouserange, current == tail, unselectedalpha, factioncolours);
 
             current = current->nextitem;
         }
     }
 }
-

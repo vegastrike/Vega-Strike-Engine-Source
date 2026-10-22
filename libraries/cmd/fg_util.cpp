@@ -26,10 +26,12 @@
  */
 
 
-#include "vegadisk/savegame.h"
 #include "fg_util.h"
-#include "root_generic/faction_generic.h"
+
 #include <algorithm>
+
+#include "root_generic/faction_generic.h"
+#include "vegadisk/savegame.h"
 
 namespace fg_util {
 //
@@ -37,12 +39,12 @@ namespace fg_util {
 void itoa(unsigned int dat, char *output) {
     if (dat == 0) {
         *output++ = '0';
-        *output = '\0';
+        *output   = '\0';
     } else {
         char *s = output;
         while (dat) {
-            *s++ = '0' + dat % 10;
-            dat /= 10;
+            *s++  = '0' + dat % 10;
+            dat  /= 10;
         }
         *s = '\0';
         std::reverse(output, s);
@@ -89,14 +91,14 @@ unsigned int PerShipDataSize() {
 }
 
 bool CheckFG(std::vector<std::string> &data) {
-    bool retval = false;
-    unsigned int leg = data.size();
-    unsigned int inc = PerShipDataSize();
+    bool         retval = false;
+    unsigned int leg    = data.size();
+    unsigned int inc    = PerShipDataSize();
     for (unsigned int i = ShipListOffset() + 1; i + 1 < leg; i += inc) {
         std::string *numlanded = &data[i + 1];
-        std::string *numtotal = &data[i];
+        std::string *numtotal  = &data[i];
         if (*numlanded != *numtotal) {
-            retval = true;
+            retval     = true;
             *numlanded = *numtotal;
         }
     }
@@ -109,9 +111,9 @@ bool CheckFG(SaveGame *sg, const std::string &fgname, unsigned int faction) {
 }
 
 void PurgeZeroShips(SaveGame *sg, unsigned int faction) {
-    std::string key = MakeFactionKey(faction);
+    std::string  key = MakeFactionKey(faction);
     unsigned int len = sg->getMissionStringDataLength(key);
-    unsigned int i = 0;
+    unsigned int i   = 0;
     while (i < len) {
         CheckFG(sg, sg->getMissionStringData(key)[i] /*flightgroup*/, faction);
         i += 1;
@@ -125,5 +127,4 @@ void PurgeZeroShips(SaveGame *sg) {
 }
 
 //
-}
-
+}  // namespace fg_util

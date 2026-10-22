@@ -29,9 +29,9 @@
 #include "configuration/game_config.h"
 
 std::string vega_config::GameConfig::EscapedString(const std::string &input) {
-    std::string rv;
+    std::string            rv;
     std::string::size_type rp = 0;
-    std::string::size_type n = input.length();
+    std::string::size_type n  = input.length();
     for (; rp < n; ++rp) {
         switch (input.at(rp)) {
             case '\\':
@@ -79,25 +79,26 @@ void vega_config::GameConfig::LoadGameConfig(const std::string &filename) {
         VS_LOG(debug, (boost::format("%1%: Found game config at '%2%'") % __func__ % filename));
     } else {
         VS_LOG_AND_FLUSH(fatal, (boost::format("%1%: Could not find game config at '%2%'") % __func__ % filename));
-//        VSExit
+        //        VSExit
     }
     pt::read_xml(filename, temp_ptree, boost::property_tree::xml_parser::no_comments);
-//    pt::write_xml(filename + ".out.xml", temp_ptree);
-    for (const auto& iterator : temp_ptree.get_child("vegaconfig.variables.")) {
+    //    pt::write_xml(filename + ".out.xml", temp_ptree);
+    for (const auto &iterator : temp_ptree.get_child("vegaconfig.variables.")) {
         if (boost::iequals(iterator.first, "section")) {
             std::string section_name = iterator.second.get<std::string>("<xmlattr>.name", "");
             if (section_name.empty()) {
                 continue;
             }
             pt::ptree inner_tree = iterator.second;
-            for (const auto& iterator2 : inner_tree) {
+            for (const auto &iterator2 : inner_tree) {
                 if (boost::iequals(iterator2.first, "var")) {
                     std::string variable_name = iterator2.second.get<std::string>("<xmlattr>.name", "");
                     if (variable_name.empty()) {
                         continue;
                     }
                     std::string variable_value = iterator2.second.get<std::string>("<xmlattr>.value", "");
-//                    VS_LOG(debug, (boost::format("%1%: putting value %2% in the tree at %3%") % __func__ % variable_value % (section_name + "." + variable_name)));
+                    //                    VS_LOG(debug, (boost::format("%1%: putting value %2% in the tree at %3%") %
+                    //                    __func__ % variable_value % (section_name + "." + variable_name)));
                     variables_()->put(section_name + "." + variable_name, variable_value);
                 } else if (boost::iequals(iterator2.first, "section")) {
                     std::string subsection_name = iterator2.second.get<std::string>("<xmlattr>.name", "");
@@ -105,21 +106,22 @@ void vega_config::GameConfig::LoadGameConfig(const std::string &filename) {
                         continue;
                     }
                     pt::ptree inner_tree2 = iterator2.second;
-                    for (const auto& iterator3 : inner_tree2) {
+                    for (const auto &iterator3 : inner_tree2) {
                         if (boost::iequals(iterator3.first, "var")) {
                             std::string variable_name2 = iterator3.second.get<std::string>("<xmlattr>.name", "");
                             if (variable_name2.empty()) {
                                 continue;
                             }
                             std::string variable_value2 = iterator3.second.get<std::string>("<xmlattr>.value", "");
-                            variables_()->put(section_name + "." + subsection_name + "." + variable_name2, variable_value2);
+                            variables_()->put(section_name + "." + subsection_name + "." + variable_name2,
+                                              variable_value2);
                         }
                     }
                 }
             }
         }
     }
-//    pt::write_xml(filename + ".variables_.out.xml", variables_()->);
+    //    pt::write_xml(filename + ".variables_.out.xml", variables_()->);
 }
 
 vega_config::GameConfig &vega_config::GetGameConfig() {

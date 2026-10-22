@@ -27,15 +27,16 @@
 
 
 #include "cmd/images.h"
+
 #include "gfx_generic/cockpit_generic.h"
 
-template<typename BOGUS>
+template <typename BOGUS>
 UnitImages<BOGUS>::UnitImages() {
     VSCONSTRUCT1('i');
 }
 
-template<typename BOGUS>
-//added by chuck starchaser, to try to break dependency to VSSprite in vegaserver
+template <typename BOGUS>
+// added by chuck starchaser, to try to break dependency to VSSprite in vegaserver
 UnitImages<BOGUS>::~UnitImages() {
     if (pExplosion != nullptr) {
         delete pExplosion;
@@ -48,9 +49,7 @@ UnitImages<BOGUS>::~UnitImages() {
     VSDESTRUCT1
 }
 
-//explicit instantiation needed
-template
-struct UnitImages<void>;
+// explicit instantiation needed
+template struct UnitImages<void>;
 
 static UnitImages<void> bleh;
-

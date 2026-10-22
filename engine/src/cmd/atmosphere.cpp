@@ -27,15 +27,16 @@
 
 
 #include "cmd/atmosphere.h"
-#include "gfx_generic/mesh.h"
+
+#include "cmd/collection.h"
+#include "cmd/planet.h"
+#include "cmd/unit_generic.h"
 #include "gfx_generic/matrix.h"
+#include "gfx_generic/mesh.h"
+#include "gfx_generic/sphere.h"
 #include "gfx_generic/vec.h"
 #include "src/gfxlib_struct.h"
-#include "gfx_generic/sphere.h"
-#include "cmd/planet.h"
 #include "src/star_system.h"
-#include "cmd/collection.h"
-#include "cmd/unit_generic.h"
 #include "src/universe.h"
 
 Atmosphere::SunBox::~SunBox() {
@@ -59,18 +60,8 @@ void Atmosphere::setArray1(float c0[3], const GFXColor &c1) {
 }
 
 Atmosphere::Atmosphere(const Parameters &params) : user_params(params), divisions(64) {
-    dome = new SphereMesh(params.radius,
-            divisions,
-            divisions,
-            "white.bmp",
-            "",
-            NULL,
-            true,
-            ONE,
-            ZERO,
-            false,
-            0,
-            M_PI / 2);
+    dome = new SphereMesh(params.radius, divisions, divisions, "white.bmp", "", NULL, true, ONE, ZERO, false, 0,
+                          M_PI / 2);
 }
 
 Atmosphere::~Atmosphere() {
@@ -88,17 +79,18 @@ void Atmosphere::SetParameters(const Parameters &params) {
 }
 
 void Atmosphere::Update(const QVector &position, const Matrix &tmatrix) {
-    Planet *currPlanet;
+    Planet     *currPlanet;
     StarSystem *system = _Universe->activeStarSystem();
     for (size_t a = 0; a < sunboxes.size(); ++a) {
         delete sunboxes[a];
     }
     sunboxes.clear();
     QVector localDir;
-    float rho1 = 0.0;
-    Unit *primary;
+    float   rho1 = 0.0;
+    Unit   *primary;
     for (un_iter iter = system->getUnitList().createIterator(); (primary = *iter) != NULL; ++iter) {
-        if (primary->getUnitType() == Vega_UnitType::planet && (currPlanet = dynamic_cast<Planet*>(primary))->hasLights()) {
+        if (primary->getUnitType() == Vega_UnitType::planet &&
+            (currPlanet = dynamic_cast<Planet *>(primary))->hasLights()) {
             /* for now just assume all planets with lights are really bright */
             QVector direction = (currPlanet->Position() - position);
             direction.Normalize();
@@ -109,28 +101,28 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix) {
 
                 /* bad */
                 localDir = localDirection;
-                rho1 = rho;
+                rho1     = rho;
 
                 /* need a function for the sunbox size. for now, say it takes up a quarter
                  *  of the screen */
                 /* drop the z value and find the theta */
                 QVector lprime = localDirection;
-                lprime.k = 0;
+                lprime.k       = 0;
                 lprime.Normalize();
-                //float theta = atan2(lprime.i,lprime.j);
-                //float size = .125;
+                // float theta = atan2(lprime.i,lprime.j);
+                // float size = .125;
                 sunboxes.push_back(new SunBox(NULL));
                 break;
             }
         }
     }
     if (!sunboxes.empty()) {
-        float rho = acos(rho1) / (PI / 2);
+        float rho    = acos(rho1) / (PI / 2);
         float radius = user_params.radius;
         /* index 0 is the top color, index 1 is the bottom color */
         GFXLight light0 = GFXLight();
         light0.SetProperties(AMBIENT,
-                rho * user_params.high_ambient_color[0] + (1 - rho) * user_params.low_ambient_color[0]);
+                             rho * user_params.high_ambient_color[0] + (1 - rho) * user_params.low_ambient_color[0]);
         light0.SetProperties(DIFFUSE, rho * user_params.high_color[0] + (1 - rho) * user_params.low_color[0]);
         light0.SetProperties(ATTENUATE, 0.5 * GFXColor(1, 0.25 / radius, 0));
         light0.SetProperties(POSITION, GFXColor(0, 1.1 * radius, 0, 1));
@@ -139,18 +131,18 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix) {
 
         GFXLight light1 = GFXLight();
         light1.SetProperties(AMBIENT,
-                (1 - rho) * user_params.high_ambient_color[1] + rho * user_params.low_ambient_color[1]);
+                             (1 - rho) * user_params.high_ambient_color[1] + rho * user_params.low_ambient_color[1]);
         light1.SetProperties(DIFFUSE, (1 - rho) * user_params.high_color[1] + rho * user_params.low_color[1]);
         light1.SetProperties(ATTENUATE, 0.5 * GFXColor(1, 0.75 / radius, 0));
         light1.SetProperties(POSITION, GFXColor(0, -1.1 * radius, 0, 1));
 
         /* Note!! make sure that this light never goes too far around the sphere */
-        GFXLight light2 = light1;         /* -80 degree declination from sun position */
-        Matrix m;
-        QVector r;
+        GFXLight light2 = light1; /* -80 degree declination from sun position */
+        Matrix   m;
+        QVector  r;
         ScaledCrossProduct(QVector(0, 1, 0), localDir, r);
         Rotate(m, r.Cast(), -80 * (PI / 180));
-        r = Transform(m, QVector(0, 0, 1));
+        r             = Transform(m, QVector(0, 0, 1));
         float sradius = 1.1 * radius;
         light2.SetProperties(POSITION, GFXColor(sradius * r.i, sradius * r.j, sradius * r.k, 1));
 
@@ -182,10 +174,7 @@ void Atmosphere::ProcessDrawQueue() {
 
 void Atmosphere::Draw() {
     GFXDisable(TEXTURE1);
-    Matrix rot(1, 0, 0,
-            0, 0, -1,
-            0, 1, 0,
-            QVector(0, 0, 0));
+    Matrix rot(1, 0, 0, 0, 0, -1, 0, 1, 0, QVector(0, 0, 0));
     Matrix rot1;
     MultMatrix(rot1, tmatrix, rot);
     CopyMatrix(rot1, tmatrix);
@@ -201,19 +190,13 @@ void Atmosphere::Draw() {
     rot1.r[4] = -tmp2.j;
     rot1.r[5] = -tmp2.k;
 
-    GFXMaterial a = {
-            0, 0, 0, 0,
-            1, 1, 1, 1,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0
-    };
+    GFXMaterial a = {0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     dome->SetMaterial(a);
     GFXLoadMatrixModel(rot1);
     Update(position, rot1);
 
     GFXDisable(DEPTHWRITE);
-    dome->DrawNow(100000, GFXFALSE, rot1);
+    dome->DrawNow(100'000, GFXFALSE, rot1);
     GFXDisableLight(l0);
     GFXDisableLight(l1);
     GFXDeleteLight(l0);
@@ -223,4 +206,3 @@ void Atmosphere::Draw() {
 void Atmosphere::DrawAtmospheres() {
     abort();
 }
-

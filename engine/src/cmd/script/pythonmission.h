@@ -35,6 +35,7 @@ class UnitContainer;
 class PythonMissionBaseClass {
 protected:
     virtual void Destructor();
+
 public:
     std::vector<UnitContainer *> relevant_units;
     PythonMissionBaseClass();
@@ -44,10 +45,10 @@ public:
     }
 
     virtual ~PythonMissionBaseClass();
-    virtual void Execute();
-    virtual void callFunction(std::string s);
+    virtual void        Execute();
+    virtual void        callFunction(std::string s);
     virtual std::string Pickle();
-    virtual void UnPickle(std::string s);
+    virtual void        UnPickle(std::string s);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_SCRIPT_PYTHON_MISSION_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_SCRIPT_PYTHON_MISSION_H

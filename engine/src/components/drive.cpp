@@ -26,38 +26,43 @@
  */
 
 #define _USE_MATH_DEFINES
+#include "components/drive.h"
+
 #include <math.h>
 #include <string>
 
-#include "components/drive.h"
-
-#include "component_utils.h"
 #include "cmd/unit_csv_factory.h"
+#include "component_utils.h"
 #include "configuration/configuration.h"
 
-
-
-Drive::Drive(EnergyContainer *source):
-    Component(0.0, 0.0, true, true),
-    EnergyConsumer(source, false),
-    yaw(1,0,1), pitch(1,0,1), roll(1,0,1), lateral(1,0,1),
-    vertical(1,0,1), forward(1,0,1), retro(1,0,1),
-    speed(1,0,1), max_yaw_left(1,0,1),
-    max_yaw_right(1,0,1), max_pitch_down(1,0,1), max_pitch_up(1,0,1),
-    max_roll_left(1,0,1), max_roll_right(1,0,1) {
-    type = ComponentType::Drive;
+Drive::Drive(EnergyContainer *source)
+    : Component(0.0, 0.0, true, true),
+      EnergyConsumer(source, false),
+      yaw(1, 0, 1),
+      pitch(1, 0, 1),
+      roll(1, 0, 1),
+      lateral(1, 0, 1),
+      vertical(1, 0, 1),
+      forward(1, 0, 1),
+      retro(1, 0, 1),
+      speed(1, 0, 1),
+      max_yaw_left(1, 0, 1),
+      max_yaw_right(1, 0, 1),
+      max_pitch_down(1, 0, 1),
+      max_pitch_up(1, 0, 1),
+      max_roll_left(1, 0, 1),
+      max_roll_right(1, 0, 1) {
+    type         = ComponentType::Drive;
     upgrade_name = "Drive";
-    installed = true;
+    installed    = true;
 }
 
-Drive::~Drive()
-= default;
-
+Drive::~Drive() = default;
 
 // Component Methods
 void Drive::Load(std::string unit_key) {
-    const double game_speed = configuration().physics.game_speed_dbl;
-    const double game_accel = configuration().physics.game_accel_dbl;
+    const double game_speed       = configuration().physics.game_speed_dbl;
+    const double game_accel       = configuration().physics.game_accel_dbl;
     const double game_accel_speed = game_speed * game_accel;
 
     // Minimum drive capability for limp home (in %)
@@ -67,7 +72,7 @@ void Drive::Load(std::string unit_key) {
 
     // Consumer
     // We do not support all options here.
-    if(configuration().components.drive.energy_source == "fuel") {
+    if (configuration().components.drive.energy_source == "fuel") {
         SetConsumption(1.0);
     } else {
         SetConsumption(1.0);
@@ -75,72 +80,69 @@ void Drive::Load(std::string unit_key) {
     }
 
     // Drive
-    yaw = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", std::string("0.0")),
-                                                       M_PI / 180.0, minimal_drive_functionality);
-    pitch = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", std::string("0.0")),
-                                                       M_PI / 180.0, minimal_drive_functionality);
-    roll = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", std::string("0.0")),
-                                                       M_PI / 180.0, minimal_drive_functionality);
+    yaw   = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Maneuver_Yaw", std::string("0.0")), M_PI / 180.0,
+                             minimal_drive_functionality);
+    pitch = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Maneuver_Pitch", std::string("0.0")), M_PI / 180.0,
+                             minimal_drive_functionality);
+    roll  = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Maneuver_Roll", std::string("0.0")), M_PI / 180.0,
+                             minimal_drive_functionality);
 
     ResourceYawPitchRollParser(unit_key, YPR::Yaw, max_yaw_right, max_yaw_left);
     ResourceYawPitchRollParser(unit_key, YPR::Pitch, max_pitch_up, max_pitch_down);
     ResourceYawPitchRollParser(unit_key, YPR::Roll, max_roll_right, max_roll_left);
 
     forward = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Forward_Accel", std::string("0.0")),
-                                                           game_accel_speed, minimal_drive_functionality);
-    retro = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", std::string("0.0")),
-                                                           game_accel_speed, minimal_drive_functionality);
+                               game_accel_speed, minimal_drive_functionality);
+    retro = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Retro_Accel", std::string("0.0")), game_accel_speed,
+                             minimal_drive_functionality);
 
     double accel = UnitCSVFactory::GetVariable(unit_key, "accel", -1.0f);
-    if(accel != -1.0f) {
+    if (accel != -1.0f) {
         const std::string accel_string = std::to_string(accel);
-        lateral = Resource<double>(accel_string, game_accel_speed, minimal_drive_functionality);
-        vertical = Resource<double>(accel_string, game_accel_speed, minimal_drive_functionality);
+        lateral                        = Resource<double>(accel_string, game_accel_speed, minimal_drive_functionality);
+        vertical                       = Resource<double>(accel_string, game_accel_speed, minimal_drive_functionality);
     } else {
         const double lateral_accel = 0.5 * UnitCSVFactory::GetVariable(unit_key, "Left_Accel", 0.0) +
-                                 0.5 * UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 0.0);
+                                     0.5 * UnitCSVFactory::GetVariable(unit_key, "Right_Accel", 0.0);
         const std::string lateral_accel_string = std::to_string(lateral_accel);
         lateral = Resource<double>(lateral_accel_string, game_accel_speed, minimal_drive_functionality);
 
         const double vertical_accel = 0.5 * UnitCSVFactory::GetVariable(unit_key, "Top_Accel", 0.0) +
-                                    0.5 * UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0);
+                                      0.5 * UnitCSVFactory::GetVariable(unit_key, "Bottom_Accel", 0.0);
         const std::string vertical_accel_string = std::to_string(vertical_accel);
         vertical = Resource<double>(vertical_accel_string, game_accel_speed, minimal_drive_functionality);
     }
 
     speed = Resource<double>(UnitCSVFactory::GetVariable(unit_key, "Default_Speed_Governor", std::string("0.0")),
-                                                         game_speed, minimal_drive_functionality);
+                             game_speed, minimal_drive_functionality);
 
     // We calculate percent operational as a simple average
-    operational = (yaw.Percent() + pitch.Percent() + roll.Percent() +
-                  lateral.Percent() + vertical.Percent() + forward.Percent() +
-                  retro.Percent() + speed.Percent() +
-                  max_yaw_left.Percent() + max_yaw_right.Percent() + max_pitch_down.Percent() +
-                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14;
+    operational =
+            (yaw.Percent() + pitch.Percent() + roll.Percent() + lateral.Percent() + vertical.Percent() +
+             forward.Percent() + retro.Percent() + speed.Percent() + max_yaw_left.Percent() + max_yaw_right.Percent() +
+             max_pitch_down.Percent() + max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) /
+            14;
 }
 
-
-
-
-void Drive::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    const double game_speed = configuration().physics.game_speed_dbl;
-    const double game_accel = configuration().physics.game_accel_dbl;
+void Drive::SaveToCSV(std::map<std::string, std::string> &unit) const {
+    const double game_speed       = configuration().physics.game_speed_dbl;
+    const double game_accel       = configuration().physics.game_accel_dbl;
     const double game_accel_speed = (game_speed * game_accel);
-    const double to_degrees = M_PI / 180;
-    unit["Maneuver_Yaw"] = yaw.Serialize(to_degrees);
-    unit["Maneuver_Pitch"] = pitch.Serialize(to_degrees);
-    unit["Maneuver_Roll"] = roll.Serialize(to_degrees);
+    const double to_degrees       = M_PI / 180;
+    unit["Maneuver_Yaw"]          = yaw.Serialize(to_degrees);
+    unit["Maneuver_Pitch"]        = pitch.Serialize(to_degrees);
+    unit["Maneuver_Roll"]         = roll.Serialize(to_degrees);
 
-    unit["Yaw_Governor_Right"] = max_yaw_right.Serialize(to_degrees);
-    unit["Yaw_Governor_Left"] = max_yaw_left.Serialize(to_degrees);
-    unit["Pitch_Governor_Up"] = max_pitch_up.Serialize(to_degrees);
+    unit["Yaw_Governor_Right"]  = max_yaw_right.Serialize(to_degrees);
+    unit["Yaw_Governor_Left"]   = max_yaw_left.Serialize(to_degrees);
+    unit["Pitch_Governor_Up"]   = max_pitch_up.Serialize(to_degrees);
     unit["Pitch_Governor_Down"] = max_pitch_down.Serialize(to_degrees);
     unit["Roll_Governor_Right"] = max_roll_right.Serialize(to_degrees);
-    unit["Roll_Governor_Left"] = max_roll_left.Serialize(to_degrees);
+    unit["Roll_Governor_Left"]  = max_roll_left.Serialize(to_degrees);
 
 
     unit["Forward_Accel"] = forward.Serialize(game_accel_speed);
-    unit["Retro_Accel"] = retro.Serialize(game_accel_speed);
+    unit["Retro_Accel"]   = retro.Serialize(game_accel_speed);
     unit["Left_Accel"] = unit["Right_Accel"] = lateral.Serialize(game_accel_speed);
     unit["Bottom_Accel"] = unit["Top_Accel"] = vertical.Serialize(game_accel_speed);
 
@@ -165,7 +167,6 @@ bool Drive::Upgrade(const std::string upgrade_key) {
     return false;
 }
 
-
 void Drive::Damage() {
     yaw.RandomDamage();
     pitch.RandomDamage();
@@ -186,11 +187,11 @@ void Drive::Damage() {
     max_roll_right.RandomDamage();
 
     // We calculate percent operational as a simple average
-    operational = (yaw.Percent() + pitch.Percent() + roll.Percent() +
-                  lateral.Percent() + vertical.Percent() + forward.Percent() +
-                  retro.Percent() + speed.Percent() +
-                  max_yaw_left.Percent() + max_yaw_right.Percent() + max_pitch_down.Percent() +
-                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14;
+    operational =
+            (yaw.Percent() + pitch.Percent() + roll.Percent() + lateral.Percent() + vertical.Percent() +
+             forward.Percent() + retro.Percent() + speed.Percent() + max_yaw_left.Percent() + max_yaw_right.Percent() +
+             max_pitch_down.Percent() + max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) /
+            14;
 }
 
 void Drive::DamageByPercent(double percent) {
@@ -212,11 +213,11 @@ void Drive::DamageByPercent(double percent) {
     max_roll_left.DamageByPercent(percent);
     max_roll_right.DamageByPercent(percent);
 
-    operational = (yaw.Percent() + pitch.Percent() + roll.Percent() +
-                  lateral.Percent() + vertical.Percent() + forward.Percent() +
-                  retro.Percent() + speed.Percent() +
-                  max_yaw_left.Percent() + max_yaw_right.Percent() + max_pitch_down.Percent() +
-                  max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) / 14;
+    operational =
+            (yaw.Percent() + pitch.Percent() + roll.Percent() + lateral.Percent() + vertical.Percent() +
+             forward.Percent() + retro.Percent() + speed.Percent() + max_yaw_left.Percent() + max_yaw_right.Percent() +
+             max_pitch_down.Percent() + max_pitch_up.Percent() + max_roll_left.Percent() + max_roll_right.Percent()) /
+            14;
 }
 
 void Drive::Repair() {
@@ -241,15 +242,6 @@ void Drive::Repair() {
     operational.RepairFully();
 }
 
-double Drive::Consume()
-{
+double Drive::Consume() {
     return EnergyConsumer::Consume();
 }
-
-
-
-
-
-
-
-

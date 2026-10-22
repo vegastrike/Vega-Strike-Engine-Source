@@ -27,37 +27,31 @@
  */
 
 
-#include <algorithm>
-#include "src/gfxlib.h"
-#include "cmd/unit_generic.h"
-#include "cmd/planet.h"
-#include "cmd/unit_util.h"
 #include "track.h"
+
+#include <algorithm>
+
+#include "cmd/planet.h"
+#include "cmd/unit_generic.h"
+#include "cmd/unit_util.h"
+#include "src/gfxlib.h"
 
 namespace Radar {
 
-Track::Track(Unit *player, const Unit *target)
-        : player(player),
-        target(target),
-        distance(0.0) {
+Track::Track(Unit *player, const Unit *target) : player(player), target(target), distance(0.0) {
     position = player->LocalCoordinates(target);
     distance = UnitUtil::getDistance(player, target);
-    type = IdentifyType();
+    type     = IdentifyType();
 }
 
 Track::Track(Unit *player, const Unit *target, const Vector &position)
-        : player(player),
-        target(target),
-        position(position) {
+    : player(player), target(target), position(position) {
     distance = UnitUtil::getDistance(player, target);
-    type = IdentifyType();
+    type     = IdentifyType();
 }
 
 Track::Track(Unit *player, const Unit *target, const Vector &position, float distance)
-        : player(player),
-        target(target),
-        position(position),
-        distance(distance) {
+    : player(player), target(target), position(position), distance(distance) {
     type = IdentifyType();
 }
 
@@ -145,8 +139,7 @@ Track::Type::Value Track::IdentifyType() const {
             }
 
             return Type::DeadPlanet;
-        }
-            break;
+        } break;
 
         case Vega_UnitType::asteroid:
             return Type::Asteroid;
@@ -199,4 +192,4 @@ Track::Relation::Value Track::GetRelation() const {
     return Relation::Neutral;
 }
 
-} // namespace Radar
+}  // namespace Radar

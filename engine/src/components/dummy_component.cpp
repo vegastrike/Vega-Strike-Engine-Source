@@ -27,19 +27,16 @@
 
 #include "dummy_component.h"
 
-
-DummyComponent::DummyComponent() :
-    Component() {
+DummyComponent::DummyComponent() : Component() {
     type = ComponentType::Dummy;
 }
-
 
 // Component Methods
 void DummyComponent::Load(std::string unit_key) {
     Component::Load(unit_key);
 }
 
-void DummyComponent::SaveToCSV(std::map<std::string, std::string>& unit) const {}
+void DummyComponent::SaveToCSV(std::map<std::string, std::string> &unit) const {}
 
 bool DummyComponent::CanDowngrade() const {
     return false;

@@ -26,17 +26,18 @@
  */
 
 
-#include <vector>
-#include <string>
-#include <gnuhash.h>
-#include <expat.h>
-#include "src/vegastrike.h"
-#include "root_generic/xml_support.h"
 #include <assert.h>
+#include <expat.h>
+#include <gnuhash.h>
+#include <string>
+#include <vector>
+
 #include "cmd/ai/communication.h"
 #include "cmd/music.h"
-#include "root_generic/faction_generic.h"
 #include "faction_factory.h"
+#include "root_generic/faction_generic.h"
+#include "root_generic/xml_support.h"
+#include "src/vegastrike.h"
 
 using namespace XMLSupport;
 
@@ -54,20 +55,20 @@ void Faction::LoadXML(const char *filename, char *xmlbuffer, int buflength) {
     ParseAllAllies();
 
     // Results are cached to avoid looking for too many files
-    typedef vsUMap<string, boost::shared_ptr<FSM> > Cache;
-    Cache cache;
+    typedef vsUMap<string, boost::shared_ptr<FSM>> Cache;
+    Cache                                          cache;
 
-    std::string fileSuffix(".xml");
-    std::string neutralName("neutral");
+    std::string            fileSuffix(".xml");
+    std::string            neutralName("neutral");
     boost::shared_ptr<FSM> neutralComm;
     neutralComm.reset(new FSM(neutralName + fileSuffix));
     cache.insert(Cache::value_type(neutralName, neutralComm));
 
     for (unsigned int i = 0; i < factions.size(); i++) {
-        boost::shared_ptr<Faction> fact = factions[i];
-        std::string myCommFile = fact->factionname + fileSuffix;
-        boost::shared_ptr<FSM> myComm;
-        Cache::iterator it = cache.find(myCommFile);
+        boost::shared_ptr<Faction> fact       = factions[i];
+        std::string                myCommFile = fact->factionname + fileSuffix;
+        boost::shared_ptr<FSM>     myComm;
+        Cache::iterator            it = cache.find(myCommFile);
         if (it != cache.end()) {
             myComm = it->second;
         } else {
@@ -80,10 +81,7 @@ void Faction::LoadXML(const char *filename, char *xmlbuffer, int buflength) {
         }
 
         for (unsigned int j = 0; j < factions[i]->faction.size(); j++) {
-            std::string jointCommFile = fact->factionname
-                    + std::string("to")
-                    + factions[j]->factionname
-                    + fileSuffix;
+            std::string jointCommFile = fact->factionname + std::string("to") + factions[j]->factionname + fileSuffix;
             boost::shared_ptr<FSM> jointComm;
             if (!fact->faction[j].conversation) {
                 it = cache.find(jointCommFile);
@@ -97,9 +95,7 @@ void Faction::LoadXML(const char *filename, char *xmlbuffer, int buflength) {
                     }
                     cache.insert(Cache::value_type(jointCommFile, jointComm));
                 }
-                factions[i]->faction[j].conversation = jointComm
-                        ? jointComm
-                        : (myComm ? myComm : neutralComm);
+                factions[i]->faction[j].conversation = jointComm ? jointComm : (myComm ? myComm : neutralComm);
             }
         }
     }
@@ -116,4 +112,3 @@ void FactionUtil::LoadContrabandLists() {
     }
     contrabandlists.clear();
 }
-

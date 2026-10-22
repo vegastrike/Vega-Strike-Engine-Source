@@ -54,37 +54,37 @@ struct OPCODE_API BVTCache : Pair {
     void ResetCache() {
         Model0 = nullptr;
         Model1 = nullptr;
-        id0 = 0;
-        id1 = 1;
-#ifdef __MESHMERIZER_H__        // Collision hulls only supported within ICE !
-        HullTest		= true;
-        SepVector.pid	= 0;
-        SepVector.qid	= 0;
-        SepVector.SV	= Point(1.0f, 0.0f, 0.0f);
-#endif // __MESHMERIZER_H__
+        id0    = 0;
+        id1    = 1;
+#ifdef __MESHMERIZER_H__  // Collision hulls only supported within ICE !
+        HullTest      = true;
+        SepVector.pid = 0;
+        SepVector.qid = 0;
+        SepVector.SV  = Point(1.0f, 0.0f, 0.0f);
+#endif  // __MESHMERIZER_H__
     }
 
     void ResetCountDown() {
-#ifdef __MESHMERIZER_H__        // Collision hulls only supported within ICE !
-        CountDown		= 50;
-#endif // __MESHMERIZER_H__
+#ifdef __MESHMERIZER_H__  // Collision hulls only supported within ICE !
+        CountDown = 50;
+#endif                    // __MESHMERIZER_H__
     }
 
-    const Model *Model0;    //!< Model for first object
-    const Model *Model1;    //!< Model for second object
+    const Model *Model0;  //!< Model for first object
+    const Model *Model1;  //!< Model for second object
 
-#ifdef __MESHMERIZER_H__    // Collision hulls only supported within ICE !
-    SVCache				SepVector;
-    uint32_t				CountDown;
-    bool				HullTest;
-#endif // __MESHMERIZER_H__
+#ifdef __MESHMERIZER_H__  // Collision hulls only supported within ICE !
+    SVCache  SepVector;
+    uint32_t CountDown;
+    bool     HullTest;
+#endif  // __MESHMERIZER_H__
 };
 
 class OPCODE_API AABBTreeCollider : public Collider {
 public:
     // Constructor / Destructor
     AABBTreeCollider();
-    virtual                                ~AABBTreeCollider();
+    virtual ~AABBTreeCollider();
     // Generic collision query
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,26 +104,15 @@ public:
     bool Collide(BVTCache &cache, const Matrix4x4 *world0 = nullptr, const Matrix4x4 *world1 = nullptr);
 
     // Collision queries
-    bool Collide(const AABBCollisionTree *tree0,
-            const AABBCollisionTree *tree1,
-            const Matrix4x4 *world0 = nullptr,
-            const Matrix4x4 *world1 = nullptr,
-            Pair *cache = nullptr);
-    bool Collide(const AABBNoLeafTree *tree0,
-            const AABBNoLeafTree *tree1,
-            const Matrix4x4 *world0 = nullptr,
-            const Matrix4x4 *world1 = nullptr,
-            Pair *cache = nullptr);
-    bool Collide(const AABBQuantizedTree *tree0,
-            const AABBQuantizedTree *tree1,
-            const Matrix4x4 *world0 = nullptr,
-            const Matrix4x4 *world1 = nullptr,
-            Pair *cache = nullptr);
-    bool Collide(const AABBQuantizedNoLeafTree *tree0,
-            const AABBQuantizedNoLeafTree *tree1,
-            const Matrix4x4 *world0 = nullptr,
-            const Matrix4x4 *world1 = nullptr,
-            Pair *cache = nullptr);
+    bool Collide(const AABBCollisionTree *tree0, const AABBCollisionTree *tree1, const Matrix4x4 *world0 = nullptr,
+                 const Matrix4x4 *world1 = nullptr, Pair *cache = nullptr);
+    bool Collide(const AABBNoLeafTree *tree0, const AABBNoLeafTree *tree1, const Matrix4x4 *world0 = nullptr,
+                 const Matrix4x4 *world1 = nullptr, Pair *cache = nullptr);
+    bool Collide(const AABBQuantizedTree *tree0, const AABBQuantizedTree *tree1, const Matrix4x4 *world0 = nullptr,
+                 const Matrix4x4 *world1 = nullptr, Pair *cache = nullptr);
+    bool Collide(const AABBQuantizedNoLeafTree *tree0, const AABBQuantizedNoLeafTree *tree1,
+                 const Matrix4x4 *world0 = nullptr, const Matrix4x4 *world1 = nullptr, Pair *cache = nullptr);
+
     // Settings
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -133,7 +122,7 @@ public:
      *	\see		SetFullPrimBoxTest(bool flag)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetFullBoxBoxTest(bool flag) {
+    inline_ void SetFullBoxBoxTest(bool flag) {
         mFullBoxBoxTest = flag;
     }
 
@@ -158,7 +147,7 @@ public:
      *	\return		the number of BV-BV tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbBVBVTests() const {
+    inline_ uint32_t GetNbBVBVTests() const {
         return mNbBVBVTests;
     }
 
@@ -170,7 +159,7 @@ public:
      *	\return		the number of Triangle-Triangle tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbPrimPrimTests() const {
+    inline_ uint32_t GetNbPrimPrimTests() const {
         return mNbPrimPrimTests;
     }
 
@@ -182,7 +171,7 @@ public:
      *	\return		the number of BV-Triangle tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbBVPrimTests() const {
+    inline_ uint32_t GetNbBVPrimTests() const {
         return mNbBVPrimTests;
     }
 
@@ -196,7 +185,7 @@ public:
      *	\return		the number of contacts / colliding pairs.
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbPairs() const {
+    inline_ uint32_t GetNbPairs() const {
         return mPairs.GetNbEntries() >> 1;
     }
 
@@ -208,13 +197,14 @@ public:
      *	\return		the list of colliding pairs (triangle indices)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                const Pair *GetPairs() const {
-        return (const Pair *) mPairs.GetEntries();
+    inline_ const Pair *GetPairs() const {
+        return (const Pair *)mPairs.GetEntries();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     *	Validates current settings. You should call this method after all the settings and callbacks have been defined for a collider.
+     *	Validates current settings. You should call this method after all the settings and callbacks have been defined
+     *for a collider.
      *	\return		nullptr if everything is ok, else a string describing the problem
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -222,42 +212,38 @@ public:
 
 protected:
     // Colliding pairs
-    Container mPairs;                //!< Pairs of colliding primitives
+    Container mPairs;  //!< Pairs of colliding primitives
     // User mesh interfaces
-    const MeshInterface *mIMesh0;            //!< User-defined mesh interface for object0
-    const MeshInterface *mIMesh1;            //!< User-defined mesh interface for object1
+    const MeshInterface *mIMesh0;  //!< User-defined mesh interface for object0
+    const MeshInterface *mIMesh1;  //!< User-defined mesh interface for object1
     // Stats
-    uint32_t mNbBVBVTests;        //!< Number of BV-BV tests
-    uint32_t mNbPrimPrimTests;    //!< Number of Primitive-Primitive tests
-    uint32_t mNbBVPrimTests;        //!< Number of BV-Primitive tests
+    uint32_t mNbBVBVTests;      //!< Number of BV-BV tests
+    uint32_t mNbPrimPrimTests;  //!< Number of Primitive-Primitive tests
+    uint32_t mNbBVPrimTests;    //!< Number of BV-Primitive tests
     // Precomputed data
-    Matrix3x3 mAR;                //!< Absolute rotation matrix
-    Matrix3x3 mR0to1;                //!< Rotation from object0 to object1
-    Matrix3x3 mR1to0;                //!< Rotation from object1 to object0
-    Point mT0to1;                //!< Translation from object0 to object1
-    Point mT1to0;                //!< Translation from object1 to object0
+    Matrix3x3 mAR;     //!< Absolute rotation matrix
+    Matrix3x3 mR0to1;  //!< Rotation from object0 to object1
+    Matrix3x3 mR1to0;  //!< Rotation from object1 to object0
+    Point     mT0to1;  //!< Translation from object0 to object1
+    Point     mT1to0;  //!< Translation from object1 to object0
     // Dequantization coeffs
     Point mCenterCoeff0;
     Point mExtentsCoeff0;
     Point mCenterCoeff1;
     Point mExtentsCoeff1;
     // Leaf description
-    Point mLeafVerts[3];        //!< Triangle vertices
-    uint32_t mLeafIndex;            //!< Triangle index
+    Point    mLeafVerts[3];  //!< Triangle vertices
+    uint32_t mLeafIndex;     //!< Triangle index
     // Settings
-    bool mFullBoxBoxTest;    //!< Perform full BV-BV tests (true) or SAT-lite tests (false)
-    bool mFullPrimBoxTest;    //!< Perform full Primitive-BV tests (true) or SAT-lite tests (false)
+    bool mFullBoxBoxTest;   //!< Perform full BV-BV tests (true) or SAT-lite tests (false)
+    bool mFullPrimBoxTest;  //!< Perform full Primitive-BV tests (true) or SAT-lite tests (false)
     // Internal methods
 
     // Standard AABB trees
     void _Collide(const AABBCollisionNode *b0, const AABBCollisionNode *b1);
     // Quantized AABB trees
-    void _Collide(const AABBQuantizedNode *b0,
-            const AABBQuantizedNode *b1,
-            const Point &a,
-            const Point &Pa,
-            const Point &b,
-            const Point &Pb);
+    void _Collide(const AABBQuantizedNode *b0, const AABBQuantizedNode *b1, const Point &a, const Point &Pa,
+                  const Point &b, const Point &Pb);
     // No-leaf AABB trees
     void _CollideTriBox(const AABBNoLeafNode *b);
     void _CollideBoxTri(const AABBNoLeafNode *b);
@@ -267,23 +253,19 @@ protected:
     void _CollideBoxTri(const AABBQuantizedNoLeafNode *b);
     void _Collide(const AABBQuantizedNoLeafNode *a, const AABBQuantizedNoLeafNode *b);
     // Overlap tests
-    void PrimTest(uint32_t id0, uint32_t id1);
-    inline_            void PrimTestTriIndex(uint32_t id1);
-    inline_            void PrimTestIndexTri(uint32_t id0);
+    void         PrimTest(uint32_t id0, uint32_t id1);
+    inline_ void PrimTestTriIndex(uint32_t id1);
+    inline_ void PrimTestIndexTri(uint32_t id0);
 
-    inline_            bool BoxBoxOverlap(const Point &ea, const Point &ca, const Point &eb, const Point &cb);
-    inline_            bool TriBoxOverlap(const Point &center, const Point &extents);
-    inline_            bool TriTriOverlap(const Point &V0,
-            const Point &V1,
-            const Point &V2,
-            const Point &U0,
-            const Point &U1,
-            const Point &U2);
+    inline_ bool BoxBoxOverlap(const Point &ea, const Point &ca, const Point &eb, const Point &cb);
+    inline_ bool TriBoxOverlap(const Point &center, const Point &extents);
+    inline_ bool TriTriOverlap(const Point &V0, const Point &V1, const Point &V2, const Point &U0, const Point &U1,
+                               const Point &U2);
     // Init methods
     void InitQuery(const Matrix4x4 *world0 = nullptr, const Matrix4x4 *world1 = nullptr);
     bool CheckTemporalCoherence(Pair *cache);
 
-    inline_                bool Setup(const MeshInterface *mi0, const MeshInterface *mi1) {
+    inline_ bool Setup(const MeshInterface *mi0, const MeshInterface *mi1) {
         mIMesh0 = mi0;
         mIMesh1 = mi1;
 
@@ -295,4 +277,4 @@ protected:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_TREECOLLIDER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_TREECOLLIDER_H

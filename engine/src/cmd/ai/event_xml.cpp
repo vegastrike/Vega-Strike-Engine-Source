@@ -26,41 +26,39 @@
  */
 
 
-#include "cmd/unit_generic.h"
-#include "root_generic/xml_support.h"
 #include "event_xml.h"
+
+#include <assert.h>
+#include <float.h>
+#include <list>
 #include <string>
 #include <vector>
-#include <list>
-#include <float.h>
-#include <assert.h>
-#include "src/vegastrike.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "root_generic/vs_globals.h"
-#include "root_generic/configxml.h"
-extern bool validateHardCodedScript(std::string s);
-//serves to run through a XML file that nests things for "and".
 
-using XMLSupport::EnumMap;
+#include "cmd/unit_generic.h"
+#include "root_generic/configxml.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/vegastrike.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
+extern bool validateHardCodedScript(std::string s);
+// serves to run through a XML file that nests things for "and".
+
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
-using XMLSupport::parse_float;
+using XMLSupport::EnumMap;
 using XMLSupport::parse_bool;
+using XMLSupport::parse_float;
 using XMLSupport::parse_int;
+
 namespace AIEvents {
-AIEvresult::AIEvresult(int type,
-        float const min,
-        const float max,
-        float timetofinish,
-        float timeuntilinterrupts,
-        float priority,
-        const std::string &aiscript) {
+AIEvresult::AIEvresult(int type, float const min, const float max, float timetofinish, float timeuntilinterrupts,
+                       float priority, const std::string &aiscript) {
     this->timetointerrupt = timeuntilinterrupts;
-    this->timetofinish = timetofinish;
-    this->type = type;
-    this->priority = priority;
-    this->max = max;
+    this->timetofinish    = timetofinish;
+    this->type            = type;
+    this->priority        = priority;
+    this->max             = max;
 
     this->min = min;
 
@@ -72,50 +70,41 @@ AIEvresult::AIEvresult(int type,
                 VS_LOG(serious_warning, (boost::format("SERIOUS WARNING %1%") % this->script.c_str()));
             }
         }
-        VS_LOG(serious_warning, (boost::format(
-                "SERIOUS WARNING in AI script: no fast method to perform %1$s when type %2$d is at least %3$f and at most %4$f with priority %5$f for %6$f time")
-                % this->script.c_str()
-                % type
-                % min
-                % max
-                % priority
-                % timetofinish));
+        VS_LOG(serious_warning,
+               (boost::format("SERIOUS WARNING in AI script: no fast method to perform %1$s when type %2$d is at least "
+                              "%3$f and at most %4$f with priority %5$f for %6$f time") %
+                this->script.c_str() % type % min % max % priority % timetofinish));
     }
 }
 
-const int AIUNKNOWN = 0;
-const int AIMIN = 1;
-const int AIMAX = 2;
-const int AISCRIPT = 3;
-const int AINOT = 4;
-const int TIMEIT = 5;
-const int OBEDIENCE = 6;
-const int TIMETOINTERRUPT = 7;
-const int PRIORITY = 8;
+const int                       AIUNKNOWN           = 0;
+const int                       AIMIN               = 1;
+const int                       AIMAX               = 2;
+const int                       AISCRIPT            = 3;
+const int                       AINOT               = 4;
+const int                       TIMEIT              = 5;
+const int                       OBEDIENCE           = 6;
+const int                       TIMETOINTERRUPT     = 7;
+const int                       PRIORITY            = 8;
 const XMLSupport::EnumMap::Pair AIattribute_names[] = {
-        EnumMap::Pair("UNKNOWN", AIUNKNOWN),
-        EnumMap::Pair("min", AIMIN),
-        EnumMap::Pair("max", AIMAX),
-        EnumMap::Pair("not", AINOT),
-        EnumMap::Pair("Script", AISCRIPT),
-        EnumMap::Pair("time", TIMEIT),
-        EnumMap::Pair("obedience", OBEDIENCE),
-        EnumMap::Pair("timetointerrupt", TIMETOINTERRUPT),
-        EnumMap::Pair("priority", PRIORITY)
-};
+        EnumMap::Pair("UNKNOWN", AIUNKNOWN),   EnumMap::Pair("min", AIMIN),
+        EnumMap::Pair("max", AIMAX),           EnumMap::Pair("not", AINOT),
+        EnumMap::Pair("Script", AISCRIPT),     EnumMap::Pair("time", TIMEIT),
+        EnumMap::Pair("obedience", OBEDIENCE), EnumMap::Pair("timetointerrupt", TIMETOINTERRUPT),
+        EnumMap::Pair("priority", PRIORITY)};
 const XMLSupport::EnumMap attr_map(AIattribute_names, 9);
 
 void GeneralAIEventBegin(void *userData, const XML_Char *name, const XML_Char **atts) {
-    AttributeList attributes(atts);
-    string aiscriptname("");
-    float min = -FLT_MAX;
-    float max = FLT_MAX;
-    ElemAttrMap *eam = ((ElemAttrMap *) userData);
-    float timetofinish = eam->maxtime;
-    float timetointerrupt = 0;
-    int elem = eam->element_map.lookup(name);
+    AttributeList                 attributes(atts);
+    string                        aiscriptname("");
+    float                         min             = -FLT_MAX;
+    float                         max             = FLT_MAX;
+    ElemAttrMap                  *eam             = ((ElemAttrMap *)userData);
+    float                         timetofinish    = eam->maxtime;
+    float                         timetointerrupt = 0;
+    int                           elem            = eam->element_map.lookup(name);
     AttributeList::const_iterator iter;
-    float priority = 4;
+    float                         priority = 4;
     eam->level++;
     if (elem == 0) {
         eam->result.push_back(std::list<AIEvresult>());
@@ -123,21 +112,21 @@ void GeneralAIEventBegin(void *userData, const XML_Char *name, const XML_Char **
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch (attr_map.lookup((*iter).name)) {
                 case TIMEIT:
-                    eam->maxtime = (short) XMLSupport::parse_float((*iter).value);
+                    eam->maxtime = (short)XMLSupport::parse_float((*iter).value);
                     break;
                 case OBEDIENCE:
-                    eam->obedience = (float) (XMLSupport::parse_float((*iter).value));
+                    eam->obedience = (float)(XMLSupport::parse_float((*iter).value));
             }
         }
     } else {
-        assert(eam->level != 1 && eam->result.size() >= 2);         //might not have a back on result();
+        assert(eam->level != 1 && eam->result.size() >= 2);  // might not have a back on result();
         if (eam->result.back().size() != eam->result[eam->result.size() - 2].size()) {
             eam->result.push_back(eam->result.back());
         }
         for (iter = attributes.begin(); iter != attributes.end(); iter++) {
             switch (attr_map.lookup((*iter).name)) {
                 case AINOT:
-                    elem = -elem;                 //since elem can't be 0 (see above) this will save the "not" info
+                    elem = -elem;  // since elem can't be 0 (see above) this will save the "not" info
                     break;
                 case AIMIN:
                     min = XMLSupport::parse_float((*iter).value);
@@ -168,7 +157,7 @@ void GeneralAIEventBegin(void *userData, const XML_Char *name, const XML_Char **
 }
 
 void GeneralAIEventEnd(void *userData, const XML_Char *name) {
-    ElemAttrMap *eam = ((ElemAttrMap *) userData);
+    ElemAttrMap *eam = ((ElemAttrMap *)userData);
     eam->level--;
     if (eam->result.back().size() == 0) {
         eam->result.pop_back();
@@ -179,37 +168,37 @@ void GeneralAIEventEnd(void *userData, const XML_Char *name) {
 }
 
 void LoadAI(const char *filename, ElemAttrMap &result, const string &faction) {
-    //returns obedience
+    // returns obedience
     using namespace VSFileSystem;
     const float cfg_obedience = configuration().ai.targeting.obedience_flt;
-    result.obedience = cfg_obedience;
-    result.maxtime = 10;
-    VSFile f;
+    result.obedience          = cfg_obedience;
+    result.maxtime            = 10;
+    VSFile  f;
     VSError err;
     err = f.OpenReadOnly(filename, AiFile);
     if (err > Ok) {
         VS_LOG(warning, (boost::format("ai file %1% not found") % filename));
-        string full_filename = filename;
-        full_filename = full_filename.substr(0, strlen(filename) - 4);
+        string full_filename    = filename;
+        full_filename           = full_filename.substr(0, strlen(filename) - 4);
         string::size_type where = full_filename.find_last_of(".");
-        string type = ".agg.xml";
+        string            type  = ".agg.xml";
         if (where != string::npos) {
-            type = full_filename.substr(where);
+            type          = full_filename.substr(where);
             full_filename = full_filename.substr(0, where) + ".agg.xml";
-            err = f.OpenReadOnly(full_filename, AiFile);
+            err           = f.OpenReadOnly(full_filename, AiFile);
         }
         if (err > Ok) {
             VS_LOG(warning, (boost::format("ai file %1% again not found") % full_filename));
-            full_filename = "default";
+            full_filename  = "default";
             full_filename += type;
-            err = f.OpenReadOnly(full_filename, AiFile);
+            err            = f.OpenReadOnly(full_filename, AiFile);
         }
         if (err > Ok) {
             VS_LOG(warning, (boost::format("ai file again %1% again not found") % full_filename));
             err = f.OpenReadOnly("default.agg.xml", AiFile);
             if (err > Ok) {
                 VS_LOG(error, "ai file again default.agg.xml again not found");
-                return;                 //Who knows what will happen now? Crash?    // TODO: VSExit()?
+                return;  // Who knows what will happen now? Crash?    // TODO: VSExit()?
             }
         }
     }
@@ -220,11 +209,9 @@ void LoadAI(const char *filename, ElemAttrMap &result, const string &faction) {
     f.Close();
     XML_ParserFree(parser);
     if (result.level != 0) {
-        VS_LOG(error,
-                (boost::format("Error loading AI script %1% for faction %2%. Final count not zero.") % filename
-                        % faction.c_str()));
+        VS_LOG(error, (boost::format("Error loading AI script %1% for faction %2%. Final count not zero.") % filename %
+                       faction.c_str()));
     }
     result.level = 0;
 }
-}
-
+}  // namespace AIEvents

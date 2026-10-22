@@ -34,40 +34,37 @@
 class OPCODE_API CollisionFace {
 public:
     //! Constructor
-    inline_ CollisionFace() {
-    }
-    //! Destructor
-    inline_                ~CollisionFace() {
-    }
+    inline_ CollisionFace() {}
 
-    uint32_t mFaceID;                //!< Index of touched face
-    float mDistance;                //!< Distance from collider to hitpoint
-    float mU, mV;                    //!< Impact barycentric coordinates
+    //! Destructor
+    inline_ ~CollisionFace() {}
+
+    uint32_t mFaceID;    //!< Index of touched face
+    float    mDistance;  //!< Distance from collider to hitpoint
+    float    mU, mV;     //!< Impact barycentric coordinates
 };
 
 class OPCODE_API CollisionFaces : private Container {
 public:
     //! Constructor
-    CollisionFaces() {
-    }
+    CollisionFaces() {}
 
     //! Destructor
-    ~CollisionFaces() {
-    }
+    ~CollisionFaces() {}
 
-    inline_    uint32_t GetNbFaces() const {
+    inline_ uint32_t GetNbFaces() const {
         return GetNbEntries() >> 2;
     }
 
-    inline_    const CollisionFace *GetFaces() const {
-        return (const CollisionFace *) GetEntries();
+    inline_ const CollisionFace *GetFaces() const {
+        return (const CollisionFace *)GetEntries();
     }
 
-    inline_    void Reset() {
+    inline_ void Reset() {
         Container::Reset();
     }
 
-    inline_    void AddFace(const CollisionFace &face) {
+    inline_ void AddFace(const CollisionFace &face) {
         Add(face.mFaceID).Add(face.mDistance).Add(face.mU).Add(face.mV);
     }
 };
@@ -80,14 +77,14 @@ public:
  *  \param		user_data	[in] user-defined data from SetCallback()
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-typedef void    (*HitCallback)(const CollisionFace &hit, void *user_data);
+typedef void (*HitCallback)(const CollisionFace &hit, void *user_data);
 #endif
 
 class OPCODE_API RayCollider : public Collider {
 public:
     // Constructor / Destructor
     RayCollider();
-    virtual                                ~RayCollider();
+    virtual ~RayCollider();
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -118,7 +115,9 @@ public:
      *	\see		SetDestination(StabbedFaces* sf)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_				void			SetClosestHit(bool flag)				{ mClosestHit	= flag;		}
+    inline_ void SetClosestHit(bool flag) {
+        mClosestHit = flag;
+    }
 #endif
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -129,7 +128,7 @@ public:
      *	\see		SetDestination(StabbedFaces* sf)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetCulling(bool flag) {
+    inline_ void SetCulling(bool flag) {
         mCulling = flag;
     }
 
@@ -142,17 +141,17 @@ public:
      *	\see		SetDestination(StabbedFaces* sf)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                void SetMaxDist(float max_dist = MAX_FLOAT) {
+    inline_ void SetMaxDist(float max_dist = MAX_FLOAT) {
         mMaxDist = max_dist;
     }
 
 #ifdef OPC_RAYHIT_CALLBACK
 
-    inline_                void SetHitCallback(HitCallback cb) {
+    inline_ void SetHitCallback(HitCallback cb) {
         mHitCallback = cb;
     }
 
-    inline_                void SetUserData(void *user_data) {
+    inline_ void SetUserData(void *user_data) {
         mUserData = user_data;
     }
 
@@ -166,7 +165,9 @@ public:
      *	\see		SetMaxDist(float max_dist)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_				void			SetDestination(CollisionFaces* cf)		{ mStabbedFaces	= cf;		}
+    inline_ void SetDestination(CollisionFaces *cf) {
+        mStabbedFaces = cf;
+    }
 #endif
     // Stats
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +178,7 @@ public:
      *	\return		the number of Ray-BV tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbRayBVTests() const {
+    inline_ uint32_t GetNbRayBVTests() const {
         return mNbRayBVTests;
     }
 
@@ -189,7 +190,7 @@ public:
      *	\return		the number of Ray-Triangle tests performed during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbRayPrimTests() const {
+    inline_ uint32_t GetNbRayPrimTests() const {
         return mNbRayPrimTests;
     }
 
@@ -202,13 +203,14 @@ public:
      *	\return		the number of valid intersections during last query
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                uint32_t GetNbIntersections() const {
+    inline_ uint32_t GetNbIntersections() const {
         return mNbIntersections;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     *	Validates current settings. You should call this method after all the settings and callbacks have been defined for a collider.
+     *	Validates current settings. You should call this method after all the settings and callbacks have been defined
+     *for a collider.
      *	\return		nullptr if everything is ok, else a string describing the problem
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -216,32 +218,32 @@ public:
 
 protected:
     // Ray in local space
-    Point mOrigin;            //!< Ray origin
-    Point mDir;                //!< Ray direction (normalized)
-    Point mFDir;                //!< fabsf(mDir)
+    Point mOrigin;  //!< Ray origin
+    Point mDir;     //!< Ray direction (normalized)
+    Point mFDir;    //!< fabsf(mDir)
     Point mData, mData2;
     // Stabbed faces
-    CollisionFace mStabbedFace;        //!< Current stabbed face
+    CollisionFace mStabbedFace;  //!< Current stabbed face
 #ifdef OPC_RAYHIT_CALLBACK
-    HitCallback mHitCallback;        //!< Callback used to record a hit
-    void *mUserData;            //!< User-defined data
+    HitCallback mHitCallback;    //!< Callback used to record a hit
+    void       *mUserData;       //!< User-defined data
 #else
-    CollisionFaces*	mStabbedFaces;		//!< List of stabbed faces
+    CollisionFaces *mStabbedFaces;  //!< List of stabbed faces
 #endif
     // Stats
-    uint32_t mNbRayBVTests;        //!< Number of Ray-BV tests
-    uint32_t mNbRayPrimTests;    //!< Number of Ray-Primitive tests
+    uint32_t mNbRayBVTests;    //!< Number of Ray-BV tests
+    uint32_t mNbRayPrimTests;  //!< Number of Ray-Primitive tests
     // In-out test
-    uint32_t mNbIntersections;    //!< Number of valid intersections
+    uint32_t mNbIntersections;  //!< Number of valid intersections
     // Dequantization coeffs
     Point mCenterCoeff;
     Point mExtentsCoeff;
     // Settings
-    float mMaxDist;            //!< Valid segment on the ray
+    float mMaxDist;    //!< Valid segment on the ray
 #ifndef OPC_RAYHIT_CALLBACK
-    bool			mClosestHit;		//!< Report closest hit only
+    bool mClosestHit;  //!< Report closest hit only
 #endif
-    bool mCulling;            //!< Stab culled faces or not
+    bool mCulling;     //!< Stab culled faces or not
     // Internal methods
     void _SegmentStab(const AABBCollisionNode *node);
     void _SegmentStab(const AABBNoLeafNode *node);
@@ -254,11 +256,11 @@ protected:
     void _RayStab(const AABBQuantizedNoLeafNode *node);
     void _RayStab(const AABBTreeNode *node, Container &box_indices);
     // Overlap tests
-    inline_                bool RayAABBOverlap(const Point &center, const Point &extents);
-    inline_                bool SegmentAABBOverlap(const Point &center, const Point &extents);
-    inline_                bool RayTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2);
+    inline_ bool RayAABBOverlap(const Point &center, const Point &extents);
+    inline_ bool SegmentAABBOverlap(const Point &center, const Point &extents);
+    inline_ bool RayTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2);
     // Init methods
     bool InitQuery(const Ray &world_ray, const Matrix4x4 *world = nullptr, uint32_t *face_id = nullptr);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_RAY_COLLIDER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_RAY_COLLIDER_H

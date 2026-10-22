@@ -36,9 +36,10 @@ class EnergyContainer;
 /** A dummy component. Does nothing. Comes in useful in some places. */
 class ECM : public Component, public EnergyConsumer {
     // TODO: take a deeper look at this much later...
-    //how likely to fool missiles
+    // how likely to fool missiles
     Resource<int> ecm;
-    bool active;
+    bool          active;
+
 public:
     ECM();
     explicit ECM(EnergyContainer *source);
@@ -47,7 +48,7 @@ public:
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -65,12 +66,12 @@ public:
 
     // ECM Methods
     bool Active() const;
-    bool BreakLock(void* missile) const;
-    int Get() const;
+    bool BreakLock(void *missile) const;
+    int  Get() const;
     void Set(int ecm);
     void Toggle();
 
     void _upgrade(const std::string key);
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_ECM_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_ECM_H

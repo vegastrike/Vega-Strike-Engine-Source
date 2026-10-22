@@ -34,7 +34,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		March, 20, 2001
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "collide2/Opcode.h"
@@ -50,23 +50,21 @@ using namespace Opcode;
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBTreeCollider::AABBTreeCollider() :
-        mIMesh0(nullptr),
-        mIMesh1(nullptr),
-        mNbBVBVTests(0),
-        mNbPrimPrimTests(0),
-        mNbBVPrimTests(0),
-        mFullBoxBoxTest(true),
-        mFullPrimBoxTest(true) {
-}
+AABBTreeCollider::AABBTreeCollider()
+    : mIMesh0(nullptr),
+      mIMesh1(nullptr),
+      mNbBVBVTests(0),
+      mNbPrimPrimTests(0),
+      mNbBVPrimTests(0),
+      mFullBoxBoxTest(true),
+      mFullPrimBoxTest(true) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-AABBTreeCollider::~AABBTreeCollider() {
-}
+AABBTreeCollider::~AABBTreeCollider() {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -76,7 +74,9 @@ AABBTreeCollider::~AABBTreeCollider() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const char *AABBTreeCollider::ValidateSettings() {
     if (TemporalCoherenceEnabled() && !FirstContactEnabled()) {
-        return "Temporal coherence only works with ""First contact"" mode!";
+        return "Temporal coherence only works with "
+               "First contact"
+               " mode!";
     }
     return nullptr;
 }
@@ -119,28 +119,22 @@ bool AABBTreeCollider::Collide(BVTCache &cache, const Matrix4x4 *world0, const M
 
 #ifdef __MESHMERIZER_H__
     // Handle hulls
-    if(cache.HullTest)
-    {
-        if(cache.Model0->GetHull() && cache.Model1->GetHull())
-        {
-            struct Local
-            {
-                static Point* SVCallback(const Point& sv, uint32_t& previndex, uint32_t user_data)
-                {
-                    CollisionHull* Hull = (CollisionHull*)user_data;
-                    previndex = Hull->ComputeSupportingVertex(sv, previndex);
-                    return (Point*)&Hull->GetVerts()[previndex];
+    if (cache.HullTest) {
+        if (cache.Model0->GetHull() && cache.Model1->GetHull()) {
+            struct Local {
+                static Point *SVCallback(const Point &sv, uint32_t &previndex, uint32_t user_data) {
+                    CollisionHull *Hull = (CollisionHull *)user_data;
+                    previndex           = Hull->ComputeSupportingVertex(sv, previndex);
+                    return (Point *)&Hull->GetVerts()[previndex];
                 }
             };
 
             bool Collide;
 
-            if(0)
-            {
+            if (0) {
                 static GJKEngine GJK;
-                static bool GJKInitDone=false;
-                if(!GJKInitDone)
-                {
+                static bool      GJKInitDone = false;
+                if (!GJKInitDone) {
                     GJK.Enable(GJK_BACKUP_PROCEDURE);
                     GJK.Enable(GJK_DEGENERATE);
                     GJK.Enable(GJK_HILLCLIMBING);
@@ -151,9 +145,7 @@ bool AABBTreeCollider::Collide(BVTCache &cache, const Matrix4x4 *world0, const M
                 GJK.SetUserData0(uint32_t(cache.Model0->GetHull()));
                 GJK.SetUserData1(uint32_t(cache.Model1->GetHull()));
                 Collide = GJK.Collide(*world0, *world1, &cache.SepVector);
-            }
-            else
-            {
+            } else {
                 static SVEngine SVE;
                 SVE.SetCallbackObj0(Local::SVCallback);
                 SVE.SetCallbackObj1(Local::SVCallback);
@@ -162,22 +154,21 @@ bool AABBTreeCollider::Collide(BVTCache &cache, const Matrix4x4 *world0, const M
                 Collide = SVE.Collide(*world0, *world1, &cache.SepVector);
             }
 
-            if(!Collide)
-            {
-        // Reset stats & contact status
-        mFlags &= ~OPC_CONTACT;
-        mNbBVBVTests		= 0;
-        mNbPrimPrimTests	= 0;
-        mNbBVPrimTests		= 0;
-        mPairs.Reset();
-        return true;
+            if (!Collide) {
+                // Reset stats & contact status
+                mFlags           &= ~OPC_CONTACT;
+                mNbBVBVTests      = 0;
+                mNbPrimPrimTests  = 0;
+                mNbBVPrimTests    = 0;
+                mPairs.Reset();
+                return true;
             }
         }
     }
 
     // Here, hulls collide
     cache.HullTest = false;
-#endif // __MESHMERIZER_H__
+#endif  // __MESHMERIZER_H__
 
     // Checkings
     if (!Setup(cache.Model0->GetMeshInterface(), cache.Model1->GetMeshInterface())) {
@@ -188,36 +179,36 @@ bool AABBTreeCollider::Collide(BVTCache &cache, const Matrix4x4 *world0, const M
     bool Status;
     if (!cache.Model0->HasLeafNodes()) {
         if (cache.Model0->IsQuantized()) {
-            const AABBQuantizedNoLeafTree *T0 = (const AABBQuantizedNoLeafTree *) cache.Model0->GetTree();
-            const AABBQuantizedNoLeafTree *T1 = (const AABBQuantizedNoLeafTree *) cache.Model1->GetTree();
-            Status = Collide(T0, T1, world0, world1, &cache);
+            const AABBQuantizedNoLeafTree *T0 = (const AABBQuantizedNoLeafTree *)cache.Model0->GetTree();
+            const AABBQuantizedNoLeafTree *T1 = (const AABBQuantizedNoLeafTree *)cache.Model1->GetTree();
+            Status                            = Collide(T0, T1, world0, world1, &cache);
         } else {
-            const AABBNoLeafTree *T0 = (const AABBNoLeafTree *) cache.Model0->GetTree();
-            const AABBNoLeafTree *T1 = (const AABBNoLeafTree *) cache.Model1->GetTree();
-            Status = Collide(T0, T1, world0, world1, &cache);
+            const AABBNoLeafTree *T0 = (const AABBNoLeafTree *)cache.Model0->GetTree();
+            const AABBNoLeafTree *T1 = (const AABBNoLeafTree *)cache.Model1->GetTree();
+            Status                   = Collide(T0, T1, world0, world1, &cache);
         }
     } else {
         if (cache.Model0->IsQuantized()) {
-            const AABBQuantizedTree *T0 = (const AABBQuantizedTree *) cache.Model0->GetTree();
-            const AABBQuantizedTree *T1 = (const AABBQuantizedTree *) cache.Model1->GetTree();
-            Status = Collide(T0, T1, world0, world1, &cache);
+            const AABBQuantizedTree *T0 = (const AABBQuantizedTree *)cache.Model0->GetTree();
+            const AABBQuantizedTree *T1 = (const AABBQuantizedTree *)cache.Model1->GetTree();
+            Status                      = Collide(T0, T1, world0, world1, &cache);
         } else {
-            const AABBCollisionTree *T0 = (const AABBCollisionTree *) cache.Model0->GetTree();
-            const AABBCollisionTree *T1 = (const AABBCollisionTree *) cache.Model1->GetTree();
-            Status = Collide(T0, T1, world0, world1, &cache);
+            const AABBCollisionTree *T0 = (const AABBCollisionTree *)cache.Model0->GetTree();
+            const AABBCollisionTree *T1 = (const AABBCollisionTree *)cache.Model1->GetTree();
+            Status                      = Collide(T0, T1, world0, world1, &cache);
         }
     }
 
 #ifdef __MESHMERIZER_H__
-    if(Status)
-    {
+    if (Status) {
         // Reset counter as long as overlap occurs
-        if(GetContactStatus())	cache.ResetCountDown();
+        if (GetContactStatus()) {
+            cache.ResetCountDown();
+        }
 
         // Enable hull test again when counter reaches zero
         cache.CountDown--;
-        if(!cache.CountDown)
-        {
+        if (!cache.CountDown) {
             cache.ResetCountDown();
             cache.HullTest = true;
         }
@@ -240,9 +231,9 @@ bool AABBTreeCollider::Collide(BVTCache &cache, const Matrix4x4 *world0, const M
 void AABBTreeCollider::InitQuery(const Matrix4x4 *world0, const Matrix4x4 *world1) {
     // Reset stats & contact status
     Collider::InitQuery();
-    mNbBVBVTests = 0;
+    mNbBVBVTests     = 0;
     mNbPrimPrimTests = 0;
-    mNbBVPrimTests = 0;
+    mNbBVPrimTests   = 0;
     mPairs.Reset();
 
     // Setup matrices
@@ -300,11 +291,10 @@ bool AABBTreeCollider::CheckTemporalCoherence(Pair *cache) {
     return false;
 }
 
-#define UPDATE_CACHE                        \
-    if (cache && GetContactStatus())        \
-    {                                       \
-        cache->id0 = mPairs.GetEntry(0);    \
-        cache->id1 = mPairs.GetEntry(1);    \
+#define UPDATE_CACHE                     \
+    if (cache && GetContactStatus()) {   \
+        cache->id0 = mPairs.GetEntry(0); \
+        cache->id1 = mPairs.GetEntry(1); \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,11 +309,8 @@ bool AABBTreeCollider::CheckTemporalCoherence(Pair *cache) {
  *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTreeCollider::Collide(const AABBCollisionTree *tree0,
-        const AABBCollisionTree *tree1,
-        const Matrix4x4 *world0,
-        const Matrix4x4 *world1,
-        Pair *cache) {
+bool AABBTreeCollider::Collide(const AABBCollisionTree *tree0, const AABBCollisionTree *tree1, const Matrix4x4 *world0,
+                               const Matrix4x4 *world1, Pair *cache) {
     // Init collision query
     InitQuery(world0, world1);
 
@@ -352,11 +339,8 @@ bool AABBTreeCollider::Collide(const AABBCollisionTree *tree0,
  *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTreeCollider::Collide(const AABBNoLeafTree *tree0,
-        const AABBNoLeafTree *tree1,
-        const Matrix4x4 *world0,
-        const Matrix4x4 *world1,
-        Pair *cache) {
+bool AABBTreeCollider::Collide(const AABBNoLeafTree *tree0, const AABBNoLeafTree *tree1, const Matrix4x4 *world0,
+                               const Matrix4x4 *world1, Pair *cache) {
     // Init collision query
     InitQuery(world0, world1);
 
@@ -385,11 +369,8 @@ bool AABBTreeCollider::Collide(const AABBNoLeafTree *tree0,
  *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTreeCollider::Collide(const AABBQuantizedTree *tree0,
-        const AABBQuantizedTree *tree1,
-        const Matrix4x4 *world0,
-        const Matrix4x4 *world1,
-        Pair *cache) {
+bool AABBTreeCollider::Collide(const AABBQuantizedTree *tree0, const AABBQuantizedTree *tree1, const Matrix4x4 *world0,
+                               const Matrix4x4 *world1, Pair *cache) {
     // Init collision query
     InitQuery(world0, world1);
 
@@ -399,27 +380,23 @@ bool AABBTreeCollider::Collide(const AABBQuantizedTree *tree0,
     }
 
     // Setup dequantization coeffs
-    mCenterCoeff0 = tree0->mCenterCoeff;
+    mCenterCoeff0  = tree0->mCenterCoeff;
     mExtentsCoeff0 = tree0->mExtentsCoeff;
-    mCenterCoeff1 = tree1->mCenterCoeff;
+    mCenterCoeff1  = tree1->mCenterCoeff;
     mExtentsCoeff1 = tree1->mExtentsCoeff;
 
     // Dequantize box A
     const AABBQuantizedNode *N0 = tree0->GetNodes();
-    const Point a(float(N0->mAABB.mExtents[0]) * mExtentsCoeff0.x,
-            float(N0->mAABB.mExtents[1]) * mExtentsCoeff0.y,
-            float(N0->mAABB.mExtents[2]) * mExtentsCoeff0.z);
-    const Point Pa(float(N0->mAABB.mCenter[0]) * mCenterCoeff0.x,
-            float(N0->mAABB.mCenter[1]) * mCenterCoeff0.y,
-            float(N0->mAABB.mCenter[2]) * mCenterCoeff0.z);
+    const Point a(float(N0->mAABB.mExtents[0]) * mExtentsCoeff0.x, float(N0->mAABB.mExtents[1]) * mExtentsCoeff0.y,
+                  float(N0->mAABB.mExtents[2]) * mExtentsCoeff0.z);
+    const Point Pa(float(N0->mAABB.mCenter[0]) * mCenterCoeff0.x, float(N0->mAABB.mCenter[1]) * mCenterCoeff0.y,
+                   float(N0->mAABB.mCenter[2]) * mCenterCoeff0.z);
     // Dequantize box B
     const AABBQuantizedNode *N1 = tree1->GetNodes();
-    const Point b(float(N1->mAABB.mExtents[0]) * mExtentsCoeff1.x,
-            float(N1->mAABB.mExtents[1]) * mExtentsCoeff1.y,
-            float(N1->mAABB.mExtents[2]) * mExtentsCoeff1.z);
-    const Point Pb(float(N1->mAABB.mCenter[0]) * mCenterCoeff1.x,
-            float(N1->mAABB.mCenter[1]) * mCenterCoeff1.y,
-            float(N1->mAABB.mCenter[2]) * mCenterCoeff1.z);
+    const Point b(float(N1->mAABB.mExtents[0]) * mExtentsCoeff1.x, float(N1->mAABB.mExtents[1]) * mExtentsCoeff1.y,
+                  float(N1->mAABB.mExtents[2]) * mExtentsCoeff1.z);
+    const Point Pb(float(N1->mAABB.mCenter[0]) * mCenterCoeff1.x, float(N1->mAABB.mCenter[1]) * mCenterCoeff1.y,
+                   float(N1->mAABB.mCenter[2]) * mCenterCoeff1.z);
 
     // Perform collision query
     _Collide(N0, N1, a, Pa, b, Pb);
@@ -441,11 +418,8 @@ bool AABBTreeCollider::Collide(const AABBQuantizedTree *tree0,
  *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool AABBTreeCollider::Collide(const AABBQuantizedNoLeafTree *tree0,
-        const AABBQuantizedNoLeafTree *tree1,
-        const Matrix4x4 *world0,
-        const Matrix4x4 *world1,
-        Pair *cache) {
+bool AABBTreeCollider::Collide(const AABBQuantizedNoLeafTree *tree0, const AABBQuantizedNoLeafTree *tree1,
+                               const Matrix4x4 *world0, const Matrix4x4 *world1, Pair *cache) {
     // Init collision query
     InitQuery(world0, world1);
 
@@ -455,9 +429,9 @@ bool AABBTreeCollider::Collide(const AABBQuantizedNoLeafTree *tree0,
     }
 
     // Setup dequantization coeffs
-    mCenterCoeff0 = tree0->mCenterCoeff;
+    mCenterCoeff0  = tree0->mCenterCoeff;
     mExtentsCoeff0 = tree0->mExtentsCoeff;
-    mCenterCoeff1 = tree1->mCenterCoeff;
+    mCenterCoeff1  = tree1->mCenterCoeff;
     mExtentsCoeff1 = tree1->mExtentsCoeff;
 
     // Perform collision query
@@ -473,8 +447,8 @@ bool AABBTreeCollider::Collide(const AABBQuantizedNoLeafTree *tree0,
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // The normal AABB tree can use 2 different descent rules (with different performances)
-//#define ORIGINAL_CODE			//!< UNC-like descent rules
-#define ALTERNATIVE_CODE        //!< Alternative descent rules
+// #define ORIGINAL_CODE			//!< UNC-like descent rules
+#define ALTERNATIVE_CODE  //!< Alternative descent rules
 
 #ifdef ORIGINAL_CODE
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -484,23 +458,28 @@ bool AABBTreeCollider::Collide(const AABBQuantizedNoLeafTree *tree0,
  *  \param		b1		[in] collision node from second tree
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBTreeCollider::_Collide(const AABBCollisionNode* b0, const AABBCollisionNode* b1)
-{
+void AABBTreeCollider::_Collide(const AABBCollisionNode *b0, const AABBCollisionNode *b1) {
     // Perform BV-BV overlap test
-    if(!BoxBoxOverlap(b0->mAABB.mExtents, b0->mAABB.mCenter, b1->mAABB.mExtents, b1->mAABB.mCenter))	return;
-
-    if(b0->IsLeaf() && b1->IsLeaf()) { PrimTest(b0->GetPrimitive(), b1->GetPrimitive()); return; }
-
-    if(b1->IsLeaf() || (!b0->IsLeaf() && (b0->GetSize() > b1->GetSize())))
-    {
-        _Collide(b0->GetNeg(), b1);
-        if(ContactFound()) return;
-        _Collide(b0->GetPos(), b1);
+    if (!BoxBoxOverlap(b0->mAABB.mExtents, b0->mAABB.mCenter, b1->mAABB.mExtents, b1->mAABB.mCenter)) {
+        return;
     }
-    else
-    {
+
+    if (b0->IsLeaf() && b1->IsLeaf()) {
+        PrimTest(b0->GetPrimitive(), b1->GetPrimitive());
+        return;
+    }
+
+    if (b1->IsLeaf() || (!b0->IsLeaf() && (b0->GetSize() > b1->GetSize()))) {
+        _Collide(b0->GetNeg(), b1);
+        if (ContactFound()) {
+            return;
+        }
+        _Collide(b0->GetPos(), b1);
+    } else {
         _Collide(b0, b1->GetNeg());
-        if(ContactFound()) return;
+        if (ContactFound()) {
+            return;
+        }
         _Collide(b0, b1->GetPos());
     }
 }
@@ -691,13 +670,14 @@ void AABBTreeCollider::_CollideBoxTri(const AABBNoLeafNode *b) {
 }
 
 //! Request triangle vertices from the app and transform them
-#define FETCH_LEAF(prim_index, imesh, rot, trans)                \
-    mLeafIndex = prim_index;                                     \
-    /* Request vertices from the app */                          \
-    VertexPointers VP;    imesh->GetTriangle(VP, prim_index);    \
-    /* Transform them in a common space */                       \
-    TransformPoint(mLeafVerts[0], *VP.Vertex[0], rot, trans);    \
-    TransformPoint(mLeafVerts[1], *VP.Vertex[1], rot, trans);    \
+#define FETCH_LEAF(prim_index, imesh, rot, trans)             \
+    mLeafIndex = prim_index;                                  \
+    /* Request vertices from the app */                       \
+    VertexPointers VP;                                        \
+    imesh->GetTriangle(VP, prim_index);                       \
+    /* Transform them in a common space */                    \
+    TransformPoint(mLeafVerts[0], *VP.Vertex[0], rot, trans); \
+    TransformPoint(mLeafVerts[1], *VP.Vertex[1], rot, trans); \
     TransformPoint(mLeafVerts[2], *VP.Vertex[2], rot, trans);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -819,12 +799,8 @@ void AABBTreeCollider::_Collide(const AABBNoLeafNode *a, const AABBNoLeafNode *b
  *  \param		Pb		[in] center from box B
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void AABBTreeCollider::_Collide(const AABBQuantizedNode *b0,
-        const AABBQuantizedNode *b1,
-        const Point &a,
-        const Point &Pa,
-        const Point &b,
-        const Point &Pb) {
+void AABBTreeCollider::_Collide(const AABBQuantizedNode *b0, const AABBQuantizedNode *b1, const Point &a,
+                                const Point &Pa, const Point &b, const Point &Pb) {
     // Perform BV-BV overlap test
     if (!BoxBoxOverlap(a, Pa, b, Pb)) {
         return;
@@ -838,12 +814,10 @@ void AABBTreeCollider::_Collide(const AABBQuantizedNode *b0,
     if (b1->IsLeaf() || (!b0->IsLeaf() && (b0->GetSize() > b1->GetSize()))) {
         // Dequantize box
         const QuantizedAABB *Box = &b0->GetNeg()->mAABB;
-        const Point negPa(float(Box->mCenter[0]) * mCenterCoeff0.x,
-                float(Box->mCenter[1]) * mCenterCoeff0.y,
-                float(Box->mCenter[2]) * mCenterCoeff0.z);
-        const Point nega(float(Box->mExtents[0]) * mExtentsCoeff0.x,
-                float(Box->mExtents[1]) * mExtentsCoeff0.y,
-                float(Box->mExtents[2]) * mExtentsCoeff0.z);
+        const Point          negPa(float(Box->mCenter[0]) * mCenterCoeff0.x, float(Box->mCenter[1]) * mCenterCoeff0.y,
+                                   float(Box->mCenter[2]) * mCenterCoeff0.z);
+        const Point nega(float(Box->mExtents[0]) * mExtentsCoeff0.x, float(Box->mExtents[1]) * mExtentsCoeff0.y,
+                         float(Box->mExtents[2]) * mExtentsCoeff0.z);
         _Collide(b0->GetNeg(), b1, nega, negPa, b, Pb);
 
         if (ContactFound()) {
@@ -852,22 +826,18 @@ void AABBTreeCollider::_Collide(const AABBQuantizedNode *b0,
 
         // Dequantize box
         Box = &b0->GetPos()->mAABB;
-        const Point posPa(float(Box->mCenter[0]) * mCenterCoeff0.x,
-                float(Box->mCenter[1]) * mCenterCoeff0.y,
-                float(Box->mCenter[2]) * mCenterCoeff0.z);
-        const Point posa(float(Box->mExtents[0]) * mExtentsCoeff0.x,
-                float(Box->mExtents[1]) * mExtentsCoeff0.y,
-                float(Box->mExtents[2]) * mExtentsCoeff0.z);
+        const Point posPa(float(Box->mCenter[0]) * mCenterCoeff0.x, float(Box->mCenter[1]) * mCenterCoeff0.y,
+                          float(Box->mCenter[2]) * mCenterCoeff0.z);
+        const Point posa(float(Box->mExtents[0]) * mExtentsCoeff0.x, float(Box->mExtents[1]) * mExtentsCoeff0.y,
+                         float(Box->mExtents[2]) * mExtentsCoeff0.z);
         _Collide(b0->GetPos(), b1, posa, posPa, b, Pb);
     } else {
         // Dequantize box
         const QuantizedAABB *Box = &b1->GetNeg()->mAABB;
-        const Point negPb(float(Box->mCenter[0]) * mCenterCoeff1.x,
-                float(Box->mCenter[1]) * mCenterCoeff1.y,
-                float(Box->mCenter[2]) * mCenterCoeff1.z);
-        const Point negb(float(Box->mExtents[0]) * mExtentsCoeff1.x,
-                float(Box->mExtents[1]) * mExtentsCoeff1.y,
-                float(Box->mExtents[2]) * mExtentsCoeff1.z);
+        const Point          negPb(float(Box->mCenter[0]) * mCenterCoeff1.x, float(Box->mCenter[1]) * mCenterCoeff1.y,
+                                   float(Box->mCenter[2]) * mCenterCoeff1.z);
+        const Point negb(float(Box->mExtents[0]) * mExtentsCoeff1.x, float(Box->mExtents[1]) * mExtentsCoeff1.y,
+                         float(Box->mExtents[2]) * mExtentsCoeff1.z);
         _Collide(b0, b1->GetNeg(), a, Pa, negb, negPb);
 
         if (ContactFound()) {
@@ -876,12 +846,10 @@ void AABBTreeCollider::_Collide(const AABBQuantizedNode *b0,
 
         // Dequantize box
         Box = &b1->GetPos()->mAABB;
-        const Point posPb(float(Box->mCenter[0]) * mCenterCoeff1.x,
-                float(Box->mCenter[1]) * mCenterCoeff1.y,
-                float(Box->mCenter[2]) * mCenterCoeff1.z);
-        const Point posb(float(Box->mExtents[0]) * mExtentsCoeff1.x,
-                float(Box->mExtents[1]) * mExtentsCoeff1.y,
-                float(Box->mExtents[2]) * mExtentsCoeff1.z);
+        const Point posPb(float(Box->mCenter[0]) * mCenterCoeff1.x, float(Box->mCenter[1]) * mCenterCoeff1.y,
+                          float(Box->mCenter[2]) * mCenterCoeff1.z);
+        const Point posb(float(Box->mExtents[0]) * mExtentsCoeff1.x, float(Box->mExtents[1]) * mExtentsCoeff1.y,
+                         float(Box->mExtents[2]) * mExtentsCoeff1.z);
         _Collide(b0, b1->GetPos(), a, Pa, posb, posPb);
     }
 }
@@ -900,12 +868,10 @@ void AABBTreeCollider::_Collide(const AABBQuantizedNode *b0,
 void AABBTreeCollider::_CollideTriBox(const AABBQuantizedNoLeafNode *b) {
     // Dequantize box
     const QuantizedAABB *bb = &b->mAABB;
-    const Point Pb(float(bb->mCenter[0]) * mCenterCoeff1.x,
-            float(bb->mCenter[1]) * mCenterCoeff1.y,
-            float(bb->mCenter[2]) * mCenterCoeff1.z);
-    const Point eb(float(bb->mExtents[0]) * mExtentsCoeff1.x,
-            float(bb->mExtents[1]) * mExtentsCoeff1.y,
-            float(bb->mExtents[2]) * mExtentsCoeff1.z);
+    const Point          Pb(float(bb->mCenter[0]) * mCenterCoeff1.x, float(bb->mCenter[1]) * mCenterCoeff1.y,
+                            float(bb->mCenter[2]) * mCenterCoeff1.z);
+    const Point          eb(float(bb->mExtents[0]) * mExtentsCoeff1.x, float(bb->mExtents[1]) * mExtentsCoeff1.y,
+                            float(bb->mExtents[2]) * mExtentsCoeff1.z);
 
     // Perform triangle-box overlap test
     if (!TriBoxOverlap(Pb, eb)) {
@@ -939,12 +905,10 @@ void AABBTreeCollider::_CollideTriBox(const AABBQuantizedNoLeafNode *b) {
 void AABBTreeCollider::_CollideBoxTri(const AABBQuantizedNoLeafNode *b) {
     // Dequantize box
     const QuantizedAABB *bb = &b->mAABB;
-    const Point Pa(float(bb->mCenter[0]) * mCenterCoeff0.x,
-            float(bb->mCenter[1]) * mCenterCoeff0.y,
-            float(bb->mCenter[2]) * mCenterCoeff0.z);
-    const Point ea(float(bb->mExtents[0]) * mExtentsCoeff0.x,
-            float(bb->mExtents[1]) * mExtentsCoeff0.y,
-            float(bb->mExtents[2]) * mExtentsCoeff0.z);
+    const Point          Pa(float(bb->mCenter[0]) * mCenterCoeff0.x, float(bb->mCenter[1]) * mCenterCoeff0.y,
+                            float(bb->mCenter[2]) * mCenterCoeff0.z);
+    const Point          ea(float(bb->mExtents[0]) * mExtentsCoeff0.x, float(bb->mExtents[1]) * mExtentsCoeff0.y,
+                            float(bb->mExtents[2]) * mExtentsCoeff0.z);
 
     // Perform triangle-box overlap test
     if (!TriBoxOverlap(Pa, ea)) {
@@ -978,20 +942,16 @@ void AABBTreeCollider::_CollideBoxTri(const AABBQuantizedNoLeafNode *b) {
 void AABBTreeCollider::_Collide(const AABBQuantizedNoLeafNode *a, const AABBQuantizedNoLeafNode *b) {
     // Dequantize box A
     const QuantizedAABB *ab = &a->mAABB;
-    const Point Pa(float(ab->mCenter[0]) * mCenterCoeff0.x,
-            float(ab->mCenter[1]) * mCenterCoeff0.y,
-            float(ab->mCenter[2]) * mCenterCoeff0.z);
-    const Point ea(float(ab->mExtents[0]) * mExtentsCoeff0.x,
-            float(ab->mExtents[1]) * mExtentsCoeff0.y,
-            float(ab->mExtents[2]) * mExtentsCoeff0.z);
+    const Point          Pa(float(ab->mCenter[0]) * mCenterCoeff0.x, float(ab->mCenter[1]) * mCenterCoeff0.y,
+                            float(ab->mCenter[2]) * mCenterCoeff0.z);
+    const Point          ea(float(ab->mExtents[0]) * mExtentsCoeff0.x, float(ab->mExtents[1]) * mExtentsCoeff0.y,
+                            float(ab->mExtents[2]) * mExtentsCoeff0.z);
     // Dequantize box B
     const QuantizedAABB *bb = &b->mAABB;
-    const Point Pb(float(bb->mCenter[0]) * mCenterCoeff1.x,
-            float(bb->mCenter[1]) * mCenterCoeff1.y,
-            float(bb->mCenter[2]) * mCenterCoeff1.z);
-    const Point eb(float(bb->mExtents[0]) * mExtentsCoeff1.x,
-            float(bb->mExtents[1]) * mExtentsCoeff1.y,
-            float(bb->mExtents[2]) * mExtentsCoeff1.z);
+    const Point          Pb(float(bb->mCenter[0]) * mCenterCoeff1.x, float(bb->mCenter[1]) * mCenterCoeff1.y,
+                            float(bb->mCenter[2]) * mCenterCoeff1.z);
+    const Point          eb(float(bb->mExtents[0]) * mExtentsCoeff1.x, float(bb->mExtents[1]) * mExtentsCoeff1.y,
+                            float(bb->mExtents[2]) * mExtentsCoeff1.z);
 
     // Perform BV-BV overlap test
     if (!BoxBoxOverlap(ea, Pa, eb, Pb)) {
@@ -1088,4 +1048,3 @@ void AABBTreeCollider::_Collide(const AABBQuantizedNoLeafNode *a, const AABBQuan
         }
     }
 }
-

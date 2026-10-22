@@ -26,77 +26,78 @@
  */
 
 
-#include "src/in_joystick.h"
 #include "flykeyboard.h"
-#include "cmd/unit_generic.h"
-#include "navigation.h"
+
 #include "autodocking.h"
-#include "src/config_xml.h"
-#include "root_generic/xml_support.h"
-#include "root_generic/vs_globals.h"
-#include "src/vs_logging.h"
+#include "cmd/unit_generic.h"
 #include "gfx/cockpit.h"
+#include "navigation.h"
 #include "root_generic/lin_time.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
+#include "src/in_joystick.h"
 #include "src/universe.h"
+#include "src/vs_logging.h"
 
 struct StarShipControlKeyboard {
-    bool switchmode;
-    bool setunvel;
-    bool setnulvel;
-    bool matchspeed;
-    bool jumpkey;
+    bool        switchmode;
+    bool        setunvel;
+    bool        setnulvel;
+    bool        matchspeed;
+    bool        jumpkey;
     signed char axial;
     signed char vertical;
     signed char horizontal;
-    int sheltonpress;
-    int sheltonrelease;
-    int uppress;    //negative if not pressed last
-    int uprelease;
-    int downpress;
-    int downrelease;
-    int leftpress;
-    int leftrelease;
-    int rightpress;
-    int rightrelease;
-    int ABpress;
-    int ABrelease;
-    int accelpress;
-    int accelrelease;
-    int decelpress;
-    int decelrelease;
-    int rollrightpress;
-    int rollrightrelease;
-    int rollleftpress;
-    int rollleftrelease;
-    int joyinertialxypress;
-    int joyinertialxyrelease;
-    int joyinertialxzpress;
-    int joyinertialxzrelease;
-    int joyrollpress;
-    int joyrollrelease;
-    int joybankpress;
-    int joybankrelease;
-    int inertialflightpress;
-    int inertialflightrelease;
-    bool stoppress;
-    bool startpress;
-    bool dirty;     //it wasn't updated...
-    bool autopilot;
-    bool switch_combat_mode;
-    bool ASAP;
-    bool terminateauto;
-    bool realauto;
-    bool startcomm;
-    bool commchanged;
-    bool switchwebcam;
-    bool switchsecured;
-    bool freq_increase;
-    bool freq_decrease;
-    bool switchinertialflight;
-    bool switchjoyinertialxy;
-    bool switchjoyinertialxz;
-    bool switchjoyroll;
-    bool switchjoybank;
+    int         sheltonpress;
+    int         sheltonrelease;
+    int         uppress;  // negative if not pressed last
+    int         uprelease;
+    int         downpress;
+    int         downrelease;
+    int         leftpress;
+    int         leftrelease;
+    int         rightpress;
+    int         rightrelease;
+    int         ABpress;
+    int         ABrelease;
+    int         accelpress;
+    int         accelrelease;
+    int         decelpress;
+    int         decelrelease;
+    int         rollrightpress;
+    int         rollrightrelease;
+    int         rollleftpress;
+    int         rollleftrelease;
+    int         joyinertialxypress;
+    int         joyinertialxyrelease;
+    int         joyinertialxzpress;
+    int         joyinertialxzrelease;
+    int         joyrollpress;
+    int         joyrollrelease;
+    int         joybankpress;
+    int         joybankrelease;
+    int         inertialflightpress;
+    int         inertialflightrelease;
+    bool        stoppress;
+    bool        startpress;
+    bool        dirty;  // it wasn't updated...
+    bool        autopilot;
+    bool        switch_combat_mode;
+    bool        ASAP;
+    bool        terminateauto;
+    bool        realauto;
+    bool        startcomm;
+    bool        commchanged;
+    bool        switchwebcam;
+    bool        switchsecured;
+    bool        freq_increase;
+    bool        freq_decrease;
+    bool        switchinertialflight;
+    bool        switchjoyinertialxy;
+    bool        switchjoyinertialxz;
+    bool        switchjoyroll;
+    bool        switchjoybank;
 
     void UnDirty() {
         sheltonpress = sheltonrelease = uppress = uprelease = downpress = downrelease = leftpress = leftrelease = 0;
@@ -119,7 +120,7 @@ struct StarShipControlKeyboard {
 static vector<StarShipControlKeyboard> starshipcontrolkeys;
 
 static StarShipControlKeyboard &g() {
-    while (starshipcontrolkeys.size() <= (unsigned int) _Universe->CurrentCockpit()) {
+    while (starshipcontrolkeys.size() <= (unsigned int)_Universe->CurrentCockpit()) {
         starshipcontrolkeys.emplace_back();
     }
     return starshipcontrolkeys[_Universe->CurrentCockpit()];
@@ -134,13 +135,13 @@ FlyByKeyboard::FlyByKeyboard(unsigned int whichplayer) : FlyByWire(), axis_key(0
         starshipcontrolkeys.emplace_back();
     }
     autopilot = nullptr;
-    inauto = false;
+    inauto    = false;
 
-    //Initial Joystick Mode
-    //NOTE: Perhaps it should be handled by FlyByJoystick, but it was cumbersome to do that
-    //since it handled mainly keystrokes - Any ideas?
+    // Initial Joystick Mode
+    // NOTE: Perhaps it should be handled by FlyByJoystick, but it was cumbersome to do that
+    // since it handled mainly keystrokes - Any ideas?
     const string initialJoyMode = configuration().joystick.initial_mode;
-    joy_mode = 0;
+    joy_mode                    = 0;
     if (initialJoyMode == "inertialxy") {
         joy_mode = joyModeInertialXY;
     } else if (initialJoyMode == "inertialxz") {
@@ -157,15 +158,15 @@ FlyByKeyboard::FlyByKeyboard(unsigned int whichplayer) : FlyByWire(), axis_key(0
 void FlyByKeyboard::Execute(bool resetangvelocity) {
 #define SSCK (starshipcontrolkeys[whichplayer])
     if (SSCK.setunvel) {
-        SSCK.setunvel = false;
-        Unit *t = parent->Target();
-        int neu = FactionUtil::GetNeutralFaction();
-        int upg = FactionUtil::GetUpgradeFaction();
+        SSCK.setunvel                = false;
+        Unit      *t                 = parent->Target();
+        int        neu               = FactionUtil::GetNeutralFaction();
+        int        upg               = FactionUtil::GetUpgradeFaction();
         const bool allowanyreference = configuration().ai.allow_any_speed_reference;
-        const bool onlyupgraderef = configuration().ai.only_upgrade_speed_reference;
+        const bool onlyupgraderef    = configuration().ai.only_upgrade_speed_reference;
         if (t) {
-            if ((t->getRelation(parent) >= 0
-                    && !onlyupgraderef) || t->faction == neu || t->faction == upg || allowanyreference) {
+            if ((t->getRelation(parent) >= 0 && !onlyupgraderef) || t->faction == neu || t->faction == upg ||
+                allowanyreference) {
                 parent->VelocityReference(parent->Target());
             }
         }
@@ -182,7 +183,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
         SSCK.ASAP = false;
         if (FlyByKeyboard::inauto) {
             this->eraseType(FACING | MOVEMENT);
-            FlyByKeyboard::inauto = false;
+            FlyByKeyboard::inauto   = false;
             parent->autopilotactive = FlyByKeyboard::inauto;
             if (parent->ftl_drive.Enabled()) {
                 parent->ftl_drive.Disable();
@@ -190,8 +191,8 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             }
         } else {
             // Use AutoDocker if docking clearance on target, otherwise use AutoPilot
-            const bool autodock = configuration().test.autodocker;
-            Order *autoNavigator = nullptr;
+            const bool autodock      = configuration().test.autodocker;
+            Order     *autoNavigator = nullptr;
             if (autodock) {
                 Unit *station = parent->Target();
                 if (Orders::AutoDocking::CanDock(parent, station)) {
@@ -203,7 +204,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
                 autoNavigator->SetParent(parent);
             }
             Order::EnqueueOrderFirst(autoNavigator);
-            FlyByKeyboard::inauto = true;
+            FlyByKeyboard::inauto   = true;
             parent->autopilotactive = FlyByKeyboard::inauto;
         }
     }
@@ -214,7 +215,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             cp->Autopilot(parent->Target());
         }
         enteredautopilot = true;
-        SSCK.realauto = false;
+        SSCK.realauto    = false;
     }
     if (autopilot) {
         autopilot->Execute();
@@ -224,7 +225,7 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     }
     const bool initial_inertial_mode = configuration().flight.inertial.initial;
     if (SSCK.dirty) {
-        //go with what's last there: no frames since last physics frame
+        // go with what's last there: no frames since last physics frame
         if (SSCK.uppress <= 0 && SSCK.downpress <= 0) {
             KeyboardUp(0);
         } else {
@@ -289,12 +290,11 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
                 KeyboardUp(static_cast<float>(FBWABS(SSCK.uppress)) / (FBWABS(SSCK.uppress) + SSCK.uprelease));
             } else {
                 if (SSCK.downpress != 0 && SSCK.uppress == 0) {
-                    KeyboardUp(-static_cast<float>(FBWABS(SSCK.downpress)) / (FBWABS(SSCK.downpress) + SSCK.downrelease));
+                    KeyboardUp(-static_cast<float>(FBWABS(SSCK.downpress)) /
+                               (FBWABS(SSCK.downpress) + SSCK.downrelease));
                 } else {
-                    KeyboardUp((static_cast<float>(FBWABS(SSCK.uppress))
-                            - static_cast<float>(FBWABS(SSCK.downpress)))
-                            / (FBWABS(SSCK.downpress) + SSCK.downrelease + FBWABS(SSCK.uppress)
-                                    + SSCK.uprelease));
+                    KeyboardUp((static_cast<float>(FBWABS(SSCK.uppress)) - static_cast<float>(FBWABS(SSCK.downpress))) /
+                               (FBWABS(SSCK.downpress) + SSCK.downrelease + FBWABS(SSCK.uppress) + SSCK.uprelease));
                 }
             }
         }
@@ -302,15 +302,16 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             KeyboardRight(0);
         } else {
             if (SSCK.rightpress != 0 && SSCK.leftpress == 0) {
-                KeyboardRight(static_cast<float>(FBWABS(SSCK.rightpress)) / (FBWABS(SSCK.rightpress) + SSCK.rightrelease));
+                KeyboardRight(static_cast<float>(FBWABS(SSCK.rightpress)) /
+                              (FBWABS(SSCK.rightpress) + SSCK.rightrelease));
             } else {
                 if (SSCK.leftpress != 0 && SSCK.rightpress == 0) {
-                    KeyboardRight(-static_cast<float>(FBWABS(SSCK.leftpress)) / (FBWABS(SSCK.leftpress) + SSCK.leftrelease));
+                    KeyboardRight(-static_cast<float>(FBWABS(SSCK.leftpress)) /
+                                  (FBWABS(SSCK.leftpress) + SSCK.leftrelease));
                 } else {
-                    KeyboardRight((static_cast<float>(FBWABS(SSCK.rightpress))
-                            - static_cast<float>(FBWABS(SSCK.leftpress)))
-                            / (FBWABS(SSCK.leftpress) + SSCK.leftrelease + FBWABS(SSCK.rightpress)
-                                    + SSCK.rightrelease));
+                    KeyboardRight(
+                            (static_cast<float>(FBWABS(SSCK.rightpress)) - static_cast<float>(FBWABS(SSCK.leftpress))) /
+                            (FBWABS(SSCK.leftpress) + SSCK.leftrelease + FBWABS(SSCK.rightpress) + SSCK.rightrelease));
                 }
             }
         }
@@ -318,18 +319,17 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             KeyboardRollRight(0);
         } else {
             if (SSCK.rollrightpress != 0 && SSCK.rollleftpress == 0) {
-                KeyboardRollRight(static_cast<float>(FBWABS(SSCK.rollrightpress))
-                        / (FBWABS(SSCK.rollrightpress) + SSCK.rollrightrelease));
+                KeyboardRollRight(static_cast<float>(FBWABS(SSCK.rollrightpress)) /
+                                  (FBWABS(SSCK.rollrightpress) + SSCK.rollrightrelease));
             } else {
                 if (SSCK.rollleftpress != 0 && SSCK.rollrightpress == 0) {
-                    KeyboardRollRight(-static_cast<float>(FBWABS(SSCK.rollleftpress))
-                            / (FBWABS(SSCK.rollleftpress) + SSCK.rollleftrelease));
+                    KeyboardRollRight(-static_cast<float>(FBWABS(SSCK.rollleftpress)) /
+                                      (FBWABS(SSCK.rollleftpress) + SSCK.rollleftrelease));
                 } else {
-                    KeyboardRollRight((static_cast<float>(FBWABS(SSCK.rollrightpress))
-                            - static_cast<float>(FBWABS(SSCK.rollleftpress)))
-                            / (FBWABS(SSCK.rollleftpress) + SSCK.rollleftrelease
-                                    + FBWABS(SSCK.rollrightpress)
-                                    + SSCK.rollrightrelease));
+                    KeyboardRollRight((static_cast<float>(FBWABS(SSCK.rollrightpress)) -
+                                       static_cast<float>(FBWABS(SSCK.rollleftpress))) /
+                                      (FBWABS(SSCK.rollleftpress) + SSCK.rollleftrelease + FBWABS(SSCK.rollrightpress) +
+                                       SSCK.rollrightrelease));
                 }
             }
         }
@@ -396,20 +396,20 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
         SSCK.switchinertialflight = false;
     }
     if (SSCK.switchjoyinertialxy) {
-        joy_mode ^= joyModeInertialXY;
-        SSCK.switchjoyinertialxy = false;
+        joy_mode                 ^= joyModeInertialXY;
+        SSCK.switchjoyinertialxy  = false;
     }
     if (SSCK.switchjoyinertialxz) {
-        joy_mode ^= joyModeInertialXZ;
-        SSCK.switchjoyinertialxz = false;
+        joy_mode                 ^= joyModeInertialXZ;
+        SSCK.switchjoyinertialxz  = false;
     }
     if (SSCK.switchjoyroll) {
-        joy_mode ^= joyModeRoll;
-        SSCK.switchjoyroll = false;
+        joy_mode           ^= joyModeRoll;
+        SSCK.switchjoyroll  = false;
     }
     if (SSCK.switchjoybank) {
-        joy_mode ^= joyModeBank;
-        SSCK.switchjoybank = false;
+        joy_mode           ^= joyModeBank;
+        SSCK.switchjoybank  = false;
     }
     if (SSCK.switchmode) {
         FlyByWire::SwitchFlightMode();
@@ -433,12 +433,12 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
             autopilot->Destroy();
             autopilot = nullptr;
         }
-        SSCK.autopilot = false;
+        SSCK.autopilot     = false;
         SSCK.terminateauto = false;
     }
     if (SSCK.matchspeed) {
         SSCK.matchspeed = false;
-        Unit *targ = parent->Target();
+        Unit *targ      = parent->Target();
         if (targ) {
             MatchSpeed(targ->GetVelocity());
         }
@@ -476,8 +476,8 @@ void FlyByKeyboard::Execute(bool resetangvelocity) {
     }
 }
 
-//Changing the frequency doesn't kill a communication anymore until the player stopped its current one
-//and starts a new one in that other frequency
+// Changing the frequency doesn't kill a communication anymore until the player stopped its current one
+// and starts a new one in that other frequency
 
 void FlyByKeyboard::DownFreq(const KBData &, KBSTATE k) {
     switch (k) {
@@ -1134,4 +1134,3 @@ void FlyByKeyboard::RollLeftKey(const KBData &, KBSTATE k) {
             break;
     }
 }
-

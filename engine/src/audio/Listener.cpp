@@ -36,30 +36,27 @@
 
 namespace Audio {
 
-Listener::Listener() :
-        cosAngleRange(-1, -1),
-        position(0, 0, 0),
-        atDirection(0, 0, -1),
-        upDirection(0, 1, 0),
-        velocity(0, 0, 0),
-        radius(1),
-        gain(1),
-        worldToLocal(1) // set to identity, given default settings
-{
-}
+Listener::Listener()
+    : cosAngleRange(-1, -1),
+      position(0, 0, 0),
+      atDirection(0, 0, -1),
+      upDirection(0, 1, 0),
+      velocity(0, 0, 0),
+      radius(1),
+      gain(1),
+      worldToLocal(1)  // set to identity, given default settings
+{}
 
-Listener::~Listener() {
-}
+Listener::~Listener() {}
 
 Range<Scalar> Listener::getAngleRange() const {
-    return Range<Scalar>(Scalar(acos(cosAngleRange.min)),
-            Scalar(acos(cosAngleRange.max)));
+    return Range<Scalar>(Scalar(acos(cosAngleRange.min)), Scalar(acos(cosAngleRange.max)));
 }
 
 void Listener::setAngleRange(Range<Scalar> r) {
     cosAngleRange.min = Scalar(cos(r.min));
     cosAngleRange.max = Scalar(cos(r.max));
-    dirty.attributes = 1;
+    dirty.attributes  = 1;
 }
 
 void Listener::update(int flags) {
@@ -84,12 +81,7 @@ void Listener::update(int flags) {
         dirty.gain = 0;
     }
     if (flags & RenderableListener::UPDATE_LOCATION) {
-        worldToLocal =
-                Matrix3(
-                        atDirection.cross(upDirection),
-                        upDirection,
-                        -atDirection
-                ).inverse();
+        worldToLocal   = Matrix3(atDirection.cross(upDirection), upDirection, -atDirection).inverse();
         dirty.location = 0;
     }
 }
@@ -98,4 +90,4 @@ Vector3 Listener::toLocalDirection(Vector3 dir) const {
     return worldToLocal * dir;
 }
 
-};
+};  // namespace Audio

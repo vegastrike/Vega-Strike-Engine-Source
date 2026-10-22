@@ -26,21 +26,16 @@
  */
 
 
-#include "mission.h"
-#include "flightgroup.h"
-#include "cmd/unit_generic.h"
 #include <stdio.h>
 
-Flightgroup *Flightgroup::newFlightgroup(const std::string &name,
-        const std::string &type,
-        const std::string &faction,
-        const std::string &order,
-        int num_ships,
-        int num_waves,
-        const std::string &logo_tex,
-        const std::string &logo_alp,
-        Mission *mis) {
-    Flightgroup *fg = mis->findFlightgroup(name, faction);
+#include "cmd/unit_generic.h"
+#include "flightgroup.h"
+#include "mission.h"
+
+Flightgroup *Flightgroup::newFlightgroup(const std::string &name, const std::string &type, const std::string &faction,
+                                         const std::string &order, int num_ships, int num_waves,
+                                         const std::string &logo_tex, const std::string &logo_alp, Mission *mis) {
+    Flightgroup *fg    = mis->findFlightgroup(name, faction);
     Flightgroup *fgtmp = fg;
     if (fg == NULL) {
         fg = new Flightgroup;
@@ -62,6 +57,4 @@ Flightgroup &Flightgroup::operator=(Flightgroup &other) {
     return other;
 }
 
-Flightgroup::~Flightgroup() {
-}
-
+Flightgroup::~Flightgroup() {}

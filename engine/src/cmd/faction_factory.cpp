@@ -27,28 +27,27 @@
 
 
 #include "faction_factory.h"
-#include "root_generic/faction_generic.h"
-#include "gfx/animation.h"
-#include "vs_logging.h"
-#include "src/vega_cast_utils.h"
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 #include <boost/optional/optional.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
+#include "gfx/animation.h"
+#include "root_generic/faction_generic.h"
 #include "src/vega_cast_utils.h"
+#include "vs_logging.h"
 
-namespace pt = boost::property_tree;
+namespace pt  = boost::property_tree;
 namespace alg = boost::algorithm;
 
-using boost::property_tree::ptree;
 using boost::optional;
+using boost::property_tree::ptree;
 
 using std::string;
 
-extern std::vector<boost::shared_ptr<Faction> > factions;   //the factions
+extern std::vector<boost::shared_ptr<Faction>> factions;  // the factions
 
 FactionFactory::FactionFactory(std::string filename) {
     pt::ptree tree;
@@ -69,7 +68,7 @@ void FactionFactory::parse(ptree tree) {
             continue;
         }
 
-        ptree inner = iterator.second;
+        ptree                      inner = iterator.second;
         boost::shared_ptr<Faction> faction(new Faction());
 
         string tmp_name = inner.get("<xmlattr>.name", "Unknown");
@@ -78,23 +77,23 @@ void FactionFactory::parse(ptree tree) {
         faction->factionname = new char[tmp_name.size() + 1];
         strcpy(faction->factionname, tmp_name.c_str());
 
-        faction->citizen = inner.get("<xmlattr>.citizen", false);
-        string logo_rgb = inner.get("<xmlattr>.logoRGB", "");
+        faction->citizen    = inner.get("<xmlattr>.citizen", false);
+        string logo_rgb     = inner.get("<xmlattr>.logoRGB", "");
         string logo_sec_rgb = inner.get("<xmlattr>.secLogoRGB", "");
-        string contraband = inner.get("<xmlattr>.contraband", "");
+        string contraband   = inner.get("<xmlattr>.contraband", "");
 
         // Parse spark colors
         const std::string colors[] = {"red", "green", "blue", "alpha"};
-        int i = 0;
+        int               i        = 0;
         for (const auto &color : colors) {
-            const std::string key = "<xmlattr>.spark"+color;
+            const std::string key          = "<xmlattr>.spark" + color;
             const std::string spark_string = inner.get(key, "");
-            if(spark_string.empty()) {
+            if (spark_string.empty()) {
                 continue;
             }
             try {
                 faction->sparkcolor[i++] = locale_aware_stof(spark_string);
-            } catch (const std::invalid_argument& e) {
+            } catch (const std::invalid_argument &e) {
                 VS_LOG(error, (boost::format("Error: Invalid color %1% for key %2%") % spark_string % key));
             }
         }
@@ -107,8 +106,8 @@ void FactionFactory::parse(ptree tree) {
         }
 
         for (const auto &iterator : inner) {
-            string type = iterator.first;
-            ptree inner = iterator.second;
+            string type  = iterator.first;
+            ptree  inner = iterator.second;
 
             // We skip attributes and explosions as we processed them above.
             if (type == "<xmlattr>" || type == "Explosion") {
@@ -116,8 +115,8 @@ void FactionFactory::parse(ptree tree) {
             }
 
             if (type == "stats") {
-                string name = inner.get("<xmlattr>.name", "Unknown");
-                int relation = inner.get("<xmlattr>.relation", 0);
+                string name                           = inner.get("<xmlattr>.name", "Unknown");
+                int    relation                       = inner.get("<xmlattr>.relation", 0);
                 faction->ship_relation_modifier[name] = relation;
             }
         }
@@ -134,4 +133,3 @@ void FactionFactory::parse(ptree tree) {
         factions.push_back(faction);
     }
 }
-

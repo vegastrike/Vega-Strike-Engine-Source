@@ -174,7 +174,7 @@
  */
 
 #if defined FORCE_DOXYGEN
-#  define POSH_OS_STRING /**< a string constant describing the target CPU */
+#    define POSH_OS_STRING /**< a string constant describing the target CPU */
 #endif
 
 /* ------------------------------------------------------------------
@@ -182,10 +182,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined linux || defined __linux__ || defined FORCE_DOXYGEN
-#  define POSH_OS_LINUX /**<if defined, target OS is a Linux derivative */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "Linux"
-#  endif
+#    define POSH_OS_LINUX /**<if defined, target OS is a Linux derivative */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "Linux"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -193,10 +193,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined(__HAIKU__) || defined FORCE_DOXYGEN
-#  define POSH_OS_HAIKU /**<if defined, target OS is a Haiku derivative */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "Haiku"
-#  endif
+#    define POSH_OS_HAIKU /**<if defined, target OS is a Haiku derivative */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "Haiku"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -204,10 +204,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined __CYGWIN32__ || defined FORCE_DOXYGEN
-#  define POSH_OS_CYGWIN32 /**<if defined, target OS is Cygwin */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "Cygwin"
-#  endif
+#    define POSH_OS_CYGWIN32 /**<if defined, target OS is Cygwin */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "Cygwin"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -215,10 +215,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined GO32 && defined DJGPP && defined __MSDOS__ || defined FORCE_DOXYGEN
-#  define POSH_OS_GO32 /**<if defined, target OS is DOS 32-bit using DJGPP/GO32 */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "GO32/MS-DOS"
-#  endif
+#    define POSH_OS_GO32 /**<if defined, target OS is DOS 32-bit using DJGPP/GO32 */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "GO32/MS-DOS"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -228,10 +228,10 @@
 ** ------------------------------------------------------------------
 */
 #if (defined __WATCOMC__ && defined __386__ && defined __DOS__) || defined FORCE_DOXYGEN
-#  define POSH_OS_DOS32 /**<if defined, target OS is 32-bit DOS built with Watcom */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "DOS/32-bit"
-#  endif
+#    define POSH_OS_DOS32 /**<if defined, target OS is 32-bit DOS built with Watcom */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "DOS/32-bit"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -239,22 +239,22 @@
 ** ------------------------------------------------------------------
 */
 #if defined _UNICOS || defined FORCE_DOXYGEN
-#  define POSH_OS_UNICOS /**<if defined, target OS is Cray UNICOS */
-#  if !defined FORCE_DOXYGEN
-#  define POSH_OS_STRING "UNICOS"
-#  endif
+#    define POSH_OS_UNICOS /**<if defined, target OS is Cray UNICOS */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "UNICOS"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
 ** Mac OS X
 ** ------------------------------------------------------------------
 */
-#if (defined __MWERKS__ && defined __powerc && !defined macintosh) || defined __APPLE_CC__ || defined macosx \
-    || defined FORCE_DOXYGEN
-#  define POSH_OS_OSX /**<if defined, target OS is Mac OS X */
-#  if !defined FORCE_DOXYGEN
-#    define POSH_OS_STRING "MacOS X"
-#  endif
+#if (defined __MWERKS__ && defined __powerc && !defined macintosh) || defined __APPLE_CC__ || defined macosx || \
+        defined FORCE_DOXYGEN
+#    define POSH_OS_OSX /**<if defined, target OS is Mac OS X */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "MacOS X"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -262,18 +262,18 @@
 ** ------------------------------------------------------------------
 */
 #if defined __sun__ || defined sun || defined __sun || defined __solaris__ || defined FORCE_DOXYGEN
-#  if defined __SVR4 || defined __svr4__ || defined __solaris__ || defined FORCE_DOXYGEN
-#     if !defined FORCE_DOXYGEN
-#        define POSH_OS_STRING "Solaris"
-#     endif
-#     define POSH_OS_SOLARIS /**<if defined, target OS is Sun Solaris */
-#  endif
-#  if defined FORCE_DOXYGEN || !defined POSH_OS_STRING
-#     define POSH_OS_SUNOS /**<if defined, target OS is SunOS */
-#     if !defined FORCE_DOXYGEN
-#        define POSH_OS_STRING "SunOS"
-#     endif
-#  endif
+#    if defined __SVR4 || defined __svr4__ || defined __solaris__ || defined FORCE_DOXYGEN
+#        if !defined FORCE_DOXYGEN
+#            define POSH_OS_STRING "Solaris"
+#        endif
+#        define POSH_OS_SOLARIS /**<if defined, target OS is Sun Solaris */
+#    endif
+#    if defined FORCE_DOXYGEN || !defined POSH_OS_STRING
+#        define POSH_OS_SUNOS   /**<if defined, target OS is SunOS */
+#        if !defined FORCE_DOXYGEN
+#            define POSH_OS_STRING "SunOS"
+#        endif
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -281,10 +281,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined __sgi__ || defined sgi || defined __sgi || defined FORCE_DOXYGEN
-#  define POSH_OS_IRIX /**<if defined, target OS is SGI Irix */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "Irix"
-#  endif
+#    define POSH_OS_IRIX /**<if defined, target OS is SGI Irix */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "Irix"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -292,10 +292,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined __hpux__ || defined __hpux || defined FORCE_DOXYGEN
-#  define POSH_OS_HPUX /**<if defined, target OS is HP-UX */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "HP-UX"
-#  endif
+#    define POSH_OS_HPUX /**<if defined, target OS is HP-UX */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "HP-UX"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -303,10 +303,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined _AIX || defined FORCE_DOXYGEN
-#  define POSH_OS_AIX /**<if defined, target OS is IBM AIX */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "AIX"
-#  endif
+#    define POSH_OS_AIX /**<if defined, target OS is IBM AIX */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "AIX"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -314,10 +314,10 @@
 ** ------------------------------------------------------------------
 */
 #if (defined __alpha && defined __osf__) || defined FORCE_DOXYGEN
-#  define POSH_OS_TRU64 /**<if defined, target OS is Compaq/DEC Tru64 Unix */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "Tru64"
-#  endif
+#    define POSH_OS_TRU64 /**<if defined, target OS is Compaq/DEC Tru64 Unix */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "Tru64"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -325,10 +325,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined __BEOS__ || defined __beos__ || defined FORCE_DOXYGEN
-#  define POSH_OS_BEOS /**<if defined, target OS is BeOS */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "BeOS"
-#  endif
+#    define POSH_OS_BEOS /**<if defined, target OS is BeOS */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "BeOS"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -336,10 +336,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined amiga || defined amigados || defined AMIGA || defined _AMIGA || defined FORCE_DOXYGEN
-#  define POSH_OS_AMIGA  /**<if defined, target OS is AmigaDOS */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "Amiga"
-#  endif
+#    define POSH_OS_AMIGA /**<if defined, target OS is AmigaDOS */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "Amiga"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -347,10 +347,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined __unix__ || defined FORCE_DOXYGEN
-#  define POSH_OS_UNIX /**<if defined, target OS is generic Unix variant */
-#  if !defined POSH_OS_STRING
-#     define POSH_OS_STRING "Unix-like(generic)"
-#  endif
+#    define POSH_OS_UNIX /**<if defined, target OS is generic Unix variant */
+#    if !defined POSH_OS_STRING
+#        define POSH_OS_STRING "Unix-like(generic)"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -358,10 +358,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined _WIN32_WCE || defined FORCE_DOXYGEN
-#  define POSH_OS_WINCE /**<if defined, target OS is Windows CE */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "Windows CE"
-#  endif
+#    define POSH_OS_WINCE /**<if defined, target OS is Windows CE */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "Windows CE"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -369,17 +369,17 @@
 ** ------------------------------------------------------------------
 */
 #if defined _WIN32 || defined WIN32 || defined __NT__ || defined __WIN32__ || defined FORCE_DOXYGEN
-#  define POSH_OS_WIN32 /**<if defined, target OS is Win32 (implies Win9x/Me/2K/XP)*/
-#  if defined _WIN64 || defined FORCE_DOXYGEN
-#     define POSH_OS_WIN64 /**<if defined, target OS is Win64 */
-#     if !defined FORCE_DOXYGEN
-#        define POSH_OS_STRING "Win64"
-#     endif
-#  else
-#     if !defined FORCE_DOXYGEN
-#        define POSH_OS_STRING "Win32"
-#     endif
-#  endif
+#    define POSH_OS_WIN32     /**<if defined, target OS is Win32 (implies Win9x/Me/2K/XP)*/
+#    if defined _WIN64 || defined FORCE_DOXYGEN
+#        define POSH_OS_WIN64 /**<if defined, target OS is Win64 */
+#        if !defined FORCE_DOXYGEN
+#            define POSH_OS_STRING "Win64"
+#        endif
+#    else
+#        if !defined FORCE_DOXYGEN
+#            define POSH_OS_STRING "Win32"
+#        endif
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -387,10 +387,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined __palmos__ || defined FORCE_DOXYGEN
-#  define POSH_OS_PALM
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "PalmOS"
-#  endif
+#    define POSH_OS_PALM
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "PalmOS"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -398,10 +398,10 @@
 ** ------------------------------------------------------------------
 */
 #if (defined __MWERKS__ && !defined __powerc) || defined THINK_C || defined macintosh || defined FORCE_DOXYGEN
-#  define POSH_OS_MACOS /**<if defined, target OS is MacOS */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_OS_STRING "MacOS"
-#  endif
+#    define POSH_OS_MACOS /**<if defined, target OS is MacOS */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_OS_STRING "MacOS"
+#    endif
 #endif
 
 /** @} */
@@ -411,7 +411,7 @@
  *   @{
  */
 #if defined FORCE_DOXYGEN
-#  define POSH_CPU_STRING /**< a string constant describing the target CPU */
+#    define POSH_CPU_STRING /**< a string constant describing the target CPU */
 #endif
 
 /* ------------------------------------------------------------------
@@ -419,26 +419,26 @@
 ** ------------------------------------------------------------------
 */
 #if defined mc68000 || defined m68k || defined __MC68K__ || defined m68000 || defined FORCE_DOXYGEN
-#  define POSH_CPU_68K /**< if defined, target processor is a Motorola 68000 derivative */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_CPU_STRING "MC68000"
-#  endif
+#    define POSH_CPU_68K /**< if defined, target processor is a Motorola 68000 derivative */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "MC68000"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
 ** PowerPC
 ** ------------------------------------------------------------------
 */
-#if defined __PPC__ || defined __POWERPC__ || defined powerpc || defined _POWER || defined __ppc__ || defined __powerpc__ \
-    || defined FORCE_DOXYGEN
-#  define POSH_CPU_PPC /**< if defined, target processor is a PowerPC derivative */
-#  if !defined FORCE_DOXYGEN
-#     if defined __powerpc64__
-#        define POSH_CPU_STRING "PowerPC64"
-#     else
-#        define POSH_CPU_STRING "PowerPC"
-#     endif
-#  endif
+#if defined __PPC__ || defined __POWERPC__ || defined powerpc || defined _POWER || defined __ppc__ || \
+        defined __powerpc__ || defined FORCE_DOXYGEN
+#    define POSH_CPU_PPC /**< if defined, target processor is a PowerPC derivative */
+#    if !defined FORCE_DOXYGEN
+#        if defined __powerpc64__
+#            define POSH_CPU_STRING "PowerPC64"
+#        else
+#            define POSH_CPU_STRING "PowerPC"
+#        endif
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -446,10 +446,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined _CRAYT3E || defined _CRAYMPP || defined FORCE_DOXYGEN
-#  define POSH_CPU_CRAYT3E /**< if defined, target processor is a DEC Alpha 21164 used in a Cray T3E*/
-#  if !defined FORCE_DOXYGEN
-#     define POSH_CPU_STRING "Cray T3E (Alpha 21164)"
-#  endif
+#    define POSH_CPU_CRAYT3E /**< if defined, target processor is a DEC Alpha 21164 used in a Cray T3E*/
+#    if !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "Cray T3E (Alpha 21164)"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -457,7 +457,7 @@
 ** ------------------------------------------------------------------
 */
 #if defined CRAY || defined _CRAY && !defined _CRAYT3E
-#  error Non-AXP Cray systems not supported
+#    error Non-AXP Cray systems not supported
 #endif
 
 /* ------------------------------------------------------------------
@@ -465,10 +465,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined _SH3 || defined FORCE_DOXYGEN
-#  define POSH_CPU_SH3 /**<if defined, target CPU is a member of the Hitachi SH-3 family */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_CPU_STRING "Hitachi SH-3"
-#  endif
+#    define POSH_CPU_SH3 /**<if defined, target CPU is a member of the Hitachi SH-3 family */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "Hitachi SH-3"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -476,11 +476,11 @@
 ** ------------------------------------------------------------------
 */
 #if defined __sh4__ || defined __SH4__ || defined FORCE_DOXYGEN
-#  define POSH_CPU_SH3 /**<if defined, target CPU is a member of the Hitachi SH-3 family */
-#  define POSH_CPU_SH4 /**<if defined, target CPU is a member of the Hitachi SH-4 family */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_CPU_STRING "Hitachi SH-4"
-#  endif
+#    define POSH_CPU_SH3 /**<if defined, target CPU is a member of the Hitachi SH-3 family */
+#    define POSH_CPU_SH4 /**<if defined, target CPU is a member of the Hitachi SH-4 family */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "Hitachi SH-4"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -488,17 +488,17 @@
 ** ------------------------------------------------------------------
 */
 #if defined __sparc__ || defined __sparc || defined FORCE_DOXYGEN
-#  if defined __arch64__ || defined __sparcv9 || defined __sparc_v9__ || defined FORCE_DOXYGEN
-#     define POSH_CPU_SPARC64 /**<if defined, target CPU is Sun 64-bit Sparc */
-#     if !defined FORCE_DOXYGEN
-#        define POSH_CPU_STRING "Sparc/64"
-#     endif
-#  else
-#     if !defined FORCE_DOXYGEN
-#        define POSH_CPU_STRING "Sparc/32"
-#     endif
-#  endif
-#  define POSH_CPU_SPARC /**<if defined, target CPU is Sun Sparc */
+#    if defined __arch64__ || defined __sparcv9 || defined __sparc_v9__ || defined FORCE_DOXYGEN
+#        define POSH_CPU_SPARC64 /**<if defined, target CPU is Sun 64-bit Sparc */
+#        if !defined FORCE_DOXYGEN
+#            define POSH_CPU_STRING "Sparc/64"
+#        endif
+#    else
+#        if !defined FORCE_DOXYGEN
+#            define POSH_CPU_STRING "Sparc/32"
+#        endif
+#    endif
+#    define POSH_CPU_SPARC /**<if defined, target CPU is Sun Sparc */
 #endif
 
 /* ------------------------------------------------------------------
@@ -506,10 +506,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined __arm__ || defined _ARM || defined FORCE_DOXYGEN
-#  define POSH_CPU_STRONGARM /**<if defined, target CPU is StrongARM */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_CPU_STRING "ARM"
-#  endif
+#    define POSH_CPU_STRONGARM /**<if defined, target CPU is StrongARM */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "ARM"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -517,12 +517,12 @@
 ** ------------------------------------------------------------------
 */
 #if defined mips || defined __mips__ || defined __MIPS__ || defined _MIPS || defined FORCE_DOXYGEN
-#  define POSH_CPU_MIPS /**<if defined, target CPU is MIPS variant */
-#  if defined _R5900 && !defined FORCE_DOXYGEN
-#    define POSH_CPU_STRING "MIPS R5900 (PS2)"
-#  elif !defined FORCE_DOXYGEN
-#    define POSH_CPU_STRING "MIPS"
-#  endif
+#    define POSH_CPU_MIPS /**<if defined, target CPU is MIPS variant */
+#    if defined _R5900 && !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "MIPS R5900 (PS2)"
+#    elif !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "MIPS"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -530,29 +530,29 @@
 ** ------------------------------------------------------------------
 */
 #if defined __ia64 || defined _M_IA64 || defined __ia64__ || defined FORCE_DOXYGEN
-#  define POSH_CPU_IA64 /**<if defined, target CPU is Intel Itanium/IA64 */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_CPU_STRING "IA64"
-#  endif
+#    define POSH_CPU_IA64 /**<if defined, target CPU is Intel Itanium/IA64 */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "IA64"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
 ** Intel x86 and AMD x86-64
 ** ------------------------------------------------------------------
 */
-#if defined __X86__ || defined __i386__ || defined i386 || defined _M_IX86 || defined __386__ || defined FORCE_DOXYGEN \
-    || defined __amd64__ || defined __AMD64__ || defined __x86_64__
-#  define POSH_CPU_X86 /**<if defined, target CPU is Intel 386+ compatible */
-#  if defined __x86_64__ || defined FORCE_DOXYGEN || defined __amd64__ || defined __AMD64__
-#     define POSH_CPU_X86_64 /**<if defined, target CPU is AMD x86-64 */
-#  endif
-#  if !defined FORCE_DOXYGEN
-#     if defined POSH_CPU_X86_64
-#        define POSH_CPU_STRING "AMD x86-64"
-#     else
-#        define POSH_CPU_STRING "Intel 386+"
-#     endif
-#  endif
+#if defined __X86__ || defined __i386__ || defined i386 || defined _M_IX86 || defined __386__ || \
+        defined FORCE_DOXYGEN || defined __amd64__ || defined __AMD64__ || defined __x86_64__
+#    define POSH_CPU_X86        /**<if defined, target CPU is Intel 386+ compatible */
+#    if defined __x86_64__ || defined FORCE_DOXYGEN || defined __amd64__ || defined __AMD64__
+#        define POSH_CPU_X86_64 /**<if defined, target CPU is AMD x86-64 */
+#    endif
+#    if !defined FORCE_DOXYGEN
+#        if defined POSH_CPU_X86_64
+#            define POSH_CPU_STRING "AMD x86-64"
+#        else
+#            define POSH_CPU_STRING "Intel 386+"
+#        endif
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -560,10 +560,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined __s390__ || defined FORCE_DOXYGEN
-#  define POSH_CPU_S390/**<if defined, target CPU is IBM S/390 */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_CPU_STRING "S/390"
-#  endif
+#    define POSH_CPU_S390 /**<if defined, target CPU is IBM S/390 */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "S/390"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -571,10 +571,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined __alpha || defined alpha || defined _M_ALPHA || defined __alpha__ || defined FORCE_DOXYGEN
-#  define POSH_CPU_AXP /**<if defined, target CPU is DEC Alpha */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_CPU_STRING "AXP"
-#  endif
+#    define POSH_CPU_AXP /**<if defined, target CPU is DEC Alpha */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "AXP"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -582,10 +582,10 @@
 ** ------------------------------------------------------------------
 */
 #if defined __hppa || defined hppa || defined FORCE_DOXYGEN
-#  define POSH_CPU_HPPA /**<if defined, target CPU is HP PA-RISC */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_CPU_STRING "PA-RISC"
-#  endif
+#    define POSH_CPU_HPPA /**<if defined, target CPU is HP PA-RISC */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "PA-RISC"
+#    endif
 #endif
 
 /* ------------------------------------------------------------------
@@ -593,28 +593,29 @@
 ** ------------------------------------------------------------------
 */
 #if defined __aarch64__ || defined __arm64__ || defined FORCE_DOXYGEN
-#  define POSH_CPU_AARCH64 /**<if defined, target CPU is AArch64 */
-#  if !defined FORCE_DOXYGEN
-#     define POSH_CPU_STRING "AArch64"
-#  endif
+#    define POSH_CPU_AARCH64 /**<if defined, target CPU is AArch64 */
+#    if !defined FORCE_DOXYGEN
+#        define POSH_CPU_STRING "AArch64"
+#    endif
 #endif
 
 /** @} */
 
 #if !defined POSH_CPU_STRING
-#  error POSH cannot determine target CPU
+#    error POSH cannot determine target CPU
 #endif
 
 /* Attempt to autodetect building for embedded on Sony PS2 */
 #if (!defined POSH_OS_STRING) || defined FORCE_DOXYGEN
-#  define POSH_OS_EMBEDDED /**<if defined, target OS is embedded or non-existent such as Sony PS2.  @ingroup OSSymbols */
-#  if !defined FORCE_DOXYGEN
-#     if defined _R5900
-#        define POSH_OS_STRING "Sony PS2(embedded)"
-#     elif !defined
-#        define POSH_OS_STRING "Embedded/Unknown"
-#     endif
-#  endif
+#    define POSH_OS_EMBEDDED    /**<if defined, target OS is embedded or non-existent such as Sony PS2.  @ingroup \
+                                   OSSymbols */
+#    if !defined FORCE_DOXYGEN
+#        if defined _R5900
+#            define POSH_OS_STRING "Sony PS2(embedded)"
+#        elif !defined
+#            define POSH_OS_STRING "Embedded/Unknown"
+#        endif
+#    endif
 #endif
 
 /* ---------------------------------------------------------------------------
@@ -669,15 +670,15 @@
  */
 
 /** @todo need to get a comprehensive list of how cdecl, et. al. are specified */
-#if !defined FORCE_DOXYGEN && (defined _MSC_VER || defined __WATCOMC__ || defined __GNUC__ || defined __BORLANDC__ \
-                               || defined __MWERKS__)
-#  define POSH_CDECL __cdecl
-#  define POSH_STDCALL __stdcall
-#  define POSH_FASTCALL __fastcall
+#if !defined FORCE_DOXYGEN && \
+        (defined _MSC_VER || defined __WATCOMC__ || defined __GNUC__ || defined __BORLANDC__ || defined __MWERKS__)
+#    define POSH_CDECL    __cdecl
+#    define POSH_STDCALL  __stdcall
+#    define POSH_FASTCALL __fastcall
 #else
-#  define POSH_CDECL
-#  define POSH_STDCALL
-#  define POSH_FASTCALL
+#    define POSH_CDECL
+#    define POSH_STDCALL
+#    define POSH_FASTCALL
 #endif
 
 /* ---------------------------------------------------------------------------
@@ -729,63 +730,63 @@
 ** We undefine this so that multiple inclusions will work
 */
 #if defined POSH_IMPORTEXPORT
-#  undef POSH_IMPORTEXPORT
+#    undef POSH_IMPORTEXPORT
 #endif
 
 #if defined POSH_DLL
-#   if defined POSH_OS_WIN32
-#      if defined _MSC_VER
-#         if (_MSC_VER >= 800)
-#            if defined POSH_BUILDING_LIB
-#               define POSH_IMPORTEXPORT __declspec( dllexport )
+#    if defined POSH_OS_WIN32
+#        if defined _MSC_VER
+#            if (_MSC_VER >= 800)
+#                if defined POSH_BUILDING_LIB
+#                    define POSH_IMPORTEXPORT __declspec(dllexport)
+#                else
+#                    define POSH_IMPORTEXPORT __declspec(dllimport)
+#                endif
 #            else
-#               define POSH_IMPORTEXPORT __declspec( dllimport )
+#                if defined POSH_BUILDING_LIB
+#                    define POSH_IMPORTEXPORT __export
+#                else
+#                    define POSH_IMPORTEXPORT
+#                endif
 #            endif
-#         else
-#            if defined POSH_BUILDING_LIB
-#               define POSH_IMPORTEXPORT __export
+#        endif /* defined _MSC_VER */
+#        if defined __BORLANDC__
+#            if (__BORLANDC__ >= 0x500)
+#                if defined POSH_BUILDING_LIB
+#                    define POSH_IMPORTEXPORT __declspec(dllexport)
+#                else
+#                    define POSH_IMPORTEXPORT __declspec(dllimport)
+#                endif
 #            else
-#               define POSH_IMPORTEXPORT
+#                if defined POSH_BUILDING_LIB
+#                    define POSH_IMPORTEXPORT __export
+#                else
+#                    define POSH_IMPORTEXPORT
+#                endif
 #            endif
-#         endif
-#      endif /* defined _MSC_VER */
-#      if defined __BORLANDC__
-#         if (__BORLANDC__ >= 0x500)
-#            if defined POSH_BUILDING_LIB
-#               define POSH_IMPORTEXPORT __declspec( dllexport )
-#            else
-#               define POSH_IMPORTEXPORT __declspec( dllimport )
-#            endif
-#         else
-#            if defined POSH_BUILDING_LIB
-#               define POSH_IMPORTEXPORT __export
-#            else
-#               define POSH_IMPORTEXPORT
-#            endif
-#         endif
-#      endif /* defined __BORLANDC__ */
+#        endif /* defined __BORLANDC__ */
 /* for all other compilers, we're just making a blanket assumption */
-#      if defined __GNUC__ || defined __WATCOMC__ || defined __MWERKS__
-#         if defined POSH_BUILDING_LIB
-#            define POSH_IMPORTEXPORT __declspec( dllexport )
-#         else
-#            define POSH_IMPORTEXPORT __declspec( dllimport )
-#         endif
-#      endif /* all other compilers */
-#      if !defined POSH_IMPORTEXPORT
-#         error Building DLLs not supported on this compiler (poshlib@poshlib.org if you know how)
-#      endif
-#   endif /* defined POSH_OS_WIN32 */
-#endif /* defined POSH_DLL */
+#        if defined __GNUC__ || defined __WATCOMC__ || defined __MWERKS__
+#            if defined POSH_BUILDING_LIB
+#                define POSH_IMPORTEXPORT __declspec(dllexport)
+#            else
+#                define POSH_IMPORTEXPORT __declspec(dllimport)
+#            endif
+#        endif /* all other compilers */
+#        if !defined POSH_IMPORTEXPORT
+#            error Building DLLs not supported on this compiler (poshlib@poshlib.org if you know how)
+#        endif
+#    endif /* defined POSH_OS_WIN32 */
+#endif     /* defined POSH_DLL */
 
 /* On pretty much everything else, we can thankfully just ignore this */
 #if !defined POSH_IMPORTEXPORT
-#  define POSH_IMPORTEXPORT
+#    define POSH_IMPORTEXPORT
 #endif
 
 #if defined FORCE_DOXYGEN
-#  define POSH_DLL
-#  define POSH_BUILDING_LIB
+#    define POSH_DLL
+#    define POSH_BUILDING_LIB
 #endif
 
 /* ----------------------------------------------------------------------------
@@ -793,13 +794,13 @@
 ** ----------------------------------------------------------------------------
 */
 #ifdef POSH_PUBLIC_API
-#  undef POSH_PUBLIC_API
+#    undef POSH_PUBLIC_API
 #endif
 
 #if ((defined _MSC_VER) && (_MSC_VER < 800)) || (defined __BORLANDC__ && (__BORLANDC__ < 0x500))
-#  define POSH_PUBLIC_API( rtype ) extern rtype POSH_IMPORTEXPORT
+#    define POSH_PUBLIC_API(rtype) extern rtype POSH_IMPORTEXPORT
 #else
-#  define POSH_PUBLIC_API(rtype) extern POSH_IMPORTEXPORT rtype
+#    define POSH_PUBLIC_API(rtype) extern POSH_IMPORTEXPORT rtype
 #endif
 
 /** @def POSH_PUBLIC_API
@@ -832,15 +833,15 @@
  *  @{
  */
 #if defined FORCE_DOXYGEN
-#  define POSH_LITTLE_ENDIAN
-#  define POSH_BIG_ENDIAN
-#elif defined POSH_CPU_X86 || defined POSH_CPU_AXP || defined POSH_CPU_STRONGARM || defined POSH_OS_WIN32 \
-    || defined POSH_OS_WINCE || defined __MIPSEL__ || (defined POSH_CPU_PPC && defined __LITTLE_ENDIAN__)
-#  define POSH_LITTLE_ENDIAN 1
-#  define POSH_ENDIAN_STRING "little"
+#    define POSH_LITTLE_ENDIAN
+#    define POSH_BIG_ENDIAN
+#elif defined POSH_CPU_X86 || defined POSH_CPU_AXP || defined POSH_CPU_STRONGARM || defined POSH_OS_WIN32 || \
+        defined POSH_OS_WINCE || defined __MIPSEL__ || (defined POSH_CPU_PPC && defined __LITTLE_ENDIAN__)
+#    define POSH_LITTLE_ENDIAN 1
+#    define POSH_ENDIAN_STRING "little"
 #else
-#  define POSH_BIG_ENDIAN 1
-#  define POSH_ENDIAN_STRING "big"
+#    define POSH_BIG_ENDIAN    1
+#    define POSH_ENDIAN_STRING "big"
 #endif
 
 /** @def POSH_LITTLE_ENDIAN
@@ -858,9 +859,9 @@
 ** ----------------------------------------------------------------------------
 */
 #if defined FORCE_DOXYGEN
-#  define POSH_COMPILE_TIME_ASSERT( name, x )
+#    define POSH_COMPILE_TIME_ASSERT(name, x)
 #else
-#  define POSH_COMPILE_TIME_ASSERT(name, x) typedef int _POSH_dummy_##name[(x) ? 1 : -1]
+#    define POSH_COMPILE_TIME_ASSERT(name, x) typedef int _POSH_dummy_##name[(x) ? 1 : -1]
 #endif
 
 /** @def POSH_COMPILE_TIME_ASSERT(name,x)
@@ -879,34 +880,34 @@
  *   @ingroup ExportedSymbols
  */
 #if defined FORCE_DOXYGEN
-#  define POSH_64BIT_INTEGER
+#    define POSH_64BIT_INTEGER
 typedef struct compiler_specific posh_i64_t;
 typedef struct compiler_specific posh_s64_t;
 typedef struct compiler_specific posh_u64_t;
-#  define POSH_S64( x )
-#  define POSH_U64( x )
-#elif defined (__LP64__) || defined (__powerpc64__) || defined POSH_CPU_SPARC64
-#  define POSH_64BIT_INTEGER 1
-typedef long posh_i64_t;
-typedef long posh_s64_t;
+#    define POSH_S64(x)
+#    define POSH_U64(x)
+#elif defined(__LP64__) || defined(__powerpc64__) || defined POSH_CPU_SPARC64
+#    define POSH_64BIT_INTEGER 1
+typedef long          posh_i64_t;
+typedef long          posh_s64_t;
 typedef unsigned long posh_u64_t;
-#  define POSH_S64(x) ( (posh_s64_t) x )
-#  define POSH_U64(x) ( (posh_u64_t) x )
-#elif defined __GNUC__ || defined __MWERKS__ || defined __SUNPRO_C || defined __SUNPRO_CC || defined __APPLE_CC__ \
-    || defined POSH_OS_IRIX || defined _LONG_LONG || defined _CRAYC
-#  define POSH_64BIT_INTEGER 1
+#    define POSH_S64(x)        ((posh_s64_t)x)
+#    define POSH_U64(x)        ((posh_u64_t)x)
+#elif defined __GNUC__ || defined __MWERKS__ || defined __SUNPRO_C || defined __SUNPRO_CC || defined __APPLE_CC__ || \
+        defined POSH_OS_IRIX || defined _LONG_LONG || defined _CRAYC
+#    define POSH_64BIT_INTEGER 1
 typedef long long          posh_i64_t;
 typedef long long          posh_s64_t;
 typedef unsigned long long posh_u64_t;
-#  define POSH_U64( x ) x##LL
-#  define POSH_S64( x ) x##LL
+#    define POSH_U64(x)        x##LL
+#    define POSH_S64(x)        x##LL
 #elif defined _MSC_VER || defined __BORLANDC__ || defined __WATCOMC__ || (defined __alpha && defined __DECC)
-#  define POSH_64BIT_INTEGER 1
+#    define POSH_64BIT_INTEGER 1
 typedef __int64          posh_i64_t;
 typedef __int64          posh_s64_t;
 typedef unsigned __int64 posh_u64_t;
-#  define POSH_S64( x ) ( (posh_s64_t) x )
-#  define POSH_U64( x ) ( (posh_u64_t) x )
+#    define POSH_S64(x)        ((posh_s64_t)x)
+#    define POSH_U64(x)        ((posh_u64_t)x)
 #endif
 
 /** @def POSH_S64
@@ -967,22 +968,22 @@ typedef unsigned __int64 posh_u64_t;
 */
 /** @defgroup PoshTypes Basic Types
  *   @{ */
-typedef unsigned char posh_byte_t;        /**< unsigned 8-bit integer */
-typedef unsigned char posh_u8_t;          /**< unsigned 8-bit integer */
-typedef signed char posh_i8_t;          /**< signed 8-bit integer */
-typedef signed char posh_s8_t;          /**< signed 8-bit integer */
-typedef unsigned short posh_u16_t;         /**< unsigned 16-bit integer */
-typedef short posh_i16_t;         /**< signed 16-bit integer */
-typedef short posh_s16_t;         /**< signed 16-bit integer */
+typedef unsigned char  posh_byte_t; /**< unsigned 8-bit integer */
+typedef unsigned char  posh_u8_t;   /**< unsigned 8-bit integer */
+typedef signed char    posh_i8_t;   /**< signed 8-bit integer */
+typedef signed char    posh_s8_t;   /**< signed 8-bit integer */
+typedef unsigned short posh_u16_t;  /**< unsigned 16-bit integer */
+typedef short          posh_i16_t;  /**< signed 16-bit integer */
+typedef short          posh_s16_t;  /**< signed 16-bit integer */
 
 #if !defined POSH_OS_PALM
-typedef unsigned posh_u32_t;         /**< unsigned 32-bit integer */
-typedef int posh_i32_t;         /**< signed 32-bit integer */
-typedef int posh_s32_t;         /**< signed 32-bit integer */
+typedef unsigned posh_u32_t;        /**< unsigned 32-bit integer */
+typedef int      posh_i32_t;        /**< signed 32-bit integer */
+typedef int      posh_s32_t;        /**< signed 32-bit integer */
 #else
-typedef unsigned long  posh_u32_t;         /**< unsigned 32-bit integer */
-typedef long           posh_i32_t;         /**< signed 32-bit integer */
-typedef long           posh_s32_t;         /**< signed 32-bit integer */
+typedef unsigned long posh_u32_t; /**< unsigned 32-bit integer */
+typedef long          posh_i32_t; /**< signed 32-bit integer */
+typedef long          posh_s32_t; /**< signed 32-bit integer */
 #endif
 /** @} */
 
@@ -1000,7 +1001,7 @@ typedef long           posh_s32_t;         /**< signed 32-bit integer */
 ** ----------------------------------------------------------------------------
 */
 #if defined FORCE_DOXYGEN
-#  define POSH_NO_FLOAT
+#    define POSH_NO_FLOAT
 /** @def POSH_NO_FLOAT
  *   define this if you want to disable floating point support
  *   @ingroup ImportedSymbols
@@ -1009,7 +1010,7 @@ typedef long           posh_s32_t;         /**< signed 32-bit integer */
  *   functionality, but allows POSH to operate safely on a slightly wider variety
  *   of platforms such as Cray and the MIPS R5900 (Sony PS2).
  */
-#  undef POSH_NO_FLOAT
+#    undef POSH_NO_FLOAT
 #endif
 
 /* ----------------------------------------------------------------------------
@@ -1056,21 +1057,21 @@ POSH_COMPILE_TIME_ASSERT(posh_i64_t, sizeof(posh_i64_t) == 8);
  *   POSH defines this symbol if the target platform supports 64-bit pointer
  *   types and, implicitly, 64-bit addressing.
  */
-#   define POSH_64BIT_POINTER
+#    define POSH_64BIT_POINTER
 
 #endif /* defined FORCE_DOXYGEN */
 
 #if defined POSH_CPU_AXP && (defined POSH_OS_TRU64 || defined POSH_OS_LINUX || defined __FreeBSD__)
-#  define POSH_64BIT_POINTER 1
+#    define POSH_64BIT_POINTER 1
 #endif
 
 #if defined POSH_CPU_X86_64 && defined POSH_OS_LINUX
-#  define POSH_64BIT_POINTER 1
+#    define POSH_64BIT_POINTER 1
 #endif
 
-#if defined POSH_CPU_SPARC64 || defined POSH_OS_WIN64 || defined __64BIT__ || defined __LP64 || defined _LP64 \
-    || defined __LP64__ || defined _ADDR64 || defined _CRAYC
-#   define POSH_64BIT_POINTER 1
+#if defined POSH_CPU_SPARC64 || defined POSH_OS_WIN64 || defined __64BIT__ || defined __LP64 || defined _LP64 || \
+        defined __LP64__ || defined _ADDR64 || defined _CRAYC
+#    define POSH_64BIT_POINTER 1
 #endif
 
 #if defined POSH_64BIT_POINTER
@@ -1084,7 +1085,7 @@ POSH_COMPILE_TIME_ASSERT(posh_64bit_pointer, sizeof(void *) == 8);
  *
  *  If this assertion is triggered on a known 32 or 64-bit architecture,
  *  please let us know (poshlib@poshlib.org) */
-POSH_COMPILE_TIME_ASSERT( posh_32bit_pointer, sizeof (void*) == 4 );
+POSH_COMPILE_TIME_ASSERT(posh_32bit_pointer, sizeof(void *) == 4);
 #endif
 
 /* ----------------------------------------------------------------------------
@@ -1146,21 +1147,21 @@ extern const char *POSH_GetArchString(void);
 #if !defined POSH_NO_FLOAT
 extern posh_u32_t POSH_LittleFloatBits(float f);
 extern posh_u32_t POSH_BigFloatBits(float f);
-extern float POSH_FloatFromLittleBits(posh_u32_t bits);
-extern float POSH_FloatFromBigBits(posh_u32_t bits);
+extern float      POSH_FloatFromLittleBits(posh_u32_t bits);
+extern float      POSH_FloatFromBigBits(posh_u32_t bits);
 
-extern void POSH_DoubleBits(double d, posh_byte_t dst[8]);
+extern void   POSH_DoubleBits(double d, posh_byte_t dst[8]);
 extern double POSH_DoubleFromBits(const posh_byte_t src[8]);
 
 extern float *POSH_WriteFloatToLittle(void *dst, float f);
 extern float *POSH_WriteFloatToBig(void *dst, float f);
-extern float POSH_ReadFloatFromLittle(const void *src);
-extern float POSH_ReadFloatFromBig(const void *src);
+extern float  POSH_ReadFloatFromLittle(const void *src);
+extern float  POSH_ReadFloatFromBig(const void *src);
 
 extern double *POSH_WriteDoubleToLittle(void *dst, double d);
 extern double *POSH_WriteDoubleToBig(void *dst, double d);
-extern double POSH_ReadDoubleFromLittle(const void *src);
-extern double POSH_ReadDoubleFromBig(const void *src);
+extern double  POSH_ReadDoubleFromLittle(const void *src);
+extern double  POSH_ReadDoubleFromBig(const void *src);
 #endif /* !defined POSH_NO_FLOAT */
 
 /** @} */
@@ -1259,63 +1260,62 @@ extern posh_s64_t POSH_ReadS64FromBig(const void *src);
  */
 #if defined FORCE_DOXYGEN
 
-#define POSH_LittleU16( x ) /**< Converts from little endian to host endian.*/
-#define POSH_LittleU32( x ) /**< Converts from little endian to host endian.*/
-#define POSH_LittleU64( x ) /**< Converts from little endian to host endian.*/
-#define POSH_LittleS16( x ) /**< Converts from little endian to host endian.*/
-#define POSH_LittleS32( x ) /**< Converts from little endian to host endian.*/
-#define POSH_LittleS64( x ) /**< Converts from little endian to host endian.*/
+#    define POSH_LittleU16(x) /**< Converts from little endian to host endian.*/
+#    define POSH_LittleU32(x) /**< Converts from little endian to host endian.*/
+#    define POSH_LittleU64(x) /**< Converts from little endian to host endian.*/
+#    define POSH_LittleS16(x) /**< Converts from little endian to host endian.*/
+#    define POSH_LittleS32(x) /**< Converts from little endian to host endian.*/
+#    define POSH_LittleS64(x) /**< Converts from little endian to host endian.*/
 
-#define POSH_BigU16( x ) /**< Converts from big endian to host endian.*/
-#define POSH_BigU32( x ) /**< Converts from big endian to host endian.*/
-#define POSH_BigU64( x ) /**< Converts from big endian to host endian.*/
-#define POSH_BigS16( x ) /**< Converts from big endian to host endian.*/
-#define POSH_BigS32( x ) /**< Converts from big endian to host endian.*/
-#define POSH_BigS64( x ) /**< Converts from big endian to host endian.*/
+#    define POSH_BigU16(x)    /**< Converts from big endian to host endian.*/
+#    define POSH_BigU32(x)    /**< Converts from big endian to host endian.*/
+#    define POSH_BigU64(x)    /**< Converts from big endian to host endian.*/
+#    define POSH_BigS16(x)    /**< Converts from big endian to host endian.*/
+#    define POSH_BigS32(x)    /**< Converts from big endian to host endian.*/
+#    define POSH_BigS64(x)    /**< Converts from big endian to host endian.*/
 
 #elif defined POSH_LITTLE_ENDIAN
 
-#define POSH_LittleU16(x) (x)
-#define POSH_LittleU32(x) (x)
-#define POSH_LittleS16(x) (x)
-#define POSH_LittleS32(x) (x)
-#if defined POSH_64BIT_INTEGER
-#  define POSH_LittleU64(x) (x)
-#  define POSH_LittleS64(x) (x)
-#endif /* defined POSH_64BIT_INTEGER */
+#    define POSH_LittleU16(x) (x)
+#    define POSH_LittleU32(x) (x)
+#    define POSH_LittleS16(x) (x)
+#    define POSH_LittleS32(x) (x)
+#    if defined POSH_64BIT_INTEGER
+#        define POSH_LittleU64(x) (x)
+#        define POSH_LittleS64(x) (x)
+#    endif /* defined POSH_64BIT_INTEGER */
 
-#define POSH_BigU16(x) POSH_SwapU16( x )
-#define POSH_BigU32(x) POSH_SwapU32( x )
-#define POSH_BigS16(x) POSH_SwapS16( x )
-#define POSH_BigS32(x) POSH_SwapS32( x )
-#if defined POSH_64BIT_INTEGER
-#  define POSH_BigU64(x) POSH_SwapU64( x )
-#  define POSH_BigS64(x) POSH_SwapS64( x )
-#endif /* defined POSH_64BIT_INTEGER */
+#    define POSH_BigU16(x) POSH_SwapU16(x)
+#    define POSH_BigU32(x) POSH_SwapU32(x)
+#    define POSH_BigS16(x) POSH_SwapS16(x)
+#    define POSH_BigS32(x) POSH_SwapS32(x)
+#    if defined POSH_64BIT_INTEGER
+#        define POSH_BigU64(x) POSH_SwapU64(x)
+#        define POSH_BigS64(x) POSH_SwapS64(x)
+#    endif /* defined POSH_64BIT_INTEGER */
 
 #else
 
-#define POSH_BigU16( x ) (x)
-#define POSH_BigU32( x ) (x)
-#define POSH_BigS16( x ) (x)
-#define POSH_BigS32( x ) (x)
+#    define POSH_BigU16(x) (x)
+#    define POSH_BigU32(x) (x)
+#    define POSH_BigS16(x) (x)
+#    define POSH_BigS32(x) (x)
 
-#if defined POSH_64BIT_INTEGER
-#  define POSH_BigU64( x ) (x)
-#  define POSH_BigS64( x ) (x)
-#endif /* POSH_64BIT_INTEGER */
+#    if defined POSH_64BIT_INTEGER
+#        define POSH_BigU64(x) (x)
+#        define POSH_BigS64(x) (x)
+#    endif /* POSH_64BIT_INTEGER */
 
-#define POSH_LittleU16( x ) POSH_SwapU16( x )
-#define POSH_LittleU32( x ) POSH_SwapU32( x )
-#define POSH_LittleS16( x ) POSH_SwapS16( x )
-#define POSH_LittleS32( x ) POSH_SwapS32( x )
+#    define POSH_LittleU16(x) POSH_SwapU16(x)
+#    define POSH_LittleU32(x) POSH_SwapU32(x)
+#    define POSH_LittleS16(x) POSH_SwapS16(x)
+#    define POSH_LittleS32(x) POSH_SwapS32(x)
 
-#if defined POSH_64BIT_INTEGER
-#  define POSH_LittleU64( x ) POSH_SwapU64( x )
-#  define POSH_LittleS64( x ) POSH_SwapS64( x )
-#endif /* POSH_64BIT_INTEGER */
+#    if defined POSH_64BIT_INTEGER
+#        define POSH_LittleU64(x) POSH_SwapU64(x)
+#        define POSH_LittleS64(x) POSH_SwapS64(x)
+#    endif /* POSH_64BIT_INTEGER */
 
 #endif
 
 /** @} */
-

@@ -26,11 +26,7 @@
  */
 #ifndef VEGA_STRIKE_ENGINE_GFX_ENV_MAP_GENT_H
 #define VEGA_STRIKE_ENGINE_GFX_ENV_MAP_GENT_H
-void EnvironmentMapGeneratorMain(const char *inpt,
-        const char *outpt,
-        float a = 0,
-        float m = 1,
-        float p = 1,
-        bool w = false);
+void EnvironmentMapGeneratorMain(const char *inpt, const char *outpt, float a = 0, float m = 1, float p = 1,
+                                 bool w = false);
 
-#endif //VEGA_STRIKE_ENGINE_GFX_ENV_MAP_GENT_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_ENV_MAP_GENT_H

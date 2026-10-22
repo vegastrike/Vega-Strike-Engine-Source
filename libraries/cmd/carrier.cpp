@@ -28,29 +28,25 @@
 
 #include "cmd/carrier.h"
 
-#include "root_generic/configxml.h"
-
-#include "cmd/unit_generic.h"
-#include "cmd/ship.h"
-#include "src/universe.h"
-#include "src/universe_util.h"
-
 #include "cmd/ai/aggressive.h"
 #include "cmd/missile.h"
+#include "cmd/ship.h"
+#include "cmd/unit_generic.h"
 #include "resource/random_utils.h"
+#include "root_generic/configxml.h"
 #include "root_generic/vega_random.h"
-#include "src/vs_logging.h"
+#include "src/universe.h"
+#include "src/universe_util.h"
 #include "src/vega_cast_utils.h"
+#include "src/vs_logging.h"
 
 
 // TODO: find out where this is and maybe refactor
-extern int SelectDockPort(const Unit *, const Unit *parent);
+extern int  SelectDockPort(const Unit *, const Unit *parent);
 extern void SwitchUnits(Unit *, Unit *);
 extern void PlayDockingSound(int dock);
 
 constexpr float M_PI_FLT = M_PI;
-
-
 
 // TODO: move these two functions to vector and make into single constructor
 inline double uniformrand(const double min, const double max) {
@@ -58,34 +54,31 @@ inline double uniformrand(const double min, const double max) {
 }
 
 inline QVector randVector(const double min, const double max) {
-    return QVector(uniformrand(min, max),
-            uniformrand(min, max),
-            uniformrand(min, max));
+    return QVector(uniformrand(min, max), uniformrand(min, max), uniformrand(min, max));
 }
 
 Carrier::Carrier() = default;
 
-
-//index in here is unsigned, UINT_MAX and UINT_MAX-1 seem to be
-//special states.  This means the total amount of cargo any ship can have
-//is UINT_MAX -3   which is 65532 for 32bit machines.
+// index in here is unsigned, UINT_MAX and UINT_MAX-1 seem to be
+// special states.  This means the total amount of cargo any ship can have
+// is UINT_MAX -3   which is 65532 for 32bit machines.
 void Carrier::EjectCargo(unsigned int index) {
-    Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
-    Cargo *tmp = nullptr;
-    Cargo ejectedPilot;
-    Cargo dockedPilot;
+    Unit  *unit = vega_dynamic_cast_ptr<Unit>(this);
+    Cargo *tmp  = nullptr;
+    Cargo  ejectedPilot;
+    Cargo  dockedPilot;
     string name;
-    bool isplayer = unit->IsPlayerShip();
-    //if (index==((unsigned int)-1)) { is ejecting normally
-    //if (index==((unsigned int)-2)) { is ejecting for eject-dock
+    bool   isplayer = unit->IsPlayerShip();
+    // if (index==((unsigned int)-1)) { is ejecting normally
+    // if (index==((unsigned int)-2)) { is ejecting for eject-dock
 
     Cockpit *cp = nullptr;
     if (index == (UINT_MAX - 1)) {
-//        _Universe->CurrentCockpit();
-        //this calls the unit's existence, by the way.
+        //        _Universe->CurrentCockpit();
+        // this calls the unit's existence, by the way.
         name = "return_to_cockpit";
-        
-        //we will have to check for this on undock to return to the parent unit!
+
+        // we will have to check for this on undock to return to the parent unit!
         dockedPilot.SetName("return_to_cockpit");
         dockedPilot.SetMass(.1);
         dockedPilot.SetVolume(1);
@@ -93,10 +86,10 @@ void Carrier::EjectCargo(unsigned int index) {
     }
     if (index == UINT_MAX) {
         int pilotnum = _Universe->CurrentCockpit();
-        name = "Pilot";
+        name         = "Pilot";
         if (nullptr != (cp = _Universe->isPlayerStarship(unit))) {
             string playernum = string("player") + ((pilotnum == 0) ? string("") : XMLSupport::tostring(pilotnum));
-            isplayer = true;
+            isplayer         = true;
         }
         ejectedPilot.SetName("eject");
         ejectedPilot.SetMass(.1);
@@ -128,23 +121,23 @@ void Carrier::EjectCargo(unsigned int index) {
             tmpcontent = "Mission_Cargo";
         }
 
-        //prevents a number of bad things, incl. impossible speeds and people getting rich on broken stuff
+        // prevents a number of bad things, incl. impossible speeds and people getting rich on broken stuff
         if ((!tmp->IsMissionFlag()) && tmp->IsComponent()) {
             tmpcontent = "Space_Salvage";
         }
-        //this happens if it's a ship
+        // this happens if it's a ship
         if (tmp->GetQuantity() > 0) {
             const int sslen = strlen("starships");
-            Unit *cargo = nullptr;
+            Unit     *cargo = nullptr;
             if (tmp->GetCategory().length() >= static_cast<unsigned int>(sslen)) {
                 if ((!tmp->IsMissionFlag()) && tmp->GetCategory() == "starships") {
-                    string ans = tmpcontent;
+                    string            ans   = tmpcontent;
                     string::size_type blank = ans.find(".blank");
                     if (blank != string::npos) {
                         ans = ans.substr(0, blank);
                     }
-                    Flightgroup *fg = unit->getFlightgroup();
-                    int fgsnumber = 0;
+                    Flightgroup *fg        = unit->getFlightgroup();
+                    int          fgsnumber = 0;
                     if (fg != nullptr) {
                         fgsnumber = fg->nr_ships;
                         ++(fg->nr_ships);
@@ -154,18 +147,18 @@ void Carrier::EjectCargo(unsigned int index) {
                     cargo->PrimeOrders();
                     cargo->SetAI(new Orders::AggressiveAI("default.agg.xml"));
                     cargo->SetTurretAI();
-                    //he's alive!!!!!
+                    // he's alive!!!!!
                 }
             }
-            float arot = 0;
+            float       arot = 0;
             const float grot = configuration().graphics.generic_cargo_rotation_speed_flt * M_PI_FLT / 180.0F;
             if (!cargo) {
                 const float crot = configuration().graphics.cargo_rotation_speed_flt * M_PI_FLT / 180.0F;
                 const float erot = configuration().graphics.eject_rotation_speed_flt * M_PI_FLT / 180.0F;
                 if (tmpcontent == "eject") {
                     if (isplayer) {
-                        Flightgroup *fg = unit->getFlightgroup();
-                        int fgsnumber = 0;
+                        Flightgroup *fg        = unit->getFlightgroup();
+                        int          fgsnumber = 0;
                         if (fg != nullptr) {
                             fgsnumber = fg->nr_ships;
                             ++(fg->nr_ships);
@@ -174,26 +167,26 @@ void Carrier::EjectCargo(unsigned int index) {
                         cargo = new Unit("eject", false, unit->faction, "", fg, fgsnumber);
                     } else {
                         int fac = FactionUtil::GetUpgradeFaction();
-                        cargo = new Unit("eject", false, fac, "", nullptr, 0);
+                        cargo   = new Unit("eject", false, fac, "", nullptr, 0);
                     }
                     if (unit->owner) {
                         cargo->owner = unit->owner;
                     } else {
                         cargo->owner = unit;
                     }
-                    arot = erot;
+                    arot                     = erot;
                     const bool eject_attacks = configuration().ai.eject_attacks;
                     if (eject_attacks) {
                         cargo->PrimeOrders();
-                        //generally fraidycat AI
+                        // generally fraidycat AI
                         cargo->SetAI(new Orders::AggressiveAI("default.agg.xml"));
                     }
 
-                    //Meat. Docking should happen here
+                    // Meat. Docking should happen here
                 } else if (tmpcontent == "return_to_cockpit") {
                     if (isplayer) {
-                        Flightgroup *fg = unit->getFlightgroup();
-                        int fgsnumber = 0;
+                        Flightgroup *fg        = unit->getFlightgroup();
+                        int          fgsnumber = 0;
                         if (fg != nullptr) {
                             fgsnumber = fg->nr_ships;
                             ++(fg->nr_ships);
@@ -206,60 +199,38 @@ void Carrier::EjectCargo(unsigned int index) {
                             cargo->owner = unit;
                         }
                     } else {
-                        int fac = FactionUtil::GetUpgradeFaction();
+                        int         fac            = FactionUtil::GetUpgradeFaction();
                         const float ejectcargotime = configuration().physics.eject_live_time_flt;
                         if (cargotime == 0.0) {
                             cargo = new Unit("eject", false, fac, "", nullptr, 0);
                         } else {
-                            cargo = new Missile("eject",
-                                    fac, "",
-                                    0,
-                                    0,
-                                    ejectcargotime,
-                                    1,
-                                    1,
-                                    1);
+                            cargo = new Missile("eject", fac, "", 0, 0, ejectcargotime, 1, 1, 1);
                         }
                     }
                     arot = erot;
                     cargo->PrimeOrders();
                     cargo->aistate = nullptr;
                 } else {
-                    string tmpnam = tmpcontent + ".cargo";
+                    string             tmpnam = tmpcontent + ".cargo";
                     static std::string nam("Name");
-                    float rot = crot;
+                    float              rot = crot;
                     if (UniverseUtil::LookupUnitStat(tmpnam, "upgrades", nam).empty()) {
                         tmpnam = "generic_cargo";
-                        rot = grot;
+                        rot    = grot;
                     }
                     int upgrfac = FactionUtil::GetUpgradeFaction();
-                    cargo = new Missile(tmpnam.c_str(),
-                            upgrfac,
-                            "",
-                            0,
-                            0,
-                            cargotime,
-                            1,
-                            1,
-                            1);
-                    arot = rot;
+                    cargo       = new Missile(tmpnam.c_str(), upgrfac, "", 0, 0, cargotime, 1, 1, 1);
+                    arot        = rot;
                 }
             }
             if (cargo->name == "LOAD_FAILED") {
                 cargo->Kill();
-                cargo = new Missile("generic_cargo",
-                        FactionUtil::GetUpgradeFaction(), "",
-                        0,
-                        0,
-                        cargotime,
-                        1,
-                        1,
-                        1);
-                arot = grot;
+                cargo = new Missile("generic_cargo", FactionUtil::GetUpgradeFaction(), "", 0, 0, cargotime, 1, 1, 1);
+                arot  = grot;
             }
-            Vector rotation
-                    (VegaRandom::Instance().UniformInclusive(-arot, arot), VegaRandom::Instance().UniformInclusive(-arot, arot), VegaRandom::Instance().UniformInclusive(-arot,
-                            arot));
+            Vector     rotation(VegaRandom::Instance().UniformInclusive(-arot, arot),
+                                VegaRandom::Instance().UniformInclusive(-arot, arot),
+                                VegaRandom::Instance().UniformInclusive(-arot, arot));
             const bool all_rotate_same = configuration().graphics.cargo_rotates_at_same_speed;
             if (all_rotate_same && arot != 0) {
                 float tmp = rotation.Magnitude();
@@ -280,12 +251,12 @@ void Carrier::EjectCargo(unsigned int index) {
                 tmpvel.Normalize();
                 if ((SelectDockPort(unit, unit) > -1)) {
                     const float eject_cargo_offset = configuration().physics.eject_distance_flt;
-                    QVector loc(Transform(unit->GetTransformation(),
-                            unit->DockingPortLocations()[0].GetPosition().Cast()));
-                    //index is always > -1 because it's unsigned.  Let's use the correct terms, -1 in Uint is UINT_MAX
-                    loc += tmpvel * 1.5 * unit->rSize()
-                            + randVector(-.5 * unit->rSize() + (index == UINT_MAX ? eject_cargo_offset / 2 : 0),
-                                    .5 * unit->rSize() + (index == UINT_MAX ? eject_cargo_offset : 0));
+                    QVector     loc(
+                            Transform(unit->GetTransformation(), unit->DockingPortLocations()[0].GetPosition().Cast()));
+                    // index is always > -1 because it's unsigned.  Let's use the correct terms, -1 in Uint is UINT_MAX
+                    loc += tmpvel * 1.5 * unit->rSize() +
+                           randVector(-.5 * unit->rSize() + (index == UINT_MAX ? eject_cargo_offset / 2 : 0),
+                                      .5 * unit->rSize() + (index == UINT_MAX ? eject_cargo_offset : 0));
                     cargo->SetPosAndCumPos(loc);
                     Vector p, q, r;
                     unit->GetOrientation(p, q, r);
@@ -296,8 +267,8 @@ void Carrier::EjectCargo(unsigned int index) {
                         cargo->owner = unit;
                     }
                 } else {
-                    cargo->SetPosAndCumPos(unit->Position() + tmpvel * 1.5 * unit->rSize()
-                            + randVector(-.5 * unit->rSize(), .5 * unit->rSize()));
+                    cargo->SetPosAndCumPos(unit->Position() + tmpvel * 1.5 * unit->rSize() +
+                                           randVector(-.5 * unit->rSize(), .5 * unit->rSize()));
                     cargo->SetAngularVelocity(rotation);
                 }
                 const float velmul = configuration().physics.eject_cargo_speed_flt;
@@ -314,14 +285,14 @@ void Carrier::EjectCargo(unsigned int index) {
                     unit->PrimeOrders();
                     cargo->SetTurretAI();
                     cargo->faction = unit->faction;
-                    //changes control to that cockpit
+                    // changes control to that cockpit
                     cp->SetParent(cargo, unit->Position());
                     if (tmpcontent == "return_to_cockpit") {
                         const bool simulate_while_at_base = configuration().physics.simulate_while_docked;
                         if ((simulate_while_at_base) || (_Universe->numPlayers() > 1)) {
                             unit->TurretFAW();
                         }
-                        //make unit a sitting duck in the meantime
+                        // make unit a sitting duck in the meantime
                         SwitchUnits(nullptr, unit);
                         if (unit->owner) {
                             cargo->owner = unit->owner;
@@ -332,10 +303,11 @@ void Carrier::EjectCargo(unsigned int index) {
                         cargo->SetOwner(unit);
                         cargo->Position() = unit->Position();
                         cargo->SetPosAndCumPos(unit->Position());
-                        //claims to be docked, stops speed and taking damage etc. but doesn't seem to call the base script
+                        // claims to be docked, stops speed and taking damage etc. but doesn't seem to call the base
+                        // script
                         cargo->ForceDock(unit, 0);
                         PlayDockingSound(3);
-                        //actually calls the interface, meow. yay!
+                        // actually calls the interface, meow. yay!
                         cargo->UpgradeInterface(unit);
                         if ((simulate_while_at_base) || (_Universe->numPlayers() > 1)) {
                             unit->TurretFAW();
@@ -347,7 +319,7 @@ void Carrier::EjectCargo(unsigned int index) {
                         } else {
                             cargo->owner = unit;
                         }
-                    }                                            //switching NULL gives "dead" AI to the unit I ejected from, by the way.
+                    }  // switching NULL gives "dead" AI to the unit I ejected from, by the way.
                 }
                 _Universe->activeStarSystem()->AddUnit(cargo);
                 if (index != -1U && index != -2U) {
@@ -368,13 +340,13 @@ unsigned int Carrier::numCargo() const {
 std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vector &oldspd) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
-    ///FIXME somehow mangle string
-    string mangled = unit->cargo_hold.GetCargo(i).GetName();
+    /// FIXME somehow mangle string
+    string      mangled            = unit->cargo_hold.GetCargo(i).GetName();
     const float scramblingmanifest = configuration().general.percentage_speed_change_to_fault_search_flt;
     {
-        //Keep inside subblock, otherwise MSVC will throw an error while redefining 'i'
+        // Keep inside subblock, otherwise MSVC will throw an error while redefining 'i'
         bool last = true;
-        for (char & i : mangled) {
+        for (char &i : mangled) {
             if (last) {
                 i = toupper(i);
             }
@@ -382,10 +354,9 @@ std::string Carrier::GetManifest(unsigned int i, Unit *scanningUnit, const Vecto
         }
     }
     if (unit->CourseDeviation(oldspd, unit->GetVelocity()) > scramblingmanifest) {
-        for (char & i : mangled) {
+        for (char &i : mangled) {
             i += static_cast<char>(randomInt(2) - 1);
         }
     }
     return mangled;
 }
-

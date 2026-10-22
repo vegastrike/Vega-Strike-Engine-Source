@@ -32,11 +32,10 @@
 //
 
 #include "Exceptions.h"
-#include "Types.h"
 #include "Format.h"
-
-#include "Source.h"
 #include "SimpleScene.h"
+#include "Source.h"
+#include "Types.h"
 
 namespace Audio {
 
@@ -52,7 +51,7 @@ namespace Audio {
  */
 class SimpleSource : public Source, public SharedFromThis<SimpleSource> {
 private:
-    bool playing;
+    bool         playing;
     SimpleScene *scene;
 
 public:
@@ -71,7 +70,6 @@ public:
     // by a concrete Sound class. All are protected, so the stream interface is independent
     // of implementations.
 protected:
-
     /** @copydoc Source::startPlayingImpl */
     virtual void startPlayingImpl(Timestamp start);
 
@@ -82,6 +80,6 @@ protected:
     virtual bool isPlayingImpl() const;
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_SIMPLESOURCE_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_SIMPLESOURCE_H

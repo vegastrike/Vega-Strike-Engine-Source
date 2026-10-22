@@ -33,19 +33,17 @@
 
 #ifdef HAVE_OGG
 
-#include "../CodecRegistry.h"
+#    include "OggCodec.h"
 
-#include "OggCodec.h"
-#include "OggStream.h"
-#include "OggData.h"
+#    include "../CodecRegistry.h"
+#    include "OggData.h"
+#    include "OggStream.h"
 
 namespace Audio {
 
-OggCodec::OggCodec() : Codec("ogg") {
-}
+OggCodec::OggCodec() : Codec("ogg") {}
 
-OggCodec::~OggCodec() {
-}
+OggCodec::~OggCodec() {}
 
 const Codec::Extensions *OggCodec::getExtensions() const {
     static Extensions ext;
@@ -63,7 +61,7 @@ bool OggCodec::canHandle(const std::string &path, bool canOpen, VSFileSystem::VS
                 return false;
             }
 
-            Format fmt;
+            Format          fmt;
             __impl::OggData test(file, fmt, 0);
 
             return true;
@@ -82,6 +80,6 @@ Stream *OggCodec::open(const std::string &path, VSFileSystem::VSFileType type) {
 
 static CodecRegistration registration(new OggCodec());
 
-};
+};  // namespace Audio
 
 #endif

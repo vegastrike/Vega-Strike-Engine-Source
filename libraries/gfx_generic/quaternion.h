@@ -27,22 +27,21 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_QUATERNION_H
 #define VEGA_STRIKE_ENGINE_GFX_QUATERNION_H
 
-#include "gfx_generic/vec.h"
 #include "gfx_generic/matrix.h"
+#include "gfx_generic/vec.h"
 
 struct Quaternion {
-    float s;
+    float  s;
     Vector v;
 
-    inline Quaternion() : s(0), v(0, 0, 0) {
-    }
+    inline Quaternion() : s(0), v(0, 0, 0) {}
 
     inline Quaternion(float s, Vector v) {
         this->s = s;
         this->v = v;
     }
 
-    //inline Quaternion(float s, Vector v) {this->s = s; this->v = v;};
+    // inline Quaternion(float s, Vector v) {this->s = s; this->v = v;};
     inline Quaternion Conjugate() const {
         return Quaternion(s, Vector(-v.i, -v.j, -v.k));
     }
@@ -57,8 +56,7 @@ struct Quaternion {
     }
 
     inline Quaternion operator*(const Quaternion &rval) const {
-        return Quaternion(s * rval.s - DotProduct(v, rval.v),
-                s * rval.v + rval.s * v + v.Cross(rval.v));
+        return Quaternion(s * rval.s - DotProduct(v, rval.v), s * rval.v + rval.s * v + v.Cross(rval.v));
     }
 
     inline Quaternion &operator*=(const Quaternion &rval) {
@@ -66,9 +64,9 @@ struct Quaternion {
     }
 
     Quaternion &Normalize() {
-        float rcpmag = 1.0f / Magnitude();
-        v *= rcpmag;
-        s *= rcpmag;
+        float rcpmag  = 1.0f / Magnitude();
+        v            *= rcpmag;
+        s            *= rcpmag;
         return *this;
     }
 
@@ -76,9 +74,9 @@ struct Quaternion {
     static Quaternion from_axis_angle(const Vector &axis, float angle);
 
     void to_matrix(Matrix &mat) const {
-        const float GFXEPSILON = ((float) 10e-6);
-        float W = v.i * v.i + v.j * v.j + v.k * v.k + s * s;         //norm
-        W = (W < 0 + GFXEPSILON && W > 0 - GFXEPSILON) ? 0 : 2.0 / W;
+        const float GFXEPSILON = ((float)10e-6);
+        float       W          = v.i * v.i + v.j * v.j + v.k * v.k + s * s;  // norm
+        W                      = (W < 0 + GFXEPSILON && W > 0 - GFXEPSILON) ? 0 : 2.0 / W;
 
         float xw = v.i * W;
         float yw = v.j * W;
@@ -96,7 +94,7 @@ struct Quaternion {
         float yz = v.j * zw;
         float zz = v.k * zw;
 
-#define M(B, A) mat.r[B*3+A]
+#define M(B, A) mat.r[B * 3 + A]
 
         M(0, 0) = 1.0f - (yy + zz);
         M(0, 1) = (xy - sz);
@@ -109,11 +107,10 @@ struct Quaternion {
         M(2, 0) = (xz - sy);
         M(2, 1) = (yz + sx);
         M(2, 2) = 1.0f - (xx + yy);
-        //M(3,0)  = M(3,1) = M(3,2) = M(0,3) = M(1,3) = M(2,3) = 0;
-        //M(3,3) = 1;
+        // M(3,0)  = M(3,1) = M(3,2) = M(0,3) = M(1,3) = M(2,3) = 0;
+        // M(3,3) = 1;
 
 #undef M
-
     }
 };
 
@@ -133,14 +130,13 @@ const Quaternion identity_quaternion(1, Vector(0, 0, 0));
 
 struct Transformation {
     Quaternion orientation;
-    QVector position;
+    QVector    position;
 
-    inline Transformation() : orientation(identity_quaternion), position(0, 0, 0) {
-    }
+    inline Transformation() : orientation(identity_quaternion), position(0, 0, 0) {}
 
-    inline Transformation(const Quaternion &orient, const QVector &pos) : orientation(orient), position(pos) {
-    }
-    //inline Transformation(const Quaternion &orient, const QVector &pos) : orientation(orient), position(pos) { }
+    inline Transformation(const Quaternion &orient, const QVector &pos) : orientation(orient), position(pos) {}
+
+    // inline Transformation(const Quaternion &orient, const QVector &pos) : orientation(orient), position(pos) { }
 
     inline void netswap() {
         orientation.netswap();
@@ -154,12 +150,12 @@ struct Transformation {
 
     inline void Compose(const Transformation &b, const Matrix &m) {
         orientation *= b.orientation;
-        position = Transform(m, position);
+        position     = Transform(m, position);
     }
 
     inline void InvertOrientationRevPos() {
         orientation = orientation.Conjugate();
-        position = -position;
+        position    = -position;
     }
 
     inline void InvertAndToMatrix(Matrix &m) {
@@ -169,7 +165,7 @@ struct Transformation {
     }
 
     static Transformation from_matrix(Matrix &m) {
-        Vector p, q, r;
+        Vector  p, q, r;
         QVector c;
         MatrixToVectors(m, p, q, r, c);
         return Transformation(Quaternion::from_vectors(p, q, r), c);
@@ -178,4 +174,4 @@ struct Transformation {
 
 const Transformation identity_transformation(identity_quaternion, QVector(0, 0, 0));
 
-#endif //VEGA_STRIKE_ENGINE_GFX_QUATERNION_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_QUATERNION_H

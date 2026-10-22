@@ -33,10 +33,10 @@ class Unit {
 public:
     bool killed;
     bool zapped;
-    int ucref;
+    int  ucref;
 
     Unit(bool kill) : killed(kill) {
-        ucref = 0;
+        ucref  = 0;
         zapped = false;
     }
 
@@ -72,4 +72,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_TEST_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_TEST_H

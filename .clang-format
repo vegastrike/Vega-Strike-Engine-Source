@@ -42,19 +42,62 @@ ForEachMacros: [RANGES_FOR, FOREACH, BOOST_FOREACH]
 IncludeBlocks: Regroup
 IncludeCategories:
   - Regex: '^((<|")boost/python\.hpp("|>))$'
-    Priority: -2
+    Priority: -4
+    SortPriority: -4
   - Regex: '^((<|")Python\.h("|>))$'
+    Priority: -3
+    SortPriority: -3
+  - Regex: '^"collide2/opcodetypes\.h"$'
+    Priority: -2
+    SortPriority: -2
+  - Regex: '^"collide2/opcodesysdef\.h"$'
     Priority: -1
-  - Regex: '^<[[:alnum:]._]+>$'
-    Priority: 1
+    SortPriority: -1
   - Regex: '^((<|")boost/)'
+    Priority: 1
+    SortPriority: 2
+  - Regex: '^<(GL/)?gl\.h>$'
     Priority: 2
-  - Regex: '^<[[:alnum:]./_]+>$'
+    SortPriority: 3
+  - Regex: '^<(GL/)?glu\.h>$'
     Priority: 3
-  - Regex: '^"[[:alnum:]./_]+"$'
+    SortPriority: 4
+  - Regex: '^<(GL/)?glut\.h>$'
     Priority: 4
-  - Regex: '.*'
+    SortPriority: 5
+  - Regex: '^<(GL/)?glx\.h>$'
     Priority: 5
+    SortPriority: 6
+  - Regex: '^<(GL/)?glext\.h>$'
+    Priority: 6
+    SortPriority: 7
+  - Regex: '^<[[:alnum:]._]+>$'
+    Priority: 7
+    SortPriority: 1
+  - Regex: '^<[[:alnum:]./_]+>$'
+    Priority: 8
+    SortPriority: 8
+  - Regex: '^"collide2/Opcode\.h"$'
+    Priority: 9
+    SortPriority: 9
+  - Regex: '^"collide2/[[:alnum:]./_]+"$'
+    Priority: 10
+    SortPriority: 10
+  - Regex: '^"(src/python/)?unit_wrapper_class\.h"$'
+    Priority: 11
+    SortPriority: 12
+  - Regex: '^"src/python/unit_from_to_python\.h"$'
+    Priority: 12
+    SortPriority: 13
+  - Regex: '^"src/python/define_odd_unit_functions\.h"$'
+    Priority: 13
+    SortPriority: 14
+  - Regex: '^"[[:alnum:]./_]+"$'
+    Priority: 14
+    SortPriority: 11
+  - Regex: '.*'
+    Priority: 15
+    SortPriority: 15
 IndentAccessModifiers: false
 IndentExternBlock: Indent
 IndentPPDirectives: AfterHash

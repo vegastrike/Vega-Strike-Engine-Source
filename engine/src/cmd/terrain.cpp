@@ -27,30 +27,26 @@
 
 
 #include "cmd/terrain.h"
-#include "src/config_xml.h"
-#include "root_generic/vs_globals.h"
-#include "root_generic/xml_support.h"
-#include "src/star_system.h"
+
+#include <vector>
+
+#include "cmd/building.h"
+#include "cmd/collection.h"
+#include "cmd/damageable.h"
 #include "cmd/unit_generic.h"
 #include "gfx_generic/vec.h"
-#include "src/vegastrike.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
+#include "src/star_system.h"
 #include "src/universe.h"
-#include <vector>
-#include "cmd/collection.h"
-#include "cmd/building.h"
-#include "cmd/damageable.h"
+#include "src/vegastrike.h"
 
 static std::vector<Terrain *> allterrains;
 
-Terrain::Terrain(const char *filename,
-        const Vector &scales,
-        const float mass,
-        const float radius,
-        updateparity *updatetransform) : QuadTree(filename, scales, radius),
-        TotalSizeX(0),
-        TotalSizeZ(0),
-        mass(mass),
-        whichstage(0) {
+Terrain::Terrain(const char *filename, const Vector &scales, const float mass, const float radius,
+                 updateparity *updatetransform)
+    : QuadTree(filename, scales, radius), TotalSizeX(0), TotalSizeZ(0), mass(mass), whichstage(0) {
     this->updatetransform = updatetransform;
     allterrains.push_back(this);
     draw = TERRAINRENDER | TERRAINUPDATE;
@@ -70,15 +66,11 @@ void Terrain::SetTransformation(const Matrix &Mat) {
 }
 
 void Terrain::ApplyForce(Unit *un, const Vector &normal, float dist) {
-    un->ApplyForce(normal * .4 * un->GetMass()
-            * fabs(normal.Dot((un->GetVelocity() / simulation_atom_var))
-                    + fabs(dist) / (simulation_atom_var)));
+    un->ApplyForce(normal * .4 * un->GetMass() *
+                   fabs(normal.Dot((un->GetVelocity() / simulation_atom_var)) + fabs(dist) / (simulation_atom_var)));
     Damage damage(.5 * fabs(normal.Dot(un->GetVelocity())) * mass * simulation_atom_var);
 
-    un->ApplyDamage(un->Position().Cast() - normal * un->rSize(),
-            -normal,
-            damage,
-            un, GFXColor(1, 1, 1, 1), NULL);
+    un->ApplyDamage(un->Position().Cast() - normal * un->rSize(), -normal, damage, un, GFXColor(1, 1, 1, 1), NULL);
 }
 
 void Terrain::Collide(Unit *un, const Matrix &t) {
@@ -140,7 +132,7 @@ void Terrain::DeleteAll() {
 
 void Terrain::Render() {
     static GFXColor terraincolor(getTerrainColor());
-    GFXColor tmpcol(0, 0, 0, 1);
+    GFXColor        tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     GFXLightContextAmbient(terraincolor);
     QuadTree::Render();
@@ -149,7 +141,7 @@ void Terrain::Render() {
 
 void Terrain::RenderAll() {
     static GFXColor terraincolor(getTerrainColor());
-    GFXColor tmpcol(0, 0, 0, 1);
+    GFXColor        tmpcol(0, 0, 0, 1);
     GFXGetLightContextAmbient(tmpcol);
     GFXLightContextAmbient(terraincolor);
     for (unsigned int i = 0; i < allterrains.size(); i++) {
@@ -180,4 +172,3 @@ void Terrain::UpdateAll(int resolution) {
 Vector Terrain::GetUpVector(const Vector &pos) {
     return GetNormal(pos, Vector(0, 1, 0));
 }
-

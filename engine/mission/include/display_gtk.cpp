@@ -25,16 +25,16 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if defined(_WIN32) && _MSC_VER > 1300
-#define __restrict
+#if defined(_WIN32) && _MSC_VER > 1'300
+#    define __restrict
 #endif
 #include "mission/include/display_gtk.h"
 
 GtkWidget *window, *main_vbox, *scrolled_win, *tree, *main_hbox;
-GtkWidget *labels[4];    // Array of changable lables to display the mission information
+GtkWidget *labels[4];  // Array of changable lables to display the mission information
 
 void InitGraphics(void) {
-    char title[1024];
+    char       title[1'024];
     GtkWidget *label;
 
     /* Create a new GTK window */
@@ -48,7 +48,8 @@ void InitGraphics(void) {
 
     gtk_container_set_border_width(GTK_CONTAINER(window), 0);
 
-    /* The main vertical box to store the header, the horizontal box (mission tree and description) and the bottom buttons) */
+    /* The main vertical box to store the header, the horizontal box (mission tree and description) and the bottom
+     * buttons) */
     main_vbox = gtk_vbox_new(FALSE, 1);
     gtk_container_border_width(GTK_CONTAINER(main_vbox), 1);
     gtk_container_add(GTK_CONTAINER(window), main_vbox);
@@ -147,11 +148,11 @@ void AddLabelRow(char *desc, int count, GtkWidget *vbox) {
  */
 
 void AddMissionsToTree(char *path, GtkWidget *tree, int is_parent) {
-    glob_t *search;
+    glob_t      *search;
     unsigned int length;
-    int count, max;
-    char *file, *filename;
-    GtkWidget *subtree, *item;
+    int          count, max;
+    char        *file, *filename;
+    GtkWidget   *subtree, *item;
 
     // First we check for sub directories. stick them at the top
     // For some reason, glob(,,GLOB_ONLYDIR,) doesn't seem to only match directories,
@@ -159,19 +160,19 @@ void AddMissionsToTree(char *path, GtkWidget *tree, int is_parent) {
     // That will be the directory.
 
     search = FindDirs(path);
-    max = search->gl_pathc - 1;    // search->gl_pathc is a uint. If there's no files, it's 0.
+    max    = search->gl_pathc - 1;  // search->gl_pathc is a uint. If there's no files, it's 0.
     for (count = 0; count <= max; count++) {
-        file = search->gl_pathv[count];
+        file   = search->gl_pathv[count];
         length = strlen(file);
         if (file[length - 1] != SEPERATOR) {
             continue;
-        }    // Verify it's a directory and not a file
+        }  // Verify it's a directory and not a file
 
         filename = _strdup(file);
         filename = StripPath(filename);
         if (strcmp("CVS", filename) == 0) {
             continue;
-        }    // Don't need to display this directory
+        }  // Don't need to display this directory
 
         item = AddItem(tree, filename, "dir");
 
@@ -184,13 +185,12 @@ void AddMissionsToTree(char *path, GtkWidget *tree, int is_parent) {
         gtk_tree_item_set_subtree(GTK_TREE_ITEM(item), subtree);
 
         AddMissionsToTree(file, subtree, 0);
-
     }
 
     search = FindFiles(path, EXT_MISSION);
-    max = search->gl_pathc - 1;
+    max    = search->gl_pathc - 1;
     for (count = 0; count <= max; count++) {
-        file = search->gl_pathv[count];
+        file   = search->gl_pathv[count];
         length = strlen(file);
         if (file[length - 1] == SEPERATOR) {
             continue;
@@ -237,18 +237,11 @@ void select_item(GtkWidget *item, gchar *filename) {
     gtk_label_set_text(GTK_LABEL(labels[3]), DATA.briefing);
 }
 
-void deselect_item(GtkWidget *item, gchar *filename) {
-}
+void deselect_item(GtkWidget *item, gchar *filename) {}
 
 /* These would be useful for campaigns. Don't have anything for them now */
-void cb_unselect_child(GtkWidget *root_tree, GtkWidget *child, GtkWidget *subtree) {
+void cb_unselect_child(GtkWidget *root_tree, GtkWidget *child, GtkWidget *subtree) {}
 
-}
+void cb_select_child(GtkWidget *root_tree, GtkWidget *child, GtkWidget *subtree) {}
 
-void cb_select_child(GtkWidget *root_tree, GtkWidget *child, GtkWidget *subtree) {
-
-}
-
-void cb_selection_changed(GtkWidget *tree) {
-
-}
+void cb_selection_changed(GtkWidget *tree) {}

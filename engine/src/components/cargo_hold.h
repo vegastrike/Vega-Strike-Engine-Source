@@ -27,29 +27,33 @@
 #ifndef VEGA_STRIKE_ENGINE_COMPONENTS_CARGO_HOLD_H
 #define VEGA_STRIKE_ENGINE_COMPONENTS_CARGO_HOLD_H
 
+#include <vector>
+
 #include "component.h"
 #include "resource/cargo.h"
-#include "resource/resource.h"
 #include "resource/manifest.h"
-#include <vector>
+#include "resource/resource.h"
 
 class ComponentsManager;
 
 enum class HoldType {
-    cargo, hidden, upgrade
+    cargo,
+    hidden,
+    upgrade
 };
 
 /** A cargo hold. Can hold cargo. */
 class CargoHold : public Component, public Manifest {
-    HoldType hold_type;
+    HoldType         hold_type;
     Resource<double> capacity;
+
 public:
     CargoHold(HoldType hold_type);
 
     // Component Methods
-    void Load(std::string unit_key) override;      
-    
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void Load(std::string unit_key) override;
+
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -60,13 +64,13 @@ public:
     bool Upgrade(const std::string upgrade_key) override;
 
     // Cargo Hold Methods
-    bool CanAddCargo(const Cargo &carg) const;
-    void AddCargo(ComponentsManager *manager, const Cargo &carg, bool sort = true);
-    Cargo RemoveCargo(ComponentsManager *manager, const std::string& name, int quantity);
-    Cargo RemoveCargo(ComponentsManager *manager, unsigned int index, int quantity);
-    Cargo& GetCargo(unsigned int i);
-    const Cargo& GetCargo(unsigned int i) const;
-    void Clear();
+    bool         CanAddCargo(const Cargo &carg) const;
+    void         AddCargo(ComponentsManager *manager, const Cargo &carg, bool sort = true);
+    Cargo        RemoveCargo(ComponentsManager *manager, const std::string &name, int quantity);
+    Cargo        RemoveCargo(ComponentsManager *manager, unsigned int index, int quantity);
+    Cargo       &GetCargo(unsigned int i);
+    const Cargo &GetCargo(unsigned int i) const;
+    void         Clear();
 
     double CurrentCapacity() const;
     double MaxCapacity() const;
@@ -78,4 +82,4 @@ public:
     void Free();
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_CARGO_HOLD_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_CARGO_HOLD_H

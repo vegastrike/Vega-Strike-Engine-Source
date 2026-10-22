@@ -25,89 +25,70 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cmd/script/mission.h"
-#include "src/universe_util.h"
-#include "universe_generic.h"
-#include "cmd/unit_generic.h"
-#include "cmd/unit_factory.h"    //for UnitFactory::getMasterPartList()
-#include "cmd/collection.h"
-#include "networking/netserver.h"
 #include <string>
+
+#include "cmd/collection.h"
+#include "cmd/script/mission.h"
+#include "cmd/unit_factory.h"  //for UnitFactory::getMasterPartList()
+#include "cmd/unit_generic.h"
+#include "networking/netserver.h"
+#include "root_generic/configxml.h"
 #include "root_generic/lin_time.h"
 #include "root_generic/load_mission.h"
-#include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
+#include "src/universe_util.h"
+#include "universe_generic.h"
 
-void SetStarSystemLoading(bool value) {
-}
+void SetStarSystemLoading(bool value) {}
 
 using std::string;
 
-void ClientServerSetLightContext(int lc) {
-}
+void ClientServerSetLightContext(int lc) {}
 
 namespace UniverseUtil {
-void playVictoryTune() {
-}
+void playVictoryTune() {}
 
 int musicAddList(string str) {
     return 0;
 }
 
-void musicLayerPlaySong(string str, int layer) {
-}
+void musicLayerPlaySong(string str, int layer) {}
 
-void addParticle(QVector loc, Vector velocity, Vector color, float size) {
-}
+void addParticle(QVector loc, Vector velocity, Vector color, float size) {}
 
-void musicLayerPlayList(int which, int layer) {
-}
+void musicLayerPlayList(int which, int layer) {}
 
-void musicLayerLoopList(int numloops, int layer) {
-}
+void musicLayerLoopList(int numloops, int layer) {}
 
-void musicLayerSetSoftVolume(float vol, float latency_override, int layer) {
-}
+void musicLayerSetSoftVolume(float vol, float latency_override, int layer) {}
 
-void musicLayerSetHardVolume(float vol, int layer) {
-}
+void musicLayerSetHardVolume(float vol, int layer) {}
 
-void musicSetSoftVolume(float vol, float latency_override) {
-}
+void musicSetSoftVolume(float vol, float latency_override) {}
 
-void musicSetHardVolume(float vol) {
-}
+void musicSetHardVolume(float vol) {}
 
-void musicMute(bool stopSound) {
-}
+void musicMute(bool stopSound) {}
 
-void playSound(string soundName, QVector loc, Vector speed) {
-}
+void playSound(string soundName, QVector loc, Vector speed) {}
 
-void playSoundCockpit(string soundName) {
-}
+void playSoundCockpit(string soundName) {}
 
-void cacheAnimation(string aniName) {
-}
+void cacheAnimation(string aniName) {}
 
-void playAnimation(string aniName, QVector loc, float size) {
-}
+void playAnimation(string aniName, QVector loc, float size) {}
 
-void playAnimationGrow(string aniName, QVector loc, float size, float growpercent) {
-}
+void playAnimationGrow(string aniName, QVector loc, float size, float growpercent) {}
 
 unsigned int getCurrentPlayer() {
     return _Universe->CurrentCockpit();
 }
 
-void musicLayerSkip(int layer) {
-}
+void musicLayerSkip(int layer) {}
 
-void musicLayerStop(int layer) {
-}
+void musicLayerStop(int layer) {}
 
-void StopAllSounds(void) {
-}
+void StopAllSounds(void) {}
 
 void loadGame(const string &savename) {
     unsigned int num = 0;
@@ -135,27 +116,23 @@ void saveGame(const string &savename) {
     }
 }
 
-void showSplashScreen(const string &filename) {
-}
+void showSplashScreen(const string &filename) {}
 
-void showSplashMessage(const string &text) {
-}
+void showSplashMessage(const string &text) {}
 
-void showSplashProgress(float progress) {
-}
+void showSplashProgress(float progress) {}
 
-void hideSplashScreen() {
-}
+void hideSplashScreen() {}
 
 bool isSplashScreenShowing() {
     return false;
 }
 
 void sendCustom(int cp, string cmd, string args, string id) {
-    if (cp < 0 || (unsigned int) cp >= _Universe->numPlayers()) {
+    if (cp < 0 || (unsigned int)cp >= _Universe->numPlayers()) {
         fprintf(stderr, "sendCustom %s with invalid player %d\n", cmd.c_str(), cp);
         return;
     }
     VSServer->sendCustom(cp, cmd, args, id);
 }
-}
+}  // namespace UniverseUtil

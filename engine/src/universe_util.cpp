@@ -28,37 +28,35 @@
 
 /// Functions for python modules
 ///
-#include "cmd/script/mission.h"
 #include "src/universe_util.h"
-#include "src/universe.h"
-#include "cmd/collection.h"
-#include "src/star_system.h"
+
 #include <string>
+
+#include "cmd/base.h"
+#include "cmd/collection.h"
 #include "cmd/music.h"
-#include "src/audiolib.h"
+#include "cmd/script/mission.h"
 #include "gfx/animation.h"
+#include "gfx/particle.h"
 #include "root_generic/lin_time.h"
 #include "root_generic/load_mission.h"
-#include "src/config_xml.h"
-#include "root_generic/vs_globals.h"
-#include "gfx/particle.h"
-#include "cmd/base.h"
 #include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
+#include "src/audiolib.h"
+#include "src/config_xml.h"
+#include "src/star_system.h"
 #include "src/universe.h"
-#include "vegadisk/savegame.h"
 #include "src/vs_logging.h"
+#include "vegadisk/savegame.h"
 
-extern unsigned int AddAnimation(const QVector &pos,
-        const float size,
-        bool mvolatile,
-        const std::string &name,
-        float percentgrow);
-extern void RespawnNow(Cockpit *cp);
-extern void TerminateCurrentBase(void);
-extern void SetStarSystemLoading(bool value);
-extern bool GetStarSystemLoading();
-extern void bootstrap_draw(const std::string &message, Animation *newSplashScreen);
-extern Animation *GetSplashScreen();
+extern unsigned int          AddAnimation(const QVector &pos, const float size, bool mvolatile, const std::string &name,
+                                          float percentgrow);
+extern void                  RespawnNow(Cockpit *cp);
+extern void                  TerminateCurrentBase(void);
+extern void                  SetStarSystemLoading(bool value);
+extern bool                  GetStarSystemLoading();
+extern void                  bootstrap_draw(const std::string &message, Animation *newSplashScreen);
+extern Animation            *GetSplashScreen();
 extern const vector<string> &ParseDestinations(const string &value);
 
 using std::string;
@@ -165,10 +163,9 @@ void addParticle(QVector loc, Vector velocity, GFXColor color, float size) {
 
 void loadGame(const string &savename) {
     Cockpit *cockpit = _Universe->AccessCockpit();
-    Unit *player = cockpit->GetParent();
+    Unit    *player  = cockpit->GetParent();
     UniverseUtil::setCurrentSaveGame(savename);
     if (player) {
-
         player->Kill();
     }
     RespawnNow(cockpit);
@@ -177,10 +174,8 @@ void loadGame(const string &savename) {
 }
 
 void saveGame(const string &savename) {
-
     UniverseUtil::setCurrentSaveGame(savename);
     WriteSaveGame(_Universe->AccessCockpit(), false);
-
 }
 
 void showSplashScreen(const string &filename) {
@@ -196,7 +191,7 @@ void showSplashScreen(const string &filename) {
         if (!s) {
             s.emplace(ParseDestinations(configuration().graphics.splash_screen));
         }
-        int snum = time(nullptr) % s->size();
+        int snum  = time(nullptr) % s->size();
         curSplash = new Animation(s->at(snum).c_str(), false);
     }
     SetStarSystemLoading(true);
@@ -207,9 +202,9 @@ void showSplashMessage(const string &text) {
     bootstrap_draw(text, 0);
 }
 
-void showSplashProgress(float progress) //DELETE ?
+void showSplashProgress(float progress)  // DELETE ?
 {
-    //Unimplemented
+    // Unimplemented
 }
 
 void hideSplashScreen() {
@@ -227,4 +222,4 @@ void sendCustom(int cp, string cmd, string args, string id) {
     }
     receivedCustom(cp, true, cmd, args, id);
 }
-}
+}  // namespace UniverseUtil

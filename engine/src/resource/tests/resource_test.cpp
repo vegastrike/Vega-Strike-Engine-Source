@@ -25,10 +25,9 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
-
 #include "resource/resource.h"
 
+#include <gtest/gtest.h>
 
 TEST(Resource, Operators) {
     // Constructor, Value
@@ -81,12 +80,11 @@ TEST(Resource, Operators) {
     --resource;
     EXPECT_EQ(resource, 0.0);
 
-    Resource<int> a(1,0,1);
-    Resource<int> b(1,0,1);
+    Resource<int> a(1, 0, 1);
+    Resource<int> b(1, 0, 1);
 
     EXPECT_TRUE(a == b);
 }
-
 
 TEST(Resource, Methods) {
     Resource<double> resource = Resource<double>(10.0, 0.0, 10.0);
@@ -120,7 +118,7 @@ TEST(Resource, Methods) {
     EXPECT_EQ(resource.Value(), 4.0);
 
     Resource<int> int_resource = Resource<int>(10, 0);
-    int to_int = int_resource;
+    int           to_int       = int_resource;
     EXPECT_EQ(to_int, 10);
 }
 
@@ -189,27 +187,27 @@ TEST(Resource, Damage_Repair) {
 }
 
 TEST(Resource, Serialization) {
-    const double value = 15.0;
-    const double adjusted = 21.0;
-    const double max = 30.0;
-    const double modifier = 3.0;
-    const std::string one = "10.0";
-    const std::string two = "7.0/10.0";
-    const std::string three = "5.0/7.0/10.0";
+    const double      value    = 15.0;
+    const double      adjusted = 21.0;
+    const double      max      = 30.0;
+    const double      modifier = 3.0;
+    const std::string one      = "10.0";
+    const std::string two      = "7.0/10.0";
+    const std::string three    = "5.0/7.0/10.0";
 
-    const std::string three_ten = "10.00/10.00/10.00";
+    const std::string three_ten       = "10.00/10.00/10.00";
     const std::string seven_seven_ten = "7.00/7.00/10.00";
-    const std::string five_seven_ten = "5.00/7.00/10.00";
+    const std::string five_seven_ten  = "5.00/7.00/10.00";
 
-    Resource<double> resource = Resource<double>(one, modifier);
-    std::string serialization_string = resource.Serialize(modifier);
+    Resource<double> resource             = Resource<double>(one, modifier);
+    std::string      serialization_string = resource.Serialize(modifier);
 
     EXPECT_EQ(resource.Value(), max);
     EXPECT_EQ(resource.AdjustedValue(), max);
     EXPECT_EQ(resource.MaxValue(), max);
     EXPECT_EQ(serialization_string, three_ten);
 
-    resource = Resource<double>(two, modifier);
+    resource             = Resource<double>(two, modifier);
     serialization_string = resource.Serialize(modifier);
 
     EXPECT_EQ(resource.Value(), adjusted);
@@ -217,7 +215,7 @@ TEST(Resource, Serialization) {
     EXPECT_EQ(resource.MaxValue(), max);
     EXPECT_EQ(serialization_string, seven_seven_ten);
 
-    resource = Resource<double>(three, modifier);
+    resource             = Resource<double>(three, modifier);
     serialization_string = resource.Serialize(modifier);
 
     EXPECT_EQ(resource.Value(), value);

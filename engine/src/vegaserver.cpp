@@ -31,26 +31,26 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include "root_generic/vs_globals.h"
-#include "networking/netserver.h"
-#include "cmd/script/mission.h"
-#include "src/force_feedback.h"
-#include "root_generic/lin_time.h"
-#include "cmd/unit_factory.h"
 
+#include "cmd/script/mission.h"
+#include "cmd/unit_factory.h"
+#include "networking/netserver.h"
+#include "root_generic/lin_time.h"
 #include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
+#include "src/force_feedback.h"
 #include "src/vs_exit.h"
-//#ifndef _WIN32
-//#include <fenv.h>
-//#endif
-char SERVER = 1;
-Universe *_Universe;
+// #ifndef _WIN32
+// #include <fenv.h>
+// #endif
+char                  SERVER = 1;
+Universe             *_Universe;
 LeakVector<Mission *> active_missions;
 
 vs_options game_options;
 
 float SIMULATION_ATOM = 0.0f;
-float AUDIO_ATOM = 0.0f;
+float AUDIO_ATOM      = 0.0f;
 
 void VSExit(int code) {
     VSServer->closeAllSockets();
@@ -62,18 +62,17 @@ void VSExit(int code) {
 Unit *TheTopLevelUnit = NULL;
 
 int main(int argc, char **argv) {
-
-    //#ifndef _WIN32
-    //feenableexcept(FE_DIVBYZERO|FE_INVALID);//|FE_OVERFLOW|FE_UNDERFLOW)
-    //#endif
+    // #ifndef _WIN32
+    // feenableexcept(FE_DIVBYZERO|FE_INVALID);//|FE_OVERFLOW|FE_UNDERFLOW)
+    // #endif
     VSFileSystem::ChangeToProgramDirectory(argv[0]);
 
-    //Stupid static variable somewhere, so need to initialize it twice.
+    // Stupid static variable somewhere, so need to initialize it twice.
     InitTime();
     setNewTime(0);
-    setNewTime(((double) time(NULL)) - VEGA_EPOCH);
+    setNewTime(((double)time(NULL)) - VEGA_EPOCH);
     VSServer = new NetServer;
-    //Fake forcefeedback
+    // Fake forcefeedback
     forcefeedback = new ForceFeedback();
     VSServer->start(argc, argv);
 
@@ -81,4 +80,3 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-

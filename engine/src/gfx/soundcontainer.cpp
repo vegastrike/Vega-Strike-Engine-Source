@@ -26,13 +26,12 @@
  */
 
 
-#include <string>
-
 #include "soundcontainer.h"
 
+#include <string>
+
 GameSoundContainer::GameSoundContainer(const SoundContainer &other)
-        : SoundContainer(other), triggered(false), loaded(false) {
-}
+    : SoundContainer(other), triggered(false), loaded(false) {}
 
 GameSoundContainer::~GameSoundContainer() {
     unload();

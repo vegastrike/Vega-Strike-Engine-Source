@@ -27,27 +27,28 @@
 #ifndef VEGA_STRIKE_ENGINE_MISSION_HASHTABLE_H
 #define VEGA_STRIKE_ENGINE_MISSION_HASHTABLE_H
 
-#include <math.h>
 #include <list>
+#include <math.h>
 #include <string>
 
 using namespace std;
 
-//const int hashsize = 1001;
+// const int hashsize = 1001;
 
-//Hashtable doesn't grow
-template<class KEY, class VALUE, class SIZ>
+// Hashtable doesn't grow
+template <class KEY, class VALUE, class SIZ>
 class Hashtable {
     class HashElement {
     public:
-        KEY key;
+        KEY    key;
         VALUE *value;
 
         HashElement(KEY k, VALUE *v) {
-            key = k;
+            key   = k;
             value = v;
         }
     };
+
     list<HashElement> table[sizeof(SIZ)];
 
     static int hash(const int key) {
@@ -55,9 +56,9 @@ class Hashtable {
     }
 
     static int hash(const string &key) {
-        int k = 0;
-        char *start = (char *) key.c_str();
-        char *end = start + strlen(start);
+        int   k     = 0;
+        char *start = (char *)key.c_str();
+        char *end   = start + strlen(start);
 
         for (; start != end; start++) {
             k += (k << 3) + *start;
@@ -67,12 +68,10 @@ class Hashtable {
     }
 
 public:
-
-    Hashtable() {
-    }
+    Hashtable() {}
 
     VALUE *Get(const KEY &key) const {
-        int hashval = hash(key);
+        int                               hashval = hash(key);
         list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
 
         for (; iter != end; iter++) {
@@ -93,7 +92,7 @@ public:
     }
 
     void Delete(const KEY &key) {
-        int hashval = hash(key);
+        int                         hashval = hash(key);
         list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
 
         for (; iter != end; iter++) {
@@ -108,11 +107,11 @@ public:
         }
     }
 
-/*
-	VALUE *Get(const KEY &key);
-	void Put(const KEY &key, VALUE *value);
-	void Delete(const KEY &key);
-*/
+    /*
+        VALUE *Get(const KEY &key);
+        void Put(const KEY &key, VALUE *value);
+        void Delete(const KEY &key);
+    */
 };
 
-#endif //VEGA_STRIKE_ENGINE_MISSION_HASHTABLE_H
+#endif  // VEGA_STRIKE_ENGINE_MISSION_HASHTABLE_H

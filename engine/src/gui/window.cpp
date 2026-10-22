@@ -31,11 +31,11 @@
 #include "groupcontrol.h"
 #include "windowcontroller.h"
 
-//For drawing the cursor.
-#include "imgui/imgui.h"
+// For drawing the cursor.
 #include "gui/imgui_support.h"
+#include "imgui/imgui.h"
 
-//The outside boundaries of the window.
+// The outside boundaries of the window.
 void Window::setRect(const Rect &r) {
     m_rect = r;
 }
@@ -48,18 +48,18 @@ void Window::setSizeAndCenter(const Size &size) {
     setRect(Rect(-size.width / 2.0, -size.height / 2.0, size.width, size.height));
 }
 
-//Initially display the window.
-//Call this when all the properties and controls of the window are set.
+// Initially display the window.
+// Call this when all the properties and controls of the window are set.
 void Window::open(void) {
     globalWindowManager().openWindow(this);
 }
 
-//Done with the window.
+// Done with the window.
 void Window::close(void) {
     processCommand("Window::Close", NULL);
 }
 
-//Manage controls.
+// Manage controls.
 void Window::addControl(Control *c) {
     m_controls->addChild(c);
 }
@@ -68,22 +68,22 @@ void Window::deleteControl(Control *c) {
     m_controls->deleteControl(c);
 }
 
-//Take a control away from this window and save it elsewhere.
+// Take a control away from this window and save it elsewhere.
 Control *Window::removeControlFromWindow(Control *c) {
     return m_controls->removeControlFromGroup(c);
 }
 
-//Find a control using its id.  NULL returned if none found.
-//Note that the control may be hidden.
+// Find a control using its id.  NULL returned if none found.
+// Note that the control may be hidden.
 Control *Window::findControlById(const std::string &id) {
     return m_controls->findControlById(id);
 }
 
-//Draw/redraw the whole window.
+// Draw/redraw the whole window.
 void Window::draw(void) {
     // Convert normalized VS coordinates to pixels for ImGui
     float x = Coordinates::normToPixelX(m_rect.left());
-    float y = Coordinates::normToPixelY(m_rect.top()); // ImGui origin is top-left
+    float y = Coordinates::normToPixelY(m_rect.top());  // ImGui origin is top-left
     float w = Coordinates::normToPixelW(m_rect.size.width);
     float h = Coordinates::normToPixelH(m_rect.size.height);
 
@@ -94,32 +94,27 @@ void Window::draw(void) {
     std::string windowName = "LegacyWindow_" + std::to_string(reinterpret_cast<uintptr_t>(this));
 
     // Lock down the window flags so it behaves like a static legacy container
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | 
-                             ImGuiWindowFlags_NoResize | 
-                             ImGuiWindowFlags_NoMove | 
-                             ImGuiWindowFlags_NoScrollbar | 
-                             ImGuiWindowFlags_NoSavedSettings;
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                             ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings;
 
     // Set background color matching legacy window color
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(m_color.r, m_color.g, m_color.b, m_color.a));
 
     if (ImGui::Begin(windowName.c_str(), nullptr, flags)) {
-        
         // Run control drawing routines inside this isolated ImGui context, this allows for hybrid imgui/gx rendering
         if (m_controller) {
             m_controller->draw();
         }
-        
+
         drawBackground();
         m_controls->draw();
         ImGui::End();
     }
-    
-    ImGui::PopStyleColor();
 
+    ImGui::PopStyleColor();
 }
 
-//Draw window background.
+// Draw window background.
 void Window::drawBackground(void) {
     m_texture.draw(m_rect);
     if (!isClear(m_color)) {
@@ -130,11 +125,10 @@ void Window::drawBackground(void) {
     }
 }
 
-//Read window properties and controls from an XML file.
-void Window::readFromXml(const std::string &fileName) {
-}
+// Read window properties and controls from an XML file.
+void Window::readFromXml(const std::string &fileName) {}
 
-//OVERRIDES
+// OVERRIDES
 bool Window::processMouseDown(const InputEvent &event) {
     if (m_controls->processMouseDown(event)) {
         return true;
@@ -164,31 +158,31 @@ bool Window::processMouseDrag(const InputEvent &event) {
 }
 
 bool Window::processCommand(const EventCommandId &command, Control *control) {
-    //The controller should see the command first.
+    // The controller should see the command first.
     if (m_controller != NULL) {
         if (m_controller->processWindowCommand(command, control)) {
             return true;
         }
     }
-    //Default command responders.
+    // Default command responders.
     if (command == "Window::Close") {
-        //Close the window!
-        //CAREFUL!  This may delete this object!  Should be the last line in the function.
+        // Close the window!
+        // CAREFUL!  This may delete this object!  Should be the last line in the function.
         globalWindowManager().closeWindow(this, m_deleteOnClose);
         return true;
     }
     return EventResponder::processCommand(command, control);
 }
 
-//CONSTRUCTION
-Window::Window(void) :
-        m_rect(0.0, 0.0, 0.0, 0.0),
-        m_color(GUI_OPAQUE_BLACK()),
-        m_outlineColor(GUI_CLEAR),
-        m_outlineWidth(1.0),
-        m_deleteOnClose(true),
-        m_controls(NULL),
-        m_controller(NULL) {
+// CONSTRUCTION
+Window::Window(void)
+    : m_rect(0.0, 0.0, 0.0, 0.0),
+      m_color(GUI_OPAQUE_BLACK()),
+      m_outlineColor(GUI_CLEAR),
+      m_outlineWidth(1.0),
+      m_deleteOnClose(true),
+      m_controls(NULL),
+      m_controller(NULL) {
     m_controls = new GroupControl();
 }
 
@@ -200,14 +194,14 @@ Window::~Window(void) {
 
 extern void ConditionalCursorDraw(bool);
 
-//Draw all visible windows.
+// Draw all visible windows.
 void WindowManager::draw() {
-    GFXHudMode(true);            //Load identity matrices.
+    GFXHudMode(true);  // Load identity matrices.
 
-    //Just loop through all the windows, and remember if anything gets drawn.
-    //Since the first window in the list is drawn first, z-order is
-    //maintained.  First entry is the bottom window, last is the top window.
-    //FIXME mbyron -- I think the event manager needs to get involved with window z-order.
+    // Just loop through all the windows, and remember if anything gets drawn.
+    // Since the first window in the list is drawn first, z-order is
+    // maintained.  First entry is the bottom window, last is the top window.
+    // FIXME mbyron -- I think the event manager needs to get involved with window z-order.
     //(Mouse events should go to windows in zorder, shouldn't they?)
     for (size_t i = 0; i < m_windows.size(); i++) {
         if (m_windows[i]->controller()) {
@@ -222,21 +216,21 @@ void WindowManager::draw() {
     EndGUIFrame(MOUSE_POINTER_NORMAL);
 }
 
-//A new window has been created and is ready to be drawn.
+// A new window has been created and is ready to be drawn.
 void WindowManager::openWindow(Window *w) {
     m_windows.push_back(w);
     globalEventManager().pushResponder(w);
 }
 
-//A window has been closed.
-void WindowManager::closeWindow(Window *w, //Old window.
-        bool deleteWindow //True = delete window.
+// A window has been closed.
+void WindowManager::closeWindow(Window *w,            // Old window.
+                                bool    deleteWindow  // True = delete window.
 ) {
     vector<Window *>::iterator iter;
     for (iter = m_windows.begin(); iter != m_windows.end(); iter++) {
         if ((*iter) == w) {
             m_windows.erase(iter);
-            globalEventManager().removeResponder(w);             //Have to do this now.
+            globalEventManager().removeResponder(w);  // Have to do this now.
             if (deleteWindow) {
                 EventManager::addToDeleteQueue(w);
             }
@@ -245,22 +239,21 @@ void WindowManager::closeWindow(Window *w, //Old window.
     }
 }
 
-//Close all windows.
+// Close all windows.
 void WindowManager::shutDown(void) {
     while (m_windows.size() > 0) {
         m_windows.back()->close();
     }
-    //m_windows.erase(m_windows.begin());
+    // m_windows.erase(m_windows.begin());
 }
 
-//Pointer to the one, global window manager.
+// Pointer to the one, global window manager.
 WindowManager *globalWindowManagerPtr = NULL;
 
-//Get the one window manager.
+// Get the one window manager.
 WindowManager &globalWindowManager(void) {
     if (globalWindowManagerPtr == NULL) {
         globalWindowManagerPtr = new WindowManager;
     }
     return *globalWindowManagerPtr;
 }
-

@@ -31,18 +31,18 @@
 // C++ Interface: Audio::Codec
 //
 
-#include <boost/smart_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/smart_ptr.hpp>
 
 // Some compilers don't like template typedefs
-#define SharedPtr boost::shared_ptr
-#define WeakPtr boost::weak_ptr
-#define AutoPtr boost::scoped_ptr
+#define SharedPtr      boost::shared_ptr
+#define WeakPtr        boost::weak_ptr
+#define AutoPtr        boost::scoped_ptr
 #define SharedFromThis boost::enable_shared_from_this
-#define MakeShared boost::make_shared
+#define MakeShared     boost::make_shared
 
-#include "Vector.h"
 #include "audio/Matrix.h"
+#include "Vector.h"
 
 namespace Audio {
 
@@ -71,23 +71,21 @@ typedef TMatrix3<Scalar> Matrix3;
 typedef TMatrix3<LScalar> LMatrix3;
 
 /** Per-frequency data usually comes in lf/hf bundles */
-template<typename T>
+template <typename T>
 struct PerFrequency {
     T lf;
     T hf;
 
-    PerFrequency(T _lf, T _hf) : lf(_lf), hf(_hf) {
-    }
+    PerFrequency(T _lf, T _hf) : lf(_lf), hf(_hf) {}
 };
 
 /** Range data usually comes in min/max bundles */
-template<typename T>
+template <typename T>
 struct Range {
     T min;
     T max;
 
-    Range(T mn, T mx) : min(mn), max(mx) {
-    }
+    Range(T mn, T mx) : min(mn), max(mx) {}
 
     T span() const {
         return max - min;
@@ -117,10 +115,9 @@ struct Range {
 /** Generic user data container interface */
 class UserData {
 public:
-    virtual ~UserData() {
-    };
+    virtual ~UserData() {};
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_TYPES_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_TYPES_H

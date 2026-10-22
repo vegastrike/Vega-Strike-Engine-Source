@@ -28,7 +28,7 @@
 
 #include "cmd/images.h"
 
-template<typename BOGUS>
+template <typename BOGUS>
 UnitImages<BOGUS>::~UnitImages() {
     if (pExplosion != nullptr) {
         delete pExplosion;
@@ -37,7 +37,6 @@ UnitImages<BOGUS>::~UnitImages() {
     VSDESTRUCT1
 }
 
-//explicit instantiation needed
-template
-struct UnitImages<void>;
+// explicit instantiation needed
+template struct UnitImages<void>;
 static UnitImages<void> bleh;

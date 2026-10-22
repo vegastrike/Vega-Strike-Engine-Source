@@ -32,11 +32,11 @@ namespace CS {
 /**
  * Swap two elements
  */
-template<class T>
+template <class T>
 CS_FORCEINLINE_TEMPLATEMETHOD void Swap(T &a, T &b) {
     T tmp = a;
-    a = b;
-    b = tmp;
+    a     = b;
+    b     = tmp;
 }
 
 /**
@@ -49,71 +49,39 @@ CS_FORCEINLINE_TEMPLATEMETHOD void Swap(T &a, T &b) {
  * ForEach (anArray.GetIterator (), OurFunctor ());
  * \endcode
  */
-template<class T, class Fn>
-CS_FORCEINLINE_TEMPLATEMETHOD Fn
-&
-ForEach (T
-it,
-Fn &Func
-) {
-while (it.
-HasNext()
-) {
-Func (it
-.
-Next()
-);
-}
-return
-Func;
+template <class T, class Fn>
+CS_FORCEINLINE_TEMPLATEMETHOD Fn &ForEach(T it, Fn &Func) {
+    while (it.HasNext()) {
+        Func(it.Next());
+    }
+    return Func;
 }
 
 /**
  * Iterate over all elements in the list and perform operation
  * given by Func.
  */
-template<class T, class Fn>
-CS_FORCEINLINE_TEMPLATEMETHOD Fn
-&
-ForEach (T
-* start,
-T *end, Fn
-& Func)
-{
-while (start != end)
-{
-Func (*start);
-start++;
-}
-return
-Func;
+template <class T, class Fn>
+CS_FORCEINLINE_TEMPLATEMETHOD Fn &ForEach(T *start, T *end, Fn &Func) {
+    while (start != end) {
+        Func(*start);
+        start++;
+    }
+    return Func;
 }
 
 /**
  * Iterate over all elements in the iterator and perform operation
  * given by Func.
  */
-template<class T, class Fn, class P>
-CS_FORCEINLINE_TEMPLATEMETHOD Fn
-&
-ForEach (T
-it,
-Fn &Func, P
-& p)
-{
-while (it.
-HasNext()
-)
-{
-Func (it
-.
-Next(), p
-);
-}
-return
-Func;
+template <class T, class Fn, class P>
+CS_FORCEINLINE_TEMPLATEMETHOD Fn &ForEach(T it, Fn &Func, P &p) {
+    while (it.HasNext()) {
+        Func(it.Next(), p);
+    }
+    return Func;
 }
 
-}
+}  // namespace CS
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_CSUTIL_ALGORITHMS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_CSUTIL_ALGORITHMS_H

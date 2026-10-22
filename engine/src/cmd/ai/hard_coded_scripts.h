@@ -27,6 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AI_HARD_CODED_SCRIPTS_H
 #define VEGA_STRIKE_ENGINE_CMD_AI_HARD_CODED_SCRIPTS_H
 
+#include "cmd/unit_generic.h"
+#include "order.h"
+
 typedef void CCScript(Order *script, Unit *un);
 
 CCScript AfterburnerSlide;
@@ -81,4 +84,4 @@ CCScript RollFacePerpendicularFast;
 CCScript RollFacePerpendicular;
 CCScript RollFacePerpendicularSlow;
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_HARD_CODED_SCRIPTS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_HARD_CODED_SCRIPTS_H

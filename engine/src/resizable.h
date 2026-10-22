@@ -33,31 +33,32 @@
 
 #include "vs_logging.h"
 
-template<class ITEM>
+template <class ITEM>
 class Resizable {
     unsigned int num;
     unsigned int alloc;
-    ITEM *q;
+    ITEM        *q;
+
 public:
     Resizable() {
-        num = 0;
+        num   = 0;
         alloc = 16;
-        q = new ITEM[16]{};
+        q     = new ITEM[16]{};
     }
 
     Resizable(const Resizable<ITEM> &c) {
-        num = c.num;
+        num   = c.num;
         alloc = c.alloc;
-        q = new ITEM[alloc]{};
+        q     = new ITEM[alloc]{};
         for (unsigned int i = 0; i < c.num; ++i) {
-            q[i] = const_cast<Resizable<ITEM>&>(c)[i];
+            q[i] = const_cast<Resizable<ITEM> &>(c)[i];
         }
     }
 
     ~Resizable() {
         delete[] q;
-        q = nullptr;
-        num = 0;
+        q     = nullptr;
+        num   = 0;
         alloc = 0;
     }
 
@@ -69,8 +70,8 @@ private:
             for (unsigned int i = 0; i < num; ++i) {
                 tmp.push_back(q[i]);
             }
-            delete [] q;
-            q = new ITEM[alloc]{};
+            delete[] q;
+            q              = new ITEM[alloc]{};
             unsigned int i = 0;
             for (auto item : tmp) {
                 q[i++] = item;
@@ -104,18 +105,18 @@ public:
 
     void push_back3(const ITEM aa[3]) {
         grow_storage(3);
-        q[num] = aa[0];
-        q[num + 1] = aa[1];
-        q[num + 2] = aa[2];
-        num += 3;
+        q[num]      = aa[0];
+        q[num + 1]  = aa[1];
+        q[num + 2]  = aa[2];
+        num        += 3;
     }
 
     void push_back(const ITEM &aa, const ITEM &bb, const ITEM &cc) {
         grow_storage(3);
-        q[num] = aa;
-        q[num + 1] = bb;
-        q[num + 2] = cc;
-        num += 3;
+        q[num]      = aa;
+        q[num + 1]  = bb;
+        q[num + 2]  = cc;
+        num        += 3;
     }
 
     void push_backN(const ITEM *aa, const unsigned int N) {
@@ -169,4 +170,4 @@ public:
         return q[i];
     }
 };
-#endif // VEGA_STRIKE_ENGINE_SRC_RESIZABLE_H
+#endif  // VEGA_STRIKE_ENGINE_SRC_RESIZABLE_H

@@ -25,16 +25,17 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../../first.h"
 #include "coords.h"
 
-//explicit instantiations of all 6 sides of an abstract cube:
-template side<eLeft> left_side("left");
+#include "../../first.h"
+
+// explicit instantiations of all 6 sides of an abstract cube:
+template side<eLeft>  left_side("left");
 template side<eRight> left_side("right");
-template side<eUp> left_side("up");
-template side<eDown> left_side("down");
+template side<eUp>    left_side("up");
+template side<eDown>  left_side("down");
 template side<eFront> left_side("front");
-template side<eBack> left_side("back");
+template side<eBack>  left_side("back");
 
 ucoords::ucoords(scoords const &sc) {
     u_ = sc.u_ + 0.5f;
@@ -58,26 +59,24 @@ scoords::scoords(ucoords const &uc) {
 }
 
 side_and_coords::side_and_coords(ccoords const *cc) {
-    register float X((cc.get_x()))
-    register float Y((cc.get_y()))
-    register float Z((cc.get_z()))
-    register float X2 = X * X;
+    register float X((cc.get_x())) register float Y((cc.get_y())) register float Z((cc.get_z())) register float X2 =
+            X * X;
     register float Y2 = Y * Y;
     register float Z2 = Z * Z;
-    eSide s;
-    float u;
-    float v;
+    eSide          s;
+    float          u;
+    float          v;
     if (X2 > Y2) {
         if (X2 > Z2) {
-            //this is either the left side or the right side
+            // this is either the left side or the right side
             if (X > 0) {
                 s = eLeft;
-                //cc = ccoords(  0.5f,    U,    V );
+                // cc = ccoords(  0.5f,    U,    V );
                 u = Y;
                 v = Z;
             } else {
                 s = eRight;
-                //cc = ccoords( -0.5f,   -U,    V );
+                // cc = ccoords( -0.5f,   -U,    V );
                 u = -Y;
                 v = Z;
             }
@@ -86,39 +85,39 @@ side_and_coords::side_and_coords(ccoords const *cc) {
         }
     } else {
         if (Y2 > Z2) {
-            //this is either up or down sides
+            // this is either up or down sides
             if (Y > 0) {
                 s = eUp;
-                //cc = ccoords(    -U,  0.5,   -V );
+                // cc = ccoords(    -U,  0.5,   -V );
                 u = -X;
                 v = -Z;
             } else {
                 s = eDown;
-                //cc = ccoords(    -U, -0.5,    V );
+                // cc = ccoords(    -U, -0.5,    V );
                 u = X;
                 v = Z;
             }
         } else {
-            front_or_back:
-            //this is either the front or the back
+        front_or_back:
+            // this is either the front or the back
             if (Z > 0) {
                 s = eFront;
-                //cc = ccoords(     U,    V,  0.5 );
+                // cc = ccoords(     U,    V,  0.5 );
                 u = X;
                 v = Y;
             } else {
                 s = eBack;
-                //cc = ccoords(     U,   -V, -0.5 );
+                // cc = ccoords(     U,   -V, -0.5 );
                 u = X;
                 v = -Y;
             }
         }
     }
-    //snc = side_and_coords( s, scoords( u, v ) );
-    //FIXME (FINISH ME)
+    // snc = side_and_coords( s, scoords( u, v ) );
+    // FIXME (FINISH ME)
 }
 
-void ccoords::check_invariants() //just for debugging; --should pass if code is correct
+void ccoords::check_invariants()  // just for debugging; --should pass if code is correct
 {
     vs_assert(x_ >= -0.5 && x_ <= 0.5, "bad range for x_");
     vs_assert(y_ >= -0.5 && y_ <= 0.5, "bad range for y_");
@@ -130,19 +129,17 @@ void ccoords::check_invariants() //just for debugging; --should pass if code is 
 
 ccoords::ccoords(fvector const &v) {
     float inv_max = 1.0f / std::max(std::max(abs(v.x_), abs(v.y_)), abs(v.z_));
-    x_ = v.x_ * inv_max;
-    y_ = v.y_ * inv_max;
-    z_ = v.z_ * inv_max;
+    x_            = v.x_ * inv_max;
+    y_            = v.y_ * inv_max;
+    z_            = v.z_ * inv_max;
 }
 
 ccoords::ccoords(side_and_coords const &snc) {
-    eSide S((snc.get_side().get_eSide()))
-    float U((snc.get_scoords().get_u()))
-    float V((snc.get_scoords().get_v()))
-    switch (S) {
-        //The numbers and axis flips and whatnot below are COMPLETELY bogus for now.
-        //I have *no idea* what the standard mapping of texture coords to cube space
-        //coordinates are, or where to find the information.
+    eSide S((snc.get_side().get_eSide())) float U((snc.get_scoords().get_u())) float V(
+            (snc.get_scoords().get_v())) switch (S) {
+        // The numbers and axis flips and whatnot below are COMPLETELY bogus for now.
+        // I have *no idea* what the standard mapping of texture coords to cube space
+        // coordinates are, or where to find the information.
         case eLeft:
             cc = ccoords(0.5f, U, V);
             break;
@@ -166,5 +163,3 @@ ccoords::ccoords(side_and_coords const &snc) {
             break;
     }
 }
-
-

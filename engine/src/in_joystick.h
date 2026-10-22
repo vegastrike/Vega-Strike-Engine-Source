@@ -32,29 +32,29 @@
  */
 #include "src/in_kb_data.h"
 
-#if defined (HAVE_SDL)
-#include <SDL3/SDL.h>
-#endif //defined (HAVE_SDL)
+#if defined(HAVE_SDL)
+#    include <SDL3/SDL.h>
+#endif  // defined (HAVE_SDL)
 
 #include "src/vegastrike.h"
-//#include "glob.h"
-//#include "dbg.h"
+// #include "glob.h"
+// #include "dbg.h"
 #include "src/in_kb.h"
 #define NUMJBUTTONS 64
 
 class JoyStick;
 
-//typedef void (*JoyHandler) (int);
+// typedef void (*JoyHandler) (int);
 
 extern void ProcessJoystick(int whichjoystick);
 extern void InitJoystick();
 extern void DeInitJoystick();
 
-const int MAX_JOYSTICKS = 16;
-const int MOUSE_JOYSTICK = MAX_JOYSTICKS - 1;
-const int MAX_BUTTONS = 64;
+const int MAX_JOYSTICKS           = 16;
+const int MOUSE_JOYSTICK          = MAX_JOYSTICKS - 1;
+const int MAX_BUTTONS             = 64;
 const int MAX_DIGITAL_HATSWITCHES = 4;
-const int MAX_DIGITAL_VALUES = 9;
+const int MAX_DIGITAL_VALUES      = 9;
 
 enum {
     VS_HAT_CENTERED = 0,
@@ -74,34 +74,35 @@ class JoyStick {
     bool mouse;
     void InitMouse(int i);
     void GetMouse(float &x, float &y, float &z, int &buttons);
+
 public:
-//initializes the joystick
+    // initializes the joystick
     JoyStick(int which, SDL_JoystickID instance_id);
     ~JoyStick();
-// Re-point this slot at a real SDL joystick (hotplug attach). Closes any
-// existing/fake handle, opens the new device, and refreshes the axis/button/hat
-// counts. The slot's bindings (keyed by slot index) are untouched.
+    // Re-point this slot at a real SDL joystick (hotplug attach). Closes any
+    // existing/fake handle, opens the new device, and refreshes the axis/button/hat
+    // counts. The slot's bindings (keyed by slot index) are untouched.
     void Attach(SDL_JoystickID instance_id);
-//engine calls GetJoyStick to get coordinates and buttons
-    void GetJoyStick(float &x, float &y, float &z, long long& buttons);
+    // engine calls GetJoyStick to get coordinates and buttons
+    void GetJoyStick(float &x, float &y, float &z, long long &buttons);
     bool isAvailable(void);
     bool is_around(float axe, float hswitch);
-    int NumButtons();
+    int  NumButtons();
 
-#if defined (HAVE_SDL)
-    SDL_JoystickID  instanceID;
-    SDL_Joystick    *joy;
-#else //defined (HAVE_SDL)
-    void   *otherdata; //bad form to have an ifdef in a struct
-#endif //defined (HAVE_SDL)
+#if defined(HAVE_SDL)
+    SDL_JoystickID instanceID;
+    SDL_Joystick  *joy;
+#else   // defined (HAVE_SDL)
+    void *otherdata;  // bad form to have an ifdef in a struct
+#endif  // defined (HAVE_SDL)
     int    nr_of_axes{};
     int    nr_of_buttons{};
     int    nr_of_hats{};
     int    hat_margin{};
     size_t player{};
 #define MAX_AXES 32
-    bool axis_inverse[MAX_AXES]{};
-    int axis_axis[MAX_AXES]{};
+    bool  axis_inverse[MAX_AXES]{};
+    int   axis_axis[MAX_AXES]{};
     float joy_axis[MAX_AXES]{};
     // Warp (relative) mouse deflection accumulator: deltas build up a virtual
     // target deflection that decays back toward center, so the flight controller
@@ -114,24 +115,24 @@ public:
     bool debug_digital_hatswitch{};
 
     long long joy_buttons{};
-    bool  joy_available{};
-    float joy_xmin{};
-    float joy_xmax{};
-    float joy_ymin{};
-    float joy_ymax{};
-    float joy_zmin{};
-    float joy_zmax{};
-    float joy_x{};
-    float joy_y{};
-    float joy_z{};
-    float deadzone{};
+    bool      joy_available{};
+    float     joy_xmin{};
+    float     joy_xmax{};
+    float     joy_ymin{};
+    float     joy_ymax{};
+    float     joy_zmin{};
+    float     joy_zmax{};
+    float     joy_x{};
+    float     joy_y{};
+    float     joy_z{};
+    float     deadzone{};
 };
 
 extern JoyStick *joystick[MAX_JOYSTICKS];
-typedef void (*JoyHandler)(KBSTATE, float x, float y, int mod);
-void BindJoyKey(int key, int joystick, KBHandler handler, const KBData &data);
-void UnbindJoyKey(int joystick, int key);
-void RestoreJoystickState();
+typedef void     (*JoyHandler)(KBSTATE, float x, float y, int mod);
+void             BindJoyKey(int key, int joystick, KBHandler handler, const KBData &data);
+void             UnbindJoyKey(int joystick, int key);
+void             RestoreJoystickState();
 
 void UnbindHatswitchKey(int hatswitch, int val_index);
 void BindHatswitchKey(int hatswitch, int val_index, KBHandler handler, const KBData &data);
@@ -139,4 +140,4 @@ void BindHatswitchKey(int hatswitch, int val_index, KBHandler handler, const KBD
 void BindDigitalHatswitchKey(int joystick, int hatswitch, int dir_index, KBHandler handler, const KBData &data);
 void UnbindDigitalHatswitchKey(int joystick, int hatswitch, int dir_index);
 
-#endif //VEGA_STRIKE_ENGINE_JOYSTICK_H
+#endif  // VEGA_STRIKE_ENGINE_JOYSTICK_H

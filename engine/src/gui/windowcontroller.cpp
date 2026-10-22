@@ -25,47 +25,43 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "src/vegastrike.h"
-
-#include "eventmanager.h"
-
 #include "windowcontroller.h"
 
-//Make everything happen.
+#include "eventmanager.h"
+#include "src/vegastrike.h"
+
+// Make everything happen.
 void WindowController::run(void) {
     if (m_window) {
-        m_window->setDeleteOnClose(true);         //We want the window to delete itself.
+        m_window->setDeleteOnClose(true);  // We want the window to delete itself.
         m_window->setController(this);
         m_window->open();
     } else {
-        //We have no window.  Close down.
+        // We have no window.  Close down.
         delete this;
     }
 }
 
 void WindowController::draw(void) {
-    //Do nothing.
+    // Do nothing.
 }
 
-//Process a command from the window.
+// Process a command from the window.
 bool WindowController::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Window::Close") {
-        //Our window is closing.
+        // Our window is closing.
         if (m_deleteOnWindowClose) {
             delete this;
-            //We return false so that the window itself can see this command.
+            // We return false so that the window itself can see this command.
             return false;
         }
     }
-    //Didn't find a handler.
+    // Didn't find a handler.
     return false;
 }
 
-//CONSTRUCTOR
-WindowController::WindowController() : m_window(NULL), m_deleteOnWindowClose(true) {
-}
+// CONSTRUCTOR
+WindowController::WindowController() : m_window(NULL), m_deleteOnWindowClose(true) {}
 
-//DESTRUCTOR
-WindowController::~WindowController(void) {
-}
-
+// DESTRUCTOR
+WindowController::~WindowController(void) {}

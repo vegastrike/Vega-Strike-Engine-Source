@@ -39,30 +39,24 @@ const std::string UPGRADES_SUFFIX = "__upgrades";
 
 // A struct to hold all results of the upgrade operation
 struct UpgradeOperationResult {
-    double percent = 0.0;       // Old part percent operational
-    bool success = false;       // Can we upgrade/downgrade
-    bool upgradeable = false;   // Temp variable. Until we map all types.
+    double percent     = 0.0;    // Old part percent operational
+    bool   success     = false;  // Can we upgrade/downgrade
+    bool   upgradeable = false;  // Temp variable. Until we map all types.
 };
-
-
 
 // TODO: make this into a subclass of unit later
 
-class UpgradeableUnit
-{
+class UpgradeableUnit {
 public:
     UpgradeableUnit();
+
     virtual ~UpgradeableUnit() {}
-    UpgradeOperationResult UpgradeUnit(const std::string upgrade_name,
-                     bool upgrade, bool apply);
-    bool RepairUnit(const std::string upgrade_name);
-    void UpgradeUnit(const std::string &upgrades);
-    bool UpgradeMounts(const Unit *up,
-                  int subunitoffset,
-                  bool touchme,
-                  bool downgrade,
-                  int &numave,
-                  double &percentage);
+
+    UpgradeOperationResult UpgradeUnit(const std::string upgrade_name, bool upgrade, bool apply);
+    bool                   RepairUnit(const std::string upgrade_name);
+    void                   UpgradeUnit(const std::string &upgrades);
+    bool                   UpgradeMounts(const Unit *up, int subunitoffset, bool touchme, bool downgrade, int &numave,
+                                         double &percentage);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UPGRADEABLE_UNIT_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UPGRADEABLE_UNIT_H

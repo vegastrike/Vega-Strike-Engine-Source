@@ -29,25 +29,25 @@
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef WIN32
-//this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
-#include <unistd.h>
+// this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can
+// compile without it
+#    include <unistd.h>
 #endif
 
 #include <expat.h>
-#include "root_generic/xml_support.h"
-
-#include "src/vegastrike.h"
 
 #include "cmd/unit_generic.h"
 #include "mission.h"
 #include "root_generic/easydom.h"
+#include "root_generic/xml_support.h"
+#include "src/vegastrike.h"
 
 void Mission::checkStatement(missionNode *node, int mode) {
-    //no difference
+    // no difference
     if (node->tag == DTAG_IF) {
         doIf(node, mode);
     } else if (node->tag == DTAG_BLOCK) {
@@ -78,19 +78,20 @@ void Mission::doIf(missionNode *node, int mode) {
 
         int nr_subnodes = node->subnodes.size();
         if (nr_subnodes != 3) {
-            fatalError(node, mode, (boost::format("an if-statement needs exact three subnodes, not %1%") % nr_subnodes).str());
+            fatalError(node, mode,
+                       (boost::format("an if-statement needs exact three subnodes, not %1%") % nr_subnodes).str());
             printf("nr_of_subnodes: %d\n", nr_subnodes);
 
             assert(0);
         }
 
-        node->script.if_block[0] = (missionNode *) node->subnodes[0];
+        node->script.if_block[0] = (missionNode *)node->subnodes[0];
         debug(8, node->script.if_block[0], mode, "if-node");
 
-        node->script.if_block[1] = (missionNode *) node->subnodes[1];
+        node->script.if_block[1] = (missionNode *)node->subnodes[1];
         debug(8, node->script.if_block[1], mode, "if-node");
 
-        node->script.if_block[2] = (missionNode *) node->subnodes[2];
+        node->script.if_block[2] = (missionNode *)node->subnodes[2];
         debug(8, node->script.if_block[2], mode, "if-node");
     }
     bool ok = checkBoolExpr(node->script.if_block[0], mode);
@@ -113,14 +114,13 @@ void Mission::doWhile(missionNode *node, int mode) {
             fatalError(node, mode, "a while-expr needs exact two subnodes");
             assert(0);
         }
-        node->script.while_arg[0] = (missionNode *) node->subnodes[0];
-        node->script.while_arg[1] = (missionNode *) node->subnodes[1];
+        node->script.while_arg[0] = (missionNode *)node->subnodes[0];
+        node->script.while_arg[1] = (missionNode *)node->subnodes[1];
 
     } else {
-        //runtime
+        // runtime
         while (checkBoolExpr(node->script.while_arg[0], mode)) {
             checkStatement(node->script.while_arg[1], mode);
         }
     }
 }
-

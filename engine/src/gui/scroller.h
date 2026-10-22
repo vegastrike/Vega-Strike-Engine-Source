@@ -29,78 +29,77 @@
 
 #include "gui/groupcontrol.h"
 
-//See cpp file for detailed descriptions of classes, functions, etc.
+// See cpp file for detailed descriptions of classes, functions, etc.
 
-//The Scroller class is a Control that offers scroll positioning.
-//It has a drag "thumb", and scroll buttons.
-//This implementation keeps track of the scroll position internally,
-//and uses an integer scroll position.
-//The only "event" it communicates to the outside world is a change
-//of scroll position.
+// The Scroller class is a Control that offers scroll positioning.
+// It has a drag "thumb", and scroll buttons.
+// This implementation keeps track of the scroll position internally,
+// and uses an integer scroll position.
+// The only "event" it communicates to the outside world is a change
+// of scroll position.
 
 class Scroller : public GroupControl {
 public:
-//Parameters for the scrolling range:  Max value, visible values, optional min value.
-//The "visible" value sets the "thumb" size.
+    // Parameters for the scrolling range:  Max value, visible values, optional min value.
+    // The "visible" value sets the "thumb" size.
     void setRangeValues(int max, int visible, int min = 0);
 
-//Scroll position.
-//This is some value between min and max.
+    // Scroll position.
+    // This is some value between min and max.
     int scrollPosition(void) {
         return m_scrollPosition;
     }
 
     void setScrollPosition(int pos);
 
-//The color of the thumb.
+    // The color of the thumb.
     void setThumbColor(const GFXColor &c, const GFXColor &outline);
 
-//The background color of the buttons.
+    // The background color of the buttons.
     void setButtonColor(const GFXColor &c);
 
-//Draw the control.
+    // Draw the control.
     virtual void draw(void);
 
-//OVERRIDES
+    // OVERRIDES
 
-//The outside boundaries of the control.
+    // The outside boundaries of the control.
     virtual void setRect(const Rect &r);
 
-//Background color of control.
+    // Background color of control.
     virtual void setColor(const GFXColor &c);
 
-//This is used as the color of the arrows on the scroller buttons.
+    // This is used as the color of the arrows on the scroller buttons.
     virtual void setTextColor(const GFXColor &c);
 
-//Process a command event.
+    // Process a command event.
     virtual bool processCommand(const EventCommandId &command, Control *control);
 
-//CONSTRUCTION
+    // CONSTRUCTION
 public:
     Scroller(void);
 
-    virtual ~Scroller(void) {
-    }
+    virtual ~Scroller(void) {}
 
 protected:
-//INTERNAL IMPLEMENTATION
+    // INTERNAL IMPLEMENTATION
 
-//Calculate the rects for the child controls.
+    // Calculate the rects for the child controls.
     void calcLayout(void);
 
-//Create the child controls.
+    // Create the child controls.
     void createControls(void);
 
-//VARIABLES
+    // VARIABLES
 protected:
-    int m_minValue;         //The minimum value in the scrolling range.
-    int m_maxValue;         //The maximum value in the scrolling range.
-    int m_visible;          //Number of visible cells.  Used for thumb length.
-    int m_scrollPosition;   //The current position of this scroller.
-    GFXColor m_thumbColor;  //Color to paint the thumb.
-    GFXColor m_thumbOutlineColor; //Color of outline for thumb.
+    int      m_minValue;           // The minimum value in the scrolling range.
+    int      m_maxValue;           // The maximum value in the scrolling range.
+    int      m_visible;            // Number of visible cells.  Used for thumb length.
+    int      m_scrollPosition;     // The current position of this scroller.
+    GFXColor m_thumbColor;         // Color to paint the thumb.
+    GFXColor m_thumbOutlineColor;  // Color of outline for thumb.
 
-    bool m_needLayout;  //True = Need to re-layout the controls.
+    bool m_needLayout;             // True = Need to re-layout the controls.
 };
 
-#endif   //VEGA_STRIKE_ENGINE_GUI_SCROLLER_H
+#endif                             // VEGA_STRIKE_ENGINE_GUI_SCROLLER_H

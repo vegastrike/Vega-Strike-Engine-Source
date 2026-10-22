@@ -35,25 +35,21 @@
 
 namespace Audio {
 
-template<typename T>
+template <typename T>
 class TVector3 {
 public:
     T x, y, z;
 
-    TVector3() {
-    }
+    TVector3() {}
 
-    TVector3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) {
-    }
+    TVector3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) {}
 
-    explicit TVector3(T s) : x(s), y(s), z(s) {
-    }
+    explicit TVector3(T s) : x(s), y(s), z(s) {}
 
-    template<typename Y>
-    TVector3(const TVector3<Y> &other) : x(T(other.x)), y(T(other.y)), z(T(other.z)) {
-    }
+    template <typename Y>
+    TVector3(const TVector3<Y> &other) : x(T(other.x)), y(T(other.y)), z(T(other.z)) {}
 
-    template<typename Y>
+    template <typename Y>
     TVector3<T> &operator=(const TVector3<Y> &other) {
         x = T(other.x);
         y = T(other.y);
@@ -160,11 +156,7 @@ public:
     }
 
     TVector3<T> cross(const TVector3<T> &v) const {
-        return TVector3<T>(
-                y * v.z - z * v.y,
-                z * v.x - x * v.z,
-                x * v.y - y * v.x
-        );
+        return TVector3<T>(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
     }
 
     void normalize() {
@@ -176,6 +168,6 @@ public:
     }
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_VECTOR_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_VECTOR_H

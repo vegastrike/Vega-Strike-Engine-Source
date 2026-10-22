@@ -26,46 +26,48 @@
  */
 
 
-#include <stdlib.h>
-#include <iostream>
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "cmd/unit_generic.h"
-#include "gfx/aux_texture.h"
-#include "gfx/ani_texture.h"
 #include "gfx/sprite.h"
-#include "src/gfxlib.h"
-#include "root_generic/vs_globals.h"
-#include "gldrv/gl_globals.h"
+
 #include <assert.h>
+#include <iostream>
 #include <math.h>
-#include "src/gnuhash.h"
-#include "imgui/imgui.h"
+#include <stdlib.h>
+
+#include "cmd/unit_generic.h"
+#include "gfx/ani_texture.h"
+#include "gfx/aux_texture.h"
+#include "gldrv/gl_globals.h"
 #include "gui/guidefs.h"
+#include "imgui/imgui.h"
+#include "root_generic/vs_globals.h"
+#include "src/gfxlib.h"
+#include "src/gnuhash.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
 #ifdef _WIN32
-#include <direct.h>
+#    include <direct.h>
 #endif
 
 #ifndef M_PI_2
-# define M_PI_2 (1.57079632679489661923)
+#    define M_PI_2 (1.57079632679489661923)
 #endif
 
-#include "audio/Types.h"
 #include "audio/Source.h"
+#include "audio/Types.h"
 
 using namespace VSFileSystem;
 
 typedef vsUMap<std::string, VSSprite *> VSSpriteCache;
-static VSSpriteCache sprite_cache;
+static VSSpriteCache                    sprite_cache;
 
 static std::pair<bool, VSSprite *> cacheLookup(const char *file) {
     const std::string hashName = VSFileSystem::GetHashName(std::string(file));
-    auto it = sprite_cache.find(hashName);
+    auto              it       = sprite_cache.find(hashName);
     if (it != sprite_cache.end()) {
         return std::pair<bool, VSSprite *>(true, it->second);
     } else {
-        return std::pair<bool, VSSprite *>(false, static_cast<VSSprite*>(nullptr));
+        return std::pair<bool, VSSprite *>(false, static_cast<VSSprite *>(nullptr));
     }
 }
 
@@ -74,22 +76,16 @@ static void cacheInsert(const char *file, VSSprite *spr) {
     sprite_cache.insert(std::pair<std::string, VSSprite *>(hashName, spr));
 }
 
-VSSprite::VSSprite(Texture *_surface,
-        float _xcenter,
-        float _ycenter,
-        float _width,
-        float _height,
-        float _s,
-        float _t,
-        bool _isAnimation) :
-        xcenter(_xcenter),
-        ycenter(_ycenter),
-        widtho2(_width / 2),
-        heighto2(_height / 2),
-        maxs(_s),
-        maxt(_t),
-        rotation(0),
-        isAnimation(_isAnimation) {
+VSSprite::VSSprite(Texture *_surface, float _xcenter, float _ycenter, float _width, float _height, float _s, float _t,
+                   bool _isAnimation)
+    : xcenter(_xcenter),
+      ycenter(_ycenter),
+      widtho2(_width / 2),
+      heighto2(_height / 2),
+      maxs(_s),
+      maxt(_t),
+      rotation(0),
+      isAnimation(_isAnimation) {
     surface = _surface;
 }
 
@@ -104,12 +100,12 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
     VSCONSTRUCT2('S')
     xcenter = ycenter = 0;
     widtho2 = heighto2 = 0;
-    rotation = 0;
-    surface = NULL;
+    rotation           = 0;
+    surface            = NULL;
     maxs = maxt = 0;
     isAnimation = false;
 
-    //Check cache
+    // Check cache
     {
         std::pair<bool, VSSprite *> lkup = cacheLookup(file);
         if (lkup.first) {
@@ -124,65 +120,56 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
         }
     }
 
-    VSFile f;
+    VSFile  f;
     VSError err = Unspecified;
     if (file[0] != '\0') {
         err = f.OpenReadOnly(file, VSSpriteFile);
     }
     if (err <= Ok) {
-        char texture[127] = {0};
+        char texture[127]  = {0};
         char texturea[127] = {0};
         f.Fscanf("%126s %126s", texture, texturea);
         f.Fscanf("%f %f", &widtho2, &heighto2);
         f.Fscanf("%f %f", &xcenter, &ycenter);
-        texture[sizeof(texture) - sizeof(*texture) - 1] = 0;
+        texture[sizeof(texture) - sizeof(*texture) - 1]    = 0;
         texturea[sizeof(texturea) - sizeof(*texturea) - 1] = 0;
 
-        widtho2 /= 2;
+        widtho2  /= 2;
         heighto2 /= -2;
-        surface = NULL;
+        surface   = NULL;
         if (g_game.use_sprites || force == GFXTRUE) {
             int len = strlen(texture);
-            if (len > 4 && texture[len - 1] == 'i' && texture[len - 2] == 'n' && texture[len - 3] == 'a'
-                    && texture[len - 4] == '.') {
-                surface = new AnimatedTexture(f, 0, texturefilter, GFXFALSE);
+            if (len > 4 && texture[len - 1] == 'i' && texture[len - 2] == 'n' && texture[len - 3] == 'a' &&
+                texture[len - 4] == '.') {
+                surface     = new AnimatedTexture(f, 0, texturefilter, GFXFALSE);
                 isAnimation = true;
             } else if (texturea[0] == '0') {
-                surface = new Texture(texture, 0, texturefilter, TEXTURE2D, TEXTURE_2D, GFXTRUE, 65536, GFXFALSE);
+                surface     = new Texture(texture, 0, texturefilter, TEXTURE2D, TEXTURE_2D, GFXTRUE, 65'536, GFXFALSE);
                 isAnimation = false;
             } else {
-                surface = new Texture(texture,
-                        texturea,
-                        0,
-                        texturefilter,
-                        TEXTURE2D,
-                        TEXTURE_2D,
-                        1,
-                        0,
-                        GFXTRUE,
-                        65536,
-                        GFXFALSE);
+                surface = new Texture(texture, texturea, 0, texturefilter, TEXTURE2D, TEXTURE_2D, 1, 0, GFXTRUE, 65'536,
+                                      GFXFALSE);
                 isAnimation = false;
             }
             if (!surface->LoadSuccess()) {
                 delete surface;
-                surface = NULL;
+                surface          = NULL;
                 VSSprite *newspr = new VSSprite();
-                *newspr = *this;
-                newspr->surface = NULL;
+                *newspr          = *this;
+                newspr->surface  = NULL;
                 cacheInsert(file, newspr);
             } else {
-                //Update cache
+                // Update cache
                 VSSprite *newspr = new VSSprite();
-                *newspr = *this;
-                newspr->surface = this->surface->Clone();
+                *newspr          = *this;
+                newspr->surface  = this->surface->Clone();
                 cacheInsert(file, newspr);
             }
         }
-        //Finally close file
+        // Finally close file
         f.Close();
     } else {
-        cacheInsert(file, 0);         //Mark bad file
+        cacheInsert(file, 0);  // Mark bad file
         widtho2 = heighto2 = 0;
         xcenter = ycenter = 0;
     }
@@ -224,16 +211,16 @@ void VSSprite::SetTime(double newtime) {
 
 void VSSprite::DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
     if (rotation) {
-        const float cw = widtho2 * cos(rotation);
-        const float sw = widtho2 * sin(rotation);
-        const float ch = heighto2 * cos(M_PI_2 + rotation);
-        const float sh = heighto2 * sin(M_PI_2 + rotation);
+        const float cw   = widtho2 * cos(rotation);
+        const float sw   = widtho2 * sin(rotation);
+        const float ch   = heighto2 * cos(M_PI_2 + rotation);
+        const float sh   = heighto2 * sin(M_PI_2 + rotation);
         const float wnew = cw + ch;
         const float hnew = sw + sh;
-        ll = Vector(xcenter - wnew, ycenter + hnew, 0.00f);
-        lr = Vector(xcenter + wnew, ycenter + hnew, 0.00f);
-        ur = Vector(xcenter + wnew, ycenter - hnew, 0.00f);
-        ul = Vector(xcenter - wnew, ycenter - hnew, 0.00f);
+        ll               = Vector(xcenter - wnew, ycenter + hnew, 0.00f);
+        lr               = Vector(xcenter + wnew, ycenter + hnew, 0.00f);
+        ur               = Vector(xcenter + wnew, ycenter - hnew, 0.00f);
+        ul               = Vector(xcenter - wnew, ycenter - hnew, 0.00f);
     } else {
         ll = Vector(xcenter - widtho2, ycenter + heighto2, 0.00f);
         lr = Vector(xcenter + widtho2, ycenter + heighto2, 0.00f);
@@ -244,11 +231,11 @@ void VSSprite::DrawHere(Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
 
 void VSSprite::Draw() {
     if (surface) {
-        //don't do anything if no surface
+        // don't do anything if no surface
         size_t lyr;
         size_t numlayers = surface->numLayers();
-        bool multitex = (numlayers > 1);
-        int numpasses = surface->numPasses();
+        bool   multitex  = (numlayers > 1);
+        int    numpasses = surface->numPasses();
         GFXDisable(CULLFACE);
         Vector ll, lr, ur, ul;
         DrawHere(ll, lr, ur, ul);
@@ -273,20 +260,13 @@ void VSSprite::Draw() {
 
                 GFXTextureEnv(0, GFXMODULATETEXTURE);
                 if (!multitex) {
-                    const float vert[4 * (3 + 2)] = {
-                            ll.i, ll.j, ll.k, ms, Mt,
-                            lr.i, lr.j, lr.k, Ms, Mt,
-                            ur.i, ur.j, ur.k, Ms, mt,
-                            ul.i, ul.j, ul.k, ms, mt
-                    };
+                    const float vert[4 * (3 + 2)] = {ll.i, ll.j, ll.k, ms, Mt, lr.i, lr.j, lr.k, Ms, Mt,
+                                                     ur.i, ur.j, ur.k, Ms, mt, ul.i, ul.j, ul.k, ms, mt};
                     GFXDraw(GFXQUAD, vert, 4, 3, 0, 2);
                 } else {
-                    const float vert[4 * (3 + 4)] = {
-                            ll.i, ll.j, ll.k, ms, Mt, ms, Mt,
-                            lr.i, lr.j, lr.k, Ms, Mt, Ms, Mt,
-                            ur.i, ur.j, ur.k, Ms, mt, Ms, mt,
-                            ul.i, ul.j, ul.k, ms, mt, ms, mt
-                    };
+                    const float vert[4 * (3 + 4)] = {ll.i, ll.j, ll.k, ms,   Mt,   ms,   Mt,   lr.i, lr.j, lr.k,
+                                                     Ms,   Mt,   Ms,   Mt,   ur.i, ur.j, ur.k, Ms,   mt,   Ms,
+                                                     mt,   ul.i, ul.j, ul.k, ms,   mt,   ms,   mt};
                     GFXDraw(GFXQUAD, vert, 4, 3, 0, 2, 2);
                 }
             }
@@ -309,32 +289,29 @@ void VSSprite::DrawWithImGui(ImDrawList *drawList = ImGui::GetBackgroundDrawList
 
     // Make the sprite's texture active and fetch its GL ID
     surface->MakeActive(0, 0);
-    
+
     GLint actual_gl_id = 0;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &actual_gl_id);
-    if (actual_gl_id <= 0) return;
+    if (actual_gl_id <= 0) {
+        return;
+    }
 
     ImTextureID texID = static_cast<ImTextureID>(static_cast<uintptr_t>(actual_gl_id));
 
     // xcenter/ycenter is the centre of the sprite, as DrawHere builds the corners
     // around it. ImGui draws down from a top-left corner, so convert.
-    ImVec2 topLeft(
-    Coordinates::normToPixelX(xcenter - widtho2),
-    Coordinates::normToPixelY(ycenter + heighto2)
-    );
+    ImVec2 topLeft(Coordinates::normToPixelX(xcenter - widtho2), Coordinates::normToPixelY(ycenter + heighto2));
     // Get the size of the sprite in pixels
-    ImVec2 spriteSize(Coordinates::normToPixelW(widtho2 * 2), Coordinates::normToPixelH(heighto2 * 2)); 
+    ImVec2 spriteSize(Coordinates::normToPixelW(widtho2 * 2), Coordinates::normToPixelH(heighto2 * 2));
 
     // Draw directly to ImGui's top-level overlay
     // Note: (0,0) to (1,1) UVs work cleanly here. If flipped vertically, swap 0.0f and 1.0f on Y.
-    drawList->AddImage(
-        texID,
-        topLeft,                                             // Top-left (Hotspot)
-        ImVec2(topLeft.x + spriteSize.x, topLeft.y + spriteSize.y), // Bottom-right
-        ImVec2(0.0f, 1.0f),                                   // UV Top-Left
-        ImVec2(1.0f, 0.0f),                                   // UV Bottom-Right
-        IM_COL32(255, 255, 255, 255)
-    );
+    drawList->AddImage(texID,
+                       topLeft,                                                     // Top-left (Hotspot)
+                       ImVec2(topLeft.x + spriteSize.x, topLeft.y + spriteSize.y),  // Bottom-right
+                       ImVec2(0.0f, 1.0f),                                          // UV Top-Left
+                       ImVec2(1.0f, 0.0f),                                          // UV Bottom-Right
+                       IM_COL32(255, 255, 255, 255));
 }
 
 void VSSprite::SetPosition(const float &x1, const float &y1) {
@@ -348,7 +325,7 @@ void VSSprite::GetPosition(float &x1, float &y1) {
 }
 
 void VSSprite::SetSize(float x1, float y1) {
-    widtho2 = x1 / 2;
+    widtho2  = x1 / 2;
     heighto2 = y1 / 2;
 }
 
@@ -367,13 +344,13 @@ void VSSprite::GetRotation(float &rot) {
 
 void VSSprite::SetTimeSource(SharedPtr<Audio::Source> source) {
     if (isAnimation) {
-        ((AnimatedTexture *) surface)->SetTimeSource(source);
+        ((AnimatedTexture *)surface)->SetTimeSource(source);
     }
 }
 
 SharedPtr<Audio::Source> VSSprite::GetTimeSource() const {
     if (isAnimation) {
-        return ((AnimatedTexture *) surface)->GetTimeSource();
+        return ((AnimatedTexture *)surface)->GetTimeSource();
     } else {
         return SharedPtr<Audio::Source>();
     }
@@ -381,13 +358,13 @@ SharedPtr<Audio::Source> VSSprite::GetTimeSource() const {
 
 void VSSprite::ClearTimeSource() {
     if (isAnimation) {
-        ((AnimatedTexture *) surface)->ClearTimeSource();
+        ((AnimatedTexture *)surface)->ClearTimeSource();
     }
 }
 
 bool VSSprite::Done() const {
     if (isAnimation) {
-        return ((AnimatedTexture *) surface)->Done();
+        return ((AnimatedTexture *)surface)->Done();
     } else {
         return false;
     }
@@ -395,11 +372,10 @@ bool VSSprite::Done() const {
 
 void VSSprite::Reset() {
     if (isAnimation) {
-        ((AnimatedTexture *) surface)->Reset();
+        ((AnimatedTexture *)surface)->Reset();
     }
 }
 
 bool VSSprite::LoadSuccess() const {
     return surface != NULL && surface->LoadSuccess();
 }
-

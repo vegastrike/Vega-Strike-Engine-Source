@@ -28,9 +28,9 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_RADAR_H
 #define VEGA_STRIKE_ENGINE_GFX_RADAR_RADAR_H
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 class Unit;
 class VSSprite;
@@ -42,25 +42,19 @@ class Sensor;
 // Draws radar on display
 class Display {
 public:
-    virtual ~Display() {
-    }
+    virtual ~Display() {}
 
     virtual void Draw(const Sensor &sensor, VSSprite *, VSSprite *) = 0;
 
-    virtual void OnDockEnd() {
-    }
+    virtual void OnDockEnd() {}
 
-    virtual void OnJumpBegin() {
-    }
+    virtual void OnJumpBegin() {}
 
-    virtual void OnJumpEnd() {
-    }
+    virtual void OnJumpEnd() {}
 
-    virtual void OnPauseBegin() {
-    }
+    virtual void OnPauseBegin() {}
 
-    virtual void OnPauseEnd() {
-    }
+    virtual void OnPauseEnd() {}
 };
 
 struct Type {
@@ -74,6 +68,6 @@ struct Type {
 
 std::unique_ptr<Display> Factory(Type::Value);
 
-} // namespace Radar
+}  // namespace Radar
 
-#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_RADAR_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_RADAR_RADAR_H

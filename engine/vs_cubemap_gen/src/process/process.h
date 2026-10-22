@@ -26,6 +26,7 @@
  */
 #ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_PROCESS_H
 #define VEGA_STRIKE_ENGINE_CUBE_MAP_PROCESS_H
+
 /*
  * The purpose of this is to control the general processing: reading the input
  * textures into floating point memory textures, allocating memory textures for
@@ -33,10 +34,10 @@
  * calling nvcompress, and reassembling all the many dds into a single dds.
  * But it's also called "process" because we might want to implement multithreading
  * or multiple processes here, to run on separate cores, in multi-core machines.
-*/
+ */
 
 class process {
 public
 };
 
-#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_PROCESS_H
+#endif  // VEGA_STRIKE_ENGINE_CUBE_MAP_PROCESS_H

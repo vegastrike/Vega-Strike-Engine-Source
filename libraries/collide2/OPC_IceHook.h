@@ -1,5 +1,5 @@
 /*
- * OPC_IceHook.h
+* OPC_IceHook.h
  *
  * Copyright (C) 2023 Benjamen R. Meyer
  * Copyright (C) 2025 Stephen G. Tuggy

@@ -26,16 +26,16 @@
  */
 
 
-#include "cmd/bolt.h"
-#include "src/gfxlib.h"
-#include "gfx_generic/mesh.h"
-#include "src/gfxlib_struct.h"
+#include <algorithm>
+#include <string>
 #include <vector>
 
-#include <string>
-#include <algorithm>
+#include "cmd/bolt.h"
 #include "cmd/unit_generic.h"
+#include "gfx_generic/mesh.h"
 #include "root_generic/configxml.h"
+#include "src/gfxlib.h"
+#include "src/gfxlib_struct.h"
 GFXVertexList *bolt_draw::boltmesh = NULL;
 
 bolt_draw::~bolt_draw() {
@@ -53,13 +53,13 @@ bolt_draw::~bolt_draw() {
 }
 
 bolt_draw::bolt_draw() {
-    boltmesh = NULL;
+    boltmesh   = NULL;
     boltdecals = NULL;
 }
 
 int Bolt::AddTexture(bolt_draw *q, std::string file) {
     int decal = 0;
-    if (decal >= (int) q->bolts.size()) {
+    if (decal >= (int)q->bolts.size()) {
         q->bolts.push_back(vector<Bolt>());
     }
     return decal;
@@ -67,18 +67,16 @@ int Bolt::AddTexture(bolt_draw *q, std::string file) {
 
 int Bolt::AddAnimation(bolt_draw *q, std::string file, QVector cur_position) {
     int decal = 0;
-    if (decal >= (int) q->balls.size()) {
+    if (decal >= (int)q->balls.size()) {
         q->balls.push_back(vector<Bolt>());
     }
     return decal;
 }
 
-void Bolt::Draw() {
-}
+void Bolt::Draw() {}
 
 extern void BoltDestroyGeneric(Bolt *whichbolt, unsigned int index, int decal, bool isBall);
 
 void Bolt::Destroy(unsigned int index) {
     BoltDestroyGeneric(this, index, decal, type->type != weapon_info::BOLT);
 }
-

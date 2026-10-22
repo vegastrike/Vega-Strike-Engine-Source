@@ -32,8 +32,8 @@
 //
 
 #include "Exceptions.h"
-#include "Types.h"
 #include "Format.h"
+#include "Types.h"
 
 namespace Audio {
 
@@ -69,11 +69,11 @@ public:
     virtual ~RenderableSource();
 
     enum UpdateFlags {
-        UPDATE_ALL = 0x0F,
-        UPDATE_LOCATION = 0x01,
+        UPDATE_ALL        = 0x0F,
+        UPDATE_LOCATION   = 0x01,
         UPDATE_ATTRIBUTES = 0x02,
-        UPDATE_EFFECTS = 0x04,
-        UPDATE_GAIN = 0x08
+        UPDATE_EFFECTS    = 0x04,
+        UPDATE_GAIN       = 0x08
     };
 
     /** Play the source from the specified timestamp
@@ -128,7 +128,6 @@ public:
     // by a concrete Sound class. All are protected, so the interface is independent
     // of implementations.
 protected:
-
     /** @see startPlaying
      * @param start The starting position.
      */
@@ -150,6 +149,6 @@ protected:
     virtual void seekImpl(Timestamp time) = 0;
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERABLESOURCE_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_RENDERABLESOURCE_H

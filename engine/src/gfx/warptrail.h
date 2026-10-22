@@ -30,4 +30,4 @@
 void AddWarp(Unit *un, QVector beg, float tim);
 void WarpTrailDraw();
 
-#endif //VEGA_STRIKE_ENGINE_GFX_WARP_TRAIL_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_WARP_TRAIL_H

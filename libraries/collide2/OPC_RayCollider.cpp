@@ -67,16 +67,16 @@
  *	FIRST CONTACT:
  *
  *		- You can setup "first contact" mode or "all contacts" mode with RayCollider::SetFirstContact().
- *		- In "first contact" mode we return as soon as the ray hits one face. If can be useful e.g. for shadow feelers, where
- *		you want to know whether the path to the light is free or not (a boolean answer is enough).
+ *		- In "first contact" mode we return as soon as the ray hits one face. If can be useful e.g. for shadow feelers,
+ *where you want to know whether the path to the light is free or not (a boolean answer is enough).
  *		- In "all contacts" mode we return all faces hit by the ray.
  *
  *	TEMPORAL COHERENCE:
  *
  *		- You can enable or disable temporal coherence with RayCollider::SetTemporalCoherence().
  *		- It currently only works in "first contact" mode.
- *		- If temporal coherence is enabled, the previously hit triangle is cached during the first query. Then, next queries
- *		start by colliding the ray against the cached triangle. If they still collide, we return immediately.
+ *		- If temporal coherence is enabled, the previously hit triangle is cached during the first query. Then, next
+ *queries start by colliding the ray against the cached triangle. If they still collide, we return immediately.
  *
  *	CLOSEST HIT:
  *
@@ -95,7 +95,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		June, 2, 2001
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		March, 20, 2001
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,7 +118,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		March, 20, 2001
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "collide2/Opcode.h"
@@ -128,104 +128,106 @@ using namespace Opcode;
 #include "OPC_RayAABBOverlap.h"
 #include "OPC_RayTriOverlap.h"
 
-#define SET_CONTACT(prim_index, flag)                                                           \
-    mNbIntersections++;                                                                         \
-    /* Set contact status */                                                                    \
-    mFlags |= flag;                                                                             \
-    /* In any case the contact has been found and recorded in mStabbedFace  */                  \
+#define SET_CONTACT(prim_index, flag)                                          \
+    mNbIntersections++;                                                        \
+    /* Set contact status */                                                   \
+    mFlags |= flag;                                                            \
+    /* In any case the contact has been found and recorded in mStabbedFace  */ \
     mStabbedFace.mFaceID = prim_index;
 
 #ifdef OPC_RAYHIT_CALLBACK
 
-#define HANDLE_CONTACT(prim_index, flag)                                                        \
-        SET_CONTACT(prim_index, flag)                                                           \
-                                                                                                \
-        if(mHitCallback)    (mHitCallback)(mStabbedFace, mUserData);else{}
+#    define HANDLE_CONTACT(prim_index, flag)         \
+        SET_CONTACT(prim_index, flag)                \
+                                                     \
+        if (mHitCallback)                            \
+            (mHitCallback)(mStabbedFace, mUserData); \
+        else {                                       \
+        }
 
-#define UPDATE_CACHE                                                                            \
-        if(cache && GetContactStatus())                                                         \
-        {                                                                                       \
-            *cache    = mStabbedFace.mFaceID;                                                   \
-        }else{}
+#    define UPDATE_CACHE                   \
+        if (cache && GetContactStatus()) { \
+            *cache = mStabbedFace.mFaceID; \
+        } else {                           \
+        }
 #else
 
-#define HANDLE_CONTACT(prim_index, flag)													    \
-        SET_CONTACT(prim_index, flag)															\
-                                                                                                \
-        /* Now we can also record it in mStabbedFaces if available */							\
-        if(mStabbedFaces)																		\
-        {																						\
-            /* If we want all faces or if that's the first one we hit */						\
-            if(!mClosestHit || !mStabbedFaces->GetNbFaces())									\
-            {																					\
-                mStabbedFaces->AddFace(mStabbedFace);											\
-            }																					\
-            else																				\
-            {																					\
-                /* We only keep closest hit */													\
-                CollisionFace* Current = const_cast<CollisionFace*>(mStabbedFaces->GetFaces());	\
-                if(Current && mStabbedFace.mDistance<Current->mDistance)						\
-                {																				\
-                    *Current = mStabbedFace;													\
-                }																				\
-            }																					\
-        }else{}
+#    define HANDLE_CONTACT(prim_index, flag)                                                     \
+        SET_CONTACT(prim_index, flag)                                                            \
+                                                                                                 \
+        /* Now we can also record it in mStabbedFaces if available */                            \
+        if (mStabbedFaces) {                                                                     \
+            /* If we want all faces or if that's the first one we hit */                         \
+            if (!mClosestHit || !mStabbedFaces->GetNbFaces()) {                                  \
+                mStabbedFaces->AddFace(mStabbedFace);                                            \
+            } else {                                                                             \
+                /* We only keep closest hit */                                                   \
+                CollisionFace *Current = const_cast<CollisionFace *>(mStabbedFaces->GetFaces()); \
+                if (Current && mStabbedFace.mDistance < Current->mDistance) {                    \
+                    *Current = mStabbedFace;                                                     \
+                }                                                                                \
+            }                                                                                    \
+        } else {                                                                                 \
+        }
 
-#define UPDATE_CACHE												                            \
-        if(cache && GetContactStatus() && mStabbedFaces)				                        \
-        {																                        \
-            const CollisionFace* Current = mStabbedFaces->GetFaces();	                        \
-            if(Current)	*cache	= Current->mFaceID;						                        \
-            else		*cache	= INVALID_ID;							                        \
-        }else{}
+#    define UPDATE_CACHE                                              \
+        if (cache && GetContactStatus() && mStabbedFaces) {           \
+            const CollisionFace *Current = mStabbedFaces->GetFaces(); \
+            if (Current)                                              \
+                *cache = Current->mFaceID;                            \
+            else                                                      \
+                *cache = INVALID_ID;                                  \
+        } else {                                                      \
+        }
 #endif
 
-#define SEGMENT_PRIM(prim_index, flag)                                                          \
-    /* Request vertices from the app */                                                         \
-    VertexPointers VP;    mIMesh->GetTriangle(VP, prim_index);                                  \
-                                                                                                \
-    /* Perform ray-tri overlap test and return */                                               \
-    if(RayTriOverlap(*VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2]))                              \
-    {                                                                                           \
-        /* Intersection point is valid if dist < segment's length */                            \
-        /* We know dist>0 so we can use integers */                                             \
-        if(IR(mStabbedFace.mDistance)<IR(mMaxDist))                                             \
-        {                                                                                       \
-            HANDLE_CONTACT(prim_index, flag)                                                    \
-        }                                                                                       \
-    }else{}
+#define SEGMENT_PRIM(prim_index, flag)                                \
+    /* Request vertices from the app */                               \
+    VertexPointers VP;                                                \
+    mIMesh->GetTriangle(VP, prim_index);                              \
+                                                                      \
+    /* Perform ray-tri overlap test and return */                     \
+    if (RayTriOverlap(*VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2])) { \
+        /* Intersection point is valid if dist < segment's length */  \
+        /* We know dist>0 so we can use integers */                   \
+        if (IR(mStabbedFace.mDistance) < IR(mMaxDist)) {              \
+            HANDLE_CONTACT(prim_index, flag)                          \
+        }                                                             \
+    } else {                                                          \
+    }
 
-#define RAY_PRIM(prim_index, flag)                                                              \
-    /* Request vertices from the app */                                                         \
-    VertexPointers VP;    mIMesh->GetTriangle(VP, prim_index);                                  \
-                                                                                                \
-    /* Perform ray-tri overlap test and return */                                               \
-    if(RayTriOverlap(*VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2]))                              \
-    {                                                                                           \
-        HANDLE_CONTACT(prim_index, flag)                                                        \
-    }else{}
-
+#define RAY_PRIM(prim_index, flag)                                    \
+    /* Request vertices from the app */                               \
+    VertexPointers VP;                                                \
+    mIMesh->GetTriangle(VP, prim_index);                              \
+                                                                      \
+    /* Perform ray-tri overlap test and return */                     \
+    if (RayTriOverlap(*VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2])) { \
+        HANDLE_CONTACT(prim_index, flag)                              \
+    } else {                                                          \
+    }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RayCollider::RayCollider() :
+RayCollider::RayCollider()
+    :
 #ifdef OPC_RAYHIT_CALLBACK
-        mHitCallback(nullptr),
-        mUserData(0),
+      mHitCallback(nullptr),
+      mUserData(0),
 #else
-        mStabbedFaces		(nullptr),
+      mStabbedFaces(nullptr),
 #endif
-        mNbRayBVTests(0),
-        mNbRayPrimTests(0),
-        mNbIntersections(0),
-        mMaxDist(MAX_FLOAT),
+      mNbRayBVTests(0),
+      mNbRayPrimTests(0),
+      mNbIntersections(0),
+      mMaxDist(MAX_FLOAT),
 #ifndef OPC_RAYHIT_CALLBACK
-        mClosestHit			(false),
+      mClosestHit(false),
 #endif
-        mCulling(true) {
+      mCulling(true) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -233,8 +235,7 @@ RayCollider::RayCollider() :
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-RayCollider::~RayCollider() {
-}
+RayCollider::~RayCollider() {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -247,11 +248,19 @@ const char *RayCollider::ValidateSettings() {
         return "Higher distance bound must be positive!";
     }
     if (TemporalCoherenceEnabled() && !FirstContactEnabled()) {
-        return "Temporal coherence only works with ""First contact"" mode!";
+        return "Temporal coherence only works with "
+               "First contact"
+               " mode!";
     }
 #ifndef OPC_RAYHIT_CALLBACK
-    if(mClosestHit && FirstContactEnabled())					return "Closest hit doesn't work with ""First contact"" mode!";
-    if(TemporalCoherenceEnabled() && mClosestHit)				return "Temporal coherence can't guarantee to report closest hit!";
+    if (mClosestHit && FirstContactEnabled()) {
+        return "Closest hit doesn't work with "
+               "First contact"
+               " mode!";
+    }
+    if (TemporalCoherenceEnabled() && mClosestHit) {
+        return "Temporal coherence can't guarantee to report closest hit!";
+    }
 #endif
     if (SkipPrimitiveTests()) {
         return "SkipPrimitiveTests not possible for RayCollider ! (not implemented)";
@@ -286,10 +295,10 @@ bool RayCollider::Collide(const Ray &world_ray, const Model &model, const Matrix
 
     if (!model.HasLeafNodes()) {
         if (model.IsQuantized()) {
-            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree *) model.GetTree();
+            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree *)model.GetTree();
 
             // Setup dequantization coeffs
-            mCenterCoeff = Tree->mCenterCoeff;
+            mCenterCoeff  = Tree->mCenterCoeff;
             mExtentsCoeff = Tree->mExtentsCoeff;
 
             // Perform stabbing query
@@ -299,7 +308,7 @@ bool RayCollider::Collide(const Ray &world_ray, const Model &model, const Matrix
                 _RayStab(Tree->GetNodes());
             }
         } else {
-            const AABBNoLeafTree *Tree = (const AABBNoLeafTree *) model.GetTree();
+            const AABBNoLeafTree *Tree = (const AABBNoLeafTree *)model.GetTree();
 
             // Perform stabbing query
             if (IR(mMaxDist) != IEEE_MAX_FLOAT) {
@@ -310,10 +319,10 @@ bool RayCollider::Collide(const Ray &world_ray, const Model &model, const Matrix
         }
     } else {
         if (model.IsQuantized()) {
-            const AABBQuantizedTree *Tree = (const AABBQuantizedTree *) model.GetTree();
+            const AABBQuantizedTree *Tree = (const AABBQuantizedTree *)model.GetTree();
 
             // Setup dequantization coeffs
-            mCenterCoeff = Tree->mCenterCoeff;
+            mCenterCoeff  = Tree->mCenterCoeff;
             mExtentsCoeff = Tree->mExtentsCoeff;
 
             // Perform stabbing query
@@ -323,7 +332,7 @@ bool RayCollider::Collide(const Ray &world_ray, const Model &model, const Matrix
                 _RayStab(Tree->GetNodes());
             }
         } else {
-            const AABBCollisionTree *Tree = (const AABBCollisionTree *) model.GetTree();
+            const AABBCollisionTree *Tree = (const AABBCollisionTree *)model.GetTree();
 
             // Perform stabbing query
             if (IR(mMaxDist) != IEEE_MAX_FLOAT) {
@@ -338,7 +347,6 @@ bool RayCollider::Collide(const Ray &world_ray, const Model &model, const Matrix
     UPDATE_CACHE
     return true;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -357,24 +365,26 @@ bool RayCollider::Collide(const Ray &world_ray, const Model &model, const Matrix
 bool RayCollider::InitQuery(const Ray &world_ray, const Matrix4x4 *world, uint32_t *face_id) {
     // Reset stats & contact status
     Collider::InitQuery();
-    mNbRayBVTests = 0;
-    mNbRayPrimTests = 0;
+    mNbRayBVTests    = 0;
+    mNbRayPrimTests  = 0;
     mNbIntersections = 0;
 #ifndef OPC_RAYHIT_CALLBACK
-    if(mStabbedFaces)	mStabbedFaces->Reset();
+    if (mStabbedFaces) {
+        mStabbedFaces->Reset();
+    }
 #endif
 
     // Compute ray in local space
     // The (Origin/Dir) form is needed for the ray-triangle test anyway (even for segment tests)
     if (world) {
         Matrix3x3 InvWorld = *world;
-        mDir = InvWorld * world_ray.mDir;
+        mDir               = InvWorld * world_ray.mDir;
 
         Matrix4x4 World;
         InvertPRMatrix(World, *world);
         mOrigin = world_ray.mOrig * World;
     } else {
-        mDir = world_ray.mDir;
+        mDir    = world_ray.mDir;
         mOrigin = world_ray.mOrig;
     }
 
@@ -407,7 +417,7 @@ bool RayCollider::InitQuery(const Ray &world_ray, const Matrix4x4 *world, uint32
     // Precompute data (moved after temporal coherence since only needed for ray-AABB)
     if (IR(mMaxDist) != IEEE_MAX_FLOAT) {
         // For Segment-AABB overlap
-        mData = 0.5f * mDir * mMaxDist;
+        mData  = 0.5f * mDir * mMaxDist;
         mData2 = mOrigin + mData;
 
         // Precompute mFDir;
@@ -416,12 +426,12 @@ bool RayCollider::InitQuery(const Ray &world_ray, const Matrix4x4 *world, uint32
         mFDir.z = fabsf(mData.z);
     } else {
         // For Ray-AABB overlap
-//		uint32_t x = SIR(mDir.x)-1;
-//		uint32_t y = SIR(mDir.y)-1;
-//		uint32_t z = SIR(mDir.z)-1;
-//		mData.x = FR(x);
-//		mData.y = FR(y);
-//		mData.z = FR(z);
+        //		uint32_t x = SIR(mDir.x)-1;
+        //		uint32_t y = SIR(mDir.y)-1;
+        //		uint32_t z = SIR(mDir.z)-1;
+        //		mData.x = FR(x);
+        //		mData.y = FR(y);
+        //		mData.z = FR(z);
 
         // Precompute mFDir;
         mFDir.x = fabsf(mDir.x);
@@ -470,7 +480,6 @@ bool RayCollider::Collide(const Ray &world_ray, const AABBTree *tree, Container 
     return true;
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Recursive stabbing query for normal AABB trees.
@@ -505,12 +514,10 @@ void RayCollider::_SegmentStab(const AABBCollisionNode *node) {
 void RayCollider::_SegmentStab(const AABBQuantizedNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Segment-AABB overlap test
     if (!SegmentAABBOverlap(Center, Extents)) {
@@ -568,12 +575,10 @@ void RayCollider::_SegmentStab(const AABBNoLeafNode *node) {
 void RayCollider::_SegmentStab(const AABBQuantizedNoLeafNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Segment-AABB overlap test
     if (!SegmentAABBOverlap(Center, Extents)) {
@@ -655,12 +660,10 @@ void RayCollider::_RayStab(const AABBCollisionNode *node) {
 void RayCollider::_RayStab(const AABBQuantizedNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Ray-AABB overlap test
     if (!RayAABBOverlap(Center, Extents)) {
@@ -718,12 +721,10 @@ void RayCollider::_RayStab(const AABBNoLeafNode *node) {
 void RayCollider::_RayStab(const AABBQuantizedNoLeafNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Ray-AABB overlap test
     if (!RayAABBOverlap(Center, Extents)) {
@@ -770,4 +771,3 @@ void RayCollider::_RayStab(const AABBTreeNode *node, Container &box_indices) {
         _RayStab(node->GetNeg(), box_indices);
     }
 }
-

@@ -30,24 +30,15 @@
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-JumpDrive::JumpDrive() :
-    Component(),
-    EnergyConsumer(nullptr, false, 0),
-    destination(-1),
-    delay(0.0) {
+JumpDrive::JumpDrive() : Component(), EnergyConsumer(nullptr, false, 0), destination(-1), delay(0.0) {
     type = ComponentType::JumpDrive;
 }
 
-JumpDrive::JumpDrive(EnergyContainer *source):
-    Component(0.0, 0.0, true),
-    EnergyConsumer(source, false),
-    delay(0.0) {
+JumpDrive::JumpDrive(EnergyContainer *source) : Component(0.0, 0.0, true), EnergyConsumer(source, false), delay(0.0) {
     type = ComponentType::JumpDrive;
 }
 
-JumpDrive::~JumpDrive()
-= default;
-
+JumpDrive::~JumpDrive() = default;
 
 int JumpDrive::Destination() const {
     return destination;
@@ -58,7 +49,7 @@ bool JumpDrive::IsDestinationSet() const {
 }
 
 void JumpDrive::SetDestination(int destination) {
-    if(!Destroyed()) {
+    if (!Destroyed()) {
         this->destination = destination;
     }
 }
@@ -79,7 +70,6 @@ bool JumpDrive::Enabled() const {
     return Installed() && !Destroyed();
 }
 
-
 // Component Methods
 void JumpDrive::Load(std::string unit_key) {
     Component::Load(unit_key);
@@ -91,12 +81,12 @@ void JumpDrive::Load(std::string unit_key) {
 
     // Jump Drive
     installed = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Present", false);
-    delay = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
+    delay     = UnitCSVFactory::GetVariable(unit_key, "Jump_Drive_Delay", 0);
 }
 
-void JumpDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    unit["Jump_Drive_Present"] = std::to_string(Installed());
-    unit["Jump_Drive_Delay"] = std::to_string(delay);
+void JumpDrive::SaveToCSV(std::map<std::string, std::string> &unit) const {
+    unit["Jump_Drive_Present"]  = std::to_string(Installed());
+    unit["Jump_Drive_Delay"]    = std::to_string(delay);
     unit["Outsystem_Jump_Cost"] = std::to_string(consumption / configuration().components.jump_drive.factor_dbl);
 }
 
@@ -105,7 +95,7 @@ bool JumpDrive::CanDowngrade() const {
 }
 
 bool JumpDrive::Downgrade() {
-    if(!CanDowngrade()) {
+    if (!CanDowngrade()) {
         return false;
     }
 
@@ -119,7 +109,7 @@ bool JumpDrive::CanUpgrade(const std::string upgrade_key) const {
 }
 
 bool JumpDrive::Upgrade(const std::string upgrade_key) {
-    if(!CanUpgrade(upgrade_key)) {
+    if (!CanUpgrade(upgrade_key)) {
         return false;
     }
 
@@ -127,11 +117,7 @@ bool JumpDrive::Upgrade(const std::string upgrade_key) {
     return true;
 }
 
-double JumpDrive::Consume()
-{
+double JumpDrive::Consume() {
     return 0.0;
     // return EnergyConsumer::Consume();
 }
-
-
-

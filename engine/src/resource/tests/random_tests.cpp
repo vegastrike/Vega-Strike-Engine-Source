@@ -114,32 +114,32 @@ TEST(VegaRandom, RandomFloat) {
 
 TEST(VegaRandom, RandomInt32InRange) {
     for (int i = 0; i < kNumRepetitions; ++i) {
-        int random_int32 = VegaRandom::Instance().RandomInt32InRange(-1000, 1000);
-        EXPECT_GE(random_int32, -1000);
-        EXPECT_LE(random_int32, 1000);
+        int random_int32 = VegaRandom::Instance().RandomInt32InRange(-1'000, 1'000);
+        EXPECT_GE(random_int32, -1'000);
+        EXPECT_LE(random_int32, 1'000);
     }
 }
 
 TEST(VegaRandom, RandomInt32UpTo) {
     for (int i = 0; i < kNumRepetitions; ++i) {
-        int random_int32 = VegaRandom::Instance().RandomInt32UpTo(1000);
+        int random_int32 = VegaRandom::Instance().RandomInt32UpTo(1'000);
         EXPECT_GE(random_int32, 0);
-        EXPECT_LE(random_int32, 1000);
+        EXPECT_LE(random_int32, 1'000);
     }
 }
 
 TEST(VegaRandom, RandomUInt32InRange) {
     for (int i = 0; i < kNumRepetitions; ++i) {
-        uint_fast32_t random_uint32 = VegaRandom::Instance().RandomUInt32InRange( 1000, 2000);
-        EXPECT_GE(random_uint32, 1000);
-        EXPECT_LE(random_uint32, 2000);
+        uint_fast32_t random_uint32 = VegaRandom::Instance().RandomUInt32InRange(1'000, 2'000);
+        EXPECT_GE(random_uint32, 1'000);
+        EXPECT_LE(random_uint32, 2'000);
     }
 }
 
 TEST(VegaRandom, RandomUInt32UpTo) {
     for (int i = 0; i < kNumRepetitions; ++i) {
-        uint_fast32_t random_uint32 = VegaRandom::Instance().RandomUInt32UpTo(1000);
-        EXPECT_LE(random_uint32, 1000);
+        uint_fast32_t random_uint32 = VegaRandom::Instance().RandomUInt32UpTo(1'000);
+        EXPECT_LE(random_uint32, 1'000);
     }
 }
 
@@ -250,7 +250,7 @@ TEST(VegaRandom, RandomSizeT) {
 TEST(VegaRandom, RandomSizeTLessThan) {
     // Initialize our test collection
     std::vector<int> test_vector{};
-    const size_t test_vector_size = VegaRandom::Instance().RandomSizeTInRange(1, 200);
+    const size_t     test_vector_size = VegaRandom::Instance().RandomSizeTInRange(1, 200);
     for (size_t i = 0; i < test_vector_size; ++i) {
         test_vector.emplace_back(VegaRandom::Instance().GenRandInt31());
     }

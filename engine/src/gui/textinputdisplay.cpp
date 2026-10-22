@@ -26,10 +26,11 @@
  */
 
 #include "textinputdisplay.h"
-#include "root_generic/lin_time.h"
+
 #include "guidefs.h"
-using std::vector;
+#include "root_generic/lin_time.h"
 using std::string;
+using std::vector;
 
 TextInputDisplay::TextInputDisplay(vector<unsigned int> *keyboard_input_queue, const char *disallowed) {
     isFocused = false;
@@ -46,7 +47,7 @@ TextInputDisplay::TextInputDisplay(vector<unsigned int> *keyboard_input_queue, c
 
 bool TextInputDisplay::processMouseDown(const InputEvent &event) {
     if (event.code != WHEELUP_MOUSE_BUTTON && event.code != WHEELDOWN_MOUSE_BUTTON) {
-        //If click is on me, set me focused... otherwise, clear my focus.
+        // If click is on me, set me focused... otherwise, clear my focus.
         this->isFocused = (hitTest(event.loc));
     }
     return StaticDisplay::processMouseDown(event);
@@ -54,7 +55,7 @@ bool TextInputDisplay::processMouseDown(const InputEvent &event) {
 
 void TextInputDisplay::processUnfocus(const InputEvent &event) {
     if (event.code != WHEELUP_MOUSE_BUTTON && event.code != WHEELDOWN_MOUSE_BUTTON) {
-        //If click is on me, set me focused... otherwise, clear my focus.
+        // If click is on me, set me focused... otherwise, clear my focus.
         this->isFocused = false;
     }
     StaticDisplay::processUnfocus(event);
@@ -95,15 +96,15 @@ void TextInputDisplay::draw() {
                 }
             }
             if (allowed) {
-                char tmp[2] = {0, 0};
-                tmp[0] = (char) c;
-                text += tmp;
+                char tmp[2]  = {0, 0};
+                tmp[0]       = (char)c;
+                text        += tmp;
             }
         }
     }
     keyboard_queue->clear();
-    unsigned int x = (unsigned int) getNewTime();
-    string text1;
+    unsigned int x = (unsigned int)getNewTime();
+    string       text1;
     if (passwordChar) {
         text1.insert(0u, text.length(), passwordChar);
     } else {
@@ -120,4 +121,3 @@ void TextInputDisplay::draw() {
 TextInputDisplay::~TextInputDisplay() {
     delete[] this->disallowed;
 }
-

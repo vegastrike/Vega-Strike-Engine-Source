@@ -33,24 +33,24 @@
 
 #ifdef HAVE_OGG
 
-#include "OggStream.h"
-#include "OggData.h"
+#    include "OggStream.h"
 
-#include <utility>
-#include <limits>
-#include <stdlib.h>
+#    include <limits>
+#    include <stdlib.h>
+#    include <utility>
 
-#include <vorbis/vorbisfile.h>
-#include "vegadisk/vsfilesystem.h"
+#    include <vorbis/vorbisfile.h>
 
-#ifndef OGG_BUFFER_SIZE
-#define OGG_BUFFER_SIZE 4096*2*2
-#endif
+#    include "OggData.h"
+#    include "vegadisk/vsfilesystem.h"
+
+#    ifndef OGG_BUFFER_SIZE
+#        define OGG_BUFFER_SIZE 4'096 * 2 * 2
+#    endif
 
 namespace Audio {
 
-OggStream::OggStream(const std::string &path, VSFileSystem::VSFileType type)
-        : Stream(path) {
+OggStream::OggStream(const std::string &path, VSFileSystem::VSFileType type) : Stream(path) {
     if (file.OpenReadOnly(path, type) <= VSFileSystem::Ok) {
         throw FileOpenException("Error opening file \"" + path + "\"");
     }
@@ -60,9 +60,9 @@ OggStream::OggStream(const std::string &path, VSFileSystem::VSFileType type)
     duration = ov_time_total(&oggData->vorbisFile, oggData->streamIndex);
 
     // Allocate read buffer
-    readBufferSize = OGG_BUFFER_SIZE;
+    readBufferSize  = OGG_BUFFER_SIZE;
     readBufferAvail = 0;
-    readBuffer = malloc(readBufferSize);
+    readBuffer      = malloc(readBufferSize);
 }
 
 OggStream::~OggStream() {
@@ -108,16 +108,14 @@ void OggStream::getBufferImpl(void *&buffer, unsigned int &bufferSize) {
         throw NoBufferException();
     }
 
-    buffer = readBuffer;
+    buffer     = readBuffer;
     bufferSize = readBufferAvail;
 }
 
 void OggStream::nextBufferImpl() {
-    int curStream = oggData->streamIndex;
+    int  curStream = oggData->streamIndex;
     long ovr;
-    switch (ovr = ov_read(&oggData->vorbisFile,
-            (char *) readBuffer, readBufferSize,
-            0, 2, 1, &curStream)) {
+    switch (ovr = ov_read(&oggData->vorbisFile, (char *)readBuffer, readBufferSize, 0, 2, 1, &curStream)) {
         case OV_HOLE:
             throw CorruptStreamException(false);
         case OV_EBADLINK:
@@ -129,7 +127,6 @@ void OggStream::nextBufferImpl() {
     }
 }
 
-};
+};  // namespace Audio
 
-#endif // HAVE_OGG
-
+#endif  // HAVE_OGG

@@ -26,16 +26,17 @@
  */
 
 #include "text_area.h"
-#include "gldrv/winsys.h"
+
 #include <cstdlib>
 #include <cstring>
 
+#include "gldrv/winsys.h"
 #include "vega_string_utils.h"
 
-//Array of textures for the text area
-//GUITexture *Images;
+// Array of textures for the text area
+// GUITexture *Images;
 
-//List of images to load. Last element must always be NULL
+// List of images to load. Last element must always be NULL
 /*
  *  char *LoadImages[] = {  TEXT_AREA_00, TEXT_AREA_01, TEXT_AREA_02, TEXT_AREA_03, TEXT_AREA_04,
  *                       TEXT_AREA_05, TEXT_AREA_06, TEXT_AREA_07, TEXT_AREA_08, TEXT_AREA_09,
@@ -46,66 +47,65 @@
 
 static char EMPTY_STR[] = "";
 
-TextArea::~TextArea() {
-}
+TextArea::~TextArea() {}
 
-TextArea::TextArea() : TextArea(0, 0, 1, 1, 1) {
-}
+TextArea::TextArea() : TextArea(0, 0, 1, 1, 1) {}
 
-//Currently, corners overlap the horizontal and vertical bars. It's only noticeable with transparency
+// Currently, corners overlap the horizontal and vertical bars. It's only noticeable with transparency
 TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar) {
-    #ifdef DEBUG
+#ifdef DEBUG
     // stephengtuggy 2020-10-30: Leaving these here, since this library is supposed to be
     // self-sufficient, hence not depend on Vega Strike libraries
-    cout<<"Displaying border at "<<x<<","<<y<<"\n";
-    cout<<"with the dimensions of "<<wid<<","<<y<<"\n";
-    cout<<"Scrollbar: "<<scrollbar<<endl;
-    cout<<"------------\n";
-    #endif
+    cout << "Displaying border at " << x << "," << y << "\n";
+    cout << "with the dimensions of " << wid << "," << y << "\n";
+    cout << "Scrollbar: " << scrollbar << endl;
+    cout << "------------\n";
+#endif
 
     LoadTextures();
 
-    //Initialize the variables
-    item_count = 0;
-    cur_selected = 0;
+    // Initialize the variables
+    item_count      = 0;
+    cur_selected    = 0;
     top_item_number = 0;
-    button_pressed = 0;
+    button_pressed  = 0;
     cur_highlighted = 0;
-    page_size = 5;
-    scroll_start = 0;
-    scroll_cur = 0;
-    do_highlight = 1;
-    do_multiline = 0;
+    page_size       = 5;
+    scroll_start    = 0;
+    scroll_cur      = 0;
+    do_highlight    = 1;
+    do_multiline    = 0;
 
     ratio[0] = 0.06;
     if (scrollbar == 0) {
-        ratio[1] = ratio[0];
+        ratio[1]      = ratio[0];
         has_scrollbar = 0;
     } else {
-        ratio[1] = 0.12;
+        ratio[1]      = 0.12;
         has_scrollbar = 1;
     }
-    //Top and bottom button ratios. Only change these if you change the ratio[1] and/or the image
-    //If you change these, uncomment the appropriate ShowColor() in the Refresh to verify the alignment
-    button_ratio[0] = 0.91096;       //left x, both buttons
-    button_ratio[1] = 0.0345;        //Top button, top left corner y
-    button_ratio[2] = 0.0585;        //Height and width of the buttons
+    // Top and bottom button ratios. Only change these if you change the ratio[1] and/or the image
+    // If you change these, uncomment the appropriate ShowColor() in the Refresh to verify the alignment
+    button_ratio[0] = 0.91096;     // left x, both buttons
+    button_ratio[1] = 0.0345;      // Top button, top left corner y
+    button_ratio[2] = 0.0585;      // Height and width of the buttons
 
-    scrollbar_ratio[0] = 0.91096;       //x axis
-    scrollbar_ratio[1] = 0.1;           //y axis
-    scrollbar_ratio[2] = 0.0585;        //Width
-    //scrollbar_ratio[3] = 0.89;	// Height
-    scrollbar_ratio[3] = 0.73;          //Height (how much the bar doesn't take of the buttons)
+    scrollbar_ratio[0] = 0.91096;  // x axis
+    scrollbar_ratio[1] = 0.1;      // y axis
+    scrollbar_ratio[2] = 0.0585;   // Width
+    // scrollbar_ratio[3] = 0.89;	// Height
+    scrollbar_ratio[3] = 0.73;  // Height (how much the bar doesn't take of the buttons)
 
-    //Set the variables to control where and how text will be displayed
-    font_size = 4;
-    font_size_float = 4;
-    horizontal_per_level = 0.05;
-    horizontal_spacer = 0.01;
+    // Set the variables to control where and how text will be displayed
+    font_size             = 4;
+    font_size_float       = 4;
+    horizontal_per_level  = 0.05;
+    horizontal_spacer     = 0.01;
     vertical_left_of_text = 0.02;
-    text_spacing = (font_size_float / 100) + (horizontal_spacer * 2);
+    text_spacing          = (font_size_float / 100) + (horizontal_spacer * 2);
 
-    //The parent TextAreaItem. This is the only link where parent == nullptr. It is not displayed and handled only internally
+    // The parent TextAreaItem. This is the only link where parent == nullptr. It is not displayed and handled only
+    // internally
     item_tree_top = MakeShared<TextAreaItem>("", "", nullptr);
     if (wid < 0 || hei < 0) {
         // stephengtuggy 2020-10-30: Leaving this here, since comment at top of
@@ -120,44 +120,44 @@ TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar) {
     if (y - hei < -1) {
         hei = -1 + y;
     }
-    //Set the class variables to remember the dimensions and locations of the text area
+    // Set the class variables to remember the dimensions and locations of the text area
     xcoord[0] = x;
     ycoord[0] = y;
-    width[0] = wid;
+    width[0]  = wid;
     height[0] = hei;
 
-    //Displayable text area
-    //Some parts of y and height are based on the width, not the height, of the text area
-    //If you want to see the area created by this, there's a commented ShowColor() at the end of TextArea::Refresh
+    // Displayable text area
+    // Some parts of y and height are based on the width, not the height, of the text area
+    // If you want to see the area created by this, there's a commented ShowColor() at the end of TextArea::Refresh
     xcoord[5] = x + (wid * ratio[0]) + (wid * vertical_left_of_text);
     ycoord[5] = y - (wid * ratio[0]) - (wid * horizontal_spacer);
-    width[5] = (wid * (1 - ratio[0] - ratio[1])) - (wid * vertical_left_of_text * 2);
+    width[5]  = (wid * (1 - ratio[0] - ratio[1])) - (wid * vertical_left_of_text * 2);
     height[5] = (hei * (1 - ratio[0])) - (wid * horizontal_spacer * 2);
 
-    //Top scroll button
+    // Top scroll button
     xcoord[1] = x + (wid * button_ratio[0]);
     ycoord[1] = y - (wid * button_ratio[1]);
-    width[1] = wid * button_ratio[2];
+    width[1]  = wid * button_ratio[2];
     height[1] = width[1];
 
-    //Bottom scroll button
+    // Bottom scroll button
     xcoord[2] = xcoord[1];
     ycoord[2] = y - hei + (wid * (button_ratio[2] + button_ratio[1]));
-    //The original non-working patched formula. I spent so much time fixing this, that this line is to remember it. God knows why.
-    //ycoord[2] = y - (hei * (1 - button_ratio[1] - button_ratio[3]));
-    width[2] = width[1];
+    // The original non-working patched formula. I spent so much time fixing this, that this line is to remember it. God
+    // knows why. ycoord[2] = y - (hei * (1 - button_ratio[1] - button_ratio[3]));
+    width[2]  = width[1];
     height[2] = width[1];
 
-    //Scrollbar Area
+    // Scrollbar Area
     xcoord[3] = x + (wid * scrollbar_ratio[0]);
     ycoord[3] = y - (wid * scrollbar_ratio[1]);
-    width[3] = wid * scrollbar_ratio[2];
-    //height[3] = hei * scrollbar_ratio[3];
+    width[3]  = wid * scrollbar_ratio[2];
+    // height[3] = hei * scrollbar_ratio[3];
     height[3] = hei - (height[1] + height[2]) - ((height[2] * scrollbar_ratio[3]) * 2);
 
-    //Static portion of the active scrollbar
+    // Static portion of the active scrollbar
     xcoord[4] = xcoord[3];
-    width[4] = width[3];
+    width[4]  = width[3];
 
     max_lines = (height[5] / text_spacing) - 1;
 
@@ -165,7 +165,7 @@ TextArea::TextArea(float x, float y, float wid, float hei, int scrollbar) {
 }
 
 void TextArea::Refresh() {
-    //Draw the bars to run across the length
+    // Draw the bars to run across the length
 
     if (has_scrollbar != 0) {
         DisplayScrollbar();
@@ -183,8 +183,8 @@ void TextArea::RenderText() {
     if (item_count == 0) {
         return;
     }
-    //There's a bug in glut_support. Can't show a color then text. Have to render an image between colors and text
-    //ShowImage(0,0,0,0, Images[0], 0, 0);
+    // There's a bug in glut_support. Can't show a color then text. Have to render an image between colors and text
+    // ShowImage(0,0,0,0, Images[0], 0, 0);
     RenderTextItem(item_tree_top, 0);
 }
 
@@ -213,7 +213,7 @@ void TextArea::RenderTextItem(const SharedPtr<TextAreaItem> current, const int l
     if (current->child_count() <= 0) {
         return;
     }
-    for (const auto& current_child : current->children) {
+    for (const auto &current_child : current->children) {
         RenderTextItem(current_child, level + 1);
     }
 }
@@ -249,12 +249,12 @@ void TextArea::ChangeTextItemColor(const char *name, const GFXColor &col) {
 }
 
 void TextArea::ClearList() {
-    //Wipe the list clean
+    // Wipe the list clean
     item_tree_top.reset();
-    item_count = 0;
-    cur_selected = 0;
+    item_count      = 0;
+    cur_selected    = 0;
     top_item_number = 0;
-    item_tree_top = MakeShared<TextAreaItem>("", "", nullptr);
+    item_tree_top   = MakeShared<TextAreaItem>("", "", nullptr);
 }
 
 void TextArea::SetText(const char *text) {
@@ -288,11 +288,11 @@ void TextArea::SortList() {
     item_tree_top->Sort();
 }
 
-//The button checks assume that the scroll buttons and scrollbar are on the same x-axis
-//If you change the position of the buttons, you'll need to add more checks here
+// The button checks assume that the scroll buttons and scrollbar are on the same x-axis
+// If you change the position of the buttons, you'll need to add more checks here
 int TextArea::MouseClick(const int button, const int state, const float x, const float y) {
     if (state == WS_MOUSE_UP && scroll_start != 0) {
-        scroll_cur = 0;
+        scroll_cur   = 0;
         scroll_start = 0;
         return 1;
     }
@@ -301,16 +301,16 @@ int TextArea::MouseClick(const int button, const int state, const float x, const
     }
     if (button != WS_LEFT_BUTTON) {
         return 1;
-    }                                        //Don't have anything to do with the middle and right button
-    //Check to see if the cursor is in the same x-axis as the buttons and scrollbar
+    }  // Don't have anything to do with the middle and right button
+    // Check to see if the cursor is in the same x-axis as the buttons and scrollbar
     if (x > xcoord[1] && x < (xcoord[1] + width[1])) {
-        //Find out if the click is on a button, the scrollbar, or nowhere
+        // Find out if the click is on a button, the scrollbar, or nowhere
         if (y < ycoord[1] && y > (ycoord[1] - height[1])) {
             if (state == WS_MOUSE_UP) {
-                //ShowImage(xcoord[1], ycoord[1], width[1], height[1], Images[IMG_BUTTON_UP], 0, 0);
+                // ShowImage(xcoord[1], ycoord[1], width[1], height[1], Images[IMG_BUTTON_UP], 0, 0);
                 button_pressed = 0;
             } else {
-                //ShowImage(xcoord[1], ycoord[1], width[1], height[1], Images[IMG_HIGHLIGHT_BUTTON_UP], 0, 0);
+                // ShowImage(xcoord[1], ycoord[1], width[1], height[1], Images[IMG_HIGHLIGHT_BUTTON_UP], 0, 0);
                 button_pressed = 1;
 
                 top_item_number--;
@@ -324,15 +324,15 @@ int TextArea::MouseClick(const int button, const int state, const float x, const
         }
         if (y < ycoord[2] && y > (ycoord[2] - height[2])) {
             if (state == WS_MOUSE_UP) {
-                //ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_BUTTON_DOWN], 0, 0);
+                // ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_BUTTON_DOWN], 0, 0);
                 button_pressed = 0;
             } else {
-                //ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_HIGHLIGHT_BUTTON_DOWN], 0, 0);
+                // ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_HIGHLIGHT_BUTTON_DOWN], 0, 0);
                 button_pressed = 2;
 
                 ++top_item_number;
                 if (top_item_number >= (item_count - max_lines)) {
-                    top_item_number = static_cast<int>(std::round(item_count-max_lines));
+                    top_item_number = static_cast<int>(std::round(item_count - max_lines));
                 }
             }
         }
@@ -343,18 +343,19 @@ int TextArea::MouseClick(const int button, const int state, const float x, const
     if (Inside(x, y, 3) != 0 && Inside(x, y, 4) == 0) {
         if (state != WS_MOUSE_UP) {
             return 1;
-        }           //We're outside the active scroll bar, but in the passive area. The active scrollbar is only for MouseMoveClick
+        }  // We're outside the active scroll bar, but in the passive area. The active scrollbar is only for
+           // MouseMoveClick
         if (y > ycoord[4]) {
-            //Top area
+            // Top area
             top_item_number -= page_size;
             if (top_item_number < 0) {
                 top_item_number = 0;
             }
         } else {
-            //Bottom area
+            // Bottom area
             top_item_number += page_size;
             if (top_item_number >= (item_count - max_lines)) {
-                top_item_number = static_cast<int>(std::round(item_count-max_lines));
+                top_item_number = static_cast<int>(std::round(item_count - max_lines));
             }
         }
     }
@@ -434,7 +435,7 @@ void TextArea::LoadTextures() {
      */
 }
 
-//Assumes the mouse is in the text area
+// Assumes the mouse is in the text area
 int TextArea::LocateCount(const float y) const {
     float base = ycoord[5] - y - horizontal_spacer;
     if (base < 0) {
@@ -470,23 +471,23 @@ void TextArea::DisplayScrollbar() {
         ShowColor(xcoord[3], ycoord[3], width[3], height[3], 0, 1, 1, 0.05);
         return;
     }
-    //The percentage that each item consists of the entire list
+    // The percentage that each item consists of the entire list
     item_perc = item_count;
     item_perc = 1 / item_perc;
 
-    //The percentage that the visible list takes of the entire list
-    page_perc = max_lines;
+    // The percentage that the visible list takes of the entire list
+    page_perc  = max_lines;
     page_perc /= item_count;
-    //If this isn't 0, the scrollbar is being moved
+    // If this isn't 0, the scrollbar is being moved
     if (scroll_cur != 0) {
-        const float move = ((scroll_cur - scroll_start) / height[3]) / item_perc;
-        int change = 0;
-        change = static_cast<int>(std::round(move));
+        const float move   = ((scroll_cur - scroll_start) / height[3]) / item_perc;
+        int         change = 0;
+        change             = static_cast<int>(std::round(move));
         if (move < 0) {
-            change *= -1;
+            change          *= -1;
             top_item_number += change;
             if (top_item_number >= (item_count - max_lines)) {
-                top_item_number = static_cast<int>(std::round(item_count-max_lines));
+                top_item_number = static_cast<int>(std::round(item_count - max_lines));
             }
         } else {
             top_item_number -= change;
@@ -498,10 +499,10 @@ void TextArea::DisplayScrollbar() {
             scroll_start = scroll_cur;
         }
     }
-    //How much is scrolled up past the view
+    // How much is scrolled up past the view
     y_dist = item_perc * top_item_number;
 
-    new_y = ycoord[3] - (y_dist * height[3]);
+    new_y      = ycoord[3] - (y_dist * height[3]);
     new_height = page_perc * height[3];
 
     ycoord[4] = new_y;
@@ -518,21 +519,21 @@ void TextArea::DisplayScrollbar() {
 void TextArea::ChompIntoItems(const char *text, const char *parent) {
     char *temp = vega_str_dup(text);
     char *cur = temp, chr = '\0';
-    int i = 0, max = strlen(temp);
+    int   i = 0, max = strlen(temp);
     float cur_width = 0, wid = 0, end = glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
-    end /= 2500;
-    wid = end;
+    end /= 2'500;
+    wid  = end;
     for (i = 0; i <= max; i++) {
         if (temp[i] == '\r') {
             continue;
         }
         cur_width = WidthOfChar(temp[i]);
         if (wid + cur_width > width[5] || temp[i] == '\n') {
-            chr = temp[i];
+            chr     = temp[i];
             temp[i] = '\0';
             AddTextItem("content", cur, parent);
             temp[i] = chr;
-            cur = &temp[i];
+            cur     = &temp[i];
             if (cur[0] == '\n') {
                 cur++;
             }
@@ -547,8 +548,8 @@ void TextArea::ChompIntoItems(const char *text, const char *parent) {
     free(temp);
 }
 
-TextAreaItem::TextAreaItem(const char *new_name, const char *desc, SharedPtr<TextAreaItem> parent_class) :
-        col(1, 1, 1, 1) {
+TextAreaItem::TextAreaItem(const char *new_name, const char *desc, SharedPtr<TextAreaItem> parent_class)
+    : col(1, 1, 1, 1) {
     if (new_name != nullptr) {
         name = vega_str_dup(new_name);
     } else {
@@ -577,14 +578,14 @@ TextAreaItem::~TextAreaItem() {
     parent.reset();
 }
 
-SharedPtr<TextAreaItem> TextAreaItem::FindChild(const char* search_name) {
+SharedPtr<TextAreaItem> TextAreaItem::FindChild(const char *search_name) {
     if (search_name == nullptr) {
         return shared_from_this();
     }
     if (strcmp(name, search_name) == 0) {
         return shared_from_this();
     }
-    for (const auto& current_child : children) {
+    for (const auto &current_child : children) {
         SharedPtr<TextAreaItem> match = current_child->FindChild(search_name);
         if (match) {
             return match;
@@ -594,13 +595,13 @@ SharedPtr<TextAreaItem> TextAreaItem::FindChild(const char* search_name) {
 }
 
 void TextAreaItem::Sort() {
-    for (const auto& cur : children) {
+    for (const auto &cur : children) {
         cur->Sort();
     }
     std::sort(children.begin(), children.end(),
-        [](const SharedPtr<TextAreaItem>& a, const SharedPtr<TextAreaItem>& b) -> bool {
-            return a->description < b->description;
-        });
+              [](const SharedPtr<TextAreaItem> &a, const SharedPtr<TextAreaItem> &b) -> bool {
+                  return a->description < b->description;
+              });
 }
 
 SharedPtr<TextAreaItem> TextAreaItem::FindCount(const int count, size_t cur) {
@@ -626,8 +627,7 @@ typedef TextAreaItem *TextAreaItemStr;
 
 void TextAreaItem::AddChild(const char *new_name, const char *desc, const GFXColor new_col) {
     SharedPtr<TextAreaItem> new_text_area_item = MakeShared<TextAreaItem>(new_name, desc, nullptr);
-    new_text_area_item->col = new_col;
-    new_text_area_item->parent = shared_from_this();
+    new_text_area_item->col                    = new_col;
+    new_text_area_item->parent                 = shared_from_this();
     children.emplace_back(new_text_area_item);
 }
-

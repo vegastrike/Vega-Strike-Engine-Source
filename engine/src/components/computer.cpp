@@ -27,31 +27,29 @@
 
 #include "computer.h"
 
-
-Computer::Computer() :
-        nav_point(0, 0, 0),
-        target(nullptr),
-        threat(nullptr),
-        velocity_reference(nullptr),
-        force_velocity_ref(false),
-        threatlevel(0),
-        set_speed(0),
-        slide_start(1),
-        slide_end(1),
-        original_itts(false),
-        itts(false),
-        combat_mode(true) {
+Computer::Computer()
+    : nav_point(0, 0, 0),
+      target(nullptr),
+      threat(nullptr),
+      velocity_reference(nullptr),
+      force_velocity_ref(false),
+      threatlevel(0),
+      set_speed(0),
+      slide_start(1),
+      slide_end(1),
+      original_itts(false),
+      itts(false),
+      combat_mode(true) {
     upgrade_name = "Computer";
-    installed = true;
+    installed    = true;
 }
-
 
 // Component Methods
 void Computer::Load(std::string unit_key) {
     Component::Load(unit_key);
 }
 
-void Computer::SaveToCSV(std::map<std::string, std::string>& unit) const {}
+void Computer::SaveToCSV(std::map<std::string, std::string> &unit) const {}
 
 bool Computer::CanDowngrade() const {
     return false;

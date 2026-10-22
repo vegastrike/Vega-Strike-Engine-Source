@@ -28,23 +28,28 @@
 
 #include "gfx_generic/boltdrawmanager.h"
 
-#include "matrix.h"
 #include "gfx/animation.h"
-
+#include "matrix.h"
 #include "root_generic/lin_time.h"
 #include "root_generic/options.h"
 #include "src/universe.h"
 
 QVector BoltDrawManager::camera_position = QVector();
-float BoltDrawManager::pixel_angle = 0.0;
-float BoltDrawManager::elapsed_time = 0.0;
+float   BoltDrawManager::pixel_angle     = 0.0;
+float   BoltDrawManager::elapsed_time    = 0.0;
 
 BoltDrawManager::BoltDrawManager() {
     if (!boltmesh) {
         GFXVertex vtx[12];
-#define V(ii, xx, yy, zz, ss, \
-           tt) vtx[(ii)].x = (xx); vtx[(ii)].y = (yy); vtx[(ii)].z = (zz) + configuration().graphics.bolt_offset_flt + .875; vtx[(ii)].i = 0; vtx[(ii)].j = 0; vtx[(ii)].k = 1; \
-    vtx[(ii)].s = (ss); vtx[(ii)].t = (tt);
+#define V(ii, xx, yy, zz, ss, tt)                                         \
+    vtx[(ii)].x = (xx);                                                   \
+    vtx[(ii)].y = (yy);                                                   \
+    vtx[(ii)].z = (zz) + configuration().graphics.bolt_offset_flt + .875; \
+    vtx[(ii)].i = 0;                                                      \
+    vtx[(ii)].j = 0;                                                      \
+    vtx[(ii)].k = 1;                                                      \
+    vtx[(ii)].s = (ss);                                                   \
+    vtx[(ii)].t = (tt);
         V(0, 0, 0, -.875, 0, .5);
         V(1, 0, -1, 0, .875, 1);
         V(2, 0, 0, .125, 1, .5);
@@ -57,7 +62,7 @@ BoltDrawManager::BoltDrawManager() {
         V(9, 0, 1, 0, .375, .1875);
         V(10, -1, 0, 0, .1875, .375);
         V(11, 0, -1, 0, 0, .1875);
-        boltmesh = new GFXVertexList(GFXQUAD, 12, vtx, 12, false);         //not mutable;
+        boltmesh = new GFXVertexList(GFXQUAD, 12, vtx, 12, false);  // not mutable;
     }
 }
 
@@ -83,8 +88,8 @@ BoltDrawManager::~BoltDrawManager() {
 }
 
 BoltDrawManager &BoltDrawManager::GetInstance() {
-    static BoltDrawManager instance;    // Guaranteed to be destroyed.
-    return instance;                    // Instantiated on first use.
+    static BoltDrawManager instance;  // Guaranteed to be destroyed.
+    return instance;                  // Instantiated on first use.
 }
 
 void BoltDrawManager::Draw() {
@@ -94,14 +99,15 @@ void BoltDrawManager::Draw() {
     GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
     GFXAlphaTest(GREATER, .1);
 
-    float pixel_angle = 2
-            * sin(configuration().graphics.fov_flt * M_PI / 180.0F
-                    / (configuration().graphics.resolution_y
-                            > configuration().graphics.resolution_x ? configuration().graphics.resolution_y : configuration().graphics.resolution_x))
-            * configuration().graphics.bolt_pixel_size_flt;
-    pixel_angle *= pixel_angle;
-    camera_position = _Universe->AccessCamera()->GetPosition();
-    elapsed_time = GetElapsedTime();
+    float pixel_angle = 2 *
+                        sin(configuration().graphics.fov_flt * M_PI / 180.0F /
+                            (configuration().graphics.resolution_y > configuration().graphics.resolution_x
+                                     ? configuration().graphics.resolution_y
+                                     : configuration().graphics.resolution_x)) *
+                        configuration().graphics.bolt_pixel_size_flt;
+    pixel_angle     *= pixel_angle;
+    camera_position  = _Universe->AccessCamera()->GetPosition();
+    elapsed_time     = GetElapsedTime();
 
     // Iterate over ball types
     Bolt::DrawAllBalls();
@@ -120,12 +126,9 @@ void BoltDrawManager::Draw() {
     GFXColor4f(1, 1, 1, 1);
 }
 
-CollideMap::iterator BoltDrawManager::AddBall(const WeaponInfo *typ,
-        const Matrix &orientationpos,
-        const Vector &shipspeed,
-        void *owner,
-        CollideMap::iterator hint) {
-    Bolt ball = Bolt(typ, orientationpos, shipspeed, owner, hint);             //FIXME turrets won't work! Velocity
+CollideMap::iterator BoltDrawManager::AddBall(const WeaponInfo *typ, const Matrix &orientationpos,
+                                              const Vector &shipspeed, void *owner, CollideMap::iterator hint) {
+    Bolt ball = Bolt(typ, orientationpos, shipspeed, owner, hint);  // FIXME turrets won't work! Velocity
     _balls.push_back(ball);
     return _balls[_balls.size() - 1].location;
 }

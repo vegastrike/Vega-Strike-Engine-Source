@@ -28,52 +28,54 @@
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
-#if defined (_MSC_VER) && _MSC_VER <= 1200
-#define Vector Vactor
+#if defined(_MSC_VER) && _MSC_VER <= 1'200
+#    define Vector Vactor
 #endif
 #include <boost/python.hpp>
+
 #include <boost/python/converter/from_python.hpp>
-#if defined (_MSC_VER) && _MSC_VER <= 1200
-#undef Vector
+#if defined(_MSC_VER) && _MSC_VER <= 1'200
+#    undef Vector
 #endif
 
 #include <Python.h>
+
+#include <compile.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
-#include <compile.h>
 #if ((PY_VERSION_HEX) < 0x030B0000)
-#include <eval.h>
+#    include <eval.h>
 #endif
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 
+#include "cmd/basecomputer.h"
+#include "cmd/unit_generic.h"
+#include "cmd/vega_py_run.h"
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "src/python/init.h"
-#include "src/python/python_compile.h"
-#include "src/python/python_class.h"
-#include "cmd/unit_generic.h"
 #include "src/python/config/python_utils.h"
-#include "cmd/vega_py_run.h"
-#include "cmd/basecomputer.h"
+#include "src/python/init.h"
+#include "src/python/python_class.h"
+#include "src/python/python_compile.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
-#if defined (_WIN32) && !defined (__CYGWIN__)
-#include <direct.h>
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#    include <direct.h>
 #endif
 class Unit;
-//FROM_PYTHON_SMART_POINTER(Unit)
+// FROM_PYTHON_SMART_POINTER(Unit)
 
 
 #ifdef _WIN32
-//Python 2.5 doesn't seem to like forward-slashes.
-#define PATHSEP "\\"
+// Python 2.5 doesn't seem to like forward-slashes.
+#    define PATHSEP "\\"
 #else
-#define PATHSEP "/"
+#    define PATHSEP "/"
 #endif
 
-#define Q(x) #x
+#define Q(x)     #x
 #define QUOTE(x) Q(x)
 
 void Python::initpaths() {
@@ -97,7 +99,7 @@ void Python::initpaths() {
      *                       "]\n");
      */
     std::string modpaths("\"\",");
-    //Find all the mods dir (ignore homedir)
+    // Find all the mods dir (ignore homedir)
     for (unsigned int i = 1; i < VSFileSystem::Rootdir.size(); i++) {
         modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + moduledir + PATHSEP "builtin\",";
         modpaths += "r\"" + VSFileSystem::Rootdir[i] + PATHSEP + moduledir + PATHSEP "quests\",";
@@ -135,30 +137,30 @@ void Python::reseterrors() {
     }
 }
 
-#if BOOST_VERSION != 102800
+#if BOOST_VERSION != 102'800
 
-static void *Vector_convertible(PyObject * p) {
+static void *Vector_convertible(PyObject *p) {
     return PyTuple_Check(p) ? p : 0;
 }
 
-static void Vector_construct(PyObject * source, boost::python::converter::rvalue_from_python_stage1_data * data) {
-    void *const storage = ((boost::python::converter::rvalue_from_python_storage<Vector> *) data)->storage.bytes;
-    new(storage) Vector(0, 0, 0);
-    //Fill in QVector values from source tuple here
-    //details left to reader.
-    Vector *vec = (Vector *) storage;
-    static char fff[4] = "fff"; //added by chuck_starchaser, to kill a warning
+static void Vector_construct(PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data) {
+    void *const storage = ((boost::python::converter::rvalue_from_python_storage<Vector> *)data)->storage.bytes;
+    new (storage) Vector(0, 0, 0);
+    // Fill in QVector values from source tuple here
+    // details left to reader.
+    Vector     *vec    = (Vector *)storage;
+    static char fff[4] = "fff";  // added by chuck_starchaser, to kill a warning
     PyArg_ParseTuple(source, fff, &vec->i, &vec->j, &vec->k);
     data->convertible = storage;
 }
 
-static void QVector_construct(PyObject * source, boost::python::converter::rvalue_from_python_stage1_data * data) {
-    void *const storage = ((boost::python::converter::rvalue_from_python_storage<QVector> *) data)->storage.bytes;
-    new(storage) QVector(0, 0, 0);
-    //Fill in QVector values from source tuple here
-    //details left to reader.
-    QVector *vec = (QVector *) storage;
-    static char ddd[4] = "ddd"; //added by chuck_starchaser, to kill a warning
+static void QVector_construct(PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data) {
+    void *const storage = ((boost::python::converter::rvalue_from_python_storage<QVector> *)data)->storage.bytes;
+    new (storage) QVector(0, 0, 0);
+    // Fill in QVector values from source tuple here
+    // details left to reader.
+    QVector    *vec    = (QVector *)storage;
+    static char ddd[4] = "ddd";  // added by chuck_starchaser, to kill a warning
     PyArg_ParseTuple(source, ddd, &vec->i, &vec->j, &vec->k);
     data->convertible = storage;
 }
@@ -213,13 +215,12 @@ void Python::init() {
         Py_ExitStatusException(status);
     }
 
-    boost::python::import("base_computer"); // REQUIRED 
+    boost::python::import("base_computer");  // REQUIRED
     initpaths();
 
-#if BOOST_VERSION != 102800
-    boost::python::converter::registry::insert(Vector_convertible,
-            QVector_construct,
-            boost::python::type_id<QVector>());
+#if BOOST_VERSION != 102'800
+    boost::python::converter::registry::insert(Vector_convertible, QVector_construct,
+                                               boost::python::type_id<QVector>());
     boost::python::converter::registry::insert(Vector_convertible, Vector_construct, boost::python::type_id<Vector>());
 #endif
 #if (PY_VERSION_HEX < 0x03000000)
@@ -237,8 +238,7 @@ void Python::init() {
             "'.'.join([str(i) for i in VS.EngineVersion().GetVersion()]),"
             "VS.EngineVersion().GetAssetAPIVersion()"
             ")"
-            ")"
-    };
+            ")"};
     VegaPyRunString(python_snippet_to_run_2);
 #if (PY_VERSION_HEX < 0x03000000)
     InitDirector2();
@@ -273,15 +273,19 @@ void Python::test() {
      *
      *  PyObject* Py_CompileString(char *str, char *filename, int start)
      *  Return value: New reference.
-     *  Parse and compile the Python source code in str, returning the resulting code object. The start token is given by start; this can be used to constrain the code which can be compiled and should be Py_eval_input, Py_file_input, or Py_single_input. The filename specified by filename is used to construct the code object and may appear in tracebacks or SyntaxError exception messages. This returns NULL if the code cannot be parsed or compiled.
+     *  Parse and compile the Python source code in str, returning the resulting code object. The start token is given
+     * by start; this can be used to constrain the code which can be compiled and should be Py_eval_input,
+     * Py_file_input, or Py_single_input. The filename specified by filename is used to construct the code object and
+     * may appear in tracebacks or SyntaxError exception messages. This returns NULL if the code cannot be parsed or
+     * compiled.
      *
      *  This would be the preferred mode of operation for AI scripts
      */
 
-//char buffer[128];
-//PythonIOString::buffer << endl << '\0';
-//vs_config->setVariable("data","test","NULL");
-//VSFileSystem::vs_fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
-//VSFileSystem::vs_fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
+    // char buffer[128];
+    // PythonIOString::buffer << endl << '\0';
+    // vs_config->setVariable("data","test","NULL");
+    // VSFileSystem::vs_fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
+    // VSFileSystem::vs_fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogs();
 }

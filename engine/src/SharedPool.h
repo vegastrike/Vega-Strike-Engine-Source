@@ -28,17 +28,18 @@
 #define VEGA_STRIKE_ENGINE_STRINGPOOL_H
 
 #include <string>
+
 #include "src/gnuhash.h"
 
 #ifndef INITIAL_STRINGPOOL_SIZE
-#define INITIAL_STRINGPOOL_SIZE (1<<15)
+#    define INITIAL_STRINGPOOL_SIZE (1 << 15)
 #endif
 
-//Need reference counted strings, or we'll eat memory like crazy
-template<class T, class RefcounterTraits = vsHashComp<T> >
+// Need reference counted strings, or we'll eat memory like crazy
+template <class T, class RefcounterTraits = vsHashComp<T>>
 class SharedPool {
 public:
-    typedef vsUMap<T, unsigned int> ReferenceCounter;
+    typedef vsUMap<T, unsigned int>         ReferenceCounter;
     typedef SharedPool<T, RefcounterTraits> PoolType;
 
 private:
@@ -46,7 +47,7 @@ private:
     static PoolType *ms_singleton;
 
 public:
-    typedef T ValueType;
+    typedef T                ValueType;
     typedef RefcounterTraits RefocounterTraitsType;
 
     static PoolType &getSingleton() {
@@ -63,14 +64,14 @@ public:
 public:
     class Reference {
         typename ReferenceCounter::iterator _it;
-        ReferenceCounter *_rc;
+        ReferenceCounter                   *_rc;
 
         void unref() {
             if (_rc && (_it != _rc->end())) {
                 if ((_it->second == 0) || ((--(_it->second)) == 0)) {
                     _rc->erase(_it);
                 }
-                _it = _rc->end(); // Should this be inside the if block?
+                _it = _rc->end();  // Should this be inside the if block?
             }
         }
 
@@ -81,28 +82,23 @@ public:
         }
 
     public:
-        Reference() :
-                _it(SharedPool::getSingleton().referenceCounter.end()),
-                _rc(&SharedPool::getSingleton().referenceCounter) {
-        }
+        Reference()
+            : _it(SharedPool::getSingleton().referenceCounter.end()),
+              _rc(&SharedPool::getSingleton().referenceCounter) {}
 
-        explicit Reference(const T &s) :
-                _it(SharedPool::getSingleton().referenceCounter.end()),
-                _rc(&SharedPool::getSingleton().referenceCounter) {
+        explicit Reference(const T &s)
+            : _it(SharedPool::getSingleton().referenceCounter.end()),
+              _rc(&SharedPool::getSingleton().referenceCounter) {
             set(s);
         }
 
-        explicit Reference(ReferenceCounter *pool) :
-                _it(pool->end()), _rc(pool) {
-        }
+        explicit Reference(ReferenceCounter *pool) : _it(pool->end()), _rc(pool) {}
 
-        Reference(ReferenceCounter *pool, const T &s) :
-                _it(pool->end()), _rc(pool) {
+        Reference(ReferenceCounter *pool, const T &s) : _it(pool->end()), _rc(pool) {
             set(s);
         }
 
-        Reference(const Reference &other) :
-                _it(other._it), _rc(other._rc) {
+        Reference(const Reference &other) : _it(other._it), _rc(other._rc) {
             ref();
         }
 
@@ -192,7 +188,9 @@ public:
 
 class StringpoolTraits : public vsHashComp<std::string> {
 public:
-    enum { min_buckets = INITIAL_STRINGPOOL_SIZE };
+    enum {
+        min_buckets = INITIAL_STRINGPOOL_SIZE
+    };
 };
 
 typedef SharedPool<std::string, StringpoolTraits> StringPool;
@@ -207,11 +205,11 @@ inline std::string operator+(const StringPool::Reference &r, const std::string &
     return r.get() + s;
 }
 
-template<typename T>
+template <typename T>
 inline T &operator<<(T &stream, const StringPool::Reference &ref) {
     return stream << ref.get();
 }
 
 #include "SharedPool.cpp"
 
-#endif //VEGA_STRIKE_ENGINE_STRINGPOOL_H
+#endif  // VEGA_STRIKE_ENGINE_STRINGPOOL_H

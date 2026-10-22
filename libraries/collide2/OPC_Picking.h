@@ -29,8 +29,8 @@
 
 enum CullMode {
     CULLMODE_NONE = 0,
-    CULLMODE_CW = 1,
-    CULLMODE_CCW = 2
+    CULLMODE_CW   = 1,
+    CULLMODE_CCW  = 2
 };
 
 typedef CullMode (*CullModeCallback)(uint32_t triangle_index, void *user_data);
@@ -40,10 +40,9 @@ OPCODE_API bool SetupClosestHit(RayCollider &collider, CollisionFace &closest_co
 OPCODE_API bool SetupShadowFeeler(RayCollider &collider);
 OPCODE_API bool SetupInOutTest(RayCollider &collider);
 
-OPCODE_API bool Picking(
-        CollisionFace &picked_face,
-        const Ray &world_ray, const Model &model, const Matrix4x4 *world,
-        float min_dist, float max_dist, const Point &view_point, CullModeCallback callback, void *user_data);
+OPCODE_API bool Picking(CollisionFace &picked_face, const Ray &world_ray, const Model &model, const Matrix4x4 *world,
+                        float min_dist, float max_dist, const Point &view_point, CullModeCallback callback,
+                        void *user_data);
 #endif
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_PICKING_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_PICKING_H

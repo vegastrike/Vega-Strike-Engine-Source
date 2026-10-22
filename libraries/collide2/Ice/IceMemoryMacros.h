@@ -99,35 +99,37 @@ inline_ void MoveMemory(void *dest, const void *src, size_t size) {
     memmove(dest, src, size);
 }
 
-#define SIZEOFOBJECT        sizeof(*this)                                    //!< Gives the size of current object. Avoid some mistakes (e.g. "sizeof(this)").
-//#define CLEAROBJECT		{ memset(this, 0, SIZEOFOBJECT);	}			//!< Clears current object. Laziness is my business. HANDLE WITH CARE.
+#define SIZEOFOBJECT sizeof(*this)  //!< Gives the size of current object. Avoid some mistakes (e.g. "sizeof(this)").
 
-template<typename T>
-inline void DELETESINGLE(T *&x) {                                             //!< Deletes an instance of a class.
+// #define CLEAROBJECT		{ memset(this, 0, SIZEOFOBJECT);	}			//!< Clears current object. Laziness is my
+// business. HANDLE WITH CARE.
+
+template <typename T>
+inline void DELETESINGLE(T *&x) {  //!< Deletes an instance of a class.
     if (x) {
         delete x;
         x = nullptr;
     }
 }
 
-template<typename T>
-inline void DELETEARRAY(T *&x) {                                              //!< Deletes an array.
+template <typename T>
+inline void DELETEARRAY(T *&x) {  //!< Deletes an array.
     if (x) {
-        delete[]x;
+        delete[] x;
         x = nullptr;
     }
 }
 
-template<typename T>
-inline void SAFE_RELEASE(T *&x) {                                             //!< Safe D3D-style release
+template <typename T>
+inline void SAFE_RELEASE(T *&x) {  //!< Safe D3D-style release
     if (x) {
         x->Release();
         x = nullptr;
     }
 }
 
-template<typename T>
-inline void SAFE_DESTRUCT(T *&x) {                                            //!< Safe ICE-style release
+template <typename T>
+inline void SAFE_DESTRUCT(T *&x) {  //!< Safe ICE-style release
     if (x) {
         x->SelfDestruct();
         x = nullptr;
@@ -135,12 +137,19 @@ inline void SAFE_DESTRUCT(T *&x) {                                            //
 }
 
 #ifdef __ICEERROR_H__
-#define CHECKALLOC(x)		if(!x) return SetIceError("Out of memory.", EC_OUT_OF_MEMORY);	//!< Standard alloc checking. HANDLE WITH CARE.
+#    define CHECKALLOC(x) \
+        if (!x)           \
+            return SetIceError("Out of memory.", EC_OUT_OF_MEMORY);  //!< Standard alloc checking. HANDLE WITH CARE.
 #else
-#define CHECKALLOC(x)        if(!x) return false;
+#    define CHECKALLOC(x) \
+        if (!x)           \
+            return false;
 #endif
 
 //! Standard allocation cycle
-#define SAFE_ALLOC(ptr, type, count)    DELETEARRAY(ptr);    ptr = new type[count];    CHECKALLOC(ptr);
+#define SAFE_ALLOC(ptr, type, count) \
+    DELETEARRAY(ptr);                \
+    ptr = new type[count];           \
+    CHECKALLOC(ptr);
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MEMORY_MACROS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_MEMORY_MACROS_H

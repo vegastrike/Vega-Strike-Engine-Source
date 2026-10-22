@@ -29,66 +29,64 @@
 
 #include "gui/control.h"
 
-//See cpp file for detailed descriptions of classes, functions, etc.
+// See cpp file for detailed descriptions of classes, functions, etc.
 
-//The group control is simply a collection of controls that can be
-//manipulated as one.
-//Note that this Control "owns" the controls under it.  They are deleted
-//when this control is deleted.
+// The group control is simply a collection of controls that can be
+// manipulated as one.
+// Note that this Control "owns" the controls under it.  They are deleted
+// when this control is deleted.
 class GroupControl : public Control {
 public:
-//Whether this control has children.
+    // Whether this control has children.
     virtual bool hasGroupChildren(void) {
         return true;
     }
 
-//Add a new control to this collection.
+    // Add a new control to this collection.
     void addChild(Control *child);
 
-//Delete a control that is in this collection.
-//Returns true if successful.
+    // Delete a control that is in this collection.
+    // Returns true if successful.
     bool deleteControl(Control *c);
 
-//Take a control away from this collection and save it elsewhere.
+    // Take a control away from this collection and save it elsewhere.
     Control *removeControlFromGroup(Control *c);
 
-//Find a control using its id.  NULL returned if none found.
-//Note that the control may be hidden.
+    // Find a control using its id.  NULL returned if none found.
+    // Note that the control may be hidden.
     Control *findControlById(const std::string &id);
 
-//Number of child controls.
+    // Number of child controls.
     int childCount(void) {
         return m_controls.size();
     }
 
-//A control in this group.
+    // A control in this group.
     Control *childAt(int index) {
         return m_controls[index];
     }
 
-//Draw the control.
-//This should not draw outside its rectangle!
+    // Draw the control.
+    // This should not draw outside its rectangle!
     virtual void draw(void);
 
-//OVERRIDES
+    // OVERRIDES
     virtual bool processMouseDown(const InputEvent &event);
     virtual bool processMouseUp(const InputEvent &event);
     virtual bool processMouseMove(const InputEvent &event);
     virtual bool processMouseDrag(const InputEvent &event);
 
-//CONSTRUCTION
+    // CONSTRUCTION
 public:
-    GroupControl(void) {
-    }
+    GroupControl(void) {}
 
     virtual ~GroupControl(void);
 
-//INTERNAL IMPLEMENTATION
+    // INTERNAL IMPLEMENTATION
 protected:
-
-//VARIABLES
+    // VARIABLES
 protected:
     std::vector<Control *> m_controls;
 };
 
-#endif   //VEGA_STRIKE_ENGINE_GUI_GROUP_CONTROL_H
+#endif  // VEGA_STRIKE_ENGINE_GUI_GROUP_CONTROL_H

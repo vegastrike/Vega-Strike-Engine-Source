@@ -23,7 +23,6 @@
 
 using namespace Opcode;
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Computes the sum of two AABBs.
@@ -75,7 +74,7 @@ float AABB::MakeCube(AABB &cube) const {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void AABB::MakeSphere(Sphere &sphere) const {
     GetExtents(sphere.mCenter);
-    sphere.mRadius = sphere.mCenter.Magnitude() * 1.00001f;    // To make sure sphere::Contains(*this)	succeeds
+    sphere.mRadius = sphere.mCenter.Magnitude() * 1.00001f;  // To make sure sphere::Contains(*this)	succeeds
     GetCenter(sphere.mCenter);
 }
 
@@ -201,18 +200,11 @@ bool AABB::ComputePoints(Point *pts) const {
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const Point *AABB::GetVertexNormals() const {
-    static float VertexNormals[] =
-            {
-                    -INVSQRT3, -INVSQRT3, -INVSQRT3,
-                    INVSQRT3, -INVSQRT3, -INVSQRT3,
-                    INVSQRT3, INVSQRT3, -INVSQRT3,
-                    -INVSQRT3, INVSQRT3, -INVSQRT3,
-                    -INVSQRT3, -INVSQRT3, INVSQRT3,
-                    INVSQRT3, -INVSQRT3, INVSQRT3,
-                    INVSQRT3, INVSQRT3, INVSQRT3,
-                    -INVSQRT3, INVSQRT3, INVSQRT3
-            };
-    return (const Point *) VertexNormals;
+    static float VertexNormals[] = {-INVSQRT3, -INVSQRT3, -INVSQRT3, INVSQRT3,  -INVSQRT3, -INVSQRT3,
+                                    INVSQRT3,  INVSQRT3,  -INVSQRT3, -INVSQRT3, INVSQRT3,  -INVSQRT3,
+                                    -INVSQRT3, -INVSQRT3, INVSQRT3,  INVSQRT3,  -INVSQRT3, INVSQRT3,
+                                    INVSQRT3,  INVSQRT3,  INVSQRT3,  -INVSQRT3, INVSQRT3,  INVSQRT3};
+    return (const Point *)VertexNormals;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -222,12 +214,7 @@ const Point *AABB::GetVertexNormals() const {
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const uint32_t *AABB::GetEdges() const {
-    static uint32_t Indices[] = {
-            0, 1, 1, 2, 2, 3, 3, 0,
-            7, 6, 6, 5, 5, 4, 4, 7,
-            1, 5, 6, 2,
-            3, 7, 4, 0
-    };
+    static uint32_t Indices[] = {0, 1, 1, 2, 2, 3, 3, 0, 7, 6, 6, 5, 5, 4, 4, 7, 1, 5, 6, 2, 3, 7, 4, 0};
     return Indices;
 }
 
@@ -238,24 +225,23 @@ const uint32_t *AABB::GetEdges() const {
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const Point *AABB::GetEdgeNormals() const {
-    static float EdgeNormals[] =
-            {
-                    0, -INVSQRT2, -INVSQRT2,    // 0-1
-                    INVSQRT2, 0, -INVSQRT2,    // 1-2
-                    0, INVSQRT2, -INVSQRT2,    // 2-3
-                    -INVSQRT2, 0, -INVSQRT2,    // 3-0
+    static float EdgeNormals[] = {
+            0,         -INVSQRT2, -INVSQRT2,  // 0-1
+            INVSQRT2,  0,         -INVSQRT2,  // 1-2
+            0,         INVSQRT2,  -INVSQRT2,  // 2-3
+            -INVSQRT2, 0,         -INVSQRT2,  // 3-0
 
-                    0, INVSQRT2, INVSQRT2,    // 7-6
-                    INVSQRT2, 0, INVSQRT2,    // 6-5
-                    0, -INVSQRT2, INVSQRT2,    // 5-4
-                    -INVSQRT2, 0, INVSQRT2,    // 4-7
+            0,         INVSQRT2,  INVSQRT2,   // 7-6
+            INVSQRT2,  0,         INVSQRT2,   // 6-5
+            0,         -INVSQRT2, INVSQRT2,   // 5-4
+            -INVSQRT2, 0,         INVSQRT2,   // 4-7
 
-                    INVSQRT2, -INVSQRT2, 0,            // 1-5
-                    INVSQRT2, INVSQRT2, 0,            // 6-2
-                    -INVSQRT2, INVSQRT2, 0,            // 3-7
-                    -INVSQRT2, -INVSQRT2, 0            // 4-0
-            };
-    return (const Point *) EdgeNormals;
+            INVSQRT2,  -INVSQRT2, 0,          // 1-5
+            INVSQRT2,  INVSQRT2,  0,          // 6-2
+            -INVSQRT2, INVSQRT2,  0,          // 3-7
+            -INVSQRT2, -INVSQRT2, 0           // 4-0
+    };
+    return (const Point *)EdgeNormals;
 }
 
 // ===========================================================================
@@ -282,15 +268,15 @@ const Point *AABB::GetEdgeNormals() const {
 
 // NOTE: This sample program requires OPEN INVENTOR!
 
-//indexlist: this table stores the 64 possible cases of classification of
-//the eyepoint with respect to the 6 defining planes of the bbox (2^6=64)
-//only 26 (3^3-1, where 1 is "inside" cube) of these cases are valid.
-//the first 6 numbers in each row are the indices of the bbox vertices that
-//form the outline of which we want to compute the area (counterclockwise
-//ordering), the 7th entry means the number of vertices in the outline.
-//there are 6 cases with a single face and and a 4-vertex outline, and
-//20 cases with 2 or 3 faces and a 6-vertex outline. a value of 0 indicates
-//an invalid case.
+// indexlist: this table stores the 64 possible cases of classification of
+// the eyepoint with respect to the 6 defining planes of the bbox (2^6=64)
+// only 26 (3^3-1, where 1 is "inside" cube) of these cases are valid.
+// the first 6 numbers in each row are the indices of the bbox vertices that
+// form the outline of which we want to compute the area (counterclockwise
+// ordering), the 7th entry means the number of vertices in the outline.
+// there are 6 cases with a single face and and a 4-vertex outline, and
+// 20 cases with 2 or 3 faces and a 6-vertex outline. a value of 0 indicates
+// an invalid case.
 
 
 // Original list was made of 7 items, I added an 8th element:
@@ -299,73 +285,72 @@ const Point *AABB::GetEdgeNormals() const {
 //
 // I also replaced original ints with sbytes.
 
-static const int8_t gIndexList[64][8] =
-        {
-                {-1, -1, -1, -1, -1, -1, -1, 0}, // 0 inside
-                {0, 4, 7, 3, 0, -1, -1, 4}, // 1 left
-                {1, 2, 6, 5, 1, -1, -1, 4}, // 2 right
-                {-1, -1, -1, -1, -1, -1, -1, 0}, // 3 -
-                {0, 1, 5, 4, 0, -1, -1, 4}, // 4 bottom
-                {0, 1, 5, 4, 7, 3, 0, 6}, // 5 bottom, left
-                {0, 1, 2, 6, 5, 4, 0, 6}, // 6 bottom, right
-                {-1, -1, -1, -1, -1, -1, -1, 0}, // 7 -
-                {2, 3, 7, 6, 2, -1, -1, 4}, // 8 top
-                {0, 4, 7, 6, 2, 3, 0, 6}, // 9 top, left
-                {1, 2, 3, 7, 6, 5, 1, 6}, //10 top, right
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //11 -
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //12 -
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //13 -
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //14 -
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //15 -
-                {0, 3, 2, 1, 0, -1, -1, 4}, //16 front
-                {0, 4, 7, 3, 2, 1, 0, 6}, //17 front, left
-                {0, 3, 2, 6, 5, 1, 0, 6}, //18 front, right
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //19 -
-                {0, 3, 2, 1, 5, 4, 0, 6}, //20 front, bottom
-                {1, 5, 4, 7, 3, 2, 1, 6}, //21 front, bottom, left
-                {0, 3, 2, 6, 5, 4, 0, 6}, //22 front, bottom, right
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //23 -
-                {0, 3, 7, 6, 2, 1, 0, 6}, //24 front, top
-                {0, 4, 7, 6, 2, 1, 0, 6}, //25 front, top, left
-                {0, 3, 7, 6, 5, 1, 0, 6}, //26 front, top, right
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //27 -
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //28 -
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //29 -
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //30 -
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //31 -
-                {4, 5, 6, 7, 4, -1, -1, 4}, //32 back
-                {0, 4, 5, 6, 7, 3, 0, 6}, //33 back, left
-                {1, 2, 6, 7, 4, 5, 1, 6}, //34 back, right
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //35 -
-                {0, 1, 5, 6, 7, 4, 0, 6}, //36 back, bottom
-                {0, 1, 5, 6, 7, 3, 0, 6}, //37 back, bottom, left
-                {0, 1, 2, 6, 7, 4, 0, 6}, //38 back, bottom, right
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //39 -
-                {2, 3, 7, 4, 5, 6, 2, 6}, //40 back, top
-                {0, 4, 5, 6, 2, 3, 0, 6}, //41 back, top, left
-                {1, 2, 3, 7, 4, 5, 1, 6}, //42 back, top, right
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //43 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //44 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //45 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //46 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //47 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //48 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //49 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //50 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //51 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //52 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //53 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //54 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //55 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //56 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //57 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //58 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //59 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //60 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //61 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}, //62 invalid
-                {-1, -1, -1, -1, -1, -1, -1, 0}  //63 invalid
-        };
+static const int8_t gIndexList[64][8] = {
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 0 inside
+        {0, 4, 7, 3, 0, -1, -1, 4},       // 1 left
+        {1, 2, 6, 5, 1, -1, -1, 4},       // 2 right
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 3 -
+        {0, 1, 5, 4, 0, -1, -1, 4},       // 4 bottom
+        {0, 1, 5, 4, 7, 3, 0, 6},         // 5 bottom, left
+        {0, 1, 2, 6, 5, 4, 0, 6},         // 6 bottom, right
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 7 -
+        {2, 3, 7, 6, 2, -1, -1, 4},       // 8 top
+        {0, 4, 7, 6, 2, 3, 0, 6},         // 9 top, left
+        {1, 2, 3, 7, 6, 5, 1, 6},         // 10 top, right
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 11 -
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 12 -
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 13 -
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 14 -
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 15 -
+        {0, 3, 2, 1, 0, -1, -1, 4},       // 16 front
+        {0, 4, 7, 3, 2, 1, 0, 6},         // 17 front, left
+        {0, 3, 2, 6, 5, 1, 0, 6},         // 18 front, right
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 19 -
+        {0, 3, 2, 1, 5, 4, 0, 6},         // 20 front, bottom
+        {1, 5, 4, 7, 3, 2, 1, 6},         // 21 front, bottom, left
+        {0, 3, 2, 6, 5, 4, 0, 6},         // 22 front, bottom, right
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 23 -
+        {0, 3, 7, 6, 2, 1, 0, 6},         // 24 front, top
+        {0, 4, 7, 6, 2, 1, 0, 6},         // 25 front, top, left
+        {0, 3, 7, 6, 5, 1, 0, 6},         // 26 front, top, right
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 27 -
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 28 -
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 29 -
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 30 -
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 31 -
+        {4, 5, 6, 7, 4, -1, -1, 4},       // 32 back
+        {0, 4, 5, 6, 7, 3, 0, 6},         // 33 back, left
+        {1, 2, 6, 7, 4, 5, 1, 6},         // 34 back, right
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 35 -
+        {0, 1, 5, 6, 7, 4, 0, 6},         // 36 back, bottom
+        {0, 1, 5, 6, 7, 3, 0, 6},         // 37 back, bottom, left
+        {0, 1, 2, 6, 7, 4, 0, 6},         // 38 back, bottom, right
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 39 -
+        {2, 3, 7, 4, 5, 6, 2, 6},         // 40 back, top
+        {0, 4, 5, 6, 2, 3, 0, 6},         // 41 back, top, left
+        {1, 2, 3, 7, 4, 5, 1, 6},         // 42 back, top, right
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 43 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 44 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 45 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 46 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 47 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 48 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 49 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 50 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 51 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 52 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 53 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 54 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 55 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 56 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 57 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 58 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 59 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 60 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 61 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0},  // 62 invalid
+        {-1, -1, -1, -1, -1, -1, -1, 0}   // 63 invalid
+};
 
 const int8_t *AABB::ComputeOutline(const Point &local_eye, int32_t &num) const {
     // Get box corners
@@ -375,15 +360,15 @@ const int8_t *AABB::ComputeOutline(const Point &local_eye, int32_t &num) const {
     GetMax(max);
 
     // Compute 6-bit code to classify eye with respect to the 6 defining planes of the bbox
-    int pos = ((local_eye.x < min.x) ? 1 : 0)    // 1 = left
-            + ((local_eye.x > max.x) ? 2 : 0)    // 2 = right
-            + ((local_eye.y < min.y) ? 4 : 0)    // 4 = bottom
-            + ((local_eye.y > max.y) ? 8 : 0)    // 8 = top
-            + ((local_eye.z < min.z) ? 16 : 0)    // 16 = front
-            + ((local_eye.z > max.z) ? 32 : 0);    // 32 = back
+    int pos = ((local_eye.x < min.x) ? 1 : 0)      // 1 = left
+              + ((local_eye.x > max.x) ? 2 : 0)    // 2 = right
+              + ((local_eye.y < min.y) ? 4 : 0)    // 4 = bottom
+              + ((local_eye.y > max.y) ? 8 : 0)    // 8 = top
+              + ((local_eye.z < min.z) ? 16 : 0)   // 16 = front
+              + ((local_eye.z > max.z) ? 32 : 0);  // 32 = back
 
     // Look up number of vertices in outline
-    num = (int32_t) gIndexList[pos][7];
+    num = (int32_t)gIndexList[pos][7];
     // Zero indicates invalid case
     if (!num) {
         return nullptr;
@@ -394,10 +379,10 @@ const int8_t *AABB::ComputeOutline(const Point &local_eye, int32_t &num) const {
 
 // calculateBoxArea: computes the screen-projected 2D area of an oriented 3D bounding box
 
-//const Point&		eye,		//eye point (in bbox object coordinates)
-//const AABB&			box,		//3d bbox
-//const Matrix4x4&	mat,		//free transformation for bbox
-//float width, float height, int& num)
+// const Point&		eye,		//eye point (in bbox object coordinates)
+// const AABB&			box,		//3d bbox
+// const Matrix4x4&	mat,		//free transformation for bbox
+// float width, float height, int& num)
 float AABB::ComputeBoxArea(const Point &eye, const Matrix4x4 &mat, float width, float height, int32_t &num) const {
     const int8_t *Outline = ComputeOutline(eye, num);
     if (!Outline) {
@@ -422,6 +407,5 @@ float AABB::ComputeBoxArea(const Point &eye, const Matrix4x4 &mat, float width, 
         Sum += (dst[i][0] - dst[i + 1][0]) * (dst[i][1] + dst[i + 1][1]);
     }
 
-    return Sum * 0.5f;    //return computed value corrected by 0.5
+    return Sum * 0.5f;  // return computed value corrected by 0.5
 }
-

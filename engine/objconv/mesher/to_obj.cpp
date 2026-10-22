@@ -26,4 +26,3 @@
  */
 
 #include "objconv/mesher/to_obj.h"
-

@@ -28,16 +28,16 @@
 #define VEGA_STRIKE_ENGINE_IN_KB_DATA_H
 
 #include <string>
+
 class KBData {
 public:
     std::string data;
 
-    KBData() {
-    }
+    KBData() {}
 
     KBData(const std::string &s) {
         this->data = s;
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_IN_KB_DATA_H
+#endif  // VEGA_STRIKE_ENGINE_IN_KB_DATA_H

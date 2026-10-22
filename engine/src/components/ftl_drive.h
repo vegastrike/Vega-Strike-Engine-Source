@@ -52,7 +52,7 @@ public:
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -67,4 +67,4 @@ public:
     double Consume() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_FTL_DRIVE_H

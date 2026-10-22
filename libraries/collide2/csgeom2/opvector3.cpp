@@ -1,5 +1,5 @@
 /*
- * opvector3.cpp
+* opvector3.cpp
  *
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 1998,1999,2000 by Jorrit Tyberghein

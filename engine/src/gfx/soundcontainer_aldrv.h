@@ -56,4 +56,4 @@ protected:
     bool isPlayingImpl() const override;
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_ALDRV_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_ALDRV_H

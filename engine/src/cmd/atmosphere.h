@@ -26,11 +26,12 @@
  */
 // NO HEADER GUARD
 
-#include "gfx_generic/vec.h"
-#include "src/gfxlib_struct.h"
+#include <vector>
+
 #include "gfx_generic/matrix.h"
 #include "gfx_generic/mesh.h"
-#include <vector>
+#include "gfx_generic/vec.h"
+#include "src/gfxlib_struct.h"
 
 class Atmosphere {
 public:
@@ -47,7 +48,7 @@ public:
         GFXColor high_color[2];
         /* high angle */
         GFXColor high_ambient_color[2];
-        float scattering;
+        float    scattering;
         /* "scattering" coefficient, basically
          *                                        how much the low_color spreads around */
     };
@@ -57,24 +58,24 @@ private:
 
     class SunBox {
     public:
-        SunBox(Mesh *m) : sunbox(m) {
-        }
+        SunBox(Mesh *m) : sunbox(m) {}
 
         ~SunBox();
         Mesh *sunbox;
     };
+
     void setArray(float *, const GFXColor &);
     void setArray1(float *, const GFXColor &);
-/* Internal state information */
-    Mesh *dome;                                        /* entire sky; for texture mapping */
-/* 3 rendering passes, to preserve framerate */
-    Mesh *cap;                                         /* mid to zenith */
-    Mesh *stack;                               /* horizon to zenith */
-/* box around the sun (single star for now) */
+    /* Internal state information */
+    Mesh *dome;  /* entire sky; for texture mapping */
+                 /* 3 rendering passes, to preserve framerate */
+    Mesh *cap;   /* mid to zenith */
+    Mesh *stack; /* horizon to zenith */
+                 /* box around the sun (single star for now) */
     std::vector<SunBox *> sunboxes;
-    Matrix tmatrix;
-    QVector position;
-/* lighting contexts for the above 3 */
+    Matrix                tmatrix;
+    QVector               position;
+    /* lighting contexts for the above 3 */
     int l0, l1, l2;
     int divisions;
 
@@ -82,19 +83,18 @@ public:
     Atmosphere(const Parameters &params);
     ~Atmosphere();
     const Parameters &parameters();
-    void SetParameters(const Parameters &params);
+    void              SetParameters(const Parameters &params);
 
-/* Update the precomputed mesh to the new parameters. This is
- *  expensive, so let the upper layers decide when to do this
- */
+    /* Update the precomputed mesh to the new parameters. This is
+     *  expensive, so let the upper layers decide when to do this
+     */
 
-/* ugh, make update just change the lighting state */
-    void Update(const QVector &position, const Matrix &tmatrix);
-    void Draw();
+    /* ugh, make update just change the lighting state */
+    void        Update(const QVector &position, const Matrix &tmatrix);
+    void        Draw();
     static void ProcessDrawQueue();
-    void SetMatricesAndDraw(const QVector &position, const Matrix tmatrix);
-/* inherit the orientation of
- *                                                                                the transformation matrix  */
+    void        SetMatricesAndDraw(const QVector &position, const Matrix tmatrix);
+    /* inherit the orientation of
+     *                                                                                the transformation matrix  */
     static void DrawAtmospheres();
 };
-

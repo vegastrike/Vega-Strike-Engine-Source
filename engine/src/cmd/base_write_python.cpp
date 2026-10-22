@@ -27,73 +27,73 @@
 
 #include "cmd/base.h"
 #ifdef BASE_MAKER
-//#ifndef BASE_XML
-#include <cstdio>
-#include <boost/format.hpp>
-#include "vega_string_utils.h"
-#include "root_generic/vega_random.h"
+// #ifndef BASE_XML
+#    include <cstdio>
 
-void BaseInterface::Room::Link::EndXML( FILE *fp )
-{
-    VSFileSystem::vs_fprintf( fp, "room, '%s', %g, %g, %g, %g, '%s'", index.c_str(), x, y, wid, hei, text.c_str() );
+#    include <boost/format.hpp>
+
+#    include "root_generic/vega_random.h"
+#    include "vega_string_utils.h"
+
+void BaseInterface::Room::Link::EndXML(FILE *fp) {
+    VSFileSystem::vs_fprintf(fp, "room, '%s', %g, %g, %g, %g, '%s'", index.c_str(), x, y, wid, hei, text.c_str());
 }
 
-void BaseInterface::Room::Goto::EndXML( FILE *fp )
-{
-    VSFileSystem::vs_fprintf( fp, "Base.Link (" );
-    Link::EndXML( fp );
-    VSFileSystem::vs_fprintf( fp, ", %d)\n", Goto::index );
+void BaseInterface::Room::Goto::EndXML(FILE *fp) {
+    VSFileSystem::vs_fprintf(fp, "Base.Link (");
+    Link::EndXML(fp);
+    VSFileSystem::vs_fprintf(fp, ", %d)\n", Goto::index);
 }
 
-void BaseInterface::Room::Python::EndXML( FILE *fp )
-{
-    VSFileSystem::vs_fprintf( fp, "Base.Python (" );
-    Link::EndXML( fp );
-    VSFileSystem::vs_fprintf( fp, ", '%s')\n", pythonfile.c_str() );
+void BaseInterface::Room::Python::EndXML(FILE *fp) {
+    VSFileSystem::vs_fprintf(fp, "Base.Python (");
+    Link::EndXML(fp);
+    VSFileSystem::vs_fprintf(fp, ", '%s')\n", pythonfile.c_str());
 }
 
-void BaseInterface::Room::Talk::EndXML( FILE *fp )
-{
-    const std::string python_filename = (boost::format("NEW_SCRIPT_%1%.py") % VegaRandom::Instance().GenRandUInt32()).str();
+void BaseInterface::Room::Talk::EndXML(FILE *fp) {
+    const std::string python_filename =
+            (boost::format("NEW_SCRIPT_%1%.py") % VegaRandom::Instance().GenRandUInt32()).str();
     char *randstr = vega_str_dup(python_filename.c_str());
-    VSFileSystem::vs_fprintf( fp, "Base.Python (" );
-    Link::EndXML( fp );
-    VSFileSystem::vs_fprintf( fp, ", '%s')\n", randstr );
-    FILE *py = VSFileSystem::vs_open( randstr, "wt" );
-    VSFileSystem::vs_fprintf( py, "import Base\nimport VS\nimport random\n\nrandnum=random.randrange(0,%d)\n", static_cast<int>(say.size()) );
+    VSFileSystem::vs_fprintf(fp, "Base.Python (");
+    Link::EndXML(fp);
+    VSFileSystem::vs_fprintf(fp, ", '%s')\n", randstr);
+    FILE *py = VSFileSystem::vs_open(randstr, "wt");
+    VSFileSystem::vs_fprintf(py, "import Base\nimport VS\nimport random\n\nrandnum=random.randrange(0,%d)\n",
+                             static_cast<int>(say.size()));
     for (int i = 0; i < say.size(); i++) {
-        VSFileSystem::vs_fprintf( fp, "if (randnum==%d):\n", i );
-        for (int j = 0; j < say[i].size(); j++)
+        VSFileSystem::vs_fprintf(fp, "if (randnum==%d):\n", i);
+        for (int j = 0; j < say[i].size(); j++) {
             if (say[i][j] == '\n') {
-                say[i][j] = '\\';
+                say[i][j]              = '\\';
                 static const char *ins = "n";
-                say[i].insert( j, ins );
+                say[i].insert(j, ins);
             }
-        VSFileSystem::vs_fprintf( fp, "  Base.Message ('%s')\n", say[i].c_str() );
-        if ( !( soundfiles[i].empty() ) )
-            VSFileSystem::vs_fprintf( fp, "  VS.playSound ('%s', (0,0,0), (0,0,0))\n", soundfiles[i].c_str() );
+        }
+        VSFileSystem::vs_fprintf(fp, "  Base.Message ('%s')\n", say[i].c_str());
+        if (!(soundfiles[i].empty())) {
+            VSFileSystem::vs_fprintf(fp, "  VS.playSound ('%s', (0,0,0), (0,0,0))\n", soundfiles[i].c_str());
+        }
     }
-    //obsolete... creates a file that uses the Python function instead.
+    // obsolete... creates a file that uses the Python function instead.
 }
 
-void BaseInterface::Room::Launch::EndXML( FILE *fp )
-{
-    VSFileSystem::vs_fprintf( fp, "Base.Launch (" );
-    Link::EndXML( fp );
-    VSFileSystem::vs_fprintf( fp, ")\n" );
-}
-void BaseInterface::Room::Eject::EndXML( FILE *fp )
-{
-    VSFileSystem::vs_fprintf( fp, "Base.Eject (" );
-    Link::EndXML( fp );
-    VSFileSystem::vs_fprintf( fp, ")\n" );
+void BaseInterface::Room::Launch::EndXML(FILE *fp) {
+    VSFileSystem::vs_fprintf(fp, "Base.Launch (");
+    Link::EndXML(fp);
+    VSFileSystem::vs_fprintf(fp, ")\n");
 }
 
-void BaseInterface::Room::Comp::EndXML( FILE *fp )
-{
-    VSFileSystem::vs_fprintf( fp, "Base.Comp (" );
-    Link::EndXML( fp );
-    VSFileSystem::vs_write( ", '", 3, 1, fp );
+void BaseInterface::Room::Eject::EndXML(FILE *fp) {
+    VSFileSystem::vs_fprintf(fp, "Base.Eject (");
+    Link::EndXML(fp);
+    VSFileSystem::vs_fprintf(fp, ")\n");
+}
+
+void BaseInterface::Room::Comp::EndXML(FILE *fp) {
+    VSFileSystem::vs_fprintf(fp, "Base.Comp (");
+    Link::EndXML(fp);
+    VSFileSystem::vs_write(", '", 3, 1, fp);
     for (const auto each_mode : modes) {
         std::string mode_string;
         switch (modes.at(RAW_DISPLAY_MODE(each_mode))) {
@@ -119,33 +119,29 @@ void BaseInterface::Room::Comp::EndXML( FILE *fp )
                 break;
         }
         if (!mode_string.empty()) {
-            VSFileSystem::vs_fprintf( fp, "%s ", mode_string.c_str() );
+            VSFileSystem::vs_fprintf(fp, "%s ", mode_string.c_str());
         }
         if (each_mode == modes.at(modes.size() - 1)) {
-            VSFileSystem::vs_fprintf( fp, "'" );
+            VSFileSystem::vs_fprintf(fp, "'");
         }
     }
-    VSFileSystem::vs_fprintf( fp, ")\n" );
+    VSFileSystem::vs_fprintf(fp, ")\n");
 }
 
-void BaseInterface::Room::BaseObj::EndXML( FILE *fp )
-{
-//Do nothing
+void BaseInterface::Room::BaseObj::EndXML(FILE *fp) {
+    // Do nothing
 }
 
-void BaseInterface::Room::BaseShip::EndXML( FILE *fp )
-{
-    VSFileSystem::vs_fprintf( fp, "Base.Ship (room, '%s', (%lg,%lg,%lg), (%g, %g, %g), (%g, %g, %g))\n", index.c_str(),
-                              mat.p.i, mat.p.j, mat.p.k,
-                              mat.getR().i, mat.getR().j, mat.getR().k,
-                              mat.getQ().i, mat.getQ().j, mat.getQ().k );
+void BaseInterface::Room::BaseShip::EndXML(FILE *fp) {
+    VSFileSystem::vs_fprintf(fp, "Base.Ship (room, '%s', (%lg,%lg,%lg), (%g, %g, %g), (%g, %g, %g))\n", index.c_str(),
+                             mat.p.i, mat.p.j, mat.p.k, mat.getR().i, mat.getR().j, mat.getR().k, mat.getQ().i,
+                             mat.getQ().j, mat.getQ().k);
 }
 
-void BaseInterface::Room::BaseVSSprite::EndXML( FILE *fp )
-{
+void BaseInterface::Room::BaseVSSprite::EndXML(FILE *fp) {
     float x, y;
-    spr.GetPosition( x, y );
-    VSFileSystem::vs_fprintf( fp, "Base.Texture (room, '%s', '%s', %g, %g)\n", index.c_str(), texfile.c_str(), x, y );
+    spr.GetPosition(x, y);
+    VSFileSystem::vs_fprintf(fp, "Base.Texture (room, '%s', '%s', %g, %g)\n", index.c_str(), texfile.c_str(), x, y);
 }
 
 void BaseInterface::Room::EndXML(FILE *fp) const {
@@ -171,6 +167,5 @@ void BaseInterface::EndXML(FILE *fp) const {
     }
 }
 
-//#endif
+// #endif
 #endif
-

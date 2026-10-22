@@ -32,24 +32,22 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SPHERE_COLLIDER_H
 
 struct OPCODE_API SphereCache : VolumeCache {
-    SphereCache() : Center(0.0f, 0.0f, 0.0f), FatRadius2(0.0f), FatCoeff(1.1f) {
-    }
+    SphereCache() : Center(0.0f, 0.0f, 0.0f), FatRadius2(0.0f), FatCoeff(1.1f) {}
 
-    ~SphereCache() {
-    }
+    ~SphereCache() {}
 
     // Cached faces signature
-    Point Center;        //!< Sphere used when performing the query resulting in cached faces
-    float FatRadius2;    //!< Sphere used when performing the query resulting in cached faces
+    Point Center;      //!< Sphere used when performing the query resulting in cached faces
+    float FatRadius2;  //!< Sphere used when performing the query resulting in cached faces
     // User settings
-    float FatCoeff;    //!< mRadius2 multiplier used to create a fat sphere
+    float FatCoeff;  //!< mRadius2 multiplier used to create a fat sphere
 };
 
 class OPCODE_API SphereCollider : public VolumeCollider {
 public:
     // Constructor / Destructor
     SphereCollider();
-    virtual                                ~SphereCollider();
+    virtual ~SphereCollider();
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -67,18 +65,16 @@ public:
      *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    bool Collide(SphereCache &cache,
-            const Sphere &sphere,
-            const Model &model,
-            const Matrix4x4 *worlds = nullptr,
-            const Matrix4x4 *worldm = nullptr);
+    bool Collide(SphereCache &cache, const Sphere &sphere, const Model &model, const Matrix4x4 *worlds = nullptr,
+                 const Matrix4x4 *worldm = nullptr);
 
     //
     bool Collide(SphereCache &cache, const Sphere &sphere, const AABBTree *tree);
+
 protected:
     // Sphere in model space
-    Point mCenter;            //!< Sphere center
-    float mRadius2;            //!< Sphere radius squared
+    Point mCenter;   //!< Sphere center
+    float mRadius2;  //!< Sphere radius squared
     // Internal methods
     void _Collide(const AABBCollisionNode *node);
     void _Collide(const AABBNoLeafNode *node);
@@ -90,29 +86,25 @@ protected:
     void _CollideNoPrimitiveTest(const AABBQuantizedNode *node);
     void _CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node);
     // Overlap tests
-    inline_                bool SphereContainsBox(const Point &bc, const Point &be);
-    inline_                bool SphereAABBOverlap(const Point &center, const Point &extents);
-    bool SphereTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2);
+    inline_ bool SphereContainsBox(const Point &bc, const Point &be);
+    inline_ bool SphereAABBOverlap(const Point &center, const Point &extents);
+    bool         SphereTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2);
     // Init methods
-    bool InitQuery(SphereCache &cache,
-            const Sphere &sphere,
-            const Matrix4x4 *worlds = nullptr,
-            const Matrix4x4 *worldm = nullptr);
+    bool InitQuery(SphereCache &cache, const Sphere &sphere, const Matrix4x4 *worlds = nullptr,
+                   const Matrix4x4 *worldm = nullptr);
 };
 
 class OPCODE_API HybridSphereCollider : public SphereCollider {
 public:
     // Constructor / Destructor
     HybridSphereCollider();
-    virtual                                ~HybridSphereCollider();
+    virtual ~HybridSphereCollider();
 
-    bool Collide(SphereCache &cache,
-            const Sphere &sphere,
-            const HybridModel &model,
-            const Matrix4x4 *worlds = nullptr,
-            const Matrix4x4 *worldm = nullptr);
+    bool Collide(SphereCache &cache, const Sphere &sphere, const HybridModel &model, const Matrix4x4 *worlds = nullptr,
+                 const Matrix4x4 *worldm = nullptr);
+
 protected:
     Container mTouchedBoxes;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SPHERE_COLLIDER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_SPHERE_COLLIDER_H

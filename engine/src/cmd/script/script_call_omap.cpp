@@ -29,80 +29,81 @@
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef WIN32
-//this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
-#include <unistd.h>
+// this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can
+// compile without it
+#    include <unistd.h>
 #endif
 
 #include <expat.h>
+
 #include "cmd/unit_generic.h"
-#include "root_generic/xml_support.h"
-
-#include "src/vegastrike.h"
-
 #include "mission.h"
 #include "root_generic/easydom.h"
+#include "root_generic/xml_support.h"
+#include "src/vegastrike.h"
 
 varInst *Mission::call_omap(missionNode *node, int mode) {
     varInst *viret = NULL;
     if (mode == SCRIPT_PARSE) {
-        string cmd = node->attr_value("name");
+        string cmd             = node->attr_value("name");
         node->script.method_id = module_omap_map[cmd];
     }
-    callback_module_omap_type method_id = (callback_module_omap_type) node->script.method_id;
+    callback_module_omap_type method_id = (callback_module_omap_type)node->script.method_id;
     if (method_id == CMT_OMAP_new) {
         viret = call_omap_new(node, mode);
 
         return viret;
     } else {
-        varInst *ovi = getObjectArg(node, mode);
-        omap_t *my_object = getOMapObject(node, mode, ovi);
+        varInst *ovi       = getObjectArg(node, mode);
+        omap_t  *my_object = getOMapObject(node, mode, ovi);
         if (method_id == CMT_OMAP_delete) {
             if (mode == SCRIPT_RUN) {
                 omap_t::iterator iter;
                 for (iter = my_object->begin(); iter != my_object->end(); iter++) {
-                    string varname = (*iter).first;
-                    varInst *vi = (*iter).second;
+                    string   varname = (*iter).first;
+                    varInst *vi      = (*iter).second;
                     deleteVarInst(vi, true);
                 }
                 my_object->clear();
                 delete my_object;
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_OMAP_set) {
-            missionNode *snode = getArgument(node, mode, 2);
-            varInst *var_vi = checkExpression(snode, mode);             //should be getObjExpr
+            missionNode *snode  = getArgument(node, mode, 2);
+            varInst     *var_vi = checkExpression(snode, mode);  // should be getObjExpr
 
             string name = getStringArgument(node, mode, 1);
 
             debug(3, node, mode, "omap set");
             if (mode == SCRIPT_RUN) {
                 varInst *push_vi = newVarInst(VI_IN_OBJECT);
-                push_vi->type = var_vi->type;
+                push_vi->type    = var_vi->type;
                 assignVariable(push_vi, var_vi);
 
                 (*my_object)[name] = push_vi;
             }
             deleteVarInst(var_vi);
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_OMAP_get) {
             debug(3, node, mode, "omap.get");
 
             string name = getStringArgument(node, mode, 1);
 
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_ANY;
             if (mode == SCRIPT_RUN) {
                 varInst *back_vi = (*my_object)[name];
                 assignVariable(viret, back_vi);
-                if (back_vi->type > 10)
+                if (back_vi->type > 10) {
                     assert(0);
-                deleteVarInst(back_vi);                 //this won't delete it
+                }
+                deleteVarInst(back_vi);  // this won't delete it
             }
         } else if (method_id == CMT_OMAP_toxml) {
             if (node->subnodes.size() != 1) {
@@ -111,9 +112,9 @@ varInst *Mission::call_omap(missionNode *node, int mode) {
             }
             debug(3, node, mode, "omap.toxml");
             if (mode == SCRIPT_RUN) {
-                //call_olist_toxml(node,mode,ovi); DELETE ME FIXME ?
+                // call_olist_toxml(node,mode,ovi); DELETE ME FIXME ?
             }
-            viret = newVarInst(VI_TEMP);
+            viret       = newVarInst(VI_TEMP);
             viret->type = VAR_VOID;
         } else if (method_id == CMT_OMAP_size) {
             if (node->subnodes.size() != 1) {
@@ -124,7 +125,7 @@ varInst *Mission::call_omap(missionNode *node, int mode) {
 
             viret = newVarInst(VI_TEMP);
             if (mode == SCRIPT_RUN) {
-                int len = my_object->size();
+                int len        = my_object->size();
                 viret->int_val = len;
             }
             viret->type = VAR_INT;
@@ -134,15 +135,15 @@ varInst *Mission::call_omap(missionNode *node, int mode) {
         }
         deleteVarInst(ovi);
         return viret;
-    }     //else (objects)
+    }  // else (objects)
 
-    return NULL;     //never reach
+    return NULL;  // never reach
 }
 
 omap_t *Mission::getOMapObject(missionNode *node, int mode, varInst *ovi) {
     omap_t *my_object = NULL;
     if (mode == SCRIPT_RUN) {
-        my_object = (omap_t *) ovi->object;
+        my_object = (omap_t *)ovi->object;
         if (my_object == NULL) {
             fatalError(node, mode, "omap: no object");
             assert(0);
@@ -156,14 +157,13 @@ varInst *Mission::call_omap_new(missionNode *node, int mode) {
 
     omap_t *my_object = new omap_t;
 
-    viret->type = VAR_OBJECT;
+    viret->type       = VAR_OBJECT;
     viret->objectname = "omap";
 
-    viret->object = (void *) my_object;
+    viret->object = (void *)my_object;
 
     debug(3, node, mode, "omap new object: ");
     printVarInst(3, viret);
 
     return viret;
 }
-

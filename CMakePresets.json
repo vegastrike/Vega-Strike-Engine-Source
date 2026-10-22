@@ -16,9 +16,6 @@
         "deprecated": true,
         "uninitialized": false
       },
-      "debug": {
-        "output": true
-      },
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }

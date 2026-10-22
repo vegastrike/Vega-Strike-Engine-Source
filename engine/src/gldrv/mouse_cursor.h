@@ -31,17 +31,19 @@
 #include <utility>
 
 enum class CursorType {
-    arrow, over_arrow, crosshairs
+    arrow,
+    over_arrow,
+    crosshairs
 };
 
-void initMouseCursors();
-void freeMouseCursors();
-void showCursor();
-void hideCursor();
-void changeCursor(const CursorType type);
-std::pair<float, float> CalculateRelativeXY(int orig_x, int orig_y);
-std::pair<int, int> CalculateAbsoluteXY(float fraction_x, float fraction_y);
+void                      initMouseCursors();
+void                      freeMouseCursors();
+void                      showCursor();
+void                      hideCursor();
+void                      changeCursor(const CursorType type);
+std::pair<float, float>   CalculateRelativeXY(int orig_x, int orig_y);
+std::pair<int, int>       CalculateAbsoluteXY(float fraction_x, float fraction_y);
 std::pair<double, double> GetJoystickFromMouse();
-std::pair<int, int> GetMousePosition();
+std::pair<int, int>       GetMousePosition();
 
-#endif //VEGA_STRIKE_ENGINE_GLDRV_MOUSE_CURSOR_H
+#endif  // VEGA_STRIKE_ENGINE_GLDRV_MOUSE_CURSOR_H

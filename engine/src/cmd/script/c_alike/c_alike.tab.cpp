@@ -26,8 +26,8 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <string>
 #include <stdio.h>
+#include <string>
 using std::string;
 bool have_yy_error = false;
 

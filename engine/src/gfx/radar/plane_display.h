@@ -28,12 +28,13 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_PLANE_DISPLAY_H
 #define VEGA_STRIKE_ENGINE_GFX_RADAR_PLANE_DISPLAY_H
 
-#include <vector>
 #include <queue>
-#include "gfx_generic/vec.h"
-#include "gfx_generic/matrix.h"
-#include "sensor.h"
+#include <vector>
+
 #include "dual_display.h"
+#include "gfx_generic/matrix.h"
+#include "gfx_generic/vec.h"
+#include "sensor.h"
 
 class VSSprite;
 struct GFXColor;  // Edit from class to struct as defined in gfxlib_struct.
@@ -66,37 +67,35 @@ protected:
     void DrawTargetMarker(const Vector &, const Vector &, const Vector &, float, const GFXColor &, bool);
 
     void Animate();
-    void PrepareAnimation(const Vector &,
-            const Vector &,
-            const AngleSequence &,
-            const AngleSequence &,
-            const AngleSequence &);
+    void PrepareAnimation(const Vector &, const Vector &, const AngleSequence &, const AngleSequence &,
+                          const AngleSequence &);
 
-    void CalculateRotation();
+    void   CalculateRotation();
     Vector Projection(const ViewArea &, const Vector &);
 
 protected:
-    Vector finalCameraAngle;
-    Vector currentCameraAngle;
-    Vector xrotation;
-    Vector yrotation;
-    Vector zrotation;
+    Vector              finalCameraAngle;
+    Vector              currentCameraAngle;
+    Vector              xrotation;
+    Vector              yrotation;
+    Vector              zrotation;
     std::vector<Vector> groundPlane;
-    float radarTime;
+    float               radarTime;
 
     // Primitive animation system
     struct AnimationItem {
-        float duration;
+        float  duration;
         Vector position;
     };
+
     typedef std::queue<AnimationItem> AnimationCollection;
-    AnimationCollection animation;
-    float lastAnimationTime;
-    AngleSequence nothingSequence;
-    AngleSequence bounceSequence;
-    AngleSequence cosineSequence;
+    AnimationCollection               animation;
+    float                             lastAnimationTime;
+    AngleSequence                     nothingSequence;
+    AngleSequence                     bounceSequence;
+    AngleSequence                     cosineSequence;
 };
 
-} // namespace Radar
+}  // namespace Radar
 
-#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_PLANE_DISPLAY_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_RADAR_PLANE_DISPLAY_H

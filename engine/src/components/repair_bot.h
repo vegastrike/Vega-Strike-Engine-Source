@@ -34,15 +34,15 @@
 class RepairBot : public Component {
     // Repair bot type. 0 is no bot;
     unsigned char repair_bot;
-    float next_repair_time;
-    unsigned int next_repair_cargo;    // (~0 : select randomly)
+    float         next_repair_time;
+    unsigned int  next_repair_cargo;  // (~0 : select randomly)
 public:
     RepairBot();
 
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -58,4 +58,4 @@ public:
     ~RepairBot() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_REPAIR_BOT_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_REPAIR_BOT_H

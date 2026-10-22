@@ -30,15 +30,16 @@
 #include "src/in.h"
 
 extern int mousex, mousey;
-int getMouseButtonStatus();  //returns button status that are bitwise anded (i.e. 1,3 down  the number looks like 0x1|(0x1<<2)
+int getMouseButtonStatus();  // returns button status that are bitwise anded (i.e. 1,3 down  the number looks like
+                             // 0x1|(0x1<<2)
 void InitMouse();
 void RestoreMouse();
 void ResetMouseState();
 void ProcessMouse();
 void BindKey(int key, MouseHandler handler);
 void UnbindMouse(int key);
-int getMouseDrawFunc();
+int  getMouseDrawFunc();
 void GetMouseDelta(int &dx, int &dy);
-int lookupMouseButton(int winsys_button); //returns 0 for left click, 1 for middle, 2 for right. ....
+int  lookupMouseButton(int winsys_button);  // returns 0 for left click, 1 for middle, 2 for right. ....
 
-#endif //VEGA_STRIKE_ENGINE_MOUSE_H
+#endif                                      // VEGA_STRIKE_ENGINE_MOUSE_H

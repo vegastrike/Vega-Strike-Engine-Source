@@ -38,7 +38,7 @@ public:
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -51,4 +51,4 @@ public:
     ~DummyComponent() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_DUMMY_COMPONENT_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_DUMMY_COMPONENT_H

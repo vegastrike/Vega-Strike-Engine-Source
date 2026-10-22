@@ -24,24 +24,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
+
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-#include <iostream>
 
 #include "main_menu.h"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return 1;
     }
 
     constexpr SDL_WindowFlags window_flags = 0;
-    SDL_Window* window = SDL_CreateWindow(
-        "SDL3 Window",
-        800, 600,
-        window_flags
-    );
+    SDL_Window               *window       = SDL_CreateWindow("SDL3 Window", 800, 600, window_flags);
 
     if (!window) {
         std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
@@ -49,7 +46,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, nullptr);
 
     if (window && renderer) {
         std::cout << "Created window and renderer\n" << std::flush;

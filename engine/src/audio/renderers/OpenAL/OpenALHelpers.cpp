@@ -32,13 +32,12 @@
 
 #include "OpenALHelpers.h"
 
-#include "../../Types.h"
-#include "../../Exceptions.h"
-
-#include "al.h"
-
-#include <string>
 #include <stdio.h>
+#include <string>
+
+#include "../../Exceptions.h"
+#include "../../Types.h"
+#include "al.h"
 #include "src/vs_logging.h"
 
 namespace Audio {
@@ -47,12 +46,12 @@ namespace OpenAL {
 
 void _checkAlErrorAt(ALenum error, const char *filename, int lineno) {
     switch (error) {
-        case AL_NO_ERROR :
+        case AL_NO_ERROR:
             return;
         default: {
-            const char *errdesc = (const char *) alGetString(error);
-            char s_lineno[32];
-            char s_errcode_buf[32];
+            const char *errdesc = (const char *)alGetString(error);
+            char        s_lineno[32];
+            char        s_errcode_buf[32];
             const char *s_errcode;
             sprintf(s_lineno, "%d", lineno);
 
@@ -123,6 +122,6 @@ ALenum asALFormat(const Format &format) {
     return alformat;
 }
 
-}
-}
-}
+}  // namespace OpenAL
+}  // namespace __impl
+}  // namespace Audio

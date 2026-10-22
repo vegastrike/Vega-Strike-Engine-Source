@@ -27,25 +27,26 @@
 
 
 #include "cmd/csv.h"
-#include "root_generic/vs_globals.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "cmd/unit_csv_factory.h"
-#include "cmd/unit_json_factory.h"
-#include "src/vs_exit.h"
 
 #include <boost/algorithm/string.hpp>
+
+#include "cmd/unit_csv_factory.h"
+#include "cmd/unit_json_factory.h"
+#include "root_generic/vs_globals.h"
+#include "src/vs_exit.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
 using std::string;
 
 std::vector<string> readCSV(const string &s, string delim) {
     std::vector<string> l;
-    string as;
-    unsigned int epos = 0;
-    unsigned int sl = s.length();
-    bool insert;
-    bool quote = false;
-    char ddelim = 0;
+    string              as;
+    unsigned int        epos = 0;
+    unsigned int        sl   = s.length();
+    bool                insert;
+    bool                quote  = false;
+    char                ddelim = 0;
     while ((epos < sl) && !((s[epos] == '\r') || (s[epos] == '\n'))) {
         insert = true;
         if (quote) {
@@ -96,9 +97,9 @@ std::vector<string> readCSV(const string &s, string delim) {
 static string addQuote(string s, string delim = ",;") {
     if (s.find_first_of(delim + "\"") != string::npos) {
         if (s.find('\"') != string::npos) {
-            //Replace " by ""
+            // Replace " by ""
             string as;
-            int sl = s.length();
+            int    sl = s.length();
             as.reserve(2 * sl);
             for (int i = 0; i < sl; i++) {
                 if (s[i] != '\"') {
@@ -109,7 +110,7 @@ static string addQuote(string s, string delim = ",;") {
             }
             s.swap(as);
         }
-        //Add single quotes to the sides
+        // Add single quotes to the sides
         s.insert(s.begin(), 1, '\"');
         s.insert(s.end(), 1, '\"');
     }
@@ -119,8 +120,8 @@ static string addQuote(string s, string delim = ",;") {
 string writeCSV(const std::map<std::string, std::string> &unit, string delim) {
     std::string first_line;
     std::string second_line;
-    for (auto const& pair : unit) {
-        std::string pair_first = pair.first;
+    for (auto const &pair : unit) {
+        std::string pair_first  = pair.first;
         std::string pair_second = pair.second;
 
         // Replaces standard comma with turned comma (U+2E32)
@@ -145,20 +146,20 @@ string writeCSV(const std::map<std::string, std::string> &unit, string delim) {
 }
 
 void CSVTable::Init(const string &data) {
-    //Clear optimizer
+    // Clear optimizer
     optimizer_setup = false;
     optimizer_keys.clear();
     optimizer_indexes.clear();
     optimizer_type = ~0;
     const string delim(",;");
-    const char *cdata = data.c_str();
-    const char *csep = strchr(cdata, '\n');
+    const char  *cdata = data.c_str();
+    const char  *csep  = strchr(cdata, '\n');
     if (csep == NULL) {
         return;
     }
     string buffer(cdata, csep - cdata);
     cdata = csep + 1;
-    key = readCSV(buffer, delim);
+    key   = readCSV(buffer, delim);
     for (unsigned int i = 0; i < key.size(); i++) {
         columns[key[i]] = i;
     }
@@ -175,10 +176,10 @@ void CSVTable::Init(const string &data) {
             cdata = csep + 1;
         }
         std::vector<string> strs = readCSV(buffer);
-        unsigned int row = table.size() / key.size();
+        unsigned int        row  = table.size() / key.size();
         while (strs.size() > key.size()) {
             VS_LOG(error,
-                    (boost::format("error in csv, line %1$d: %2$s has no key") % (row + 1) % strs.back().c_str()));
+                   (boost::format("error in csv, line %1$d: %2$s has no key") % (row + 1) % strs.back().c_str()));
             strs.pop_back();
         }
         while (strs.size() < key.size()) {
@@ -201,7 +202,7 @@ CSVTable::CSVTable(const string &data, const string &root) {
 
 CSVTable::CSVTable(VSFileSystem::VSFile &f, const string &root) {
     std::string data = f.ReadFull();
-    this->rootdir = root;
+    this->rootdir    = root;
     Init(data);
 }
 
@@ -219,8 +220,7 @@ static string strip_white(const string &s) {
     }
 }
 
-void
-CSVTable::Merge(const CSVTable &other) {
+void CSVTable::Merge(const CSVTable &other) {
     // Remember in preparation to reshape
     size_t orig_cols = key.size();
 
@@ -248,7 +248,7 @@ CSVTable::Merge(const CSVTable &other) {
         std::vector<std::string> orig_table;
         orig_table.swap(table);
         std::vector<std::string>::const_iterator orig_it = orig_table.begin();
-        const std::string empty;
+        const std::string                        empty;
 
         VS_LOG(info, (boost::format("Reshaping %1% columns into %2%") % orig_cols % columns.size()));
         table.reserve(rows.size() * key.size());
@@ -276,7 +276,7 @@ CSVTable::Merge(const CSVTable &other) {
         } else {
             ++merged_rows;
         }
-        std::vector<std::string>::iterator table_it = table.begin() + local->second * key.size();
+        std::vector<std::string>::iterator       table_it = table.begin() + local->second * key.size();
         std::vector<std::string>::const_iterator other_it = other.table.begin() + it->second * other.key.size();
         for (size_t i = 0; i < colmap.size(); ++i) {
             if (!strip_white(*(other_it + i)).empty()) {
@@ -290,11 +290,11 @@ CSVTable::Merge(const CSVTable &other) {
 
 CSVRow::CSVRow(CSVTable *parent, const string &key) {
     this->parent = parent;
-    iter = parent->rows[key] * parent->key.size();
+    iter         = parent->rows[key] * parent->key.size();
 }
 
 const string &CSVRow::operator[](const string &col) const {
-    static string empty_string;
+    static string                 empty_string;
     vsUMap<string, int>::iterator i = parent->columns.find(col);
     if (i == parent->columns.end()) {
         return empty_string;
@@ -341,8 +341,8 @@ string CSVRow::getRoot() {
 
 void CSVTable::SetupOptimizer(const std::vector<string> &keys, unsigned int type) {
     optimizer_setup = true;
-    optimizer_type = type;
-    optimizer_keys = keys;
+    optimizer_type  = type;
+    optimizer_keys  = keys;
     optimizer_indexes.resize(keys.size(), CSVTable::optimizer_undefined);
     for (unsigned int i = 0; i < keys.size(); ++i) {
         ColumnExists(keys[i], optimizer_indexes[i]);
@@ -351,7 +351,7 @@ void CSVTable::SetupOptimizer(const std::vector<string> &keys, unsigned int type
 
 CSVTable *loadCSVTableList(const string &csvfiles, VSFileSystem::VSFileType fileType, bool critical) {
     string::size_type pwhere = 0, where, where2 = 0;
-    CSVTable *table = NULL;
+    CSVTable         *table = NULL;
     while (where2 != string::npos) {
         where = where2 = csvfiles.find_first_of(" \t\r\n", pwhere);
         if (where == string::npos) {
@@ -362,7 +362,7 @@ CSVTable *loadCSVTableList(const string &csvfiles, VSFileSystem::VSFileType file
         if (!tmp.empty()) {
             VS_LOG(trace, (boost::format("Opening CSV database from '%1%'") % tmp));
 
-            VSFileSystem::VSFile thisFile;
+            VSFileSystem::VSFile  thisFile;
             VSFileSystem::VSError err = thisFile.OpenReadOnly(tmp, fileType);
             if (err <= VSFileSystem::Ok) {
                 VS_LOG(info, (boost::format("Loading CSV database from '%1%'") % tmp));

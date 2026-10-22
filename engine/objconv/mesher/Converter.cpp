@@ -26,17 +26,17 @@
  */
 
 #include "PrecompiledHeaders/Converter.h"
-#include "objconv/mesher/Converter.h"
 
 #include <algorithm>
 
+#include "objconv/mesher/Converter.h"
+
 namespace Converter {
 typedef std::map<std::string, Module *> ModuleMap;
-typedef std::set<Module *> ModuleList;
+typedef std::set<Module *>              ModuleList;
 
 struct Registry {
-    Registry() : defaultModule(0) {
-    }
+    Registry() : defaultModule(0) {}
 
     ~Registry() {
         for (ModuleList::iterator it = registeredModules.begin(); it != registeredModules.end(); ++it) {
@@ -48,12 +48,12 @@ struct Registry {
     }
 
     ModuleList registeredModules;
-    ModuleMap commandMap;
-    Module *defaultModule;
+    ModuleMap  commandMap;
+    Module    *defaultModule;
 };
 
-//This awkward thing makes sure the registry has been constructed when we need it.
-//Since we'll be using registry functions at static object initialization, we need this.
+// This awkward thing makes sure the registry has been constructed when we need it.
+// Since we'll be using registry functions at static object initialization, we need this.
 static Registry &getRegistry() {
     static Registry registry;
     return registry;
@@ -77,21 +77,20 @@ static int _parseParams(const ParameterList &params, unsigned int phase) {
     Registry &registry = getRegistry();
 
     ParameterList::const_iterator pit = params.begin();
-    ParameterList feedbackParams;
+    ParameterList                 feedbackParams;
     while ((pit != params.end()) || (feedbackParams.size() > 0)) {
         if (feedbackParams.size() > 0) {
-            Module *handler = registry.defaultModule;
+            Module     *handler = registry.defaultModule;
             std::string command;
             if (feedbackParams[0][0] == '-') {
-                //Copy command name - it will be useful for the handler
+                // Copy command name - it will be useful for the handler
                 command = feedbackParams[0];
                 feedbackParams.erase(feedbackParams.begin());
 
-                //Command may be options, in which case they may be assigned values.
-                //The syntax is --command=value, so strip the '=value' portion for
-                //command lookup.
-                ModuleMap::const_iterator it = registry.commandMap.find(
-                        command.substr(0, command.rfind('=')));
+                // Command may be options, in which case they may be assigned values.
+                // The syntax is --command=value, so strip the '=value' portion for
+                // command lookup.
+                ModuleMap::const_iterator it = registry.commandMap.find(command.substr(0, command.rfind('=')));
                 if (it != registry.commandMap.end()) {
                     handler = it->second;
                 }
@@ -114,7 +113,7 @@ static int _parseParams(const ParameterList &params, unsigned int phase) {
 
 int parseParams(int argc, const char *const *argv) {
     ParameterList params;
-    for (unsigned int i = 0; i < (unsigned int) argc; ++i) {
+    for (unsigned int i = 0; i < (unsigned int)argc; ++i) {
         params.push_back(argv[i]);
     }
     parseParams(params);
@@ -152,16 +151,16 @@ class HelpHandler : public Module {
 
 public:
     HelpHandler() {
-        //Long names
+        // Long names
         mNames.push_back("--help");
 
-        //Short names
+        // Short names
         mNames.push_back("-h");
     }
 
-/*
- *     Module interface
- */
+    /*
+     *     Module interface
+     */
 
     virtual int execute(const string &command, ParameterList &params, unsigned int phase) {
         if (command == "-h" || command == "--help") {
@@ -191,21 +190,20 @@ public:
     virtual void help(const string &command, ParameterList &params) const {
         if (command == "-h" || command == "--help") {
             cout << "Show help for command\n"
-                    << "Usage:\n"
-                    << "\tmesher (--help|-h) [ (command) *(help-args) ]\n\n"
-                    << "\"help-args\" depends on \"command\"\n"
-                    << "Use --help alone for a list of commands\n"
-                    << "NOTE: \"command\" must not have the heading slashes\n"
-                    << endl;
+                 << "Usage:\n"
+                 << "\tmesher (--help|-h) [ (command) *(help-args) ]\n\n"
+                 << "\"help-args\" depends on \"command\"\n"
+                 << "Use --help alone for a list of commands\n"
+                 << "NOTE: \"command\" must not have the heading slashes\n"
+                 << endl;
             params.clear();
         } else if (command.empty()) {
             cout << "Commands:\n\n";
             Registry &registry = getRegistry();
             for (ModuleList::iterator it = registry.registeredModules.begin(); it != registry.registeredModules.end();
-                    ++it) {
-                for (Module::NameList::const_iterator nit = (*it)->getNames().begin();
-                        nit != (*it)->getNames().end();
-                        ++nit) {
+                 ++it) {
+                for (Module::NameList::const_iterator nit = (*it)->getNames().begin(); nit != (*it)->getNames().end();
+                     ++nit) {
                     cout << nit->c_str() << "\n";
                 }
             }
@@ -214,17 +212,12 @@ public:
             cout << "Help for " << command << endl;
             Registry &registry = getRegistry();
             for (ModuleList::iterator it = registry.registeredModules.begin(); it != registry.registeredModules.end();
-                    ++it) {
+                 ++it) {
                 string hcommand;
-                bool found =
-                        ((*it)->getNames().end()
-                                != find((*it)->getNames().begin(),
-                                        (*it)->getNames().end(),
-                                        (hcommand = (string("--") + command))))
-                                || ((*it)->getNames().end()
-                                        != find((*it)->getNames().begin(),
-                                                (*it)->getNames().end(),
-                                                (hcommand = (string("-") + command))));
+                bool   found = ((*it)->getNames().end() != find((*it)->getNames().begin(), (*it)->getNames().end(),
+                                                                (hcommand = (string("--") + command)))) ||
+                             ((*it)->getNames().end() != find((*it)->getNames().begin(), (*it)->getNames().end(),
+                                                              (hcommand = (string("-") + command))));
                 if (found) {
                     (*it)->help(hcommand, params);
                 }
@@ -235,5 +228,4 @@ public:
 };
 
 static ModuleDeclaration<HelpHandler, false> __hh_declaration;
-}
-
+}  // namespace Converter

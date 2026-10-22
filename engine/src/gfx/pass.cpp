@@ -28,10 +28,10 @@
 
 #include "pass.h"
 
-#include <iostream>
-#include <sstream>
-#include <map>
 #include <exception>
+#include <iostream>
+#include <map>
+#include <sstream>
 
 #include <boost/range/adaptors.hpp>
 
@@ -41,24 +41,23 @@
 using boost::property_tree::ptree;
 
 Pass::Pass()
-        : program(0),
-        type(FixedPass),
-        colorWrite(true),
-        zWrite(True),
-        perLightIteration(0),
-        maxIterations(0),
-        blendMode(Default),
-        depthFunction(LEqual),
-        cullMode(DefaultFace),
-        polyMode(Fill),
-        offsetFactor(0),
-        offsetUnits(0),
-        lineWidth(1),
-        sequence(0) {
-}
+    : program(0),
+      type(FixedPass),
+      colorWrite(true),
+      zWrite(True),
+      perLightIteration(0),
+      maxIterations(0),
+      blendMode(Default),
+      depthFunction(LEqual),
+      cullMode(DefaultFace),
+      polyMode(Fill),
+      offsetFactor(0),
+      offsetUnits(0),
+      lineWidth(1),
+      sequence(0) {}
 
 Pass::~Pass() {
-    //Should deallocate the program... but... GFX doesn't have that API.
+    // Should deallocate the program... but... GFX doesn't have that API.
 }
 
 // TODO: consider making this a constructor
@@ -74,15 +73,15 @@ void Pass::parsePass(ptree tree, string techniqueName, int &nextSequence) {
     setDepthFunction(tree.get("<xmlattr>.depth_function", "lequal"));
     setCullMode(tree.get("<xmlattr>.cull", "default"));
     setPolyMode(tree.get("<xmlattr>.polygon_mode", "fill"));
-    offsetUnits = tree.get("<xmlattr>.polygon_offset_units", 0.0f);
+    offsetUnits  = tree.get("<xmlattr>.polygon_offset_units", 0.0f);
     offsetFactor = tree.get("<xmlattr>.polygon_offset_factor", 0.0f);
-    lineWidth = tree.get("<xmlattr>.line_width", 1.0f);
-    sRGBAware = tree.get("<xmlattr>.srgb_aware", false);
+    lineWidth    = tree.get("<xmlattr>.line_width", 1.0f);
+    sRGBAware    = tree.get("<xmlattr>.srgb_aware", false);
 
     nextSequence = sequence + 1;
 
     for (const auto &iterator : tree) {
-        string key = iterator.first;
+        string    key   = iterator.first;
         pt::ptree value = iterator.second;
 
         // Process attributes
@@ -101,10 +100,10 @@ void Pass::parsePass(ptree tree, string techniqueName, int &nextSequence) {
     if (type == ShaderPass) {
         if (vp.empty()) {
             throw std::exception();
-        } //throw InvalidParameters( "Missing vertex program reference in technique \""+techniqueName+"\"" );
+        }  // throw InvalidParameters( "Missing vertex program reference in technique \""+techniqueName+"\"" );
         if (fp.empty()) {
             throw std::exception();
-        } //throw InvalidParameters( "Missing fragment program reference in technique \""+techniqueName+"\"" );
+        }  // throw InvalidParameters( "Missing fragment program reference in technique \""+techniqueName+"\"" );
         setProgram(vp, fp);
     }
 }
@@ -115,13 +114,13 @@ void Pass::parseTextureUnit(ptree tree) {
         target = tree.get("<xmlattr>.target", -1);
     } else {
         target = tree.get("<xmlattr>.target",
-                0); // Behavior change. This used to throw an exception and now works. Think about.
+                          0);  // Behavior change. This used to throw an exception and now works. Think about.
     }
 
-    string source = tree.get("<xmlattr>.src", "");
+    string source        = tree.get("<xmlattr>.src", "");
     string defaultSource = tree.get("<xmlattr>.default", "");
-    string name = tree.get("<xmlattr>.name", "");
-    string kindString = tree.get("<xmlattr>.kind", "");
+    string name          = tree.get("<xmlattr>.name", "");
+    string kindString    = tree.get("<xmlattr>.kind", "");
 
     TextureUnit::Kind kind = TextureUnit::TexDefault;
     if (kindString == "default") {
@@ -143,15 +142,15 @@ void Pass::parseTextureUnit(ptree tree) {
 
 void Pass::parseParam(ptree tree) {
     string floatsString = tree.get("<xmlattr>.value", "");
-    string name = tree.get("<xmlattr>.name", "");
-    bool optional = tree.get("<xmlattr>.optional", false);
+    string name         = tree.get("<xmlattr>.name", "");
+    bool   optional     = tree.get("<xmlattr>.optional", false);
 
     float floats[4];
 
     std::stringstream ss(floatsString);
-    string floatString;
+    string            floatString;
 
-    for (float & each_float : floats) {
+    for (float &each_float : floats) {
         each_float = 0.0F;
         std::getline(ss, floatString, ',');
         each_float = locale_aware_stof(floatString, 0.0F);
@@ -160,29 +159,20 @@ void Pass::parseParam(ptree tree) {
     addShaderParam(name, floats, optional);
 
     VS_LOG(debug, (boost::format("Added constant #%1% \"%2%\" with value "
-                                 "(%3$.2f,%4$.2f,%5$.2f,%6$.2f) as %7%")
-            % getNumShaderParams()
-            % name
-            % floats[0]
-            % floats[1]
-            % floats[2]
-            % floats[3]
-            % (optional ? "optional" : "required")));
-
+                                 "(%3$.2f,%4$.2f,%5$.2f,%6$.2f) as %7%") %
+                   getNumShaderParams() % name % floats[0] % floats[1] % floats[2] % floats[3] %
+                   (optional ? "optional" : "required")));
 }
 
 void Pass::parseAutoParam(ptree tree) {
-    string name = tree.get("<xmlattr>.name", "");
+    string name     = tree.get("<xmlattr>.name", "");
     string semantic = tree.get("<xmlattr>.semantic", "");
-    bool optional = tree.get("<xmlattr>.optional", false);
+    bool   optional = tree.get("<xmlattr>.optional", false);
 
     addShaderParam(name, getShaderParam(semantic), optional);
 
-    VS_LOG(debug, (boost::format("Added param #%1% \"%2%\" with semantic %3% as %4%")
-            % getNumShaderParams()
-            % name
-            % semantic
-            % (optional ? "optional" : "required")));
+    VS_LOG(debug, (boost::format("Added param #%1% \"%2%\" with semantic %3% as %4%") % getNumShaderParams() % name %
+                   semantic % (optional ? "optional" : "required")));
 }
 
 void Pass::setType(string typeString) {
@@ -209,7 +199,7 @@ void Pass::setPerLightIteration(ptree tree, string iterationString) {
     if (iterationString == "once") {
         perLightIteration = 0;
     } else if (iterationString.empty()) {
-        throw std::exception(); // "Invalid iteration attribute" );
+        throw std::exception();  // "Invalid iteration attribute" );
     } else {
         perLightIteration = tree.get("iteration", 0u);
     }

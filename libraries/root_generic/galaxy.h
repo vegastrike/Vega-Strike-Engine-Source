@@ -27,25 +27,25 @@
 #ifndef VEGA_STRIKE_ENGINE_GALAXY_H
 #define VEGA_STRIKE_ENGINE_GALAXY_H
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/foreach.hpp>
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
-using std::string;
+#include <boost/foreach.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
 using std::map;
+using std::string;
 using std::vector;
 
 class Galaxy {
 public:
     Galaxy(string const &galaxy_file);
 
-    map<string, string> variables;
-    map<string, map<string, string>> planets; // planets-variables
-    map<string, map<string, map<string, string>>> systems; // sectors-systems-variables
+    map<string, string>                           variables;
+    map<string, map<string, string>>              planets;  // planets-variables
+    map<string, map<string, map<string, string>>> systems;  // sectors-systems-variables
 };
 
-#endif //VEGA_STRIKE_ENGINE_GALAXY_H
+#endif                                                      // VEGA_STRIKE_ENGINE_GALAXY_H

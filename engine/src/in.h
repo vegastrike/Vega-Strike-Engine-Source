@@ -40,4 +40,4 @@ typedef void (*KBHandler)(const KBData &, KBSTATE);
 
 typedef void (*MouseHandler)(KBSTATE, int x, int y, int delx, int dely, int mod);
 
-#endif //VEGA_STRIKE_ENGINE_IN_H
+#endif  // VEGA_STRIKE_ENGINE_IN_H

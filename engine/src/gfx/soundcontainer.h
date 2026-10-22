@@ -91,7 +91,7 @@ public:
 
     // Concrete classes implement the following:
 protected:
-    virtual void loadImpl() = 0;
+    virtual void loadImpl()   = 0;
     virtual void unloadImpl() = 0;
 
     /**
@@ -106,7 +106,6 @@ protected:
      * Return whether or not the sound is really playing now.
      */
     virtual bool isPlayingImpl() const = 0;
-
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_SOUND_CONTAINER_H

@@ -28,7 +28,7 @@
 #ifndef VEGA_STRIKE_ENGINE_RESOURCE_RANDOM_UTILS_H
 #define VEGA_STRIKE_ENGINE_RESOURCE_RANDOM_UTILS_H
 
-int randomInt(int max, int min = 0 );
+int    randomInt(int max, int min = 0);
 double randomDouble();
 
-#endif //VEGA_STRIKE_ENGINE_RESOURCE_RANDOM_UTILS_H
+#endif  // VEGA_STRIKE_ENGINE_RESOURCE_RANDOM_UTILS_H

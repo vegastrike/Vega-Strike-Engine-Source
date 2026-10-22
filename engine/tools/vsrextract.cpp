@@ -41,35 +41,38 @@
 
   @todo Allow only specified files to be extracted. (Low priority)
  */
-#include "vsrtools.h"
-#include "tools/common.h"
-#include <stdlib.h>
-#include <string>
-#include <vector>
 #include <algorithm>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
 #include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <unistd.h>
+#include <vector>
 
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include "tools/common.h"
+#include "vsrtools.h"
+
+using std::min;
 using std::string;
 using std::vector;
-using std::min;
 
 class PackageFileExtractor {
 public:
     PackageFileExtractor(const string &fname);
     void extract(const string &topdir) const;
     void extract(const string &topdir, const string &entry) const;
+
 private:
-    void makePathExist(const string &path) const;
-    void extractFile(const VSRMember &member) const;
-    void extract(const VSRMember &member) const;
-    FILEHandle pkg;
+    void              makePathExist(const string &path) const;
+    void              extractFile(const VSRMember &member) const;
+    void              extract(const VSRMember &member) const;
+    FILEHandle        pkg;
     vector<VSRMember> pkg_index;
 };
 
@@ -87,20 +90,17 @@ int main(int argc, char *argv[]) {
         PackageFileExtractor extractor(argv[1]);
         extractor.extract(".");
     } catch (int error) {
-        fprintf(stderr, "Error extracting files from '%s'.\n%s\n", argv[1],
-                strerror(error));
+        fprintf(stderr, "Error extracting files from '%s'.\n%s\n", argv[1], strerror(error));
         exit(1);
     }
 
     return 0;
 }
 
-PackageFileExtractor::PackageFileExtractor(const string &fname)
-        : pkg(fname, "rb") {
+PackageFileExtractor::PackageFileExtractor(const string &fname) : pkg(fname, "rb") {
     VSRHeader hdr;
 
-    if ((fread(&hdr, sizeof(VSRHeader), 1, pkg) != 1)
-            || (strcmp(hdr.magic, "VSR") != 0)) {
+    if ((fread(&hdr, sizeof(VSRHeader), 1, pkg) != 1) || (strcmp(hdr.magic, "VSR") != 0)) {
         int tmp = errno;
         if (tmp == 0) {
             tmp = EINVAL;
@@ -128,29 +128,27 @@ PackageFileExtractor::PackageFileExtractor(const string &fname)
     }
 }
 
-void
-PackageFileExtractor::extractFile(const VSRMember &file) const {
+void PackageFileExtractor::extractFile(const VSRMember &file) const {
     if (fseek(pkg, file.offset, SEEK_SET)) {
         throw errno;
     }
 
     FILEHandle mfile(file.filename, "wb");
-    uint32_t bytes_left = file.fileLength;
-    uint32_t chunk, actual = 0;
-    char buffer[1024];
+    uint32_t   bytes_left = file.fileLength;
+    uint32_t   chunk, actual = 0;
+    char       buffer[1'024];
 
-    chunk = min(1024u, bytes_left);
+    chunk = min(1'024u, bytes_left);
     while (bytes_left && (actual = fread(buffer, 1, chunk, pkg)) > 0) {
-        bytes_left -= actual;
-        uint32_t written = fwrite(buffer, 1, actual, mfile);
+        bytes_left       -= actual;
+        uint32_t written  = fwrite(buffer, 1, actual, mfile);
         if (written != actual) {
             int tmp = errno;
             unlink(file.filename.c_str());
-            fprintf(stdout, "%s:%d Error extracting '%s'!\n",
-                    __FILE__, __LINE__, file.filename.c_str());
+            fprintf(stdout, "%s:%d Error extracting '%s'!\n", __FILE__, __LINE__, file.filename.c_str());
             throw tmp;
         }
-        chunk = min(1024u, bytes_left);
+        chunk = min(1'024u, bytes_left);
     }
     if (bytes_left) {
         int tmp = errno;
@@ -159,41 +157,35 @@ PackageFileExtractor::extractFile(const VSRMember &file) const {
     }
 }
 
-void
-PackageFileExtractor::extract(const VSRMember &member) const {
+void PackageFileExtractor::extract(const VSRMember &member) const {
     size_t last_sep = member.filename.rfind('/');
     if (last_sep != string::npos) {
-        makePathExist(string(member.filename.begin(),
-                member.filename.begin() + last_sep));
+        makePathExist(string(member.filename.begin(), member.filename.begin() + last_sep));
     }
     extractFile(member);
 }
 
-void
-PackageFileExtractor::extract(const string &targetpath) const {
+void PackageFileExtractor::extract(const string &targetpath) const {
     if (chdir(targetpath.c_str())) {
         int tmp = errno;
-        fprintf(stdout, "%s:%d Unable to change directory to '%s'.\n",
-                __FILE__, __LINE__, targetpath.c_str());
+        fprintf(stdout, "%s:%d Unable to change directory to '%s'.\n", __FILE__, __LINE__, targetpath.c_str());
         throw tmp;
     }
-    for (vector<VSRMember>::const_iterator ii = pkg_index.begin();
-            ii != pkg_index.end(); ++ii) {
+    for (vector<VSRMember>::const_iterator ii = pkg_index.begin(); ii != pkg_index.end(); ++ii) {
         extract(*ii);
     }
 }
 
-void
-PackageFileExtractor::makePathExist(const string &path) const {
+void PackageFileExtractor::makePathExist(const string &path) const {
     fprintf(stdout, "Trying to make '%s'\n", path.c_str());
     size_t last_sep = path.rfind('/');
     if (last_sep != string::npos) {
-        makePathExist(string(path.begin(),
-                path.begin() + last_sep));
+        makePathExist(string(path.begin(), path.begin() + last_sep));
     }
     mkdir(path.c_str()
 #ifndef WIN32
-            , 0755
+                  ,
+          0755
 #endif
     );
 }

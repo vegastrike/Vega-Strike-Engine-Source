@@ -28,13 +28,11 @@
 
 #include "gfx_generic/texture_manager.h"
 
-TextureManager::TextureManager() {
-
-}
+TextureManager::TextureManager() {}
 
 TextureManager &TextureManager::GetInstance() {
-    static TextureManager instance;     // Guaranteed to be destroyed.
-    return instance;                    // Instantiated on first use.
+    static TextureManager instance;  // Guaranteed to be destroyed.
+    return instance;                 // Instantiated on first use.
 }
 
 Texture *TextureManager::GetTexture(std::string const &name, enum FILTER mipmap) {

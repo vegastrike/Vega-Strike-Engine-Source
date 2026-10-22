@@ -28,10 +28,10 @@
 #ifndef VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H
 #define VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H
 
-#if defined(__APPLE__) && defined (__MACH__)
-#   include <glut.h>
+#if defined(__APPLE__) && defined(__MACH__)
+#    include <glut.h>
 #else
-#   include <glut.h>
+#    include <glut.h>
 #endif
 
-#endif //VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H
+#endif  // VEGA_STRIKE_ENGINE_GLDRV_GL_INCLUDE_H

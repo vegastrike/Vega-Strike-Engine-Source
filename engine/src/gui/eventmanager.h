@@ -27,11 +27,11 @@
 #ifndef VEGA_STRIKE_ENGINE_GUI_EVENTMANAGER_H
 #define VEGA_STRIKE_ENGINE_GUI_EVENTMANAGER_H
 
-#include "eventresponder.h"
-
 #include <vector>
 
-//See cpp file for detailed descriptions of classes, functions, etc.
+#include "eventresponder.h"
+
+// See cpp file for detailed descriptions of classes, functions, etc.
 
 /* The EventManager class contains the basic event loop and the code
  * to support the EventResponder chain.  There should be only one
@@ -41,57 +41,56 @@
  */
 class EventManager {
 public:
-//Use this instead of deleting, because other events that happen at the
-//same time may delete the same object.
+    // Use this instead of deleting, because other events that happen at the
+    // same time may delete the same object.
     static void addToDeleteQueue(EventResponder *controlToDelete);
-//STATIC: Initialize the event manager.  This starts the event loop, etc.
-//This may be called more than once -- it does nothing after the
-//first call.
+    // STATIC: Initialize the event manager.  This starts the event loop, etc.
+    // This may be called more than once -- it does nothing after the
+    // first call.
     static void initializeEventManager(void);
 
-//Add a new event responder to the top of the chain.
-//This responder will get events *first*.
+    // Add a new event responder to the top of the chain.
+    // This responder will get events *first*.
     void pushResponder(EventResponder *responder);
 
-//Remove an event responder from the chain.
-//"all" = True means get rid of all instances of the responder in the chain.
-//False means get rid of the topmost one only.
+    // Remove an event responder from the chain.
+    //"all" = True means get rid of all instances of the responder in the chain.
+    // False means get rid of the topmost one only.
     void removeResponder(EventResponder *responder, bool top = false);
 
-//Send a command through the responder chain.
+    // Send a command through the responder chain.
     void sendCommand(const EventCommandId &id, Control *control);
 
-//Get the current mouse position.
+    // Get the current mouse position.
     Point mouseLoc(void) {
         return m_mouseLoc;
     }
 
 protected:
-//CONSTRUCTION
-//Constructor isn't public.  Use initializeEventManager.
+    // CONSTRUCTION
+    // Constructor isn't public.  Use initializeEventManager.
     EventManager(void);
     virtual ~EventManager(void);
 
-//INTERNAL IMPLEMENTATION
-//Send an input event through the responder chain.
+    // INTERNAL IMPLEMENTATION
+    // Send an input event through the responder chain.
     void sendInputEvent(const InputEvent &event);
 
-//DATA
-    std::vector<EventResponder *> m_responders; //Stack of responders for events.
-    Point m_mouseLoc;                           //Current mouse point.
+    // DATA
+    std::vector<EventResponder *> m_responders;  // Stack of responders for events.
+    Point                         m_mouseLoc;    // Current mouse point.
 
-//HACKS FOR WORKING WITH CURRENT EVENT SYSTEM
-    void checkForShutDownEventManager(void);   //Called to revert to old event management.
-    void takeOverEventManagement(void);        //Called to grab event management from old system.
+                                                 // HACKS FOR WORKING WITH CURRENT EVENT SYSTEM
+    void checkForShutDownEventManager(void);  // Called to revert to old event management.
+    void takeOverEventManagement(void);       // Called to grab event management from old system.
 public:
-
     static void ProcessMouseClick(int button, int state, int x, int y);
     static void ProcessMouseActive(int x, int y);
     static void ProcessMousePassive(int x, int y);
 };
 
-//Get the global instance of the event manager
+// Get the global instance of the event manager
 EventManager &globalEventManager(void);
-bool hasGlobalEventManager(void);
+bool          hasGlobalEventManager(void);
 
-#endif   //VEGA_STRIKE_ENGINE_GUI_EVENTMANAGER_H
+#endif  // VEGA_STRIKE_ENGINE_GUI_EVENTMANAGER_H

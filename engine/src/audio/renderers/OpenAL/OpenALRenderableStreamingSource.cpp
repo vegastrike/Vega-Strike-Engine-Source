@@ -29,18 +29,16 @@
 //
 // C++ Implementation: Audio::OpenALRenderableListener
 //
-#include "src/vega_cast_utils.h"
 #include "OpenALRenderableStreamingSource.h"
-#include "OpenALStreamingSound.h"
-#include "OpenALHelpers.h"
 
-#include "al.h"
-
-#include "../../Source.h"
 #include "../../Listener.h"
-
-#include "src/vs_math.h"
+#include "../../Source.h"
+#include "al.h"
+#include "OpenALHelpers.h"
+#include "OpenALStreamingSound.h"
+#include "src/vega_cast_utils.h"
 #include "src/vs_logging.h"
+#include "src/vs_math.h"
 
 namespace Audio {
 
@@ -53,12 +51,7 @@ static inline void alSource3f(ALuint source, ALenum param, const LVector3 &v) {
 }
 
 OpenALRenderableStreamingSource::OpenALRenderableStreamingSource(Source *source)
-        : RenderableSource(source),
-        alSource(0),
-        atEos(false),
-        shouldPlay(false),
-        startedPlaying(false),
-        buffering(false) {
+    : RenderableSource(source), alSource(0), atEos(false), shouldPlay(false), startedPlaying(false), buffering(false) {
     alGenSources(1, &alSource);
 }
 
@@ -80,7 +73,7 @@ void OpenALRenderableStreamingSource::startPlayingImpl(Timestamp start) {
         }
 
         // Seek the stream to the specified position
-        atEos = false;
+        atEos      = false;
         shouldPlay = true;
         p_streaming_sound->seek(start);
 
@@ -97,9 +90,9 @@ void OpenALRenderableStreamingSource::startPlayingImpl(Timestamp start) {
 }
 
 void OpenALRenderableStreamingSource::stopPlayingImpl() {
-    shouldPlay = false;
+    shouldPlay     = false;
     startedPlaying = false;
-    buffering = false;
+    buffering      = false;
     alSourceStop(alSource);
 }
 
@@ -126,9 +119,9 @@ Timestamp OpenALRenderableStreamingSource::getPlayingTimeImpl() const {
         throw NotImplementedException("getPlayingTimeImpl");
     }
 
-    OpenALStreamingSound *p_streaming_sound = vega_dynamic_cast_ptr<OpenALStreamingSound>(getSource()->getSound().get());
-    Timestamp base = p_streaming_sound
-            ->getTimeBase();
+    OpenALStreamingSound *p_streaming_sound =
+            vega_dynamic_cast_ptr<OpenALStreamingSound>(getSource()->getSound().get());
+    Timestamp base = p_streaming_sound->getTimeBase();
 
     return Timestamp(offs) + base;
 }
@@ -136,14 +129,14 @@ Timestamp OpenALRenderableStreamingSource::getPlayingTimeImpl() const {
 void OpenALRenderableStreamingSource::seekImpl(Timestamp time) {
     // Seek the stream to the specified position
     atEos = false;
-    OpenALStreamingSound *p_streaming_sound = vega_dynamic_cast_ptr<OpenALStreamingSound>(getSource()->getSound().get());
-    p_streaming_sound
-            ->seek(time);
+    OpenALStreamingSound *p_streaming_sound =
+            vega_dynamic_cast_ptr<OpenALStreamingSound>(getSource()->getSound().get());
+    p_streaming_sound->seek(time);
 }
 
 void OpenALRenderableStreamingSource::updateImpl(int flags, const Listener &sceneListener) {
-    Source *source = getSource();
-    ALSourceHandle als = getALSource();
+    Source        *source = getSource();
+    ALSourceHandle als    = getALSource();
 
     // Restart playing in case of a buffer underrun,
     // else just fill buffers
@@ -208,16 +201,10 @@ void OpenALRenderableStreamingSource::updateImpl(int flags, const Listener &scen
             alSource3f(als, AL_VELOCITY, source->getVelocity());
             alSource3f(als, AL_DIRECTION, source->getDirection());
         } else {
-            alSource3f(als, AL_POSITION,
-                    source->getPosition() - sceneListener.getPosition());
+            alSource3f(als, AL_POSITION, source->getPosition() - sceneListener.getPosition());
             alSource3f(als, AL_VELOCITY,
-                    sceneListener.toLocalDirection(
-                            source->getVelocity() - sceneListener.getVelocity()
-                    ));
-            alSource3f(als, AL_DIRECTION,
-                    sceneListener.toLocalDirection(
-                            source->getDirection()
-                    ));
+                       sceneListener.toLocalDirection(source->getVelocity() - sceneListener.getVelocity()));
+            alSource3f(als, AL_DIRECTION, sceneListener.toLocalDirection(source->getDirection()));
         }
     }
 
@@ -235,10 +222,10 @@ void OpenALRenderableStreamingSource::queueALBuffers() {
 
     buffering = true;
 
-    OpenALStreamingSound *streamingSound = vega_dynamic_cast_ptr<OpenALStreamingSound>(sound.get());
-    Source *source = getSource();
-    ALSourceHandle als = getALSource();
-    ALint buffersProcessed = 0;
+    OpenALStreamingSound *streamingSound   = vega_dynamic_cast_ptr<OpenALStreamingSound>(sound.get());
+    Source               *source           = getSource();
+    ALSourceHandle        als              = getALSource();
+    ALint                 buffersProcessed = 0;
 
     // Unqueue any buffers the AL is done with,
     // returning them to the streaming sound
@@ -246,7 +233,7 @@ void OpenALRenderableStreamingSource::queueALBuffers() {
 
     while (buffersProcessed > 0) {
         ALBufferHandle buffers[2];
-        ALsizei nbuffers = (buffersProcessed > 2) ? 2 : (ALsizei) buffersProcessed;
+        ALsizei        nbuffers = (buffersProcessed > 2) ? 2 : (ALsizei)buffersProcessed;
         alSourceUnqueueBuffers(als, nbuffers, buffers);
 
         for (ALsizei i = 0; i < nbuffers; ++i) {
@@ -268,7 +255,7 @@ void OpenALRenderableStreamingSource::queueALBuffers() {
                 streamingSound->seek(0);
                 buffer = streamingSound->readAndFlip();
             } else {
-                atEos = true;
+                atEos  = true;
                 buffer = AL_NULL_BUFFER;
             }
         }
@@ -278,4 +265,4 @@ void OpenALRenderableStreamingSource::queueALBuffers() {
     } while (buffer != AL_NULL_BUFFER);
 }
 
-};
+};  // namespace Audio

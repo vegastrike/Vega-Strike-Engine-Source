@@ -27,11 +27,10 @@
 
 
 #include "gfx/soundcontainer_aldrv.h"
+
 #include "src/audiolib.h"
 
-AldrvSoundContainer::AldrvSoundContainer(const SoundContainer &other)
-        : GameSoundContainer(other), sound(-2) {
-}
+AldrvSoundContainer::AldrvSoundContainer(const SoundContainer &other) : GameSoundContainer(other), sound(-2) {}
 
 // unload already takes care
 AldrvSoundContainer::~AldrvSoundContainer() = default;
@@ -60,4 +59,3 @@ void AldrvSoundContainer::stopImpl() {
 bool AldrvSoundContainer::isPlayingImpl() const {
     return AUDIsPlaying(sound);
 }
-

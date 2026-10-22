@@ -39,10 +39,6 @@ using namespace Opcode;
 
 // Cast operator
 Matrix3x3::operator Matrix4x4() const {
-    return Matrix4x4(
-            m[0][0], m[0][1], m[0][2], 0.0f,
-            m[1][0], m[1][1], m[1][2], 0.0f,
-            m[2][0], m[2][1], m[2][2], 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f);
+    return Matrix4x4(m[0][0], m[0][1], m[0][2], 0.0f, m[1][0], m[1][1], m[1][2], 0.0f, m[2][0], m[2][1], m[2][2], 0.0f,
+                     0.0f, 0.0f, 0.0f, 1.0f);
 }
-

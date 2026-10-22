@@ -31,12 +31,12 @@
 // C++ Interface: Audio::CodecRegistry
 //
 
-#include <string>
 #include <map>
 #include <set>
+#include <string>
+
 #include "Exceptions.h"
 #include "Singleton.h"
-
 #include "vegadisk/vsfilesystem.h"
 
 namespace Audio {
@@ -57,15 +57,15 @@ class Stream;
 class CodecRegistry : public Singleton<CodecRegistry> {
 private:
     // The many required indexes
-    typedef std::set<Codec *> CodecSet;
-    typedef std::map<Codec *, int> CodecPriority;
+    typedef std::set<Codec *>               CodecSet;
+    typedef std::map<Codec *, int>          CodecPriority;
     typedef std::map<std::string, CodecSet> ExtensionCodecs;
-    typedef std::map<std::string, Codec *> NameCodec;
+    typedef std::map<std::string, Codec *>  NameCodec;
 
-    CodecPriority codecPriority;
+    CodecPriority   codecPriority;
     ExtensionCodecs extensionCodecs;
-    CodecSet universalCodecs;
-    NameCodec nameCodec;
+    CodecSet        universalCodecs;
+    NameCodec       nameCodec;
 
 public:
     /** Construct an empty registry
@@ -116,16 +116,16 @@ public:
      * @see findByFile
      */
     Stream *open(const std::string &path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) const;
-
 };
 
 class CodecRegistration {
     Codec *codec;
+
 public:
     CodecRegistration(Codec *codec, int priority = 0);
     ~CodecRegistration();
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_CODECREGISTRY_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_CODECREGISTRY_H

@@ -25,17 +25,18 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <ctype.h>
-#include <math.h>
 #include "objconv/trisort.h"
 
-#if defined(__APPLE__) && defined (__MACH__)
-#define sqrtf sqrt
+#include <algorithm>
+#include <cctype>
+#include <cstdio>
+#include <cstdlib>
+#include <math.h>
+#include <string>
+#include <vector>
+
+#if defined(__APPLE__) && defined(__MACH__)
+#    define sqrtf sqrt
 #endif
 
 bool nearzero(double fb) {
@@ -61,16 +62,16 @@ bool Face::Cross(Plane &result) const {
         v1.y = this->p[i].V.y - this->p[0].V.y;
         v1.z = this->p[i].V.z - this->p[0].V.z;
         Vector v2(0, 0, 0);
-        v2.x = this->p[1].V.x - this->p[0].V.x;
-        v2.y = this->p[1].V.y - this->p[0].V.y;
-        v2.z = this->p[1].V.z - this->p[0].V.z;
+        v2.x     = this->p[1].V.x - this->p[0].V.x;
+        v2.y     = this->p[1].V.y - this->p[0].V.y;
+        v2.z     = this->p[1].V.z - this->p[0].V.z;
         result.a = v1.y * v2.z - v1.z * v2.y;
         result.b = v1.z * v2.x - v1.x * v2.z;
         result.c = v1.x * v2.y - v1.y * v2.x;
-        size = result.a * result.a + result.b * result.b + result.c * result.c;
+        size     = result.a * result.a + result.b * result.b + result.c * result.c;
     }
     if (size) {
-        size = ((double) 1) / sqrtf(size);
+        size = 1.0 / sqrtf(size);
     } else {
         return false;
     }
@@ -115,9 +116,9 @@ Plane Face::planeEqu() const {
 }
 
 bool Face::operator<(const Face &b) const {
-    //printf ("comparing %d %d\n",id,b.id);
-    Plane bpe(b.planeEqu());
-    Plane ape(planeEqu());
+    // printf ("comparing %d %d\n",id,b.id);
+    Plane            bpe(b.planeEqu());
+    Plane            ape(planeEqu());
     POLYGON_RELATION bfronta = inFront(bpe);
     POLYGON_RELATION afrontb = b.inFront(ape);
     if (bfronta == FRONT || afrontb == BACK) {
@@ -139,7 +140,7 @@ void Mesh::sort() {
     std::sort(f.begin(), f.end());
 }
 
-void Index::write(FILE *fp) const {
+void Index::write(std::FILE *fp) const {
     printf("G: %lf\n", V.z);
     fprintf(fp, "%d/", p);
     if (n != -1) {
@@ -155,7 +156,7 @@ void Index::write(FILE *fp) const {
 }
 
 void Mesh::write(const char *filename) const {
-    FILE *fp = fopen(filename, "w");
+    std::FILE *fp = fopen(filename, "w");
     if (fp) {
         unsigned int i;
         for (i = 0; i < p.size(); i++) {
@@ -230,19 +231,19 @@ Index Mesh::processfacevertex(char *vertex) const {
         }
     }
     Vector v(0, 0, 0);
-    if (a <= (int) p.size() && a > 0) {
+    if (a <= static_cast<int>(p.size()) && a > 0) {
         v = p[a - 1];
     }
     return Index(v, a, b, c, d);
 }
 
 Face Mesh::processface(char *line) const {
-    Face f;
+    Face  f;
     char *ln = line;
     while (line[0]) {
         char *lastspace = findspace(line);
         if (lastspace) {
-            bool done = (lastspace[0] == 0);
+            bool done    = (lastspace[0] == 0);
             (*lastspace) = 0;
             f.p.push_back(processfacevertex(line));
             line = lastspace + 1;
@@ -287,10 +288,10 @@ void Mesh::processline(char *line) {
 }
 
 Mesh::Mesh(const char *filename) {
-    FILE *fp = fopen(filename, "r");
-    char line[65536];
-    line[65535] = 0;
-    while (fgets(line, 65535, fp)) {
+    std::FILE *fp = fopen(filename, "r");
+    char  line[65'536];
+    line[65'535] = 0;
+    while (fgets(line, 65'535, fp)) {
         processline(line);
     }
 }
@@ -305,4 +306,3 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
-

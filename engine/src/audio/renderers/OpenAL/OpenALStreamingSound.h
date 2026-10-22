@@ -32,11 +32,10 @@
 //
 
 #include "../../Exceptions.h"
-#include "../../Types.h"
 #include "../../Format.h"
 #include "../../SimpleSound.h"
 #include "../../SoundBuffer.h"
-
+#include "../../Types.h"
 #include "al.h"
 
 namespace Audio {
@@ -60,7 +59,7 @@ class OpenALRenderableSource;
  */
 class OpenALStreamingSound : public SimpleSound {
     ALBufferHandle bufferHandles[2];
-    Timestamp bufferStarts[2];
+    Timestamp      bufferStarts[2];
 
     SoundBuffer buffer;
 
@@ -80,7 +79,7 @@ public:
      *      samples below which a read would be triggered.
      */
     OpenALStreamingSound(const std::string &name, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile,
-            unsigned int bufferSamples = 0);
+                         unsigned int bufferSamples = 0);
 
 public:
     virtual ~OpenALStreamingSound();
@@ -137,6 +136,6 @@ public:
     void seek(double position);
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_STREAMING_SOUND_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_STREAMING_SOUND_H

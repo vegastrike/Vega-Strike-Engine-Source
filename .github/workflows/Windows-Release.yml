@@ -10,9 +10,6 @@ on:
       - edited
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -29,7 +26,7 @@ jobs:
             python-version:  3.13.13
             is-release:      1
             install-nsis:    0
-          - os:              windows-2025-vs2026
+          - os:              windows-2025
             triplet:         x64-win10
             preset-name:     VS2026Win64-pie-enabled-RelWithDebInfo
             python-version:  3.13.13
@@ -37,6 +34,9 @@ jobs:
             install-nsis:    1
 
     env:
+      CMAKE_FIND_DEBUG_MODE: "OFF"
+      CMAKE_VERBOSE_MAKEFILE: "OFF"
+      VCPKG_DISABLE_METRICS: 'ON'
       VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
       VCPKG_ASSET_SOURCES: "${{ github.workspace }}/vcpkgAssets"
       X_VCPKG_ASSET_SOURCES: clear;x-azurl,file:///${{ github.workspace }}/vcpkgAssets,,readwrite
@@ -112,6 +112,8 @@ jobs:
         uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
         with:
           binaryCachePath: "${{ github.workspace }}/vcpkgBCache"
+          runVcpkgInstall: true
+          runVcpkgFormatString: '[`install`, `--recurse`, `--clean-after-build`, `--x-install-root`, `$[env.VCPKG_INSTALLED_DIR]`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]'
 
       - name: Build the code
         run: |

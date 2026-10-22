@@ -30,28 +30,27 @@
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef WIN32
-//this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
-#include <unistd.h>
+// this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can
+// compile without it
+#    include <unistd.h>
 #endif
 
 #include <expat.h>
-#include "root_generic/xml_support.h"
-
-#include "src/vegastrike.h"
 
 #include "cmd/unit_generic.h"
 #include "mission.h"
 #include "root_generic/easydom.h"
-
 #include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
 #include "src/config_xml.h"
+#include "src/vegastrike.h"
 
-using std::cout;
 using std::cerr;
+using std::cout;
 using std::endl;
 
 /* *********************************************************** */
@@ -80,7 +79,7 @@ void Mission::trace(missionNode *node, int mode) {
         cout << module_node->script.name << ":" << node->attr_value("line");
     }
     cout << " tag " << node->Name() << "name " << node->attr_value("name") << " module " << node->attr_value("module")
-            << endl;
+         << endl;
 }
 
 /* *********************************************************** */
@@ -98,15 +97,15 @@ void Mission::fatalError(missionNode *node, int mode, string message) {
         }
         cout << endl << "Stackdump: " << endl;
         for (unsigned int i = 0; i < runtime.cur_thread->exec_stack.size(); i++) {
-            contextStack *cstack = runtime.cur_thread->exec_stack[i];
-            missionNode *mnode = runtime.cur_thread->module_stack[i];
-            unsigned int classid = runtime.cur_thread->classid_stack[i];
+            contextStack *cstack  = runtime.cur_thread->exec_stack[i];
+            missionNode  *mnode   = runtime.cur_thread->module_stack[i];
+            unsigned int  classid = runtime.cur_thread->classid_stack[i];
             for (unsigned int j = 0; j < cstack->contexts.size(); j++) {
                 scriptContext *context = cstack->contexts[j];
-                missionNode *bnode = context->block_node;
+                missionNode   *bnode   = context->block_node;
                 if (bnode) {
                     cout << mnode->script.name << ":" << classid << " line " << bnode->attr_value("line") << " "
-                            << bnode->script.name << " ";
+                         << bnode->script.name << " ";
 
                     printNode(bnode, mode);
                 }
@@ -167,33 +166,32 @@ bool Mission::have_return(int mode) {
 /* *********************************************************** */
 
 void Mission::initTagMap() {
-    tagmap["module"] = DTAG_MODULE;
-    tagmap["script"] = DTAG_SCRIPT;
-    tagmap["if"] = DTAG_IF;
-    tagmap["block"] = DTAG_BLOCK;
-    tagmap["setvar"] = DTAG_SETVAR;
-    tagmap["exec"] = DTAG_EXEC;
-    tagmap["call"] = DTAG_CALL;
-    tagmap["while"] = DTAG_WHILE;
-    tagmap["and"] = DTAG_AND_EXPR;
-    tagmap["or"] = DTAG_OR_EXPR;
-    tagmap["not"] = DTAG_NOT_EXPR;
-    tagmap["test"] = DTAG_TEST_EXPR;
-    tagmap["fmath"] = DTAG_FMATH;
-    tagmap["vmath"] = DTAG_VMATH;
-    tagmap["var"] = DTAG_VAR_EXPR;
-    tagmap["defvar"] = DTAG_DEFVAR;
-    tagmap["const"] = DTAG_CONST;
+    tagmap["module"]    = DTAG_MODULE;
+    tagmap["script"]    = DTAG_SCRIPT;
+    tagmap["if"]        = DTAG_IF;
+    tagmap["block"]     = DTAG_BLOCK;
+    tagmap["setvar"]    = DTAG_SETVAR;
+    tagmap["exec"]      = DTAG_EXEC;
+    tagmap["call"]      = DTAG_CALL;
+    tagmap["while"]     = DTAG_WHILE;
+    tagmap["and"]       = DTAG_AND_EXPR;
+    tagmap["or"]        = DTAG_OR_EXPR;
+    tagmap["not"]       = DTAG_NOT_EXPR;
+    tagmap["test"]      = DTAG_TEST_EXPR;
+    tagmap["fmath"]     = DTAG_FMATH;
+    tagmap["vmath"]     = DTAG_VMATH;
+    tagmap["var"]       = DTAG_VAR_EXPR;
+    tagmap["defvar"]    = DTAG_DEFVAR;
+    tagmap["const"]     = DTAG_CONST;
     tagmap["arguments"] = DTAG_ARGUMENTS;
-    tagmap["globals"] = DTAG_GLOBALS;
-    tagmap["return"] = DTAG_RETURN;
-    tagmap["import"] = DTAG_IMPORT;
+    tagmap["globals"]   = DTAG_GLOBALS;
+    tagmap["return"]    = DTAG_RETURN;
+    tagmap["import"]    = DTAG_IMPORT;
 }
 
 /* *********************************************************** */
 
-void Mission::printVarInst(varInst *vi) {
-}
+void Mission::printVarInst(varInst *vi) {}
 
 /* *********************************************************** */
 
@@ -287,8 +285,8 @@ void Mission::printThread(missionThread *thread) {
 /* *********************************************************** */
 
 varInst *Mission::searchScopestack(string name) {
-    int elem = scope_stack.size() - 1;
-    varInst *vi = NULL;
+    int      elem = scope_stack.size() - 1;
+    varInst *vi   = NULL;
     while (vi == NULL && elem >= 0) {
         missionNode *scope = scope_stack[elem];
 
@@ -296,7 +294,7 @@ varInst *Mission::searchScopestack(string name) {
         if (vi == NULL) {
             if (scope->script.classvars.size() > 0) {
                 varInstMap *cvmap = scope->script.classvars[0];
-                vi = (*cvmap)[name];
+                vi                = (*cvmap)[name];
                 debug(10, scope, 0, "found var " + name + " as classvar");
             }
             if (vi == NULL) {
@@ -325,4 +323,3 @@ missionNode *Mission::lookupScript(string scriptname, string modulename) {
     }
     return scriptnode;
 }
-

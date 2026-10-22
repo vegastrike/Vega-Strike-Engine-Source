@@ -28,7 +28,7 @@
 #define VEGA_STRIKE_ENGINE_INHANDLER_H
 
 #include "src/in_kb.h"
-//#include "cmd_unit.h"
+// #include "cmd_unit.h"
 #include <map>
 #include <string>
 
@@ -44,43 +44,37 @@ public:
 
     InputListener(Unit *parent) {
         this->parent = parent;
-        //int a;
-        //mousex = mousey = 0;
-        //ZeroMemory(keystate, sizeof(keystate));
+        // int a;
+        // mousex = mousey = 0;
+        // ZeroMemory(keystate, sizeof(keystate));
     }
 
     virtual void MoveMouse(int x, int y) {
-        //mousex = x;
-        //mousey = y;
+        // mousex = x;
+        // mousey = y;
     }
 
-    virtual void MoveMouse(int *x, int *y, int num) {
-    }
+    virtual void MoveMouse(int *x, int *y, int num) {}
 
     virtual void KeyDown(int key) {
-        //keystate[key] = 1;
+        // keystate[key] = 1;
     }
 
-    virtual void KeyDown(int *key, int num) {
-    }
+    virtual void KeyDown(int *key, int num) {}
 
     virtual void KeyUp(int key) {
-        //keystate[key] = 0;
+        // keystate[key] = 0;
     }
 
-    virtual void KeyUp(int *key, int num) {
-    }
+    virtual void KeyUp(int *key, int num) {}
 
-    virtual void Activate() {
-    }
+    virtual void Activate() {}
 
-    virtual void Deactivate() {
-    }
+    virtual void Deactivate() {}
 
-//InHandler &Dispatch(); // Drives the input dispatcher, for switching input states
-//InHandler &Revert(); // return to the previous state
+    // InHandler &Dispatch(); // Drives the input dispatcher, for switching input states
+    // InHandler &Revert(); // return to the previous state
 };
 
-//const InputListener End;
-#endif //VEGA_STRIKE_ENGINE_INHANDLER_H
-
+// const InputListener End;
+#endif  // VEGA_STRIKE_ENGINE_INHANDLER_H

@@ -34,14 +34,9 @@
 
 namespace Audio {
 
-SimpleSource::~SimpleSource() {
-}
+SimpleSource::~SimpleSource() {}
 
-SimpleSource::SimpleSource(SharedPtr<Sound> sound, bool looping) :
-        Source(sound, looping),
-        playing(false),
-        scene(0) {
-}
+SimpleSource::SimpleSource(SharedPtr<Sound> sound, bool looping) : Source(sound, looping), playing(false), scene(0) {}
 
 void SimpleSource::notifySceneAttached(SimpleScene *scn) {
     scene = scn;
@@ -79,4 +74,4 @@ bool SimpleSource::isPlayingImpl() const {
     return playing;
 }
 
-};
+};  // namespace Audio

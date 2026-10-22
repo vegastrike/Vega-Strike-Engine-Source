@@ -30,31 +30,31 @@ struct OPCODE_API OPCODECREATE {
     //! Constructor
     OPCODECREATE();
 
-    MeshInterface *mIMesh;            //!< Mesh interface (access to triangles & vertices) (*)
-    BuildSettings mSettings;        //!< Builder's settings
-    bool mNoLeaf;        //!< true => discard leaf nodes (else use a normal tree)
-    bool mQuantized;        //!< true => quantize the tree (else use a normal tree)
+    MeshInterface *mIMesh;      //!< Mesh interface (access to triangles & vertices) (*)
+    BuildSettings  mSettings;   //!< Builder's settings
+    bool           mNoLeaf;     //!< true => discard leaf nodes (else use a normal tree)
+    bool           mQuantized;  //!< true => quantize the tree (else use a normal tree)
 #ifdef __MESHMERIZER_H__
-    bool					mCollisionHull;	//!< true => use convex hull + GJK
-#endif // __MESHMERIZER_H__
-    bool mKeepOriginal;    //!< true => keep a copy of the original tree (debug purpose)
-    bool mCanRemap;        //!< true => allows OPCODE to reorganize client arrays
+    bool mCollisionHull;        //!< true => use convex hull + GJK
+#endif                          // __MESHMERIZER_H__
+    bool mKeepOriginal;         //!< true => keep a copy of the original tree (debug purpose)
+    bool mCanRemap;             //!< true => allows OPCODE to reorganize client arrays
 
     // (*) This pointer is saved internally and used by OPCODE until collision structures are released,
     // so beware of the object's lifetime.
 };
 
 enum ModelFlag {
-    OPC_QUANTIZED = (1 << 0),    //!< Compressed/uncompressed tree
-    OPC_NO_LEAF = (1 << 1),    //!< Leaf/NoLeaf tree
-    OPC_SINGLE_NODE = (1 << 2)    //!< Special case for 1-node models
+    OPC_QUANTIZED   = (1 << 0),  //!< Compressed/uncompressed tree
+    OPC_NO_LEAF     = (1 << 1),  //!< Leaf/NoLeaf tree
+    OPC_SINGLE_NODE = (1 << 2)   //!< Special case for 1-node models
 };
 
 class OPCODE_API BaseModel {
 public:
     // Constructor/Destructor
     BaseModel();
-    virtual                                ~BaseModel();
+    virtual ~BaseModel();
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -89,7 +89,7 @@ public:
      *	\return		generic tree
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    const AABBTree *GetSourceTree() const {
+    inline_ const AABBTree *GetSourceTree() const {
         return mSource;
     }
 
@@ -99,7 +99,7 @@ public:
      *	\return		the collision tree
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    const AABBOptimizedTree *GetTree() const {
+    inline_ const AABBOptimizedTree *GetTree() const {
         return mTree;
     }
 
@@ -109,7 +109,7 @@ public:
      *	\return		the collision tree
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            AABBOptimizedTree *GetTree() {
+    inline_ AABBOptimizedTree *GetTree() {
         return mTree;
     }
 
@@ -120,7 +120,7 @@ public:
      *	\return		number of nodes
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            uint32_t GetNbNodes() const {
+    inline_ uint32_t GetNbNodes() const {
         return mTree->GetNbNodes();
     }
 
@@ -130,7 +130,7 @@ public:
      *	\return		true if the tree has leaf nodes (normal tree), else false (optimized tree)
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            BOOL HasLeafNodes() const {
+    inline_ BOOL HasLeafNodes() const {
         return !(mModelCode & OPC_NO_LEAF);
     }
 
@@ -140,7 +140,7 @@ public:
      *	\return		true if the tree is quantized
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            BOOL IsQuantized() const {
+    inline_ BOOL IsQuantized() const {
         return mModelCode & OPC_QUANTIZED;
     }
 
@@ -150,7 +150,7 @@ public:
      *	\return		true if the model has only 1 node
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            BOOL HasSingleNode() const {
+    inline_ BOOL HasSingleNode() const {
         return mModelCode & OPC_SINGLE_NODE;
     }
 
@@ -160,7 +160,7 @@ public:
      *	\return		model's code
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            uint32_t GetModelCode() const {
+    inline_ uint32_t GetModelCode() const {
         return mModelCode;
     }
 
@@ -170,7 +170,7 @@ public:
      *	\return		mesh interface
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    const MeshInterface *GetMeshInterface() const {
+    inline_ const MeshInterface *GetMeshInterface() const {
         return mIMesh;
     }
 
@@ -180,18 +180,18 @@ public:
      *	\param		imesh		[in] mesh interface
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_            void SetMeshInterface(const MeshInterface *imesh) {
+    inline_ void SetMeshInterface(const MeshInterface *imesh) {
         mIMesh = imesh;
     }
 
 protected:
-    const MeshInterface *mIMesh;            //!< User-defined mesh interface
-    uint32_t mModelCode;        //!< Model code = combination of ModelFlag(s)
-    AABBTree *mSource;        //!< Original source tree
-    AABBOptimizedTree *mTree;            //!< Optimized tree owned by the model
+    const MeshInterface *mIMesh;      //!< User-defined mesh interface
+    uint32_t             mModelCode;  //!< Model code = combination of ModelFlag(s)
+    AABBTree            *mSource;     //!< Original source tree
+    AABBOptimizedTree   *mTree;       //!< Optimized tree owned by the model
     // Internal methods
     void ReleaseBase();
     bool CreateTree(bool no_leaf, bool quantized);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_BASEMODEL_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_BASEMODEL_H

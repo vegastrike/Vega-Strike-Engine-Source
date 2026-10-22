@@ -27,8 +27,8 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_HALOSYSTEM_H
 #define VEGA_STRIKE_ENGINE_GFX_HALOSYSTEM_H
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "gfx_generic/matrix.h"
 class Mesh;
@@ -43,12 +43,13 @@ private:
     struct Halo {
         Matrix trans;
         Vector size;
-        Mesh *mesh;
+        Mesh  *mesh;
         double sparkle_accum;
-        float sparkle_rate;
-        float activation;
-        float oscale;
+        float  sparkle_rate;
+        float  activation;
+        float  oscale;
     };
+
     std::vector<Halo> halo;
 
 public:
@@ -59,24 +60,12 @@ public:
         return halo.size();
     }
 
-    unsigned int AddHalo(const char *filename,
-            const Matrix &trans,
-            const Vector &size,
-            const GFXColor &col,
-            std::string halo_type /*when it grows*/,
-            float activation_accel);
-//Draw draws smoke and damage fx:
-    void Draw(const Matrix &trans,
-            const Vector &scale,
-            int halo_alpha,
-            float nebdist,
-            float hullpercentage,
-            const Vector &velocity,
-            const Vector &linaccel,
-            const Vector &angaccel,
-            float maxaccel,
-            float maxvelocity,
-            int faction);
+    unsigned int AddHalo(const char *filename, const Matrix &trans, const Vector &size, const GFXColor &col,
+                         std::string halo_type /*when it grows*/, float activation_accel);
+    // Draw draws smoke and damage fx:
+    void Draw(const Matrix &trans, const Vector &scale, int halo_alpha, float nebdist, float hullpercentage,
+              const Vector &velocity, const Vector &linaccel, const Vector &angaccel, float maxaccel, float maxvelocity,
+              int faction);
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_HALOSYSTEM_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_HALOSYSTEM_H

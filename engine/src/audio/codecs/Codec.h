@@ -33,8 +33,8 @@
 
 #include <string>
 #include <vector>
-#include "../Exceptions.h"
 
+#include "../Exceptions.h"
 #include "vegadisk/vsfilesystem.h"
 
 namespace Audio {
@@ -106,9 +106,8 @@ public:
      *      value will be less accurate. Whenever in doubt, the function will return
      *      success (true).
      */
-    virtual bool canHandle(const std::string &path,
-            bool canOpen,
-            VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) = 0;
+    virtual bool canHandle(const std::string &path, bool canOpen,
+                           VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) = 0;
 
     /**
      * Returns an instance of the Stream class attached to this codec and the specified
@@ -123,6 +122,6 @@ public:
     virtual Stream *open(const std::string &path, VSFileSystem::VSFileType type = VSFileSystem::UnknownFile) = 0;
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_CODEC_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_CODEC_H

@@ -31,11 +31,12 @@
  *  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <string>
 #include <gnuhash.h>
+#include <string>
+
 #include "root_generic/configxml.h"
-#include "root_generic/xml_support.h"
 #include "root_generic/easydom.h"
+#include "root_generic/xml_support.h"
 #include "src/in_kb.h"
 
 using std::string;
@@ -43,23 +44,23 @@ using std::string;
 using XMLSupport::AttributeList;
 
 typedef vsUMap<string, KBHandler> CommandMap;
-typedef vsUMap<string, int> KeyMap;
+typedef vsUMap<string, int>       KeyMap;
 
 class GameVegaConfig : public VegaConfig {
 public:
     explicit GameVegaConfig(const char *configfile);
-#define AXIS_X 0
-#define AXIS_Y 1
-#define AXIS_Z 2
+#define AXIS_X        0
+#define AXIS_Y        1
+#define AXIS_Z        2
 #define AXIS_THROTTLE 3
 private:
-    void initCommandMap();
-    void initKeyMap();
+    void       initCommandMap();
+    void       initKeyMap();
     CommandMap command_map;
-    KeyMap key_map;
-    int hs_value_index;
-//vector<vColor *> colors;
+    KeyMap     key_map;
+    int        hs_value_index;
+    // vector<vColor *> colors;
     void bindKeys();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CONFIG_XML_H
+#endif  // VEGA_STRIKE_ENGINE_CONFIG_XML_H

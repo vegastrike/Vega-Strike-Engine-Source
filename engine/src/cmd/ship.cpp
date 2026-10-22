@@ -31,13 +31,8 @@
 
 Ship::Ship() = default;
 
-Ship::Ship(const char *filename,
-        bool SubU,
-        int faction,
-        std::string unitModifications,
-        Flightgroup *flightgrp,
-        int fg_subnumber)
-        : Unit(filename, SubU, faction, unitModifications, flightgrp, fg_subnumber)
-{}
+Ship::Ship(const char *filename, bool SubU, int faction, std::string unitModifications, Flightgroup *flightgrp,
+           int fg_subnumber)
+    : Unit(filename, SubU, faction, unitModifications, flightgrp, fg_subnumber) {}
 
 Ship::~Ship() = default;

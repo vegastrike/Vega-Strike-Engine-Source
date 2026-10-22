@@ -29,16 +29,17 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Contains a sphere-vs-tree collider.
- *	This class performs a collision test between a sphere and an AABB tree. You can use this to do a standard player vs world collision,
- *	in a Nettle/Telemachos way. It doesn't suffer from all reported bugs in those two classic codes - the "new" one by Paul Nettle is a
- *	debuggued version I think. Collision response can be driven by reported collision data - it works extremely well for me. In sake of
- *	efficiency, all meshes (that is, all AABB trees) should of course also be kept in an extra hierarchical structure (octree, whatever).
+ *	This class performs a collision test between a sphere and an AABB tree. You can use this to do a standard player vs
+ *world collision, in a Nettle/Telemachos way. It doesn't suffer from all reported bugs in those two classic codes - the
+ *"new" one by Paul Nettle is a debuggued version I think. Collision response can be driven by reported collision data -
+ *it works extremely well for me. In sake of efficiency, all meshes (that is, all AABB trees) should of course also be
+ *kept in an extra hierarchical structure (octree, whatever).
  *
  *  \class		SphereCollider
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		June, 2, 2001
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,20 +57,20 @@ using namespace Opcode;
 #include "OPC_SphereAABBOverlap.h"
 #include "OPC_SphereTriOverlap.h"
 
-#define SET_CONTACT(prim_index, flag)                                       \
-    /* Set contact status */                                                \
-    mFlags |= flag;                                                         \
+#define SET_CONTACT(prim_index, flag) \
+    /* Set contact status */          \
+    mFlags |= flag;                   \
     mTouchedPrimitives->Add(prim_index);
 
 //! Sphere-triangle overlap test
-#define SPHERE_PRIM(prim_index, flag)                                       \
-    /* Request vertices from the app */                                     \
-    VertexPointers VP;    mIMesh->GetTriangle(VP, prim_index);              \
-                                                                            \
-    /* Perform sphere-tri overlap test */                                   \
-    if(SphereTriOverlap(*VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2]))       \
-    {                                                                       \
-        SET_CONTACT(prim_index, flag)                                       \
+#define SPHERE_PRIM(prim_index, flag)                                    \
+    /* Request vertices from the app */                                  \
+    VertexPointers VP;                                                   \
+    mIMesh->GetTriangle(VP, prim_index);                                 \
+                                                                         \
+    /* Perform sphere-tri overlap test */                                \
+    if (SphereTriOverlap(*VP.Vertex[0], *VP.Vertex[1], *VP.Vertex[2])) { \
+        SET_CONTACT(prim_index, flag)                                    \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,8 +88,7 @@ SphereCollider::SphereCollider() {
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-SphereCollider::~SphereCollider() {
-}
+SphereCollider::~SphereCollider() {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -106,11 +106,8 @@ SphereCollider::~SphereCollider() {
  *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool SphereCollider::Collide(SphereCache &cache,
-        const Sphere &sphere,
-        const Model &model,
-        const Matrix4x4 *worlds,
-        const Matrix4x4 *worldm) {
+bool SphereCollider::Collide(SphereCache &cache, const Sphere &sphere, const Model &model, const Matrix4x4 *worlds,
+                             const Matrix4x4 *worldm) {
     // Checkings
     if (!Setup(&model)) {
         return false;
@@ -123,10 +120,10 @@ bool SphereCollider::Collide(SphereCache &cache,
 
     if (!model.HasLeafNodes()) {
         if (model.IsQuantized()) {
-            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree *) model.GetTree();
+            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree *)model.GetTree();
 
             // Setup dequantization coeffs
-            mCenterCoeff = Tree->mCenterCoeff;
+            mCenterCoeff  = Tree->mCenterCoeff;
             mExtentsCoeff = Tree->mExtentsCoeff;
 
             // Perform collision query
@@ -136,7 +133,7 @@ bool SphereCollider::Collide(SphereCache &cache,
                 _Collide(Tree->GetNodes());
             }
         } else {
-            const AABBNoLeafTree *Tree = (const AABBNoLeafTree *) model.GetTree();
+            const AABBNoLeafTree *Tree = (const AABBNoLeafTree *)model.GetTree();
 
             // Perform collision query
             if (SkipPrimitiveTests()) {
@@ -147,10 +144,10 @@ bool SphereCollider::Collide(SphereCache &cache,
         }
     } else {
         if (model.IsQuantized()) {
-            const AABBQuantizedTree *Tree = (const AABBQuantizedTree *) model.GetTree();
+            const AABBQuantizedTree *Tree = (const AABBQuantizedTree *)model.GetTree();
 
             // Setup dequantization coeffs
-            mCenterCoeff = Tree->mCenterCoeff;
+            mCenterCoeff  = Tree->mCenterCoeff;
             mExtentsCoeff = Tree->mExtentsCoeff;
 
             // Perform collision query
@@ -160,7 +157,7 @@ bool SphereCollider::Collide(SphereCache &cache,
                 _Collide(Tree->GetNodes());
             }
         } else {
-            const AABBCollisionTree *Tree = (const AABBCollisionTree *) model.GetTree();
+            const AABBCollisionTree *Tree = (const AABBCollisionTree *)model.GetTree();
 
             // Perform collision query
             if (SkipPrimitiveTests()) {
@@ -188,10 +185,8 @@ bool SphereCollider::Collide(SphereCache &cache,
  *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool SphereCollider::InitQuery(SphereCache &cache,
-        const Sphere &sphere,
-        const Matrix4x4 *worlds,
-        const Matrix4x4 *worldm) {
+bool SphereCollider::InitQuery(SphereCache &cache, const Sphere &sphere, const Matrix4x4 *worlds,
+                               const Matrix4x4 *worldm) {
     // 1) Call the base method
     VolumeCollider::InitQuery();
 
@@ -256,7 +251,8 @@ bool SphereCollider::InitQuery(SphereCache &cache,
             // else no face has been touched during previous query
             // => we'll have to perform a normal query
         } else {
-            // We're interested in all contacts =>test the new real sphere N(ew) against the previous fat sphere P(revious):
+            // We're interested in all contacts =>test the new real sphere N(ew) against the previous fat sphere
+            // P(revious):
             float r = sqrtf(cache.FatRadius2) - sphere.mRadius;
             if (IsCacheValid(cache) && cache.Center.SquareDistance(mCenter) < r * r) {
                 // - if N is included in P, return previous list
@@ -277,10 +273,10 @@ bool SphereCollider::InitQuery(SphereCache &cache,
 
                 // Make a fat sphere so that coherence will work for subsequent frames
                 mRadius2 *= cache.FatCoeff;
-//				mRadius2 = (sphere.mRadius * cache.FatCoeff)*(sphere.mRadius * cache.FatCoeff);
+                //				mRadius2 = (sphere.mRadius * cache.FatCoeff)*(sphere.mRadius * cache.FatCoeff);
 
                 // Update cache with query data (signature for cached faces)
-                cache.Center = mCenter;
+                cache.Center     = mCenter;
                 cache.FatRadius2 = mRadius2;
             }
         }
@@ -377,13 +373,12 @@ inline_ bool SphereCollider::SphereContainsBox(const Point &bc, const Point &be)
     return TRUE;
 }
 
-#define TEST_BOX_IN_SPHERE(center, extents) \
-    if(SphereContainsBox(center, extents))  \
-    {                                       \
-        /* Set contact status */            \
-        mFlags |= OPC_CONTACT;              \
-        _Dump(node);                        \
-        return;                             \
+#define TEST_BOX_IN_SPHERE(center, extents)   \
+    if (SphereContainsBox(center, extents)) { \
+        /* Set contact status */              \
+        mFlags |= OPC_CONTACT;                \
+        _Dump(node);                          \
+        return;                               \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -449,12 +444,10 @@ void SphereCollider::_CollideNoPrimitiveTest(const AABBCollisionNode *node) {
 void SphereCollider::_Collide(const AABBQuantizedNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(Center, Extents)) {
@@ -485,12 +478,10 @@ void SphereCollider::_Collide(const AABBQuantizedNode *node) {
 void SphereCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(Center, Extents)) {
@@ -583,12 +574,10 @@ void SphereCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode *node) {
 void SphereCollider::_Collide(const AABBQuantizedNoLeafNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(Center, Extents)) {
@@ -623,12 +612,10 @@ void SphereCollider::_Collide(const AABBQuantizedNoLeafNode *node) {
 void SphereCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Perform Sphere-AABB overlap test
     if (!SphereAABBOverlap(Center, Extents)) {
@@ -678,33 +665,22 @@ void SphereCollider::_Collide(const AABBTreeNode *node) {
     }
 }
 
-
-
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-HybridSphereCollider::HybridSphereCollider() {
-}
+HybridSphereCollider::HybridSphereCollider() {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-HybridSphereCollider::~HybridSphereCollider() {
-}
+HybridSphereCollider::~HybridSphereCollider() {}
 
-bool HybridSphereCollider::Collide(SphereCache &cache,
-        const Sphere &sphere,
-        const HybridModel &model,
-        const Matrix4x4 *worlds,
-        const Matrix4x4 *worldm) {
+bool HybridSphereCollider::Collide(SphereCache &cache, const Sphere &sphere, const HybridModel &model,
+                                   const Matrix4x4 *worlds, const Matrix4x4 *worldm) {
     // We don't want primitive tests here!
     mFlags |= OPC_NO_PRIMITIVE_TESTS;
 
@@ -737,32 +713,32 @@ bool HybridSphereCollider::Collide(SphereCache &cache,
     // Now, do the actual query against leaf boxes
     if (!model.HasLeafNodes()) {
         if (model.IsQuantized()) {
-            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree *) model.GetTree();
+            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree *)model.GetTree();
 
             // Setup dequantization coeffs
-            mCenterCoeff = Tree->mCenterCoeff;
+            mCenterCoeff  = Tree->mCenterCoeff;
             mExtentsCoeff = Tree->mExtentsCoeff;
 
             // Perform collision query - we don't want primitive tests here!
             _CollideNoPrimitiveTest(Tree->GetNodes());
         } else {
-            const AABBNoLeafTree *Tree = (const AABBNoLeafTree *) model.GetTree();
+            const AABBNoLeafTree *Tree = (const AABBNoLeafTree *)model.GetTree();
 
             // Perform collision query - we don't want primitive tests here!
             _CollideNoPrimitiveTest(Tree->GetNodes());
         }
     } else {
         if (model.IsQuantized()) {
-            const AABBQuantizedTree *Tree = (const AABBQuantizedTree *) model.GetTree();
+            const AABBQuantizedTree *Tree = (const AABBQuantizedTree *)model.GetTree();
 
             // Setup dequantization coeffs
-            mCenterCoeff = Tree->mCenterCoeff;
+            mCenterCoeff  = Tree->mCenterCoeff;
             mExtentsCoeff = Tree->mExtentsCoeff;
 
             // Perform collision query - we don't want primitive tests here!
             _CollideNoPrimitiveTest(Tree->GetNodes());
         } else {
-            const AABBCollisionTree *Tree = (const AABBCollisionTree *) model.GetTree();
+            const AABBCollisionTree *Tree = (const AABBCollisionTree *)model.GetTree();
 
             // Perform collision query - we don't want primitive tests here!
             _CollideNoPrimitiveTest(Tree->GetNodes());
@@ -779,11 +755,11 @@ bool HybridSphereCollider::Collide(SphereCache &cache,
         mTouchedPrimitives = &cache.TouchedPrimitives;
 
         // Read touched leaf boxes
-        uint32_t Nb = mTouchedBoxes.GetNbEntries();
+        uint32_t        Nb      = mTouchedBoxes.GetNbEntries();
         const uint32_t *Touched = mTouchedBoxes.GetEntries();
 
-        const LeafTriangles *LT = model.GetLeafTriangles();
-        const uint32_t *Indices = model.GetIndices();
+        const LeafTriangles *LT      = model.GetLeafTriangles();
+        const uint32_t      *Indices = model.GetIndices();
 
         // Loop through touched leaves
         while (Nb--) {
@@ -813,4 +789,3 @@ bool HybridSphereCollider::Collide(SphereCache &cache,
 
     return true;
 }
-

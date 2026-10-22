@@ -27,17 +27,24 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H
 #define VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H
 
-#include "gfx_generic/vec.h" // TODO: replace with class Vector;
 #include <map>
 #include <string>
 
+#include "gfx_generic/vec.h"  // TODO: replace with class Vector;
+
 enum class SoundType {
-    engine, shield, armor, hull, explosion, cloaking, jump
+    engine,
+    shield,
+    armor,
+    hull,
+    explosion,
+    cloaking,
+    jump
 };
 
 class Audible {
 private:
-    std::map<SoundType, int> sounds;
+    std::map<SoundType, int>         sounds;
     std::map<SoundType, std::string> defaultSoundNames;
 
 public:
@@ -54,8 +61,8 @@ public:
     void playArmorDamageSound(const Vector &pnt);
     void playHullDamageSound(const Vector &pnt);
     void playEngineSound();
-protected:
 
+protected:
     void playExplosionDamageSound();
 
 
@@ -67,4 +74,4 @@ private:
     void playDopplerSound(const Vector &pnt, int sound);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AUDIBLE_H

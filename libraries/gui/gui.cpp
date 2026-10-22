@@ -29,16 +29,17 @@
 
 #include <cassert>
 #include <string>
+
 #include <SDL3/SDL.h>
 
 #include "collections.h"
 
 // Must come before imgui.h
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui.h"
-#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
+#include "imgui.h"
 
 // TrueType font (Roboto-Medium) embedded as a compressed base85 array so the engine
 // needs no font file on disk at runtime. Loaded via the dynamic font atlas, which
@@ -46,8 +47,8 @@
 #include "roboto_font.h"
 
 
-bool gui_initialized = false;
-SDL_Window* current_window = nullptr;
+bool        gui_initialized = false;
+SDL_Window *current_window  = nullptr;
 
 // Font size requested by a settings change, applied on the next frame. Stored as a
 // float so we can defer the atlas rebuild to a safe point (start of a frame, before
@@ -57,21 +58,21 @@ static float s_pending_font_size = 0.0f;
 // Font file requested by a settings change, applied on the next frame. Empty means
 // "use the embedded Roboto". When set, the atlas is rebuilt with the new .ttf.
 static std::string s_pending_font_file;
-static bool s_font_file_pending = false;
+static bool        s_font_file_pending = false;
 
 void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontSize, const char *fontFile) {
-    current_window = window;
+    current_window           = window;
     SDL_GLContext gl_context = *context;
 
     assert(current_window);
 
     ImGui::CreateContext();
-    
+
     ImGui_ImplSDL3_InitForOpenGL(current_window, gl_context);
-    const char* glsl_version = "#version 130";
+    const char *glsl_version = "#version 130";
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    ImGuiIO& io = ImGui::GetIO();
+    ImGuiIO &io = ImGui::GetIO();
     io.Fonts->Clear();
     ImFontConfig cfg;
     cfg.SizePixels = fontSize;
@@ -79,10 +80,11 @@ void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontS
     // Roboto TrueType. With the synced OpenGL3 backend the atlas is dynamic: each
     // glyph size is baked crisp on demand.
     io.FontDefault = (fontFile != nullptr && fontFile[0] != '\0')
-            ? io.Fonts->AddFontFromFileTTF(fontFile, fontSize, &cfg) : nullptr;
+                             ? io.Fonts->AddFontFromFileTTF(fontFile, fontSize, &cfg)
+                             : nullptr;
     if (io.FontDefault == nullptr) {
-        io.FontDefault = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
-            RobotoMediumFont_compressed_data_base85, fontSize, &cfg);
+        io.FontDefault =
+                io.Fonts->AddFontFromMemoryCompressedBase85TTF(RobotoMediumFont_compressed_data_base85, fontSize, &cfg);
     }
 
     gui_initialized = true;
@@ -107,22 +109,22 @@ void ImGui_ApplyPendingFontSize() {
     }
     if (s_pending_font_size > 0.0f) {
         ImGui::GetStyle().FontSizeBase = s_pending_font_size;
-        s_pending_font_size = 0.0f;
+        s_pending_font_size            = 0.0f;
     }
     if (s_font_file_pending) {
         ImGuiIO &io = ImGui::GetIO();
         io.Fonts->Clear();
         ImFontConfig cfg;
         cfg.SizePixels = ImGui::GetStyle().FontSizeBase;
-        ImFont *f = (!s_pending_font_file.empty())
-                ? io.Fonts->AddFontFromFileTTF(s_pending_font_file.c_str(), cfg.SizePixels, &cfg)
-                : nullptr;
+        ImFont *f      = (!s_pending_font_file.empty())
+                                 ? io.Fonts->AddFontFromFileTTF(s_pending_font_file.c_str(), cfg.SizePixels, &cfg)
+                                 : nullptr;
         if (f == nullptr) {
-            f = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
-                RobotoMediumFont_compressed_data_base85, cfg.SizePixels, &cfg);
+            f = io.Fonts->AddFontFromMemoryCompressedBase85TTF(RobotoMediumFont_compressed_data_base85, cfg.SizePixels,
+                                                               &cfg);
         }
         io.FontDefault = f;
-        io.Fonts->Build();   // the dynamic-atlas backend updates the texture on NewFrame
+        io.Fonts->Build();  // the dynamic-atlas backend updates the texture on NewFrame
         s_font_file_pending = false;
         s_pending_font_file.clear();
     }
@@ -135,4 +137,3 @@ void CleanupGui() {
     ImGui::DestroyContext();
     gui_initialized = false;
 }
-

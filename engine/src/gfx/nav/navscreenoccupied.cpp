@@ -85,62 +85,62 @@ void navscreenoccupied::reset() {
 
 float navscreenoccupied::findfreesector(float x, float y) {
     float percent = ((x - screenskipby4[0]) / (screenskipby4[1] - screenskipby4[0]));
-    float answer = 0.0;
-    //strange structure, but it uses n tests for n cases, instead of 2 '(x<y)&&(x>z)'-per-case
-    //though i could have done *10 and turned it onto an int... variety is fun
+    float answer  = 0.0;
+    // strange structure, but it uses n tests for n cases, instead of 2 '(x<y)&&(x>z)'-per-case
+    // though i could have done *10 and turned it onto an int... variety is fun
     if (percent >= 0.1) {
-        //0.1 - n
+        // 0.1 - n
         if (percent >= 0.2) {
-            //0.2 - n
+            // 0.2 - n
             if (percent >= 0.3) {
-                //0.3 - n
+                // 0.3 - n
                 if (percent >= 0.4) {
-                    //0.4 - n
+                    // 0.4 - n
                     if (percent >= 0.5) {
-                        //0.5 - n
+                        // 0.5 - n
                         if (percent >= 0.6) {
-                            //0.6 - n
+                            // 0.6 - n
                             if (percent >= 0.7) {
-                                //0.7 - n
+                                // 0.7 - n
                                 if (percent >= 0.8) {
-                                    //0.8 - n
-                                    if (percent >= 0.9) {                                           //0.9 - n
+                                    // 0.8 - n
+                                    if (percent >= 0.9) {  // 0.9 - n
                                         answer = findfreefloat(sector9, y);
-                                    } else {                                             //percent 0.8 - 0.9
+                                    } else {               // percent 0.8 - 0.9
                                         answer = findfreefloat(sector8, y);
                                     }
                                 } else {
-                                    //percent 0.7 - 0.8
+                                    // percent 0.7 - 0.8
 
                                     answer = findfreefloat(sector7, y);
                                 }
                             } else {
-                                //percent 0.6 - 0.7
+                                // percent 0.6 - 0.7
 
                                 answer = findfreefloat(sector6, y);
                             }
                         } else {
-                            //percent 0.5 - 0.6
+                            // percent 0.5 - 0.6
 
                             answer = findfreefloat(sector5, y);
                         }
                     } else {
-                        //percent 0.4 - 0.5
+                        // percent 0.4 - 0.5
 
                         answer = findfreefloat(sector4, y);
                     }
                 } else {
-                    //percent 0.3 - 0.4
+                    // percent 0.3 - 0.4
 
                     answer = findfreefloat(sector3, y);
                 }
             } else {
-                //percent 0.2 - 0.3
+                // percent 0.2 - 0.3
 
                 answer = findfreefloat(sector2, y);
             }
         } else {
-            //percent 0.1 - 0.2
+            // percent 0.1 - 0.2
 
             answer = findfreefloat(sector1, y);
         }
@@ -153,12 +153,12 @@ float navscreenoccupied::findfreesector(float x, float y) {
 }
 
 float navscreenoccupied::findfreefloat(int &sector, float &y) {
-    //convert the y into a height of 32
-    //scan that 32 down untill a free power
-    //set that power used and return its float
+    // convert the y into a height of 32
+    // scan that 32 down untill a free power
+    // set that power used and return its float
 
-//( [.2] - [-.5] ) / ( [.5] - [-.5] )
-//( [.7] ) / ( [1] ) = .7
+    //( [.2] - [-.5] ) / ( [.5] - [-.5] )
+    //( [.7] ) / ( [1] ) = .7
     float percent = ((y - screenskipby4[2]) / (screenskipby4[3] - screenskipby4[2]));
 
     percent = percent * 31.0;
@@ -170,24 +170,24 @@ float navscreenoccupied::findfreefloat(int &sector, float &y) {
     }
     if (bit < 0) {
         bit = 0;
-        //run back up (0 -> 31 is upwards)
+        // run back up (0 -> 31 is upwards)
         while (checkbit(sector, bit)) {
             bit += 1;
         }
         if (bit > 31) {
-            //was all full
+            // was all full
 
-            //set it to the default
+            // set it to the default
             return y;
         } else {
-            //set the flaot to this %
+            // set the flaot to this %
             percent = (float(bit) / float(31));
             if (markreturned == 1) {
                 dosetbit(sector, bit);
             }
         }
     } else {
-        //set the float to this %
+        // set the float to this %
         percent = (float(bit) / float(31));
         if (markreturned == 1) {
             dosetbit(sector, bit);
@@ -196,4 +196,3 @@ float navscreenoccupied::findfreefloat(int &sector, float &y) {
     answer = screenskipby4[2] + ((screenskipby4[3] - screenskipby4[2]) * percent);
     return answer;
 }
-

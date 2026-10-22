@@ -31,9 +31,10 @@
 // C++ Interface: Audio::SceneManager
 //
 
-#include <string>
 #include <map>
 #include <set>
+#include <string>
+
 #include "Exceptions.h"
 #include "Singleton.h"
 #include "Types.h"
@@ -54,7 +55,7 @@ namespace __impl {
 // Forward declaration of internal scene manager data
 struct SceneManagerData;
 
-};
+};  // namespace __impl
 
 /**
  * Audio Scene Manager.
@@ -87,7 +88,7 @@ private:
     AutoPtr<__impl::SceneManagerData> data;
 
 public:
-    typedef VirtualIterator<SharedPtr<Scene> > SceneIterator;
+    typedef VirtualIterator<SharedPtr<Scene>> SceneIterator;
 
 protected:
     /** Returns the renderer
@@ -137,13 +138,8 @@ public:
      * @param radius The base radius of the source
      * @remarks The source should not be looping, and an exception will be thrown if it is.
      */
-    void playSource(
-            SharedPtr<SourceTemplate> tpl,
-            const std::string &sceneName,
-            LVector3 position,
-            Vector3 direction,
-            Vector3 velocity,
-            Scalar radius);
+    void playSource(SharedPtr<SourceTemplate> tpl, const std::string &sceneName, LVector3 position, Vector3 direction,
+                    Vector3 velocity, Scalar radius);
 
     /** Convenience API to play a source once and forget.
      * @param tpl The source template from which a source should be instanced
@@ -155,14 +151,8 @@ public:
      * @param radius The base radius of the source
      * @remarks The source should not be looping, and an exception will be thrown if it is.
      */
-    void playSource(
-            SharedPtr<SourceTemplate> tpl,
-            const std::string &soundName,
-            const std::string &sceneName,
-            LVector3 position,
-            Vector3 direction,
-            Vector3 velocity,
-            Scalar radius);
+    void playSource(SharedPtr<SourceTemplate> tpl, const std::string &soundName, const std::string &sceneName,
+                    LVector3 position, Vector3 direction, Vector3 velocity, Scalar radius);
 
     /** Create a new named scene */
     virtual SharedPtr<Scene> createScene(const std::string &name);
@@ -356,6 +346,6 @@ protected:
     virtual void updateListenerImpl(bool withAttributes);
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_SCENEMANAGER_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_SCENEMANAGER_H

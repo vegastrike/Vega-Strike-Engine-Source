@@ -27,10 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_OCCLUSION_H
 #define VEGA_STRIKE_ENGINE_GFX_OCCLUSION_H
 
-#include "root_generic/vs_globals.h"
-
-#include "src/gfxlib.h"
 #include "gfx_generic/vec.h"
+#include "root_generic/vs_globals.h"
+#include "src/gfxlib.h"
 
 namespace Occlusion {
 
@@ -65,6 +64,6 @@ void /*GFXDRVAPI*/ addOccluder(const QVector &pos, float rSize, bool significant
  */
 float /*GFXDRVAPI*/ testOcclusion(const QVector &lightPos, float lightSize, const QVector &pos, float rSize);
 
-}
+}  // namespace Occlusion
 
-#endif //VEGA_STRIKE_ENGINE_GFX_OCCLUSION_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_OCCLUSION_H

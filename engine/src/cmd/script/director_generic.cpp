@@ -28,31 +28,29 @@
 
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
-#include <boost/python/class.hpp>
 
 #include <Python.h>
 
-#include "cmd/unit_generic.h"
+#include <boost/python/class.hpp>
+#include <boost/version.hpp>
+
 #include "cmd/ai/order.h"
-
-#include "root_generic/configxml.h"
+#include "cmd/unit_generic.h"
 #include "gfx_generic/cockpit_generic.h"
-
-#include "src/python/python_class.h"
-
-#include "pythonmission.h"
 #include "mission.h"
-#include "vegadisk/savegame.h"
+#include "pythonmission.h"
+#include "root_generic/configxml.h"
 #include "src/gnuhash.h"
+#include "src/python/python_class.h"
 #include "src/universe.h"
 #include "src/vs_logging.h"
+#include "vegadisk/savegame.h"
 
 PYTHON_INIT_INHERIT_GLOBALS(Director, PythonMissionBaseClass);
 
 float getSaveData(int whichcp, const string &key, unsigned int num) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return 0;
     }
     vector<float> *ans = &(_Universe->AccessCockpit(whichcp)->savegame->getMissionData(key));
@@ -64,14 +62,14 @@ float getSaveData(int whichcp, const string &key, unsigned int num) {
 
 const vector<float> &getSaveData(int whichcp, const string &key) {
     static vector<float> empty;
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return empty;
     }
     return _Universe->AccessCockpit(whichcp)->savegame->getMissionData(key);
 }
 
 string getSaveString(int whichcp, const string &key, unsigned int num) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return "";
     }
     vector<std::string> *ans = &(_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData(key));
@@ -82,21 +80,21 @@ string getSaveString(int whichcp, const string &key, unsigned int num) {
 }
 
 unsigned int getSaveDataLength(int whichcp, const string &key) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return 0;
     }
     return _Universe->AccessCockpit(whichcp)->savegame->getMissionDataLength(key);
 }
 
 unsigned int getSaveStringLength(int whichcp, const string &key) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return 0;
     }
     return _Universe->AccessCockpit(whichcp)->savegame->getMissionStringDataLength(key);
 }
 
 unsigned int pushSaveData(int whichcp, const string &key, float val) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return 0;
     }
     vector<float> *ans = &((_Universe->AccessCockpit(whichcp)->savegame->getMissionData(key)));
@@ -106,23 +104,22 @@ unsigned int pushSaveData(int whichcp, const string &key, float val) {
 }
 
 unsigned int eraseSaveData(int whichcp, const string &key, unsigned int index) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return 0;
     }
     vector<float> *ans = &((_Universe->AccessCockpit(whichcp)->savegame->getMissionData(key)));
     if (index < ans->size()) {
-
         ans->erase(ans->begin() + index);
     }
     return ans->size();
 }
 
 unsigned int clearSaveData(int whichcp, const string &key) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return 0;
     }
     vector<float> *ans = &((_Universe->AccessCockpit(whichcp)->savegame->getMissionData(key)));
-    int ret = ans->size();
+    int            ret = ans->size();
     if (!ret) {
         return 0;
     }
@@ -132,7 +129,7 @@ unsigned int clearSaveData(int whichcp, const string &key) {
 }
 
 unsigned int pushSaveString(int whichcp, const string &key, const string &value) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return 0;
     }
     vector<std::string> *ans = &((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData(key)));
@@ -142,45 +139,42 @@ unsigned int pushSaveString(int whichcp, const string &key, const string &value)
 }
 
 void putSaveString(int whichcp, const string &key, unsigned int num, const string &val) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return;
     }
     vector<std::string> *ans = &((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData(key)));
     if (num < ans->size()) {
-
         (*ans)[num] = val;
     }
 }
 
 void putSaveData(int whichcp, const string &key, unsigned int num, float val) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return;
     }
     vector<float> *ans = &((_Universe->AccessCockpit(whichcp)->savegame->getMissionData(key)));
     if (num < ans->size()) {
-
         (*ans)[num] = val;
     }
 }
 
 unsigned int eraseSaveString(int whichcp, const string &key, unsigned int index) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return 0;
     }
     vector<std::string> *ans = &((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData(key)));
     if (index < ans->size()) {
-
         ans->erase(ans->begin() + index);
     }
     return ans->size();
 }
 
 unsigned int clearSaveString(int whichcp, const string &key) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return 0;
     }
     vector<std::string> *ans = &((_Universe->AccessCockpit(whichcp)->savegame->getMissionStringData(key)));
-    int ret = ans->size();
+    int                  ret = ans->size();
     if (!ret) {
         return 0;
     }
@@ -190,11 +184,11 @@ unsigned int clearSaveString(int whichcp, const string &key) {
 }
 
 vector<string> loadStringList(int playernum, const string &mykey) {
-    if (playernum < 0 || (unsigned int) playernum >= _Universe->numPlayers()) {
+    if (playernum < 0 || (unsigned int)playernum >= _Universe->numPlayers()) {
         return vector<string>();
     }
 
-    SaveGame *savegame = _Universe->AccessCockpit(playernum)->savegame;
+    SaveGame      *savegame = _Universe->AccessCockpit(playernum)->savegame;
     vector<string> rez;
 
     const vector<string> &ans = savegame->readMissionStringData(mykey);
@@ -206,14 +200,14 @@ vector<string> loadStringList(int playernum, const string &mykey) {
         /* This variant loads it from float data, converting to character data.
            It's a legacy variant, highly and unpleasantly convoluted and sub-performant,
            but we must support it to be compatible with old savegames */
-        const vector<float> &ans = savegame->readMissionData(mykey);
-        int lengt = ans.size();
+        const vector<float> &ans   = savegame->readMissionData(mykey);
+        int                  lengt = ans.size();
         rez.reserve(ans.size());
         if (lengt >= 1) {
             string curstr;
-            int length = (int) ans[0];
+            int    length = (int)ans[0];
             for (int j = 0; j < length && j < lengt; j++) {
-                char myint = (char) ans[j + 1];
+                char myint = (char)ans[j + 1];
                 if (myint != '\0') {
                     curstr += myint;
                 } else {
@@ -227,7 +221,7 @@ vector<string> loadStringList(int playernum, const string &mykey) {
 }
 
 const vector<string> &getStringList(int playernum, const string &mykey) {
-    if (playernum < 0 || (unsigned int) playernum >= _Universe->numPlayers()) {
+    if (playernum < 0 || (unsigned int)playernum >= _Universe->numPlayers()) {
         static const vector<string> empty;
         return empty;
     }
@@ -241,7 +235,7 @@ const vector<string> &getStringList(int playernum, const string &mykey) {
 }
 
 void saveStringList(int playernum, const string &mykey, const vector<string> &names) {
-    if (playernum < 0 || (unsigned int) playernum >= _Universe->numPlayers()) {
+    if (playernum < 0 || (unsigned int)playernum >= _Universe->numPlayers()) {
         return;
     }
 
@@ -255,13 +249,12 @@ void saveStringList(int playernum, const string &mykey, const vector<string> &na
     vector<string> &ans = savegame->getMissionStringData(mykey);
     clearSaveString(playernum, mykey);
     for (vector<string>::const_iterator i = names.begin(); i != names.end(); ++i) {
-
         ans.push_back(*i);
     }
 }
 
 void saveDataList(int whichcp, const string &key, const vector<float> &values) {
-    if (whichcp < 0 || (unsigned int) whichcp >= _Universe->numPlayers()) {
+    if (whichcp < 0 || (unsigned int)whichcp >= _Universe->numPlayers()) {
         return;
     }
 
@@ -269,7 +262,6 @@ void saveDataList(int whichcp, const string &key, const vector<float> &values) {
 
     vector<float> &ans = _Universe->AccessCockpit(whichcp)->savegame->getMissionData(key);
     for (vector<float>::const_iterator i = values.begin(); i != values.end(); ++i) {
-
         ans.push_back(*i);
     }
 }
@@ -336,15 +328,9 @@ static bool isUtf8SaveGamePy(string savegame) {
 
 BOOST_PYTHON_MODULE(Director) {
     PYTHON_BEGIN_INHERIT_CLASS(Director, pythonMission, PythonMissionBaseClass, "Mission")
-        PYTHON_DEFINE_METHOD_DEFAULT(Class, &PythonMissionBaseClass::Pickle, "Pickle", pythonMission::default_Pickle);
-        PYTHON_DEFINE_METHOD_DEFAULT(Class,
-                &PythonMissionBaseClass::UnPickle,
-                "UnPickle",
-                pythonMission::default_UnPickle);
-        PYTHON_DEFINE_METHOD_DEFAULT(Class,
-                &PythonMissionBaseClass::Execute,
-                "Execute",
-                pythonMission::default_Execute);
+    PYTHON_DEFINE_METHOD_DEFAULT(Class, &PythonMissionBaseClass::Pickle, "Pickle", pythonMission::default_Pickle);
+    PYTHON_DEFINE_METHOD_DEFAULT(Class, &PythonMissionBaseClass::UnPickle, "UnPickle", pythonMission::default_UnPickle);
+    PYTHON_DEFINE_METHOD_DEFAULT(Class, &PythonMissionBaseClass::Execute, "Execute", pythonMission::default_Execute);
     PYTHON_END_CLASS(Director, pythonMission)
     boost::python::def("putSaveData", &putSaveDataPy);
     boost::python::def("pushSaveData", &pushSaveDataPy);
@@ -380,7 +366,7 @@ void Mission::loadModule(string modulename) {
 
     VS_LOG(trace, (boost::format("  loading module %1%") % modulename));
 
-    string filename = "modules/" + modulename + ".module";
+    string       filename   = "modules/" + modulename + ".module";
     missionNode *import_top = importf->LoadXML(filename.c_str());
     if (import_top == NULL) {
     }
@@ -460,28 +446,28 @@ void Mission::UnPickle(string pickled) {
 void Mission::DirectorStart(missionNode *node) {
     VS_LOG(trace, "DIRECTOR START");
 
-    const int st_debuglevel = configuration().interpreter.debug_level;
+    const int  st_debuglevel = configuration().interpreter.debug_level;
     const bool st_start_game = configuration().interpreter.start_game;
-    const bool st_do_trace = configuration().interpreter.trace;
+    const bool st_do_trace   = configuration().interpreter.trace;
 
     debuglevel = st_debuglevel;
     start_game = st_start_game;
-    do_trace = st_do_trace;
+    do_trace   = st_do_trace;
 
-    vi_counter = 0;
+    vi_counter     = 0;
     old_vi_counter = 0;
 
-    olist_counter = 0;
+    olist_counter     = 0;
     old_olist_counter = 0;
 
-    string_counter = 0;
-    old_string_counter = 0;
+    string_counter             = 0;
+    old_string_counter         = 0;
     missionThread *main_thread = new missionThread;
-    runtime.thread_nr = 0;
+    runtime.thread_nr          = 0;
     runtime.threads.push_back(main_thread);
     runtime.cur_thread = main_thread;
 
-    director = NULL;
+    director            = NULL;
     std::string doparse = node->attr_value("do_parse");
     if (!doparse.empty()) {
         if (XMLSupport::parse_bool(doparse) == false) {
@@ -504,7 +490,7 @@ void Mission::DirectorStart(missionNode *node) {
 
     vsUMap<string, missionNode *>::iterator iter;
     for (iter = runtime.modules.begin(); iter != runtime.modules.end(); iter++) {
-        string mname = (*iter).first;
+        string       mname = (*iter).first;
         missionNode *mnode = (*iter).second;
         if (mname != "director") {
             VS_LOG(trace, (boost::format(" parsing full module %1%") % mname));
@@ -516,7 +502,7 @@ void Mission::DirectorStart(missionNode *node) {
 void Mission::DirectorInitgame() {
     this->player_num = _Universe->CurrentCockpit();
     if (nextpythonmission) {
-        //CAUSES AN UNRESOLVED EXTERNAL SYMBOL FOR PythonClass::last_instance ?!?!
+        // CAUSES AN UNRESOLVED EXTERNAL SYMBOL FOR PythonClass::last_instance ?!?!
 #ifndef _WIN32
         char *tmp = nextpythonmission;
         while (*tmp) {
@@ -527,7 +513,7 @@ void Mission::DirectorInitgame() {
         }
 #endif
         runtime.pymissions = (pythonMission::FactoryString(nextpythonmission));
-        delete[] nextpythonmission;          //delete the allocated memory
+        delete[] nextpythonmission;  // delete the allocated memory
         nextpythonmission = NULL;
         if (!this->unpickleData.empty()) {
             if (runtime.pymissions) {
@@ -541,4 +527,3 @@ void Mission::DirectorInitgame() {
     }
     RunDirectorScript("initgame");
 }
-

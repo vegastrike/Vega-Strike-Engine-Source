@@ -29,16 +29,15 @@
 
 #include <map>
 #include <string>
+
 #include <boost/json.hpp>
 
 #include "vegadisk/vsfilesystem.h"
 
-class UnitOptimizeFactory
-{
+class UnitOptimizeFactory {
 public:
-    static void RecursiveParse(std::map<std::string, std::string> unit_attributes,
-                        const boost::json::object object);
+    static void RecursiveParse(std::map<std::string, std::string> unit_attributes, const boost::json::object object);
     static void ParseJSON(VSFileSystem::VSFile &file);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_OPTIMIZE_FACTORY_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_OPTIMIZE_FACTORY_H

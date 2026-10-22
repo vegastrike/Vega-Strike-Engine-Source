@@ -27,11 +27,11 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_CARRIER_H
 #define VEGA_STRIKE_ENGINE_CMD_CARRIER_H
 
-#include "resource/cargo.h"
-#include "gfx_generic/vec.h"
-
 #include <string>
 #include <vector>
+
+#include "gfx_generic/vec.h"
+#include "resource/cargo.h"
 
 class Unit;
 
@@ -42,8 +42,8 @@ public:
     virtual ~Carrier() = default;
 
     unsigned int numCargo() const;
-    std::string GetManifest(unsigned int i, Unit *scanningUnit, const Vector &original_velocity) const;
-    void EjectCargo(unsigned int index);
+    std::string  GetManifest(unsigned int i, Unit *scanningUnit, const Vector &original_velocity) const;
+    void         EjectCargo(unsigned int index);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_CARRIER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_CARRIER_H

@@ -45,7 +45,7 @@ Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Ve
         }
         switch (max) {
             case 1:
-                //column 0
+                // column 0
                 S = sqrtf((v2.i - (v2.j + v3.k)) + 1);
                 X = S * .5;
                 S = .5 / S;
@@ -54,7 +54,7 @@ Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Ve
                 Z = (v3.i + v1.k) * S;
                 break;
             case 2:
-                //column 1
+                // column 1
                 S = sqrtf((v3.j - (v3.k + v1.i)) + 1);
                 Y = 0.5 * S;
                 S = .5 / S;
@@ -63,7 +63,7 @@ Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Ve
                 X = (v1.j + v2.i);
                 break;
             case 3:
-                //column 2
+                // column 2
                 S = sqrtf((v1.k - (v1.i + v2.j)) + 1);
                 Z = 0.5 * S;
                 S = .5 / S;
@@ -114,8 +114,5 @@ Quaternion Quaternion::from_vectors(const Vector &v1, const Vector &v2, const Ve
 Quaternion Quaternion::from_axis_angle(const Vector &axis, float angle) {
     float sin_a = sin(angle / 2);
     float cos_a = cos(angle / 2);
-    return Quaternion(cos_a, Vector(axis.i * sin_a,
-            axis.j * sin_a,
-            axis.k * sin_a));
+    return Quaternion(cos_a, Vector(axis.i * sin_a, axis.j * sin_a, axis.k * sin_a));
 }
-

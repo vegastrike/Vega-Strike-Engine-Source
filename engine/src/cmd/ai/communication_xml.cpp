@@ -26,20 +26,22 @@
  */
 
 
-#include <vector>
-#include <string>
-#include <expat.h>
-#include "src/vegastrike.h"
-#include "communication.h"
 #include <assert.h>
-#include "vegadisk/vsfilesystem.h"
+#include <expat.h>
+#include <string>
+#include <vector>
+
+#include "communication.h"
+#include "src/vegastrike.h"
 #include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 
 static int unitlevel;
 using namespace XMLSupport;
-using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
+using XMLSupport::EnumMap;
+
 namespace CommXML {
 enum Names {
     UNKNOWN,
@@ -54,38 +56,29 @@ enum Names {
     GAIN
 };
 
-const EnumMap::Pair element_names[] = {
-        EnumMap::Pair("UNKNOWN", UNKNOWN),
-        EnumMap::Pair("Node", NODE),
-        EnumMap::Pair("Edge", EDGE),
-        EnumMap::Pair("Sound", SOUND)
-};
-const EnumMap::Pair attribute_names[] = {
-        EnumMap::Pair("UNKNOWN", UNKNOWN),
-        EnumMap::Pair("Text", NAME),
-        EnumMap::Pair("Index", INDEX),
-        EnumMap::Pair("Relationship", VALUE),
-        EnumMap::Pair("file", FILENAME),
-        EnumMap::Pair("sex", SEXE),
-        EnumMap::Pair("gain", GAIN)
-};
+const EnumMap::Pair element_names[]   = {EnumMap::Pair("UNKNOWN", UNKNOWN), EnumMap::Pair("Node", NODE),
+                                         EnumMap::Pair("Edge", EDGE), EnumMap::Pair("Sound", SOUND)};
+const EnumMap::Pair attribute_names[] = {EnumMap::Pair("UNKNOWN", UNKNOWN), EnumMap::Pair("Text", NAME),
+                                         EnumMap::Pair("Index", INDEX),     EnumMap::Pair("Relationship", VALUE),
+                                         EnumMap::Pair("file", FILENAME),   EnumMap::Pair("sex", SEXE),
+                                         EnumMap::Pair("gain", GAIN)};
 
 const EnumMap element_map(element_names, sizeof(element_names) / sizeof(element_names[0]));
 const EnumMap attribute_map(attribute_names, sizeof(attribute_names) / sizeof(attribute_names[0]));
-}
+}  // namespace CommXML
 
 void FSM::beginElement(void *userData, const XML_Char *names, const XML_Char **atts) {
-    ((FSM *) userData)->beginElement(names, AttributeList(atts));
+    ((FSM *)userData)->beginElement(names, AttributeList(atts));
 }
 
 void FSM::beginElement(const string &name, const AttributeList attributes) {
     using namespace CommXML;
     AttributeList::const_iterator iter;
-    Names elem = (Names) element_map.lookup(name);
-    string nam;
-    string filename;
-    float val = 0.0f;  //FIXME "= 0.0f" added by chuck_starchaser without knowing what value to use
-    unsigned char sexe = 0; //FIXME "= 0" added by chuck_starchaser without knowing what value to use
+    Names                         elem = (Names)element_map.lookup(name);
+    string                        nam;
+    string                        filename;
+    float         val  = 0.0f;  // FIXME "= 0.0f" added by chuck_starchaser without knowing what value to use
+    unsigned char sexe = 0;     // FIXME "= 0" added by chuck_starchaser without knowing what value to use
     switch (elem) {
         case SOUND:
             val = 1.0f;
@@ -103,11 +96,8 @@ void FSM::beginElement(const string &name, const AttributeList attributes) {
                 }
             }
             if (!filename.empty()) {
-                nodes.back()
-                        .AddSound(filename,
-                                sexe,
-                                val);
-            } //FIXME sexe was used uninitialized until I added = 0 --chuck_starchaser
+                nodes.back().AddSound(filename, sexe, val);
+            }  // FIXME sexe was used uninitialized until I added = 0 --chuck_starchaser
             break;
         case UNKNOWN:
             unitlevel++;
@@ -120,7 +110,7 @@ void FSM::beginElement(const string &name, const AttributeList attributes) {
                 if (strtoupper((*iter).name) == "RELATIONSHIP") {
                     val = parse_float((*iter).value);
                 } else {
-                    string tmp = strtoupper((*iter).name);
+                    string       tmp = strtoupper((*iter).name);
                     unsigned int num = 0;
                     if (1 == sscanf(tmp.c_str(), "TEXT%d", &num) || tmp == "TEXT") {
                         while (!(num < messages.size())) {
@@ -139,7 +129,7 @@ void FSM::beginElement(const string &name, const AttributeList attributes) {
                 }
             }
             nodes.push_back(Node(messages,
-                    val)); //FIXME val was used uninitialized until I added = 0 --chuck_starchaser
+                                 val));  // FIXME val was used uninitialized until I added = 0 --chuck_starchaser
             break;
         }
         case EDGE:
@@ -157,7 +147,7 @@ void FSM::beginElement(const string &name, const AttributeList attributes) {
 
 void FSM::endElement(void *userData, const XML_Char *name) {
     using namespace CommXML;
-    Names elem = (Names) element_map.lookup(name);
+    Names elem = (Names)element_map.lookup(name);
     switch (elem) {
         case UNKNOWN:
             unitlevel--;
@@ -172,7 +162,7 @@ void FSM::LoadXML(const char *filename) {
     using namespace CommXML;
     using namespace VSFileSystem;
     unitlevel = 0;
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly(filename, CommFile);
     if (err > Ok) {
         VS_LOG_AND_FLUSH(fatal, (boost::format("Failed to open Communications file '%1%' -- aborting!\n") % filename));
@@ -187,4 +177,3 @@ void FSM::LoadXML(const char *filename) {
     f.Close();
     XML_ParserFree(parser);
 }
-

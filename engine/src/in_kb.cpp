@@ -25,33 +25,35 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <queue>
-#include <list>
-#include <unordered_set>
-#include "src/vegastrike.h"
-#include "root_generic/vs_globals.h"
 #include "src/in_kb.h"
-#include "src/in_handler.h"
+
+#include <list>
+#include <queue>
+#include <unordered_set>
+
 #include "cmd/ai/firekeyboard.h"
 #include "gldrv/winsys.h"
+#include "root_generic/vs_globals.h"
+#include "src/in_handler.h"
 #include "src/in_kb_data.h"
 #include "src/universe.h"
+#include "src/vegastrike.h"
 
 
-std::map<std::string, HandlerCall> keyBindings;
+std::map<std::string, HandlerCall>  keyBindings;
 std::map<std::string, unsigned int> playerBindings;
-KBSTATE mouseButtonState;
+KBSTATE                             mouseButtonState;
 
 static void kbGetInput(int key, int modifiers, bool pressed, int x, int y) {
     const std::string map_key = std::to_string(key) + "-" + std::to_string(modifiers);
 
     KBSTATE state = keyBindings[map_key].state;
-    int i = _Universe->CurrentCockpit();
+    int     i     = _Universe->CurrentCockpit();
     _Universe->SetActiveCockpit(playerBindings[map_key]);
     if ((state == RESET || state == DOWN || state == PRESS) && !pressed) {
         keyBindings[map_key].function(keyBindings[map_key].data, RELEASE);
     }
-    if ((state == RESET || state == UP || state == RELEASE)  && pressed) {
+    if ((state == RESET || state == UP || state == RELEASE) && pressed) {
         keyBindings[map_key].function(keyBindings[map_key].data, PRESS);
     }
     keyBindings[map_key].state = pressed ? DOWN : UP;
@@ -59,7 +61,7 @@ static void kbGetInput(int key, int modifiers, bool pressed, int x, int y) {
 }
 
 static bool kbHasBinding(int key, int modifiers) {
-    const std::string map_key = std::to_string(key) + "-" + std::to_string(modifiers);
+    const std::string  map_key = std::to_string(key) + "-" + std::to_string(modifiers);
     static HandlerCall defaultHandler;
     return keyBindings[map_key].function != defaultHandler.function;
 }
@@ -67,12 +69,12 @@ static bool kbHasBinding(int key, int modifiers) {
 // Global (always-active) actions fire in ANY context (in-flight, docked, nav, text),
 // not just the HUD. Add handlers here as more global actions are needed.
 static const std::unordered_set<KBHandler> kGlobalActionHandlers = {
-    FireKeyboard::ToggleConfigScreen,
+        FireKeyboard::ToggleConfigScreen,
 };
 
 bool HandleGlobalKey(unsigned int ch, unsigned int mod, bool down, int x, int y) {
     // Normalize modifiers the same way glut_keyboard_cb does.
-    bool shifton = false, alton = false, ctrlon = false;
+    bool         shifton = false, alton = false, ctrlon = false;
     unsigned int modmask = KB_MOD_MASK;
     if ((WSK_MOD_LSHIFT == (mod & WSK_MOD_LSHIFT)) || (WSK_MOD_RSHIFT == (mod & WSK_MOD_RSHIFT))) {
         shifton = true;
@@ -83,9 +85,9 @@ bool HandleGlobalKey(unsigned int ch, unsigned int mod, bool down, int x, int y)
     if ((WSK_MOD_LCTRL == (mod & WSK_MOD_LCTRL)) || (WSK_MOD_RCTRL == (mod & WSK_MOD_RCTRL))) {
         ctrlon = true;
     }
-    int curmod = getModifier(alton, ctrlon, shifton) & modmask;
+    int               curmod  = getModifier(alton, ctrlon, shifton) & modmask;
     const std::string map_key = std::to_string(ch) + "-" + std::to_string(curmod);
-    auto it = keyBindings.find(map_key);
+    auto              it      = keyBindings.find(map_key);
     if (it == keyBindings.end()) {
         return false;
     }
@@ -135,10 +137,9 @@ void setActiveModifiers(unsigned int mask) {
 #ifdef SDL_WINDOWING
 
 void setActiveModifiersSDL(SDL_Keymod mask) {
-    setActiveModifiers(
-            ((mask & (SDL_KMOD_LSHIFT | SDL_KMOD_RSHIFT)) ? KB_MOD_SHIFT : 0)
-                    | ((mask & (SDL_KMOD_LCTRL | SDL_KMOD_RCTRL)) ? KB_MOD_CTRL : 0)
-                    | ((mask & (SDL_KMOD_LALT | SDL_KMOD_RALT)) ? KB_MOD_ALT : 0));
+    setActiveModifiers(((mask & (SDL_KMOD_LSHIFT | SDL_KMOD_RSHIFT)) ? KB_MOD_SHIFT : 0) |
+                       ((mask & (SDL_KMOD_LCTRL | SDL_KMOD_RCTRL)) ? KB_MOD_CTRL : 0) |
+                       ((mask & (SDL_KMOD_LALT | SDL_KMOD_RALT)) ? KB_MOD_ALT : 0));
 }
 
 #endif
@@ -175,15 +176,15 @@ int getModifier(bool alton, bool cntrlon, bool shifton) {
 
 void glut_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, int y) {
     bool shifton = false;
-    int alton = false;
-    int ctrlon = false;
+    int  alton   = false;
+    int  ctrlon  = false;
 
     unsigned int modmask = KB_MOD_MASK;
     if ((WSK_MOD_LSHIFT == (mod & WSK_MOD_LSHIFT)) || (WSK_MOD_RSHIFT == (mod & WSK_MOD_RSHIFT))) {
-        //This is ugly, but we have to support legacy config files...
+        // This is ugly, but we have to support legacy config files...
         //...maybe add config option to disable this soooo ugly thing...
         if (!kbHasBinding(ch, KB_MOD_SHIFT)) {
-            ch = shiftup(ch);
+            ch       = shiftup(ch);
             modmask &= ~KB_MOD_SHIFT;
         }
         shifton = true;
@@ -194,18 +195,15 @@ void glut_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, in
     if ((WSK_MOD_LCTRL == (mod & WSK_MOD_LCTRL)) || (WSK_MOD_RCTRL == (mod & WSK_MOD_RCTRL))) {
         ctrlon = true;
     }
-    //Polling state
-    setActiveModifiers(
-            (shifton ? KB_MOD_SHIFT : 0)
-                    | (alton ? KB_MOD_ALT : 0)
-                    | (ctrlon ? KB_MOD_CTRL : 0));
+    // Polling state
+    setActiveModifiers((shifton ? KB_MOD_SHIFT : 0) | (alton ? KB_MOD_ALT : 0) | (ctrlon ? KB_MOD_CTRL : 0));
 
     int curmod = getModifier(alton, ctrlon, shifton) & modmask;
     kbGetInput(ch, curmod, release, x, y);
     if (release) {
         for (int i = 0; i < LAST_MODIFIER; ++i) {
             const std::string shiftdown_key = std::to_string(shiftdown(ch)) + "-" + std::to_string(i);
-            const std::string shiftup_key = std::to_string(shiftup(ch)) + "-" + std::to_string(i);
+            const std::string shiftup_key   = std::to_string(shiftup(ch)) + "-" + std::to_string(i);
 
             if (i != curmod) {
                 if (keyBindings[shiftdown_key].state == DOWN) {
@@ -217,10 +215,10 @@ void glut_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, in
                 }
             } else {
                 if (shifton) {
-                    if (((unsigned int) shiftdown(ch)) != ch && keyBindings[shiftdown_key].state == DOWN) {
+                    if (((unsigned int)shiftdown(ch)) != ch && keyBindings[shiftdown_key].state == DOWN) {
                         kbGetInput(shiftdown(ch), i, release, x, y);
                     }
-                } else if (((unsigned int) shiftup(ch)) != ch && keyBindings[shiftup_key].state == DOWN) {
+                } else if (((unsigned int)shiftup(ch)) != ch && keyBindings[shiftup_key].state == DOWN) {
                     kbGetInput(shiftup(ch), i, release, x, y);
                 }
             }
@@ -238,24 +236,22 @@ void RestoreKB() {
     winsys_set_keyboard_func(glut_keyboard_cb);
 }
 
-
-
 void ProcessKB() {
-    for (const auto& binding : keyBindings) {
-        HandlerCall handler = binding.second;
-        const KBSTATE state = keyBindings[binding.first].state;
+    for (const auto &binding : keyBindings) {
+        HandlerCall   handler = binding.second;
+        const KBSTATE state   = keyBindings[binding.first].state;
         binding.second.function(binding.second.data, state);
     }
 }
 
 void BindKey(int key, unsigned int mod, unsigned int player, KBHandler handler, const KBData &data) {
     const std::string map_key = std::to_string(key) + "-" + std::to_string(mod);
-    HandlerCall handler_call;
-    handler_call.function = handler;
-    handler_call.data = data;
-    keyBindings[map_key] = handler_call;
+    HandlerCall       handler_call;
+    handler_call.function   = handler;
+    handler_call.data       = data;
+    keyBindings[map_key]    = handler_call;
     playerBindings[map_key] = player;
-    handler(std::string(), RESET);     //key is not used in handler
+    handler(std::string(), RESET);  // key is not used in handler
     keyBindings[map_key].state = RESET;
 }
 
@@ -266,4 +262,3 @@ void ClearKeyBindings() {
     keyBindings.clear();
     playerBindings.clear();
 }
-

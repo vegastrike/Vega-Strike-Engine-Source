@@ -26,15 +26,14 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_PLANESCOLLIDER_H
 
 struct OPCODE_API PlanesCache : VolumeCache {
-    PlanesCache() {
-    }
+    PlanesCache() {}
 };
 
 class OPCODE_API PlanesCollider : public VolumeCollider {
 public:
     // Constructor / Destructor
     PlanesCollider();
-    virtual                                ~PlanesCollider();
+    virtual ~PlanesCollider();
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -52,18 +51,12 @@ public:
      *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    bool Collide(PlanesCache &cache,
-            const Plane *planes,
-            uint32_t nb_planes,
-            const Model &model,
-            const Matrix4x4 *worldm = nullptr);
+    bool Collide(PlanesCache &cache, const Plane *planes, uint32_t nb_planes, const Model &model,
+                 const Matrix4x4 *worldm = nullptr);
 
     // Mutant box-with-planes collision queries
-    inline_                bool Collide(PlanesCache &cache,
-            const OBB &box,
-            const Model &model,
-            const Matrix4x4 *worldb = nullptr,
-            const Matrix4x4 *worldm = nullptr) {
+    inline_ bool Collide(PlanesCache &cache, const OBB &box, const Model &model, const Matrix4x4 *worldb = nullptr,
+                         const Matrix4x4 *worldm = nullptr) {
         Plane PL[6];
 
         if (worldb) {
@@ -80,11 +73,13 @@ public:
         // Collide with box planes
         return Collide(cache, PL, 6, model, worldm);
     }
+
     // Settings
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
-     *	Validates current settings. You should call this method after all the settings and callbacks have been defined for a collider.
+     *	Validates current settings. You should call this method after all the settings and callbacks have been defined
+     *for a collider.
      *	\return		nullptr if everything is ok, else a string describing the problem
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +88,7 @@ public:
 protected:
     // Planes in model space
     uint32_t mNbPlanes;
-    Plane *mPlanes;
+    Plane   *mPlanes;
     // Leaf description
     VertexPointers mVP;
     // Internal methods
@@ -106,11 +101,9 @@ protected:
     void _CollideNoPrimitiveTest(const AABBQuantizedNode *node, uint32_t clip_mask);
     void _CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node, uint32_t clip_mask);
     // Overlap tests
-    inline_                bool PlanesAABBOverlap(const Point &center,
-            const Point &extents,
-            uint32_t &out_clip_mask,
-            uint32_t in_clip_mask);
-    inline_                bool PlanesTriOverlap(uint32_t in_clip_mask);
+    inline_ bool PlanesAABBOverlap(const Point &center, const Point &extents, uint32_t &out_clip_mask,
+                                   uint32_t in_clip_mask);
+    inline_ bool PlanesTriOverlap(uint32_t in_clip_mask);
     // Init methods
     bool InitQuery(PlanesCache &cache, const Plane *planes, uint32_t nb_planes, const Matrix4x4 *worldm = nullptr);
 };
@@ -119,15 +112,13 @@ class OPCODE_API HybridPlanesCollider : public PlanesCollider {
 public:
     // Constructor / Destructor
     HybridPlanesCollider();
-    virtual                                ~HybridPlanesCollider();
+    virtual ~HybridPlanesCollider();
 
-    bool Collide(PlanesCache &cache,
-            const Plane *planes,
-            uint32_t nb_planes,
-            const HybridModel &model,
-            const Matrix4x4 *worldm = nullptr);
+    bool Collide(PlanesCache &cache, const Plane *planes, uint32_t nb_planes, const HybridModel &model,
+                 const Matrix4x4 *worldm = nullptr);
+
 protected:
     Container mTouchedBoxes;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_PLANESCOLLIDER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_PLANESCOLLIDER_H

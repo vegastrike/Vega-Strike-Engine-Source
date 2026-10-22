@@ -29,23 +29,23 @@
 
 #include "src/vegastrike.h"
 
-#define VEGA_EPOCH 1136073600. //Jan 1, 2006 GMT
+#define VEGA_EPOCH 1136073600.  // Jan 1, 2006 GMT
 
-void InitTime();
+void   InitTime();
 double GetElapsedTime();
-void UpdateTime();
-void micro_sleep(unsigned int n);
+void   UpdateTime();
+void   micro_sleep(unsigned int n);
 double getNewTime();
-void setNewTime(double newnewtime);
+void   setNewTime(double newnewtime);
 
-//Essentially calling UpdateTime();getNewTime() without modifying any state.
-//Always use this except at the beginning of a frame.
+// Essentially calling UpdateTime();getNewTime() without modifying any state.
+// Always use this except at the beginning of a frame.
 double queryTime();
 
-//like query time, but returns a monotonous increasing sequence
+// like query time, but returns a monotonous increasing sequence
 double realTime();
 
 extern float getTimeCompression();
-extern void setTimeCompression(float tc);
+extern void  setTimeCompression(float tc);
 
-#endif //VEGA_STRIKE_ENGINE_LIN_TIME_H
+#endif  // VEGA_STRIKE_ENGINE_LIN_TIME_H

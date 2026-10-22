@@ -29,8 +29,9 @@
 #include "flykeyboard.h"
 
 class FlyByJoystick : public FlyByKeyboard {
-    std::vector<int> whichjoystick; //which joysticks are bound to this
-    bool keyboard;
+    std::vector<int> whichjoystick;  // which joysticks are bound to this
+    bool             keyboard;
+
 public:
     explicit FlyByJoystick(unsigned int whichplayer);
     static void JAccelKey(KBSTATE, float, float, int);
@@ -41,4 +42,3 @@ public:
     void Execute() override;
     ~FlyByJoystick() override;
 };
-

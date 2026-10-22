@@ -27,13 +27,13 @@
 #ifndef VEGA_STRIKE_ENGINE_HEAP_H
 #define VEGA_STRIKE_ENGINE_HEAP_H
 
-#include <vector>
 #include <algorithm>
 #include <functional>
+#include <vector>
 
 namespace VS {
 
-template<typename T, typename Comp = std::less<T> >
+template <typename T, typename Comp = std::less<T>>
 class priority_queue : protected std::vector<T> {
     Comp comp;
 
@@ -48,27 +48,23 @@ class priority_queue : protected std::vector<T> {
     }
 
 public:
-    typedef typename std::vector<T>::value_type value_type;
-    typedef typename std::vector<T>::reference reference;
+    typedef typename std::vector<T>::value_type      value_type;
+    typedef typename std::vector<T>::reference       reference;
     typedef typename std::vector<T>::const_reference const_reference;
-    typedef typename std::vector<T>::const_iterator const_iterator;
-    typedef typename std::vector<T>::size_type size_type;
+    typedef typename std::vector<T>::const_iterator  const_iterator;
+    typedef typename std::vector<T>::size_type       size_type;
 
-    priority_queue() {
-    }
+    priority_queue() {}
 
-    explicit priority_queue(const Comp &comp_) : comp(comp_) {
-    }
+    explicit priority_queue(const Comp &comp_) : comp(comp_) {}
 
-    template<typename RanIT>
-    explicit priority_queue(RanIT start, RanIT end)
-            : std::vector<T>(start, end) {
+    template <typename RanIT>
+    explicit priority_queue(RanIT start, RanIT end) : std::vector<T>(start, end) {
         std::make_heap(begin(), end(), comp);
     }
 
-    template<typename RanIT>
-    explicit priority_queue(RanIT start, RanIT end, const Comp &comp_)
-            : std::vector<T>(start, end), comp(comp_) {
+    template <typename RanIT>
+    explicit priority_queue(RanIT start, RanIT end, const Comp &comp_) : std::vector<T>(start, end), comp(comp_) {
         std::make_heap(_begin(), _end(), comp);
     }
 
@@ -103,6 +99,6 @@ public:
     }
 };
 
-}
+}  // namespace VS
 
-#endif //VEGA_STRIKE_ENGINE_HEAP_H
+#endif  // VEGA_STRIKE_ENGINE_HEAP_H

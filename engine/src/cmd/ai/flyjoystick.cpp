@@ -26,14 +26,14 @@
  */
 
 
-#include "src/in_joystick.h"
-
 #include "flyjoystick.h"
+
 #include "firekeyboard.h"
 #include "flykeyboard.h"
+#include "in_kb_data.h"
 #include "root_generic/vs_globals.h"
 #include "src/config_xml.h"
-#include  "in_kb_data.h"
+#include "src/in_joystick.h"
 
 FlyByJoystick::FlyByJoystick(unsigned int configfile) : FlyByKeyboard(configfile), keyboard(false) {
     for (int i = 0; i < MAX_JOYSTICKS; i++) {
@@ -41,22 +41,22 @@ FlyByJoystick::FlyByJoystick(unsigned int configfile) : FlyByKeyboard(configfile
             whichjoystick.push_back(i);
         }
     }
-    //remember keybindings from config file?
+    // remember keybindings from config file?
 }
 
 void FlyByJoystick::Execute() {
-    const bool clamp_joystick_axes = configuration().joystick.clamp_axes;
-    const bool nonlinear_throttle_nav = configuration().joystick.nonlinear_throttle_nav;
-    const bool nonlinear_throttle_combat = configuration().joystick.nonlinear_throttle_combat;
-    const float expfactorn = configuration().joystick.nonlinear_expfactor_nav_flt;
-    const float pfactorn = configuration().joystick.nonlinear_pfactor_nav_flt;
-    const float expamountn = configuration().joystick.nonlinear_expamount_nav_flt;
-    const float pamountn = configuration().joystick.nonlinear_pamount_nav_flt;
-    const float expfactorc = configuration().joystick.nonlinear_expfactor_combat_flt;
-    const float pfactorc = configuration().joystick.nonlinear_pfactor_combat_flt;
-    const float expamountc = configuration().joystick.nonlinear_expamount_combat_flt;
-    const float pamountc = configuration().joystick.nonlinear_pamount_combat_flt;
-    desired_ang_velocity = Vector(0, 0, 0);
+    const bool  clamp_joystick_axes       = configuration().joystick.clamp_axes;
+    const bool  nonlinear_throttle_nav    = configuration().joystick.nonlinear_throttle_nav;
+    const bool  nonlinear_throttle_combat = configuration().joystick.nonlinear_throttle_combat;
+    const float expfactorn                = configuration().joystick.nonlinear_expfactor_nav_flt;
+    const float pfactorn                  = configuration().joystick.nonlinear_pfactor_nav_flt;
+    const float expamountn                = configuration().joystick.nonlinear_expamount_nav_flt;
+    const float pamountn                  = configuration().joystick.nonlinear_pamount_nav_flt;
+    const float expfactorc                = configuration().joystick.nonlinear_expfactor_combat_flt;
+    const float pfactorc                  = configuration().joystick.nonlinear_pfactor_combat_flt;
+    const float expamountc                = configuration().joystick.nonlinear_expamount_combat_flt;
+    const float pamountc                  = configuration().joystick.nonlinear_pamount_combat_flt;
+    desired_ang_velocity                  = Vector(0, 0, 0);
     for (unsigned int i = 0; i < this->whichjoystick.size(); i++) {
         int which_joystick = this->whichjoystick[i];
         if (which_joystick < MAX_JOYSTICKS) {
@@ -69,7 +69,7 @@ void FlyByJoystick::Execute() {
             if (joy_nr != -1 && joystick[joy_nr]->isAvailable()) {
                 int config_axis = joystick[joy_nr]->axis_axis[AXIS_Y];
                 if (config_axis != -1) {
-                    bool inverse = joystick[joy_nr]->axis_inverse[AXIS_Y];
+                    bool  inverse    = joystick[joy_nr]->axis_inverse[AXIS_Y];
                     float axis_value = -joystick[joy_nr]->joy_axis[config_axis];
                     if (inverse) {
                         axis_value = -axis_value;
@@ -98,7 +98,7 @@ void FlyByJoystick::Execute() {
             if (joy_nr != -1 && joystick[joy_nr]->isAvailable()) {
                 int config_axis = joystick[joy_nr]->axis_axis[AXIS_X];
                 if (config_axis != -1) {
-                    bool inverse = joystick[joy_nr]->axis_inverse[AXIS_X];
+                    bool  inverse    = joystick[joy_nr]->axis_inverse[AXIS_X];
                     float axis_value = -joystick[joy_nr]->joy_axis[config_axis];
                     if (inverse) {
                         axis_value = -axis_value;
@@ -129,7 +129,7 @@ void FlyByJoystick::Execute() {
             if (joy_nr != -1 && joystick[joy_nr]->isAvailable()) {
                 int config_axis = joystick[joy_nr]->axis_axis[AXIS_Z];
                 if (config_axis != -1) {
-                    bool inverse = joystick[joy_nr]->axis_inverse[AXIS_Z];
+                    bool  inverse    = joystick[joy_nr]->axis_inverse[AXIS_Z];
                     float axis_value = -joystick[joy_nr]->joy_axis[config_axis];
                     if (inverse) {
                         axis_value = -axis_value;
@@ -160,7 +160,7 @@ void FlyByJoystick::Execute() {
             if (joy_nr != -1 && joystick[joy_nr]->isAvailable()) {
                 int config_axis = joystick[joy_nr]->axis_axis[AXIS_THROTTLE];
                 if (config_axis != -1) {
-                    bool inverse = joystick[joy_nr]->axis_inverse[AXIS_THROTTLE];
+                    bool  inverse    = joystick[joy_nr]->axis_inverse[AXIS_THROTTLE];
                     float axis_value = -joystick[joy_nr]->joy_axis[config_axis];
                     if (inverse) {
                         axis_value = -axis_value;
@@ -171,24 +171,22 @@ void FlyByJoystick::Execute() {
                     }
                     if (axis_value < -1) {
                         axis_value = -1;
-                    }                          //this code due to paolodinca
+                    }  // this code due to paolodinca
 
-                    //put axis from 0 to 2
+                    // put axis from 0 to 2
                     axis_value++;
-                    //put axis from 0 to 1
-                    axis_value = axis_value / 2;                      //thanks!
+                    // put axis from 0 to 1
+                    axis_value = axis_value / 2;  // thanks!
                     if (nonlinear_throttle_nav && !cpu->combat_mode) {
                         static float norm = float(exp(expfactorn) - 1);
-                        axis_value =
-                                float(expamountn * (exp(expfactorn * axis_value) - 1) / norm
-                                        + pamountn * std::pow(axis_value, pfactorn));
+                        axis_value        = float(expamountn * (exp(expfactorn * axis_value) - 1) / norm +
+                                           pamountn * std::pow(axis_value, pfactorn));
                     } else if (nonlinear_throttle_combat && cpu->combat_mode) {
                         static float norm = float(exp(expfactorc) - 1);
-                        axis_value =
-                                float(expamountc * (exp(expfactorc * axis_value) - 1) / norm
-                                        + pamountc * std::pow(axis_value, pfactorc));
+                        axis_value        = float(expamountc * (exp(expfactorc * axis_value) - 1) / norm +
+                                           pamountc * std::pow(axis_value, pfactorc));
                     }
-                    cpu->set_speed = axis_value * parent->MaxSpeed();
+                    cpu->set_speed   = axis_value * parent->MaxSpeed();
                     desired_velocity = Vector(0, 0, cpu->set_speed);
                 }
             }
@@ -197,6 +195,4 @@ void FlyByJoystick::Execute() {
     FlyByKeyboard::Execute(false);
 }
 
-FlyByJoystick::~FlyByJoystick() {
-}
-
+FlyByJoystick::~FlyByJoystick() {}

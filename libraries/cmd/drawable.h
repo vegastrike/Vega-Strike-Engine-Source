@@ -27,14 +27,14 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_DRAWABLE_H
 #define VEGA_STRIKE_ENGINE_CMD_DRAWABLE_H
 
-#include "gfx_generic/quaternion.h"
-#include "gfx/halo_system.h"
-#include <vector>
 #include <map>
-#include <string>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "components/cloak.h"
+#include "gfx/halo_system.h"
+#include "gfx_generic/quaternion.h"
 
 class Mesh;
 class Flightgroup;
@@ -42,32 +42,33 @@ class Unit;
 struct GFXColor;
 class VSSprite;
 
-using std::vector;
-using std::string;
 using std::map;
+using std::string;
+using std::vector;
 
 class Drawable {
 public:
-    //number of meshes (each with separate texture) this unit has
-    std::vector<Mesh *> meshdata;
+    // number of meshes (each with separate texture) this unit has
+    std::vector<Mesh *>         meshdata;
     std::unique_ptr<HaloSystem> halos;
 
 protected:
     vector<vector<Mesh *> *> vecAnimations;
-    vector<string> vecAnimationNames;
+    vector<string>           vecAnimationNames;
 
-    bool animatedMesh;
+    bool         animatedMesh;
     unsigned int activeAnimation;
-    double timeperframe;
-    bool done;
+    double       timeperframe;
+    bool         done;
     unsigned int activeMesh;
     unsigned int nextactiveMesh;
-    bool infiniteLoop;
+    bool         infiniteLoop;
     unsigned int loopCount;
 
     string uniqueUnitName;
 
     unsigned int num_chunks{};
+
 public:
     static std::string root;
 
@@ -80,10 +81,8 @@ public:
     Drawable();
     virtual ~Drawable();
 
-    bool DrawableInit(const char *filename,
-            int faction,
-            Flightgroup *flightgrp = nullptr,
-            const char *animationExt = nullptr);
+    bool DrawableInit(const char *filename, int faction, Flightgroup *flightgrp = nullptr,
+                      const char *animationExt = nullptr);
 
     static void UpdateFrames();
 
@@ -104,7 +103,7 @@ public:
 
     void ChangeAnimation(unsigned int AnimNumber);
 
-    //set how_many_times to 0 for continuous loop animation
+    // set how_many_times to 0 for continuous loop animation
     void StartAnimation(unsigned int how_many_times = 0, int numAnimation = 0);
 
     void StopAnimation();
@@ -127,19 +126,18 @@ public:
 
     void SetAniSpeed(float speed);
 
-    //Uses GFX so only in Unit class
-    virtual void Draw(const Transformation &quat = identity_transformation,
-            const Matrix &m = identity_matrix);
+    // Uses GFX so only in Unit class
+    virtual void Draw(const Transformation &quat = identity_transformation, const Matrix &m = identity_matrix);
 
-    ///Draws this unit with the transformation and matrix (should be equiv) separately
-    virtual void DrawNow(const Matrix &m = identity_matrix, float lod = 1000000000);
+    /// Draws this unit with the transformation and matrix (should be equiv) separately
+    virtual void        DrawNow(const Matrix &m = identity_matrix, float lod = 1'000'000'000);
     virtual std::string drawableGetName() = 0;
 
     void Sparkle(bool on_screen, const Matrix *ctm);
     void DrawHalo(bool on_screen, float apparent_size, Matrix wmat, Cloak cloak);
     void DrawSubunits(bool on_screen, Matrix wmat, Cloak cloak, float average_scale, unsigned char char_damage);
 
-    //Split this mesh with into 2^level submeshes at arbitrary planes
+    // Split this mesh with into 2^level submeshes at arbitrary planes
     virtual void Split(int level);
 
     unsigned int nummesh() const {
@@ -147,13 +145,13 @@ public:
         return (meshdata.size() - 1);
     }
 
-    //Lights the shields, without applying damage or making the AI mad - useful for special effects
+    // Lights the shields, without applying damage or making the AI mad - useful for special effects
     void LightShields(const Vector &pnt, const Vector &normal, float amt, const GFXColor &color);
 
-    ///Holds temporary values for inter-function XML communication Saves deprecated restr info
+    /// Holds temporary values for inter-function XML communication Saves deprecated restr info
     Matrix WarpMatrix(const Matrix &ctm) const;
 
-    ///Sets the camera to be within this unit.
+    /// Sets the camera to be within this unit.
     void UpdateHudMatrix(int whichcam);
 
     VSSprite *getHudImage() const;
@@ -161,4 +159,4 @@ public:
 
 Matrix *GetCumulativeTransformationMatrix(Unit *unit, const Matrix &parentMatrix, Matrix invview);
 
-#endif //VEGA_STRIKE_ENGINE_CMD_DRAWABLE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_DRAWABLE_H

@@ -30,7 +30,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		March, 20, 2001
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		November, 27, 2002
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "collide2/Opcode.h"
@@ -128,20 +128,21 @@ using namespace Opcode;
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-MeshInterface::MeshInterface() :
+MeshInterface::MeshInterface()
+    :
 #ifdef OPC_USE_CALLBACKS
-        mUserData(nullptr),
-        mObjCallback(nullptr),
+      mUserData(nullptr),
+      mObjCallback(nullptr),
 #else
-        mTris			(nullptr),
-        mVerts			(nullptr),
-#ifdef OPC_USE_STRIDE
-        mTriStride		(sizeof(IndexedTriangle)),
-        mVertexStride	(sizeof(Point)),
+      mTris(nullptr),
+      mVerts(nullptr),
+#    ifdef OPC_USE_STRIDE
+      mTriStride(sizeof(IndexedTriangle)),
+      mVertexStride(sizeof(Point)),
+#    endif
 #endif
-#endif
-        mNbTris(0),
-        mNbVerts(0) {
+      mNbTris(0),
+      mNbVerts(0) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,8 +150,7 @@ MeshInterface::MeshInterface() :
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-MeshInterface::~MeshInterface() {
-}
+MeshInterface::~MeshInterface() {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -167,7 +167,9 @@ bool MeshInterface::IsValid() const {
         return false;
     }
 #else
-    if(!mTris || !mVerts)		return false;
+    if (!mTris || !mVerts) {
+        return false;
+    }
 #endif
     return true;
 }
@@ -193,9 +195,7 @@ uint32_t MeshInterface::CheckTopology() const {
     for (uint32_t i = 0; i < mNbTris; i++) {
         GetTriangle(VP, i);
 
-        if ((VP.Vertex[0] == VP.Vertex[1])
-                || (VP.Vertex[1] == VP.Vertex[2])
-                || (VP.Vertex[2] == VP.Vertex[0])) {
+        if ((VP.Vertex[0] == VP.Vertex[1]) || (VP.Vertex[1] == VP.Vertex[2]) || (VP.Vertex[2] == VP.Vertex[0])) {
             NbDegenerate++;
         }
     }
@@ -213,12 +213,12 @@ uint32_t MeshInterface::CheckTopology() const {
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool MeshInterface::SetCallback(RequestCallback callback, void *user_data) {
-//	if(!callback)	return SetIceError("MeshInterface::SetCallback: callback pointer is null");
+    //	if(!callback)	return SetIceError("MeshInterface::SetCallback: callback pointer is null");
     if (!callback) {
         return (false);
     }
     mObjCallback = callback;
-    mUserData = user_data;
+    mUserData    = user_data;
     return true;
 }
 
@@ -231,34 +231,40 @@ bool MeshInterface::SetCallback(RequestCallback callback, void *user_data) {
  *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool MeshInterface::SetPointers(const IndexedTriangle* tris, const Point* verts)
-{
-//	if(!tris || !verts)	return SetIceError("MeshInterface::SetPointers: pointer is null", nullptr);
-    if(!tris || !verts) return(false);
+bool MeshInterface::SetPointers(const IndexedTriangle* tris, const Point* verts) {
+    //	if(!tris || !verts)	return SetIceError("MeshInterface::SetPointers: pointer is null", nullptr);
+    if (!tris || !verts) {
+        return (false);
+    }
 
-    mTris	= tris;
-    mVerts	= verts;
+    mTris  = tris;
+    mVerts = verts;
     return true;
 }
-#ifdef OPC_USE_STRIDE
+#    ifdef OPC_USE_STRIDE
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Strides control
- *  \param		tri_stride		[in] size of a triangle in bytes. The first sizeof(IndexedTriangle) bytes are used to get vertex indices.
- *  \param		vertex_stride	[in] size of a vertex in bytes. The first sizeof(Point) bytes are used to get vertex position.
+ *  \param		tri_stride		[in] size of a triangle in bytes. The first sizeof(IndexedTriangle) bytes are used to
+ *get vertex indices.
+ *  \param		vertex_stride	[in] size of a vertex in bytes. The first sizeof(Point) bytes are used to get vertex
+ *position.
  *  \return		true if success
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool MeshInterface::SetStrides(uint32_t tri_stride, uint32_t vertex_stride)
-{
-    if(tri_stride<sizeof(IndexedTriangle))	return SetIceError("MeshInterface::SetStrides: invalid triangle stride", nullptr);
-    if(vertex_stride<sizeof(Point))			return SetIceError("MeshInterface::SetStrides: invalid vertex stride", nullptr);
+bool MeshInterface::SetStrides(uint32_t tri_stride, uint32_t vertex_stride) {
+    if (tri_stride < sizeof(IndexedTriangle)) {
+        return SetIceError("MeshInterface::SetStrides: invalid triangle stride", nullptr);
+    }
+    if (vertex_stride < sizeof(Point)) {
+        return SetIceError("MeshInterface::SetStrides: invalid vertex stride", nullptr);
+    }
 
-    mTriStride		= tri_stride;
-    mVertexStride	= vertex_stride;
+    mTriStride    = tri_stride;
+    mVertexStride = vertex_stride;
     return true;
 }
-#endif
+#    endif
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -285,26 +291,23 @@ bool MeshInterface::RemapClient(uint32_t nb_indices, const uint32_t *permutation
     IndexedTriangle* Tmp = new IndexedTriangle[mNbTris];
     CHECKALLOC(Tmp);
 
-#ifdef OPC_USE_STRIDE
+#    ifdef OPC_USE_STRIDE
     uint32_t Stride = mTriStride;
-#else
+#    else
     uint32_t Stride = sizeof(IndexedTriangle);
-#endif
+#    endif
 
-    for(uint32_t i=0;i<mNbTris;i++)
-    {
+    for (uint32_t i = 0; i < mNbTris; i++) {
         const IndexedTriangle* T = (const IndexedTriangle*)(((uint8_t*)mTris) + i * Stride);
-        Tmp[i] = *T;
+        Tmp[i]                   = *T;
     }
 
-    for(uint32_t i=0;i<mNbTris;i++)
-    {
+    for (uint32_t i = 0; i < mNbTris; i++) {
         IndexedTriangle* T = (IndexedTriangle*)(((uint8_t*)mTris) + i * Stride);
-        *T = Tmp[permutation[i]];
+        *T                 = Tmp[permutation[i]];
     }
 
     DELETEARRAY(Tmp);
 #endif
     return true;
 }
-

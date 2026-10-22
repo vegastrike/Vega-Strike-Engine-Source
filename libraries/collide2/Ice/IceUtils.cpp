@@ -39,4 +39,3 @@ uint32_t Alignment(uint32_t address) {
     // Here all bits are null, except the highest one (else the address would be null)
     return Align;
 }
-

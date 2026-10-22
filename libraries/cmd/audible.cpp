@@ -29,27 +29,26 @@
 #include "cmd/audible.h"
 
 #include "gfx_generic/vec.h"
-#include "root_generic/vs_globals.h"
-#include "src/universe.h"
-#include "src/audiolib.h"
-#include "root_generic/options.h"
 #include "root_generic/configxml.h"
+#include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
+#include "src/audiolib.h"
+#include "src/universe.h"
 
-static const SoundType typesArray[] = {SoundType::engine, SoundType::shield, SoundType::armor,
-        SoundType::hull, SoundType::explosion, SoundType::cloaking,
-        SoundType::jump};
+static const SoundType typesArray[] = {SoundType::engine,    SoundType::shield,   SoundType::armor, SoundType::hull,
+                                       SoundType::explosion, SoundType::cloaking, SoundType::jump};
 
 Audible::Audible() {
     for (const SoundType &soundType : typesArray) {
         sounds[soundType] = -1;
     }
 
-    defaultSoundNames[SoundType::engine] = configuration().audio.unit_audio.afterburner;
-    defaultSoundNames[SoundType::shield] = configuration().audio.unit_audio.shield;
-    defaultSoundNames[SoundType::armor] = configuration().audio.unit_audio.armor;
-    defaultSoundNames[SoundType::hull] = configuration().audio.unit_audio.armor;
+    defaultSoundNames[SoundType::engine]    = configuration().audio.unit_audio.afterburner;
+    defaultSoundNames[SoundType::shield]    = configuration().audio.unit_audio.shield;
+    defaultSoundNames[SoundType::armor]     = configuration().audio.unit_audio.armor;
+    defaultSoundNames[SoundType::hull]      = configuration().audio.unit_audio.armor;
     defaultSoundNames[SoundType::explosion] = configuration().audio.unit_audio.explode;
-    defaultSoundNames[SoundType::cloaking] = configuration().audio.unit_audio.cloak;
+    defaultSoundNames[SoundType::cloaking]  = configuration().audio.unit_audio.cloak;
 }
 
 Audible::~Audible() = default;
@@ -99,7 +98,7 @@ void Audible::playSound(SoundType type) {
 }
 
 void Audible::playShieldDamageSound(const Vector &pnt) {
-    const int shield_sound = sounds[SoundType::shield];
+    const int                   shield_sound = sounds[SoundType::shield];
     static boost::optional<int> player_shield_sound{};
     if (player_shield_sound == boost::none) {
         player_shield_sound = AUDCreateSoundWAV(configuration().audio.unit_audio.player_shield_hit);
@@ -109,7 +108,7 @@ void Audible::playShieldDamageSound(const Vector &pnt) {
 }
 
 void Audible::playArmorDamageSound(const Vector &pnt) {
-    const int armor_sound = sounds[SoundType::armor];
+    const int                   armor_sound = sounds[SoundType::armor];
     static boost::optional<int> player_armor_sound{};
     if (player_armor_sound == boost::none) {
         player_armor_sound = AUDCreateSoundWAV(configuration().audio.unit_audio.player_armor_hit);
@@ -119,7 +118,7 @@ void Audible::playArmorDamageSound(const Vector &pnt) {
 }
 
 void Audible::playHullDamageSound(const Vector &pnt) {
-    const int hull_sound = sounds[SoundType::hull];
+    const int                   hull_sound = sounds[SoundType::hull];
     static boost::optional<int> player_hull_sound{};
     if (player_hull_sound == boost::none) {
         player_hull_sound = AUDCreateSoundWAV(configuration().audio.unit_audio.player_hull_hit);
@@ -168,9 +167,8 @@ void Audible::playSound(const Vector &pnt, int sound, int playerSound) {
 void Audible::playDopplerSound(const Vector &pnt, int sound) {
     Unit *unit = static_cast<Unit *>(this);
 
-    QVector position = unit->ToWorldCoordinates(pnt).Cast() +
-            unit->cumulative_transformation.position;
-    Vector velocity = unit->Velocity;
-    const float gain = 1;
+    QVector     position = unit->ToWorldCoordinates(pnt).Cast() + unit->cumulative_transformation.position;
+    Vector      velocity = unit->Velocity;
+    const float gain     = 1;
     AUDPlay(sound, position, velocity, gain);
 }

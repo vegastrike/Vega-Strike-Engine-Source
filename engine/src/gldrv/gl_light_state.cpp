@@ -28,15 +28,15 @@
 
 #include <assert.h>
 #include <cstring>
-//#include <vegastrike.h>
-#include "gl_globals.h"
-#include "hashtable_3d.h"
-#include "gl_light.h"
-
+// #include <vegastrike.h>
 #include <math.h>
+
 #include "gfx_generic/matrix.h"
+#include "gl_globals.h"
+#include "gl_light.h"
+#include "hashtable_3d.h"
 #ifndef M_PI
-#define M_PI 3.14159265358979323846264338328
+#    define M_PI 3.14159265358979323846264338328
 #endif
 
 QVector _light_offset(0, 0, 0);
@@ -49,14 +49,10 @@ QVector GFXGetLightOffset() {
     return _light_offset;
 }
 
-void GFXUploadLightState(int max_light_location,
-        int active_light_array,
-        int apparent_light_size_array,
-        bool shader,
-        vector<int>::const_iterator begin,
-        vector<int>::const_iterator end) {
+void GFXUploadLightState(int max_light_location, int active_light_array, int apparent_light_size_array, bool shader,
+                         vector<int>::const_iterator begin, vector<int>::const_iterator end) {
     // FIXME: (klauss) Very bad thing: static variables initialized with heap-allocated arrays...
-    static GLint *lightData = new GLint[GFX_MAX_LIGHTS];
+    static GLint *lightData  = new GLint[GFX_MAX_LIGHTS];
     static float *lightSizes = new float[GFX_MAX_LIGHTS * 4];
 
     Matrix modelview;
@@ -66,13 +62,13 @@ void GFXUploadLightState(int max_light_location,
     GFXGetMatrixModel(modelview);
 
     size_t maxval = 0;
-    size_t i = 0;
+    size_t i      = 0;
 
     for (vector<int>::const_iterator lightit = begin; lightit != end; ++i, ++lightit) {
         const gfx_light &light = (*_llights)[*lightit];
         if (light.enabled()) {
             lightData[i] = 1;
-            maxval = i;
+            maxval       = i;
 
             // Only bother with apparent light size if there is a shader
             if (shader) {
@@ -92,12 +88,12 @@ void GFXUploadLightState(int max_light_location,
                 QVector lightPos = light.getPosition() - modelview.p + _light_offset;
 
                 double lightDistance = lightPos.Magnitude();
-                double lightSize = light.getSize() * 0.5;
+                double lightSize     = light.getSize() * 0.5;
                 double lightCosAngle;
                 double lightSolidAngle;
                 if (lightSize <= 0.0) {
                     // Point light always has zero solid angle
-                    lightCosAngle = 1.0;
+                    lightCosAngle   = 1.0;
                     lightSolidAngle = 0.0;
                 } else {
                     // NOTE: assuming lightSize > 0, the following condition
@@ -107,8 +103,8 @@ void GFXUploadLightState(int max_light_location,
                         // Light cos angle is:
                         //  Vector(1, 0, 0) . Vector(lightDistance, lightSize, 0).Normalize()
                         // Which happens to resolve to:
-                        //lightCosAngle = float(lightDistance / (lightDistance + lightSize));
-                        lightCosAngle = lightDistance / sqrt(lightDistance * lightDistance + lightSize * lightSize);
+                        // lightCosAngle = float(lightDistance / (lightDistance + lightSize));
+                        lightCosAngle   = lightDistance / sqrt(lightDistance * lightDistance + lightSize * lightSize);
                         lightSolidAngle = 2.0 * M_PI * (1.0 - lightCosAngle);
                         // Light steradians is:
                         //  Steradians = Fractional Area * 4 * Pi
@@ -117,13 +113,13 @@ void GFXUploadLightState(int max_light_location,
                         //  Sky area = 4 * Pi * lightDistance^2
                         // Do the math...
                         /*lightSolidAngle = float(M_PI
-                            * ( lightSize / lightDistance )
-                            * ( lightSize / lightDistance ));*/
+                         * ( lightSize / lightDistance )
+                         * ( lightSize / lightDistance ));*/
                     } else {
                         // nil distance, avoid infinites that kill shaders
                         // NOTE: the constants aren't capricious, they're the right
                         //  constants for a light coming from all around.
-                        lightCosAngle = 0.0;
+                        lightCosAngle   = 0.0;
                         lightSolidAngle = 2.0 * M_PI;
                     }
                 }
@@ -133,7 +129,7 @@ void GFXUploadLightState(int max_light_location,
                 lightSizes[i * 4 + 3] = 0.f;
             }
         } else {
-            lightData[i] = 0;
+            lightData[i]          = 0;
             lightSizes[i * 4 + 0] = 0.f;
             lightSizes[i * 4 + 1] = 0.f;
             lightSizes[i * 4 + 2] = 0.f;
@@ -141,8 +137,8 @@ void GFXUploadLightState(int max_light_location,
         }
     }
 
-    for (; i < (size_t) GFX_MAX_LIGHTS; ++i) {
-        lightData[i] = 0;
+    for (; i < (size_t)GFX_MAX_LIGHTS; ++i) {
+        lightData[i]          = 0;
         lightSizes[i * 4 + 0] = 0.f;
         lightSizes[i * 4 + 1] = 0.f;
         lightSizes[i * 4 + 2] = 0.f;
@@ -150,8 +146,8 @@ void GFXUploadLightState(int max_light_location,
     }
 
     if (!shader) {
-        //only bother with actual GL state in the event of lack of shaders
-        for (size_t i = 0; i < (size_t) GFX_MAX_LIGHTS; ++i) {
+        // only bother with actual GL state in the event of lack of shaders
+        for (size_t i = 0; i < (size_t)GFX_MAX_LIGHTS; ++i) {
             int isenabled = glIsEnabled(GL_LIGHT0 + i);
             if (isenabled && !lightData[i]) {
                 glDisable(GL_LIGHT0 + i);
@@ -160,7 +156,7 @@ void GFXUploadLightState(int max_light_location,
             }
         }
     } else {
-        //only bother with shader constants it there is a shader
+        // only bother with shader constants it there is a shader
         GFXLoadIdentity(MODEL);
         for (size_t i = 0; i <= maxval; ++i) {
             if (lightData[i]) {
@@ -170,28 +166,28 @@ void GFXUploadLightState(int max_light_location,
         }
         GFXLoadMatrixModel(modelview);
         if (active_light_array >= 0) {
-            GFXShaderConstantv(active_light_array, GFX_MAX_LIGHTS, (int *) lightData);
+            GFXShaderConstantv(active_light_array, GFX_MAX_LIGHTS, (int *)lightData);
         }
         if (max_light_location >= 0) {
             GFXShaderConstanti(max_light_location, maxval);
         }
         if (apparent_light_size_array >= 0) {
-            GFXShaderConstant4v(apparent_light_size_array, GFX_MAX_LIGHTS, (float *) lightSizes);
+            GFXShaderConstant4v(apparent_light_size_array, GFX_MAX_LIGHTS, (float *)lightSizes);
         }
     }
 }
 
 #define GFX_HARDWARE_LIGHTING
-//table to store local lights, numerical pointers to _llights (eg indices)
-const float atten0scale = 1;
-const float atten1scale = 1. / GFX_SCALE;
-const float atten2scale = 1. / (GFX_SCALE * GFX_SCALE);
-int _GLLightsEnabled = 0;
+// table to store local lights, numerical pointers to _llights (eg indices)
+const float                                        atten0scale      = 1;
+const float                                        atten1scale      = 1. / GFX_SCALE;
+const float                                        atten2scale      = 1. / (GFX_SCALE * GFX_SCALE);
+int                                                _GLLightsEnabled = 0;
 Hashtable3d<LineCollideStar, 20, CTACC, lighthuge> lighttable;
 
-GFXLight gfx_light::operator=(const GFXLight &tmp) {   // Let's see if I can write a better copy operator
-//    memcpy( this, &tmp, sizeof (GFXLight) );
-    this->target = tmp.target;
+GFXLight gfx_light::operator=(const GFXLight &tmp) {  // Let's see if I can write a better copy operator
+                                                      //    memcpy( this, &tmp, sizeof (GFXLight) );
+    this->target  = tmp.target;
     this->options = tmp.options;
     memcpy(this->vect, tmp.vect, sizeof(float) * 3);
     memcpy(this->diffuse, tmp.diffuse, sizeof(float) * 4);
@@ -199,9 +195,9 @@ GFXLight gfx_light::operator=(const GFXLight &tmp) {   // Let's see if I can wri
     memcpy(this->ambient, tmp.ambient, sizeof(float) * 4);
     memcpy(this->attenuate, tmp.attenuate, sizeof(float) * 3);
     memcpy(this->direction, tmp.direction, sizeof(float) * 3);
-    this->exp = tmp.exp;
-    this->cutoff = tmp.cutoff;
-    this->size = tmp.size;
+    this->exp       = tmp.exp;
+    this->cutoff    = tmp.cutoff;
+    this->size      = tmp.size;
     this->occlusion = tmp.occlusion;
     apply_attenuate(tmp.attenuated());
     // if (tmp.enabled()) {
@@ -214,10 +210,10 @@ GFXLight gfx_light::operator=(const GFXLight &tmp) {   // Let's see if I can wri
 
 int gfx_light::lightNum() {
     int tmp = (this - &_llights->front());
-    assert(tmp >= 0 && tmp < (int) _llights->size());
-    //assert (&(*_llights)[GLLights[target].index]==this);
+    assert(tmp >= 0 && tmp < (int)_llights->size());
+    // assert (&(*_llights)[GLLights[target].index]==this);
     return tmp;
-} //which number it is in the main scheme of things
+}  // which number it is in the main scheme of things
 
 int findLocalClobberable() {
     int clobberdisabled = -1;
@@ -233,9 +229,9 @@ int findLocalClobberable() {
 }
 
 static int findGlobalClobberable() {
-    //searches through the GLlights and sees which one is clobberable.  Returns -1 if not.
+    // searches through the GLlights and sees which one is clobberable.  Returns -1 if not.
     int clobberdisabled = -1;
-    int clobberlocal = -1;
+    int clobberlocal    = -1;
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
         if (GLLights[i].index == -1) {
             return i;
@@ -254,16 +250,16 @@ static int findGlobalClobberable() {
 
 bool gfx_light::Create(const GFXLight &temp, bool global) {
     int foundclobberable = 0;
-    *this = temp;
+    *this                = temp;
     if (!global) {
         options |= GFX_LOCAL_LIGHT;
         if (enabled()) {
             disable();
-            this->Enable();             //upon creation need to call enable script with disabled light
+            this->Enable();  // upon creation need to call enable script with disabled light
         }
     } else {
-        options &= (~GFX_LOCAL_LIGHT);
-        foundclobberable = enabled() ? findGlobalClobberable() : findLocalClobberable();
+        options          &= (~GFX_LOCAL_LIGHT);
+        foundclobberable  = enabled() ? findGlobalClobberable() : findLocalClobberable();
         if (foundclobberable != -1) {
             _GLLightsEnabled += (enabled() != 0);
             ClobberGLLight(foundclobberable);
@@ -273,11 +269,11 @@ bool gfx_light::Create(const GFXLight &temp, bool global) {
 }
 
 void gfx_light::Kill() {
-    Disable();     //first disables it...which _will_ remove it from the light table.
+    Disable();                // first disables it...which _will_ remove it from the light table.
     if (target >= 0) {
-        TrashFromGLLights();          //then if not already done, trash from GLlights;
+        TrashFromGLLights();  // then if not already done, trash from GLlights;
     }
-    target = -2;
+    target  = -2;
     options = 0;
 }
 
@@ -287,12 +283,8 @@ void gfx_light::Kill() {
 */
 
 void gfx_light::SendGLPosition(const GLenum target) const {
-    float v[4] = {
-            static_cast<float>(vect[0] + _light_offset.x),
-            static_cast<float>(vect[1] + _light_offset.y),
-            static_cast<float>(vect[2] + _light_offset.z),
-            1
-    };
+    float v[4] = {static_cast<float>(vect[0] + _light_offset.x), static_cast<float>(vect[1] + _light_offset.y),
+                  static_cast<float>(vect[2] + _light_offset.z), 1};
     glLightfv(target, GL_POSITION, v);
 }
 
@@ -306,21 +298,22 @@ inline void gfx_light::ContextSwitchClobberLight(const GLenum gltarg, const int 
     glLightf(gltarg, GL_QUADRATIC_ATTENUATION, attenuate[2] * atten2scale);
 
     float v[4];
-#define glLightfvAttenuated(gltarg, attr, value, attenuation) do { \
-        v[0]=value[0]*attenuation; \
-        v[1]=value[1]*attenuation; \
-        v[2]=value[2]*attenuation; \
-        v[3]=value[3]*attenuation; \
-        glLightfv( gltarg, attr, v ); \
-    } while(0)
+#define glLightfvAttenuated(gltarg, attr, value, attenuation) \
+    do {                                                      \
+        v[0] = value[0] * attenuation;                        \
+        v[1] = value[1] * attenuation;                        \
+        v[2] = value[2] * attenuation;                        \
+        v[3] = value[3] * attenuation;                        \
+        glLightfv(gltarg, attr, v);                           \
+    } while (0)
 
     SendGLPosition(gltarg);
     glLightfvAttenuated(gltarg, GL_DIFFUSE, diffuse, occlusion);
     glLightfvAttenuated(gltarg, GL_SPECULAR, specular, occlusion);
     glLightfv(gltarg, GL_AMBIENT, ambient);
     if (original != -1) {
-        gfx_light *orig = &((*_llights)[GLLights[original].index]);
-        orig->target = -1;
+        gfx_light *orig          = &((*_llights)[GLLights[original].index]);
+        orig->target             = -1;
         GLLights[original].index = -1;
     }
 }
@@ -344,23 +337,23 @@ inline void gfx_light::FinesseClobberLight(const GLenum gltarg, const int origin
             glLightf(gltarg, GL_QUADRATIC_ATTENUATION, attenuate[2] * atten2scale);
         }
     }
-    if (vect[0] != orig->vect[0] || vect[1] != orig->vect[1] || vect[2] != orig->vect[2]
-            || attenuated() != orig->attenuated()) {
+    if (vect[0] != orig->vect[0] || vect[1] != orig->vect[1] || vect[2] != orig->vect[2] ||
+        attenuated() != orig->attenuated()) {
         SendGLPosition(gltarg);
     }
-    if (diffuse[0] != orig->diffuse[0] || diffuse[1] != orig->diffuse[1] || diffuse[2] != orig->diffuse[2] || diffuse[3]
-            != orig->diffuse[3]) {
+    if (diffuse[0] != orig->diffuse[0] || diffuse[1] != orig->diffuse[1] || diffuse[2] != orig->diffuse[2] ||
+        diffuse[3] != orig->diffuse[3]) {
         glLightfv(gltarg, GL_DIFFUSE, diffuse);
     }
-    if (specular[0] != orig->specular[0] || specular[1] != orig->specular[1] || specular[2] != orig->specular[2]
-            || specular[3] != orig->specular[3]) {
+    if (specular[0] != orig->specular[0] || specular[1] != orig->specular[1] || specular[2] != orig->specular[2] ||
+        specular[3] != orig->specular[3]) {
         glLightfv(gltarg, GL_SPECULAR, specular);
     }
-    if (ambient[0] != orig->ambient[0] || ambient[1] != orig->ambient[1] || ambient[2] != orig->ambient[2] || ambient[3]
-            != orig->ambient[3]) {
+    if (ambient[0] != orig->ambient[0] || ambient[1] != orig->ambient[1] || ambient[2] != orig->ambient[2] ||
+        ambient[3] != orig->ambient[3]) {
         glLightfv(gltarg, GL_AMBIENT, ambient);
     }
-    orig->target = -1;
+    orig->target             = -1;
     GLLights[original].index = -1;
 }
 
@@ -375,7 +368,7 @@ void gfx_light::ClobberGLLight(const int target) {
             glDisable(GL_LIGHT0 + target);
         }
     }
-    GLLights[target].options &= (OpenGLL::GL_ENABLED);     //turn off options
+    GLLights[target].options &= (OpenGLL::GL_ENABLED);  // turn off options
 #ifdef GFX_HARDWARE_LIGHTING
     if (GLLights[target].index == -1) {
 #endif
@@ -385,8 +378,8 @@ void gfx_light::ClobberGLLight(const int target) {
         FinesseClobberLight(GL_LIGHT0 + target, GLLights[target].index);
     }
 #endif
-    this->target = target;
-    GLLights[target].index = lightNum();
+    this->target              = target;
+    GLLights[target].index    = lightNum();
     GLLights[target].options |= OpenGLL::GLL_ON * enabled() + OpenGLL::GLL_LOCAL * LocalLight();
 }
 
@@ -397,7 +390,7 @@ void gfx_light::ResetProperties(const enum LIGHT_TARGET light_targ, const GFXCol
         t = *this;
         t.SetProperties(light_targ, color);
         changed = RemoveFromTable(false, t);
-        *this = t;
+        *this   = t;
         if (changed) {
             AddToTable();
         }
@@ -463,75 +456,71 @@ void gfx_light::ResetProperties(const enum LIGHT_TARGET light_targ, const GFXCol
     }
 }
 
-void gfx_light::ResetProperties(const enum LIGHT_TARGET light_target, const Vector& vector) {
+void gfx_light::ResetProperties(const enum LIGHT_TARGET light_target, const Vector &vector) {
     bool changed = false;
-    if (LocalLight())
-    {
+    if (LocalLight()) {
         GFXLight t;
         t = *this;
         t.SetProperties(light_target, vector);
         changed = RemoveFromTable(false, t);
-        *this = t;
-        if (changed)
-        {
+        *this   = t;
+        if (changed) {
             AddToTable();
         }
-        if (target >= 0)
-        {
+        if (target >= 0) {
             TrashFromGLLights();
         }
         return;
     }
 
-    switch (light_target)
-    {
-    case DIFFUSE:
-    case SPECULAR:
-    case AMBIENT:
-        VS_LOG(error, (boost::format("%1%: Called the wrong overload, with a Vector instead of a GFXColor")
-                % __FUNCTION__));
-        break;
-    case POSITION:
-        vect[0] = vector.i;
-        vect[1] = vector.j;
-        vect[2] = vector.k;
-        if (target < 0) {
+    switch (light_target) {
+        case DIFFUSE:
+        case SPECULAR:
+        case AMBIENT:
+            VS_LOG(error, (boost::format("%1%: Called the wrong overload, with a Vector instead of a GFXColor") %
+                           __FUNCTION__));
             break;
-        }
-        SendGLPosition(GL_LIGHT0 + target);
-        break;
-    case ATTENUATE:
-    default:
-        attenuate[0] = vector.i;
-        attenuate[1] = vector.j;
-        attenuate[2] = vector.k;
-        apply_attenuate(attenuated());
-        if (target < 0) {
+        case POSITION:
+            vect[0] = vector.i;
+            vect[1] = vector.j;
+            vect[2] = vector.k;
+            if (target < 0) {
+                break;
+            }
+            SendGLPosition(GL_LIGHT0 + target);
             break;
-        }
-        SendGLPosition(GL_LIGHT0 + target);
-        glLightf(GL_LIGHT0 + target, GL_CONSTANT_ATTENUATION, attenuate[0] * atten0scale);
-        glLightf(GL_LIGHT0 + target, GL_LINEAR_ATTENUATION, attenuate[1] * atten1scale);
-        glLightf(GL_LIGHT0 + target, GL_QUADRATIC_ATTENUATION, attenuate[2] * atten2scale);
-        break;
+        case ATTENUATE:
+        default:
+            attenuate[0] = vector.i;
+            attenuate[1] = vector.j;
+            attenuate[2] = vector.k;
+            apply_attenuate(attenuated());
+            if (target < 0) {
+                break;
+            }
+            SendGLPosition(GL_LIGHT0 + target);
+            glLightf(GL_LIGHT0 + target, GL_CONSTANT_ATTENUATION, attenuate[0] * atten0scale);
+            glLightf(GL_LIGHT0 + target, GL_LINEAR_ATTENUATION, attenuate[1] * atten1scale);
+            glLightf(GL_LIGHT0 + target, GL_QUADRATIC_ATTENUATION, attenuate[2] * atten2scale);
+            break;
     }
 }
 
 void gfx_light::TrashFromGLLights() {
     assert(target >= 0);
-    assert((GLLights[target].options & OpenGLL::GLL_ON)
-            == 0);       //better be disabled so we know it's not in the table, etc
+    assert((GLLights[target].options & OpenGLL::GLL_ON) ==
+           0);  // better be disabled so we know it's not in the table, etc
     assert((&(*_llights)[GLLights[target].index]) == this);
     removelightfromnewpick(GLLights[target].index);
-    GLLights[target].index = -1;
+    GLLights[target].index   = -1;
     GLLights[target].options = OpenGLL::GLL_LOCAL;
-    target = -1;
+    target                   = -1;
 }
 
 void gfx_light::AddToTable() {
     LineCollideStar tmp;
-    bool err;
-    LineCollide *coltarg = new LineCollide(CalculateBounds(err));     //leak??
+    bool            err;
+    LineCollide    *coltarg = new LineCollide(CalculateBounds(err));  // leak??
     if (err) {
         return;
     }
@@ -541,17 +530,17 @@ void gfx_light::AddToTable() {
 
 bool gfx_light::RemoveFromTable(bool shouldremove, const GFXLight &t) {
     LineCollideStar tmp;
-    bool err;
-    LineCollide coltarg(CalculateBounds(err));
+    bool            err;
+    LineCollide     coltarg(CalculateBounds(err));
     if (!shouldremove) {
-        bool err2;
+        bool        err2;
         LineCollide coltarg2(CalculateBounds(err2));
-        if (lighttable.hash_int(coltarg2.Mini.i) == lighttable.hash_int(coltarg.Mini.i)
-                && lighttable.hash_int(coltarg2.Mini.j) == lighttable.hash_int(coltarg.Mini.j)
-                && lighttable.hash_int(coltarg2.Mini.k) == lighttable.hash_int(coltarg.Mini.k)
-                && lighttable.hash_int(coltarg2.Maxi.i) == lighttable.hash_int(coltarg.Maxi.i)
-                && lighttable.hash_int(coltarg2.Maxi.j) == lighttable.hash_int(coltarg.Maxi.j)
-                && lighttable.hash_int(coltarg2.Maxi.k) == lighttable.hash_int(coltarg.Maxi.k)) {
+        if (lighttable.hash_int(coltarg2.Mini.i) == lighttable.hash_int(coltarg.Mini.i) &&
+            lighttable.hash_int(coltarg2.Mini.j) == lighttable.hash_int(coltarg.Mini.j) &&
+            lighttable.hash_int(coltarg2.Mini.k) == lighttable.hash_int(coltarg.Mini.k) &&
+            lighttable.hash_int(coltarg2.Maxi.i) == lighttable.hash_int(coltarg.Maxi.i) &&
+            lighttable.hash_int(coltarg2.Maxi.j) == lighttable.hash_int(coltarg.Maxi.j) &&
+            lighttable.hash_int(coltarg2.Maxi.k) == lighttable.hash_int(coltarg.Maxi.k)) {
             return false;
         }
     }
@@ -570,7 +559,7 @@ bool gfx_light::RemoveFromTable(bool shouldremove, const GFXLight &t) {
     return true;
 }
 
-//unimplemented
+// unimplemented
 void gfx_light::Enable() {
     if (!enabled()) {
         if (LocalLight()) {
@@ -591,7 +580,7 @@ void gfx_light::Enable() {
     }
 }
 
-//unimplemented
+// unimplemented
 void gfx_light::Disable() {
     if (enabled()) {
         disable();
@@ -611,17 +600,20 @@ void gfx_light::Disable() {
     }
 }
 
-//i =  tot/(A+B*d+C*d*d)    Ai+Bi*d+Ci*d*d = tot
-//d= (-Bi + sqrtf (B*i*B*i - 4*Ci*(Ai-tot)))/ (2Ci)
-//d= (-B + sqrtf (B*B + 4*C*(tot/i-A)))/ (2C)
+// i =  tot/(A+B*d+C*d*d)    Ai+Bi*d+Ci*d*d = tot
+// d= (-Bi + sqrtf (B*i*B*i - 4*Ci*(Ai-tot)))/ (2Ci)
+// d= (-B + sqrtf (B*B + 4*C*(tot/i-A)))/ (2C)
 
 LineCollide gfx_light::CalculateBounds(bool &error) {
-    error = false;
-    float tot_intensity = ((specular[0] + specular[1] + specular[2]) * specular[3]
-            + (diffuse[0] + diffuse[1] + diffuse[2]) * diffuse[3]
-            + (ambient[0] + ambient[1] + ambient[2]) * ambient[3]) * .33;
-    //double d = (-(double)attenuate[1]+sqrt((double)attenuate[1]*(double)attenuate[1]+4*(double)attenuate[2]*(((double)tot_intensity/(double)intensity_cutoff) - (double)attenuate[0])))/(2*(double)attenuate[2]);
-    //simplistic calculation above causes floating point inaccuracies
+    error               = false;
+    float tot_intensity = ((specular[0] + specular[1] + specular[2]) * specular[3] +
+                           (diffuse[0] + diffuse[1] + diffuse[2]) * diffuse[3] +
+                           (ambient[0] + ambient[1] + ambient[2]) * ambient[3]) *
+                          .33;
+    // double d =
+    // (-(double)attenuate[1]+sqrt((double)attenuate[1]*(double)attenuate[1]+4*(double)attenuate[2]*(((double)tot_intensity/(double)intensity_cutoff)
+    // - (double)attenuate[0])))/(2*(double)attenuate[2]); simplistic calculation above causes floating point
+    // inaccuracies
     double ffastmathreallysucksd;
     double ffastmathreallysucksq;
 
@@ -633,21 +625,21 @@ LineCollide gfx_light::CalculateBounds(bool &error) {
     }
     ffastmathreallysucksd /= ffastmathreallysucksq;
 
-    QVector st(vect[0] - ffastmathreallysucksd, vect[1] - ffastmathreallysucksd, vect[2] - ffastmathreallysucksd);
-    QVector end(vect[0] + ffastmathreallysucksd, vect[1] + ffastmathreallysucksd, vect[2] + ffastmathreallysucksd);
+    QVector     st(vect[0] - ffastmathreallysucksd, vect[1] - ffastmathreallysucksd, vect[2] - ffastmathreallysucksd);
+    QVector     end(vect[0] + ffastmathreallysucksd, vect[1] + ffastmathreallysucksd, vect[2] + ffastmathreallysucksd);
     LineCollide retval(NULL, LineCollide::UNIT, st, end);
-    *((int *) (&retval.object)) = lightNum();       //put in a lightNum
+    *((int *)(&retval.object)) = lightNum();  // put in a lightNum
     return retval;
 }
 
 void light_rekey_frame() {
-    unpicklights();     //picks doubtless changed position
+    unpicklights();  // picks doubtless changed position
     for (int i = 0; i < GFX_MAX_LIGHTS; i++) {
         if (GLLights[i].options & OpenGLL::GL_ENABLED) {
             if (GLLights[i].index >= 0) {
                 if ((*_llights)[GLLights[i].index].Target() == i) {
                     (*_llights)[GLLights[i].index].SendGLPosition(
-                            GL_LIGHT0 + i);                       //send position transformed by current cam matrix
+                            GL_LIGHT0 + i);  // send position transformed by current cam matrix
                 } else {
                     unsigned int li = GLLights[i].index;
                     if ((*_llights)[li].enabled() && ((*_llights)[li].Target() == -1)) {
@@ -664,4 +656,3 @@ void light_rekey_frame() {
         }
     }
 }
-

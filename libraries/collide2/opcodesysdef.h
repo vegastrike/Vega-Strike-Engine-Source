@@ -1,5 +1,5 @@
 /**
- * opcodesysdef.h
+* opcodesysdef.h
  *
  * Copyright (C) 2001-2025 Pierre Terdiman, Daniel Horn, pyramid3d,
  * Stephen G. Tuggy, Benjamen R. Meyer, and other Vega Strike contributors.

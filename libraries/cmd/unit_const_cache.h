@@ -28,17 +28,19 @@
 
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H
-#include "src/hashtable.h"
-#include <string>
-#include <gnuhash.h>
 #include <functional>
+#include <gnuhash.h>
+#include <string>
+
+#include "src/hashtable.h"
 
 class Mesh;
 
 class StringIntKey {
 public:
     std::string key;
-    int fac;
+    int         fac;
+
 public:
     StringIntKey(std::string k, int f) {
         key = k;
@@ -51,36 +53,37 @@ extern bool operator==(const StringIntKey &a, const StringIntKey &b);
 extern bool operator<(const StringIntKey &a, const StringIntKey &b);
 
 namespace std {
-template<>
+template <>
 struct hash<StringIntKey> {
     std::size_t operator()(StringIntKey const &s) const noexcept {
         return (std::hash<std::string>{}(s.key)) ^ s.fac;
     }
 };
-}
+}  // namespace std
 
-#if HAVE_TR1_UNORDERED_MAP || (!defined (_WIN32) && __GNUC__ != 2)
+#if HAVE_TR1_UNORDERED_MAP || (!defined(_WIN32) && __GNUC__ != 2)
 class ConstHasher {
 public:
-    template<class T>
+    template <class T>
     size_t operator()(const T &key) const {
         return vsHash<T>()(key);
     }
 
     size_t operator()(const StringIntKey &key) const {
-        return vsHash<std::string>()(key.key) ^ vsHash<size_t>()((size_t) key.fac);
+        return vsHash<std::string>()(key.key) ^ vsHash<size_t>()((size_t)key.fac);
     }
 };
 #endif
 
-template<class Typ, class Key>
+template <class Typ, class Key>
 class ClassCache {
-#if HAVE_TR1_UNORDERED_MAP || (!defined (_WIN32) && __GNUC__ != 2)
+#if HAVE_TR1_UNORDERED_MAP || (!defined(_WIN32) && __GNUC__ != 2)
     typedef vsUMap<Key, Typ *, ConstHasher> cache_map;
 #else
-    typedef vsUMap< Key, Typ* > cache_map;
+    typedef vsUMap<Key, Typ *> cache_map;
 #endif
     static cache_map unit_cache;
+
 public:
     static const Typ *getCachedConst(Key k) {
         return getCachedMutable(k);
@@ -113,6 +116,6 @@ public:
 };
 
 typedef ClassCache<Unit, StringIntKey> UnitConstCache;
-typedef ClassCache<Mesh, std::string> WeaponMeshCache;
+typedef ClassCache<Mesh, std::string>  WeaponMeshCache;
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_CONST_CACHE_H

@@ -25,39 +25,35 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
 #include <map>
 
+#include <gtest/gtest.h>
+
+#include "cmd/unit_csv_factory.h"
 #include "components/afterburner.h"
 #include "components/afterburner_upgrade.h"
 
-#include "cmd/unit_csv_factory.h"
-
 static const std::string upgrades_suffix_string = "__upgrades";
-const std::string afterburner_string = "afterburner";
-const std::string upgrade_string = "upgrade";
+const std::string        afterburner_string     = "afterburner";
+const std::string        upgrade_string         = "upgrade";
 
-std::map<std::string,std::string> afterburner_map = {
-    { "Name", "Afterburner"},
-    { "Mass", "5.0"},
-    { "Afterburner_Accel", "10"},
-    { "Afterburner_Speed_Governor", "100"},
-    { "Afterburner_Usage_Cost", "2.0"}
-};
+std::map<std::string, std::string> afterburner_map = {{"Name", "Afterburner"},
+                                                      {"Mass", "5.0"},
+                                                      {"Afterburner_Accel", "10"},
+                                                      {"Afterburner_Speed_Governor", "100"},
+                                                      {"Afterburner_Usage_Cost", "2.0"}};
 
-std::map<std::string,std::string> afterburner_upgrade_map = {
-    { "Name", "AfterburnerUpgrade"},
-    { "Mass", "5.0"},
-    { "Afterburner_Accel", "1.5"},
-    { "Afterburner_Speed_Governor", "1.5"},
-    { "Afterburner_Usage_Cost", "1.5"}
-};
+std::map<std::string, std::string> afterburner_upgrade_map = {{"Name", "AfterburnerUpgrade"},
+                                                              {"Mass", "5.0"},
+                                                              {"Afterburner_Accel", "1.5"},
+                                                              {"Afterburner_Speed_Governor", "1.5"},
+                                                              {"Afterburner_Usage_Cost", "1.5"}};
 
 TEST(Afterburner, Sanity) {
     UnitCSVFactory::LoadUnit(afterburner_string + upgrades_suffix_string, afterburner_map);
     UnitCSVFactory::LoadUnit(upgrade_string + upgrades_suffix_string, afterburner_upgrade_map);
 
-    Afterburner afterburner;
+    Afterburner        afterburner;
     AfterburnerUpgrade upgrade(&afterburner);
 
     afterburner.Load(afterburner_string + upgrades_suffix_string);
@@ -69,7 +65,7 @@ TEST(Afterburner, Sanity) {
     EXPECT_EQ(afterburner.GetConsumption(), 2.0);
 
     // Disabled. Afterburner_Upgrade does not get saved to file.
-    //EXPECT_EQ(upgrade.GetMass(), 5.0);
+    // EXPECT_EQ(upgrade.GetMass(), 5.0);
     // EXPECT_EQ(upgrade.thrust, 1.5);
     // EXPECT_EQ(upgrade.speed, 1.5);
     // EXPECT_EQ(upgrade.consumption, 1.5);
@@ -79,7 +75,7 @@ TEST(Afterburner, UpgradeDowngrade) {
     UnitCSVFactory::LoadUnit(afterburner_string + upgrades_suffix_string, afterburner_map);
     UnitCSVFactory::LoadUnit(upgrade_string + upgrades_suffix_string, afterburner_upgrade_map);
 
-    Afterburner afterburner;
+    Afterburner        afterburner;
     AfterburnerUpgrade upgrade(&afterburner);
 
     afterburner.Load(afterburner_string + upgrades_suffix_string);
@@ -103,7 +99,7 @@ TEST(Afterburner, UpgradeDowngrade) {
     EXPECT_EQ(afterburner.speed.MaxValue(), 150.0);
     EXPECT_EQ(afterburner.GetConsumption(), 3.0);
 
-    //EXPECT_EQ(upgrade.GetMass(), 5.0);
+    // EXPECT_EQ(upgrade.GetMass(), 5.0);
     EXPECT_EQ(upgrade.thrust, 1.5);
     EXPECT_EQ(upgrade.speed, 1.5);
     EXPECT_EQ(upgrade.consumption, 1.5);

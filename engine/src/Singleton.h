@@ -28,18 +28,18 @@
 #define VEGA_STRIKE_ENGINE_SINGLETON_H
 
 //
-//C++ Template: Singleton<T>
+// C++ Template: Singleton<T>
 //
 
 namespace InitializationFunctors {
-template<typename T>
+template <typename T>
 class DefaultConstructor {
 public:
     T *operator()() const {
         return new T();
     }
 };
-};
+};  // namespace InitializationFunctors
 
 /**
  * Singleton template
@@ -53,7 +53,7 @@ public:
  *      You must add an extern Singleton<T,INIT>::_singletonInstance in your class implementation
  *      or linking against derived classes will fail.
  */
-template<typename T, typename INIT = InitializationFunctors::DefaultConstructor<T> >
+template <typename T, typename INIT = InitializationFunctors::DefaultConstructor<T>>
 class Singleton {
 protected:
     static T *_singletonInstance;
@@ -62,7 +62,7 @@ protected:
         if (_singletonInstance != 0) {
             delete _singletonInstance;
         }
-        //GCC 3.3 errors out if you do '(INIT())()'
+        // GCC 3.3 errors out if you do '(INIT())()'
         INIT singletonConstructor;
         _singletonInstance = singletonConstructor();
     }
@@ -86,4 +86,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_SINGLETON_H
+#endif  // VEGA_STRIKE_ENGINE_SINGLETON_H

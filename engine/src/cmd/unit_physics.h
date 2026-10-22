@@ -27,34 +27,28 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H
 #define VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H
 
-#include "gfx_generic/mesh.h"
-#include "root_generic/lin_time.h"
 #include "cmd/beam.h"
 #include "cmd/planet.h"
-#include "src/audiolib.h"
+#include "gfx_generic/mesh.h"
 #include "root_generic/configxml.h"
+#include "root_generic/lin_time.h"
 #include "root_generic/vs_globals.h"
+#include "src/audiolib.h"
 #include "src/vs_math.h"
 
 #ifdef FIX_TERRAIN
-#include "gfx/planetary_transform.h"
+#    include "gfx/planetary_transform.h"
 #endif
-#include "gfx/cockpit.h"
-#include "cmd/unit_util.h"
-#include "src/universe_util.h"
 #include "cmd/script/mission.h"
+#include "cmd/unit_util.h"
+#include "gfx/cockpit.h"
+#include "src/universe_util.h"
 
-extern unsigned int apply_float_to_unsigned_int(float tmp); //short fix
+extern unsigned int apply_float_to_unsigned_int(float tmp);  // short fix
 
-
-void Unit::UpdatePhysics2(const Transformation &trans,
-        const Transformation &old_physical_state,
-        const Vector &accel,
-        float difficulty,
-        const Matrix &transmat,
-        const Vector &cum_vel,
-        bool lastframe,
-        UnitCollection *uc) {
+void Unit::UpdatePhysics2(const Transformation &trans, const Transformation &old_physical_state, const Vector &accel,
+                          float difficulty, const Matrix &transmat, const Vector &cum_vel, bool lastframe,
+                          UnitCollection *uc) {
     Movable::UpdatePhysics2(trans, old_physical_state, accel, difficulty, transmat, cum_vel, lastframe, uc);
 
     this->AddVelocity(difficulty);
@@ -62,11 +56,11 @@ void Unit::UpdatePhysics2(const Transformation &trans,
 #ifdef DEPRECATEDPLANETSTUFF
     if (planet) {
         Matrix basis;
-        curr_physical_state.to_matrix( this->cumulative_transformation_matrix );
+        curr_physical_state.to_matrix(this->cumulative_transformation_matrix);
         Vector p, q, r, c;
-        MatrixToVectors( this->cumulative_transformation_matrix, p, q, r, c );
-        planet->trans->InvTransformBasis( this->cumulative_transformation_matrix, p, q, r, c );
-        planet->cps = Transformation::from_matrix( this->cumulative_transformation_matrix );
+        MatrixToVectors(this->cumulative_transformation_matrix, p, q, r, c);
+        planet->trans->InvTransformBasis(this->cumulative_transformation_matrix, p, q, r, c);
+        planet->cps = Transformation::from_matrix(this->cumulative_transformation_matrix);
     }
 #endif
     this->cumulative_transformation = this->curr_physical_state;
@@ -76,23 +70,23 @@ void Unit::UpdatePhysics2(const Transformation &trans,
     unsigned int i, n;
     if (lastframe) {
         char tmp = 0;
-        //double blah = queryTime();
+        // double blah = queryTime();
         for (i = 0, n = this->meshdata.size(); i < n; i++) {
             if (!this->meshdata[i]) {
                 continue;
             }
             if (!this->meshdata[i]->HasBeenDrawn()) {
-                this->meshdata[i]->UpdateFX(simulation_atom_var /*SIMULATION_ATOM?*/ );
+                this->meshdata[i]->UpdateFX(simulation_atom_var /*SIMULATION_ATOM?*/);
             } else {
                 this->meshdata[i]->UnDraw();
                 tmp = 1;
             }
         }
-        //double blah1 = queryTime();
+        // double blah1 = queryTime();
         if (!tmp && this->Destroyed()) {
-            Explode(false, simulation_atom_var /*SIMULATION_ATOM?*/ );
+            Explode(false, simulation_atom_var /*SIMULATION_ATOM?*/);
         }
-        //double blah2 = queryTime();
+        // double blah2 = queryTime();
     }
 }
 
@@ -102,7 +96,7 @@ void Unit::UpdatePhysics2(const Transformation &trans,
 void GameUnit::Thrust(const Vector &amt1, bool afterburn) {
     if (this->afterburntype == 0) {
         afterburn = afterburn && this->energy > this->afterburnenergy * simulation_atom_var;
-    } //SIMULATION_ATOM; ?
+    }  // SIMULATION_ATOM; ?
     if (this->afterburntype == 1) {
         afterburn = afterburn && this->fuel > 0;
     }
@@ -126,24 +120,23 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn) {
             }
         }
     } else if (afterburn || !must_afterburn_to_buzz) {
-        const float buzzingtime = configuration().audio.buzzing_time_flt;
-        const float buzzingdistance = configuration().audio.buzzing_distance_flt;
-        static float lastbuzz = getNewTime();
-        Unit *playa = _Universe->AccessCockpit()->GetParent();
+        const float  buzzingtime     = configuration().audio.buzzing_time_flt;
+        const float  buzzingdistance = configuration().audio.buzzing_distance_flt;
+        static float lastbuzz        = getNewTime();
+        Unit        *playa           = _Universe->AccessCockpit()->GetParent();
         if (playa) {
-            if (UnitUtil::getDistance(this,
-                    playa) < buzzingdistance && playa->owner != this && this->owner != playa
-                    && this->owner != playa->owner) {
+            if (UnitUtil::getDistance(this, playa) < buzzingdistance && playa->owner != this && this->owner != playa &&
+                this->owner != playa->owner) {
                 float ttime = getNewTime();
                 if (ttime - lastbuzz > buzzingtime) {
                     Vector pvel = playa->GetVelocity();
-                    Vector vel = this->GetVelocity();
+                    Vector vel  = this->GetVelocity();
                     pvel.Normalize();
                     vel.Normalize();
                     float dotprod = vel.Dot(pvel);
                     if (dotprod < .86) {
                         lastbuzz = ttime;
-                        //AUDPlay( this->sound->engine, this->Position(), this->GetVelocity(), 1 );
+                        // AUDPlay( this->sound->engine, this->Position(), this->GetVelocity(), 1 );
                         playEngineSound();
                     } else {
                     }
@@ -155,10 +148,10 @@ void GameUnit::Thrust(const Vector &amt1, bool afterburn) {
 
 Vector Unit::ResolveForces(const Transformation &trans, const Matrix &transmat) {
 #ifndef PERFRAMESOUND
-    //AUDAdjustSound( this->sound->engine, this->cumulative_transformation.position, this->cumulative_velocity );
+    // AUDAdjustSound( this->sound->engine, this->cumulative_transformation.position, this->cumulative_velocity );
     adjustSound(SoundType::engine);
 #endif
     return Movable::ResolveForces(trans, transmat);
 }
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_PHYSICS_H

@@ -24,9 +24,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
+
+#ifndef VEGA_STRIKE_ENGINE_SRC_PYTHON_DEFINE_ODD_UNIT_FUNCTIONS_H
+#define VEGA_STRIKE_ENGINE_SRC_PYTHON_DEFINE_ODD_UNIT_FUNCTIONS_H
 
 
+#include "python_class.h"
+
+#include "unit_wrapper_class.h"
+
+// Warning: Do not mark this function inline. If you do, you will get a linker error.
+// ReSharper disable once CppNonInlineFunctionDefinitionInHeaderFile
 void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::setNull, "setNull");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::isNull, "isNull");
@@ -43,8 +51,8 @@ void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::cosAngleFromMountTo, "cosAngleFromMountTo");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::getAverageGunSpeed, "getAverageGunSpeed");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::InsideCollideTree, "InsideCollideTree");
-//  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::getFlightgroupLeader,"getFlightgroupLeader");
-//  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::setFlightgroupLeader,"setFlightgroupLeader");
+    //  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::getFlightgroupLeader,"getFlightgroupLeader");
+    //  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::setFlightgroupLeader,"setFlightgroupLeader");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetVelocityDifficultyMult, "GetVelocityDifficultyMult");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetJumpStatus, "GetJumpStatus");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::ApplyDamage, "ApplyDamage");
@@ -60,3 +68,4 @@ void DefineOddUnitFunctions(boost::python::class_builder<UnitWrapper> &Class) {
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::GetHullPercent, "GetHullPercent");
     PYTHON_DEFINE_METHOD(Class, &UnitWrapper::rSize, "rSize");
 }
+#endif  // VEGA_STRIKE_ENGINE_SRC_PYTHON_DEFINE_ODD_UNIT_FUNCTIONS_H

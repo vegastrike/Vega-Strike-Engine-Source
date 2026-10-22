@@ -27,18 +27,15 @@
 
 #include "components/afterburner_upgrade.h"
 
-#include "components/afterburner.h"
-#include "cmd/unit_csv_factory.h"
-
 #include <boost/format.hpp>
 
+#include "cmd/unit_csv_factory.h"
+#include "components/afterburner.h"
 
-AfterburnerUpgrade::AfterburnerUpgrade(Afterburner *afterburner):
-    Component(), afterburner(afterburner), thrust(1.0),
-    speed(1.0), consumption(1.0) {
+AfterburnerUpgrade::AfterburnerUpgrade(Afterburner *afterburner)
+    : Component(), afterburner(afterburner), thrust(1.0), speed(1.0), consumption(1.0) {
     type = ComponentType::AfterburnerUpgrade;
 }
-
 
 // Component Methods
 void AfterburnerUpgrade::Load(std::string unit_key) {
@@ -47,12 +44,11 @@ void AfterburnerUpgrade::Load(std::string unit_key) {
     // Then, if we sell the upgrade, we get the original.
 }
 
-void AfterburnerUpgrade::SaveToCSV(std::map<std::string, std::string>& unit) const {
+void AfterburnerUpgrade::SaveToCSV(std::map<std::string, std::string> &unit) const {
     // Not supported with the current file format
     // Instead, we save the modified Afterburner stats and load the upgrade above.
     // Then, if we sell the upgrade, we get the original.
 }
-
 
 // Can only upgrade/downgrade if Afterburner is undamaged.
 // Otherwise, there are a lot of edge cases.
@@ -61,7 +57,7 @@ bool AfterburnerUpgrade::CanDowngrade() const {
 }
 
 bool AfterburnerUpgrade::Downgrade() {
-    if(!CanDowngrade()) {
+    if (!CanDowngrade()) {
         return false;
     }
 
@@ -84,7 +80,7 @@ bool AfterburnerUpgrade::CanUpgrade(const std::string upgrade_key) const {
 }
 
 bool AfterburnerUpgrade::Upgrade(const std::string upgrade_key) {
-    if(!CanUpgrade(upgrade_key)) {
+    if (!CanUpgrade(upgrade_key)) {
         return false;
     }
 
@@ -92,8 +88,8 @@ bool AfterburnerUpgrade::Upgrade(const std::string upgrade_key) {
     Component::Upgrade(upgrade_key);
 
     // Load modifiers
-    thrust = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Accel", 1.0);
-    speed = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Speed_Governor", 1.0);
+    thrust      = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Accel", 1.0);
+    speed       = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Speed_Governor", 1.0);
     consumption = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Usage_Cost", 1.0);
 
     // Add effects of upgrade on afterburner

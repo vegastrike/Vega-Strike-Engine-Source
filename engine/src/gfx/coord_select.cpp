@@ -25,18 +25,19 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "cmd/unit_generic.h"
-#include "src/star_system.h"
-#include "loc_select.h"
 #include "coord_select.h"
+
+#include "cmd/unit_generic.h"
+#include "gfx/camera.h"
+#include "loc_select.h"
 #include "root_generic/vs_globals.h"
 #include "src/in_kb.h"
-#include "gfx/camera.h"
+#include "src/star_system.h"
 #include "src/universe.h"
 
-int CoordinateSelectChange = 0;
-int CoordinateSelectmousex;
-int CoordinateSelectmousey;
+int           CoordinateSelectChange = 0;
+int           CoordinateSelectmousex;
+int           CoordinateSelectmousey;
 extern Vector MouseCoordinate(int mouseX, int mouseY);
 
 extern KBSTATE mouseButtonState;
@@ -51,9 +52,9 @@ void CoordinateSelect::MouseMoveHandle(KBSTATE, int x, int y, int, int, int) {
     CoordinateSelectmousey = y;
 }
 
-CoordinateSelect::CoordinateSelect(QVector start) : LocSelAni("locationselect.ani", true, .5, MIPMAP, true),
-        LocalPosition(start) {
-    CrosshairSize = 2;
+CoordinateSelect::CoordinateSelect(QVector start)
+    : LocSelAni("locationselect.ani", true, .5, MIPMAP, true), LocalPosition(start) {
+    CrosshairSize          = 2;
     CoordinateSelectmousex = configuration().graphics.resolution_x / 2;
     CoordinateSelectmousey = configuration().graphics.resolution_y / 2;
     CoordinateSelectChange = 1;
@@ -66,14 +67,14 @@ void CoordinateSelect::UpdateMouse() {
         _Universe->AccessCamera()->GetPQR(CamPos, CamQ, CamR);
 
         Vector mousePoint(MouseCoordinate(CoordinateSelectmousex, CoordinateSelectmousey));
-        float mouseDistance = mousePoint.k * mousePoint.k;
-        mousePoint = Transform(CamPos, CamQ, CamR, mousePoint);
-        //QVector cp;
+        float  mouseDistance = mousePoint.k * mousePoint.k;
+        mousePoint           = Transform(CamPos, CamQ, CamR, mousePoint);
+        // QVector cp;
         CamPos = _Universe->AccessCamera()->GetPosition();
-        //float mouseDistance = mousePoint.Dot (CamR);
-        //distance out into z...straight line...
+        // float mouseDistance = mousePoint.Dot (CamR);
+        // distance out into z...straight line...
 
-        float distance = CamR.Dot((LocalPosition - CamPos).Cast());           //distance out into z...straight line...
+        float distance = CamR.Dot((LocalPosition - CamPos).Cast());  // distance out into z...straight line...
         if (mouseDistance != 0) {
             LocalPosition = mousePoint * (distance / mouseDistance) + CamPos.Cast();
         } else {
@@ -86,13 +87,14 @@ void CoordinateSelect::UpdateMouse() {
         _Universe->AccessCamera()->GetPQR(CamPos, CamQ, CamR);
         CamPos = _Universe->AccessCamera()->GetPosition();
 
-        LocalPosition = LocalPosition - CamPos;
-        float distance = sqrt(CamR.Dot(LocalPosition));         //distance out into z...straight line...
-        //make it a ratio btw top and bottom.... for near and far;
-        float ratio = float(configuration().graphics.resolution_y - CoordinateSelectmousey) / configuration().graphics.resolution_y;
+        LocalPosition  = LocalPosition - CamPos;
+        float distance = sqrt(CamR.Dot(LocalPosition));  // distance out into z...straight line...
+        // make it a ratio btw top and bottom.... for near and far;
+        float ratio = float(configuration().graphics.resolution_y - CoordinateSelectmousey) /
+                      configuration().graphics.resolution_y;
         float tmp, n, f;
-        GFXGetFrustumVars(true, &tmp, &tmp, &tmp, &tmp, &n, &f);         ///unkind call :-D
-        tmp = n + ratio * ratio * ratio * (f - n);           //how far n^3 law
+        GFXGetFrustumVars(true, &tmp, &tmp, &tmp, &tmp, &n, &f);  /// unkind call :-D
+        tmp = n + ratio * ratio * ratio * (f - n);                // how far n^3 law
         if (distance != 0) {
             LocalPosition = LocalPosition * (tmp / distance) + CamPos;
         } else {
@@ -114,4 +116,3 @@ void CoordinateSelect::Draw() {
     LocSelAni.Draw();
     GFXPopBlendMode();
 }
-

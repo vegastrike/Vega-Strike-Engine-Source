@@ -27,14 +27,15 @@
 // NO HEADER GUARD
 
 #ifdef WIN32
-#include <time.h>
-#else //WIN32
+#    include <time.h>
+#else  // WIN32
 
-#include <unistd.h>
-#include <sys/time.h>
+#    include <unistd.h>
 
-#define RESETTIME() startTime()
-#define REPORTTIME(comment) endTime( comment, __FILE__, __LINE__ )
+#    include <sys/time.h>
+
+#    define RESETTIME()         startTime()
+#    define REPORTTIME(comment) endTime(comment, __FILE__, __LINE__)
 
 static timeval start;
 
@@ -49,4 +50,4 @@ static inline void endTime(const char *comment, const char *file, int lineno) {
     std::clog << file << "(" << comment << "):" << lineno << ": " << time << std::endl;
 }
 
-#endif //WIN32
+#endif  // WIN32

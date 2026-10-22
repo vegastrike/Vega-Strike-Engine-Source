@@ -30,10 +30,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-inline_ bool PlanesCollider::PlanesAABBOverlap(const Point &center,
-        const Point &extents,
-        uint32_t &out_clip_mask,
-        uint32_t in_clip_mask) {
+inline_ bool PlanesCollider::PlanesAABBOverlap(const Point &center, const Point &extents, uint32_t &out_clip_mask,
+                                               uint32_t in_clip_mask) {
     // Stats
     mNbVolumeBVTests++;
 
@@ -47,28 +45,28 @@ inline_ bool PlanesCollider::PlanesAABBOverlap(const Point &center,
     // to be outside any of the planes. The loop also constructs a new output
     // clip mask. Most FPUs have a native single-cycle fabsf() operation.
 
-    uint32_t Mask = 1;            // current mask index (1,2,4,8,..)
-    uint32_t TmpOutClipMask = 0;            // initialize output clip mask into empty.
+    uint32_t Mask           = 1;                   // current mask index (1,2,4,8,..)
+    uint32_t TmpOutClipMask = 0;                   // initialize output clip mask into empty.
 
-    while (Mask <= in_clip_mask)                // keep looping while we have active planes left...
+    while (Mask <= in_clip_mask)                   // keep looping while we have active planes left...
     {
-        if (in_clip_mask & Mask)                // if clip plane is active, process it..
+        if (in_clip_mask & Mask)                   // if clip plane is active, process it..
         {
-            float NP = extents.x * fabsf(p->n.x) + extents.y * fabsf(p->n.y)
-                    + extents.z * fabsf(p->n.z);    // ### fabsf could be precomputed
+            float NP = extents.x * fabsf(p->n.x) + extents.y * fabsf(p->n.y) +
+                       extents.z * fabsf(p->n.z);  // ### fabsf could be precomputed
             float MP = center.x * p->n.x + center.y * p->n.y + center.z * p->n.z + p->d;
 
-            if (NP < MP) {                        // near vertex behind the clip plane...
+            if (NP < MP) {                         // near vertex behind the clip plane...
                 return FALSE;
-            }                // .. so there is no intersection..
-            if ((-NP) < MP) {                    // near and far vertices on different sides of plane..
+            }  // .. so there is no intersection..
+            if ((-NP) < MP) {  // near and far vertices on different sides of plane..
                 TmpOutClipMask |= Mask;
-            }        // .. so update the clip mask...
+            }  // .. so update the clip mask...
         }
-        Mask += Mask;                            // mk = (1<<plane)
-        p++;                                // advance to next plane
+        Mask += Mask;                // mk = (1<<plane)
+        p++;                         // advance to next plane
     }
 
-    out_clip_mask = TmpOutClipMask;            // copy output value (temp used to resolve aliasing!)
-    return TRUE;                            // indicate that AABB intersects frustum
+    out_clip_mask = TmpOutClipMask;  // copy output value (temp used to resolve aliasing!)
+    return TRUE;                     // indicate that AABB intersects frustum
 }

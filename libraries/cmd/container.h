@@ -34,6 +34,7 @@ class Unit;
 class UnitContainer {
 protected:
     Unit *unit;
+
 public:
     UnitContainer();
     UnitContainer(Unit *);
@@ -66,7 +67,7 @@ public:
     }
 
     ~UnitContainer();
-    void SetUnit(Unit *);
+    void  SetUnit(Unit *);
     Unit *GetUnit();
 
     const Unit *GetConstUnit() const {
@@ -74,4 +75,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNITCONTAINER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNITCONTAINER_H

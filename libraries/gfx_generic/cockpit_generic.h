@@ -27,12 +27,14 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_COCKPIT_GENERIC_H
 #define VEGA_STRIKE_ENGINE_GFX_COCKPIT_GENERIC_H
 
-#include "root_generic/xml_support.h"
-#include "cmd/container.h"
 #include <vector>
+
+#include "cmd/container.h"
 #include "gfx_generic/vec.h"
+#include "root_generic/xml_support.h"
 #include "vegadisk/vsfilesystem.h"
-//using namespace XMLSupport;  DONT DO THIS IN HEADERS
+
+// using namespace XMLSupport;  DONT DO THIS IN HEADERS
 enum VIEWSTYLE {
     CP_FRONT,
     CP_BACK,
@@ -50,20 +52,23 @@ enum VIEWSTYLE {
     CP_NUMVIEWS
 };
 #ifdef NETCOMM_WEBCAM
-#define MAXVDUS (13)
+#    define MAXVDUS (13)
 #else
-#define MAXVDUS (12)
+#    define MAXVDUS (12)
 #endif
 class Unit;
 class Camera;
 class Animation;
 class NavigationSystem;
+
 namespace Radar {
 class Sensor;
 }
-#include "src/in.h"
+
 #include "cmd/images.h"
 #include "gfx_generic/soundcontainer_generic.h"
+#include "src/in.h"
+
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
  * Gauges are used to indicate analog controls, and some diagital ones
@@ -71,7 +76,7 @@ class Sensor;
  */
 class Cockpit {
 public:
-    ///cockpit events.
+    /// cockpit events.
     enum EVENTID {
         EVENTID_FIRST,
 
@@ -152,96 +157,91 @@ public:
     };
 
 protected:
-    ///style of current view (chase cam, inside)
+    /// style of current view (chase cam, inside)
     enum VIEWSTYLE view;
 
-    int currentcamera;
+    int   currentcamera;
     float radar_time;
     float gauge_time[UnitImages<void>::NUMGAUGES];
 
-    ///this is the parent that Cockpit will read data from
+    /// this is the parent that Cockpit will read data from
     UnitContainer parent;
-    
+
     int unitfaction;
 
-    ///4 views f/r/l/b
+    /// 4 views f/r/l/b
     float shakin;
 
 
-    ///Color of cockpit default text
-    ///The font that the entire cockpit will use. Currently without color
-    //Gauge *gauges[UnitImages::NUMGAUGES];
-    //0 means no autopilot...positive autopilto in progress
-    float autopilot_time;
-    UnitContainer autopilot_target; //usually null
+    /// Color of cockpit default text
+    /// The font that the entire cockpit will use. Currently without color
+    // Gauge *gauges[UnitImages::NUMGAUGES];
+    // 0 means no autopilot...positive autopilto in progress
+    float         autopilot_time;
+    UnitContainer autopilot_target;  // usually null
 
     /**
      * two values that represent the adjustment to perspective needed to center teh crosshairs in the perceived view.
      */
     float cockpit_offset, viewport_offset;
 
-    virtual void LoadXML(const char *file) {
-    }
+    virtual void LoadXML(const char *file) {}
 
-    virtual void LoadXML(VSFileSystem::VSFile &f) {
-    }
+    virtual void LoadXML(VSFileSystem::VSFile &f) {}
 
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
     static void endElement(void *userData, const XML_Char *name);
 
-    virtual void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes) {
-    }
+    virtual void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes) {}
 
-    virtual void endElement(const std::string &name) {
-    }
+    virtual void endElement(const std::string &name) {}
 
-    ///Destructs cockpit info for new loading
+    /// Destructs cockpit info for new loading
     virtual void Delete();
 
-    ///draws the navigation symbol around targetted location
-    virtual void DrawNavigationSymbol(const Vector &loc, const Vector &p, const Vector &q, float size) {
-    }
+    /// draws the navigation symbol around targetted location
+    virtual void DrawNavigationSymbol(const Vector &loc, const Vector &p, const Vector &q, float size) {}
 
-    ///draws the target box around targetted unit
+    /// draws the target box around targetted unit
     virtual float computeLockingSymbol(Unit *par) {
         return 1;
     }
 
     float cockpit_time;
-    bool ejecting;
-    bool going_to_dock_screen;
-    int partial_number_of_attackers;
+    bool  ejecting;
+    bool  going_to_dock_screen;
+    int   partial_number_of_attackers;
 
 private:
     std::vector<SoundContainer *> sounds;
 
 public:
-    int number_of_attackers;
+    int          number_of_attackers;
     unsigned int retry_dock;
-    double TimeOfLastCollision;
-    char jumpok;
+    double       TimeOfLastCollision;
+    char         jumpok;
 
 
 protected:
     // Turret Variables
-    Unit* parent_unit = nullptr;      // The ship
-    Unit* current_unit = nullptr;     // Either the ship (cockpit) or one of the turrets
+    Unit *parent_unit  = nullptr;  // The ship
+    Unit *current_unit = nullptr;  // Either the ship (cockpit) or one of the turrets
 
     int number_of_turrets = -1;
-    int current_view = -1;            // -1 Cockpit. 0...n turrets
+    int current_view      = -1;    // -1 Cockpit. 0...n turrets
 
 public:
-    virtual void setTargetLabel(const std::string &msg) {
-    }
+    virtual void setTargetLabel(const std::string &msg) {}
 
     virtual std::string getTargetLabel() {
         return std::string();
     }
 
-    void updateAttackers();
-    static bool tooManyAttackers(); //checks config file and declares if too many folks are attacking any of the players (to avoid expensive tests where unnecessary).
-    virtual void ReceivedTargetInfo() {
-    }
+    void        updateAttackers();
+    static bool tooManyAttackers();  // checks config file and declares if too many folks are attacking any of the
+                                     // players (to avoid expensive tests where unnecessary).
+
+    virtual void ReceivedTargetInfo() {}
 
     bool autoInProgress() {
         return autopilot_time > 0;
@@ -249,7 +249,7 @@ public:
 
     bool unitInAutoRegion(Unit *un);
 
-    ///Sets the current viewstyle
+    /// Sets the current viewstyle
     void SetView(const enum VIEWSTYLE tmp) {
         view = tmp;
     }
@@ -260,17 +260,14 @@ public:
 
     virtual void InitStatic();
 
-    virtual void Shake(float amt, int level /*0 = shield, 1 = armor 2 = hull*/ ) {
-    }
+    virtual void Shake(float amt, int level /*0 = shield, 1 = armor 2 = hull*/) {}
 
-    float godliness;
+    float       godliness;
     virtual int Autopilot(Unit *target);
-    void RestoreGodliness();
+    void        RestoreGodliness();
 
-    ///Restores the view from the IDentity Matrix needed to draw sprites
-    virtual void RestoreViewPort() {
-    }
-
+    /// Restores the view from the IDentity Matrix needed to draw sprites
+    virtual void RestoreViewPort() {}
 
     static std::string MakeBaseName(const Unit *base);
 
@@ -278,22 +275,22 @@ public:
 
     void UnpackUnitInfo(vector<std::string> &info);
 
-    std::string communication_choices;  
+    std::string communication_choices;
 
-    ///How far away chasecam and pan cam is
+    /// How far away chasecam and pan cam is
     float zoomfactor;
     Cockpit(const char *file, Unit *parent, const std::string &pilotname);
     virtual ~Cockpit();
 
-    ///Loads cockpit info...just as constructor
+    /// Loads cockpit info...just as constructor
     virtual void Init(const char *file, bool defaultCockpit = false);
-    void recreate(const std::string &pilotname);
+    void         recreate(const std::string &pilotname);
 
-    ///Sets owner of this cockpit
-    //unsigned int whichcockpit;//0 is the first player, 1 is the second and so forth
+    /// Sets owner of this cockpit
+    // unsigned int whichcockpit;//0 is the first player, 1 is the second and so forth
     class Flightgroup *fg;
-    class StarSystem *activeStarSystem; //used for context switch in Universe
-    virtual void SetParent(Unit *unit, const QVector &position);
+    class StarSystem  *activeStarSystem;  // used for context switch in Universe
+    virtual void       SetParent(Unit *unit, const QVector &position);
 
     Unit *GetParent() {
         return parent.GetUnit();
@@ -301,59 +298,47 @@ public:
 
     Unit *GetSaveParent();
 
-    ///Draws Cockpit then restores viewport
-    virtual void Draw() {
-    }
+    /// Draws Cockpit then restores viewport
+    virtual void Draw() {}
 
-    bool Update(); //respawns and the like. Returns true if starsystem was reloaded
+    bool         Update();  // respawns and the like. Returns true if starsystem was reloaded
     virtual void UpdAutoPilot();
 
-    ///Sets up the world for rendering...call before draw
-    virtual void SetupViewPort(bool clip = true) {
-    }
+    /// Sets up the world for rendering...call before draw
+    virtual void SetupViewPort(bool clip = true) {}
 
     virtual int getVDUMode(int vdunum) {
         return 0;
     }
 
-    virtual void VDUSwitch(int vdunum) {
-    }
+    virtual void VDUSwitch(int vdunum) {}
 
-    virtual void ScrollVDU(int vdunum, int howmuch) {
-    }
+    virtual void ScrollVDU(int vdunum, int howmuch) {}
 
-    virtual void ScrollAllVDU(int howmuch) {
-    }
+    virtual void ScrollAllVDU(int howmuch) {}
 
     virtual int getScrollOffset(unsigned int whichtype) {
         return 1;
     }
 
-    virtual void SelectProperCamera() {
-    }
+    virtual void SelectProperCamera() {}
 
     virtual void Eject();
     virtual void EjectDock();
     virtual void SetInsidePanYawSpeed(float speed);
     virtual void SetInsidePanPitchSpeed(float speed);
 
-    static void Respawn(const KBData &, KBSTATE) {
-    }
+    static void Respawn(const KBData &, KBSTATE) {}
 
-    static void SwitchControl(const KBData &, KBSTATE) {
-    }
+    static void SwitchControl(const KBData &, KBSTATE) {}
 
-    static void ForceSwitchControl(const KBData &, KBSTATE) {
-    }
+    static void ForceSwitchControl(const KBData &, KBSTATE) {}
 
-    static void TurretControl(const KBData &, KBSTATE) {
-    }
+    static void TurretControl(const KBData &, KBSTATE) {}
 
-    virtual void SetCommAnimation(Animation *ani, Unit *un) {
-    }
+    virtual void SetCommAnimation(Animation *ani, Unit *un) {}
 
-    virtual void SetStaticAnimation() {
-    }
+    virtual void SetStaticAnimation() {}
 
     /**
      * Retrieves the sound associated to the given event.
@@ -369,7 +354,7 @@ public:
 
     class SaveGame *savegame;
 
-    ///Accesses the current navigationsystem
+    /// Accesses the current navigationsystem
     virtual NavigationSystem *AccessNavSystem() {
         return NULL;
     }
@@ -378,23 +363,21 @@ public:
         return "";
     }
 
-    ///Accesses the current camera
+    /// Accesses the current camera
     virtual Camera *AccessCamera() {
         return NULL;
     }
 
-    ///Returns the passed in cam
+    /// Returns the passed in cam
     virtual Camera *AccessCamera(int) {
         return NULL;
     }
 
-    ///Changes current camera to selected camera
-    virtual void SelectCamera(int) {
-    }
+    /// Changes current camera to selected camera
+    virtual void SelectCamera(int) {}
 
-    ///GFXLoadMatrix proper camera
-    virtual void SetViewport() {
-    }
+    /// GFXLoadMatrix proper camera
+    virtual void SetViewport() {}
 
     virtual void visitSystem(std::string systemName);
 
@@ -411,24 +394,19 @@ public:
     }
 
     // Cockpit events
-    virtual void OnPauseBegin() {
-    }
+    virtual void OnPauseBegin() {}
 
-    virtual void OnPauseEnd() {
-    }
+    virtual void OnPauseEnd() {}
 
-    virtual void OnDockEnd(Unit *, Unit *) {
-    }
+    virtual void OnDockEnd(Unit *, Unit *) {}
 
-    virtual void OnJumpBegin(Unit *) {
-    }
+    virtual void OnJumpBegin(Unit *) {}
 
-    virtual void OnJumpEnd(Unit *) {
-    }
+    virtual void OnJumpEnd(Unit *) {}
 
 protected:
     /// Override to use a specific kind of sound implementation
     virtual SoundContainer *soundImpl(const SoundContainer &specs);
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_COCKPIT_GENERIC_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_COCKPIT_GENERIC_H

@@ -27,48 +27,49 @@
 
 
 #include "gfx/camera.h"
-#include "cmd/unit_generic.h" ///for GetUnit ();
+
+#include "cmd/unit_generic.h"  ///for GetUnit ();
 #include "gfx_generic/matrix.h"
 
-//Remove GL specific stuff here
+// Remove GL specific stuff here
 
+#include <assert.h>  //needed for assert() calls
+
+#include "root_generic/lin_time.h"
 #include "root_generic/vs_globals.h"
 #include "src/audiolib.h"
-#include "root_generic/lin_time.h"
+// #include "planetary_transform.h"  commented out by chuck_starchaser; --never used
 
-#include <assert.h>     //needed for assert() calls
-//#include "planetary_transform.h"  commented out by chuck_starchaser; --never used
-
-#include "src/vs_logging.h"
 #include "src/vs_exit.h"
+#include "src/vs_logging.h"
 
-//const float PI=3.1415926536;
+// const float PI=3.1415926536;
 
 Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1, 0.075, &Coord, &P, &Q, &R) {
     ResetVectors(P, Q, R);
-    R = -R;
-    Coord.i = 0;
-    Coord.j = 0;
-    Coord.k = -1;
+    R        = -R;
+    Coord.i  = 0;
+    Coord.j  = 0;
+    Coord.k  = -1;
     velocity = angular_velocity = Vector(0, 0, 0);
     lastpos.Set(0, 0, 0);
     cockpit_offset = 0;
     //////////////////////////////////////////SetPlanetaryTransform( NULL );
     changed = GFXTRUE;
-    //SetPosition();
-    //SetOrientation();
+    // SetPosition();
+    // SetOrientation();
     Yaw(PI);
     x = y = 0;
     xsize = ysize = 1.0;
-    zoom = 1.0;
-    fov = configuration().graphics.fov_flt;
+    zoom          = 1.0;
+    fov           = configuration().graphics.fov_flt;
 
-    lastGFXUpdate.clip = GFXTRUE;
-    lastGFXUpdate.updateFrustum = GFXTRUE;
-    lastGFXUpdate.centerCamera = GFXFALSE;
+    lastGFXUpdate.clip             = GFXTRUE;
+    lastGFXUpdate.updateFrustum    = GFXTRUE;
+    lastGFXUpdate.centerCamera     = GFXFALSE;
     lastGFXUpdate.overrideZFrustum = GFXFALSE;
-    lastGFXUpdate.overrideZNear = 0;
-    lastGFXUpdate.overrideZFar = 1000000;
+    lastGFXUpdate.overrideZNear    = 0;
+    lastGFXUpdate.overrideZFar     = 1'000'000;
 }
 
 void Camera::GetPQR(Vector &p1, Vector &q1, Vector &r1) const {
@@ -83,45 +84,39 @@ void Camera::GetPQR(Vector &p1, Vector &q1, Vector &r1) const {
     r1.k = R.k;
 }
 
-void Camera::UpdateGFX(GFXBOOL clip,
-        GFXBOOL updateFrustum,
-        GFXBOOL centerCamera,
-        GFXBOOL overrideZFrustum,
-        float overrideZNear,
-        float overrideZFar) {
-    lastGFXUpdate.clip = clip;
-    lastGFXUpdate.updateFrustum = updateFrustum;
-    lastGFXUpdate.centerCamera = centerCamera;
+void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum, GFXBOOL centerCamera, GFXBOOL overrideZFrustum,
+                       float overrideZNear, float overrideZFar) {
+    lastGFXUpdate.clip             = clip;
+    lastGFXUpdate.updateFrustum    = updateFrustum;
+    lastGFXUpdate.centerCamera     = centerCamera;
     lastGFXUpdate.overrideZFrustum = overrideZFrustum;
-    lastGFXUpdate.overrideZNear = overrideZNear;
-    lastGFXUpdate.overrideZFar = overrideZFar;
+    lastGFXUpdate.overrideZNear    = overrideZNear;
+    lastGFXUpdate.overrideZFar     = overrideZFar;
 
-    const float ZFARCONST = 1000000;
-    float znear, zfar;
+    const float ZFARCONST = 1'000'000;
+    float       znear, zfar;
     if (changed) {
         myPhysics.Update();
         changed = GFXFALSE;
     }
     GFXLoadIdentity(PROJECTION);
-    //FIXMEGFXLoadIdentity(VIEW);
+    // FIXMEGFXLoadIdentity(VIEW);
     switch (projectionType) {
         case Camera::PERSPECTIVE:
             znear = (overrideZFrustum ? overrideZNear : configuration().graphics.znear_flt);
-            zfar = (overrideZFrustum ? overrideZFar : configuration().graphics.zfar_flt * (clip ? 1 : ZFARCONST));
+            zfar  = (overrideZFrustum ? overrideZFar : configuration().graphics.zfar_flt * (clip ? 1 : ZFARCONST));
 
-            GFXPerspective(zoom * fov,
-                    configuration().graphics.aspect_flt,
-                    znear,
-                    zfar,
-                    cockpit_offset);             //set perspective to 78 degree FOV
+            GFXPerspective(zoom * fov, configuration().graphics.aspect_flt, znear, zfar,
+                           cockpit_offset);  // set perspective to 78 degree FOV
             break;
         case Camera::PARALLEL:
 
             znear = (overrideZFrustum ? overrideZNear : -configuration().graphics.zfar_flt * (clip ? 1 : ZFARCONST));
-            zfar = (overrideZFrustum ? overrideZFar : configuration().graphics.zfar_flt * (clip ? 1 : ZFARCONST));
+            zfar  = (overrideZFrustum ? overrideZFar : configuration().graphics.zfar_flt * (clip ? 1 : ZFARCONST));
 
-            //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
-            GFXParallel(configuration().graphics.aspect_flt * -zoom, configuration().graphics.aspect_flt * zoom, -zoom, zoom, znear, zfar);
+            // GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
+            GFXParallel(configuration().graphics.aspect_flt * -zoom, configuration().graphics.aspect_flt * zoom, -zoom,
+                        zoom, znear, zfar);
             break;
     }
     GFXLookAt(-R, centerCamera ? QVector(0, 0, 0) : Coord, Q);
@@ -129,13 +124,13 @@ void Camera::UpdateGFX(GFXBOOL clip,
         GFXCalculateFrustum();
     }
 #ifdef PERFRAMESOUND
-    Vector lastpos( view[12], view[13], view[14] );
-    AUDListener( Coord, (Coord-lastpos)/GetElapsedTime() );           //this pos-last pos / elapsed time
+    Vector lastpos(view[12], view[13], view[14]);
+    AUDListener(Coord, (Coord - lastpos) / GetElapsedTime());  // this pos-last pos / elapsed time
 #endif
-    //GFXGetMatrix(VIEW,view);
+    // GFXGetMatrix(VIEW,view);
     GFXSubwindow(x, y, xsize, ysize);
 #ifdef PERFRAMESOUND
-    AUDListenerOrientation( P, Q, R );
+    AUDListenerOrientation(P, Q, R);
 #endif
 
     if (centerCamera) {
@@ -143,7 +138,6 @@ void Camera::UpdateGFX(GFXBOOL clip,
     } else {
         GFXSetLightOffset(Vector(0, 0, 0));
     }
-
 }
 
 void Camera::UpdateCameraSounds() {
@@ -158,12 +152,12 @@ void Camera::GetView(Matrix &vw) {
 }
 
 void Camera::SetNebula(Nebula *neb) {
-    nebula.SetUnit((Unit *) neb);
+    nebula.SetUnit((Unit *)neb);
 }
 
-Nebula *Camera::GetNebula() //this function can't be const, as it must return a non-const ptr
+Nebula *Camera::GetNebula()  // this function can't be const, as it must return a non-const ptr
 {
-    return reinterpret_cast<Nebula *>( nebula.GetUnit()); //changed by chuck from (Nebula*) cast
+    return reinterpret_cast<Nebula *>(nebula.GetUnit());  // changed by chuck from (Nebula*) cast
 }
 
 void Camera::UpdatePlanetGFX() {
@@ -178,24 +172,23 @@ void Camera::UpdateGLCenter() {
 #define ITISDEPRECATED 0
     assert(ITISDEPRECATED);
 #undef ITISDEPRECATED
-//static float rotfactor = 0;
-    //glMatrixMode(GL_PROJECTION);
+    // static float rotfactor = 0;
+    // glMatrixMode(GL_PROJECTION);
     if (changed) {
         GFXLoadIdentity(PROJECTION);
         GFXLoadIdentity(VIEW);
-        //updating the center should always use a perspective
+        // updating the center should always use a perspective
         switch (Camera::PERSPECTIVE) {
             case Camera::PERSPECTIVE:
-                GFXPerspective(zoom * fov,
-                        configuration().graphics.aspect_flt,
-                        configuration().graphics.znear_flt,
-                        configuration().graphics.zfar_flt,
-                        cockpit_offset);             //set perspective to 78 degree FOV
+                GFXPerspective(zoom * fov, configuration().graphics.aspect_flt, configuration().graphics.znear_flt,
+                               configuration().graphics.zfar_flt,
+                               cockpit_offset);  // set perspective to 78 degree FOV
                 break;
             case Camera::PARALLEL:
 
-                //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
-                GFXParallel(configuration().graphics.aspect_flt * -zoom, configuration().graphics.aspect_flt * zoom, -zoom, zoom, -configuration().graphics.znear_flt, configuration().graphics.zfar_flt);
+                // GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
+                GFXParallel(configuration().graphics.aspect_flt * -zoom, configuration().graphics.aspect_flt * zoom,
+                            -zoom, zoom, -configuration().graphics.znear_flt, configuration().graphics.zfar_flt);
                 break;
         }
         RestoreViewPort(0, 0);
@@ -203,16 +196,16 @@ void Camera::UpdateGLCenter() {
         GFXLookAt(-R, QVector(0, 0, 0), Q);
         changed = GFXFALSE;
     }
-    //glMultMatrixf(view);
+    // glMultMatrixf(view);
 }
 
 void Camera::SetPosition(const QVector &origin, const Vector &vel, const Vector &angvel, const Vector &acceleration) {
     if (FINITE(origin.i) && FINITE(origin.j) && FINITE(origin.k)) {
-        velocity = vel;
+        velocity         = vel;
         angular_velocity = angvel;
-        accel = acceleration;
-        Coord = origin;
-        changed = GFXTRUE;
+        accel            = acceleration;
+        Coord            = origin;
+        changed          = GFXTRUE;
     } else {
         // What value should this return? -- stephengtuggy 2021-09-06
         VS_LOG_FLUSH_EXIT(fatal, "fatal error in camera", -3);
@@ -224,7 +217,7 @@ void Camera::SetPosition(const QVector &origin, const Vector &vel, const Vector 
  */
 Matrix *Camera::GetPlanetGFX() {
     return &planetview;
-    //CopyMatrix (x,view);
+    // CopyMatrix (x,view);
 }
 
 void Camera::LookDirection(const Vector &myR, const Vector &up) {
@@ -245,11 +238,11 @@ void Camera::SetOrientation(const Vector &p, const Vector &q, const Vector &r) {
 }
 
 void Camera::SetSubwindow(float x, float y, float xsize, float ysize) {
-    this->x = x;
-    this->y = y;
+    this->x     = x;
+    this->y     = y;
     this->xsize = xsize;
     this->ysize = ysize;
-    changed = GFXTRUE;
+    changed     = GFXTRUE;
 }
 
 void Camera::SetProjectionType(ProjectionType t) {
@@ -288,17 +281,16 @@ void Camera::Roll(float rad) {
 }
 
 void Camera::XSlide(float factor) {
-    Coord += (P * factor).Cast();
-    changed = GFXTRUE;
+    Coord   += (P * factor).Cast();
+    changed  = GFXTRUE;
 }
 
 void Camera::YSlide(float factor) {
-    Coord += (Q * factor).Cast();
-    changed = GFXTRUE;
+    Coord   += (Q * factor).Cast();
+    changed  = GFXTRUE;
 }
 
 void Camera::ZSlide(float factor) {
-    Coord += (R * factor).Cast();
-    changed = GFXTRUE;
+    Coord   += (R * factor).Cast();
+    changed  = GFXTRUE;
 }
-

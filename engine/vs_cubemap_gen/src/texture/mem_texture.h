@@ -27,25 +27,26 @@
 #ifndef VEGA_STRIKE_ENGINE_CUBE_MAP_MEM_TEXTURE_H
 #define VEGA_STRIKE_ENGINE_CUBE_MAP_MEM_TEXTURE_H
 
-//this file presents:
+// this file presents:
 class mem_texture;
 
-//this file references:
+// this file references:
 class fcolor;
 class steradians;
 
-//it also defines:
+// it also defines:
 typedef std::pair<fcolor, steradians> tex_fetch_t;
 
 struct RectIterRanges {
     unsigned startu, endu, startv, endv;
 };
 
-template<size_t SIZE>
+template <size_t SIZE>
 class mem_tex {
-    float buff[6 * SIZE * SIZE * 4]; //6 square SIZE textures * RGBA -worth of floats
-    size_t tex_index(side const &s, icoords const &ic) const;
+    float   buff[6 * SIZE * SIZE * 4];  // 6 square SIZE textures * RGBA -worth of floats
+    size_t  tex_index(side const &s, icoords const &ic) const;
     radians angles_from_center_[SIZE >> 1];
+
 public:
     mem_tex();
 
@@ -53,12 +54,12 @@ public:
         return SIZE;
     }
 
-    radians angle_from_center(size_t single_coord) const;
-    radians texel_angle_width(size_t single_coord) const;
-    steradians texel_solid_angle(icoords const &ic) const;
+    radians           angle_from_center(size_t single_coord) const;
+    radians           texel_angle_width(size_t single_coord) const;
+    steradians        texel_solid_angle(icoords const &ic) const;
     fRGBAcolor const *pTexel(side const &s, icoords const &ic) const;
-    fRGBAcolor *pTexel(side const &s, icoords const &ic);
-    RectIterRanges get_iter_ranges(side_and_coords const &sc1, side_and_coords const &sc2);
+    fRGBAcolor       *pTexel(side const &s, icoords const &ic);
+    RectIterRanges    get_iter_ranges(side_and_coords const &sc1, side_and_coords const &sc2);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CUBE_MAP_MEM_TEXTURE_H
+#endif  // VEGA_STRIKE_ENGINE_CUBE_MAP_MEM_TEXTURE_H

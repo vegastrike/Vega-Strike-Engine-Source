@@ -4,8 +4,8 @@
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2026 The Vega Strike Contributors:
  * Project creator: Daniel Horn
- * Original development team: As listed in the AUTHORS file. Specifically: surfdargent, hellcatv, ace123, klaussfreire, dan_w, pyramid3d
- * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ * Original development team: As listed in the AUTHORS file. Specifically: surfdargent, hellcatv, ace123, klaussfreire,
+ * dan_w, pyramid3d Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -31,31 +31,34 @@
 //====================================
 
 #include <algorithm>
-#include "gfx_generic/mesh.h"
-#include "gfx/aux_texture.h"
-#include "gfx/aux_logo.h"
-#include "root_generic/lin_time.h"
-#include "root_generic/configxml.h"
-#include "root_generic/vs_globals.h"
+
 #include "cmd/nebula.h"
-#include "gfx/camera.h"
 #include "gfx/animation.h"
+#include "gfx/aux_logo.h"
+#include "gfx/aux_texture.h"
+#include "gfx/camera.h"
 #include "gfx/technique.h"
+#include "gfx_generic/mesh.h"
 #include "gfx_generic/mesh_xml.h"
 #include "gldrv/gl_globals.h"
 #include "gldrv/gl_light.h"
-#if defined (CG_SUPPORT)
-#include "src/cg_global.h"
+#include "root_generic/configxml.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/vs_globals.h"
+#if defined(CG_SUPPORT)
+#    include "src/cg_global.h"
 #endif
-#include "src/universe_util.h"
-#include "src/universe.h"
 #include <utility>
+
+#include "src/universe.h"
+#include "src/universe_util.h"
 #ifdef _WIN32
 // What do we need from unistd? - let's find out :)
 #else
-#include <unistd.h>
+#    include <unistd.h>
 #endif
 #include <signal.h>
+
 #include <sys/types.h>
 
 extern vector<Logo *> undrawn_logos;
@@ -63,10 +66,10 @@ extern vector<Logo *> undrawn_logos;
 #include <exception>
 
 #ifdef _MSC_VER
-//Undefine those nasty min/max macros
-//MS must hate the STL
-#undef min
-#undef max
+// Undefine those nasty min/max macros
+// MS must hate the STL
+#    undef min
+#    undef max
 #endif
 
 #include "src/vs_logging.h"
@@ -76,17 +79,13 @@ private:
     std::string _message;
 
 public:
-    Exception() {
-    }
+    Exception() {}
 
-    Exception(const Exception &other) : _message(other._message) {
-    }
+    Exception(const Exception &other) : _message(other._message) {}
 
-    explicit Exception(const std::string &message) : _message(message) {
-    }
+    explicit Exception(const std::string &message) : _message(message) {}
 
-    virtual ~Exception() {
-    }
+    virtual ~Exception() {}
 
     virtual const char *what() const noexcept {
         return _message.c_str();
@@ -95,23 +94,21 @@ public:
 
 class MissingTexture : public Exception {
 public:
-    explicit MissingTexture(const string &msg) : Exception(msg) {
-    }
+    explicit MissingTexture(const string &msg) : Exception(msg) {}
 
-    MissingTexture() {
-    }
+    MissingTexture() {}
 };
 
 class OrigMeshContainer {
 public:
     float d{};
     Mesh *orig;
-    int program{};
+    int   program{};
 
     unsigned int transparent{1};
     unsigned int zsort{1};
     unsigned int passno{14};
-    int sequence{16};
+    int          sequence{16};
 
     OrigMeshContainer() {
         orig = nullptr;
@@ -121,54 +118,60 @@ public:
         assert(passno < orig->technique->getNumPasses());
 
         const Pass &pass = orig->technique->getPass(passno);
-        this->orig = orig;
-        this->d = -d;
-        this->passno = passno;
-        this->sequence = pass.sequence;
-        this->program = pass.getCompiledProgram();
+        this->orig       = orig;
+        this->d          = -d;
+        this->passno     = passno;
+        this->sequence   = pass.sequence;
+        this->program    = pass.getCompiledProgram();
         this->transparent =
-                ((pass.blendMode == Pass::Decal)
-                        || ((pass.blendMode == Pass::Default)
-                                && (orig->blendDst == ZERO)
-                                && (orig->blendSrc != DESTCOLOR))
-                ) ? 0 : 1;
-        this->zsort = (transparent
-                && ((pass.blendMode != Pass::Default) || (orig->blendDst != ONE) || (orig->blendSrc != ONE))) ? 1 : 0;
+                ((pass.blendMode == Pass::Decal) ||
+                 ((pass.blendMode == Pass::Default) && (orig->blendDst == ZERO) && (orig->blendSrc != DESTCOLOR)))
+                        ? 0
+                        : 1;
+        this->zsort = (transparent &&
+                       ((pass.blendMode != Pass::Default) || (orig->blendDst != ONE) || (orig->blendSrc != ONE)))
+                              ? 1
+                              : 0;
 
         assert(this->passno == passno);
         assert(this->sequence == pass.sequence);
     }
 
-    #define SLESSX(a, b)                            \
-    do {if ( !( (a) == (b) ) ) return ( (a) < (b) );  \
-    }                                                 \
-    while (0)
+#define SLESSX(a, b)            \
+    do {                        \
+        if (!((a) == (b)))      \
+            return ((a) < (b)); \
+    } while (0)
 
-    #define PLESSX(a, b)                                            \
-    do {SLESSX( bool(a), bool(b) ); if ( bool(a) ) SLESSX( *a, *b );  \
-    }                                                                 \
-    while (0)
+#define PLESSX(a, b)              \
+    do {                          \
+        SLESSX(bool(a), bool(b)); \
+        if (bool(a))              \
+            SLESSX(*a, *b);       \
+    } while (0)
 
-    #define SLESS(f) SLESSX( f, b.f )
+#define SLESS(f) SLESSX(f, b.f)
 
-    #define PLESS(f) PLESSX( f, b.f )
+#define PLESS(f) PLESSX(f, b.f)
 
     bool operator<(const OrigMeshContainer &b) const {
-        SLESS(sequence); //explicit sequence takes precedence
-        SLESS(transparent); //then render opaques first
-        SLESS(zsort);   //And the ones that need z-sort last
-        if (zsort)
+        SLESS(sequence);     // explicit sequence takes precedence
+        SLESS(transparent);  // then render opaques first
+        SLESS(zsort);        // And the ones that need z-sort last
+        if (zsort) {
             SLESS(d);
-        SLESS(passno);  //Make sure lesser passes render first
-        SLESS(program); //group same program together (with fixed-fn at the beginning)
-        //Fixed-fn passes have program == 0
+        }
+        SLESS(passno);   // Make sure lesser passes render first
+        SLESS(program);  // group same program together (with fixed-fn at the beginning)
+        // Fixed-fn passes have program == 0
         if (program == 0) {
-            //Fixed-fn passes sort by texture
+            // Fixed-fn passes sort by texture
             SLESS(orig->Decal.size());
-            if (!orig->Decal.empty())
+            if (!orig->Decal.empty()) {
                 PLESS(orig->Decal[0]);
+            }
         } else {
-            //Shader passes sort by effective texture
+            // Shader passes sort by effective texture
             const Pass &apass = orig->technique->getPass(passno);
             const Pass &bpass = b.orig->technique->getPass(b.passno);
 
@@ -178,35 +181,35 @@ public:
                 const Pass::TextureUnit btu = bpass.getTextureUnit(i);
                 if (atu.sourceType == btu.sourceType) {
                     if (atu.sourceType == Pass::TextureUnit::File) {
-                        //Compare preloaded textures
+                        // Compare preloaded textures
                         SLESSX(*atu.texture, *btu.texture);
                     } else if (atu.sourceType == Pass::TextureUnit::Decal) {
-                        //Compare decal textures
-                        const Texture *ta =
-                                (atu.sourceIndex < static_cast<int>(orig->Decal.size())) ? orig->Decal[atu.sourceIndex]
-                                        : NULL;
-                        const Texture *tb = (btu.sourceIndex < static_cast<int>(b.orig->Decal.size())) ? b.orig
-                                ->Decal[btu.sourceIndex]
-                                : NULL;
+                        // Compare decal textures
+                        const Texture *ta = (atu.sourceIndex < static_cast<int>(orig->Decal.size()))
+                                                    ? orig->Decal[atu.sourceIndex]
+                                                    : NULL;
+                        const Texture *tb = (btu.sourceIndex < static_cast<int>(b.orig->Decal.size()))
+                                                    ? b.orig->Decal[btu.sourceIndex]
+                                                    : NULL;
                         PLESSX(ta, tb);
                     }
                 } else {
-                    //Render file-type ones first
+                    // Render file-type ones first
                     return atu.sourceType == Pass::TextureUnit::File;
                 }
             }
         }
-        //They're equivalent!
+        // They're equivalent!
         return false;
     }
 
-    #undef PLESS
-    #undef SLESS
-    #undef PLESSX
-    #undef SLESSX
+#undef PLESS
+#undef SLESS
+#undef PLESSX
+#undef SLESSX
 
     bool operator==(const OrigMeshContainer &b) const {
-        //TODO: Specialize operator==
+        // TODO: Specialize operator==
         return !(*this < b) && !(b < *this);
     }
 };
@@ -218,11 +221,10 @@ struct OrigMeshPainterSort {
 };
 
 struct MeshDrawContextPainterSort {
-    Vector ctr;
+    Vector                              ctr;
     const std::vector<MeshDrawContext> &queue;
 
-    MeshDrawContextPainterSort(const Vector &center, const std::vector<MeshDrawContext> &q) : ctr(center), queue(q) {
-    }
+    MeshDrawContextPainterSort(const Vector &center, const std::vector<MeshDrawContext> &q) : ctr(center), queue(q) {}
 
     bool operator()(int a, int b) const {
         return (queue[a].mat.p - ctr).MagnitudeSquared() > (queue[b].mat.p - ctr).MagnitudeSquared();
@@ -231,30 +233,28 @@ struct MeshDrawContextPainterSort {
 
 typedef std::vector<OrigMeshContainer> OrigMeshVector;
 
-#define NUM_PASSES (4)
-#define BASE_PASS (0)
+#define NUM_PASSES   (4)
+#define BASE_PASS    (0)
 #define ENVSPEC_PASS (1)
-#define DAMAGE_PASS (2)
-#define GLOW_PASS (3)
-#define BASE_TEX (0)
-#define ENVSPEC_TEX (1)
-#define DAMAGE_TEX (2)
-#define GLOW_TEX (3)
-#define NORMAL_TEX (4)
-#define NUM_TEX (5)
+#define DAMAGE_PASS  (2)
+#define GLOW_PASS    (3)
+#define BASE_TEX     (0)
+#define ENVSPEC_TEX  (1)
+#define DAMAGE_TEX   (2)
+#define GLOW_TEX     (3)
+#define NORMAL_TEX   (4)
+#define NUM_TEX      (5)
 
 const int UNDRAWN_MESHES_SIZE = NUM_MESH_SEQUENCE;
 
 OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE];
 
 Texture *Mesh::TempGetTexture(MeshXML *xml, std::string filename, std::string factionname, GFXBOOL detail) const {
-    static FILTER fil =
-            configuration().graphics.detail_texture_trilinear ? TRILINEAR
-                    : MIPMAP;
-    const bool factionalize_textures = configuration().graphics.faction_dependent_textures;
-    string faction_prefix = (factionalize_textures ? (factionname + "_") : string());
-    Texture *ret = NULL;
-    string facplus = faction_prefix + filename;
+    static FILTER fil                   = configuration().graphics.detail_texture_trilinear ? TRILINEAR : MIPMAP;
+    const bool    factionalize_textures = configuration().graphics.faction_dependent_textures;
+    string        faction_prefix        = (factionalize_textures ? (factionname + "_") : string());
+    Texture      *ret                   = NULL;
+    string        facplus               = faction_prefix + filename;
     if (filename.find(".ani") != string::npos) {
         ret = new AnimatedTexture(facplus.c_str(), 1, fil, detail);
         if (!ret->LoadSuccess()) {
@@ -270,10 +270,10 @@ Texture *Mesh::TempGetTexture(MeshXML *xml, std::string filename, std::string fa
             return ret;
         }
     }
-    ret = new Texture(facplus.c_str(), 1, fil, TEXTURE2D, TEXTURE_2D, GFXFALSE, 65536, detail);
+    ret = new Texture(facplus.c_str(), 1, fil, TEXTURE2D, TEXTURE_2D, GFXFALSE, 65'536, detail);
     if (!ret->LoadSuccess()) {
         delete ret;
-        ret = new Texture(filename.c_str(), 1, fil, TEXTURE2D, TEXTURE_2D, GFXFALSE, 65536, detail);
+        ret = new Texture(filename.c_str(), 1, fil, TEXTURE2D, TEXTURE_2D, GFXFALSE, 65'536, detail);
     }
     return ret;
 }
@@ -315,13 +315,13 @@ void Mesh::setTextureCumulativeTime(double d) {
 
 Texture *Mesh::TempGetTexture(MeshXML *xml, int index, std::string factionname) const {
     const bool factionalize_textures = configuration().graphics.faction_dependent_textures;
-    string faction_prefix = (factionalize_textures ? (factionname + "_") : string());
-    Texture *tex = NULL;
-    assert(index < (int) xml->decals.size());
+    string     faction_prefix        = (factionalize_textures ? (factionname + "_") : string());
+    Texture   *tex                   = NULL;
+    assert(index < (int)xml->decals.size());
     MeshXML::ZeTexture *zt = &(xml->decals[index]);
     if (zt->animated_name.length()) {
         string tempani = faction_prefix + zt->animated_name;
-        tex = new AnimatedTexture(tempani.c_str(), 0, BILINEAR);
+        tex            = new AnimatedTexture(tempani.c_str(), 0, BILINEAR);
         if (!tex->LoadSuccess()) {
             delete tex;
             tex = new AnimatedTexture(zt->animated_name.c_str(), 0, BILINEAR);
@@ -331,72 +331,41 @@ Texture *Mesh::TempGetTexture(MeshXML *xml, int index, std::string factionname) 
     } else {
         if (zt->alpha_name.length() == 0) {
             string temptex = faction_prefix + zt->decal_name;
-            tex =
-                    new Texture(
-                            temptex.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D,
-                            (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
+            tex            = new Texture(temptex.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D,
+                              (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
             if (!tex->LoadSuccess()) {
                 delete tex;
-                tex =
-                        new Texture(
-                                zt->decal_name.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D,
-                                (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
+                tex = new Texture(zt->decal_name.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D,
+                                  (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
             }
         } else {
             string temptex = faction_prefix + zt->decal_name;
             string tempalp = faction_prefix + zt->alpha_name;
-            tex =
-                    new Texture(temptex.c_str(), tempalp.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0,
-                            (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
+            tex            = new Texture(temptex.c_str(), tempalp.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0,
+                              (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
             if (!tex->LoadSuccess()) {
                 delete tex;
-                tex =
-                        new Texture(zt->decal_name.c_str(),
-                                zt->alpha_name.c_str(),
-                                0,
-                                MIPMAP,
-                                TEXTURE2D,
-                                TEXTURE_2D,
-                                1,
-                                0,
-                                (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
+                tex = new Texture(zt->decal_name.c_str(), zt->alpha_name.c_str(), 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1,
+                                  0, (g_game.use_ship_textures || xml->force_texture) ? GFXTRUE : GFXFALSE);
             }
         }
     }
     return tex;
 }
 
-Texture *createTexture(const char *filename,
-        int stage = 0,
-        enum FILTER f1 = MIPMAP,
-        enum TEXTURE_TARGET t0 = TEXTURE2D,
-        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
-        unsigned char c = GFXFALSE,
-        int i = 65536) {
+Texture *createTexture(const char *filename, int stage = 0, enum FILTER f1 = MIPMAP, enum TEXTURE_TARGET t0 = TEXTURE2D,
+                       enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D, unsigned char c = GFXFALSE, int i = 65'536) {
     return new Texture(filename, stage, f1, t0, t, c, i);
 }
 
-Logo *createLogo(int numberlogos,
-        Vector *center,
-        Vector *normal,
-        float *sizes,
-        float *rotations,
-        float offset,
-        Texture *Dec,
-        Vector *Ref) {
+Logo *createLogo(int numberlogos, Vector *center, Vector *normal, float *sizes, float *rotations, float offset,
+                 Texture *Dec, Vector *Ref) {
     return new Logo(numberlogos, center, normal, sizes, rotations, offset, Dec, Ref);
 }
 
-Texture *createTexture(char const *ccc,
-        char const *cc,
-        int k = 0,
-        enum FILTER f1 = MIPMAP,
-        enum TEXTURE_TARGET t0 = TEXTURE2D,
-        enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D,
-        float f = 1,
-        int j = 0,
-        unsigned char c = GFXFALSE,
-        int i = 65536) {
+Texture *createTexture(char const *ccc, char const *cc, int k = 0, enum FILTER f1 = MIPMAP,
+                       enum TEXTURE_TARGET t0 = TEXTURE2D, enum TEXTURE_IMAGE_TARGET t = TEXTURE_2D, float f = 1,
+                       int j = 0, unsigned char c = GFXFALSE, int i = 65'536) {
     return new Texture(ccc, cc, k, f1, t0, t, f, j, c, i);
 }
 
@@ -408,9 +377,10 @@ extern Hashtable<std::string, std::vector<Mesh *>, MESH_HASTHABLE_SIZE> bfxmHash
 
 Mesh::~Mesh() {
     if (!orig || orig == this) {
-        for (auto & undrawn_mesh : undrawn_meshes) {
-            const auto first_to_remove1 = std::stable_partition(undrawn_mesh.begin(), undrawn_mesh.end(),
-                [this](const OrigMeshContainer & pi) { return pi.orig != this; });
+        for (auto &undrawn_mesh : undrawn_meshes) {
+            const auto first_to_remove1 =
+                    std::stable_partition(undrawn_mesh.begin(), undrawn_mesh.end(),
+                                          [this](const OrigMeshContainer &pi) { return pi.orig != this; });
             const intmax_t num_meshes_removed = undrawn_mesh.end() - first_to_remove1;
             undrawn_mesh.erase(first_to_remove1, undrawn_mesh.end());
             if (num_meshes_removed > 0) {
@@ -421,7 +391,7 @@ Mesh::~Mesh() {
             delete vlist;
             vlist = nullptr;
         }
-        for (auto & texture : Decal) {
+        for (auto &texture : Decal) {
             if (texture != nullptr) {
                 delete texture;
                 texture = nullptr;
@@ -438,11 +408,11 @@ Mesh::~Mesh() {
         if (meshHashTable.Get(hash_name) == this) {
             meshHashTable.Delete(hash_name);
         }
-        vector<Mesh *> *hashers = bfxmHashTable.Get(hash_name);
+        vector<Mesh *>          *hashers = bfxmHashTable.Get(hash_name);
         vector<Mesh *>::iterator finder;
         if (hashers && !hashers->empty()) {
-            const auto first_to_remove = std::stable_partition(hashers->begin(), hashers->end(),
-                [this](const Mesh * pi) { return pi != this; });
+            const auto     first_to_remove    = std::stable_partition(hashers->begin(), hashers->end(),
+                                                                      [this](const Mesh *pi) { return pi != this; });
             const intmax_t num_meshes_removed = hashers->end() - first_to_remove;
             hashers->erase(first_to_remove, hashers->end());
             if (num_meshes_removed > 0) {
@@ -469,26 +439,21 @@ Mesh::~Mesh() {
     }
 }
 
-void Mesh::Draw(float lod,
-                const Matrix &m,
-                float toofar,
-                Cloak cloak,
-                float nebdist,
-                unsigned char hulldamage,
-                bool renormalize,
-                const MeshFX *mfx) //short fix
+void Mesh::Draw(float lod, const Matrix &m, float toofar, Cloak cloak, float nebdist, unsigned char hulldamage,
+                bool          renormalize,
+                const MeshFX *mfx)  // short fix
 {
     Mesh *origmesh = getLOD(lod);
     if (origmesh->rSize() > 0) {
-        //Vector pos (local_pos.Transform(m));
+        // Vector pos (local_pos.Transform(m));
         MeshDrawContext c(m);
         if (mfx) {
-            c.xtraFX = *mfx;
+            c.xtraFX    = *mfx;
             c.useXtraFX = true;
         }
         UpdateFX(GetElapsedTime());
         c.SpecialFX = &LocalFX;
-        c.damage = hulldamage;
+        c.damage    = hulldamage;
 
         c.mesh_seq = ((toofar + rSize()) > configuration().graphics.zfar_flt) ? NUM_ZBUF_SEQ : draw_sequence;
 
@@ -504,15 +469,15 @@ void Mesh::Draw(float lod,
         // This should have gradually made the ship cloak go transparent
         // for cloak.Glass but it does the same thing as the ordinary cloak.
         // TODO: revisit this.
-        if(cloak.Active()) {
+        if (cloak.Active()) {
             c.cloaked |= MeshDrawContext::CLOAK;
             c.cloaked |= MeshDrawContext::GLASSCLOAK;
 
             if (cloak.Glass()) {
                 c.CloakFX.a = cloak.Current();
-                c.mesh_seq = 2; //MESH_SPECIAL_FX_ONLY;
+                c.mesh_seq  = 2;  // MESH_SPECIAL_FX_ONLY;
             } else {
-                c.mesh_seq = 2;
+                c.mesh_seq  = 2;
                 c.CloakFX.r = cloak.Visibility();
                 c.CloakFX.g = cloak.Visibility();
                 c.CloakFX.b = cloak.Visibility();
@@ -524,17 +489,16 @@ void Mesh::Draw(float lod,
             c.cloaked |= MeshDrawContext::NEARINVIS;
         }
 
-        //c.mat[12]=pos.i;
-        //c.mat[13]=pos.j;
-        //c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
+        // c.mat[12]=pos.i;
+        // c.mat[13]=pos.j;
+        // c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
 
         origmesh->draw_queue[static_cast<size_t>(c.mesh_seq)].push_back(c);
         if (!(origmesh->will_be_drawn & (1 << c.mesh_seq))) {
             origmesh->will_be_drawn |= (1 << c.mesh_seq);
             for (int passno = 0, npasses = origmesh->technique->getNumPasses(); passno < npasses; ++passno) {
-                undrawn_meshes[static_cast<size_t>(c.mesh_seq)].push_back(OrigMeshContainer(origmesh,
-                        toofar - rSize(),
-                        passno));
+                undrawn_meshes[static_cast<size_t>(c.mesh_seq)].push_back(
+                        OrigMeshContainer(origmesh, toofar - rSize(), passno));
             }
         }
         will_be_drawn |= (1 << c.mesh_seq);
@@ -542,9 +506,9 @@ void Mesh::Draw(float lod,
 }
 
 void Mesh::DrawNow(float lod, bool centered, const Matrix &m, int cloak, float nebdist) {
-    //short fix
+    // short fix
     Mesh *o = getLOD(lod);
-    //fixme: cloaking not delt with.... not needed for backgroudn anyway
+    // fixme: cloaking not delt with.... not needed for backgroudn anyway
     if (nebdist < 0) {
         Nebula *t = _Universe->AccessCamera()->GetNebula();
         if (t) {
@@ -554,11 +518,11 @@ void Mesh::DrawNow(float lod, bool centered, const Matrix &m, int cloak, float n
         GFXFogMode(FOG_OFF);
     }
     if (centered) {
-        //Matrix m1 (m);
-        //Vector pos(_Universe->AccessCamera()->GetPosition().Transform(m1));
-        //m1[12]=pos.i;
-        //m1[13]=pos.j;
-        //m1[14]=pos.k;
+        // Matrix m1 (m);
+        // Vector pos(_Universe->AccessCamera()->GetPosition().Transform(m1));
+        // m1[12]=pos.i;
+        // m1[13]=pos.j;
+        // m1[14]=pos.k;
         GFXCenterCamera(true);
         GFXLoadMatrixModel(m);
     } else {
@@ -568,9 +532,9 @@ void Mesh::DrawNow(float lod, bool centered, const Matrix &m, int cloak, float n
         }
         GFXLoadMatrixModel(m);
     }
-    //Making it static avoids frequent reallocations - although may be troublesome for thread safety
-    //but... WTH... nothing is thread safe in VS.
-    //Also: Be careful with reentrancy... right now, this section is not reentrant.
+    // Making it static avoids frequent reallocations - although may be troublesome for thread safety
+    // but... WTH... nothing is thread safe in VS.
+    // Also: Be careful with reentrancy... right now, this section is not reentrant.
     static vector<int> specialfxlight;
 
     unsigned int i;
@@ -587,8 +551,8 @@ void Mesh::DrawNow(float lod, bool centered, const Matrix &m, int cloak, float n
     if (!o->Decal.empty() && o->Decal[0]) {
         o->Decal[0]->MakeActive();
     }
-    GFXTextureEnv(0, GFXMODULATETEXTURE);     //Default diffuse mode
-    GFXTextureEnv(1, GFXADDTEXTURE);     //Default envmap mode
+    GFXTextureEnv(0, GFXMODULATETEXTURE);  // Default diffuse mode
+    GFXTextureEnv(1, GFXADDTEXTURE);       // Default envmap mode
     GFXToggleTexture(bool(!o->Decal.empty() && o->Decal[0]), 0);
     o->vlist->DrawOnce();
     if (centered) {
@@ -606,7 +570,7 @@ void Mesh::ProcessZFarMeshes(bool nocamerasetup) {
     int a = NUM_ZBUF_SEQ;
 
     if (!undrawn_meshes[a].empty()) {
-        //clear Z buffer
+        // clear Z buffer
         GFXClear(GFXFALSE, GFXTRUE, GFXFALSE);
 
         const float far_margin = configuration().graphics.mesh_far_percent_flt;
@@ -618,7 +582,7 @@ void Mesh::ProcessZFarMeshes(bool nocamerasetup) {
         for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
             Mesh *m = it->orig;
             m->ProcessDrawQueue(it->passno, a, it->zsort, _Universe->AccessCamera()->GetPosition());
-            m->will_be_drawn &= (~(1 << a));           //not accurate any more
+            m->will_be_drawn &= (~(1 << a));  // not accurate any more
         }
         for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
             Mesh *m = it->orig;
@@ -638,11 +602,9 @@ const GFXMaterial &Mesh::GetMaterial() const {
     return GFXGetMaterial(myMatNum);
 }
 
-template<typename T>
+template <typename T>
 inline bool rangesOverlap(T min1, T max1, T min2, T max2) {
-    return !(((min1 < min2) == (max1 < min2))
-            && ((min1 < max2) == (max1 < max2))
-            && ((min1 < min2) == (min1 < max2)));
+    return !(((min1 < min2) == (max1 < min2)) && ((min1 < max2) == (max1 < max2)) && ((min1 < min2) == (min1 < max2)));
 }
 
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects, bool nocamerasetup) {
@@ -653,7 +615,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects, bool nocamerasetup) {
             continue;
         }
         if (!zcleared) {
-            //clear Z buffer
+            // clear Z buffer
             GFXClear(GFXFALSE, GFXTRUE, GFXFALSE);
             zcleared = true;
         }
@@ -666,14 +628,15 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects, bool nocamerasetup) {
             // "} else {" until fixed.
             // The bug was introduced in (svn r13722)
             //} else if (!nocamerasetup) {
-        } else { // less correct (svn r13721) but working on nav computer
-            _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, configuration().graphics.znear_flt, configuration().graphics.zfar_flt);
+        } else {  // less correct (svn r13721) but working on nav computer
+            _Universe->AccessCamera()->UpdateGFXFrustum(GFXTRUE, configuration().graphics.znear_flt,
+                                                        configuration().graphics.zfar_flt);
         }
         std::sort(undrawn_meshes[a].begin(), undrawn_meshes[a].end());
         for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
             Mesh *m = it->orig;
             m->ProcessDrawQueue(it->passno, a, it->zsort, _Universe->AccessCamera()->GetPosition());
-            m->will_be_drawn &= (~(1 << a));               //not accurate any more
+            m->will_be_drawn &= (~(1 << a));  // not accurate any more
         }
         for (OrigMeshVector::iterator it = undrawn_meshes[a].begin(); it < undrawn_meshes[a].end(); ++it) {
             Mesh *m = it->orig;
@@ -722,11 +685,8 @@ void Mesh::SelectCullFace(int whichdrawqueue) {
     }
 }
 
-void SetupCloakState(char cloaked,
-        const GFXColor &CloakFX,
-        vector<int> &specialfxlight,
-        unsigned char hulldamage,
-        unsigned int matnum) {
+void SetupCloakState(char cloaked, const GFXColor &CloakFX, vector<int> &specialfxlight, unsigned char hulldamage,
+                     unsigned int matnum) {
     if (cloaked & MeshDrawContext::CLOAK) {
         GFXPushBlendMode();
         GFXDisable(CULLFACE);
@@ -739,23 +699,17 @@ void SetupCloakState(char cloaked,
             GFXDisable(TEXTURE1);
             int ligh;
             GFXCreateLight(ligh,
-                    GFXLight(true,
-                            GFXColor(0, 0, 0,
-                                    1), GFXColor(0, 0, 0, 1), GFXColor(0, 0, 0, 1), CloakFX, GFXColor(1,
-                                    0,
-                                    0)),
-                    true);
+                           GFXLight(true, GFXColor(0, 0, 0, 1), GFXColor(0, 0, 0, 1), GFXColor(0, 0, 0, 1), CloakFX,
+                                    GFXColor(1, 0, 0)),
+                           true);
             specialfxlight.push_back(ligh);
             GFXBlendMode(ONE, ONE);
-            GFXSelectMaterialHighlights(matnum,
-                    GFXColor(1, 1, 1, 1),
-                    GFXColor(1, 1, 1, 1),
-                    GFXColor(1, 1, 1, 1),
-                    CloakFX);
+            GFXSelectMaterialHighlights(matnum, GFXColor(1, 1, 1, 1), GFXColor(1, 1, 1, 1), GFXColor(1, 1, 1, 1),
+                                        CloakFX);
         } else {
             GFXEnable(TEXTURE1);
             if (cloaked & MeshDrawContext::NEARINVIS) {
-                //NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
+                // NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
             }
             GFXBlendMode(SRCALPHA, INVSRCALPHA);
             GFXColorMaterial(AMBIENT | DIFFUSE);
@@ -766,7 +720,7 @@ void SetupCloakState(char cloaked,
             }
         }
     } else if (hulldamage) {
-        //ok now we go in and do the dirtying
+        // ok now we go in and do the dirtying
         GFXColorMaterial(AMBIENT | DIFFUSE);
         GFXColor4f(1, 1, 1, hulldamage / 255.);
     }
@@ -779,8 +733,8 @@ static void RestoreCloakState(char cloaked, bool envMap, unsigned char damage) {
             GFXEnable(TEXTURE1);
         }
         GFXPopBlendMode();
-#if defined (CG_SUPPORT)
-        cgGLDisableProfile( cloak_cg->vertexProfile );
+#if defined(CG_SUPPORT)
+        cgGLDisableProfile(cloak_cg->vertexProfile);
 #endif
     }
     if (damage) {
@@ -799,20 +753,12 @@ static void SetupFogState(char cloaked) {
     }
 }
 
-bool SetupSpecMapFirstPass(Texture **decal,
-        size_t decalSize,
-        unsigned int mat,
-        bool envMap,
-        float polygon_offset,
-        Texture *detailTexture,
-        const vector<Vector> &detailPlanes,
-        bool &skip_glowpass,
-        bool nomultienv) {
+bool SetupSpecMapFirstPass(Texture **decal, size_t decalSize, unsigned int mat, bool envMap, float polygon_offset,
+                           Texture *detailTexture, const vector<Vector> &detailPlanes, bool &skip_glowpass,
+                           bool nomultienv) {
     GFXPushBlendMode();
 
-    static bool separatespec =
-            configuration().graphics.separate_specular_color ? GFXTRUE
-                    : GFXFALSE;
+    static bool separatespec = configuration().graphics.separate_specular_color ? GFXTRUE : GFXFALSE;
     GFXSetSeparateSpecularColor(separatespec);
 
     const bool multitex_glowpass = configuration().graphics.multi_texture_glow_maps;
@@ -822,24 +768,18 @@ bool SetupSpecMapFirstPass(Texture **decal,
         GFXPolygonOffset(a, b - polygon_offset);
     }
     if (nomultienv) {
-        GFXSelectMaterialHighlights(mat,
-                GFXColor(1, 1, 1, 1),
-                GFXColor(1, 1, 1, 1),
-                GFXColor(0, 0, 0, 0),
-                GFXColor(0, 0, 0, 0));
+        GFXSelectMaterialHighlights(mat, GFXColor(1, 1, 1, 1), GFXColor(1, 1, 1, 1), GFXColor(0, 0, 0, 0),
+                                    GFXColor(0, 0, 0, 0));
         GFXBlendMode(ONE, ONE);
         GFXDepthFunc(LEQUAL);
     }
-    bool retval = false;
-    skip_glowpass = false;
+    bool retval         = false;
+    skip_glowpass       = false;
     size_t detailoffset = 2;
     if (!nomultienv && (decalSize > 1) && (decal[1])) {
         detailoffset = 1;
-        GFXSelectMaterialHighlights(mat,
-                GFXColor(1, 1, 1, 1),
-                GFXColor(1, 1, 1, 1),
-                GFXColor(0, 0, 0, 0),
-                GFXColor(0, 0, 0, 0));
+        GFXSelectMaterialHighlights(mat, GFXColor(1, 1, 1, 1), GFXColor(1, 1, 1, 1), GFXColor(0, 0, 0, 0),
+                                    GFXColor(0, 0, 0, 0));
         retval = true;
         if (envMap && detailTexture == NULL) {
             if ((decalSize > GLOW_PASS) && decal[GLOW_PASS] && gl_options.Multitexture && multitex_glowpass) {
@@ -866,7 +806,7 @@ bool SetupSpecMapFirstPass(Texture **decal,
     }
     if (detailTexture && (gl_options.Multitexture > detailoffset)) {
         for (unsigned int i = 1; i < detailPlanes.size(); i += 2) {
-            int stage = (i / 2) + detailoffset;
+            int         stage     = (i / 2) + detailoffset;
             const float params[4] = {detailPlanes[i - 1].i, detailPlanes[i - 1].j, detailPlanes[i - 1].k, 0};
             const float paramt[4] = {detailPlanes[i].i, detailPlanes[i].j, detailPlanes[i].k, 0};
             GFXTextureCoordGenMode(stage, OBJECT_LINEAR_GEN, params, paramt);
@@ -878,10 +818,8 @@ bool SetupSpecMapFirstPass(Texture **decal,
     return retval;
 }
 
-void RestoreFirstPassState(Texture *detailTexture,
-        const vector<Vector> &detailPlanes,
-        bool skipped_glowpass,
-        bool nomultienv) {
+void RestoreFirstPassState(Texture *detailTexture, const vector<Vector> &detailPlanes, bool skipped_glowpass,
+                           bool nomultienv) {
     GFXPopBlendMode();
     if (!nomultienv) {
         GFXDepthFunc(LEQUAL);
@@ -893,7 +831,7 @@ void RestoreFirstPassState(Texture *detailTexture,
         unsigned int sizeplus1 = detailPlanes.size() / 2 + 1;
         for (unsigned int i = 1; i < sizeplus1; i++) {
             GFXToggleTexture(false, i + 1);
-        }              //turn off high detial tex
+        }  // turn off high detial tex
 
         GFXTextureCoordGenMode(1, NO_GEN, NULL, NULL);
     }
@@ -902,13 +840,11 @@ void RestoreFirstPassState(Texture *detailTexture,
 void SetupEnvmapPass(Texture *decal, unsigned int mat, int passno) {
     assert(passno >= 0 && passno <= 2);
 
-    //This is only used when there's no multitexturing... so don't use multitexturing
+    // This is only used when there's no multitexturing... so don't use multitexturing
     GFXPushBlendMode();
-    GFXSelectMaterialHighlights(mat,
-            GFXColor(0, 0, 0, 0),
-            GFXColor(0, 0, 0, 0),
-            (passno == 2) ? GFXColor(1, 1, 1, 1) : GFXColor(0, 0, 0, 0),
-            (passno == 2) ? GFXColor(0, 0, 0, 0) : GFXColor(1, 1, 1, 1));
+    GFXSelectMaterialHighlights(mat, GFXColor(0, 0, 0, 0), GFXColor(0, 0, 0, 0),
+                                (passno == 2) ? GFXColor(1, 1, 1, 1) : GFXColor(0, 0, 0, 0),
+                                (passno == 2) ? GFXColor(0, 0, 0, 0) : GFXColor(1, 1, 1, 1));
     if (passno == 2) {
         GFXSetSeparateSpecularColor(GFXFALSE);
     }
@@ -933,9 +869,7 @@ void SetupEnvmapPass(Texture *decal, unsigned int mat, int passno) {
 }
 
 void RestoreEnvmapState() {
-    static bool separatespec =
-            configuration().graphics.separate_specular_color ? GFXTRUE
-                    : GFXFALSE;
+    static bool separatespec = configuration().graphics.separate_specular_color ? GFXTRUE : GFXFALSE;
     GFXSetSeparateSpecularColor(separatespec);
     GFXEnable(LIGHTING);
     GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
@@ -945,28 +879,22 @@ void RestoreEnvmapState() {
     GFXToggleTexture(false, 0);
 }
 
-void SetupSpecMapSecondPass(Texture *decal,
-        unsigned int mat,
-        BLENDFUNC blendsrc,
-        bool envMap,
-        const GFXColor &cloakFX,
-        float polygon_offset) {
+void SetupSpecMapSecondPass(Texture *decal, unsigned int mat, BLENDFUNC blendsrc, bool envMap, const GFXColor &cloakFX,
+                            float polygon_offset) {
     GFXPushBlendMode();
-    GFXSelectMaterialHighlights(mat,
-            GFXColor(0, 0, 0, 0),
-            GFXColor(0, 0, 0, 0),
-            cloakFX,
-            (envMap ? GFXColor(1, 1, 1, 1) : GFXColor(0, 0, 0, 0)));
+    GFXSelectMaterialHighlights(mat, GFXColor(0, 0, 0, 0), GFXColor(0, 0, 0, 0), cloakFX,
+                                (envMap ? GFXColor(1, 1, 1, 1) : GFXColor(0, 0, 0, 0)));
     GFXBlendMode(ONE, ONE);
     if (!envMap || gl_options.Multitexture) {
         if (decal) {
             decal->MakeActive();
         }
     }
-    //float a,b;
-    //GFXGetPolygonOffset(&a,&b);
-    //GFXPolygonOffset (a, b-1-polygon_offset); //Not needed, since we use GL_EQUAL and appeal to invariance
-    GFXDepthFunc(LEQUAL);     //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
+    // float a,b;
+    // GFXGetPolygonOffset(&a,&b);
+    // GFXPolygonOffset (a, b-1-polygon_offset); //Not needed, since we use GL_EQUAL and appeal to invariance
+    GFXDepthFunc(LEQUAL);  // By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer
+                           // artifacts at low res)
     GFXDisable(DEPTHWRITE);
     if (envMap) {
         int stage = gl_options.Multitexture ? 1 : 0;
@@ -988,25 +916,19 @@ void SetupSpecMapSecondPass(Texture *decal,
     }
 }
 
-void SetupGlowMapFourthPass(Texture *decal,
-        unsigned int mat,
-        BLENDFUNC blendsrc,
-        const GFXColor &cloakFX,
-        float polygon_offset) {
+void SetupGlowMapFourthPass(Texture *decal, unsigned int mat, BLENDFUNC blendsrc, const GFXColor &cloakFX,
+                            float polygon_offset) {
     GFXPushBlendMode();
-    GFXSelectMaterialHighlights(mat,
-            GFXColor(0, 0, 0, 0),
-            GFXColor(0, 0, 0, 0),
-            GFXColor(0, 0, 0, 0),
-            cloakFX);
+    GFXSelectMaterialHighlights(mat, GFXColor(0, 0, 0, 0), GFXColor(0, 0, 0, 0), GFXColor(0, 0, 0, 0), cloakFX);
     GFXBlendMode(ONE, ONE);
     if (decal) {
         decal->MakeActive();
     }
-    //float a,b;
-    //GFXGetPolygonOffset(&a,&b);
-    //GFXPolygonOffset (a, b-2-polygon_offset);
-    GFXDepthFunc(LEQUAL);     //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
+    // float a,b;
+    // GFXGetPolygonOffset(&a,&b);
+    // GFXPolygonOffset (a, b-2-polygon_offset);
+    GFXDepthFunc(LEQUAL);  // By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer
+                           // artifacts at low res)
     GFXDisable(DEPTHWRITE);
     GFXDisable(TEXTURE1);
 }
@@ -1017,16 +939,17 @@ void SetupDamageMapThirdPass(Texture *decal, unsigned int mat, float polygon_off
     if (decal) {
         decal->MakeActive();
     }
-    //float a,b;
-    //GFXGetPolygonOffset(&a,&b);
-    //GFXPolygonOffset (a, b-DAMAGE_PASS-polygon_offset);
-    GFXDepthFunc(LEQUAL);     //By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer artifacts at low res)
+    // float a,b;
+    // GFXGetPolygonOffset(&a,&b);
+    // GFXPolygonOffset (a, b-DAMAGE_PASS-polygon_offset);
+    GFXDepthFunc(LEQUAL);  // By Klauss - this, with invariance, assures correct rendering (and avoids z-buffer
+                           // artifacts at low res)
     GFXDisable(DEPTHWRITE);
     GFXDisable(TEXTURE1);
 }
 
 void RestoreGlowMapState(bool write_to_depthmap, float polygonoffset, float NOT_USED_BUT_BY_HELPER = 3) {
-    GFXDepthFunc(LEQUAL);     //By Klauss - restore original depth function
+    GFXDepthFunc(LEQUAL);  // By Klauss - restore original depth function
     const bool force_write_to_depthmap = configuration().graphics.force_glowmap_restore_write_to_depthmap;
     if (force_write_to_depthmap || write_to_depthmap) {
         GFXEnable(DEPTHWRITE);
@@ -1040,20 +963,20 @@ void RestoreDamageMapState(bool write_to_depthmap, float polygonoffset) {
 }
 
 void RestoreSpecMapState(bool envMap, bool detailMap, bool write_to_depthmap, float polygonoffset) {
-    //float a,b;
-    //GFXGetPolygonOffset(&a,&b);
-    //GFXPolygonOffset (a, b+1+polygonoffset); //Not needed anymore, since InitSpecMapSecondPass() no longer messes with polygon offsets
-    GFXDepthFunc(LEQUAL);     //By Klauss - restore original depth function
+    // float a,b;
+    // GFXGetPolygonOffset(&a,&b);
+    // GFXPolygonOffset (a, b+1+polygonoffset); //Not needed anymore, since InitSpecMapSecondPass() no longer messes
+    // with polygon offsets
+    GFXDepthFunc(LEQUAL);  // By Klauss - restore original depth function
     if (envMap) {
         if (gl_options.Multitexture) {
             GFXActiveTexture(1);
-            GFXTextureEnv(1, GFXADDTEXTURE);             //restore modulate
+            GFXTextureEnv(1, GFXADDTEXTURE);  // restore modulate
         } else {
             GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
         }
     } else {
-        const bool separatespec =
-                configuration().graphics.separate_specular_color ? GFXTRUE : GFXFALSE;
+        const bool separatespec = configuration().graphics.separate_specular_color ? GFXTRUE : GFXFALSE;
         GFXSetSeparateSpecularColor(separatespec);
     }
     if (detailMap) {
@@ -1067,28 +990,29 @@ void RestoreSpecMapState(bool envMap, bool detailMap, bool write_to_depthmap, fl
 }
 
 void Mesh::ProcessDrawQueue(int whichpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
-    //Process the pass for all queued instances
+    // Process the pass for all queued instances
     const Pass &pass = technique->getPass(whichpass);
     if (pass.type == Pass::ShaderPass) {
         ProcessShaderDrawQueue(whichpass, whichdrawqueue, zsort, sortctr);
     } else {
         ProcessFixedDrawQueue(whichpass, whichdrawqueue, zsort, sortctr);
     }
-    //Restore texture units
+    // Restore texture units
     for (unsigned int i = 0; i < gl_options.Multitexture; ++i) {
         GFXToggleTexture(i < 2, i);
     }
 }
 
 void Mesh::activateTextureUnit(const Pass::TextureUnit &tu, bool deflt) {
-    //I'm leaving target and source index as int's because I tried to change technique.h's target and source to size_t's
-    //and had problems. So I'll just add static casts to int to the unsigned/size_t other sides in comparisons --chuck_starchaser
-    int targetIndex = tu.targetIndex;
-    int sourceIndex = deflt ? tu.defaultIndex : tu.sourceIndex;
-    Pass::TextureUnit::SourceType sourceType = deflt ? tu.defaultType : tu.sourceType;
+    // I'm leaving target and source index as int's because I tried to change technique.h's target and source to
+    // size_t's and had problems. So I'll just add static casts to int to the unsigned/size_t other sides in comparisons
+    // --chuck_starchaser
+    int                           targetIndex = tu.targetIndex;
+    int                           sourceIndex = deflt ? tu.defaultIndex : tu.sourceIndex;
+    Pass::TextureUnit::SourceType sourceType  = deflt ? tu.defaultType : tu.sourceType;
     switch (sourceType) {
         case Pass::TextureUnit::File:
-            //Direct file sources go in tu.texture
+            // Direct file sources go in tu.texture
             switch (tu.texKind) {
                 case Pass::TextureUnit::TexDefault:
                 case Pass::TextureUnit::Tex2D:
@@ -1118,26 +1042,22 @@ void Mesh::activateTextureUnit(const Pass::TextureUnit &tu, bool deflt) {
             break;
         case Pass::TextureUnit::Environment:
             _Universe->activateLightMap(targetIndex);
-            #ifdef NV_CUBE_MAP
-            if (tu.texKind != Pass::TextureUnit::TexDefault
-                    && tu.texKind != Pass::TextureUnit::TexCube
-                    && tu.texKind != Pass::TextureUnit::TexSepCube) {
-                throw Exception(
-                        "Environment Texture Unit for technique must be a cube map");
+#ifdef NV_CUBE_MAP
+            if (tu.texKind != Pass::TextureUnit::TexDefault && tu.texKind != Pass::TextureUnit::TexCube &&
+                tu.texKind != Pass::TextureUnit::TexSepCube) {
+                throw Exception("Environment Texture Unit for technique must be a cube map");
             }
             GFXToggleTexture(true, targetIndex, CUBEMAP);
-            #else
-            if (tu.texKind != Pass::TextureUnit::TexDefault
-                && tu.texKind != Pass::TextureUnit::Tex2D) throw Exception(
-                    "Environment Texture Unit for technique must be a 2D spheremap" );
-            GFXToggleTexture( true, targetIndex, TEXTURE2D );
-            #endif
+#else
+            if (tu.texKind != Pass::TextureUnit::TexDefault && tu.texKind != Pass::TextureUnit::Tex2D) {
+                throw Exception("Environment Texture Unit for technique must be a 2D spheremap");
+            }
+            GFXToggleTexture(true, targetIndex, TEXTURE2D);
+#endif
             break;
         case Pass::TextureUnit::Detail:
-            if (tu.texKind != Pass::TextureUnit::TexDefault
-                    && tu.texKind != Pass::TextureUnit::Tex2D) {
-                throw Exception(
-                        "Detail Texture Unit for technique must be 2D");
+            if (tu.texKind != Pass::TextureUnit::TexDefault && tu.texKind != Pass::TextureUnit::Tex2D) {
+                throw Exception("Detail Texture Unit for technique must be 2D");
             }
             if (detailTexture) {
                 detailTexture->MakeActive(targetIndex);
@@ -1145,18 +1065,20 @@ void Mesh::activateTextureUnit(const Pass::TextureUnit &tu, bool deflt) {
                 activateTextureUnit(tu, true);
             } else {
                 throw MissingTexture(
-                        "Texture Unit for technique requested a missing texture (detail default given that cannot be found)");
+                        "Texture Unit for technique requested a missing texture (detail default given that cannot be "
+                        "found)");
             }
             break;
         case Pass::TextureUnit::Decal:
             if ((sourceIndex < static_cast<int>(Decal.size())) && Decal[sourceIndex]) {
-                //Mesh has the referenced decal
+                // Mesh has the referenced decal
                 Decal[sourceIndex]->MakeActive(targetIndex);
             } else if (!deflt) {
                 activateTextureUnit(tu, true);
             } else {
                 throw MissingTexture(
-                        "Texture Unit for technique requested a missing texture (decal default given that cannot be found)");
+                        "Texture Unit for technique requested a missing texture (decal default given that cannot be "
+                        "found)");
             }
             switch (tu.texKind) {
                 case Pass::TextureUnit::TexDefault:
@@ -1174,20 +1096,15 @@ void Mesh::activateTextureUnit(const Pass::TextureUnit &tu, bool deflt) {
                     throw Exception("Texture Unit for technique of unhandled kind");
             }
             break;
-        case Pass::TextureUnit::None: //chuck_starchaser
+        case Pass::TextureUnit::None:  // chuck_starchaser
         default:
             break;
     }
 }
 
-static void setupGLState(const Pass &pass,
-        bool zwrite,
-        BLENDFUNC blendSrc,
-        BLENDFUNC blendDst,
-        int material,
-        unsigned char alphatest,
-        int whichdrawqueue) {
-    //Setup color/z writes, culling, etc...
+static void setupGLState(const Pass &pass, bool zwrite, BLENDFUNC blendSrc, BLENDFUNC blendDst, int material,
+                         unsigned char alphatest, int whichdrawqueue) {
+    // Setup color/z writes, culling, etc...
     if (pass.colorWrite) {
         GFXEnable(COLORWRITE);
     } else {
@@ -1243,8 +1160,8 @@ static void setupGLState(const Pass &pass,
     if (pass.cullMode == Pass::None) {
         GFXDisable(CULLFACE);
     } else if (pass.cullMode == Pass::DefaultFace) {
-        //Not handled by this helper function, since it depends on mesh data
-        //SelectCullFace( whichdrawqueue );
+        // Not handled by this helper function, since it depends on mesh data
+        // SelectCullFace( whichdrawqueue );
     } else {
         POLYFACE face;
         GFXEnable(CULLFACE);
@@ -1270,7 +1187,7 @@ static void setupGLState(const Pass &pass,
         GFXDisable(DEPTHWRITE);
     }
 
-    //Setup blend mode
+    // Setup blend mode
     switch (pass.blendMode) {
         case Pass::Add:
             GFXBlendMode(ONE, ONE);
@@ -1297,7 +1214,7 @@ static void setupGLState(const Pass &pass,
     GFXEnable(LIGHTING);
     GFXSelectMaterial(material);
 
-    //If we're doing zwrite, alpha test is more or less mandatory for correct results
+    // If we're doing zwrite, alpha test is more or less mandatory for correct results
     if (alphatest) {
         GFXAlphaTest(GEQUAL, alphatest / 255.0);
     } else if (zwrite) {
@@ -1317,21 +1234,20 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     if (!technique->isCompiled(GFXGetProgramVersion())) {
         try {
             technique->compile();
-        }
-        catch (const Exception &e) {
+        } catch (const Exception &e) {
             VS_LOG(info, (boost::format("Technique recompilation failed: %1%") % e.what()));
         }
     }
 
     const Pass &pass = technique->getPass(whichpass);
 
-    //First of all, decide zwrite, so we can skip the pass if !zwrite && !cwrite
+    // First of all, decide zwrite, so we can skip the pass if !zwrite && !cwrite
     bool zwrite;
     if (whichdrawqueue == MESH_SPECIAL_FX_ONLY) {
-        //Special effects pass - no zwrites... no zwrites...
+        // Special effects pass - no zwrites... no zwrites...
         zwrite = false;
     } else {
-        //Near draw queue - write to z-buffer if in auto mode and not translucent
+        // Near draw queue - write to z-buffer if in auto mode and not translucent
         zwrite = (blendDst == ZERO);
         switch (pass.zWrite) {
             case Pass::Auto:
@@ -1344,11 +1260,11 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
                 break;
         }
     }
-    //If we're not writing anything... why go on?
+    // If we're not writing anything... why go on?
     if (!pass.colorWrite && !zwrite) {
         return;
     }
-    float envmaprgba[4] = {1, 1, 1, 0};
+    float envmaprgba[4]   = {1, 1, 1, 0};
     float noenvmaprgba[4] = {0.5, 0.5, 0.5, 1.0};
 
     vector<MeshDrawContext> &cur_draw_queue = draw_queue[whichdrawqueue];
@@ -1357,15 +1273,15 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     setupGLState(pass, zwrite, blendSrc, blendDst, myMatNum, alphatest, whichdrawqueue);
     if (pass.cullMode == Pass::DefaultFace) {
         SelectCullFace(whichdrawqueue);
-    } // Default not handled by setupGLState, it depends on mesh data
+    }  // Default not handled by setupGLState, it depends on mesh data
 
-    //Activate shader
+    // Activate shader
     GFXActivateShader(pass.getCompiledProgram());
 
-    //Set shader parameters (instance-independent only)
-    int activeLightsArrayParam = -1;
+    // Set shader parameters (instance-independent only)
+    int activeLightsArrayParam      = -1;
     int apparentLightSizeArrayParam = -1;
-    int numLightsParam = -1;
+    int numLightsParam              = -1;
     for (size_t spi = 0; spi < pass.getNumShaderParams(); ++spi) {
         const Pass::ShaderParam &sp = pass.getShaderParam(spi);
         if (sp.id >= 0) {
@@ -1394,13 +1310,13 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
                 case Pass::ShaderParam::ApparentLightSizeArray:
                     apparentLightSizeArrayParam = sp.id;
                     break;
-                case Pass::ShaderParam::CloakingPhase: //chuck_starchaser
+                case Pass::ShaderParam::CloakingPhase:  // chuck_starchaser
                 default:
                     break;
             }
         }
     }
-    //Activate texture units
+    // Activate texture units
     size_t tui;
     size_t tuimask = 0;
     for (tui = 0; tui < pass.getNumTextureUnits(); ++tui) {
@@ -1416,16 +1332,15 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
         try {
             activateTextureUnit(tu);
             tuimask |= (1 << tu.targetIndex);
-        }
-        catch (const MissingTexture &e) {
+        } catch (const MissingTexture &e) {
             if (tu.defaultType == Pass::TextureUnit::Decal && tu.defaultIndex == 0) {
-                //Global default for decal 0 is white, this allows textureless objects
-                //that would otherwise not be possible
+                // Global default for decal 0 is white, this allows textureless objects
+                // that would otherwise not be possible
                 static Texture *white = new Texture("white.png");
                 white->MakeActive(tu.targetIndex);
                 tuimask |= (1 << tu.targetIndex);
             } else {
-                //Ok, this is an error - die horribly
+                // Ok, this is an error - die horribly
                 throw e;
             }
         }
@@ -1433,37 +1348,33 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     for (tui = 0; tui < gl_options.Multitexture; ++tui) {
         GFXToggleTexture(((tuimask & (1 << tui)) != 0), tui, TEXTURE2D);
     }
-    //Render all instances, no specific order if not necessary
-    //TODO: right now only meshes of same kind get drawn in correct order - should fix this.
+    // Render all instances, no specific order if not necessary
+    // TODO: right now only meshes of same kind get drawn in correct order - should fix this.
     static std::vector<int> indices;
     if (zsort) {
         indices.resize(cur_draw_queue.size());
         for (int i = 0, n = cur_draw_queue.size(); i < n; ++i) {
             indices[i] = i;
         }
-        std::sort(indices.begin(), indices.end(),
-                MeshDrawContextPainterSort(sortctr, cur_draw_queue));
+        std::sort(indices.begin(), indices.end(), MeshDrawContextPainterSort(sortctr, cur_draw_queue));
     }
     vlist->BeginDrawState();
     for (int i = 0, n = cur_draw_queue.size(); i < n; ++i) {
-        //Making it static avoids frequent reallocations - although may be troublesome for thread safety
-        //but... WTH... nothing is thread safe in VS.
-        //Also: Be careful with reentrancy... right now, this section is not reentrant.
+        // Making it static avoids frequent reallocations - although may be troublesome for thread safety
+        // but... WTH... nothing is thread safe in VS.
+        // Also: Be careful with reentrancy... right now, this section is not reentrant.
         static vector<int> lights;
-        MeshDrawContext &c = cur_draw_queue[zsort ? indices[i] : i];
+        MeshDrawContext   &c = cur_draw_queue[zsort ? indices[i] : i];
         if (c.mesh_seq == whichdrawqueue) {
             lights.clear();
-            //Dynamic lights
+            // Dynamic lights
             if (whichdrawqueue != MESH_SPECIAL_FX_ONLY) {
-                int maxPerPass = pass.perLightIteration ? pass.perLightIteration : 1;
+                int maxPerPass   = pass.perLightIteration ? pass.perLightIteration : 1;
                 int maxPassCount = pass.perLightIteration ? (pass.maxIterations ? pass.maxIterations : 32) : 1;
-                GFXPickLights(Vector(c.mat.p.i, c.mat.p.j, c.mat.p.k),
-                        rSize(),
-                        lights,
-                        maxPerPass * maxPassCount,
-                        true);
+                GFXPickLights(Vector(c.mat.p.i, c.mat.p.j, c.mat.p.k), rSize(), lights, maxPerPass * maxPassCount,
+                              true);
             }
-            //FX lights
+            // FX lights
             size_t fxLightsBase = lights.size();
             for (size_t i = 0; i < c.SpecialFX->size(); i++) {
                 int light;
@@ -1477,26 +1388,26 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
                 GFXCreateLight(light, c.xtraFX, true);
                 lights.push_back(light);
             }
-            //Fog
+            // Fog
             SetupFogState(c.cloaked);
 
-            //Render, iterating per light if/as requested
-            bool popGlobals = false;
-            size_t maxiter = 1;
-            int maxlights = lights.size();
+            // Render, iterating per light if/as requested
+            bool   popGlobals = false;
+            size_t maxiter    = 1;
+            int    maxlights  = lights.size();
             if (pass.perLightIteration) {
                 maxlights = pass.perLightIteration;
-                maxiter = pass.maxIterations;
+                maxiter   = pass.maxIterations;
             }
 
             int npasslights = 0;
             for (size_t iter = 0, lightnum = 0, nlights = lights.size();
-                    (iter < maxiter) && ((pass.perLightIteration == 0 && lightnum == 0) || (lightnum < nlights));
-                    ++iter, lightnum += npasslights) {
-                //Setup transform and lights
+                 (iter < maxiter) && ((pass.perLightIteration == 0 && lightnum == 0) || (lightnum < nlights));
+                 ++iter, lightnum += npasslights) {
+                // Setup transform and lights
                 npasslights = std::max(0, std::min(int(nlights) - int(lightnum), int(maxlights)));
 
-                //MultiAlphaBlend stuff
+                // MultiAlphaBlend stuff
                 if (iter > 0) {
                     switch (pass.blendMode) {
                         case Pass::MultiAlphaBlend:
@@ -1516,38 +1427,28 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
                     popGlobals = true;
                 }
 
-                //Set shader parameters (instance-specific only)
-                // NOTE: keep after GFXLoadMatrixModel
-                GFXUploadLightState(
-                        numLightsParam,
-                        activeLightsArrayParam,
-                        apparentLightSizeArrayParam,
-                        true,
-                        lights.begin() + lightnum,
-                        lights.begin() + lightnum + npasslights);
+                // Set shader parameters (instance-specific only)
+                //  NOTE: keep after GFXLoadMatrixModel
+                GFXUploadLightState(numLightsParam, activeLightsArrayParam, apparentLightSizeArrayParam, true,
+                                    lights.begin() + lightnum, lights.begin() + lightnum + npasslights);
 
                 for (unsigned int spi = 0; spi < pass.getNumShaderParams(); ++spi) {
                     const Pass::ShaderParam &sp = pass.getShaderParam(spi);
                     if (sp.id >= 0) {
                         switch (sp.semantic) {
                             case Pass::ShaderParam::CloakingPhase:
-                                GFXShaderConstant(sp.id,
-                                        c.CloakFX.r,
-                                        c.CloakFX.a,
-                                        ((c.cloaked & MeshDrawContext::CLOAK) ? 1.f : 0.f),
-                                        ((c.cloaked & MeshDrawContext::GLASSCLOAK) ? 1.f : 0.f));
+                                GFXShaderConstant(sp.id, c.CloakFX.r, c.CloakFX.a,
+                                                  ((c.cloaked & MeshDrawContext::CLOAK) ? 1.f : 0.f),
+                                                  ((c.cloaked & MeshDrawContext::GLASSCLOAK) ? 1.f : 0.f));
                                 break;
                             case Pass::ShaderParam::Damage:
                                 GFXShaderConstant(sp.id, c.damage / 255.f);
                                 break;
                             case Pass::ShaderParam::Damage4:
-                                GFXShaderConstant(sp.id,
-                                        c.damage / 255.f,
-                                        c.damage / 255.f,
-                                        c.damage / 255.f,
-                                        c.damage / 255.f);
+                                GFXShaderConstant(sp.id, c.damage / 255.f, c.damage / 255.f, c.damage / 255.f,
+                                                  c.damage / 255.f);
                                 break;
-                            case Pass::ShaderParam::EnvColor: //chuck_starchaser
+                            case Pass::ShaderParam::EnvColor:  // chuck_starchaser
                             case Pass::ShaderParam::DetailPlane0:
                             case Pass::ShaderParam::DetailPlane1:
                             case Pass::ShaderParam::NumLights:
@@ -1578,7 +1479,7 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     }
     vlist->EndDrawState();
 
-    //Restore state
+    // Restore state
     GFXEnable(CULLFACE);
     GFXEnable(COLORWRITE);
     GFXEnable(DEPTHWRITE);
@@ -1589,24 +1490,24 @@ void Mesh::ProcessShaderDrawQueue(size_t whichpass, int whichdrawqueue, bool zso
     if (pass.polyMode == Pass::Line) {
         GFXLineWidth(1);
     }
-    //Restore blend mode
+    // Restore blend mode
     GFXPopBlendMode();
 }
 
-#define GETDECAL(pass) ( (Decal[pass]) )
-#define HASDECAL(pass) ( ( (NUM_PASSES > pass) && Decal[pass] ) )
-#define SAFEDECAL(pass) ( (HASDECAL( pass ) ? Decal[pass] : black) )
+#define GETDECAL(pass)  ((Decal[pass]))
+#define HASDECAL(pass)  (((NUM_PASSES > pass) && Decal[pass]))
+#define SAFEDECAL(pass) ((HASDECAL(pass) ? Decal[pass] : black))
 
 void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort, const QVector &sortctr) {
     const Pass &pass = technique->getPass(techpass);
 
-    //First of all, decide zwrite, so we can skip the pass if !zwrite && !cwrite
+    // First of all, decide zwrite, so we can skip the pass if !zwrite && !cwrite
     bool zwrite;
     if (whichdrawqueue == MESH_SPECIAL_FX_ONLY) {
-        //Special effects pass - no zwrites... no zwrites...
+        // Special effects pass - no zwrites... no zwrites...
         zwrite = false;
     } else {
-        //Near draw queue - write to z-buffer if in auto mode and not translucent
+        // Near draw queue - write to z-buffer if in auto mode and not translucent
         zwrite = (blendDst == ZERO);
         switch (pass.zWrite) {
             case Pass::Auto:
@@ -1619,44 +1520,44 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                 break;
         }
     }
-    //If we're not writing anything... why go on?
+    // If we're not writing anything... why go on?
     if (!pass.colorWrite && !zwrite) {
         return;
     }
 
-    //Map texture units
+    // Map texture units
     Texture *Decal[NUM_PASSES];
     memset(Decal, 0, sizeof(Decal));
     for (unsigned int tui = 0; tui < pass.getNumTextureUnits(); ++tui) {
         const Pass::TextureUnit &tu = pass.getTextureUnit(tui);
         switch (tu.sourceType) {
             case Pass::TextureUnit::File:
-                //Direct file sources go in tu.texture
+                // Direct file sources go in tu.texture
                 Decal[tu.targetIndex] = tu.texture.get();
                 break;
             case Pass::TextureUnit::Decal:
                 if ((tu.sourceIndex < static_cast<int>(this->Decal.size())) && this->Decal[tu.sourceIndex]) {
-                    //Mesh has the referenced decal
+                    // Mesh has the referenced decal
                     Decal[tu.targetIndex] = this->Decal[tu.sourceIndex];
                 } else {
-                    //Mesh does not have the referenced decal, activate the default
+                    // Mesh does not have the referenced decal, activate the default
                     switch (tu.defaultType) {
                         case Pass::TextureUnit::File:
-                            //Direct file defaults go in tu.texture (direct file sources preclude defaults)
+                            // Direct file defaults go in tu.texture (direct file sources preclude defaults)
                             Decal[tu.targetIndex] = tu.texture.get();
                             break;
                         case Pass::TextureUnit::Decal:
-                            //Decal reference as default - risky, but may be cool
-                            if ((tu.defaultIndex < static_cast<int>(this->Decal.size()))
-                                    && this->Decal[tu.defaultIndex]) {
-                                //Valid reference, activate
+                            // Decal reference as default - risky, but may be cool
+                            if ((tu.defaultIndex < static_cast<int>(this->Decal.size())) &&
+                                this->Decal[tu.defaultIndex]) {
+                                // Valid reference, activate
                                 Decal[tu.targetIndex] = this->Decal[tu.defaultIndex];
                             } else {
-                                //Invalid reference, activate global default (null)
+                                // Invalid reference, activate global default (null)
                                 Decal[tu.targetIndex] = NULL;
                             }
                             break;
-                        case Pass::TextureUnit::None: //chuck_starchaser
+                        case Pass::TextureUnit::None:  // chuck_starchaser
                         case Pass::TextureUnit::Environment:
                         case Pass::TextureUnit::Detail:
                         default:
@@ -1664,7 +1565,7 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                     }
                 }
                 break;
-            case Pass::TextureUnit::None: //chuck_starchaser
+            case Pass::TextureUnit::None:  // chuck_starchaser
             case Pass::TextureUnit::Environment:
             case Pass::TextureUnit::Detail:
             default:
@@ -1674,13 +1575,11 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
     std::vector<MeshDrawContext> &cur_draw_queue = draw_queue[whichdrawqueue];
     if (cur_draw_queue.empty()) {
         static bool thiserrdone =
-                false;         //Avoid filling up logs with this thing (it would be output at least once per frame)
+                false;  // Avoid filling up logs with this thing (it would be output at least once per frame)
         if (!thiserrdone) {
-            VS_LOG(error,
-                    (boost::format(
-                            "cloaking queues issue! Please report at https://github.com/vegastrike/Vega-Strike-Engine-Source\nn%1$d\n%2$s")
-                            % whichdrawqueue
-                            % hash_name.c_str()));
+            VS_LOG(error, (boost::format("cloaking queues issue! Please report at "
+                                         "https://github.com/vegastrike/Vega-Strike-Engine-Source\nn%1$d\n%2$s") %
+                           whichdrawqueue % hash_name.c_str()));
         }
         thiserrdone = true;
         return;
@@ -1692,7 +1591,7 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
         --DecalSize;
     }
 
-    //Restore texture units
+    // Restore texture units
     for (unsigned int i = 2; i < gl_options.Multitexture; ++i) {
         GFXToggleTexture(false, i);
     }
@@ -1701,7 +1600,7 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
     setupGLState(pass, zwrite, blendSrc, blendDst, myMatNum, alphatest, whichdrawqueue);
     if (pass.cullMode == Pass::DefaultFace) {
         SelectCullFace(whichdrawqueue);
-    } // Default not handled by setupGLState, it depends on mesh data
+    }  // Default not handled by setupGLState, it depends on mesh data
     if (!getLighting()) {
         GFXDisable(LIGHTING);
         GFXColor4f(1, 1, 1, 1);
@@ -1712,10 +1611,11 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
         GFXAlphaTest(GEQUAL, alphatest / 255.0);
     }
     static Texture *black = new Texture("blackclear.png");
-    if (HASDECAL(BASE_TEX))
+    if (HASDECAL(BASE_TEX)) {
         GETDECAL(BASE_TEX)->MakeActive();
-    GFXTextureEnv(0, GFXMODULATETEXTURE);     //Default diffuse mode
-    GFXTextureEnv(1, GFXADDTEXTURE);     //Default envmap mode
+    }
+    GFXTextureEnv(0, GFXMODULATETEXTURE);  // Default diffuse mode
+    GFXTextureEnv(1, GFXADDTEXTURE);       // Default envmap mode
 
     GFXToggleTexture((DecalSize > 0), 0);
     if (getEnvMap()) {
@@ -1724,23 +1624,22 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
     } else {
         GFXDisable(TEXTURE1);
     }
-    const GFXMaterial &mat = GFXGetMaterial(myMatNum);
-    const bool wantsplitpass1 = configuration().graphics.specmap_with_reflection;
-    bool splitpass1 =
-            (wantsplitpass1 && getEnvMap()
-                    && ((mat.sr != 0) || (mat.sg != 0)
-                            || (mat.sb != 0)))
-                    || (getEnvMap() && !gl_options.Multitexture && (ENVSPEC_PASS < DecalSize)
-                            && (!HASDECAL(ENVSPEC_TEX)));                                                                            //For now, no PPL reflections with no multitexturing - There is a way, however, doing it before the diffuse texture (odd, I know). If you see this, remind me to do it (Klauss).
-    bool skipglowpass = false;
-    bool nomultienv = false;
-    int nomultienv_passno = 0;
+    const GFXMaterial &mat            = GFXGetMaterial(myMatNum);
+    const bool         wantsplitpass1 = configuration().graphics.specmap_with_reflection;
+    bool splitpass1 = (wantsplitpass1 && getEnvMap() && ((mat.sr != 0) || (mat.sg != 0) || (mat.sb != 0))) ||
+                      (getEnvMap() && !gl_options.Multitexture && (ENVSPEC_PASS < DecalSize) &&
+                       (!HASDECAL(ENVSPEC_TEX)));  // For now, no PPL reflections with no multitexturing - There is a
+                                                   // way, however, doing it before the diffuse texture (odd, I know).
+                                                   // If you see this, remind me to do it (Klauss).
+    bool skipglowpass      = false;
+    bool nomultienv        = false;
+    int  nomultienv_passno = 0;
 
     size_t whichpass = BASE_PASS;
 
     if (!gl_options.Multitexture && getEnvMap()) {
         if (HASDECAL(ENVSPEC_TEX)) {
-            whichpass = ENVSPEC_PASS;
+            whichpass         = ENVSPEC_PASS;
             nomultienv_passno = 0;
         } else {
             nomultienv_passno = 1;
@@ -1763,25 +1662,14 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
         if ((nomultienv && whichpass == ENVSPEC_PASS) || !whichpass || HASDECAL(whichpass)) {
             switch (whichpass) {
                 case BASE_PASS:
-                    SetupSpecMapFirstPass(Decal,
-                            DecalSize,
-                            myMatNum,
-                            getEnvMap(),
-                            polygon_offset,
-                            detailTexture,
-                            detailPlanes,
-                            skipglowpass,
-                            nomultienv
-                                    && HASDECAL(ENVSPEC_TEX));
+                    SetupSpecMapFirstPass(Decal, DecalSize, myMatNum, getEnvMap(), polygon_offset, detailTexture,
+                                          detailPlanes, skipglowpass, nomultienv && HASDECAL(ENVSPEC_TEX));
                     break;
                 case ENVSPEC_PASS:
                     if (!nomultienv) {
-                        SetupSpecMapSecondPass(SAFEDECAL(ENVSPEC_TEX),
-                                myMatNum,
-                                blendSrc,
-                                (splitpass1 ? false : getEnvMap()),
-                                (splitpass1 ? GFXColor(1, 1, 1, 1) : GFXColor(0, 0, 0, 0)),
-                                polygon_offset);
+                        SetupSpecMapSecondPass(
+                                SAFEDECAL(ENVSPEC_TEX), myMatNum, blendSrc, (splitpass1 ? false : getEnvMap()),
+                                (splitpass1 ? GFXColor(1, 1, 1, 1) : GFXColor(0, 0, 0, 0)), polygon_offset);
                     } else {
                         SetupEnvmapPass(SAFEDECAL(ENVSPEC_TEX), myMatNum, nomultienv_passno);
                     }
@@ -1793,22 +1681,21 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                     SetupGlowMapFourthPass(SAFEDECAL(GLOW_TEX), myMatNum, ONE, GFXColor(1, 1, 1, 1), polygon_offset);
                     break;
             }
-            //Render all instances, no specific order if not necessary
-            //TODO: right now only meshes of same kind get drawn in correct order - should fix this.
+            // Render all instances, no specific order if not necessary
+            // TODO: right now only meshes of same kind get drawn in correct order - should fix this.
             static std::vector<int> indices;
             if (zsort) {
                 indices.resize(cur_draw_queue.size());
                 for (int i = 0, n = cur_draw_queue.size(); i < n; ++i) {
                     indices[i] = i;
                 }
-                std::sort(indices.begin(), indices.end(),
-                        MeshDrawContextPainterSort(sortctr, cur_draw_queue));
+                std::sort(indices.begin(), indices.end(), MeshDrawContextPainterSort(sortctr, cur_draw_queue));
             }
             vlist->BeginDrawState();
             for (int i = 0, n = cur_draw_queue.size(); i < n; ++i) {
-                //Making it static avoids frequent reallocations - although may be troublesome for thread safety
-                //but... WTH... nothing is thread safe in VS.
-                //Also: Be careful with reentrancy... right now, this section is not reentrant.
+                // Making it static avoids frequent reallocations - although may be troublesome for thread safety
+                // but... WTH... nothing is thread safe in VS.
+                // Also: Be careful with reentrancy... right now, this section is not reentrant.
                 static vector<int> specialfxlight;
 
                 MeshDrawContext &c = cur_draw_queue[zsort ? indices[i] : i];
@@ -1817,10 +1704,10 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                 }
                 if (c.damage == 0 && whichpass == DAMAGE_PASS) {
                     continue;
-                }                      //No damage, so why draw it...
+                }  // No damage, so why draw it...
                 if ((c.cloaked & MeshDrawContext::CLOAK) && whichpass != 0) {
                     continue;
-                }                      //Cloaking, there are no multiple passes...
+                }  // Cloaking, there are no multiple passes...
                 if (whichdrawqueue != MESH_SPECIAL_FX_ONLY) {
                     GFXLoadIdentity(MODEL);
                     GFXPickLights(Vector(c.mat.p.i, c.mat.p.j, c.mat.p.k), rSize());
@@ -1865,16 +1752,14 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                     break;
                 case ENVSPEC_PASS:
                     if (!nomultienv) {
-                        RestoreSpecMapState((splitpass1 ? false : getEnvMap()),
-                                detailTexture != NULL,
-                                zwrite,
-                                polygon_offset);
+                        RestoreSpecMapState((splitpass1 ? false : getEnvMap()), detailTexture != NULL, zwrite,
+                                            polygon_offset);
                     } else {
                         RestoreEnvmapState();
                     }
                     break;
                 case DAMAGE_PASS:
-                    RestoreDamageMapState(zwrite, polygon_offset);                 //nothin
+                    RestoreDamageMapState(zwrite, polygon_offset);  // nothin
                     break;
                 case GLOW_PASS:
                     RestoreGlowMapState(zwrite, polygon_offset);
@@ -1888,10 +1773,10 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                         break;
                     }
                 }
-                break; //FIXME Nothing is done here! --chuck_starchaser
+                break;  // FIXME Nothing is done here! --chuck_starchaser
             case ENVSPEC_PASS:
                 if (whichpass == ENVSPEC_PASS) {
-                    //Might come from BASE_PASS and want to go to DAMAGE_PASS
+                    // Might come from BASE_PASS and want to go to DAMAGE_PASS
                     if (!nomultienv) {
                         if (splitpass1) {
                             splitpass1 = false;
@@ -1917,21 +1802,20 @@ void Mesh::ProcessFixedDrawQueue(size_t techpass, int whichdrawqueue, bool zsort
                         break;
                     }
                 }
-                break; //FIXME Nothing is done here! --chuck_starchaser
+                break;        // FIXME Nothing is done here! --chuck_starchaser
             default:
-                whichpass++;             //always increment pass number, otherwise infinite loop espresso
+                whichpass++;  // always increment pass number, otherwise infinite loop espresso
         }
     }
     if (alphatest) {
-        GFXAlphaTest(ALWAYS,
-                0);
-    }       //Are you sure it was supposed to be after vlist->EndDrawState()? It makes more sense to put it here...
+        GFXAlphaTest(ALWAYS, 0);
+    }  // Are you sure it was supposed to be after vlist->EndDrawState()? It makes more sense to put it here...
     if (!getLighting()) {
         GFXEnable(LIGHTING);
     }
     if (!zwrite) {
         GFXEnable(DEPTHWRITE);
-    }       //risky--for instance logos might be fubar!
+    }  // risky--for instance logos might be fubar!
     RestoreCullFace(whichdrawqueue);
 }
 
@@ -1950,13 +1834,12 @@ void Mesh::CreateLogos(MeshXML *xml, int faction, Flightgroup *fg) {
             numsquadlogo++;
         }
     }
-    unsigned int nfl = numforcelogo;
-    Logo **tmplogo = NULL;
-    Texture *Dec = NULL;
-    for (index = 0, nfl = numforcelogo, tmplogo = &forcelogos, Dec = FactionUtil::getForceLogo(faction);
-            index < 2;
-            index++, nfl = numsquadlogo, tmplogo = &squadlogos, Dec =
-                    (fg == NULL ? FactionUtil::getSquadLogo(faction) : fg->squadLogo)) {
+    unsigned int nfl     = numforcelogo;
+    Logo       **tmplogo = NULL;
+    Texture     *Dec     = NULL;
+    for (index = 0, nfl = numforcelogo, tmplogo = &forcelogos, Dec = FactionUtil::getForceLogo(faction); index < 2;
+         index++, nfl = numsquadlogo, tmplogo = &squadlogos,
+        Dec = (fg == NULL ? FactionUtil::getSquadLogo(faction) : fg->squadLogo)) {
         if (Dec == NULL) {
             Dec = FactionUtil::getSquadLogo(faction);
         }
@@ -1964,70 +1847,68 @@ void Mesh::CreateLogos(MeshXML *xml, int faction, Flightgroup *fg) {
             continue;
         }
         Vector *PolyNormal = new Vector[nfl];
-        Vector *center = new Vector[nfl];
-        float *sizes = new float[nfl];
-        float *rotations = new float[nfl];
-        float *offset = new float[nfl];
-        Vector *Ref = new Vector[nfl];
-        Vector norm1, norm2, norm;
-        int ri = 0;
-        float totoffset = 0;
+        Vector *center     = new Vector[nfl];
+        float  *sizes      = new float[nfl];
+        float  *rotations  = new float[nfl];
+        float  *offset     = new float[nfl];
+        Vector *Ref        = new Vector[nfl];
+        Vector  norm1, norm2, norm;
+        int     ri        = 0;
+        float   totoffset = 0;
         for (unsigned int ind = 0; ind < xml->logos.size(); ind++) {
             if (xml->logos[ind].type == index) {
                 float weight = 0;
                 norm1.Set(0, 1, 0);
                 norm2.Set(1, 0, 0);
                 if (xml->logos[ind].refpnt.size() > 2) {
-                    if (xml->logos[ind].refpnt[0] < static_cast<int>(xml->vertices.size())
-                            && xml->logos[ind].refpnt[0] >= 0
-                            && xml->logos[ind].refpnt[1] < static_cast<int>(xml->vertices.size())
-                            && xml->logos[ind].refpnt[1] >= 0
-                            && xml->logos[ind].refpnt[2] < static_cast<int>(xml->vertices.size())
-                            && xml->logos[ind].refpnt[2] >= 0) {
-                        norm2 = Vector(xml->vertices[xml->logos[ind].refpnt[1]].x
-                                        - xml->vertices[xml->logos[ind].refpnt[0]].x,
-                                xml->vertices[xml->logos[ind].refpnt[1]].y
-                                        - xml->vertices[xml->logos[ind].refpnt[0]].y,
-                                xml->vertices[xml->logos[ind].refpnt[1]].z
-                                        - xml->vertices[xml->logos[ind].refpnt[0]].z);
-                        norm1 = Vector(xml->vertices[xml->logos[ind].refpnt[2]].x
-                                        - xml->vertices[xml->logos[ind].refpnt[0]].x,
-                                xml->vertices[xml->logos[ind].refpnt[2]].y
-                                        - xml->vertices[xml->logos[ind].refpnt[0]].y,
-                                xml->vertices[xml->logos[ind].refpnt[2]].z
-                                        - xml->vertices[xml->logos[ind].refpnt[0]].z);
+                    if (xml->logos[ind].refpnt[0] < static_cast<int>(xml->vertices.size()) &&
+                        xml->logos[ind].refpnt[0] >= 0 &&
+                        xml->logos[ind].refpnt[1] < static_cast<int>(xml->vertices.size()) &&
+                        xml->logos[ind].refpnt[1] >= 0 &&
+                        xml->logos[ind].refpnt[2] < static_cast<int>(xml->vertices.size()) &&
+                        xml->logos[ind].refpnt[2] >= 0) {
+                        norm2 = Vector(
+                                xml->vertices[xml->logos[ind].refpnt[1]].x - xml->vertices[xml->logos[ind].refpnt[0]].x,
+                                xml->vertices[xml->logos[ind].refpnt[1]].y - xml->vertices[xml->logos[ind].refpnt[0]].y,
+                                xml->vertices[xml->logos[ind].refpnt[1]].z -
+                                        xml->vertices[xml->logos[ind].refpnt[0]].z);
+                        norm1 = Vector(
+                                xml->vertices[xml->logos[ind].refpnt[2]].x - xml->vertices[xml->logos[ind].refpnt[0]].x,
+                                xml->vertices[xml->logos[ind].refpnt[2]].y - xml->vertices[xml->logos[ind].refpnt[0]].y,
+                                xml->vertices[xml->logos[ind].refpnt[2]].z -
+                                        xml->vertices[xml->logos[ind].refpnt[0]].z);
                     }
                 }
                 CrossProduct(norm2, norm1, norm);
 
-                Normalize(norm);                 //norm is our normal vect, norm1 is our reference vect
+                Normalize(norm);  // norm is our normal vect, norm1 is our reference vect
                 Vector Cent(0, 0, 0);
                 for (unsigned int rj = 0; rj < xml->logos[ind].refpnt.size(); rj++) {
                     weight += xml->logos[ind].refweight[rj];
-                    Cent += Vector(xml->vertices[xml->logos[ind].refpnt[rj]].x * xml->logos[ind].refweight[rj],
-                            xml->vertices[xml->logos[ind].refpnt[rj]].y * xml->logos[ind].refweight[rj],
-                            xml->vertices[xml->logos[ind].refpnt[rj]].z * xml->logos[ind].refweight[rj]);
+                    Cent   += Vector(xml->vertices[xml->logos[ind].refpnt[rj]].x * xml->logos[ind].refweight[rj],
+                                     xml->vertices[xml->logos[ind].refpnt[rj]].y * xml->logos[ind].refweight[rj],
+                                     xml->vertices[xml->logos[ind].refpnt[rj]].z * xml->logos[ind].refweight[rj]);
                 }
                 if (weight != 0) {
                     Cent.i /= weight;
                     Cent.j /= weight;
                     Cent.k /= weight;
                 }
-                //Cent.i-=x_center;
-                //Cent.j-=y_center;
-                //Cent.k-=z_center;
-                Ref[ri] = norm2;
-                PolyNormal[ri] = norm;
-                center[ri] = Cent;
-                sizes[ri] = xml->logos[ind].size * xml->scale.k;
-                rotations[ri] = xml->logos[ind].rotate;
-                offset[ri] = xml->logos[ind].offset;
-                totoffset += offset[ri];
+                // Cent.i-=x_center;
+                // Cent.j-=y_center;
+                // Cent.k-=z_center;
+                Ref[ri]         = norm2;
+                PolyNormal[ri]  = norm;
+                center[ri]      = Cent;
+                sizes[ri]       = xml->logos[ind].size * xml->scale.k;
+                rotations[ri]   = xml->logos[ind].rotate;
+                offset[ri]      = xml->logos[ind].offset;
+                totoffset      += offset[ri];
                 ri++;
             }
         }
         totoffset /= nfl;
-        *tmplogo = new Logo(nfl, center, PolyNormal, sizes, rotations, totoffset, Dec, Ref);
+        *tmplogo   = new Logo(nfl, center, PolyNormal, sizes, rotations, totoffset, Dec, Ref);
         delete[] Ref;
         delete[] PolyNormal;
         delete[] center;
@@ -2039,11 +1920,11 @@ void Mesh::CreateLogos(MeshXML *xml, int faction, Flightgroup *fg) {
 
 void Mesh::initTechnique(const std::string &xmltechnique) {
     if (xmltechnique.empty()) {
-        //Load default technique, which depends:
+        // Load default technique, which depends:
         string effective;
         if (Decal.size() > 1 || getEnvMap()) {
-            //Use shader-ified technique for multitexture or environment-mapped meshes
-#if defined(__APPLE__) && defined (__MACH__)
+            // Use shader-ified technique for multitexture or environment-mapped meshes
+#if defined(__APPLE__) && defined(__MACH__)
             static string shader_technique = configuration().graphics.default_full_technique;
 #else
             const string shader_technique = configuration().graphics.default_full_technique;
@@ -2051,7 +1932,7 @@ void Mesh::initTechnique(const std::string &xmltechnique) {
             effective = shader_technique;
         } else {
             const string fixed_technique = configuration().graphics.default_simple_technique;
-            effective = fixed_technique;
+            effective                    = fixed_technique;
         }
         technique = Technique::getTechnique(effective);
     } else {

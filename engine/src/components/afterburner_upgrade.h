@@ -41,8 +41,9 @@ class Afterburner;
  */
 class AfterburnerUpgrade : public Component {
     Afterburner *afterburner;
+
 public:
-    //after burner acceleration
+    // after burner acceleration
     double thrust;
     double speed;
     double consumption;
@@ -54,7 +55,7 @@ public:
     // Component Methods
     void Load(std::string unit_key) override;
 
-    void SaveToCSV(std::map<std::string, std::string>& unit) const override;
+    void SaveToCSV(std::map<std::string, std::string> &unit) const override;
 
     bool CanDowngrade() const override;
 
@@ -67,4 +68,4 @@ public:
     ~AfterburnerUpgrade() override;
 };
 
-#endif // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_UPGRADE_H
+#endif  // VEGA_STRIKE_ENGINE_COMPONENTS_AFTERBURNER_UPGRADE_H

@@ -27,9 +27,10 @@
 #ifndef VEGA_STRIKE_ENGINE_AUDIO_UTILS_H
 #define VEGA_STRIKE_ENGINE_AUDIO_UTILS_H
 
-#include "Types.h"
-#include "Exceptions.h"
 #include <map>
+
+#include "Exceptions.h"
+#include "Types.h"
 
 namespace Audio {
 
@@ -65,7 +66,7 @@ void sleep(unsigned int ms);
  * @param enumMap A map associating strings to values
  * @remarks Returns enumMap[s] raising an exception on error.
  */
-template<typename T>
+template <typename T>
 T parseEnum(const std::string &s, const std::map<std::string, T> &enumMap) {
     typename std::map<std::string, T>::const_iterator it = enumMap.find(s);
     if (it != enumMap.end()) {
@@ -81,7 +82,7 @@ T parseEnum(const std::string &s, const std::map<std::string, T> &enumMap) {
  * @param deflt A default value to return when s is found in the enumeration map.
  * @remarks Returns enumMap[s] or the default, no exceptions raised.
  */
-template<typename T>
+template <typename T>
 T parseEnum(const std::string &s, const std::map<std::string, T> &enumMap, T deflt) {
     typename std::map<std::string, T>::const_iterator it = enumMap.find(s);
     if (it != enumMap.end()) {
@@ -91,6 +92,6 @@ T parseEnum(const std::string &s, const std::map<std::string, T> &enumMap, T def
     }
 }
 
-}
+}  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_UTILS_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_UTILS_H

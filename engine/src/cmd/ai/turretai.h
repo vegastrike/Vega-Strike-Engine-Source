@@ -28,18 +28,19 @@
 #define VEGA_STRIKE_ENGINE_CMD_AI_TURRET_H
 
 #include "navigation.h"
+
 namespace Orders {
 class TurretAI : public FaceTargetITTS {
     float range;
     float speed;
     float mrange;
-    bool hadFired;
+    bool  hadFired;
 
 public:
     TurretAI();
     virtual void Execute();
     virtual void getAverageGunSpeed(float &speed, float &range, float &mrange) const;
 };
-}
+}  // namespace Orders
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_TURRET_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_TURRET_H

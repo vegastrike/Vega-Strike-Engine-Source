@@ -29,14 +29,17 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+
+#include "cmd/vega_py_run.h"
+
 #include <pyerrors.h>
 #include <pythonrun.h>
-#include "cmd/vega_py_run.h"
-#include "vega_string_utils.h"
+
 #include "src/vs_logging.h"
+#include "vega_string_utils.h"
 
 void VegaPyRunString(const std::string &py_snippet) {
-    char * py_snippet_temp = vega_str_dup(py_snippet.c_str());
+    char *py_snippet_temp = vega_str_dup(py_snippet.c_str());
     VegaPyRunString(py_snippet_temp);
     free(py_snippet_temp);
 }
@@ -52,7 +55,7 @@ void VegaPyRunString(char *py_snippet) {
     }
 }
 
-void VegaPyRunFile(FILE* fp, std::string file_path_or_description) {
+void VegaPyRunFile(FILE *fp, std::string file_path_or_description) {
     VS_LOG(trace, (boost::format("running file '%1%'") % file_path_or_description));
     PyRun_SimpleFile(fp, file_path_or_description.c_str());
     if (PyErr_Occurred()) {

@@ -28,12 +28,12 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_BUBBLE_DISPLAY_H
 #define VEGA_STRIKE_ENGINE_GFX_RADAR_BUBBLE_DISPLAY_H
 
-#include <queue>
-#include "sensor.h"
-#include "gfx/radar/radar.h"
-#include "dual_display.h"
-
 #include <memory>
+#include <queue>
+
+#include "dual_display.h"
+#include "gfx/radar/radar.h"
+#include "sensor.h"
 
 struct GFXColor;
 
@@ -69,21 +69,22 @@ protected:
 protected:
     const float innerSphere;
     const float outerSphere;
-    float sphereZoom;
-    float radarTime;
-    float currentTargetMarkerSize;
+    float       sphereZoom;
+    float       radarTime;
+    float       currentTargetMarkerSize;
 
     struct AnimationItem {
         float sphereZoom;
         float duration;
     };
+
     typedef std::queue<AnimationItem> AnimationCollection;
-    AnimationCollection animation;
-    float lastAnimationTime;
-    ZoomSequence explodeSequence;
-    ZoomSequence implodeSequence;
+    AnimationCollection               animation;
+    float                             lastAnimationTime;
+    ZoomSequence                      explodeSequence;
+    ZoomSequence                      implodeSequence;
 };
 
-} // namespace Radar
+}  // namespace Radar
 
-#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_BUBBLE_DISPLAY_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_RADAR_BUBBLE_DISPLAY_H

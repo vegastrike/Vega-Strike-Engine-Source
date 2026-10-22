@@ -26,22 +26,22 @@
  */
 
 
-#include "order.h"
 #include "communication.h"
-#include "root_generic/vega_random.h"
+#include "order.h"
 #include "root_generic/configxml.h"
+#include "root_generic/vega_random.h"
 
 using std::list;
 using std::vector;
 
 void Order::AdjustRelationTo(Unit *un, float factor) {
-    //virtual stub function
+    // virtual stub function
 }
 
 void Order::Communicate(const CommunicationMessage &c) {
-    int completed = 0;
-    unsigned int i = 0;
-    CommunicationMessage *newC = new CommunicationMessage(c);
+    int                   completed = 0;
+    unsigned int          i         = 0;
+    CommunicationMessage *newC      = new CommunicationMessage(c);
     for (i = 0; i < suborders.size(); i++) {
         if ((completed & ((suborders[i])->getType() & (MOVEMENT | FACING | WEAPON))) == 0) {
             (suborders[i])->Communicate(*newC);
@@ -49,9 +49,9 @@ void Order::Communicate(const CommunicationMessage &c) {
         }
     }
     Unit *un;
-    bool already_communicated = false;
+    bool  already_communicated = false;
     for (list<CommunicationMessage *>::iterator ii = messagequeue.begin(); ii != messagequeue.end(); ii++) {
-        un = (*ii)->sender.GetUnit();
+        un                = (*ii)->sender.GetUnit();
         bool thisissender = (un == newC->sender.GetUnit());
         if (un == NULL || thisissender) {
             delete (*ii);
@@ -65,8 +65,8 @@ void Order::Communicate(const CommunicationMessage &c) {
     }
     if ((un = newC->sender.GetUnit())) {
         if (un != parent) {
-            const bool talk_more_helps = configuration().ai.talking_faster_helps;
-            const float talk_factor = configuration().ai.talk_relation_factor_flt;
+            const bool  talk_more_helps = configuration().ai.talking_faster_helps;
+            const float talk_factor     = configuration().ai.talk_relation_factor_flt;
             if (talk_more_helps || !already_communicated) {
                 AdjustRelationTo(un, newC->getDeltaRelation() * talk_factor);
             }
@@ -75,8 +75,7 @@ void Order::Communicate(const CommunicationMessage &c) {
     }
 }
 
-void Order::ProcessCommMessage(CommunicationMessage &c) {
-}
+void Order::ProcessCommMessage(CommunicationMessage &c) {}
 
 void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMessageProcessed) {
     float time = AICommresponseTime / SIMULATION_ATOM;
@@ -86,13 +85,13 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
     if (!messagequeue.empty()) {
         bool cleared = false;
         if (messagequeue.back()->curstate == messagequeue.back()->fsm->GetRequestLandNode()) {
-            cleared = true;
+            cleared                = true;
             RemoveMessageProcessed = true;
-            Unit *un = messagequeue.back()->sender.GetUnit();
+            Unit *un               = messagequeue.back()->sender.GetUnit();
             if (un) {
                 CommunicationMessage c(parent, un, NULL, 0);
-                if (parent->getRelation(un) >= 0
-                        || (parent->getFlightgroup() && parent->getFlightgroup()->name == "Base")) {
+                if (parent->getRelation(un) >= 0 ||
+                    (parent->getFlightgroup() && parent->getFlightgroup()->name == "Base")) {
                     parent->RequestClearance(un);
                     c.SetCurrentState(c.fsm->GetAbleToDockNode(), NULL, 0);
                 } else {
@@ -119,4 +118,3 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
         }
     }
 }
-

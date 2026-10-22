@@ -27,37 +27,37 @@
 
 
 #include "damage/damageable_object.h"
-#include "damage/core_vector.h"
-#include <boost/range/adaptor/reversed.hpp>
+
 #include <iostream>
+
+#include <boost/range/adaptor/reversed.hpp>
+
+#include "damage/core_vector.h"
 
 
 DamageableObject::~DamageableObject() = default;
 
-DamageableObject::DamageableObject():
-    number_of_layers(0), invulnerable(false) {}
+DamageableObject::DamageableObject() : number_of_layers(0), invulnerable(false) {}
 
+DamageableObject::DamageableObject(std::vector<DamageableLayer *> layers)
+    : number_of_layers(3), layers(layers), invulnerable(false) {}
 
-DamageableObject::DamageableObject(std::vector<DamageableLayer*> layers):
-    number_of_layers(3), layers(layers), invulnerable(false) {}
-
-
-void DamageableObject::AddLayer(DamageableLayer* layer) {
+void DamageableObject::AddLayer(DamageableLayer *layer) {
     number_of_layers++;
     layers.push_back(layer);
-    assert(number_of_layers<=3);
+    assert(number_of_layers <= 3);
 }
 
 InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Damage &damage) {
-    InflictedDamage inflicted_damage(3); // Currently hard-coded default is 3!
+    InflictedDamage inflicted_damage(3);  // Currently hard-coded default is 3!
 
-    if(invulnerable) {
+    if (invulnerable) {
         return inflicted_damage;
     }
 
     // Higher index layers are outer layers. We therefore need to reverse the order.
-    for (DamageableLayer* layer : boost::adaptors::reverse(layers)) {
-        if(!layer) {
+    for (DamageableLayer *layer : boost::adaptors::reverse(layers)) {
+        if (!layer) {
             continue;
         }
 

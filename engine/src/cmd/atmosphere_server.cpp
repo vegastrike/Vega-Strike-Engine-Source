@@ -27,23 +27,17 @@
 
 
 #include "atmosphere.h"
-#include "gfx_generic/vec.h"
 #include "gfx_generic/matrix.h"
+#include "gfx_generic/vec.h"
 
-Atmosphere::Atmosphere(const Parameters &params) : user_params(params) {
-}
+Atmosphere::Atmosphere(const Parameters &params) : user_params(params) {}
 
-void Atmosphere::Update(const QVector &position, const Matrix &tmatrix) {
-}
+void Atmosphere::Update(const QVector &position, const Matrix &tmatrix) {}
 
-void Atmosphere::SetMatricesAndDraw(const QVector &pos, const Matrix mat) {
-}
+void Atmosphere::SetMatricesAndDraw(const QVector &pos, const Matrix mat) {}
 
-void Atmosphere::ProcessDrawQueue() {
-}
+void Atmosphere::ProcessDrawQueue() {}
 
-void Atmosphere::Draw() {
-}
+void Atmosphere::Draw() {}
 
-void Atmosphere::DrawAtmospheres() {
-}
+void Atmosphere::DrawAtmospheres() {}

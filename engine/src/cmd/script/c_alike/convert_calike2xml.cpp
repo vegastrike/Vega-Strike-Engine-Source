@@ -30,7 +30,6 @@
 */
 
 #include <stdio.h>
-
 #include <string>
 
 extern std::string module_string;
@@ -51,4 +50,3 @@ void main(int argc, char **argv) {
 
     std::cout << module_string;
 }
-

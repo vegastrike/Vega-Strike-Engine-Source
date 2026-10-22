@@ -29,22 +29,22 @@
  *  xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef WIN32
-//this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
-#include <unistd.h>
+// this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can
+// compile without it
+#    include <unistd.h>
 #endif
 
 #include <expat.h>
-#include "root_generic/xml_support.h"
-
-#include "src/vegastrike.h"
 
 #include "cmd/unit_generic.h"
 #include "mission.h"
 #include "root_generic/easydom.h"
+#include "root_generic/xml_support.h"
+#include "src/vegastrike.h"
 
 /* *********************************************************** */
 
@@ -100,7 +100,7 @@ varInst *Mission::doMath(missionNode *node, int mode) {
     }
     varInst *res_vi = newVarInst(VI_TEMP);
 
-    varInst *res1_vi = checkExpression((missionNode *) node->subnodes[0], mode);
+    varInst *res1_vi = checkExpression((missionNode *)node->subnodes[0], mode);
     if (res1_vi->type != VAR_INT && res1_vi->type != VAR_FLOAT && res1_vi->type != VAR_ANY) {
         printf("res1_vi=%d\n", res1_vi->type);
         fatalError(node, mode, "only int or float expr allowed for math");
@@ -113,21 +113,21 @@ varInst *Mission::doMath(missionNode *node, int mode) {
     }
     deleteVarInst(res1_vi);
     for (int i = 1; i < len; i++) {
-        varInst *res2_vi = checkExpression((missionNode *) node->subnodes[i], mode);
+        varInst *res2_vi   = checkExpression((missionNode *)node->subnodes[i], mode);
         var_type res2_type = res2_vi->type;
         if (res2_type == VAR_INT && res_vi->type == VAR_FLOAT) {
             res2_type = VAR_FLOAT;
             if (mode == SCRIPT_RUN) {
-                float res2 = (float) res2_vi->int_val;
-                float res = floatMath(mathname, res_vi->float_val, res2);
+                float res2        = (float)res2_vi->int_val;
+                float res         = floatMath(mathname, res_vi->float_val, res2);
                 res_vi->float_val = res;
             }
         } else if (res2_type == VAR_FLOAT && res_vi->type == VAR_INT) {
             res_vi->type = VAR_FLOAT;
             if (mode == SCRIPT_RUN) {
-                res_vi->float_val = (float) res_vi->int_val;
-                float res2 = res2_vi->float_val;
-                float res = floatMath(mathname, res_vi->float_val, res2);
+                res_vi->float_val = (float)res_vi->int_val;
+                float res2        = res2_vi->float_val;
+                float res         = floatMath(mathname, res_vi->float_val, res2);
                 res_vi->float_val = res;
             }
         } else {
@@ -137,19 +137,19 @@ varInst *Mission::doMath(missionNode *node, int mode) {
             }
             if (mode == SCRIPT_RUN) {
                 if (res_vi->type == VAR_INT) {
-                    int res = intMath(mathname, res_vi->int_val, res2_vi->int_val);
+                    int res         = intMath(mathname, res_vi->int_val, res2_vi->int_val);
                     res_vi->int_val = res;
                 } else if (res_vi->type == VAR_FLOAT) {
-                    float res = floatMath(mathname, res_vi->float_val, res2_vi->float_val);
+                    float res         = floatMath(mathname, res_vi->float_val, res2_vi->float_val);
                     res_vi->float_val = res;
                 } else if (res_vi->type != res2_type) {
                     fatalError(node, mode, "can't do math on such types");
                     assert(0);
                 }
-            }             //of SCRIPT_RUN
-        }         //else
+            }  // of SCRIPT_RUN
+        }  // else
         deleteVarInst(res2_vi);
-    }     //for arguments
+    }  // for arguments
 
     return res_vi;
 }
@@ -209,13 +209,13 @@ double Mission::doFMath(missionNode *node, int mode) {
         fatalError(node, mode, "fmath needs at least 2 arguments");
         assert(0);
     }
-    double res = checkFloatExpr((missionNode *) node->subnodes[0], mode);
+    double res = checkFloatExpr((missionNode *)node->subnodes[0], mode);
 
     char buffer[200];
     sprintf(buffer, "fmath: 1st expr returns %f", res);
     debug(4, node, mode, buffer);
     for (int i = 1; i < len; i++) {
-        double res2 = checkFloatExpr((missionNode *) node->subnodes[i], mode);
+        double res2 = checkFloatExpr((missionNode *)node->subnodes[i], mode);
         if (mode == SCRIPT_RUN) {
             if (mathname == "+") {
                 res = res + res2;
@@ -385,7 +385,7 @@ int Mission::checkIntExpr(missionNode *node, int mode) {
 
 bool Mission::checkBoolExpr(missionNode *node, int mode) {
     bool ok = false;
-    //no difference between parse/run
+    // no difference between parse/run
     if (node->tag == DTAG_AND_EXPR) {
         ok = doAndOr(node, mode);
     } else if (node->tag == DTAG_OR_EXPR) {
@@ -421,7 +421,7 @@ bool Mission::checkBoolExpr(missionNode *node, int mode) {
         if (vi == NULL) {
             fatalError(node, mode, "doExec returned NULL");
             assert(0);
-            //parsing?
+            // parsing?
         } else if (node->script.vartype == VAR_BOOL) {
             ok = vi->bool_val;
         } else {
@@ -439,9 +439,9 @@ bool Mission::checkBoolExpr(missionNode *node, int mode) {
 /* *********************************************************** */
 
 bool Mission::doAndOr(missionNode *node, int mode) {
-    bool ok; //FIXME !! Not all branches result in ok being initialized
-    ok = true; //this line added temporarily by chuck_starchaser
-    //no difference between parse/run
+    bool ok;    // FIXME !! Not all branches result in ok being initialized
+    ok = true;  // this line added temporarily by chuck_starchaser
+    // no difference between parse/run
     if (node->tag == DTAG_AND_EXPR) {
         ok = true;
     } else if (node->tag == DTAG_OR_EXPR) {
@@ -451,8 +451,8 @@ bool Mission::doAndOr(missionNode *node, int mode) {
 
     int i = 0;
     for (siter = node->subnodes.begin(); siter != node->subnodes.end(); siter++, i++) {
-        missionNode *snode = (missionNode *) *siter;
-        bool res = checkBoolExpr(snode, mode);
+        missionNode *snode = (missionNode *)*siter;
+        bool         res   = checkBoolExpr(snode, mode);
         if (node->tag == DTAG_AND_EXPR) {
             ok = ok && res;
         } else if (node->tag == DTAG_OR_EXPR) {
@@ -464,7 +464,7 @@ bool Mission::doAndOr(missionNode *node, int mode) {
             warning("less than two arguments for and/or");
         }
     }
-    return ok; //FIXME ok not initialized by all paths --chuck_starchaser
+    return ok;  // FIXME ok not initialized by all paths --chuck_starchaser
 }
 
 /* *********************************************************** */
@@ -472,9 +472,9 @@ bool Mission::doAndOr(missionNode *node, int mode) {
 bool Mission::doNot(missionNode *node, int mode) {
     bool ok;
 
-    //no difference between parse/run
+    // no difference between parse/run
 
-    missionNode *snode = (missionNode *) node->subnodes[0];
+    missionNode *snode = (missionNode *)node->subnodes[0];
     if (snode) {
         ok = checkBoolExpr(snode, mode);
 
@@ -482,7 +482,7 @@ bool Mission::doNot(missionNode *node, int mode) {
     } else {
         fatalError(node, mode, "no subnode in not");
         assert(0);
-        return false;         //we'll never get here
+        return false;  // we'll never get here
     }
 }
 
@@ -537,13 +537,13 @@ bool Mission::doTest(missionNode *node, int mode) {
             fatalError(node, mode, "a test-expr needs exact two subnodes");
             assert(0);
         }
-        node->script.test_arg[0] = (missionNode *) node->subnodes[0];
-        node->script.test_arg[1] = (missionNode *) node->subnodes[1];
-    }     //end of parse
+        node->script.test_arg[0] = (missionNode *)node->subnodes[0];
+        node->script.test_arg[1] = (missionNode *)node->subnodes[1];
+    }  // end of parse
 
     varInst *arg1_vi = checkExpression(node->script.test_arg[0], mode);
     varInst *arg2_vi = checkExpression(node->script.test_arg[1], mode);
-    bool res = false;
+    bool     res     = false;
     if (arg1_vi->type != arg2_vi->type) {
         fatalError(node, mode, "test is getting not the same types");
         assert(0);
@@ -605,7 +605,7 @@ bool Mission::doTest(missionNode *node, int mode) {
             fatalError(node, mode, "no such type allowed for test");
             assert(0);
         }
-    }     //SCRIPT_RUN
+    }  // SCRIPT_RUN
 
     deleteVarInst(arg1_vi);
     deleteVarInst(arg2_vi);
@@ -623,9 +623,9 @@ varInst *Mission::checkExpression(missionNode *node, int mode) {
         case DTAG_OR_EXPR:
         case DTAG_NOT_EXPR:
         case DTAG_TEST_EXPR: {
-            bool res = checkBoolExpr(node, mode);
-            ret = newVarInst(VI_TEMP);
-            ret->type = VAR_BOOL;
+            bool res      = checkBoolExpr(node, mode);
+            ret           = newVarInst(VI_TEMP);
+            ret->type     = VAR_BOOL;
             ret->bool_val = res;
             break;
         }
@@ -651,4 +651,3 @@ varInst *Mission::checkExpression(missionNode *node, int mode) {
     }
     return ret;
 }
-

@@ -28,8 +28,8 @@
 
 #include "vsbox.h"
 
-#include "src/vega_cast_utils.h"
 #include "root_generic/xml_support.h"
+#include "src/vega_cast_utils.h"
 
 /*
  *  inline ostream &operator<<(ostrstream os, const Vector &obj) {
@@ -37,8 +37,8 @@
  *  }
  */
 string tostring(const Vector &v) {
-    return std::string("(") + XMLSupport::tostring(v.i) + ", " + XMLSupport::tostring(v.j) + ", "
-            + XMLSupport::tostring(v.k) + ")";
+    return std::string("(") + XMLSupport::tostring(v.i) + ", " + XMLSupport::tostring(v.j) + ", " +
+           XMLSupport::tostring(v.k) + ")";
 }
 
 Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), corner_max(corner2) {
@@ -47,7 +47,7 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     setEnvMap(GFXFALSE);
     blendSrc = ONE;
     blendDst = ONE;
-    Box *oldmesh;
+    Box         *oldmesh;
     const string hash_key = string("@@Box") + "#" + tostring(corner1) + "#" + tostring(corner2);
     if (nullptr != (oldmesh = vega_dynamic_cast_ptr<Box>(meshHashTable.Get(hash_key)))) {
         *this = *oldmesh;
@@ -55,21 +55,21 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
         orig = oldmesh;
         return;
     }
-    int a = 0;
+    int        a        = 0;
     GFXVertex *vertices = new GFXVertex[18];
 
-#define VERTEX(ax, ay, az) \
-    do {vertices[a].x = ax;  \
-        vertices[a].y = ay;  \
-        vertices[a].z = az;  \
-        vertices[a].i = ax;  \
-        vertices[a].j = ay;  \
-        vertices[a].k = az;  \
-        vertices[a].s = 0;   \
-        vertices[a].t = 0;   \
-        a++;                 \
-    }                        \
-    while (0)
+#define VERTEX(ax, ay, az)  \
+    do {                    \
+        vertices[a].x = ax; \
+        vertices[a].y = ay; \
+        vertices[a].z = az; \
+        vertices[a].i = ax; \
+        vertices[a].j = ay; \
+        vertices[a].k = az; \
+        vertices[a].s = 0;  \
+        vertices[a].t = 0;  \
+        a++;                \
+    } while (0)
 
     VERTEX(corner_max.i, corner_min.j, corner_max.k);
     VERTEX(corner_min.i, corner_min.j, corner_max.k);
@@ -103,8 +103,8 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     enum POLYTYPE polys[2];
     polys[0] = GFXQUAD;
     polys[1] = GFXQUADSTRIP;
-    vlist = new GFXVertexList(polys, 18, vertices, 2, offsets);
-    //quadstrips[0] = new GFXVertexList(GFXQUADSTRIP,10,vertices);
+    vlist    = new GFXVertexList(polys, 18, vertices, 2, offsets);
+    // quadstrips[0] = new GFXVertexList(GFXQUADSTRIP,10,vertices);
     delete[] vertices;
 
     meshHashTable.Put(hash_key, this);
@@ -126,9 +126,9 @@ void Box::ProcessDrawQueue(int) {
     GFXDisable(DEPTHWRITE);
     GFXDisable(CULLFACE);
 
-    unsigned vnum = 24 * draw_queue[0].size();
+    unsigned           vnum = 24 * draw_queue[0].size();
     std::vector<float> verts(vnum * (3 + 4));
-    auto v = verts.begin();
+    auto               v = verts.begin();
     while (!draw_queue[0].empty()) {
         GFXLoadMatrixModel(draw_queue[0].back().mat);
         draw_queue[0].pop_back();
@@ -306,4 +306,3 @@ void Box::ProcessDrawQueue(int) {
 }
 
 Box::~Box() = default;
-

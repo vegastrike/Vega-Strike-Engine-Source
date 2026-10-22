@@ -29,17 +29,17 @@
  *  Daniel Horn
  */
 
-#include <expat.h>
-#include "root_generic/xml_support.h"
-#include "vegadisk/vsfilesystem.h"
-#include "src/vs_logging.h"
-#include "root_generic/vs_globals.h"
-
 #include "root_generic/galaxy_xml.h"
 
+#include <expat.h>
+
 #include "root_generic/vega_random.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/vs_logging.h"
+#include "vegadisk/vsfilesystem.h"
 #ifdef WRITEGALAXYCOORDS
-#include "gfx/nav/navscreen.h"
+#    include "gfx/nav/navscreen.h"
 #endif
 #include <float.h>
 using namespace XMLSupport;
@@ -58,39 +58,32 @@ enum GalaxyNames {
     PLANETS,
     PLANET
 };
-const EnumMap::Pair element_names[8] = {
-        EnumMap::Pair("UNKNOWN", UNKNOWN),
-        EnumMap::Pair("Galaxy", GALAXY),
-        EnumMap::Pair("Systems", SYSTEMS),
-        EnumMap::Pair("Sector", SECTOR),
-        EnumMap::Pair("System", SYSTEM),
-        EnumMap::Pair("Planets", PLANETS),
-        EnumMap::Pair("Planet", PLANET),
-        EnumMap::Pair("Var", VAR)
-};
-const EnumMap::Pair attribute_names[3] = {
-        EnumMap::Pair("UNKNOWN", UNKNOWN),
-        EnumMap::Pair("name", NAME),
-        EnumMap::Pair("value", VALUE)
-};
+
+const EnumMap::Pair element_names[8]   = {EnumMap::Pair("UNKNOWN", UNKNOWN), EnumMap::Pair("Galaxy", GALAXY),
+                                          EnumMap::Pair("Systems", SYSTEMS), EnumMap::Pair("Sector", SECTOR),
+                                          EnumMap::Pair("System", SYSTEM),   EnumMap::Pair("Planets", PLANETS),
+                                          EnumMap::Pair("Planet", PLANET),   EnumMap::Pair("Var", VAR)};
+const EnumMap::Pair attribute_names[3] = {EnumMap::Pair("UNKNOWN", UNKNOWN), EnumMap::Pair("name", NAME),
+                                          EnumMap::Pair("value", VALUE)};
 
 const EnumMap element_map(element_names, 8);
 const EnumMap attribute_map(attribute_names, 3);
+
 class XML {
 public:
-    SGalaxy *g;
+    SGalaxy                 *g;
     std::vector<std::string> stak;
 };
 
 void beginElement(void *userdata, const XML_Char *nam, const XML_Char **atts) {
     AttributeList::const_iterator iter;
-    XML *xml = (XML *) userdata;
-    string tname(nam);
-    AttributeList attributes(atts);
-    GalaxyNames elem = (GalaxyNames) element_map.lookup(tname);
-    GalaxyNames attr;
-    string name;
-    string value;
+    XML                          *xml = (XML *)userdata;
+    string                        tname(nam);
+    AttributeList                 attributes(atts);
+    GalaxyNames                   elem = (GalaxyNames)element_map.lookup(tname);
+    GalaxyNames                   attr;
+    string                        name;
+    string                        value;
     switch (elem) {
         case GALAXY:
             break;
@@ -105,7 +98,7 @@ void beginElement(void *userdata, const XML_Char *nam, const XML_Char **atts) {
 
         case PLANET:
             for (iter = attributes.begin(); iter != attributes.end(); ++iter) {
-                attr = (GalaxyNames) attribute_map.lookup((*iter).name);
+                attr = (GalaxyNames)attribute_map.lookup((*iter).name);
                 switch (attr) {
                     case NAME:
                         name = (*iter).value;
@@ -120,7 +113,7 @@ void beginElement(void *userdata, const XML_Char *nam, const XML_Char **atts) {
             break;
         case VAR:
             for (iter = attributes.begin(); iter != attributes.end(); ++iter) {
-                attr = (GalaxyNames) attribute_map.lookup((*iter).name);
+                attr = (GalaxyNames)attribute_map.lookup((*iter).name);
                 switch (attr) {
                     case NAME:
                         name = (*iter).value;
@@ -140,9 +133,9 @@ void beginElement(void *userdata, const XML_Char *nam, const XML_Char **atts) {
 }
 
 void endElement(void *userdata, const XML_Char *nam) {
-    XML *xml = (XML *) userdata;
-    string name(nam);
-    GalaxyNames elem = (GalaxyNames) element_map.lookup(name);
+    XML        *xml = (XML *)userdata;
+    string      name(nam);
+    GalaxyNames elem = (GalaxyNames)element_map.lookup(name);
     switch (elem) {
         case GALAXY:
         case SYSTEMS:
@@ -159,7 +152,7 @@ void endElement(void *userdata, const XML_Char *nam) {
             break;
     }
 }
-}
+}  // namespace GalaxyXML
 
 using namespace GalaxyXML;
 
@@ -195,8 +188,8 @@ SGalaxy::SGalaxy(const SGalaxy &g) : data(g.data) {
 
 void SGalaxy::processSystem(const string &sys, const QVector &coords) {
     string sector = getStarSystemSector(sys);
-    string sys2 = getStarSystemName(sys);
-    char coord[65536];
+    string sys2   = getStarSystemName(sys);
+    char   coord[65'536];
     sprintf(coord, "%lf %lf %lf", coords.i, coords.j, coords.k);
     string ret = getVariable(sector, sys2, "");
     if (ret.length() == 0) {
@@ -206,10 +199,10 @@ void SGalaxy::processSystem(const string &sys, const QVector &coords) {
 
 void SGalaxy::processGalaxy(const string &sys) {
 #ifdef WRITEGALAXYCOORDS
-    NavigationSystem::SystemIterator si( sys, 256000 );
-    while ( !si.done() ) {
+    NavigationSystem::SystemIterator si(sys, 256'000);
+    while (!si.done()) {
         string sys = *si;
-        processSystem( sys, si.Position() );
+        processSystem(sys, si.Position());
         ++si;
     }
 #endif
@@ -269,7 +262,7 @@ void Galaxy::writeGalaxy(VSFile &f) const {
 SGalaxy::SGalaxy(const char *configfile) {
     using namespace VSFileSystem;
     subheirarchy = NULL;
-    VSFile f;
+    VSFile  f;
     VSError err = f.OpenReadOnly(configfile, UniverseFile);
     if (err <= Ok) {
         GalaxyXML::XML x;
@@ -291,11 +284,12 @@ SubHeirarchy &SGalaxy::getHeirarchy() {
     }
     return *subheirarchy;
 }
+
 /* *********************************************************** */
 
 /* *********************************************************** */
 const string &SGalaxy::getVariable(const std::vector<string> &section, const string &name,
-        const string &default_value) const {
+                                   const string &default_value) const {
     const SGalaxy *g = this;
     for (unsigned int i = 0; i < section.size(); ++i) {
         if (g->subheirarchy) {
@@ -353,9 +347,8 @@ const string &SGalaxy::getRandSystem(const string &section, const string &defaul
         if (sector.subheirarchy) {
             const size_t size = sector.subheirarchy->size();
             if (size > 0) {
-                size_t which = VegaRandom::Instance().RandomSizeTLessThan(size);
-                SubHeirarchy::const_iterator i =
-                        sector.subheirarchy->begin();
+                size_t                       which = VegaRandom::Instance().RandomSizeTLessThan(size);
+                SubHeirarchy::const_iterator i     = sector.subheirarchy->begin();
                 while (which > 0) {
                     --which, ++i;
                 }
@@ -366,19 +359,17 @@ const string &SGalaxy::getRandSystem(const string &section, const string &defaul
     return default_value;
 }
 
-const string &SGalaxy::getVariable(const string &section,
-        const string &subsection,
-        const string &name,
-        const string &defaultvalue) const {
+const string &SGalaxy::getVariable(const string &section, const string &subsection, const string &name,
+                                   const string &defaultvalue) const {
 #ifdef WRITEGALAXYCOORDS
     static bool blah = false;
     if (!blah) {
-        processGalaxy( "Sol/Sol" );
-        writeGalaxy( "/tmp/outputgalaxy" );
+        processGalaxy("Sol/Sol");
+        writeGalaxy("/tmp/outputgalaxy");
         blah = true;
     }
 #endif
-    SubHeirarchy *s = subheirarchy;
+    SubHeirarchy                *s = subheirarchy;
     SubHeirarchy::const_iterator i;
     if (s) {
         i = s->find(section);
@@ -387,7 +378,7 @@ const string &SGalaxy::getVariable(const string &section,
             if (s) {
                 i = s->find(subsection);
                 if (i != s->end()) {
-                    const SGalaxy *g = &(*i).second;
+                    const SGalaxy            *g = &(*i).second;
                     StringMap::const_iterator j = g->data.find(name);
                     if (j != g->data.end()) {
                         return (*j).second;
@@ -400,12 +391,12 @@ const string &SGalaxy::getVariable(const string &section,
 }
 
 const string &SGalaxy::getVariable(const string &section, const string &name, const string &defaultvalue) const {
-    SubHeirarchy *s = subheirarchy;
+    SubHeirarchy                *s = subheirarchy;
     SubHeirarchy::const_iterator i;
     if (s) {
         i = s->find(section);
         if (i != s->end()) {
-            const SGalaxy *g = &(*i).second;
+            const SGalaxy            *g = &(*i).second;
             StringMap::const_iterator j = g->data.find(name);
             if (j != g->data.end()) {
                 return (*j).second;
@@ -439,7 +430,7 @@ const string &Galaxy::getPlanetVariable(const string &section, const string &nam
         if (i == planet_types->subheirarchy->end()) {
             return getPlanetVariable(name, defaultvalue);
         } else {
-            const SGalaxy *g = &(*i).second;
+            const SGalaxy            *g = &(*i).second;
             StringMap::const_iterator j = g->data.find(name);
             if (j == g->data.end()) {
                 return getPlanetVariable(name, defaultvalue);
@@ -483,13 +474,13 @@ void Galaxy::setupPlanetTypeMaps() {
 
             {
                 static const string _unit("unit");
-                const string &unit = (*i).second[_unit];
+                const string       &unit = (*i).second[_unit];
 
                 if (!unit.empty()) {
                     val = unit;
                 } else {
                     static const string _texture("texture");
-                    const string &tex = (*i).second[_texture];
+                    const string       &tex = (*i).second[_texture];
                     if (!tex.empty()) {
                         val = tex;
 
@@ -509,9 +500,9 @@ void Galaxy::setupPlanetTypeMaps() {
                             val = val.substr(0, dot);
                         }
 
-                        static const string numtag = "#num#";
+                        static const string            numtag    = "#num#";
                         static const string::size_type numtaglen = numtag.length();
-                        string::size_type tagpos;
+                        string::size_type              tagpos;
                         while (string::npos != (tagpos = val.find(numtag))) {
                             val.erase(tagpos, numtaglen);
                         }
@@ -520,23 +511,15 @@ void Galaxy::setupPlanetTypeMaps() {
             }
 
             if (texture2name.find(val) != texture2name.end()) {
-                VS_LOG(warning,
-                        (boost::format("name conflict %1% has texture %2% and %3% has texture %4%")
-                                % name.c_str()
-                                % val.c_str()
-                                % texture2name[val].c_str()
-                                % val.c_str()));
+                VS_LOG(warning, (boost::format("name conflict %1% has texture %2% and %3% has texture %4%") %
+                                 name.c_str() % val.c_str() % texture2name[val].c_str() % val.c_str()));
             } else {
                 texture2name[val] = name;
             }
             val = (*i).second["initial"];
             if (initial2name.find(val) != initial2name.end()) {
-                VS_LOG(warning,
-                        (boost::format("name conflict %1% has initial %2% and %3% has initial %4%")
-                                % name.c_str()
-                                % val.c_str()
-                                % initial2name[val].c_str()
-                                % val.c_str()));
+                VS_LOG(warning, (boost::format("name conflict %1% has initial %2% and %3% has initial %4%") %
+                                 name.c_str() % val.c_str() % initial2name[val].c_str() % val.c_str()));
             } else {
                 initial2name[val] = name;
             }
@@ -556,4 +539,3 @@ Galaxy::Galaxy(const char *configfile) : SGalaxy(configfile) {
     planet_types = getInitialPlanetTypes();
     setupPlanetTypeMaps();
 }
-

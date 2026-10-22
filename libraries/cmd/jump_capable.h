@@ -27,9 +27,9 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
 #define VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
 
-#include "src/star_system.h"
-
 #include <string>
+
+#include "src/star_system.h"
 
 // This includes both spec (in-system FTL) and jump drives support.
 // TODO: consider moving actual decision making code to actual module providing capability to ship
@@ -41,25 +41,23 @@ public:
 
     virtual ~JumpCapable();
 
-    void ActivateJumpDrive(int destination = 0);
-    void AddDestination(const std::string &);
-    bool AutoPilotTo(Unit *un, bool automaticenergyrealloc);
-    bool AutoPilotToErrorMessage(const Unit *un, bool automaticenergyrealloc,
-            std::string &failuremessage, int recursive_level = 2);
-    float CalculateNearestWarpUnit(float minmultiplier, Unit **nearest_unit,
-            bool count_negative_warp_units) const;
+    void  ActivateJumpDrive(int destination = 0);
+    void  AddDestination(const std::string &);
+    bool  AutoPilotTo(Unit *un, bool automaticenergyrealloc);
+    bool  AutoPilotToErrorMessage(const Unit *un, bool automaticenergyrealloc, std::string &failuremessage,
+                                  int recursive_level = 2);
+    float CalculateNearestWarpUnit(float minmultiplier, Unit **nearest_unit, bool count_negative_warp_units) const;
     float CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const;
-    void DeactivateJumpDrive();
+    void  DeactivateJumpDrive();
     const std::vector<std::string> &GetDestinations() const;
-    StarSystem *getStarSystem();
-    const StarSystem *getStarSystem() const;
-    Vector GetWarpRefVelocity() const;
-    Vector GetWarpVelocity() const;
-    bool InCorrectStarSystem(const StarSystem *);
-    virtual bool TransferUnitToSystem(StarSystem *new_system);
-    virtual bool TransferUnitToSystem(unsigned int whichJumpQueue,
-            class StarSystem *&previouslyActiveStarSystem,
-            bool DoSightAndSound);
+    StarSystem                     *getStarSystem();
+    const StarSystem               *getStarSystem() const;
+    Vector                          GetWarpRefVelocity() const;
+    Vector                          GetWarpVelocity() const;
+    bool                            InCorrectStarSystem(const StarSystem *);
+    virtual bool                    TransferUnitToSystem(StarSystem *new_system);
+    virtual bool TransferUnitToSystem(unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem,
+                                      bool DoSightAndSound);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_JUMP_CAPABLE_H

@@ -29,23 +29,19 @@
 
 #include "cmd/unit_util.h"
 
-template<class Locator>
-void findObjectsFromPosition(CollideMap *cm,
-        CollideMap::iterator location,
-        Locator *check,
-        QVector thispos,
-        float thisrad,
-        bool acquire_on_location) {
-    CollideMap::iterator cmend = cm->end();
+template <class Locator>
+void findObjectsFromPosition(CollideMap *cm, CollideMap::iterator location, Locator *check, QVector thispos,
+                             float thisrad, bool acquire_on_location) {
+    CollideMap::iterator cmend   = cm->end();
     CollideMap::iterator cmbegin = cm->begin();
     if (cmend != cmbegin && !is_null(location)) {
         CollideMap::iterator tless = location;
         CollideMap::iterator tmore = location;
-        bool workA = true;
-        bool workB = true;
+        bool                 workA = true;
+        bool                 workB = true;
         if (location != cmend && !cm->Iterable(location)) {
-            CollideArray::CollidableBackref *br = static_cast< CollideArray::CollidableBackref * > (location);
-            location = cmbegin + br->toflattenhints_offset;
+            CollideArray::CollidableBackref *br = static_cast<CollideArray::CollidableBackref *>(location);
+            location                            = cmbegin + br->toflattenhints_offset;
             if (location == cmend) {
                 location--;
             }
@@ -54,11 +50,11 @@ void findObjectsFromPosition(CollideMap *cm,
         } else if (location != cmend) {
             ++tmore;
         } else {
-            //location == cmend
+            // location == cmend
             --location;
             if (acquire_on_location) {
                 --tless;
-            }                  //allowed because cmend!=cmbegin
+            }  // allowed because cmend!=cmbegin
             workB = false;
         }
         check->init(cm, location);
@@ -70,13 +66,12 @@ void findObjectsFromPosition(CollideMap *cm,
             }
         }
         while (workA || workB) {
-            if (workA
-                    && !check->cullless(tless)) {
+            if (workA && !check->cullless(tless)) {
                 float rad = (*tless)->radius;
                 if (rad != 0.0f && (check->BoltsOrUnits() || (check->UnitsOnly() == (rad > 0)))) {
-                    float trad =
-                            check->NeedDistance() ? ((*tless)->GetPosition() - thispos).Magnitude() - fabs(rad)
-                                    - thisrad : 0;
+                    float trad = check->NeedDistance()
+                                         ? ((*tless)->GetPosition() - thispos).Magnitude() - fabs(rad) - thisrad
+                                         : 0;
                     if (!check->acquire(trad, tless)) {
                         workA = false;
                     }
@@ -89,14 +84,12 @@ void findObjectsFromPosition(CollideMap *cm,
             } else {
                 workA = false;
             }
-            if (workB
-                    && tmore != cmend
-                    && !check->cullmore(tmore)) {
+            if (workB && tmore != cmend && !check->cullmore(tmore)) {
                 float rad = (*tmore)->radius;
                 if (rad != 0.0f && (check->BoltsOrUnits() || (check->UnitsOnly() == (rad > 0)))) {
-                    float trad =
-                            check->NeedDistance() ? ((*tmore)->GetPosition() - thispos).Magnitude() - fabs(rad)
-                                    - thisrad : 0;
+                    float trad = check->NeedDistance()
+                                         ? ((*tmore)->GetPosition() - thispos).Magnitude() - fabs(rad) - thisrad
+                                         : 0;
                     if (!check->acquire(trad, tmore)) {
                         workB = false;
                     }
@@ -109,20 +102,21 @@ void findObjectsFromPosition(CollideMap *cm,
     }
 }
 
-template<class Locator>
+template <class Locator>
 void findObjects(CollideMap *cm, CollideMap::iterator location, Locator *check) {
     if (is_null(location)) {
         return;
     }
     QVector thispos = (**location).GetPosition();
-    float thisrad = fabs((*location)->radius);
+    float   thisrad = fabs((*location)->radius);
     findObjectsFromPosition(cm, location, check, thispos, thisrad, false);
 }
 
 class NearestUnitLocator {
     CollideMap::iterator location;
-    double startkey;
-    float rad;
+    double               startkey;
+    float                rad;
+
 public:
     Collidable::CollideRef retval;
 
@@ -144,9 +138,9 @@ public:
 
     void init(CollideMap *cm, CollideMap::iterator parent) {
         this->location = parent;
-        startkey = (*location)->getKey();
-        rad = FLT_MAX;
-        retval.unit = NULL;
+        startkey       = (*location)->getKey();
+        rad            = FLT_MAX;
+        retval.unit    = NULL;
     }
 
     bool cullless(CollideMap::iterator tless) {
@@ -159,18 +153,20 @@ public:
 
     bool acquire(float distance, CollideMap::iterator i) {
         if (distance < rad) {
-            rad = distance;
+            rad    = distance;
             retval = (*i)->ref;
         }
         return true;
     }
 };
+
 class NearestBoltLocator : public NearestUnitLocator {
 public:
     bool UnitsOnly() {
         return false;
     }
 };
+
 class NearestObjectLocator : public NearestUnitLocator {
 public:
     bool isUnit;
@@ -185,13 +181,14 @@ public:
 
     bool acquire(float distance, CollideMap::iterator i) {
         Collidable::CollideRef lastret = retval;
-        bool retval = NearestUnitLocator::acquire(distance, i);
-        if (memcmp((void *) &retval, (void *) &lastret, sizeof(Collidable::CollideRef))) {
+        bool                   retval  = NearestUnitLocator::acquire(distance, i);
+        if (memcmp((void *)&retval, (void *)&lastret, sizeof(Collidable::CollideRef))) {
             isUnit = (*i)->radius > 0;
         }
         return retval;
     }
 };
+
 class NearestNavLocator : public NearestUnitLocator {
 public:
     bool BoltsOrUnits() {
@@ -209,6 +206,7 @@ public:
         return true;
     }
 };
+
 class NearestNavOrCapshipLocator : public NearestUnitLocator {
 public:
     bool BoltsOrUnits() {
@@ -226,17 +224,17 @@ public:
         return true;
     }
 };
-template<class T>
+
+template <class T>
 class UnitWithinRangeLocator {
 public:
-    T action;
+    T      action;
     double startkey;
-    float radius;
-    float maxUnitRadius;
+    float  radius;
+    float  maxUnitRadius;
 
-    UnitWithinRangeLocator(float radius, float maxUnitRadius) :
-            startkey(0), radius(radius), maxUnitRadius(maxUnitRadius) {
-    }
+    UnitWithinRangeLocator(float radius, float maxUnitRadius)
+        : startkey(0), radius(radius), maxUnitRadius(maxUnitRadius) {}
 
     bool UnitsOnly() {
         return true;
@@ -265,25 +263,27 @@ public:
 
     bool acquire(float dist, CollideMap::iterator i) {
         if (dist < radius) {
-            //Inside radius...
+            // Inside radius...
             return action.acquire((*i)->ref.unit, dist);
         }
         return true;
     }
 };
-template<class T>
+
+template <class T>
 class UnitWithinRangeOfPosition : public UnitWithinRangeLocator<T> {
 public:
-    UnitWithinRangeOfPosition(float radius, float maxUnitRadius, const Collidable &key_iterator) :
-            UnitWithinRangeLocator<T>(radius, maxUnitRadius) {
+    UnitWithinRangeOfPosition(float radius, float maxUnitRadius, const Collidable &key_iterator)
+        : UnitWithinRangeLocator<T>(radius, maxUnitRadius) {
         this->startkey = key_iterator.getKey();
     }
 
-    void init(CollideMap *cm, CollideMap::iterator parent) {
-    }
+    void init(CollideMap *cm, CollideMap::iterator parent) {}
 };
+
 class UnitPtrLocator {
     const void *unit;
+
 public:
     bool retval;
 
@@ -300,7 +300,7 @@ public:
     }
 
     UnitPtrLocator(const void *unit) {
-        retval = false;
+        retval     = false;
         this->unit = unit;
     }
 
@@ -313,11 +313,10 @@ public:
     }
 
     bool acquire(float distance, CollideMap::iterator i) {
-        return retval = (((const void *) ((*i)->ref.unit)) == unit);
+        return retval = (((const void *)((*i)->ref.unit)) == unit);
     }
 
-    void init(CollideMap *cm, CollideMap::iterator parent) {
-    }
+    void init(CollideMap *cm, CollideMap::iterator parent) {}
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_UNIT_FIND_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_UNIT_FIND_H

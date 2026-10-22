@@ -33,11 +33,12 @@
 
 class TextureManager {
     std::vector<Texture *> textures;
+
 public:
     TextureManager();
 
     static TextureManager &GetInstance();
-    Texture *GetTexture(std::string const &name, enum FILTER mipmap);
+    Texture               *GetTexture(std::string const &name, enum FILTER mipmap);
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_TEXTURE_MANAGER_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_TEXTURE_MANAGER_H

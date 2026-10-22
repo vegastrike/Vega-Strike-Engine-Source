@@ -29,8 +29,9 @@
  * This util class contains helpers which can be used in the event loops
  */
 
-#include <boost/parameter/aux_/void.hpp>
 #include <vector>
+
+#include <boost/parameter/aux_/void.hpp>
 using std::vector;
 
 enum MousePointerStyle {

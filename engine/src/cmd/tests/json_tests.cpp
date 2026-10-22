@@ -26,17 +26,16 @@
  */
 
 
+#include <fstream>
+#include <iostream>
+#include <iterator>
+#include <limits.h>
+#include <stdio.h>
+
 #include <gtest/gtest.h>
 
-#include "cmd/unit_json_factory.h"
 #include "cmd/unit_csv_factory.h"
-
-#include <iostream>
-#include <fstream>
-#include <iterator>
-
-#include <stdio.h>
-#include <limits.h>
+#include "cmd/unit_json_factory.h"
 
 TEST(JSON, Sanity) {
     // This may not work for all deployments.
@@ -45,7 +44,7 @@ TEST(JSON, Sanity) {
     // Much of this is comparing csv to json and this code doesn't work anymore as
     // I changed much of the game code for the game, rather to figure out why it isn't working.
 
-    //std::map<std::string, std::map<std::string, std::string>> json_units;
+    // std::map<std::string, std::map<std::string, std::string>> json_units;
 
-    //UnitJSONFactory::ParseJSON("test_assets/units.csv");
+    // UnitJSONFactory::ParseJSON("test_assets/units.csv");
 }

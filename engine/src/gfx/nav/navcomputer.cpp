@@ -28,65 +28,57 @@
 
 #include "src/vega_cast_utils.h"
 #include "src/vegastrike.h"
-#if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
-//For WIN32 debugging.
-#include <crtdbg.h>
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
+// For WIN32 debugging.
+#    include <crtdbg.h>
 #endif
 
-#include "gfx/nav/navscreen.h"
+#include "gfx/cockpit.h"
 #include "gfx/nav/navpath.h"
+#include "gfx/nav/navscreen.h"
+#include "gui/eventmanager.h"
+#include "gui/groupcontrol.h"
+#include "gui/modaldialog.h"
+#include "gui/newbutton.h"
+#include "gui/scroller.h"
+#include "gui/simplepicker.h"
+#include "gui/staticdisplay.h"
+#include "gui/textinputdisplay.h"
+#include "root_generic/lin_time.h"
 #include "src/in_kb.h"
 #include "src/in_kb_data.h"
 #include "src/in_mouse.h"
-#include "gfx/cockpit.h"
 #include "src/main_loop.h"
-#include "root_generic/lin_time.h"
-#include "gui/modaldialog.h"
-#include "gui/eventmanager.h"
-#include "gui/newbutton.h"
-#include "gui/staticdisplay.h"
-#include "gui/textinputdisplay.h"
-#include "gui/simplepicker.h"
-#include "gui/groupcontrol.h"
-#include "gui/scroller.h"
 
 vector<unsigned int> nav_keyboard_queue;
 
-//Info about each mode.
+// Info about each mode.
 struct ModeInfo {
     string title;
     string button;
     string command;
     string groupId;
 
-    ModeInfo(string t = "", string b = "", string c = "", string g = "") :
-            title(t), button(b), command(c), groupId(g) {
-    }
+    ModeInfo(string t = "", string b = "", string c = "", string g = "")
+        : title(t), button(b), command(c), groupId(g) {}
 };
 
-static const ModeInfo displayModeInfo[] = {
-        ModeInfo("List Mode", "Finished", "ListMode", "ListGroup"),
-        ModeInfo("Edit Mode", "Edit", "EditMode", "EditGroup")
-};
+static const ModeInfo displayModeInfo[] = {ModeInfo("List Mode", "Finished", "ListMode", "ListGroup"),
+                                           ModeInfo("Edit Mode", "Edit", "EditMode", "EditGroup")};
 
 static const ModeInfo selectorModeInfo[] = {
         ModeInfo("Target Select", "System", "TargetSelectMode", "TargetSelectGroup"),
         ModeInfo("Criteria Select", "Criteria", "CriteriaSelectMode", "CriteriaSelectGroup"),
-        ModeInfo("Chain Select", "Chain", "ChainSelectMode", "ChainSelectGroup")
-};
+        ModeInfo("Chain Select", "Chain", "ChainSelectMode", "ChainSelectGroup")};
 
-//Dispatch table for commands.
-//Make an entry here for each command you want to handle.
-//WARNING:  The order of this table is important.  There are multiple entries for
-//some commands. Basically, you can make an entry for a particular control, and then
-//later have an entry with an empty control id to cover the other cases.
+// Dispatch table for commands.
+// Make an entry here for each command you want to handle.
+// WARNING:  The order of this table is important.  There are multiple entries for
+// some commands. Basically, you can make an entry for a particular control, and then
+// later have an entry with an empty control id to cover the other cases.
 const NavComputer::WctlTableEntry NavComputer::WctlCommandTable[] = {
-        NavComputer::WctlTableEntry("Visible",
-                "",
-                &NavComputer::toggleVisibility),
-        NavComputer::WctlTableEntry("Picker::NewSelection",
-                "PathLister",
-                &NavComputer::pathListerChangedSelection),
+        NavComputer::WctlTableEntry("Visible", "", &NavComputer::toggleVisibility),
+        NavComputer::WctlTableEntry("Picker::NewSelection", "PathLister", &NavComputer::pathListerChangedSelection),
         NavComputer::WctlTableEntry(displayModeInfo[LIST].command, "", &NavComputer::changeToListMode),
         NavComputer::WctlTableEntry(displayModeInfo[EDIT].command, "", &NavComputer::changeToEditMode),
         NavComputer::WctlTableEntry(selectorModeInfo[TARGET].command, "", &NavComputer::changeToTargetMode),
@@ -108,42 +100,41 @@ const NavComputer::WctlTableEntry NavComputer::WctlCommandTable[] = {
         NavComputer::WctlTableEntry("Not", "", &NavComputer::actionNot),
         NavComputer::WctlTableEntry("RemoveCriteria", "", &NavComputer::actionRemoveCriteria),
         NavComputer::WctlTableEntry("Chain", "", &NavComputer::actionChain),
-        NavComputer::WctlTableEntry("", "", NULL)
-};
+        NavComputer::WctlTableEntry("", "", NULL)};
 
-//Process a command from the window.
-//This just dispatches to a handler.
+// Process a command from the window.
+// This just dispatches to a handler.
 bool NavComputer::processWindowCommand(const EventCommandId &command, Control *control) {
-    //Iterate through the dispatch table.
+    // Iterate through the dispatch table.
     for (const WctlTableEntry *p = &WctlCommandTable[0]; p->function; p++) {
         if (p->command == command) {
             if (p->controlId.size() == 0 || p->controlId == control->id()) {
-                //Found a handler for the command.
+                // Found a handler for the command.
                 return (this->*(p->function))(command, control);
             }
         }
     }
-    //Let the base class have a try at the command first.
+    // Let the base class have a try at the command first.
     if (WindowController::processWindowCommand(command, control)) {
         return true;
     }
-    //Didn't find a handler.
+    // Didn't find a handler.
     return false;
 }
 
-//CONSTRUCTOR.
-NavComputer::NavComputer(NavigationSystem *navsystem) :
-        navsys(navsystem), m_currentDisplay(NULL_DISPLAY), m_currentSelector(NULL_SELECTOR) {
+// CONSTRUCTOR.
+NavComputer::NavComputer(NavigationSystem *navsystem)
+    : navsys(navsystem), m_currentDisplay(NULL_DISPLAY), m_currentSelector(NULL_SELECTOR) {
     int i;
-    pathman = navsystem->pathman;
+    pathman     = navsystem->pathman;
     currentPath = NULL;
     currentNode = NULL;
-    criteria = false;
-    //Initialize display mode group controls array.
+    criteria    = false;
+    // Initialize display mode group controls array.
     for (i = 0; i < DISPLAY_MODE_COUNT; i++) {
         m_displayModeGroups[i] = NULL;
     }
-    //Initialize selector mode group controls array.
+    // Initialize selector mode group controls array.
     for (i = 0; i < SELECTOR_MODE_COUNT; i++) {
         m_selectorModeGroups[i] = NULL;
     }
@@ -157,9 +148,9 @@ NavComputer::NavComputer(NavigationSystem *navsystem) :
     m_visible = false;
 }
 
-//Destructor.
+// Destructor.
 NavComputer::~NavComputer(void) {
-    //Delete any group controls that the window doesn't "own".
+    // Delete any group controls that the window doesn't "own".
     for (int i = 0; i < DISPLAY_MODE_COUNT; i++) {
         if (m_displayModeGroups[i] != nullptr) {
             delete m_displayModeGroups[i];
@@ -174,9 +165,9 @@ NavComputer::~NavComputer(void) {
     }
 }
 
-//Set up the window and get everything ready.
+// Set up the window and get everything ready.
 void NavComputer::init(void) {
-    //Create a new window.
+    // Create a new window.
     Window *w = new Window;
     setWindow(w);
 
@@ -184,7 +175,7 @@ void NavComputer::init(void) {
     m_window->setController(this);
     m_deleteOnWindowClose = false;
 
-    //Read in the controls for all the modes.
+    // Read in the controls for all the modes.
     createControls();
 
     NavPath *path = new NavPath();
@@ -194,17 +185,17 @@ void NavComputer::init(void) {
     pathman->paths.push_back(path);
 }
 
-//Create the controls that will be used for this window.
+// Create the controls that will be used for this window.
 void NavComputer::createControls(void) {
     int i;
-    //Set up the window.
+    // Set up the window.
     window()->setFullScreen();
     window()->setColor(GUI_CLEAR);
     window()->setTexture("basecomputer.png");
 
-    //Put all the controls in the window.
+    // Put all the controls in the window.
     constructControls();
-    //Take the mode group controls out of the window.
+    // Take the mode group controls out of the window.
     for (i = 0; i < DISPLAY_MODE_COUNT; i++) {
         Control *group = window()->findControlById(displayModeInfo[i].groupId);
         if (group) {
@@ -212,7 +203,7 @@ void NavComputer::createControls(void) {
             m_displayModeGroups[i] = group;
         }
     }
-    //Take the mode group controls out of the window.
+    // Take the mode group controls out of the window.
     for (i = 0; i < SELECTOR_MODE_COUNT; i++) {
         Control *group = window()->findControlById(selectorModeInfo[i].groupId);
         if (group) {
@@ -234,7 +225,7 @@ GFXColor NavComputer::getColorForGroup(std::string id) {
     }
 }
 
-//Hack that constructs controls in code.
+// Hack that constructs controls in code.
 void NavComputer::constructControls(void) {
     {
         GroupControl *mainGroup = new GroupControl;
@@ -242,7 +233,7 @@ void NavComputer::constructControls(void) {
         window()->addControl(mainGroup);
         GFXColor color = getColorForGroup("MainGroup");
 
-        //Base info title.
+        // Base info title.
         StaticDisplay *baseTitle = new StaticDisplay;
         baseTitle->setRect(Rect(-.96, .76, 1.9, .08));
         baseTitle->setText("Error");
@@ -252,7 +243,7 @@ void NavComputer::constructControls(void) {
         baseTitle->setId("NavigationTitle");
         mainGroup->addChild(baseTitle);
 
-        //Done button.
+        // Done button.
         NewButton *done = new NewButton;
         done->setRect(Rect(.74, .74, .22, .12));
         done->setLabel("Done");
@@ -265,7 +256,7 @@ void NavComputer::constructControls(void) {
         done->setFont(Font(.05, BOLD_STROKE));
         mainGroup->addChild(done);
 
-        //Scroller for description.
+        // Scroller for description.
         Scroller *descScroller = new Scroller;
         descScroller->setRect(Rect(.91, -.29, .05, .99));
         descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -274,7 +265,7 @@ void NavComputer::constructControls(void) {
         descScroller->setTextColor(GUI_OPAQUE_WHITE());
         descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
-        //Description box.
+        // Description box.
         StaticDisplay *ms = new StaticDisplay;
         ms->setRect(Rect(.24, -.29, .67, .99));
         ms->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -287,7 +278,7 @@ void NavComputer::constructControls(void) {
         ms->setScroller(descScroller);
         mainGroup->addChild(ms);
 
-        mainGroup->addChild(descScroller);         //Want scroller "over" description box.
+        mainGroup->addChild(descScroller);  // Want scroller "over" description box.
     }
 
     {
@@ -296,7 +287,7 @@ void NavComputer::constructControls(void) {
         window()->addControl(listGroup);
         GFXColor color = getColorForGroup(displayModeInfo[LIST].groupId);
 
-        //Scroller for picker.
+        // Scroller for picker.
         Scroller *pathScroller = new Scroller;
         pathScroller->setRect(Rect(-.50, -.95, .05, 1.65));
         pathScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -305,7 +296,7 @@ void NavComputer::constructControls(void) {
         pathScroller->setTextColor(GUI_OPAQUE_WHITE());
         pathScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
-        //Save game picker.
+        // Save game picker.
         SimplePicker *pathList = new SimplePicker;
         pathList->setRect(Rect(-.96, -.95, .46, 1.65));
         pathList->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -320,7 +311,7 @@ void NavComputer::constructControls(void) {
         pathList->setScroller(pathScroller);
         listGroup->addChild(pathList);
 
-        listGroup->addChild(pathScroller);         //Want scroller "over" picker.
+        listGroup->addChild(pathScroller);  // Want scroller "over" picker.
 
         NewButton *up = new NewButton;
         up->setRect(Rect(-.41, .58, .22, .12));
@@ -473,7 +464,7 @@ void NavComputer::constructControls(void) {
         window()->addControl(editGroup);
         GFXColor color = getColorForGroup(displayModeInfo[EDIT].groupId);
 
-        //Apply hint title.
+        // Apply hint title.
         StaticDisplay *applyHint = new StaticDisplay;
         applyHint->setRect(Rect(-.96, .56, .26, .20));
         applyHint->setText("Apply To:");
@@ -579,7 +570,7 @@ void NavComputer::constructControls(void) {
         finished->setCommand(displayModeInfo[LIST].command);
         editGroup->addChild(finished);
 
-        //Scroller for description.
+        // Scroller for description.
         Scroller *descScroller = new Scroller;
         descScroller->setRect(Rect(.91, -.95, .05, .62));
         descScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -588,7 +579,7 @@ void NavComputer::constructControls(void) {
         descScroller->setTextColor(GUI_OPAQUE_WHITE());
         descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
-        //Description box.
+        // Description box.
         StaticDisplay *ms = new StaticDisplay;
         ms->setRect(Rect(.24, -.95, .67, .62));
         ms->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -601,7 +592,7 @@ void NavComputer::constructControls(void) {
         ms->setScroller(descScroller);
         editGroup->addChild(ms);
 
-        editGroup->addChild(descScroller);         //Want scroller "over" description box.
+        editGroup->addChild(descScroller);  // Want scroller "over" description box.
     }
 
     {
@@ -664,7 +655,7 @@ void NavComputer::constructControls(void) {
         window()->addControl(criteriaGroup);
         GFXColor color = getColorForGroup(selectorModeInfo[CRITERIA].groupId);
 
-        //Scroller for picker.
+        // Scroller for picker.
         Scroller *parameterScroller = new Scroller;
         parameterScroller->setRect(Rect(.15, .15, .05, .23));
         parameterScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -673,7 +664,7 @@ void NavComputer::constructControls(void) {
         parameterScroller->setTextColor(GUI_OPAQUE_WHITE());
         parameterScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
-        //Parameter picker.
+        // Parameter picker.
         SimplePicker *parameterList = new SimplePicker;
         parameterList->setRect(Rect(-.66, .15, .81, .23));
         parameterList->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -692,9 +683,9 @@ void NavComputer::constructControls(void) {
         parameterList->addCell(new ValuedPickerCell<CriteriaType>(OWNEDBY, "Owned By"));
         parameterList->addCell(new ValuedPickerCell<CriteriaType>(SECTOR, "Sector"));
 
-        criteriaGroup->addChild(parameterScroller);         //Want scroller "over" picker.
+        criteriaGroup->addChild(parameterScroller);  // Want scroller "over" picker.
 
-        //Parameter value box.
+        // Parameter value box.
         StaticDisplay *valueBox = new TextInputDisplay(&nav_keyboard_queue, "\x1b\n\t\r\\/&|:<>\"^");
         valueBox->setRect(Rect(-.66, .01, .86, .10));
         valueBox->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -770,7 +761,7 @@ void NavComputer::constructControls(void) {
         removeButton->setCommand("RemoveCriteria");
         criteriaGroup->addChild(removeButton);
 
-        //Scroller for picker.
+        // Scroller for picker.
         Scroller *criteriaScroller = new Scroller;
         criteriaScroller->setRect(Rect(.15, -.95, .05, .60));
         criteriaScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -779,7 +770,7 @@ void NavComputer::constructControls(void) {
         criteriaScroller->setTextColor(GUI_OPAQUE_WHITE());
         criteriaScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
-        //Criteria picker.
+        // Criteria picker.
         SimplePicker *criteriaList = new SimplePicker;
         criteriaList->setRect(Rect(-.66, -.95, .81, .60));
         criteriaList->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -794,7 +785,7 @@ void NavComputer::constructControls(void) {
         criteriaList->setScroller(criteriaScroller);
         criteriaGroup->addChild(criteriaList);
 
-        criteriaGroup->addChild(criteriaScroller);         //Want scroller "over" picker.
+        criteriaGroup->addChild(criteriaScroller);  // Want scroller "over" picker.
     }
 
     {
@@ -803,7 +794,7 @@ void NavComputer::constructControls(void) {
         window()->addControl(chainGroup);
         GFXColor color = getColorForGroup(selectorModeInfo[CHAIN].groupId);
 
-        //Scroller for picker.
+        // Scroller for picker.
         Scroller *chainScroller = new Scroller;
         chainScroller->setRect(Rect(.15, -.31, .05, .69));
         chainScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -812,7 +803,7 @@ void NavComputer::constructControls(void) {
         chainScroller->setTextColor(GUI_OPAQUE_WHITE());
         chainScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
-        //Path picker.
+        // Path picker.
         SimplePicker *chainList = new SimplePicker;
         chainList->setRect(Rect(-.66, -.31, .81, .69));
         chainList->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -827,9 +818,9 @@ void NavComputer::constructControls(void) {
         chainList->setScroller(chainScroller);
         chainGroup->addChild(chainList);
 
-        chainGroup->addChild(chainScroller);          //Want scroller "over" picker.
+        chainGroup->addChild(chainScroller);  // Want scroller "over" picker.
 
-        //Scroller for picker.
+        // Scroller for picker.
         Scroller *chainTypeScroller = new Scroller;
         chainTypeScroller->setRect(Rect(.15, -.79, .05, .44));
         chainTypeScroller->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -838,7 +829,7 @@ void NavComputer::constructControls(void) {
         chainTypeScroller->setTextColor(GUI_OPAQUE_WHITE());
         chainTypeScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
 
-        //Type picker.
+        // Type picker.
         SimplePicker *chainTypeList = new SimplePicker;
         chainTypeList->setRect(Rect(-.66, -.79, .81, .44));
         chainTypeList->setColor(GFXColor(color.r, color.g, color.b, .1));
@@ -854,11 +845,11 @@ void NavComputer::constructControls(void) {
         chainGroup->addChild(chainTypeList);
         chainTypeList->clear();
         chainTypeList->addCell(new ValuedPickerCell<ChainPathNode::PartType>(ChainPathNode::SOURCE, "Source"));
-        chainTypeList->addCell(new ValuedPickerCell<ChainPathNode::PartType>(ChainPathNode::DESTINATION,
-                "Destination"));
+        chainTypeList->addCell(
+                new ValuedPickerCell<ChainPathNode::PartType>(ChainPathNode::DESTINATION, "Destination"));
         chainTypeList->addCell(new ValuedPickerCell<ChainPathNode::PartType>(ChainPathNode::ALL_POINTS, "All Points"));
 
-        chainGroup->addChild(chainTypeScroller);         //Want scroller "over" picker.
+        chainGroup->addChild(chainTypeScroller);  // Want scroller "over" picker.
 
         NewButton *chain = new NewButton;
         chain->setRect(Rect(-.43, -.95, .40, .12));
@@ -878,52 +869,52 @@ void NavComputer::constructControls(void) {
     }
 }
 
-//Switch to the set of controls used for the specified mode.
+// Switch to the set of controls used for the specified mode.
 void NavComputer::switchToMajorControls(DisplayMode mode) {
     if (m_currentDisplay != mode) {
-        assert(m_displayModeGroups[mode] != NULL);         //We should have controls for this mode.
+        assert(m_displayModeGroups[mode] != NULL);  // We should have controls for this mode.
         if (m_currentDisplay != NULL_DISPLAY) {
-            //Get the old controls out of the window.
+            // Get the old controls out of the window.
             Control *oldControls = window()->findControlById(displayModeInfo[m_currentDisplay].groupId);
             if (oldControls) {
                 window()->removeControlFromWindow(oldControls);
             }
-            //We put this back in our table so that we "own" the controls.
+            // We put this back in our table so that we "own" the controls.
             m_displayModeGroups[m_currentDisplay] = oldControls;
         }
         m_currentDisplay = mode;
 
         window()->addControl(m_displayModeGroups[mode]);
-        //Take this group out of our table because we don't own it anymore.
+        // Take this group out of our table because we don't own it anymore.
         m_displayModeGroups[mode] = NULL;
 
         recalcTitle();
     }
 }
 
-//Switch to the set of controls used for the specified mode.
+// Switch to the set of controls used for the specified mode.
 void NavComputer::switchToMinorControls(SelectorMode mode) {
     if (m_currentSelector != mode) {
         if (m_currentSelector != NULL_SELECTOR) {
-            //Get the old controls out of the window.
+            // Get the old controls out of the window.
             Control *oldControls = window()->findControlById(selectorModeInfo[m_currentSelector].groupId);
             if (oldControls) {
                 window()->removeControlFromWindow(oldControls);
             }
-            //We put this back in our table so that we "own" the controls.
+            // We put this back in our table so that we "own" the controls.
             m_selectorModeGroups[m_currentSelector] = oldControls;
         }
         m_currentSelector = mode;
         if (mode != NULL_SELECTOR) {
-            assert(m_selectorModeGroups[mode] != NULL);             //We should have controls for this mode.
+            assert(m_selectorModeGroups[mode] != NULL);  // We should have controls for this mode.
             window()->addControl(m_selectorModeGroups[mode]);
-            //Take this group out of our table because we don't own it anymore.
+            // Take this group out of our table because we don't own it anymore.
             m_selectorModeGroups[mode] = NULL;
         }
     }
 }
 
-//Change display mode to LIST
+// Change display mode to LIST
 bool NavComputer::changeToListMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != LIST) {
         switchToMinorControls(NULL_SELECTOR);
@@ -933,7 +924,7 @@ bool NavComputer::changeToListMode(const EventCommandId &command, Control *contr
     return true;
 }
 
-//Change display mode to EDIT
+// Change display mode to EDIT
 bool NavComputer::changeToEditMode(const EventCommandId &command, Control *control) {
     if (m_currentDisplay != EDIT && currentPath != NULL) {
         switchToMinorControls(NULL_SELECTOR);
@@ -944,9 +935,9 @@ bool NavComputer::changeToEditMode(const EventCommandId &command, Control *contr
     return true;
 }
 
-//Change display mode to TARGET
+// Change display mode to TARGET
 bool NavComputer::changeToTargetMode(const EventCommandId &command, Control *control) {
-    assert(m_currentDisplay == EDIT);     //We should be in edit mode to have chosen a selector
+    assert(m_currentDisplay == EDIT);  // We should be in edit mode to have chosen a selector
     if (m_currentSelector != TARGET) {
         switchToMinorControls(TARGET);
         loadAbsoluteButton();
@@ -954,9 +945,9 @@ bool NavComputer::changeToTargetMode(const EventCommandId &command, Control *con
     return true;
 }
 
-//Change display mode to CRITERIA
+// Change display mode to CRITERIA
 bool NavComputer::changeToCriteriaMode(const EventCommandId &command, Control *control) {
-    assert(m_currentDisplay == EDIT);     //We should be in edit mode to have chosen a selector
+    assert(m_currentDisplay == EDIT);  // We should be in edit mode to have chosen a selector
     if (m_currentSelector != CRITERIA) {
         switchToMinorControls(CRITERIA);
         loadCriteriaLister();
@@ -964,9 +955,9 @@ bool NavComputer::changeToCriteriaMode(const EventCommandId &command, Control *c
     return true;
 }
 
-//Change display mode to CHAIN
+// Change display mode to CHAIN
 bool NavComputer::changeToChainMode(const EventCommandId &command, Control *control) {
-    assert(m_currentDisplay == EDIT);     //We should be in edit mode to have chosen a selector
+    assert(m_currentDisplay == EDIT);  // We should be in edit mode to have chosen a selector
     if (m_currentSelector != CHAIN) {
         switchToMinorControls(CHAIN);
         loadChainLister();
@@ -974,7 +965,7 @@ bool NavComputer::changeToChainMode(const EventCommandId &command, Control *cont
     return true;
 }
 
-//Open the window, etc.
+// Open the window, etc.
 void NavComputer::run(void) {
     toggleVisibility(EventCommandId(), NULL);
 }
@@ -990,8 +981,8 @@ int shiftup(int);
 static void nav_keyboard_cb(unsigned int ch, unsigned int mod, bool release, int x, int y) {
     if (!release) {
         nav_keyboard_queue.push_back(
-                ((WSK_MOD_LSHIFT == (mod & WSK_MOD_LSHIFT)) || (WSK_MOD_RSHIFT == (mod & WSK_MOD_RSHIFT))) ? shiftup(
-                        ch) : ch);
+                ((WSK_MOD_LSHIFT == (mod & WSK_MOD_LSHIFT)) || (WSK_MOD_RSHIFT == (mod & WSK_MOD_RSHIFT))) ? shiftup(ch)
+                                                                                                           : ch);
     }
 }
 
@@ -1009,7 +1000,7 @@ bool NavComputer::toggleVisibility(const EventCommandId &command, Control *contr
         GameCockpit::NavScreen(KBData(), PRESS);
     } else {
         GameCockpit::NavScreen(KBData(), PRESS);
-        //Initialize callback functions
+        // Initialize callback functions
         winsys_set_keyboard_func(nav_keyboard_cb);
         winsys_set_mouse_func(EventManager::ProcessMouseClick);
         winsys_set_motion_func(EventManager::ProcessMouseActive);
@@ -1018,29 +1009,30 @@ bool NavComputer::toggleVisibility(const EventCommandId &command, Control *contr
         m_visible = true;
         GFXLoop(nav_main_loop);
 
-        //Simulate clicking the leftmost mode button.
-        //We don't actually use the button because there isn't a button if there's only one mode.
+        // Simulate clicking the leftmost mode button.
+        // We don't actually use the button because there isn't a button if there's only one mode.
         processWindowCommand(displayModeInfo[m_displayModes[0]].command, NULL);
     }
     return m_visible;
 }
 
-//Redo the title strings for the display.
+// Redo the title strings for the display.
 void NavComputer::recalcTitle() {
-    //Generic nav title for the display.
+    // Generic nav title for the display.
 
-    string baseTitle = "Navigational Computer";
-    baseTitle += " (";
-    baseTitle += displayModeInfo[m_currentDisplay].title;
-    baseTitle += ")";
+    string baseTitle  = "Navigational Computer";
+    baseTitle        += " (";
+    baseTitle        += displayModeInfo[m_currentDisplay].title;
+    baseTitle        += ")";
 
-    //Set the string in the base title control.
-    StaticDisplay *baseTitleDisplay = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("NavigationTitle"));
+    // Set the string in the base title control.
+    StaticDisplay *baseTitleDisplay =
+            vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("NavigationTitle"));
     assert(baseTitleDisplay != NULL);
     baseTitleDisplay->setText(baseTitle);
 }
 
-//Create the window and controls for the Options Menu.
+// Create the window and controls for the Options Menu.
 void NavComputer::RenameConfirm::init(void) {
     Window *window = new Window;
     setWindow(window);
@@ -1052,7 +1044,7 @@ void NavComputer::RenameConfirm::init(void) {
     window->setOutlineWidth(2.0);
     window->setController(this);
 
-    //Information.
+    // Information.
     StaticDisplay *text = new StaticDisplay;
     text->setRect(Rect(-.4, .11, .8, .15));
     text->setText("Enter the new name for this path.");
@@ -1061,10 +1053,10 @@ void NavComputer::RenameConfirm::init(void) {
     text->setColor(GUI_CLEAR);
     text->setFont(Font(.045, 1.25));
     text->setId("Information");
-    //Put it on the window.
+    // Put it on the window.
     window->addControl(text);
 
-    //Path name input box.
+    // Path name input box.
     StaticDisplay *pathNameBox = new TextInputDisplay(&nav_keyboard_queue, "\x1b\n\t\r");
     pathNameBox->setRect(Rect(-.4, -.09, .8, .15));
     pathNameBox->setColor(GFXColor(0, 1, 1, .1));
@@ -1076,7 +1068,7 @@ void NavComputer::RenameConfirm::init(void) {
     pathNameBox->setId("PathNameBox");
     window->addControl(pathNameBox);
 
-    //Confirm Button.
+    // Confirm Button.
     NewButton *confirm = new NewButton;
     confirm->setRect(Rect(.05, -.25, .30, .10));
     confirm->setLabel("Rename");
@@ -1087,10 +1079,10 @@ void NavComputer::RenameConfirm::init(void) {
     confirm->setDownTextColor(GUI_OPAQUE_BLACK());
     confirm->setHighlightColor(GFXColor(0, 1, 0, .4));
     confirm->setFont(Font(.05, BOLD_STROKE));
-    //Put the button on the window.
+    // Put the button on the window.
     window->addControl(confirm);
 
-    //Resume Game button.
+    // Resume Game button.
     NewButton *resume = new NewButton;
     resume->setRect(Rect(-.35, -.26, .30, .12));
     resume->setLabel("Cancel");
@@ -1101,13 +1093,13 @@ void NavComputer::RenameConfirm::init(void) {
     resume->setDownTextColor(GUI_OPAQUE_BLACK());
     resume->setHighlightColor(GFXColor(0, 1, 0, .4));
     resume->setFont(Font(.05, BOLD_STROKE));
-    //Put the button on the window.
+    // Put the button on the window.
     window->addControl(resume);
 
     window->setModal(true);
 }
 
-//Process a command event from the Options Menu window.
+// Process a command event from the Options Menu window.
 bool NavComputer::RenameConfirm::processWindowCommand(const EventCommandId &command, Control *control) {
     if (command == "Rename") {
         TextInputDisplay *input = vega_dynamic_cast_ptr<TextInputDisplay>(window()->findControlById("PathNameBox"));
@@ -1115,13 +1107,13 @@ bool NavComputer::RenameConfirm::processWindowCommand(const EventCommandId &comm
         m_parent->actionRenameConfirmed(input->text());
         window()->close();
     } else {
-        //Not a command we know about.
+        // Not a command we know about.
         return WindowController::processWindowCommand(command, control);
     }
     return true;
 }
 
-//Load the paths to be put in the lister.
+// Load the paths to be put in the lister.
 void NavComputer::loadPathLister() {
     SimplePicker *listPicker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("PathLister"));
     assert(listPicker != NULL);
@@ -1131,13 +1123,13 @@ void NavComputer::loadPathLister() {
     for (vector<NavPath *>::iterator i = pathman->paths.begin(); i < pathman->paths.end(); ++i) {
         listPicker->addCell(new ValuedPickerCell<NavPath *>((*i), (*i)->getName()));
     }
-    //Make sure the description is empty.
+    // Make sure the description is empty.
     StaticDisplay *desc = vega_dynamic_cast_ptr<StaticDisplay>(window()->findControlById("Description"));
     assert(desc != NULL);
     desc->setText("");
 }
 
-//Load the paths to be put in the lister.
+// Load the paths to be put in the lister.
 void NavComputer::loadChainLister() {
     SimplePicker *chainPicker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("ChainLister"));
     assert(chainPicker != NULL);
@@ -1147,9 +1139,8 @@ void NavComputer::loadChainLister() {
     }
 }
 
-void NavComputer::loadCriteriaPickerCell(SimplePicker *picker,
-        ValuedPickerCell<CriteriaNode *> *parent,
-        CriteriaNode *node) {
+void NavComputer::loadCriteriaPickerCell(SimplePicker *picker, ValuedPickerCell<CriteriaNode *> *parent,
+                                         CriteriaNode *node) {
     assert(node != NULL);
     ValuedPickerCell<CriteriaNode *> *cell = new ValuedPickerCell<CriteriaNode *>(node, node->getText());
     cell->setHideChildren(false);
@@ -1165,21 +1156,19 @@ void NavComputer::loadCriteriaPickerCell(SimplePicker *picker,
     }
 }
 
-//Load the criteria to be put in the lister.
+// Load the criteria to be put in the lister.
 void NavComputer::loadCriteriaLister() {
     SimplePicker *picker = vega_dynamic_cast_ptr<SimplePicker>(window()->findControlById("CriteriaLister"));
     assert(picker != NULL);
     picker->clear();
     if (criteria) {
-        if (static_cast< CriteriaPathNode * > (currentNode)->getRoot()->getChild()) {
-            loadCriteriaPickerCell(picker,
-                    NULL,
-                    static_cast< CriteriaPathNode * > (currentNode)->getRoot()->getChild());
+        if (static_cast<CriteriaPathNode *>(currentNode)->getRoot()->getChild()) {
+            loadCriteriaPickerCell(picker, NULL, static_cast<CriteriaPathNode *>(currentNode)->getRoot()->getChild());
         }
     }
 }
 
-//Load the absolute button.
+// Load the absolute button.
 void NavComputer::loadAbsoluteButton() {
     NewButton *absolute = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Absolute"));
     assert(absolute != NULL);
@@ -1216,11 +1205,11 @@ void NavComputer::updateNodeDescription() {
     }
 }
 
-//The selection in the Path lister changed.
+// The selection in the Path lister changed.
 bool NavComputer::pathListerChangedSelection(const EventCommandId &command, Control *control) {
     assert(control != NULL);
-    Picker *picker = static_cast< Picker * > (control);
-    ValuedPickerCell<NavPath *> *cell = static_cast< ValuedPickerCell<NavPath *> * > ( picker->selectedCell());
+    Picker                      *picker = static_cast<Picker *>(control);
+    ValuedPickerCell<NavPath *> *cell   = static_cast<ValuedPickerCell<NavPath *> *>(picker->selectedCell());
     if (cell == NULL) {
         currentPath = NULL;
     } else {
@@ -1323,9 +1312,9 @@ bool NavComputer::actionAnd(const EventCommandId &command, Control *control) {
         return true;
     }
     ValuedPickerCell<CriteriaType> *parameterCell =
-            static_cast< ValuedPickerCell<CriteriaType> * > ( parameterPicker->selectedCell());
+            static_cast<ValuedPickerCell<CriteriaType> *>(parameterPicker->selectedCell());
     ValuedPickerCell<CriteriaNode *> *criteriaCell =
-            static_cast< ValuedPickerCell<CriteriaNode *> * > ( criteriaPicker->selectedCell());
+            static_cast<ValuedPickerCell<CriteriaNode *> *>(criteriaPicker->selectedCell());
     if (parameterCell == NULL) {
         return true;
     }
@@ -1341,8 +1330,8 @@ bool NavComputer::actionAnd(const EventCommandId &command, Control *control) {
     } else {
         newNode = new CriteriaSector(input->text());
     }
-    if (static_cast< CriteriaPathNode * > (currentNode)->getRoot()->getChild() == NULL) {
-        static_cast< CriteriaPathNode * > (currentNode)->getRoot()->setChild(newNode);
+    if (static_cast<CriteriaPathNode *>(currentNode)->getRoot()->getChild() == NULL) {
+        static_cast<CriteriaPathNode *>(currentNode)->getRoot()->setChild(newNode);
     } else {
         if (criteriaCell == NULL) {
             return true;
@@ -1367,9 +1356,9 @@ bool NavComputer::actionOr(const EventCommandId &command, Control *control) {
         return true;
     }
     ValuedPickerCell<CriteriaType> *parameterCell =
-            static_cast< ValuedPickerCell<CriteriaType> * > ( parameterPicker->selectedCell());
+            static_cast<ValuedPickerCell<CriteriaType> *>(parameterPicker->selectedCell());
     ValuedPickerCell<CriteriaNode *> *criteriaCell =
-            static_cast< ValuedPickerCell<CriteriaNode *> * > ( criteriaPicker->selectedCell());
+            static_cast<ValuedPickerCell<CriteriaNode *> *>(criteriaPicker->selectedCell());
     if (parameterCell == NULL) {
         return true;
     }
@@ -1385,8 +1374,8 @@ bool NavComputer::actionOr(const EventCommandId &command, Control *control) {
     } else {
         newNode = new CriteriaSector(input->text());
     }
-    if (static_cast< CriteriaPathNode * > (currentNode)->getRoot()->getChild() == NULL) {
-        static_cast< CriteriaPathNode * > (currentNode)->getRoot()->setChild(newNode);
+    if (static_cast<CriteriaPathNode *>(currentNode)->getRoot()->getChild() == NULL) {
+        static_cast<CriteriaPathNode *>(currentNode)->getRoot()->setChild(newNode);
     } else {
         if (criteriaCell == NULL) {
             return true;
@@ -1402,7 +1391,7 @@ bool NavComputer::actionNot(const EventCommandId &command, Control *control) {
     Picker *criteriaPicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("CriteriaLister"));
     assert(criteriaPicker != NULL);
     ValuedPickerCell<CriteriaNode *> *criteriaCell =
-            static_cast< ValuedPickerCell<CriteriaNode *> * > ( criteriaPicker->selectedCell());
+            static_cast<ValuedPickerCell<CriteriaNode *> *>(criteriaPicker->selectedCell());
     if (criteriaCell == NULL) {
         return true;
     }
@@ -1418,7 +1407,7 @@ bool NavComputer::actionRemoveCriteria(const EventCommandId &command, Control *c
     Picker *criteriaPicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("CriteriaLister"));
     assert(criteriaPicker != NULL);
     ValuedPickerCell<CriteriaNode *> *criteriaCell =
-            static_cast< ValuedPickerCell<CriteriaNode *> * > ( criteriaPicker->selectedCell());
+            static_cast<ValuedPickerCell<CriteriaNode *> *>(criteriaPicker->selectedCell());
     if (criteriaCell == NULL) {
         return true;
     }
@@ -1439,9 +1428,9 @@ bool NavComputer::actionChain(const EventCommandId &command, Control *control) {
     Picker *typePicker = vega_dynamic_cast_ptr<Picker>(window()->findControlById("ChainTypeLister"));
     assert(typePicker != NULL);
 
-    ValuedPickerCell<NavPath *> *pathCell = static_cast< ValuedPickerCell<NavPath *> * > ( pathPicker->selectedCell());
+    ValuedPickerCell<NavPath *> *pathCell = static_cast<ValuedPickerCell<NavPath *> *>(pathPicker->selectedCell());
     ValuedPickerCell<ChainPathNode::PartType> *typeCell =
-            static_cast< ValuedPickerCell<ChainPathNode::PartType> * > ( typePicker->selectedCell());
+            static_cast<ValuedPickerCell<ChainPathNode::PartType> *>(typePicker->selectedCell());
     if (!pathCell || !typeCell) {
         return true;
     }
@@ -1456,4 +1445,3 @@ void NavComputer::actionRenameConfirmed(std::string name) {
     currentPath->setName(name);
     loadPathLister();
 }
-

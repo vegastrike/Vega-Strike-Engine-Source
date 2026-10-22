@@ -34,18 +34,20 @@
 
   @todo Allow packaging of files named to the standard input.
  */
-#include "vsrtools.h"
-#include "tools/common.h"
-#include <stdlib.h>
-#include <cstring>
-#include <vector>
 #include <algorithm>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
+#include <cstring>
 #include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <vector>
+
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include "tools/common.h"
+#include "vsrtools.h"
 
 /** @addtogroup vsrtools Command line tools to handle the Vega Strike Resource
   Package files.
@@ -62,13 +64,14 @@ public:
     }
 
     void add(const string &anyname);
+
 private:
     void finish(void);
     void addDirectory(const string &dirname);
     void addFile(const string &filename, uint32_t file_size);
 
-    FILEHandle pkg;
-    uint32_t offsetInPackage;
+    FILEHandle        pkg;
+    uint32_t          offsetInPackage;
     vector<VSRMember> pkg_index;
 };
 
@@ -93,27 +96,25 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-PackageFileCreator::PackageFileCreator(const string &file)
-        : pkg(file, "wb"), offsetInPackage(12) {
+PackageFileCreator::PackageFileCreator(const string &file) : pkg(file, "wb"), offsetInPackage(12) {
     offsetInPackage = 12;
 }
 
-void
-PackageFileCreator::addFile(const string &fname, uint32_t file_size) {
+void PackageFileCreator::addFile(const string &fname, uint32_t file_size) {
     if (fseek(pkg, offsetInPackage, SEEK_SET)) {
         throw errno;
     }
     FILEHandle incoming(fname, "rb");
-    char buf[1024];
-    uint32_t size = file_size;
+    char       buf[1'024];
+    uint32_t   size = file_size;
 
     while (size > 0) {
-        int bi = fread(buf, 1, 1024, incoming);
+        int bi = fread(buf, 1, 1'024, incoming);
         if (bi <= 0) {
             throw errno;
         }
-        size -= bi;
-        int bo = fwrite(buf, 1, bi, pkg);
+        size   -= bi;
+        int bo  = fwrite(buf, 1, bi, pkg);
         if (bi != bo) {
             throw errno;
         }
@@ -122,15 +123,13 @@ PackageFileCreator::addFile(const string &fname, uint32_t file_size) {
     offsetInPackage += file_size;
 }
 
-void
-PackageFileCreator::addDirectory(const string &dname) {
+void PackageFileCreator::addDirectory(const string &dname) {
     DIR *dd = opendir(dname.c_str());
 
     if (dd == 0) {
         throw errno;
     }
-    for (struct dirent *dentry = readdir(dd); dentry != 0;
-            dentry = readdir(dd)) {
+    for (struct dirent *dentry = readdir(dd); dentry != 0; dentry = readdir(dd)) {
         try {
             if (dentry->d_name[0] != '.') {
                 add(dname + '/' + dentry->d_name);
@@ -141,8 +140,7 @@ PackageFileCreator::addDirectory(const string &dname) {
     closedir(dd);
 }
 
-void
-PackageFileCreator::add(const string &pname) {
+void PackageFileCreator::add(const string &pname) {
     struct stat stats;
 
     stat(pname.c_str(), &stats);
@@ -154,27 +152,25 @@ PackageFileCreator::add(const string &pname) {
             addFile(pname, stats.st_size);
         }
     } catch (int error) {
-        fprintf(stderr, "Addition of %s failed:\n\t%s\n", pname.c_str(),
-                strerror(error));
+        fprintf(stderr, "Addition of %s failed:\n\t%s\n", pname.c_str(), strerror(error));
     }
 }
 
 void PackageFileCreator::finish(void) {
-    //Sort the index
+    // Sort the index
     sort(pkg_index.begin(), pkg_index.end());
     VSRHeader header;
     memcpy(header.magic, "VSR", 4);
     header.entryTableOffset = offsetInPackage;
-    header.entries = pkg_index.size();
+    header.entries          = pkg_index.size();
     fseek(pkg, 0, SEEK_SET);
     fwrite(&header, sizeof(VSRHeader), 1, pkg);
-    //Now write entry table to file
+    // Now write entry table to file
     fseek(pkg, offsetInPackage, SEEK_SET);
-    for (vector<VSRMember>::iterator ii = pkg_index.begin();
-            ii != pkg_index.end(); ++ii) {
+    for (vector<VSRMember>::iterator ii = pkg_index.begin(); ii != pkg_index.end(); ++ii) {
         VSRPEntry entry;
         entry.fileLength = ii->fileLength;
-        entry.offset = ii->offset;
+        entry.offset     = ii->offset;
         memset(entry.filename, 0, 256);
         strcpy(entry.filename, ii->filename.c_str());
         fwrite(&entry, sizeof(VSRPEntry), 1, pkg);

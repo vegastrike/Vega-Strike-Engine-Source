@@ -27,11 +27,12 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_BEAM_H
 #define VEGA_STRIKE_ENGINE_CMD_BEAM_H
 
-#include "gfx_generic/mesh.h"
+#include <vector>
+
 #include "cmd/unit_collide.h"
 #include "gfx_generic/matrix.h"
+#include "gfx_generic/mesh.h"
 #include "gfx_generic/quaternion.h"
-#include <vector>
 class GFXVertexList;
 class Texture;
 struct GFXColor;
@@ -41,44 +42,47 @@ class Beam {
 private:
     const WeaponInfo *type;
 
-    int sound;
+    int            sound;
     Transformation local_transformation;
-    unsigned int decal;
+    unsigned int   decal;
     GFXVertexList *vlist;
-    LineCollide CollideInfo;
+    LineCollide    CollideInfo;
 
     unsigned int numframes;
-    float speed; //lite speed
-    float texturespeed;
-    float curlength;
-    float range;
-    float radialspeed;
-    float curthick;
-    float thickness;
-    float lastthick;
-    float lastlength;
-    float stability;
-    float damagerate;
-    float phasedamage;
-    float rangepenalty;
-    float refire;
-    float refiretime;
-    float texturestretch;
-    GFXColor Col;
+    float        speed;  // lite speed
+    float        texturespeed;
+    float        curlength;
+    float        range;
+    float        radialspeed;
+    float        curthick;
+    float        thickness;
+    float        lastthick;
+    float        lastlength;
+    float        stability;
+    float        damagerate;
+    float        phasedamage;
+    float        rangepenalty;
+    float        refire;
+    float        refiretime;
+    float        texturestretch;
+    GFXColor     Col;
+
     enum Impact {
-        ALIVE = 0,
-        IMPACT = 1,
-        UNSTABLE = 2,
+        ALIVE             = 0,
+        IMPACT            = 1,
+        UNSTABLE          = 2,
         IMPACTANDUNSTABLE = 3
-    }; //is it right now blowing the enemy to smitheri
+    };  // is it right now blowing the enemy to smitheri
+
     unsigned char impact;
-    bool listen_to_owner;
-    void *owner; //may be a dead pointer...never dereferenced
-    QVector center; //in world coordinates as of last physics frame...
-    Vector direction;
+    bool          listen_to_owner;
+    void         *owner;   // may be a dead pointer...never dereferenced
+    QVector       center;  // in world coordinates as of last physics frame...
+    Vector        direction;
 
     void RecalculateVertices(const Matrix &trans);
     void CollideHuge(const LineCollide &, Unit *targetToCollideWith, Unit *firer, Unit *superunit);
+
 public:
     Beam(const Transformation &trans, const WeaponInfo &clne, void *own, Unit *firer, int sound);
     void Init(const Transformation &trans, const WeaponInfo &clne, void *own, Unit *firer);
@@ -86,7 +90,7 @@ public:
 
     void Reinitialize();
 
-    bool Collide(class Unit *target, Unit *firer, Unit *superunit /*for cargo*/ );
+    bool Collide(class Unit *target, Unit *firer, Unit *superunit /*for cargo*/);
 
     void Destabilize();
     bool Dissolved();
@@ -98,20 +102,15 @@ public:
 
     static void ProcessDrawQueue();
 
-    bool Ready();
+    bool  Ready();
     float refireTime();
-    void RemoveFromSystem(bool eradicate);
+    void  RemoveFromSystem(bool eradicate);
 
     void SetPosition(const QVector &);
     void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 
-    void UpdatePhysics(const Transformation &,
-            const Matrix &,
-            class Unit *target,
-            float trackingcone,
-            Unit *targetToCollideWith /*prevent AI friendly fire--speed up app*/,
-            Unit *firer,
-            Unit *superunit);
-
+    void UpdatePhysics(const Transformation &, const Matrix &, class Unit *target, float trackingcone,
+                       Unit *targetToCollideWith /*prevent AI friendly fire--speed up app*/, Unit *firer,
+                       Unit *superunit);
 };
-#endif //VEGA_STRIKE_ENGINE_CMD_BEAM_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_BEAM_H

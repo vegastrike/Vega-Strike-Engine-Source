@@ -27,22 +27,24 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_AI_FIRE_KEYBOARD_H
 #define VEGA_STRIKE_ENGINE_CMD_AI_FIRE_KEYBOARD_H
 
-#include "src/in.h"
-#include "order.h"
-#include "event_xml.h"
 #include "communication.h"
-//all unified AI's should inherit from FireAt, so they can choose targets together.
+#include "event_xml.h"
+#include "order.h"
+#include "src/in.h"
+// all unified AI's should inherit from FireAt, so they can choose targets together.
 #define NUMSAVEDTARGETS 10
+
 class FireKeyboard : public Order {
-    bool itts;
-    bool refresh_target;
-    float gunspeed;
-    float gunrange;
-    float rxntime;
-    float delay;
-    float autotrackingtoggle;
-    bool ShouldFire(Unit *targ);
+    bool                            itts;
+    bool                            refresh_target;
+    float                           gunspeed;
+    float                           gunrange;
+    float                           rxntime;
+    float                           delay;
+    float                           autotrackingtoggle;
+    bool                            ShouldFire(Unit *targ);
     std::list<CommunicationMessage> resp;
+
 public:
     virtual void SetParent(Unit *parent1);
     // Reset the per-key controller state (weapk, misk, firekey, target keys, ...)
@@ -139,15 +141,15 @@ public:
     static void FormUp(const KBData &, KBSTATE);
     static void DockWithMe(const KBData &, KBSTATE);
     static void DefendTarget(const KBData &, KBSTATE);
-    //IAmDave - new flightgroup commands...
+    // IAmDave - new flightgroup commands...
     static void DockTarget(const KBData &, KBSTATE k);
     static void HoldPosition(const KBData &, KBSTATE k);
-    //IAmDave - ...new flightgroup commands end.
+    // IAmDave - ...new flightgroup commands end.
     static void AttackTarget(const KBData &, KBSTATE);
     static void TurretAIOn(const KBData &, KBSTATE);
     static void TurretAIOff(const KBData &, KBSTATE);
     static void TurretFireAtWill(const KBData &, KBSTATE);
-//Added for targeting nearest units. --ch
+    // Added for targeting nearest units. --ch
     static void NearestHostileTargetKey(const KBData &, KBSTATE k);
     static void NearestDangerousHostileKey(const KBData &, KBSTATE k);
     static void NearestFriendlyKey(const KBData &, KBSTATE k);
@@ -167,16 +169,17 @@ protected:
     void ChooseThreatTargets( bool targetturrets ); //chooses n targets and puts the best to attack in unit's target container
     void PickTargets( bool targetturrets ); //chooses the target which is nearest to the center of the screen
 #endif
-    unsigned int whichplayer;
-    unsigned int whichjoystick;
+    unsigned int             whichplayer;
+    unsigned int             whichjoystick;
     struct FIREKEYBOARDTYPE &f();
     struct FIREKEYBOARDTYPE &j();
-    unsigned int DoSpeechAndAni(Unit *un, Unit *parent, class CommunicationMessage &c);
+    unsigned int             DoSpeechAndAni(Unit *un, Unit *parent, class CommunicationMessage &c);
+
 public:
     virtual void ProcessCommMessage(class CommunicationMessage &c);
-    FireKeyboard(unsigned int whichjoystick, unsigned int whichplayer); //weapon prefs?
+    FireKeyboard(unsigned int whichjoystick, unsigned int whichplayer);  // weapon prefs?
     virtual void Execute();
     virtual ~FireKeyboard();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_FIRE_KEYBOARD_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_FIRE_KEYBOARD_H

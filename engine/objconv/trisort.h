@@ -24,38 +24,41 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
+
+#ifndef VEGA_STRIKE_ENGINE_OBJCONV_TRISORT_H
+#define VEGA_STRIKE_ENGINE_OBJCONV_TRISORT_H
+
+#include <cstdio>
+#include <vector>
 
 enum POLYGON_RELATION {
-    BACK = -1,
+    BACK    = -1,
     UNKNOWN = 0,
-    FRONT = 1
+    FRONT   = 1,
 };
 
 class Vector {
 public:
     double x, y, z;
 
-    Vector(double xx, double yy, double zz) : x(xx), y(yy), z(zz) {
-    }
+    Vector(double xx, double yy, double zz) : x(xx), y(yy), z(zz) {}
 };
+
 class Index {
 public:
     Vector V;
-    int p, n, t, c;
+    int    p, n, t, c;
 
-    Index(Vector xyz, int p, int n, int t, int c) : V(xyz), p(p), n(n), t(t), c(c) {
-    }
+    Index(Vector xyz, int p, int n, int t, int c) : V(xyz), p(p), n(n), t(t), c(c) {}
 
-    void write(FILE *fp) const;
+    void write(std::FILE *fp) const;
 };
 
 class Plane {
 public:
     double a, b, c, d;
 
-    Plane(int a, int b, int c, int d) : a(a), b(b), c(c), d(d) {
-    }
+    Plane(int a, int b, int c, int d) : a(a), b(b), c(c), d(d) {}
 
     POLYGON_RELATION inFront(const Vector &) const;
 
@@ -63,33 +66,37 @@ public:
         return a * v.x + b * v.y + c * v.z + d;
     }
 };
+
 class Face {
-    bool Cross(Plane &) const;
+    bool             Cross(Plane &) const;
     POLYGON_RELATION inFront(const Plane &) const;
+
 public:
     std::vector<Index> p;
-    int id;
-    Plane planeEqu() const;
-    bool operator<(const class Face &) const;
+    int                id;
+    Plane              planeEqu() const;
+    bool               operator<(const class Face &) const;
 
     Face() {
         static int temp = 0;
-        id = temp++;
+        id              = temp++;
     }
 };
+
 class Mesh {
-    void processline(char *line);
-    Index processfacevertex(char *chunk) const;
-    Face processface(char *line) const;
+    void                processline(char *line);
+    Index               processfacevertex(char *chunk) const;
+    Face                processface(char *line) const;
     std::vector<Vector> p;
     std::vector<Vector> n;
-    std::vector<Vector> t; //tex coords i=s j=t
+    std::vector<Vector> t;  // tex coords i=s j=t
     std::vector<Vector> c;
-    std::vector<Face> f;
+    std::vector<Face>   f;
+
 public:
     Mesh(const char *filename);
     void sort();
     void write(const char *filename) const;
-    void writeIndex(FILE *fp, const Index &) const;
+    void writeIndex(std::FILE *fp, const Index &) const;
 };
-
+#endif // VEGA_STRIKE_ENGINE_OBJCONV_TRISORT_H

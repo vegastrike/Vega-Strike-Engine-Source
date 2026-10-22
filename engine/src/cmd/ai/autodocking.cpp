@@ -28,13 +28,14 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include <cassert>
-#include <iterator>
-#include "cmd/unit_generic.h"
-#include "cmd/unit_util.h"
-#include "cmd/ai/navigation.h"
 #include "autodocking.h"
 
+#include <cassert>
+#include <iterator>
+
+#include "cmd/ai/navigation.h"
+#include "cmd/unit_generic.h"
+#include "cmd/unit_util.h"
 #include "flykeyboard.h"
 #include "src/in.h"
 #include "src/in_kb_data.h"
@@ -42,9 +43,7 @@
 namespace {
 
 // Find waypoints if we can travel through all of them.
-boost::optional<size_t> FindWaypoint(Unit *player,
-        const std::vector<DockingPorts> &dockingPorts,
-        size_t port) {
+boost::optional<size_t> FindWaypoint(Unit *player, const std::vector<DockingPorts> &dockingPorts, size_t port) {
     if (!dockingPorts[port].IsConnected()) {
         return port;
     }
@@ -54,7 +53,7 @@ boost::optional<size_t> FindWaypoint(Unit *player,
     size_t i = port + 1;
     for (; i < dockingPorts.size(); ++i) {
         const DockingPorts &waypoint = dockingPorts[i];
-        if (waypoint.IsDockable()) { // No further waypoints
+        if (waypoint.IsDockable()) {  // No further waypoints
             break;
         }
         // Do not use docking port if one of the waypoints are too small
@@ -66,8 +65,7 @@ boost::optional<size_t> FindWaypoint(Unit *player,
 }
 
 // Find suitable docking port and associated waypoints.
-Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
-        Unit *station) {
+Orders::AutoDocking::DockingPath FindDockingPort(Unit *player, Unit *station) {
     // FIXME: Prefer outside docking ports (because they are more safe to travel to)
     // FIXME: Ensure line-of-sight to first point
     // FIXME: Start at the closest waypoint (and skip those before it)
@@ -75,9 +73,9 @@ Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
     const std::vector<DockingPorts> &dockingPorts = station->DockingPortLocations();
 
     typedef std::pair<size_t, size_t> PortRange;
-    boost::optional<PortRange> candidate;
-    float shortestDistance = std::numeric_limits<float>::max();
-    const bool isPlanet = station->isPlanet();
+    boost::optional<PortRange>        candidate;
+    float                             shortestDistance = std::numeric_limits<float>::max();
+    const bool                        isPlanet         = station->isPlanet();
     for (size_t i = 0; i < dockingPorts.size(); ++i) {
         if (dockingPorts[i].IsOccupied()) {
             continue;
@@ -94,18 +92,17 @@ Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
             continue;
         }
 
-        QVector dockingPosition = Transform(station->GetTransformation(),
-                dockingPorts[i].GetPosition().Cast());
-        float distance = (dockingPosition - player->Position()).Magnitude();
+        QVector dockingPosition = Transform(station->GetTransformation(), dockingPorts[i].GetPosition().Cast());
+        float   distance        = (dockingPosition - player->Position()).Magnitude();
         if (shortestDistance > distance) {
             if (isPlanet) {
                 shortestDistance = distance;
-                candidate = PortRange(i, i);
+                candidate        = PortRange(i, i);
             } else {
                 boost::optional<size_t> waypoint = FindWaypoint(player, dockingPorts, i);
                 if (waypoint) {
                     shortestDistance = distance;
-                    candidate = PortRange(i, *waypoint);
+                    candidate        = PortRange(i, *waypoint);
                 }
             }
         }
@@ -113,8 +110,8 @@ Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
 
     Orders::AutoDocking::DockingPath result;
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
     if (candidate) {
         assert(candidate->first <= candidate->second);
@@ -124,22 +121,19 @@ Orders::AutoDocking::DockingPath FindDockingPort(Unit *player,
     }
     return result;
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
-#pragma GCC diagnostic pop
+#    pragma GCC diagnostic pop
 #endif
 }
 
-} // anonymous namespace
+}  // anonymous namespace
 
 namespace Orders {
 
 AutoDocking::AutoDocking(Unit *destination)
-        : Order(MOVEMENT | FACING, SLOCATION),
-        state(&AutoDocking::InitialState),
-        target(destination) {
-}
+    : Order(MOVEMENT | FACING, SLOCATION), state(&AutoDocking::InitialState), target(destination) {}
 
 void AutoDocking::Execute() {
-    Unit *player = GetParent();
+    Unit *player  = GetParent();
     Unit *station = target.GetUnit();
     // Exit if either the ship or the station has been destroyed
     if (player == NULL || station == NULL) {
@@ -168,7 +162,7 @@ bool AutoDocking::CanDock(Unit *player, Unit *station) {
 
 void AutoDocking::EndState(Unit *player, Unit *station) {
     player->autopilotactive = false;
-    done = true;
+    done                    = true;
 }
 
 void AutoDocking::AbortState(Unit *player, Unit *station) {
@@ -240,7 +234,7 @@ void AutoDocking::UndockingState(Unit *player, Unit *station) {
     // Enqueue undocking path if docked at inner port
     if (station->DockingPortLocations()[dockingPath.back()].IsInside()) {
         DockingPath::reverse_iterator it = dockingPath.rbegin();
-        ++it; // Skip the docking port itself
+        ++it;  // Skip the docking port itself
         for (; it != dockingPath.rend(); ++it) {
             EnqueuePort(player, station, *it);
             state = &AutoDocking::DepartureState;
@@ -252,7 +246,7 @@ void AutoDocking::DepartureState(Unit *player, Unit *station) {
     Order::Execute();
     if (Done()) {
         EraseOrders();
-        done = false;
+        done  = false;
         state = &AutoDocking::EndState;
     }
 }
@@ -270,15 +264,14 @@ void AutoDocking::EnqueuePort(Unit *player, Unit *station, size_t port) {
     // If accuracy is too high then the ship turns precisely, but it does
     // not terminate because it is trying to reach a higher accuracy than
     // it can. This causes the ship to freeze.
-    const unsigned char accuracy = 7; // Higher means more accurate
-    const bool useAfterburner = false;
-    const bool terminateAfterUse = true;
+    const unsigned char accuracy          = 7;  // Higher means more accurate
+    const bool          useAfterburner    = false;
+    const bool          terminateAfterUse = true;
 
     const DockingPorts &currentPort = station->DockingPortLocations()[port];
-    QVector position = Transform(station->GetTransformation(),
-            currentPort.GetPosition().Cast());
+    QVector             position    = Transform(station->GetTransformation(), currentPort.GetPosition().Cast());
 
-    Order *facing = new ChangeHeading(position, accuracy, turningSpeed, terminateAfterUse);
+    Order *facing   = new ChangeHeading(position, accuracy, turningSpeed, terminateAfterUse);
     Order *movement = new MoveTo(position, useAfterburner, accuracy, terminateAfterUse);
     if (currentPort.IsInside()) {
         // Perform facing and movement sequentially when navigating inside the station
@@ -292,4 +285,4 @@ void AutoDocking::EnqueuePort(Unit *player, Unit *station, size_t port) {
     }
 }
 
-} // namespace Orders
+}  // namespace Orders

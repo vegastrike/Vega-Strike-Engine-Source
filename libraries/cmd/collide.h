@@ -38,4 +38,4 @@ bool EradicateCollideTable(LineCollide *lc, StarSystem *ss);
 void AddCollideQueue(LineCollide &tmp, StarSystem *ss);
 bool lcwithin(const LineCollide &lc, const LineCollide &tmp);
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLIDE_FUNCS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLIDE_FUNCS_H

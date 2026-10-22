@@ -32,9 +32,9 @@
 //
 
 namespace Audio {
-    namespace Test {
-        int main(int argc, char **argv);
-    };
+namespace Test {
+int main(int argc, char **argv);
 };
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_TEST_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_TEST_H

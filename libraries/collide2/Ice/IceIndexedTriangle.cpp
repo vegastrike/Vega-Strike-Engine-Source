@@ -21,7 +21,7 @@ using namespace Opcode;
  *  \author		Pierre Terdiman
  *  \version	1.0
  *  \date		08.15.98
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,9 +64,7 @@ float IndexedTriangle::Perimeter(const Point *verts) const {
     const Point &p0 = verts[0];
     const Point &p1 = verts[1];
     const Point &p2 = verts[2];
-    return p0.Distance(p1)
-            + p0.Distance(p2)
-            + p1.Distance(p2);
+    return p0.Distance(p1) + p0.Distance(p2) + p1.Distance(p2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +100,7 @@ void IndexedTriangle::Normal(const Point *verts, Point &normal) const {
     const Point &p0 = verts[mVRef[0]];
     const Point &p1 = verts[mVRef[1]];
     const Point &p2 = verts[mVRef[2]];
-    normal = ((p2 - p1) ^ (p0 - p1)).Normalize();
+    normal          = ((p2 - p1) ^ (p0 - p1)).Normalize();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +118,7 @@ void IndexedTriangle::DenormalizedNormal(const Point *verts, Point &normal) cons
     const Point &p0 = verts[mVRef[0]];
     const Point &p1 = verts[mVRef[1]];
     const Point &p2 = verts[mVRef[2]];
-    normal = ((p2 - p1) ^ (p0 - p1));
+    normal          = ((p2 - p1) ^ (p0 - p1));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +136,7 @@ void IndexedTriangle::Center(const Point *verts, Point &center) const {
     const Point &p0 = verts[mVRef[0]];
     const Point &p1 = verts[mVRef[1]];
     const Point &p2 = verts[mVRef[2]];
-    center = (p0 + p1 + p2) * INV3;
+    center          = (p0 + p1 + p2) * INV3;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,11 +151,11 @@ void IndexedTriangle::CenteredNormal(const Point *verts, Point &normal) const {
         return;
     }
 
-    const Point &p0 = verts[mVRef[0]];
-    const Point &p1 = verts[mVRef[1]];
-    const Point &p2 = verts[mVRef[2]];
-    Point Center = (p0 + p1 + p2) * INV3;
-    normal = Center + ((p2 - p1) ^ (p0 - p1)).Normalize();
+    const Point &p0     = verts[mVRef[0]];
+    const Point &p1     = verts[mVRef[1]];
+    const Point &p2     = verts[mVRef[2]];
+    Point        Center = (p0 + p1 + p2) * INV3;
+    normal              = Center + ((p2 - p1) ^ (p0 - p1)).Normalize();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,18 +171,18 @@ void IndexedTriangle::RandomPoint(const Point *verts, Point &random) const {
     }
 
     // Random barycentric coords
-    float Alpha = UnitRandomFloat();
-    float Beta = UnitRandomFloat();
-    float Gamma = UnitRandomFloat();
-    float OneOverTotal = 1.0f / (Alpha + Beta + Gamma);
-    Alpha *= OneOverTotal;
-    Beta *= OneOverTotal;
-    Gamma *= OneOverTotal;
+    float Alpha         = UnitRandomFloat();
+    float Beta          = UnitRandomFloat();
+    float Gamma         = UnitRandomFloat();
+    float OneOverTotal  = 1.0f / (Alpha + Beta + Gamma);
+    Alpha              *= OneOverTotal;
+    Beta               *= OneOverTotal;
+    Gamma              *= OneOverTotal;
 
     const Point &p0 = verts[mVRef[0]];
     const Point &p1 = verts[mVRef[1]];
     const Point &p2 = verts[mVRef[2]];
-    random = Alpha * p0 + Beta * p1 + Gamma * p2;
+    random          = Alpha * p0 + Beta * p1 + Gamma * p2;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,9 +209,9 @@ bool IndexedTriangle::IsVisible(const Point *verts, const Point &source) const {
     // Backface culling
     return (Normal | source) >= 0.0f;
 
-// Same as:
-//	Plane PL(verts[mVRef[0]], verts[mVRef[1]], verts[mVRef[2]]);
-//	return PL.Distance(source) > PL.d;
+    // Same as:
+    //	Plane PL(verts[mVRef[0]], verts[mVRef[1]], verts[mVRef[2]]);
+    //	return PL.Distance(source) > PL.d;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -235,18 +233,18 @@ bool IndexedTriangle::BackfaceCulling(const Point *verts, const Point &source) c
     const Point &p2 = verts[mVRef[2]];
 
     // Compute base
-//	Point Base = (p0 + p1 + p2)*INV3;
+    //	Point Base = (p0 + p1 + p2)*INV3;
 
     // Compute denormalized normal
     Point Normal = (p2 - p1) ^ (p0 - p1);
 
     // Backface culling
-//	return (Normal | (source - Base)) >= 0.0f;
+    //	return (Normal | (source - Base)) >= 0.0f;
     return (Normal | (source - p0)) >= 0.0f;
 
-// Same as: (but a bit faster)
-//	Plane PL(verts[mVRef[0]], verts[mVRef[1]], verts[mVRef[2]]);
-//	return PL.Distance(source)>0.0f;
+    // Same as: (but a bit faster)
+    //	Plane PL(verts[mVRef[0]], verts[mVRef[1]], verts[mVRef[2]]);
+    //	return PL.Distance(source)>0.0f;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -300,7 +298,8 @@ bool IndexedTriangle::ReplaceVertex(uint32_t oldref, uint32_t newref) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- *	Checks whether the triangle is degenerate or not. A degenerate triangle has two common vertex references. This is a zero-area triangle.
+ *	Checks whether the triangle is degenerate or not. A degenerate triangle has two common vertex references. This is a
+ *zero-area triangle.
  *  \return		true if the triangle is degenerate
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -452,7 +451,7 @@ float IndexedTriangle::MinEdgeLength(const Point *verts) const {
         return 0.0f;
     }
 
-    float Min = MAX_FLOAT;
+    float Min      = MAX_FLOAT;
     float Length01 = verts[0].Distance(verts[1]);
     float Length02 = verts[0].Distance(verts[2]);
     float Length12 = verts[1].Distance(verts[2]);
@@ -480,7 +479,7 @@ float IndexedTriangle::MaxEdgeLength(const Point *verts) const {
         return 0.0f;
     }
 
-    float Max = MIN_FLOAT;
+    float Max      = MIN_FLOAT;
     float Length01 = verts[0].Distance(verts[1]);
     float Length02 = verts[0].Distance(verts[2]);
     float Length12 = verts[1].Distance(verts[2]);
@@ -522,9 +521,9 @@ void IndexedTriangle::ComputePoint(const Point *verts, float u, float v, Point &
     // Compute nearest vertex if needed
     if (nearvtx) {
         // Compute distance vector
-        Point d(p0.SquareDistance(pt),    // Distance^2 from vertex 0 to point on the face
-                p1.SquareDistance(pt),    // Distance^2 from vertex 1 to point on the face
-                p2.SquareDistance(pt));    // Distance^2 from vertex 2 to point on the face
+        Point d(p0.SquareDistance(pt),   // Distance^2 from vertex 0 to point on the face
+                p1.SquareDistance(pt),   // Distance^2 from vertex 1 to point on the face
+                p2.SquareDistance(pt));  // Distance^2 from vertex 2 to point on the face
 
         // Get smallest distance
         *nearvtx = mVRef[d.SmallestAxis()];
@@ -539,9 +538,9 @@ void IndexedTriangle::ComputePoint(const Point *verts, float u, float v, Point &
 // |w| = |u||v| |sin(u,v)|
 //**************************************
 float Angle(const Point &u, const Point &v) {
-    float NormU = u.Magnitude();    // |u|
-    float NormV = v.Magnitude();    // |v|
-    float Product = NormU * NormV;    // |u||v|
+    float NormU   = u.Magnitude();  // |u|
+    float NormV   = v.Magnitude();  // |v|
+    float Product = NormU * NormV;  // |u||v|
     if (Product == 0.0f) {
         return 0.0f;
     }
@@ -551,7 +550,7 @@ float Angle(const Point &u, const Point &v) {
     float Cosinus = (u | v) * OneOverProduct;
 
     // Sinus
-    Point w = u ^ v;
+    Point w     = u ^ v;
     float NormW = w.Magnitude();
 
     float AbsSinus = NormW * OneOverProduct;
@@ -600,7 +599,7 @@ float IndexedTriangle::Angle(const IndexedTriangle &tri, const Point *verts) con
     }
     return acosf(dp);
 
-//	return ::Angle(n0,n1);
+    //	return ::Angle(n0,n1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -612,8 +611,5 @@ float IndexedTriangle::Angle(const IndexedTriangle &tri, const Point *verts) con
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool IndexedTriangle::Equal(const IndexedTriangle &tri) const {
     // Test all vertex references
-    return (HasVertex(tri.mVRef[0]) &&
-            HasVertex(tri.mVRef[1]) &&
-            HasVertex(tri.mVRef[2]));
+    return (HasVertex(tri.mVRef[0]) && HasVertex(tri.mVRef[1]) && HasVertex(tri.mVRef[2]));
 }
-

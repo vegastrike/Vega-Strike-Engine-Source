@@ -27,33 +27,36 @@
 #ifndef VEGA_STRIKE_ENGINE_PHYSICS_H
 #define VEGA_STRIKE_ENGINE_PHYSICS_H
 
-#include "src/vs_math.h"
 #include "gfx_generic/vec.h"
+#include "src/vs_math.h"
 
-static const float oocc = (float) 0.0000000000000000111265005605; //1/c^2
-static const float c = (float) 299792458.0;
-static const float co10 = (float) 29979245.8;
+static const float oocc = (float)0.0000000000000000111265005605;  // 1/c^2
+static const float c    = (float)299792458.0;
+static const float co10 = (float)29979245.8;
 
 struct Force {
     Vector F;
-    float t;
+    float  t;
 };
+
 const int forcemax = 64;
+
 class PhysicsSystem {
-    float mass, MomentOfInertia;
-    Vector NetForce;
-    Vector NetTorque;
-    Vector AngularVelocity;
-    Vector Velocity;
+    float    mass, MomentOfInertia;
+    Vector   NetForce;
+    Vector   NetTorque;
+    Vector   AngularVelocity;
+    Vector   Velocity;
     QVector *pos;
-    Vector *p, *q, *r;
-    int NumActiveForces;
-    Force ActiveForces[forcemax];
-    int NumActiveTorques;
-    Force ActiveTorques[forcemax];
+    Vector  *p, *q, *r;
+    int      NumActiveForces;
+    Force    ActiveForces[forcemax];
+    int      NumActiveTorques;
+    Force    ActiveTorques[forcemax];
+
 public:
     PhysicsSystem(float M, float I, QVector *pos, Vector *p, Vector *q, Vector *r);
-//~PhysicsSystem();
+    //~PhysicsSystem();
     virtual void Rotate(const Vector &axis);
     virtual void JettisonReactionMass(const Vector &Direction, float speed, float mass);
     virtual void JettisonMass(const Vector &Direction, float speed, float mass);
@@ -67,7 +70,7 @@ public:
     virtual void ApplyTorque(const Vector &Vforce, const Vector &Location, float time);
     virtual void ApplyLocalTorque(const Vector &Vforce, const Vector &Location, float time);
     virtual void ApplyBalancedLocalTorque(const Vector &Vforce, const Vector &Location, float time);
-    void ApplyImpulses(float Time);
+    void         ApplyImpulses(float Time);
 
     void SetVelocity(Vector v) {
         Velocity = v;
@@ -88,5 +91,4 @@ public:
     virtual void Update();
 };
 
-#endif //VEGA_STRIKE_ENGINE_PHYSICS_H
-
+#endif  // VEGA_STRIKE_ENGINE_PHYSICS_H

@@ -28,41 +28,42 @@
 #define VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H
 
 #include "cmd/key_mutable_set.h"
-#include "src/vegastrike.h"
 #include "gfx_generic/vec.h"
-#if defined (_WIN32) || __GNUC__ != 2
-#include <limits>
+#include "src/vegastrike.h"
+#if defined(_WIN32) || __GNUC__ != 2
+#    include <limits>
 #endif
 #include <vector>
 /* Arbitrarily use Set for ALL PLATFORMS -hellcatv */
 class Unit;
 class Bolt;
+
 class Collidable {
 public:
     QVector position;
-    float radius; //radius == 0: to-be-deleted, radius <0 bolt (radius == speed in phys frame), radius >0 unit
+    float   radius;  // radius == 0: to-be-deleted, radius <0 bolt (radius == speed in phys frame), radius >0 unit
 
     union CollideRef {
-        Unit *unit;
+        Unit        *unit;
         unsigned int bolt_index;
-    }
-            ref{};
+    } ref{};
 
     QVector GetPosition() const {
         return position;
     }
 
     void SetPosition(const QVector &bpos) {
-        //in case we want to drop in an xtra radius parameter when we get performance testing
+        // in case we want to drop in an xtra radius parameter when we get performance testing
         this->position = bpos;
-#if defined(__APPLE__) && defined (__MACH__)
-        if ( !FINITE( getKey() ) )
-            position = QVector( 0, 0, 0 );      //hack for now
+#if defined(__APPLE__) && defined(__MACH__)
+        if (!FINITE(getKey())) {
+            position = QVector(0, 0, 0);  // hack for now
+        }
 
 #else
         if (ISNAN(getKey())) {
             position = QVector(0, 0, 0);
-        }      //hack for now
+        }  // hack for now
 #endif
     }
 
@@ -86,27 +87,28 @@ public:
         return *this;
     }
 
-    Collidable() : radius(
-#if defined (_WIN32) || __GNUC__ != 2
-            std::numeric_limits<float>::quiet_NaN()
+    Collidable()
+        : radius(
+#if defined(_WIN32) || __GNUC__ != 2
+                  std::numeric_limits<float>::quiet_NaN()
 #else
-            1.0f/1024.0f/1024.0f/1024.0f
+                  1.0f / 1024.0f / 1024.0f / 1024.0f
 #endif
-    ) {
+          ) {
     }
 
     explicit Collidable(Unit *un);
 
     Collidable(unsigned int bolt_index, float speed, const QVector &p) {
         ref.bolt_index = bolt_index;
-        radius = -speed * SIMULATION_ATOM;
+        radius         = -speed * SIMULATION_ATOM;
         if (
-#if defined(__APPLE__) && defined (__MACH__)
-                        !FINITE( radius )
+#if defined(__APPLE__) && defined(__MACH__)
+                !FINITE(radius)
 #else
-                        ISNAN(radius)
+                ISNAN(radius)
 #endif
-                        || radius >= -FLT_MIN) {
+                || radius >= -FLT_MIN) {
             radius = -FLT_MIN * 2;
         }
         this->SetPosition(p);
@@ -120,20 +122,17 @@ public:
     static float max_bolt_radius;
 
     std::vector<float> max_radius;
-    unsigned int location_index; //either UNIT_ONLY or UNIT_BOLT
+    unsigned int       location_index;  // either UNIT_ONLY or UNIT_BOLT
+
     class CollidableBackref : public Collidable {
     public:
-
         size_t toflattenhints_offset{};
 
-        CollidableBackref() : Collidable() {
-        }
+        CollidableBackref() : Collidable() {}
 
-        explicit CollidableBackref(Unit *un) : Collidable(un) {
-        }
+        explicit CollidableBackref(Unit *un) : Collidable(un) {}
 
-        CollidableBackref(unsigned int bolt_index, float speed, const QVector &p) : Collidable(bolt_index, speed, p) {
-        }
+        CollidableBackref(unsigned int bolt_index, float speed, const QVector &p) : Collidable(bolt_index, speed, p) {}
 
         CollidableBackref(const Collidable &b, size_t offset) : Collidable(b) {
             toflattenhints_offset = offset;
@@ -146,19 +145,19 @@ public:
         location_index = li;
     }
 
-    typedef Collidable *iterator;
-    bool Iterable(iterator);
-    typedef std::vector<Collidable> ResizableArray;
-    ResizableArray sorted;
-    ResizableArray unsorted;
-    std::vector<std::list<CollidableBackref> > toflattenhints;
-    unsigned int count;
-    void UpdateBoltInfo(iterator iter, Collidable::CollideRef ref);
-    void flatten();
-    void flatten(CollideArray &example); //maybe it has some xtra bolts
-    iterator insert(const Collidable &newKey, iterator hint);
-    iterator insert(const Collidable &newKey);
-    iterator changeKey(iterator iter, const Collidable &newKey);
+    typedef Collidable                       *iterator;
+    bool                                      Iterable(iterator);
+    typedef std::vector<Collidable>           ResizableArray;
+    ResizableArray                            sorted;
+    ResizableArray                            unsorted;
+    std::vector<std::list<CollidableBackref>> toflattenhints;
+    unsigned int                              count;
+    void                                      UpdateBoltInfo(iterator iter, Collidable::CollideRef ref);
+    void                                      flatten();
+    void                                      flatten(CollideArray &example);  // maybe it has some xtra bolts
+    iterator                                  insert(const Collidable &newKey, iterator hint);
+    iterator                                  insert(const Collidable &newKey);
+    iterator                                  changeKey(iterator iter, const Collidable &newKey);
     iterator changeKey(iterator iter, const Collidable &newKey, iterator tless, iterator tmore);
 
     iterator begin() {
@@ -170,8 +169,8 @@ public:
     }
 
     iterator lower_bound(const Collidable &);
-    void erase(iterator iter);
-    void checkSet();
+    void     erase(iterator iter);
+    void     checkSet();
 
     explicit CollideArray(unsigned int location_index) : toflattenhints(1), count(0) {
         this->location_index = location_index;
@@ -181,59 +180,54 @@ public:
 };
 
 #ifdef VS_ENABLE_COLLIDE_KEY
-class CollideMap : public KeyMutableSet< Collidable >
-{
+class CollideMap : public KeyMutableSet<Collidable> {
 #else
-#ifdef VS_ENABLE_COLLIDE_LIST
-class CollideMap : public ListMutableSet< Collidable >
-{
-#else
+#    ifdef VS_ENABLE_COLLIDE_LIST
+class CollideMap : public ListMutableSet<Collidable> {
+#    else
 class CollideMap : public CollideArray {
-#endif
+#    endif
 #endif
 public:
-    explicit CollideMap(unsigned int location_offset) : CollideArray(location_offset) {
-    }
+    explicit CollideMap(unsigned int location_offset) : CollideArray(location_offset) {}
 
-//Check collisions takes an item to check collisions with, and returns whether that item collided with a Unit only
+    // Check collisions takes an item to check collisions with, and returns whether that item collided with a Unit only
     bool CheckCollisions(Bolt *bol, const Collidable &updated);
-    bool CheckUnitCollisions(Bolt *bol,
-            const Collidable &updated); //DANGER must be used on lists that are only populated with Units, not bolts
-    bool CheckCollisions(Unit *un, const Collidable &updated); //will be handed off to a templated function
-    bool CheckUnitCollisions(Unit *un,
-            const Collidable &updated); //DANGER must be used on lists that are only populated with Units, not bolts
+    bool CheckUnitCollisions(
+            Bolt             *bol,
+            const Collidable &updated);  // DANGER must be used on lists that are only populated with Units, not bolts
+    bool CheckCollisions(Unit *un, const Collidable &updated);  // will be handed off to a templated function
+    bool CheckUnitCollisions(
+            Unit             *un,
+            const Collidable &updated);  // DANGER must be used on lists that are only populated with Units, not bolts
 
     // TODO: Add virtual destructor?
 };
 
-#if defined (VS_ENABLE_COLLIDE_LIST) || defined (VS_ENABLE_COLLIDE_KEY)
-extern CollideMap null_collide_map;
+#if defined(VS_ENABLE_COLLIDE_LIST) || defined(VS_ENABLE_COLLIDE_KEY)
+extern CollideMap           null_collide_map;
 extern CollideMap::iterator null_collide_iter;
-extern bool null_collide_iter_initialized;
+extern bool                 null_collide_iter_initialized;
 
-inline void init_null_collide_iter()
-{
+inline void init_null_collide_iter() {
     if (!null_collide_iter_initialized) {
-        null_collide_map.insert( Collidable() );
-        null_collide_iter = null_collide_map.begin();
+        null_collide_map.insert(Collidable());
+        null_collide_iter             = null_collide_map.begin();
         null_collide_iter_initialized = true;
     }
 }
 
-inline bool is_null( const CollideMap::iterator &it )
-{
-    return ISNAN( (**it).radius );
+inline bool is_null(const CollideMap::iterator &it) {
+    return ISNAN((**it).radius);
 }
 
-inline void set_null( CollideMap::iterator &it )
-{
+inline void set_null(CollideMap::iterator &it) {
     init_null_collide_iter();
     it = null_collide_iter;
 }
 #else
 
-inline void init_null_collide_iter() {
-}
+inline void init_null_collide_iter() {}
 
 inline bool is_null(const CollideMap::iterator &it) {
     return it == nullptr;
@@ -245,4 +239,4 @@ inline void set_null(CollideMap::iterator &it) {
 
 #endif
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLIDE_MAP_H

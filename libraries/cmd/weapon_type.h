@@ -40,4 +40,4 @@ enum class WEAPON_TYPE {
 WEAPON_TYPE getWeaponTypeFromString(std::string type);
 std::string getFilenameFromWeaponType(WEAPON_TYPE type);
 
-#endif //VEGA_STRIKE_ENGINE_CMD_WEAPON_TYPE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_WEAPON_TYPE_H

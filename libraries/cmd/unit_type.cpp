@@ -30,25 +30,38 @@
 #include <iostream>
 
 int SerializeUnitType(Vega_UnitType type) {
-    switch(type) {
-        case Vega_UnitType::asteroid: return 0;
-        case Vega_UnitType::building: return 1;
-        case Vega_UnitType::enhancement: return 2;
-        case Vega_UnitType::missile: return 3;
-        case Vega_UnitType::nebula: return 4;
-        case Vega_UnitType::planet: return 5;
-        case Vega_UnitType::unit: return 6;
+    switch (type) {
+        case Vega_UnitType::asteroid:
+            return 0;
+        case Vega_UnitType::building:
+            return 1;
+        case Vega_UnitType::enhancement:
+            return 2;
+        case Vega_UnitType::missile:
+            return 3;
+        case Vega_UnitType::nebula:
+            return 4;
+        case Vega_UnitType::planet:
+            return 5;
+        case Vega_UnitType::unit:
+            return 6;
     }
 }
 
 Vega_UnitType DeserializeUnitType(int type) {
-    switch(type) {
-        case 0: return Vega_UnitType::asteroid;
-        case 1: return Vega_UnitType::building;
-        case 2: return Vega_UnitType::enhancement;
-        case 3: return Vega_UnitType::missile;
-        case 4: return Vega_UnitType::nebula;
-        case 5: return Vega_UnitType::planet;
+    switch (type) {
+        case 0:
+            return Vega_UnitType::asteroid;
+        case 1:
+            return Vega_UnitType::building;
+        case 2:
+            return Vega_UnitType::enhancement;
+        case 3:
+            return Vega_UnitType::missile;
+        case 4:
+            return Vega_UnitType::nebula;
+        case 5:
+            return Vega_UnitType::planet;
         default:
             std::cerr << "DeserializeUnitType: Illegal type " << type << std::endl;
             std::cerr << "Defaulting to unit" << std::endl;
@@ -57,11 +70,11 @@ Vega_UnitType DeserializeUnitType(int type) {
 }
 
 Vega_UnitType DeserializeUnitType(std::string type) {
-    if(type == "asteroid") {
+    if (type == "asteroid") {
         return Vega_UnitType::asteroid;
-    } else if(type == "planet") {
+    } else if (type == "planet") {
         return Vega_UnitType::planet;
-    } else if(type == "nebula") {
+    } else if (type == "nebula") {
         return Vega_UnitType::nebula;
     } else {
         return Vega_UnitType::unit;

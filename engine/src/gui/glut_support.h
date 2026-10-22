@@ -35,9 +35,9 @@ using std::vector;
 #include "gfxlib.h"
 
 
-void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha);
-void ShowText(float x, float y, float wid, int size, const char *string, int no_end);
-float WidthOfChar(char chr);
+void       ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha);
+void       ShowText(float x, float y, float wid, int size, const char *string, int no_end);
+float      WidthOfChar(char chr);
 extern int HAS_ALPHA;
 
-#endif    //VEGA_STRIKE_ENGINE_GUI_GLUT_SUPPORT_H
+#endif  // VEGA_STRIKE_ENGINE_GUI_GLUT_SUPPORT_H

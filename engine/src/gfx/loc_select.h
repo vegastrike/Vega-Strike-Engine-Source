@@ -26,19 +26,19 @@
  */
 // NO HEADER GUARD
 
-#include "gfx_generic/vec.h"
-
 #include "gfx/animation.h"
+#include "gfx_generic/vec.h"
 #include "src/in_mouse.h"
+
 class LocationSelect {
 protected:
     Transformation local_transformation;
-    float CrosshairSize;
-//System *parentSystem;
+    float          CrosshairSize;
+    // System *parentSystem;
     Animation LocSelAni;
     Animation LocSelUpAni;
-    Vector p, q, r;
-    QVector LocalPosition;
+    Vector    p, q, r;
+    QVector   LocalPosition;
 
 public:
     static void MouseMoveHandle(KBSTATE, int, int, int, int, int);
@@ -51,12 +51,11 @@ public:
     }
 
     void MoveLocation(Vector pos, Vector p, Vector q);
-    void MoveLocation(Vector pos, Vector p, Vector q, Vector r); //requires normalized Vector triplet pqr
+    void MoveLocation(Vector pos, Vector p, Vector q, Vector r);  // requires normalized Vector triplet pqr
     void Draw();
 
     QVector &Position();
-    void SetPosition(float, float, float);
-    void SetPosition(const Vector &);
-    void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
+    void     SetPosition(float, float, float);
+    void     SetPosition(const Vector &);
+    void     SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 };
-

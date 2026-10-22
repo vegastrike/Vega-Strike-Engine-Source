@@ -30,26 +30,19 @@
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-FtlDrive::FtlDrive() :
-    Component(0.0, 0.0, true, true),
-    EnergyConsumer(nullptr, false, 0),
-    enabled(false) {
-    type = ComponentType::FtlDrive;
+FtlDrive::FtlDrive() : Component(0.0, 0.0, true, true), EnergyConsumer(nullptr, false, 0), enabled(false) {
+    type         = ComponentType::FtlDrive;
     upgrade_name = "FTL Drive";
-    installed = true;
+    installed    = true;
 }
 
-FtlDrive::FtlDrive(EnergyContainer *source):
-    Component(0.0, 0.0, true),
-    EnergyConsumer(source, false),
-    enabled(false) {
-    type = ComponentType::FtlDrive;
+FtlDrive::FtlDrive(EnergyContainer *source) : Component(0.0, 0.0, true), EnergyConsumer(source, false), enabled(false) {
+    type         = ComponentType::FtlDrive;
     upgrade_name = "FTL Drive";
-    installed = true;
+    installed    = true;
 }
 
-FtlDrive::~FtlDrive()
-= default;
+FtlDrive::~FtlDrive() = default;
 
 void FtlDrive::Enable() {
     enabled = true;
@@ -67,7 +60,6 @@ bool FtlDrive::Enabled() const {
     return Installed() && Operational() && enabled;
 }
 
-
 // Component Methods
 void FtlDrive::Load(std::string unit_key) {
     Component::Load(unit_key);
@@ -79,8 +71,8 @@ void FtlDrive::Load(std::string unit_key) {
     // FTL Drive
 }
 
-void FtlDrive::SaveToCSV(std::map<std::string, std::string>& unit) const {
-    unit["Warp_Usage_Cost"] = std::to_string(consumption  / configuration().components.ftl_drive.factor_dbl);
+void FtlDrive::SaveToCSV(std::map<std::string, std::string> &unit) const {
+    unit["Warp_Usage_Cost"] = std::to_string(consumption / configuration().components.ftl_drive.factor_dbl);
 }
 
 // FTL drive is integrated and so cannot be upgraded/downgraded
@@ -100,12 +92,9 @@ bool FtlDrive::Upgrade(const std::string upgrade_key) {
     return false;
 }
 
-double FtlDrive::Consume()
-{
-    if (!enabled)
-    {
+double FtlDrive::Consume() {
+    if (!enabled) {
         return 0.0;
     }
     return EnergyConsumer::Consume();
 }
-

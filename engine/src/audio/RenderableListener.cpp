@@ -34,9 +34,7 @@
 
 namespace Audio {
 
-RenderableListener::RenderableListener(Listener *_listener) :
-        listener(_listener) {
-}
+RenderableListener::RenderableListener(Listener *_listener) : listener(_listener) {}
 
 RenderableListener::~RenderableListener() {
     // Just in case.
@@ -50,4 +48,4 @@ void RenderableListener::update(int flags) {
     }
 }
 
-};
+};  // namespace Audio

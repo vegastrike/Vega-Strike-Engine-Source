@@ -33,9 +33,8 @@
 
 #ifdef HAVE_OGG
 
-#include "../Stream.h"
-
-#include "vegadisk/vsfilesystem.h"
+#    include "../Stream.h"
+#    include "vegadisk/vsfilesystem.h"
 
 namespace Audio {
 
@@ -55,11 +54,11 @@ struct OggData;
  */
 class OggStream : public Stream {
 private:
-    double duration;
-    __impl::OggData *oggData;
+    double               duration;
+    __impl::OggData     *oggData;
     VSFileSystem::VSFile file;
 
-    void *readBuffer;
+    void        *readBuffer;
     unsigned int readBufferAvail;
     unsigned int readBufferSize;
 
@@ -74,7 +73,6 @@ public:
     virtual ~OggStream();
 
 protected:
-
     /** @see Stream::getLengthImpl */
     virtual double getLengthImpl() const;
 
@@ -91,8 +89,8 @@ protected:
     virtual void nextBufferImpl();
 };
 
-};
+};  // namespace Audio
 
-#endif //HAVE_OGG
+#endif  // HAVE_OGG
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_OGG_STREAM_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_OGG_STREAM_H

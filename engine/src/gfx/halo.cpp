@@ -26,26 +26,27 @@
  */
 
 
-#include "cmd/unit_generic.h"
 #include "halo.h"
+
+#include "cmd/unit_generic.h"
+#include "decalqueue.h"
+#include "gfx/aux_texture.h"
+#include "point_to_cam.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/config_xml.h"
 #include "src/gfxlib.h"
 #include "src/vegastrike.h"
-#include "root_generic/vs_globals.h"
-#include "gfx/aux_texture.h"
-#include "decalqueue.h"
-#include "src/config_xml.h"
-#include "root_generic/xml_support.h"
-#include "point_to_cam.h"
-static DecalQueue halodecal;
+static DecalQueue            halodecal;
 static vector<GFXQuadList *> halodrawqueue;
 
 Halo::Halo(const char *texture, const GFXColor &col, const QVector &pos, float sizx, float sizy) {
     string texname(texture);
     position = pos;
-    sizex = sizx;
-    sizey = sizy;
-    decal = halodecal.AddTexture(texture, MIPMAP);
-    if (((unsigned int) decal) >= halodrawqueue.size()) {
+    sizex    = sizx;
+    sizey    = sizy;
+    decal    = halodecal.AddTexture(texture, MIPMAP);
+    if (((unsigned int)decal) >= halodrawqueue.size()) {
         halodrawqueue.push_back(new GFXQuadList(GFXTRUE));
     }
     GFXColorVertex coltmp[4];
@@ -59,30 +60,25 @@ Halo::Halo(const char *texture, const GFXColor &col, const QVector &pos, float s
 
 Halo::~Halo() {
     halodrawqueue[decal]->DelQuad(quadnum);
-    delete halodrawqueue[decal];         //deletes the quad
+    delete halodrawqueue[decal];  // deletes the quad
     halodrawqueue[decal] = NULL;
 }
 
 void Halo::Draw(const Transformation &quat, const Matrix &m, float alpha) {
-    Vector p, q, r;
-    QVector pos;
+    Vector       p, q, r;
+    QVector      pos;
     const double HaloOffset = configuration().graphics.halo_offset_dbl;
-    pos = position.Transform(m);
-    float wid = sizex;
-    float hei = sizey;
-    const bool far_shine =
-            configuration().graphics.draw_star_glow_halo || configuration().graphics.halo_far_draw;
+    pos                     = position.Transform(m);
+    float      wid          = sizex;
+    float      hei          = sizey;
+    const bool far_shine    = configuration().graphics.draw_star_glow_halo || configuration().graphics.halo_far_draw;
     CalculateOrientation(pos, p, q, r, wid, hei, HaloOffset, far_shine, NULL);
     p = p * wid;
     r = -r;
     q = q * hei;
-    //offset = r*(sizex>sizey?sizex:sizey); //screws up cus of perspective
-    GFXVertex tmp[4] = {
-            GFXVertex(pos - (p + q).Cast(), r, 0, 1),
-            GFXVertex(pos + (p - q).Cast(), r, 1, 1),
-            GFXVertex(pos + (p + q).Cast(), r, 1, 0),
-            GFXVertex(pos - (p - q).Cast(), r, 0, 0)
-    };
+    // offset = r*(sizex>sizey?sizex:sizey); //screws up cus of perspective
+    GFXVertex tmp[4] = {GFXVertex(pos - (p + q).Cast(), r, 0, 1), GFXVertex(pos + (p - q).Cast(), r, 1, 1),
+                        GFXVertex(pos + (p + q).Cast(), r, 1, 0), GFXVertex(pos - (p - q).Cast(), r, 0, 0)};
     halodrawqueue[decal]->ModQuad(quadnum, tmp, alpha);
 }
 
@@ -115,4 +111,3 @@ void Halo::ProcessDrawQueue() {
     GFXDisable(LIGHTING);
     GFXPopBlendMode();
 }
-

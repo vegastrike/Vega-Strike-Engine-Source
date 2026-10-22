@@ -27,18 +27,18 @@
 
 
 #include "src/vegastrike.h"
-#if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
-//For WIN32 debugging.
-#include <crtdbg.h>
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
+// For WIN32 debugging.
+#    include <crtdbg.h>
 #endif
 
-#include "gfx/nav/navpath.h"
+#include <vector>
+
 #include "gfx/cockpit.h"
+#include "gfx/nav/navpath.h"
 #include "gfx/nav/navscreen.h"
 #include "root_generic/configxml.h"
 #include "src/universe.h"
-
-#include <vector>
 using std::vector;
 #include <deque>
 using std::deque;
@@ -58,7 +58,7 @@ using std::pair;
 
 //*******************************************************************//
 ////
-//NavPath Class                          //
+// NavPath Class                          //
 ////
 //*******************************************************************//
 
@@ -120,7 +120,7 @@ bool NavPath::isTargetDependant() const {
 string NavPath::getDescription() const {
     string temp;
 
-    temp = getName();
+    temp  = getName();
     temp += "#n#";
     temp += "----------#n#";
     temp += "Visible: ";
@@ -178,7 +178,7 @@ bool NavPath::setSourceNode(PathNode *node) {
         return false;
     }
     PathNode *oldNode = source;
-    source = node;
+    source            = node;
     if (checkForCycles()) {
         source = oldNode;
         delete node;
@@ -207,7 +207,7 @@ bool NavPath::setDestinationNode(PathNode *node) {
         return false;
     }
     PathNode *oldNode = destination;
-    destination = node;
+    destination       = node;
     if (checkForCycles()) {
         destination = oldNode;
         delete node;
@@ -285,9 +285,9 @@ std::vector<NavPath *> NavPath::getRequiredPaths() const {
 }
 
 bool NavPath::checkForCycles() const {
-    const NavPath *v;
-    vector<NavPath *> neighbors;
-    unsigned i;
+    const NavPath         *v;
+    vector<NavPath *>      neighbors;
+    unsigned               i;
     deque<const NavPath *> pathStack;
     pathStack.push_back(this);
     bool cycle = false;
@@ -314,46 +314,43 @@ bool NavPath::evaluate() {
         return false;
     }
     if (isAbsolute()) {
-        //Using a double-rooted BFS search
+        // Using a double-rooted BFS search
         unsigned originIndex = source->initSearchQueue().front();
-        unsigned destIndex = destination->initSearchQueue().front();
+        unsigned destIndex   = destination->initSearchQueue().front();
         if (originIndex == destIndex) {
             path.push_back(originIndex);
             return true;
         }
         vector<unsigned> prev(systemIter.size());
         vector<unsigned> visited(systemIter.size(), 0);
-        deque<unsigned> oriFront, destFront;
-        bool found = false;
-        unsigned midNode;
-        unsigned midNodePrevOri;
-        unsigned midNodePrevDest;
+        deque<unsigned>  oriFront, destFront;
+        bool             found = false;
+        unsigned         midNode;
+        unsigned         midNodePrevOri;
+        unsigned         midNodePrevDest;
         midNodePrevOri = midNodePrevDest =
-                0; //to shut up a warning about possibly used uninitialized --chuck_starchaser
-        bool oriTurn = true;
+                0;  // to shut up a warning about possibly used uninitialized --chuck_starchaser
+        bool             oriTurn = true;
         deque<unsigned> *front;
-        unsigned visitMark;
+        unsigned         visitMark;
         if (originIndex >= visited.size() || destIndex >= visited.size()) {
-            VS_LOG_AND_FLUSH(error,
-                    (boost::format(
-                            "(previously) FATAL error with nav system, referencing value too big %1% %2% with visited size %3%")
-                            % ((int) originIndex)
-                            % ((int) destIndex)
-                            % ((int) visited.size())));
+            VS_LOG_AND_FLUSH(error, (boost::format("(previously) FATAL error with nav system, referencing value too "
+                                                   "big %1% %2% with visited size %3%") %
+                                     ((int)originIndex) % ((int)destIndex) % ((int)visited.size())));
             return false;
         }
         oriFront.push_back(originIndex);
         visited[originIndex] = 1;
         destFront.push_back(destIndex);
         visited[destIndex] = 2;
-        while (oriFront.size() < max_size && destFront.size() < max_size && !oriFront.empty() && !destFront.empty()
-                && !found) {
-            //stay within memory bounds in case something goes wrong (it has, unfortunately on occasion)
+        while (oriFront.size() < max_size && destFront.size() < max_size && !oriFront.empty() && !destFront.empty() &&
+               !found) {
+            // stay within memory bounds in case something goes wrong (it has, unfortunately on occasion)
             if (oriTurn) {
-                front = &oriFront;
+                front     = &oriFront;
                 visitMark = 1;
             } else {
-                front = &destFront;
+                front     = &destFront;
                 visitMark = 2;
             }
             unsigned index = front->front();
@@ -363,15 +360,15 @@ bool NavPath::evaluate() {
                 if (systemIter[adjIndex].isDrawable()) {
                     if (visited[adjIndex] == 0) {
                         visited[adjIndex] = visitMark;
-                        prev[adjIndex] = index;
+                        prev[adjIndex]    = index;
                         front->push_back(adjIndex);
                     } else if (visited[adjIndex] != visitMark) {
                         midNode = adjIndex;
                         if (oriTurn) {
                             midNodePrevDest = prev[adjIndex];
-                            midNodePrevOri = index;
+                            midNodePrevOri  = index;
                         } else {
-                            midNodePrevOri = prev[adjIndex];
+                            midNodePrevOri  = prev[adjIndex];
                             midNodePrevDest = index;
                         }
                         found = true;
@@ -387,7 +384,8 @@ bool NavPath::evaluate() {
                 path.push_front(index);
                 index = prev[index];
                 if (path.size() >= max_size) {
-                    //this prevents some odd "out of memory" crashes we were getting where there might have been a loop in the path somehow
+                    // this prevents some odd "out of memory" crashes we were getting where there might have been a loop
+                    // in the path somehow
                     path.clear();
                     found = false;
                     return false;
@@ -404,7 +402,8 @@ bool NavPath::evaluate() {
                     path.push_back(index);
                     index = prev[index];
                     if (path.size() >= max_size) {
-                        //this prevents some odd "out of memory" crashes we were getting where there might have been a loop in the path somehow
+                        // this prevents some odd "out of memory" crashes we were getting where there might have been a
+                        // loop in the path somehow
                         path.clear();
                         found = false;
                         return false;
@@ -415,13 +414,13 @@ bool NavPath::evaluate() {
         }
         return found;
     } else {
-        //Using single-rooted BFS search
+        // Using single-rooted BFS search
         vector<unsigned> prev(systemIter.size());
-        vector<bool> visited(systemIter.size(), false);
-        deque<unsigned> frontier = source->initSearchQueue();
-        set<unsigned> origins;
-        bool found = false;
-        unsigned index, destIndex = 0;
+        vector<bool>     visited(systemIter.size(), false);
+        deque<unsigned>  frontier = source->initSearchQueue();
+        set<unsigned>    origins;
+        bool             found = false;
+        unsigned         index, destIndex = 0;
         for (unsigned i = 0; i < frontier.size(); ++i) {
             index = frontier.front();
             frontier.pop_front();
@@ -440,10 +439,10 @@ bool NavPath::evaluate() {
                 unsigned adjIndex = systemIter[index].GetDestinationIndex(adjs);
                 if (!visited[adjIndex] && systemIter[adjIndex].isDrawable()) {
                     visited[adjIndex] = true;
-                    prev[adjIndex] = index;
+                    prev[adjIndex]    = index;
                     frontier.push_back(adjIndex);
                     if (destination->isDestination(adjIndex)) {
-                        found = true;
+                        found     = true;
                         destIndex = adjIndex;
                         break;
                     }
@@ -457,12 +456,13 @@ bool NavPath::evaluate() {
                 index = prev[index];
                 path.push_front(index);
                 if (path.size() >= max_size) {
-                    //this prevents some odd "out of memory" crashes we were getting where there might have been a loop in the path somehow
+                    // this prevents some odd "out of memory" crashes we were getting where there might have been a loop
+                    // in the path somehow
                     path.clear();
                     found = false;
                     return false;
                 }
-            } while (!origins.count(index));             //While the index is not an origin
+            } while (!origins.count(index));  // While the index is not an origin
         }
         return found;
     }
@@ -470,10 +470,10 @@ bool NavPath::evaluate() {
 
 void NavPath::removeOldPath() {
     NavigationSystem::CachedSystemIterator &systemIter = _Universe->AccessCockpit()->AccessNavSystem()->systemIter;
-    //Erase old path
+    // Erase old path
     //*************************
     for (list<unsigned>::iterator i = path.begin(); i != path.end(); ++i) {
-        if (systemIter[*i].paths.erase(this)) {         //This erases this path from the list of paths in system
+        if (systemIter[*i].paths.erase(this)) {  // This erases this path from the list of paths in system
             if (systemIter[*i].paths.empty()) {
                 systemIter[*i].part_of_path = false;
             }
@@ -485,7 +485,7 @@ void NavPath::removeOldPath() {
 void NavPath::addNewPath() {
     NavigationSystem::CachedSystemIterator &systemIter = _Universe->AccessCockpit()->AccessNavSystem()->systemIter;
 
-    //Inscribe new path
+    // Inscribe new path
     //*************************
 
     list<unsigned>::iterator aux;
@@ -502,7 +502,7 @@ void NavPath::addNewPath() {
 }
 
 bool NavPath::isNeighborPath(unsigned system, unsigned neighbor) {
-    map<unsigned, pair<unsigned, unsigned> >::iterator i = pathNeighbors.find(system);
+    map<unsigned, pair<unsigned, unsigned>>::iterator i = pathNeighbors.find(system);
     if (i == pathNeighbors.end()) {
         return false;
     }
@@ -530,10 +530,10 @@ bool NavPath::update() {
 }
 
 NavPath::NavPath() {
-    name = "New Path";
-    visible = true;
-    color = GFXColor(1, 0, 0);
-    source = NULL;
+    name        = "New Path";
+    visible     = true;
+    color       = GFXColor(1, 0, 0);
+    source      = NULL;
     destination = NULL;
 }
 
@@ -568,7 +568,7 @@ NavPath::~NavPath() {
 
 //*******************************************************************//
 ////
-//PathManager Class                          //
+// PathManager Class                          //
 ////
 //*******************************************************************//
 
@@ -676,8 +676,7 @@ void PathManager::dfsVisit(NavPath *path) {
     topoOrder.push_front(path);
 }
 
-PathManager::PathManager() {
-}
+PathManager::PathManager() {}
 
 PathManager::~PathManager() {
     for (std::vector<NavPath *>::iterator i = paths.begin(); i < paths.end(); ++i) {
@@ -688,7 +687,7 @@ PathManager::~PathManager() {
 
 //*******************************************************************//
 ////
-//AbsolutePathNode Class                     //
+// AbsolutePathNode Class                     //
 ////
 //*******************************************************************//
 
@@ -704,7 +703,7 @@ std::deque<unsigned> AbsolutePathNode::initSearchQueue() const {
 
 //*******************************************************************//
 ////
-//CurrentPathNode Class                      //
+// CurrentPathNode Class                      //
 ////
 //*******************************************************************//
 
@@ -720,7 +719,7 @@ std::deque<unsigned> CurrentPathNode::initSearchQueue() const {
 
 //*******************************************************************//
 ////
-//TargetPathNode Class                       //
+// TargetPathNode Class                       //
 ////
 //*******************************************************************//
 
@@ -736,15 +735,15 @@ std::deque<unsigned> TargetPathNode::initSearchQueue() const {
 
 //*******************************************************************//
 ////
-//CriteriaPathNode Class                       //
+// CriteriaPathNode Class                       //
 ////
 //*******************************************************************//
 
 std::string CriteriaPathNode::getDescription() const {
     assert(criteria != NULL);
 
-    string temp = "Criteria: ";
-    temp += criteria->getDescription();
+    string temp  = "Criteria: ";
+    temp        += criteria->getDescription();
     return temp;
 }
 
@@ -757,7 +756,7 @@ PathNode *CriteriaPathNode::clone() const {
     assert(criteria != NULL);
 
     CriteriaPathNode *newNode = new CriteriaPathNode();
-    newNode->criteria = static_cast< CriteriaRoot * > ( criteria->clone());
+    newNode->criteria         = static_cast<CriteriaRoot *>(criteria->clone());
     return newNode;
 }
 
@@ -773,13 +772,13 @@ CriteriaPathNode::~CriteriaPathNode() {
 
 //*******************************************************************//
 ////
-//ChainPathNode Class                       //
+// ChainPathNode Class                       //
 ////
 //*******************************************************************//
 
 std::string ChainPathNode::getDescription() const {
-    string temp = "Chain: ";
-    temp += supplierPath->getName();
+    string temp  = "Chain: ";
+    temp        += supplierPath->getName();
     if (type == SOURCE) {
         temp += " (Source)";
     } else if (type == DESTINATION) {
@@ -820,4 +819,3 @@ bool ChainPathNode::isDestination(unsigned index) const {
         return false;
     }
 }
-

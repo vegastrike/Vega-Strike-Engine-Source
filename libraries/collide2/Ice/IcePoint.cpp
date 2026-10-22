@@ -14,11 +14,12 @@
 /**
  *	3D point.
  *
- *	The name is "Point" instead of "Vector" since a vector is N-dimensional, whereas a point is an implicit "vector of dimension 3".
- *	So the choice was between "Point" and "Vector3", the first one looked better (IMHO).
+ *	The name is "Point" instead of "Vector" since a vector is N-dimensional, whereas a point is an implicit "vector of
+ *dimension 3". So the choice was between "Point" and "Vector3", the first one looked better (IMHO).
  *
  *	Some people, then, use a typedef to handle both points & vectors using the same class: typedef Point Vector3;
- *	This is bad since it opens the door to a lot of confusion while reading the code. I know it may sounds weird but check this out:
+ *	This is bad since it opens the door to a lot of confusion while reading the code. I know it may sounds weird but
+ *check this out:
  *
  *  \code
  *		Point P0,P1 = some 3D points;
@@ -32,14 +33,15 @@
  *		Vector3 Delta = P1 - P0;
  *  \endcode
  *
- *	Subtle things like this are not caught at compile-time, and when you find one in the code, you never know whether it's a mistake
- *	from the author or something you don't get.
+ *	Subtle things like this are not caught at compile-time, and when you find one in the code, you never know whether
+ *it's a mistake from the author or something you don't get.
  *
- *	One way to handle it at compile-time would be to use different classes for Point & Vector3, only overloading operator "-" for vectors.
- *	But then, you get a lot of redundant code in thoses classes, and basically it's really a lot of useless work.
+ *	One way to handle it at compile-time would be to use different classes for Point & Vector3, only overloading
+ *operator "-" for vectors. But then, you get a lot of redundant code in thoses classes, and basically it's really a lot
+ *of useless work.
  *
- *	Another way would be to use homogeneous points: w=1 for points, w=0 for vectors. That's why the HPoint class exists. Now, to store
- *	your model's vertices and in most cases, you really want to use Points to save ram.
+ *	Another way would be to use homogeneous points: w=1 for points, w=0 for vectors. That's why the HPoint class exists.
+ *Now, to store your model's vertices and in most cases, you really want to use Points to save ram.
  *
  *  \class		Point
  *  \author		Pierre Terdiman
@@ -95,9 +97,9 @@ Point &Point::Refract(const Point &eye, const Point &n, float refractindex, Poin
     Env.y = eye.y - y;
     Env.z = eye.z - z;
 
-    float NDotE = n | Env;
-    float NDotN = n | n;
-    NDotE /= refractindex;
+    float NDotE  = n | Env;
+    float NDotN  = n | n;
+    NDotE       /= refractindex;
 
     // Refracted vector
     refracted = n * NDotE - Env * NDotN;
@@ -110,11 +112,9 @@ Point &Point::ProjectToPlane(const Plane &p) {
     return *this;
 }
 
-void Point::ProjectToScreen(float halfrenderwidth,
-        float halfrenderheight,
-        const Matrix4x4 &mat,
-        HPoint &projected) const {
-    projected = HPoint(x, y, z, 1.0f) * mat;
+void Point::ProjectToScreen(float halfrenderwidth, float halfrenderheight, const Matrix4x4 &mat,
+                            HPoint &projected) const {
+    projected   = HPoint(x, y, z, 1.0f) * mat;
     projected.w = 1.0f / projected.w;
 
     projected.x *= projected.w;
@@ -155,12 +155,12 @@ Point &Point::Mult(const Matrix3x3 &mat, const Point &a) {
 }
 
 Point &Point::Mult2(const Matrix3x3 &mat1, const Point &a1, const Matrix3x3 &mat2, const Point &a2) {
-    x = a1.x * mat1.m[0][0] + a1.y * mat1.m[0][1] + a1.z * mat1.m[0][2] + a2.x * mat2.m[0][0] + a2.y * mat2.m[0][1]
-            + a2.z * mat2.m[0][2];
-    y = a1.x * mat1.m[1][0] + a1.y * mat1.m[1][1] + a1.z * mat1.m[1][2] + a2.x * mat2.m[1][0] + a2.y * mat2.m[1][1]
-            + a2.z * mat2.m[1][2];
-    z = a1.x * mat1.m[2][0] + a1.y * mat1.m[2][1] + a1.z * mat1.m[2][2] + a2.x * mat2.m[2][0] + a2.y * mat2.m[2][1]
-            + a2.z * mat2.m[2][2];
+    x = a1.x * mat1.m[0][0] + a1.y * mat1.m[0][1] + a1.z * mat1.m[0][2] + a2.x * mat2.m[0][0] + a2.y * mat2.m[0][1] +
+        a2.z * mat2.m[0][2];
+    y = a1.x * mat1.m[1][0] + a1.y * mat1.m[1][1] + a1.z * mat1.m[1][2] + a2.x * mat2.m[1][0] + a2.y * mat2.m[1][1] +
+        a2.z * mat2.m[1][2];
+    z = a1.x * mat1.m[2][0] + a1.y * mat1.m[2][1] + a1.z * mat1.m[2][2] + a2.x * mat2.m[2][0] + a2.y * mat2.m[2][1] +
+        a2.z * mat2.m[2][2];
     return *this;
 }
 
@@ -189,9 +189,8 @@ Point &Point::InvTransform(const Point &r, const Matrix3x3 &rotpos, const Point 
     float sx = r.x - linpos.x;
     float sy = r.y - linpos.y;
     float sz = r.z - linpos.z;
-    x = sx * rotpos.m[0][0] + sy * rotpos.m[1][0] + sz * rotpos.m[2][0];
-    y = sx * rotpos.m[0][1] + sy * rotpos.m[1][1] + sz * rotpos.m[2][1];
-    z = sx * rotpos.m[0][2] + sy * rotpos.m[1][2] + sz * rotpos.m[2][2];
+    x        = sx * rotpos.m[0][0] + sy * rotpos.m[1][0] + sz * rotpos.m[2][0];
+    y        = sx * rotpos.m[0][1] + sy * rotpos.m[1][1] + sz * rotpos.m[2][1];
+    z        = sx * rotpos.m[0][2] + sy * rotpos.m[1][2] + sz * rotpos.m[2][2];
     return *this;
 }
-

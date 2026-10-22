@@ -26,23 +26,22 @@
  */
 
 
-#include "src/vegastrike.h"
-
 #include "guitexture.h"
 
 #include <gnuhash.h>
-
-#include <string>
 #include <png.h>
-#include "vegadisk/vsfilesystem.h"
+#include <string>
+
+#include "gfx/aux_texture.h"
 #include "gfx/vsimage.h"
 #include "gldrv/gl_globals.h"
-#include "gfx/aux_texture.h"
 #include "imguitext.h"
+#include "src/vegastrike.h"
+#include "vegadisk/vsfilesystem.h"
 
 using namespace VSFileSystem;
 
-//Read a texture from a file and bind it.
+// Read a texture from a file and bind it.
 bool GuiTexture::read(const std::string &fileName) {
     Texture *oldTexture(m_texture);
     m_texture = new Texture(fileName.c_str(), 0, BILINEAR);
@@ -55,7 +54,7 @@ bool GuiTexture::read(const std::string &fileName) {
     return m_texture->LoadSuccess();
 }
 
-//Draw this texture, stretching to fit the rect.
+// Draw this texture, stretching to fit the rect.
 void GuiTexture::draw(const Rect &rect) const {
     // Don't draw unless there is something usable.
     if (m_texture == NULL || !m_texture->LoadSuccess()) {
@@ -63,8 +62,10 @@ void GuiTexture::draw(const Rect &rect) const {
     }
     m_texture->MakeActive();
 
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    if (!draw_list) return;
+    ImDrawList *draw_list = ImGui::GetWindowDrawList();
+    if (!draw_list) {
+        return;
+    }
 
     // Convert normalized Vega Strike coordinates to pixels
     float pMinX = Coordinates::normToPixelX(rect.left());
@@ -90,20 +91,11 @@ void GuiTexture::draw(const Rect &rect) const {
     ImU32 tintColor = IM_COL32(255, 255, 255, 255);
 
     // Submit to ImGui draw list instead of immediate-mode GFXDraw
-    draw_list->AddImage(
-        texID, 
-        ImVec2(pMinX, pMinY), 
-        ImVec2(pMaxX, pMaxY), 
-        uv_min, 
-        uv_max, 
-        tintColor
-    );
+    draw_list->AddImage(texID, ImVec2(pMinX, pMinY), ImVec2(pMaxX, pMaxY), uv_min, uv_max, tintColor);
 }
 
-//CONSTRUCTION
-GuiTexture::GuiTexture(void) :
-        m_texture(nullptr) {
-}
+// CONSTRUCTION
+GuiTexture::GuiTexture(void) : m_texture(nullptr) {}
 
 GuiTexture::~GuiTexture(void) {
     if (m_texture != nullptr) {
@@ -111,4 +103,3 @@ GuiTexture::~GuiTexture(void) {
         m_texture = nullptr;
     }
 }
-

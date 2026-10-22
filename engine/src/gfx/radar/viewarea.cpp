@@ -27,15 +27,15 @@
  */
 
 
-#include <cmath>
-#include "src/gfxlib_struct.h"
 #include "viewarea.h"
+
+#include <cmath>
+
+#include "src/gfxlib_struct.h"
 
 namespace Radar {
 
-ViewArea::ViewArea()
-        : sprite(0) {
-}
+ViewArea::ViewArea() : sprite(0) {}
 
 void ViewArea::SetSprite(VSSprite *sprite) {
     this->sprite = sprite;
@@ -49,16 +49,14 @@ void ViewArea::SetSprite(VSSprite *sprite) {
         size.z = 0;
     } else {
         position = Vector(0, 0, 0);
-        size = Vector(0, 0, 0);
+        size     = Vector(0, 0, 0);
     }
 }
 
 Vector ViewArea::Scale(const Vector &v) const {
     assert(sprite);
 
-    return Vector(position.x + size.x / 2 * v.x,
-            position.y + size.y / 2 * v.y,
-            position.z + size.y / 2 * v.z);
+    return Vector(position.x + size.x / 2 * v.x, position.y + size.y / 2 * v.y, position.z + size.y / 2 * v.z);
 }
 
 GFXColor ViewArea::GetColor() const {
@@ -69,4 +67,4 @@ bool ViewArea::IsActive() const {
     return (sprite != 0);
 }
 
-} // namespace Radar
+}  // namespace Radar

@@ -32,8 +32,8 @@ class SDL_Window;
 
 /** Init and cleanup ImGui.
  */
-extern bool gui_initialized;
-extern SDL_Window* current_window;
+extern bool        gui_initialized;
+extern SDL_Window *current_window;
 
 void InitGui(SDL_Window *window, const SDL_GLContext *context, float fontSize, const char *fontFile = nullptr);
 void CleanupGui();
@@ -51,4 +51,4 @@ void RequestImGuiFont(const char *fontFile);
  */
 void ImGui_ApplyPendingFontSize();
 
-#endif // VEGA_STRIKE_LIBRARIES_GUI_GUI_H
+#endif  // VEGA_STRIKE_LIBRARIES_GUI_GUI_H

@@ -56,7 +56,7 @@ inline_ bool RayCollider::RayTriOverlap(const Point &vert0, const Point &vert1, 
 
         // Calculate U parameter and test bounds
         mStabbedFace.mU = tvec | pvec;
-//		if(IR(u)&0x80000000 || u>det)					return FALSE;
+        //		if(IR(u)&0x80000000 || u>det)					return FALSE;
         if ((mStabbedFace.mU < 0.0f) || IR(mStabbedFace.mU) > IR(det)) {
             return FALSE;
         }
@@ -78,10 +78,10 @@ inline_ bool RayCollider::RayTriOverlap(const Point &vert0, const Point &vert1, 
             return FALSE;
         }
         // Else go on
-        float OneOverDet = 1.0f / det;
+        float OneOverDet        = 1.0f / det;
         mStabbedFace.mDistance *= OneOverDet;
-        mStabbedFace.mU *= OneOverDet;
-        mStabbedFace.mV *= OneOverDet;
+        mStabbedFace.mU        *= OneOverDet;
+        mStabbedFace.mV        *= OneOverDet;
     } else {
         // the non-culling branch
         if (det > -LOCAL_EPSILON && det < LOCAL_EPSILON) {
@@ -94,7 +94,7 @@ inline_ bool RayCollider::RayTriOverlap(const Point &vert0, const Point &vert1, 
 
         // Calculate U parameter and test bounds
         mStabbedFace.mU = (tvec | pvec) * OneOverDet;
-//		if(IR(u)&0x80000000 || u>1.0f)					return FALSE;
+        //		if(IR(u)&0x80000000 || u>1.0f)					return FALSE;
         if ((mStabbedFace.mU < 0.0f) || (mStabbedFace.mU > 1.0f)) {
             return FALSE;
         }

@@ -32,8 +32,9 @@
  */
 
 #ifndef WIN32
-//this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
-#include <unistd.h>
+// this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can
+// compile without it
+#    include <unistd.h>
 #endif
 
 #include "src/SharedPool.h"
@@ -41,19 +42,17 @@
 class gameMessage {
 public:
     StringPool::Reference from, to, message;
-    double time;
+    double                time;
 };
 
 class MessageCenter {
 public:
-    bool last(unsigned int n, gameMessage &m,
-            const std::vector<std::string> &who = std::vector<std::string>(), const std::vector<std::string> &whoNOT =
-    std::vector<std::string>());
+    bool last(unsigned int n, gameMessage &m, const std::vector<std::string> &who = std::vector<std::string>(),
+              const std::vector<std::string> &whoNOT = std::vector<std::string>());
     void add(std::string from, std::string to, std::string message, double delay = 0.0);
-    void clear(
-            const std::vector<std::string> &who = std::vector<std::string>(), const std::vector<std::string> &whoNOT =
-    std::vector<std::string>());
+    void clear(const std::vector<std::string> &who    = std::vector<std::string>(),
+               const std::vector<std::string> &whoNOT = std::vector<std::string>());
     std::vector<gameMessage> messages;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_SCRIPT_MSG_CENTER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_SCRIPT_MSG_CENTER_H

@@ -4,8 +4,8 @@
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2026 The Vega Strike Contributors:
  * Project creator: Daniel Horn
- * Original development team: As listed in the AUTHORS file. Specifically: ace123, surfdargent, klaussfreire, jacks, dan_w, pyramid3d
- * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ * Original development team: As listed in the AUTHORS file. Specifically: ace123, surfdargent, klaussfreire, jacks,
+ * dan_w, pyramid3d Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -27,15 +27,12 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_ANIMATION_H
 #define VEGA_STRIKE_ENGINE_GFX_ANIMATION_H
 
-#include "root_generic/lin_time.h"
-
-#include "gfx_generic/vec.h"
-
 #include <stack>
 
-#include "gfx_generic/quaternion.h"
-
 #include "gfx/ani_texture.h"
+#include "gfx_generic/quaternion.h"
+#include "gfx_generic/vec.h"
+#include "root_generic/lin_time.h"
 
 namespace VSFileSystem {
 class VSFile;
@@ -46,7 +43,7 @@ class Animation : public AnimatedTexture {
 
     Matrix local_transformation;
 
-    float height; //half the height so you can do fancy vector translatons to campspace
+    float height;  // half the height so you can do fancy vector translatons to campspace
 
     float width;
 
@@ -58,13 +55,10 @@ public:
     Animation();
 
     Animation(VSFileSystem::VSFile *f, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP,
-            bool camorient =
-            false, bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
-            1));
+              bool camorient = false, bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1, 1));
 
     Animation(const char *, bool Rep = 0, float priority = .1, enum FILTER ismipmapped = MIPMAP, bool camorient = false,
-            bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1,
-            1));
+              bool appear_near_by_radius = false, const GFXColor &col = GFXColor(1, 1, 1, 1));
 
     ~Animation() override;
 
@@ -103,4 +97,4 @@ public:
     void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_ANIMATION_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_ANIMATION_H

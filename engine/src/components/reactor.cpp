@@ -29,32 +29,25 @@
 
 #include "components/reactor.h"
 
+#include <iostream>
+
 #include "cmd/unit_csv_factory.h"
 #include "configuration/configuration.h"
 
-#include <iostream>
-
 const std::string REACTOR_RECHARGE = "Reactor_Recharge";
 
-
-
-Reactor::Reactor(EnergyContainer *source,
-                 EnergyContainer *energy,
-                 EnergyContainer *ftl_energy,
-                 double conversion_ratio):
-                 Component(0.0, 0.0, false),
-                 EnergyConsumer(source, false),
-                 capacity(0.0, 0.0, 0.0),
-                 atom_capacity(0.0),
-                 conversion_ratio(conversion_ratio),
-                 energy(energy),
-                 ftl_energy(ftl_energy) {
+Reactor::Reactor(EnergyContainer *source, EnergyContainer *energy, EnergyContainer *ftl_energy, double conversion_ratio)
+    : Component(0.0, 0.0, false),
+      EnergyConsumer(source, false),
+      capacity(0.0, 0.0, 0.0),
+      atom_capacity(0.0),
+      conversion_ratio(conversion_ratio),
+      energy(energy),
+      ftl_energy(ftl_energy) {
     type = ComponentType::Reactor;
 }
 
-Reactor::~Reactor()
-= default;
-
+Reactor::~Reactor() = default;
 
 void Reactor::Load(std::string unit_key) {
     Component::Load(unit_key);
@@ -65,23 +58,22 @@ void Reactor::Load(std::string unit_key) {
     SetConsumption(capacity * conversion_ratio);
     operational = capacity.Percent();
 
-    if(capacity.MaxValue() > 0) {
+    if (capacity.MaxValue() > 0) {
         installed = true;
     }
 }
 
-void Reactor::SaveToCSV(std::map<std::string, std::string>& unit) const {
+void Reactor::SaveToCSV(std::map<std::string, std::string> &unit) const {
     // TODO: This won't record damage to recharge
     unit[REACTOR_RECHARGE] = capacity.Serialize(configuration().components.reactor.factor_dbl);
 }
-
 
 bool Reactor::CanDowngrade() const {
     return !Damaged();
 }
 
 bool Reactor::Downgrade() {
-    if(!CanDowngrade()) {
+    if (!CanDowngrade()) {
         return false;
     }
 
@@ -98,14 +90,14 @@ bool Reactor::CanUpgrade(const std::string upgrade_key) const {
 }
 
 bool Reactor::Upgrade(const std::string upgrade_key) {
-    if(!CanUpgrade(upgrade_key)) {
+    if (!CanUpgrade(upgrade_key)) {
         return false;
     }
 
     Component::Upgrade(upgrade_key);
 
-    capacity = Resource<double>(UnitCSVFactory::GetVariable(upgrade_key, REACTOR_RECHARGE, std::string("0.0")),
-                                configuration().components.reactor.factor_dbl);
+    capacity      = Resource<double>(UnitCSVFactory::GetVariable(upgrade_key, REACTOR_RECHARGE, std::string("0.0")),
+                                     configuration().components.reactor.factor_dbl);
     atom_capacity = capacity * simulation_atom_var;
     SetConsumption(capacity * conversion_ratio);
 
@@ -115,19 +107,19 @@ bool Reactor::Upgrade(const std::string upgrade_key) {
 void Reactor::Damage() {
     capacity.RandomDamage();
     atom_capacity = capacity.Value() * simulation_atom_var;
-    operational = capacity.AdjustedValue() / capacity.MaxValue();
+    operational   = capacity.AdjustedValue() / capacity.MaxValue();
 }
 
 void Reactor::DamageByPercent(double percent) {
     capacity.DamageByPercent(percent);
     atom_capacity = capacity.Value() * simulation_atom_var;
-    operational = capacity.AdjustedValue() / capacity.MaxValue();
+    operational   = capacity.AdjustedValue() / capacity.MaxValue();
 }
 
 void Reactor::Repair() {
     capacity.RepairFully();
     atom_capacity = capacity.Value() * simulation_atom_var;
-    operational = 1.0;
+    operational   = 1.0;
 }
 
 bool Reactor::Damaged() const {
@@ -142,13 +134,13 @@ void Reactor::Generate() {
     double power = Consume();
 
     // Zero out fuel if power is 0
-    if(power < 0.0001) {
+    if (power < 0.0001) {
         ZeroSource();
         return;
     }
 
     double surplus = energy->Charge(atom_capacity * power);
-    surplus = ftl_energy->Charge(atom_capacity * surplus);
+    surplus        = ftl_energy->Charge(atom_capacity * surplus);
 }
 
 double Reactor::Capacity() const {
@@ -166,7 +158,6 @@ void Reactor::SetCapacity(double capacity) {
     operational = 1.0;
 }
 
-double Reactor::Consume()
-{
+double Reactor::Consume() {
     return EnergyConsumer::Consume();
 }

@@ -26,24 +26,22 @@
  */
 
 
-#include "cmd/unit_generic.h"
 #include "cmd/ai/fireall.h"
+
 #include "cmd/role_bitmask.h"
+#include "cmd/unit_generic.h"
+
 namespace Orders {
 
-FireAllYouGot::FireAllYouGot() : Order(WEAPON, STARGET) {
-}
+FireAllYouGot::FireAllYouGot() : Order(WEAPON, STARGET) {}
 
-FireAllYouGot::~FireAllYouGot()
-= default;
+FireAllYouGot::~FireAllYouGot() = default;
 
 void FireAllYouGot::Execute() {
     parent->Fire(ROLES::EVERYTHING_ELSE | ROLES::FIRE_GUNS | ROLES::FIRE_MISSILES, true);
 }
 
-void FireAllYouGot::Destructor()
-{
+void FireAllYouGot::Destructor() {
     Order::Destructor();
 }
-}
-
+}  // namespace Orders

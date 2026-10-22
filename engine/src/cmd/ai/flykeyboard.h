@@ -30,27 +30,31 @@
 #include "src/in.h"
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #include <glut.h>
+
 #include "flybywire.h"
 
 class FlyByKeyboard : public FlyByWire {
-    Order *autopilot;
-    Vector axis_key;
+    Order       *autopilot;
+    Vector       axis_key;
     unsigned int last_jumped;
+
 protected:
     enum joy_mode_enum {
-        joyModeNormal = 0,
+        joyModeNormal     = 0,
         joyModeInertialXY = 1,
         joyModeInertialXZ = 2,
-        joyModeRoll = 4,
-        joyModeBank = 8
+        joyModeRoll       = 4,
+        joyModeBank       = 8
     };
-    char joy_mode; //do not mix different modes
+
+    char joy_mode;  // do not mix different modes
 protected:
-    void KeyboardUp(float val);
-    void KeyboardRight(float val);
-    void KeyboardRollRight(float val);
+    void  KeyboardUp(float val);
+    void  KeyboardRight(float val);
+    void  KeyboardRollRight(float val);
     float clamp_axis(float v);
     float reduce_axis(float v);
+
 public:
     static void SwitchWebcam(const KBData &, KBSTATE);
     static void SwitchSecured(const KBData &, KBSTATE);
@@ -94,13 +98,13 @@ public:
     static void StopAutoKey(const KBData &, KBSTATE);
     static void SetVelocityRefKey(const KBData &, KBSTATE);
     static void SetNullVelocityRefKey(const KBData &, KBSTATE);
-    int whichplayer;
-    bool inauto;
+    int         whichplayer;
+    bool        inauto;
     FlyByKeyboard(unsigned int whichplayer);
     virtual void Destroy();
     virtual ~FlyByKeyboard();
-    void Execute(bool); //should we reset our ang velocity
+    void Execute(bool);  // should we reset our ang velocity
     void Execute();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_AI_FLY_KEYBOARD_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_AI_FLY_KEYBOARD_H

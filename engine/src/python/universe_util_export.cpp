@@ -26,29 +26,29 @@
  */
 
 #define PY_SSIZE_T_CLEAN
-#include <boost/version.hpp>
 #include <boost/python.hpp>
-#include "src/python/python_class.h"
-#include "cmd/container.h"
-#include "src/python/init.h"
-#include "gfx_generic/vec.h"
-#include "cmd/unit_generic.h"
-#include "src/universe_util.h"
-#include "cmd/unit_util.h"
-#include "root_generic/faction_generic.h"
+
+#include <boost/version.hpp>
+
 #include "cmd/ai/fire.h"
+#include "cmd/container.h"
+#include "cmd/unit_generic.h"
+#include "cmd/unit_util.h"
+#include "gfx_generic/vec.h"
+#include "root_generic/faction_generic.h"
+#include "src/python/init.h"
+#include "src/python/python_class.h"
+#include "src/universe_util.h"
 
 void StarSystemExports() {
-#define EXPORT_UTIL(name, aff) PYTHON_DEFINE_GLOBAL( VS, &UniverseUtil::name, #name );
-#define voidEXPORT_UTIL(name) EXPORT_UTIL( name, 0 )
+#define EXPORT_UTIL(name, aff) PYTHON_DEFINE_GLOBAL(VS, &UniverseUtil::name, #name);
+#define voidEXPORT_UTIL(name)  EXPORT_UTIL(name, 0)
 #undef EXPORT_FACTION
 #undef voidEXPORT_FACTION
-#define EXPORT_FACTION(name, aff) PYTHON_DEFINE_GLOBAL( VS, &FactionUtil::name, #name );
-#define voidEXPORT_FACTION(name) EXPORT_FACTION( name, 0 )
+#define EXPORT_FACTION(name, aff) PYTHON_DEFINE_GLOBAL(VS, &FactionUtil::name, #name);
+#define voidEXPORT_FACTION(name)  EXPORT_FACTION(name, 0)
 
 #include "star_system_exports.h"
 }
 
 #include <string>
-
-

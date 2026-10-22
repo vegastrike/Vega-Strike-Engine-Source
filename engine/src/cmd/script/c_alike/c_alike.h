@@ -34,30 +34,30 @@
 #include <stdio.h>
 
 #if defined(HAVE_LINUX_SLAB_H)
-#include <linux/slab.h>
+#    include <linux/slab.h>
 #elif defined(HAVE_LINUX_MALLOC_H)
-#include <linux/malloc.h>
+#    include <linux/malloc.h>
 #elif defined(__APPLE__) || defined(MACOSX)
-#include <sys/malloc.h>
+#    include <sys/malloc.h>
 #elif defined(HAVE_MALLOC_H)
-#include <malloc.h>
+#    include <malloc.h>
 #else
-#include <stdlib.h>
+#    include <stdlib.h>
 #endif
-#include <vector>
 #include <string>
+#include <vector>
 
 using std::string;
 
 #define YYERROR_VERBOSE
 
-#define q(x)    ("\""+x+"\"")
+#define q(x) ("\"" + x + "\"")
 
 extern std::string parseCalike(char const *filename);
-extern int yyerror(char *);
-extern int yyparse();
-extern int yywrap();
-extern int yylex();
+extern int         yyerror(char *);
+extern int         yyparse();
+extern int         yywrap();
+extern int         yylex();
 
 extern bool have_yy_error;
 
@@ -68,14 +68,14 @@ extern bool have_yy_error;
 
 extern std::string module_string;
 
-extern int yylineno;
+extern int   yylineno;
 extern char *yytext;
 extern FILE *yyin;
 
 extern YYSTYPE yylval;
 
 #if defined(BISON)
-#include "c_alike.tab.hpp"
+#    include "c_alike.tab.hpp"
 #else
-#include "c_alike.tab.cpp.h"
+#    include "c_alike.tab.cpp.h"
 #endif

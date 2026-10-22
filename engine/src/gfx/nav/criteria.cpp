@@ -27,23 +27,23 @@
 
 
 #include "src/vegastrike.h"
-#if defined (_WIN32) && !defined (__CYGWIN__) && !defined (__MINGW32__)
-//For WIN32 debugging.
-#include <crtdbg.h>
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
+// For WIN32 debugging.
+#    include <crtdbg.h>
 #endif
 
 #include <assert.h>
 
 #include "criteria.h"
-#include "root_generic/vs_globals.h"
 #include "gfx/cockpit.h"
 #include "root_generic/galaxy_xml.h"
-#include "vegadisk/savegame.h"
-#include "src/universe_util.h"
+#include "root_generic/vs_globals.h"
 #include "src/universe.h"
+#include "src/universe_util.h"
+#include "vegadisk/savegame.h"
 
-using std::string;
 using std::set;
+using std::string;
 
 /////////////////////////////////////////////////////////////////
 
@@ -106,8 +106,7 @@ void CriteriaRoot::setChild(CriteriaNode *node) {
     }
 }
 
-CriteriaRoot::CriteriaRoot(CriteriaNode *child) :
-        CriteriaParent(NULL), m_child(child) {
+CriteriaRoot::CriteriaRoot(CriteriaNode *child) : CriteriaParent(NULL), m_child(child) {
     if (m_child) {
         m_child->setParent(this);
     }
@@ -131,9 +130,9 @@ bool CriteriaNot::isDestination(unsigned system) const {
 string CriteriaNot::getDescription() const {
     assert(m_child != NULL);
 
-    string temp = "NOT(";
-    temp += m_child->getDescription();
-    temp += ")";
+    string temp  = "NOT(";
+    temp        += m_child->getDescription();
+    temp        += ")";
     return temp;
 }
 
@@ -168,12 +167,11 @@ vector<CriteriaNode *> CriteriaNot::getChildren() const {
 CriteriaNode *CriteriaNot::clone() const {
     assert(m_child);
     CriteriaNode *cloned_child = m_child->clone();
-    CriteriaNot *temp = new CriteriaNot(cloned_child);
+    CriteriaNot  *temp         = new CriteriaNot(cloned_child);
     return temp;
 }
 
-CriteriaNot::CriteriaNot(CriteriaNode *child) :
-        CriteriaParent() {
+CriteriaNot::CriteriaNot(CriteriaNode *child) : CriteriaParent() {
     assert(child != NULL);
     setParent(child->getParent());
     m_child = child;
@@ -192,11 +190,11 @@ CriteriaNot::~CriteriaNot() {
 
 /////////////////////////////////////////////////////////////////
 
-CriteriaBinaryOperator::CriteriaBinaryOperator(CriteriaNode *child, CriteriaNode *newNode) :
-        CriteriaParent(child->getParent()) {
+CriteriaBinaryOperator::CriteriaBinaryOperator(CriteriaNode *child, CriteriaNode *newNode)
+    : CriteriaParent(child->getParent()) {
     assert(child != NULL);
     assert(newNode != NULL);
-    m_left = child;
+    m_left  = child;
     m_right = newNode;
     if (child->getParent()) {
         child->getParent()->replaceChild(child, this);
@@ -268,11 +266,11 @@ string CriteriaAnd::getDescription() const {
     assert(m_left != NULL);
     assert(m_right != NULL);
 
-    string temp = "(";
-    temp += m_left->getDescription();
-    temp += " AND ";
-    temp += m_right->getDescription();
-    temp += ")";
+    string temp  = "(";
+    temp        += m_left->getDescription();
+    temp        += " AND ";
+    temp        += m_right->getDescription();
+    temp        += ")";
     return temp;
 }
 
@@ -284,7 +282,7 @@ CriteriaNode *CriteriaAnd::clone() const {
     assert(m_left);
     assert(m_right);
 
-    CriteriaNode *cloned_left = m_left->clone();
+    CriteriaNode *cloned_left  = m_left->clone();
     CriteriaNode *cloned_right = m_right->clone();
 
     CriteriaAnd *temp = new CriteriaAnd(cloned_left, cloned_right);
@@ -304,11 +302,11 @@ string CriteriaOr::getDescription() const {
     assert(m_left != NULL);
     assert(m_right != NULL);
 
-    string temp = "(";
-    temp += m_left->getDescription();
-    temp += " OR ";
-    temp += m_right->getDescription();
-    temp += ")";
+    string temp  = "(";
+    temp        += m_left->getDescription();
+    temp        += " OR ";
+    temp        += m_right->getDescription();
+    temp        += ")";
     return temp;
 }
 
@@ -320,7 +318,7 @@ CriteriaNode *CriteriaOr::clone() const {
     assert(m_left);
     assert(m_right);
 
-    CriteriaNode *cloned_left = m_left->clone();
+    CriteriaNode *cloned_left  = m_left->clone();
     CriteriaNode *cloned_right = m_right->clone();
 
     CriteriaOr *temp = new CriteriaOr(cloned_left, cloned_right);
@@ -343,10 +341,10 @@ vector<CriteriaNode *> CriteriaLeaf::getChildren() const {
 bool CriteriaContains::isDestination(unsigned system) const {
     string name = _Universe->AccessCockpit()->AccessNavSystem()->systemIter[system].GetName();
 
-    //Check to make sure we have been there in person
-    //Not only for realism
-    //but the systems may have not been created yet.
-    string key(string("visited_") + name);
+    // Check to make sure we have been there in person
+    // Not only for realism
+    // but the systems may have not been created yet.
+    string         key(string("visited_") + name);
     vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
     if (v->empty()) {
         return false;
@@ -368,9 +366,9 @@ bool CriteriaContains::isDestination(unsigned system) const {
 }
 
 string CriteriaContains::getDescription() const {
-    string temp = "CONTAINS(";
-    temp += m_value;
-    temp += ")";
+    string temp  = "CONTAINS(";
+    temp        += m_value;
+    temp        += ")";
     return temp;
 }
 
@@ -385,7 +383,7 @@ CriteriaNode *CriteriaContains::clone() const {
 /////////////////////////////////////////////////////////////////
 
 bool CriteriaOwnedBy::isDestination(unsigned system) const {
-    string name = _Universe->AccessCockpit()->AccessNavSystem()->systemIter[system].GetName();
+    string name    = _Universe->AccessCockpit()->AccessNavSystem()->systemIter[system].GetName();
     string faction = UniverseUtil::GetGalaxyFaction(name);
     if (faction == m_value) {
         return true;
@@ -395,9 +393,9 @@ bool CriteriaOwnedBy::isDestination(unsigned system) const {
 }
 
 string CriteriaOwnedBy::getDescription() const {
-    string temp = "OWNEDBY(";
-    temp += m_value;
-    temp += ")";
+    string temp  = "OWNEDBY(";
+    temp        += m_value;
+    temp        += ")";
     return temp;
 }
 
@@ -423,9 +421,9 @@ bool CriteriaSector::isDestination(unsigned system) const {
 }
 
 string CriteriaSector::getDescription() const {
-    string temp = "SECTOR(";
-    temp += m_value;
-    temp += ")";
+    string temp  = "SECTOR(";
+    temp        += m_value;
+    temp        += ")";
     return temp;
 }
 
@@ -436,4 +434,3 @@ string CriteriaSector::getText() const {
 CriteriaNode *CriteriaSector::clone() const {
     return new CriteriaSector(m_value, NULL);
 }
-

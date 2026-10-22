@@ -51,7 +51,7 @@ namespace Audio {
  */
 class SoundBuffer {
 private:
-    void *buffer;
+    void        *buffer;
     unsigned int byteCapacity;
     unsigned int bytesUsed;
 
@@ -116,7 +116,7 @@ public:
 
     /** Set the format of the stream mantaining the capacity yet destroying all current data */
     void setFormat(const Format &newFormat) {
-        format = newFormat;
+        format    = newFormat;
         bytesUsed = 0;
     }
 
@@ -153,6 +153,6 @@ public:
     void clear();
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_SOUND_BUFFER_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_SOUND_BUFFER_H

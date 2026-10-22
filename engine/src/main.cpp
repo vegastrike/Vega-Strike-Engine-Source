@@ -30,81 +30,83 @@
 #include <boost/python.hpp>
 
 #include <Python.h>
+
 #include <boost/program_options.hpp>
+
 #include "audio/test.h"
-#if defined (HAVE_SDL)
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
+#if defined(HAVE_SDL)
+#    include <SDL3/SDL.h>
+#    include <SDL3/SDL_main.h>
 #endif
 #include "cmd/role_bitmask.h"
-#if defined (WITH_MACOSX_BUNDLE)
-#include <sys/param.h>
+#if defined(WITH_MACOSX_BUNDLE)
+#    include <sys/param.h>
 #endif
 #ifdef _WIN32
-#include <direct.h>
+#    include <direct.h>
 #endif
-#include "src/gfxlib.h"
-#include "src/in_kb.h"
-#include "root_generic/lin_time.h"
-#include "src/main_loop.h"
-#include "src/config_xml.h"
+#include <time.h>
+
+#include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
+#include "audio/SceneManager.h"
+#include "cmd/music.h"
 #include "cmd/script/mission.h"
-#include "src/audiolib.h"
-#include "vegadisk/vsfilesystem.h"
-#include "root_generic/vs_globals.h"
+#include "components/player_ship.h"
+#include "configuration/configuration.h"
 #include "gfx/animation.h"
 #include "gfx/cockpit.h"
-#include "src/python/init.h"
-#include "vegadisk/savegame.h"
-#include "src/force_feedback.h"
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
-#include "src/universe_util.h"
-#include "src/universe.h"
+#include "root_generic/lin_time.h"
+#include "root_generic/vs_globals.h"
+#include "src/audiolib.h"
+#include "src/config_xml.h"
+#include "src/force_feedback.h"
+#include "src/gfxlib.h"
+#include "src/in_kb.h"
+#include "src/main_loop.h"
+#include "src/python/init.h"
 #include "src/save_util.h"
-#include "cmd/music.h"
-#include "audio/SceneManager.h"
-#include "audio/renderers/OpenAL/BorrowedOpenALRenderer.h"
-#include "configuration/configuration.h"
-#include "components/player_ship.h"
-#include <time.h>
-#if !defined(_WIN32) && !defined (__HAIKU__)
-#include <signal.h>
+#include "src/universe.h"
+#include "src/universe_util.h"
+#include "vegadisk/savegame.h"
+#include "vegadisk/vsfilesystem.h"
+#if !defined(_WIN32) && !defined(__HAIKU__)
+#    include <signal.h>
 #endif
 
-#if defined (_MSC_VER) && defined (_DEBUG)
-#include <crtdbg.h>
+#if defined(_MSC_VER) && defined(_DEBUG)
+#    include <crtdbg.h>
 #endif
 
-#if defined (CG_SUPPORT)
-#include "src/cg_global.h"
+#if defined(CG_SUPPORT)
+#    include "src/cg_global.h"
 #endif
 
-#include "src/vs_logging.h"
-#include "root_generic/options.h"
-#include "version.h"
-#include "src/vs_exit.h"
-
+#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_sdl3.h"
+#include "backends/imgui_impl_sdlrenderer3.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "libraries/gui/gui.h"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_opengl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
+#include "root_generic/options.h"
+#include "src/vs_exit.h"
+#include "src/vs_logging.h"
+#include "version.h"
 
 /*
  * Globals
  */
-Universe *_Universe;
-TextPlane *bs_tp = nullptr;
-char SERVER = 0;
+Universe  *_Universe;
+TextPlane *bs_tp  = nullptr;
+char       SERVER = 0;
 
-//false if command line option --net is given to start without network
+// false if command line option --net is given to start without network
 static bool ignore_network = true;
-// legacy_data_dir_mode determines whether the application should require the data directory to be specified on the command-line or not
-// true - no parameter required, application should start regardless of where it's called from
-// false - parameter required, application should only start if specified
-// NOTE: This is tied to the executable name. `vegastrike` -> true; `vegastrike-engine` -> false
+// legacy_data_dir_mode determines whether the application should require the data directory to be specified on the
+// command-line or not true - no parameter required, application should start regardless of where it's called from false
+// - parameter required, application should only start if specified NOTE: This is tied to the executable name.
+// `vegastrike` -> true; `vegastrike-engine` -> false
 bool legacy_data_dir_mode;
 
 void enableNetwork(bool usenetwork) {
@@ -116,22 +118,22 @@ void enableNetwork(bool usenetwork) {
  */
 
 void setup_game_data() {
-    //pass in config file l8r??
-    g_game.audio_frequency_mode = 4;     //22050/16
-    g_game.sound_enabled = 1;
-    g_game.use_textures = 1;
-    g_game.use_ship_textures = 0;
-    g_game.use_planet_textures = 0;
-    g_game.use_sprites = 1;
-    g_game.use_animations = 1;
-    g_game.use_videos = 1;
-    g_game.use_logos = 1;
-    g_game.sound_volume = 1;
-    g_game.music_volume = 1;
-    g_game.warning_level = 20;
-    g_game.capture_mouse = GFXFALSE;
-    g_game.MouseSensitivityX = 2;
-    g_game.MouseSensitivityY = 4;
+    // pass in config file l8r??
+    g_game.audio_frequency_mode = 4;  // 22050/16
+    g_game.sound_enabled        = 1;
+    g_game.use_textures         = 1;
+    g_game.use_ship_textures    = 0;
+    g_game.use_planet_textures  = 0;
+    g_game.use_sprites          = 1;
+    g_game.use_animations       = 1;
+    g_game.use_videos           = 1;
+    g_game.use_logos            = 1;
+    g_game.sound_volume         = 1;
+    g_game.music_volume         = 1;
+    g_game.warning_level        = 20;
+    g_game.capture_mouse        = GFXFALSE;
+    g_game.MouseSensitivityX    = 2;
+    g_game.MouseSensitivityY    = 4;
 }
 
 VegaConfig *createVegaConfig(const char *file) {
@@ -145,7 +147,8 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **CmdLine);
  */
 int readCommandLineOptions(int argc, char **argv);
 
-// FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
+// FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy
+// 2020-10-25
 void VSExit(int code) {
     Music::CleanupMuzak();
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
@@ -164,21 +167,25 @@ void cleanup(void) {
         _Universe->WriteSaveGame(true);
     }
 #ifdef _WIN32
-#if defined (_MSC_VER) && defined (_DEBUG)
+#    if defined(_MSC_VER) && defined(_DEBUG)
     if (!cleanexit) {
-        _RPT0( _CRT_ERROR, "WARNING: Vega Strike exit not clean\n" );
+        _RPT0(_CRT_ERROR, "WARNING: Vega Strike exit not clean\n");
     }
     return;
-#endif
+#    endif
 #else
     while (!cleanexit) {
-        usleep(10000);
+        usleep(10'000);
     }
 #endif
 
-#if defined (CG_SUPPORT)
-    if (cloak_cg->vertexProgram) cgDestroyProgram( cloak_cg->vertexProgram );
-    if (cloak_cg->shaderContext) cgDestroyContext( cloak_cg->shaderContext );
+#if defined(CG_SUPPORT)
+    if (cloak_cg->vertexProgram) {
+        cgDestroyProgram(cloak_cg->vertexProgram);
+    }
+    if (cloak_cg->shaderContext) {
+        cgDestroyContext(cloak_cg->shaderContext);
+    }
 #endif
     Music::CleanupMuzak();
     winsys_shutdown();
@@ -190,12 +197,11 @@ LeakVector<Mission *> active_missions;
 
 void bootstrap_main_loop();
 void bootstrap_first_loop();
-#if defined (WITH_MACOSX_BUNDLE)
-//WTF! this causes windowed creation to fail... please justify yourself ;-)  #undef main
+#if defined(WITH_MACOSX_BUNDLE)
+// WTF! this causes windowed creation to fail... please justify yourself ;-)  #undef main
 #endif
 
-void nothinghappens(unsigned int, unsigned int, bool, int, int) {
-}
+void nothinghappens(unsigned int, unsigned int, bool, int, int) {}
 
 void initSceneManager() {
     VS_LOG(info, "Creating scene manager...");
@@ -240,7 +246,7 @@ void closeRenderer() {
 
 extern void InitUnitTables();
 extern void CleanupUnitTables();
-bool isVista = false;
+bool        isVista = false;
 
 Unit *TheTopLevelUnit;
 
@@ -253,7 +259,7 @@ int main(int argc, char *argv[]) {
     // set standard C locale (avoids side effects when the default locale is different)
     std::locale::global(GetGlobalLocale());
 
-    const boost::filesystem::path program_name{program_path.filename()};  //canonical_program_path.filename();
+    const boost::filesystem::path program_name{program_path.filename()};  // canonical_program_path.filename();
     const boost::filesystem::path program_directory_path{program_path.parent_path()};
 
     VSFileSystem::programdir = program_directory_path.string();
@@ -271,16 +277,16 @@ int main(int argc, char *argv[]) {
         std::cerr << "Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR" << std::endl;
     }
 
-    if (!program_directory_path.empty())                  // Changing to an empty path does bad things
+    if (!program_directory_path.empty())  // Changing to an empty path does bad things
     {
         boost::filesystem::current_path(program_directory_path);
     }
 
     CONFIGFILE = nullptr;
     {
-        char pwd[8192] = "";
-        if (nullptr != getcwd(pwd, 8191)) {
-            pwd[8191] = '\0';
+        char pwd[8'192] = "";
+        if (nullptr != getcwd(pwd, 8'191)) {
+            pwd[8'191] = '\0';
             VS_LOG(info, (boost::format(" In path %1%") % pwd));
         } else {
             VS_LOG(info, " In path <<path too long>>");
@@ -288,22 +294,23 @@ int main(int argc, char *argv[]) {
     }
 #ifdef _WIN32
     OSVERSIONINFO osvi;
-    ZeroMemory( &osvi, sizeof (OSVERSIONINFO) );
-    osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 
-    GetVersionEx( &osvi );
+    GetVersionEx(&osvi);
     isVista = (osvi.dwMajorVersion == 6);
     VS_LOG(info, (boost::format("Windows version %1% %2%") % osvi.dwMajorVersion % osvi.dwMinorVersion));
 #endif
     /* Print copyright notice */
-    printf("Vega Strike "  " \n"
+    printf("Vega Strike "
+           " \n"
            "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n");
     /* Seed the random number generator */
     if (benchmark < 0.0) {
         srand(time(nullptr));
     } else {
-        //in benchmark mode, always use the same seed
-        srand(171070);
+        // in benchmark mode, always use the same seed
+        srand(171'070);
     }
 
     // Initial mission name. Can be loaded from command line arguments.
@@ -312,9 +319,9 @@ int main(int argc, char *argv[]) {
 
     setup_game_data();  // TODO: Combine with vega_config::config settings object
     {
-        std::pair<std::string, std::string> pair = ParseCommandLine(argc, argv);
-        std::string subdir = pair.first;
-        mission_name = pair.second;
+        std::pair<std::string, std::string> pair   = ParseCommandLine(argc, argv);
+        std::string                         subdir = pair.first;
+        mission_name                               = pair.second;
 
         VS_LOG(info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
         if (CONFIGFILE == nullptr) {
@@ -324,7 +331,7 @@ int main(int argc, char *argv[]) {
             snprintf(CONFIGFILE, 41, "config.json");
             CONFIGFILE[41] = '\0';
         }
-        //Specify the config file and the possible mod subdir to play
+        // Specify the config file and the possible mod subdir to play
         VSFileSystem::InitPaths(CONFIGFILE, subdir);
         // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
     }
@@ -335,7 +342,8 @@ int main(int argc, char *argv[]) {
     }
 
     // Ugly hack until we can find a way to redo all the directory initialization stuff properly.
-    // Use the subdirectory "logs" under the Vega Strike home directory. Make sure we don't duplicate the ".vegastrike/" or ".pu/", etc. part.
+    // Use the subdirectory "logs" under the Vega Strike home directory. Make sure we don't duplicate the ".vegastrike/"
+    // or ".pu/", etc. part.
     const boost::filesystem::path home_path{boost::filesystem::absolute(VSFileSystem::homedir)};
     if (home_path.string().find(VSFileSystem::HOMESUBDIR) == std::string::npos) {
         const boost::filesystem::path home_subdir(VSFileSystem::HOMESUBDIR);
@@ -362,7 +370,7 @@ int main(int argc, char *argv[]) {
         return exitcode;
     }
 
-    //might overwrite the default mission with the command line
+    // might overwrite the default mission with the command line
     InitUnitTables();
 
     // Initialise the master parts list before first use.
@@ -372,7 +380,7 @@ int main(int argc, char *argv[]) {
 
     Python::test();
 
-    std::vector<std::vector<char> > temp = ROLES::getAllRolePriorities();
+    std::vector<std::vector<char>> temp = ROLES::getAllRolePriorities();
 
     InitTime();
     UpdateTime();
@@ -385,7 +393,7 @@ int main(int argc, char *argv[]) {
     initALRenderer();
     initScenes();
 
-    _Universe = new Universe(argc, argv, configuration().game_start.galaxy.c_str());
+    _Universe       = new Universe(argc, argv, configuration().game_start.galaxy.c_str());
     TheTopLevelUnit = new Unit(0);
     _Universe->Loop(bootstrap_first_loop);
 
@@ -400,8 +408,8 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-static Animation *SplashScreen = nullptr;
-static bool BootstrapMyStarSystemLoading = true;
+static Animation *SplashScreen                 = nullptr;
+static bool       BootstrapMyStarSystemLoading = true;
 
 void SetStarSystemLoading(bool value) {
     BootstrapMyStarSystemLoading = value;
@@ -420,15 +428,15 @@ Animation *GetSplashScreen() {
 }
 
 void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
-    static Animation *ani = nullptr;
-    static bool reentryWatchdog = false;
+    static Animation *ani             = nullptr;
+    static bool       reentryWatchdog = false;
     if (!BootstrapMyStarSystemLoading || reentryWatchdog) {
         return;
     }
-    Music::MuzakCycle();     //Allow for loading music...
+    Music::MuzakCycle();  // Allow for loading music...
     if (SplashScreen == nullptr && newSplashScreen == nullptr) {
-        //if there's no splashscreen, we don't draw on it
-        //this happens, when the splash screens texture is loaded
+        // if there's no splashscreen, we don't draw on it
+        // this happens, when the splash screens texture is loaded
         return;
     }
 
@@ -456,9 +464,9 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     GFXLoadMatrixModel(tmp);
     GFXBeginScene();
 
-    bs_tp->SetPos(-.99, -.97);     //Leave a little bit of room for the bottoms of characters.
+    bs_tp->SetPos(-.99, -.97);  // Leave a little bit of room for the bottoms of characters.
     bs_tp->SetCharSize(.4, .8);
-    ScaleMatrix(tmp, Vector(6500, 6500, 0));
+    ScaleMatrix(tmp, Vector(6'500, 6'500, 0));
     GFXLoadMatrixModel(tmp);
     GFXHudMode(GFXTRUE);
     if (ani) {
@@ -471,38 +479,33 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     }
 
     // Automatically detect if ImGui is currently between NewFrame() and Render()
-    ImGuiContext* g = ImGui::GetCurrentContext();
-    const bool owns_frame = (g == nullptr || !g->WithinFrameScope);
+    ImGuiContext *g          = ImGui::GetCurrentContext();
+    const bool    owns_frame = (g == nullptr || !g->WithinFrameScope);
 
-    static constexpr ImGuiWindowFlags window_flags =
-            ImGuiWindowFlags_NoTitleBar |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoScrollbar |
-            ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoBackground |
-            ImGuiWindowFlags_NoDecoration;   // makes it transparent
+    static constexpr ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                                                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar |
+                                                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoBackground |
+                                                     ImGuiWindowFlags_NoDecoration;  // makes it transparent
 
     // create new frame if none is active
-    if(owns_frame) {
+    if (owns_frame) {
         // ImGui Init
-        ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
+        ImGui_ApplyPendingFontSize();  // apply a pending font-size change before laying out
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
         // End ImGui Init
     }
 
-    ImGui::SetNextWindowPos(ImVec2(0,0), ImGuiCond_Always);
-    const ImVec2 window_size(configuration().graphics.resolution_x,
-                             configuration().graphics.resolution_y);
+    ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+    const ImVec2 window_size(configuration().graphics.resolution_x, configuration().graphics.resolution_y);
     ImGui::SetNextWindowSize(window_size, ImGuiCond_Always);
     ImGui::Begin("main_window", nullptr, window_flags);
 
 
-    bs_tp->Draw(!configuration().graphics.default_boot_message.empty() ?
-            configuration().graphics.default_boot_message : !message.empty() ?
-                    message : configuration().graphics.initial_boot_message);
+    bs_tp->Draw(!configuration().graphics.default_boot_message.empty() ? configuration().graphics.default_boot_message
+                : !message.empty()                                     ? message
+                                                                       : configuration().graphics.initial_boot_message);
 
     // ImGui End Frame
     ImGui::End();
@@ -510,14 +513,14 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     // Always render the frame
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_Window* current_window = SDL_GL_GetCurrentWindow();
+    SDL_Window *current_window = SDL_GL_GetCurrentWindow();
     SDL_GL_SwapWindow(current_window);
     // End ImGui
 
     // open a new frame if there was an active one
-    if(!owns_frame) {
+    if (!owns_frame) {
         // ImGui Init
-        ImGui_ApplyPendingFontSize();   // apply a pending font-size change before laying out
+        ImGui_ApplyPendingFontSize();  // apply a pending font-size change before laying out
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
@@ -534,7 +537,7 @@ extern Unit **fighters;
 
 bool SetPlayerLoc(QVector &sys, bool set) {
     static QVector mysys;
-    static bool isset = false;
+    static bool    isset = false;
     if (set) {
         isset = true;
         mysys = sys;
@@ -549,7 +552,7 @@ bool SetPlayerLoc(QVector &sys, bool set) {
 
 bool SetPlayerSystem(std::string &sys, bool set) {
     static std::string mysys;
-    static bool isset = false;
+    static bool        isset = false;
     if (set) {
         isset = true;
         mysys = sys;
@@ -563,7 +566,7 @@ bool SetPlayerSystem(std::string &sys, bool set) {
 }
 
 vector<string> parse_space_string(std::string s) {
-    vector<string> ret;
+    vector<string>    ret;
     string::size_type index = 0;
     while ((index = s.find(" ")) != string::npos) {
         ret.push_back(s.substr(0, index));
@@ -576,10 +579,10 @@ vector<string> parse_space_string(std::string s) {
 void bootstrap_first_loop() {
     static int i = 0;
     if (i == 0) {
-        vector<string> s = parse_space_string(configuration().graphics.splash_screen);
-        vector<string> sa = parse_space_string(configuration().graphics.splash_audio);
-        int snum = time(nullptr) % s.size();
-        SplashScreen = new Animation(s[snum].c_str(), false);
+        vector<string> s    = parse_space_string(configuration().graphics.splash_screen);
+        vector<string> sa   = parse_space_string(configuration().graphics.splash_audio);
+        int            snum = time(nullptr) % s.size();
+        SplashScreen        = new Animation(s[snum].c_str(), false);
         if (!sa.empty() && sa[0].length()) {
             muzak->GotoSong(sa[snum % sa.size()]);
         }
@@ -594,19 +597,20 @@ void bootstrap_first_loop() {
 }
 
 void SetStartupView(Cockpit *cp) {
-    VS_LOG(debug, (boost::format("%1%: Setting cockpit startup view to: %2%") % __FUNCTION__ % configuration().graphics.startup_cockpit_view));
-    cp->SetView(configuration().graphics.startup_cockpit_view
-            == "view_target" ? CP_TARGET : (configuration().graphics.startup_cockpit_view
-            == "back" ? CP_BACK : (configuration().graphics.startup_cockpit_view
-            == "chase" ? CP_CHASE
-            : CP_FRONT)));
+    VS_LOG(debug, (boost::format("%1%: Setting cockpit startup view to: %2%") % __FUNCTION__ %
+                   configuration().graphics.startup_cockpit_view));
+    cp->SetView(configuration().graphics.startup_cockpit_view == "view_target"
+                        ? CP_TARGET
+                        : (configuration().graphics.startup_cockpit_view == "back"
+                                   ? CP_BACK
+                                   : (configuration().graphics.startup_cockpit_view == "chase" ? CP_CHASE : CP_FRONT)));
 }
 
 void bootstrap_main_loop() {
     static bool LoadMission = true;
     // InitTime();
 
-    // TODO: refactor this. 
+    // TODO: refactor this.
     // This code runs once but is called from above 4 times.
     if (LoadMission) {
         LoadMission = false;
@@ -616,11 +620,11 @@ void bootstrap_main_loop() {
 
         mission->initMission();
 
-        UniverseUtil::showSplashScreen("");         //Twice for double or triple-buffering
+        UniverseUtil::showSplashScreen("");  // Twice for double or triple-buffering
         UniverseUtil::showSplashScreen("");
 
         QVector pos;
-        string planetname;
+        string  planetname;
 
         mission->GetOrigin(pos, planetname);
         string mysystem = mission->getVariable("system", "sol.system");
@@ -629,13 +633,13 @@ void bootstrap_main_loop() {
         numplayers = XMLSupport::parse_int(mission->getVariable("num_players", "1"));
         vector<std::string> playername;
         vector<std::string> playerpasswd;
-        string pname, ppasswd;
+        string              pname, ppasswd;
         for (int p = 0; p < numplayers; p++) {
-            pname = game_options()->getPlayer(p);
+            pname   = game_options()->getPlayer(p);
             ppasswd = game_options()->getPassword(p);
 
             if (!ignore_network) {
-                //In network mode, test if all player sections are present
+                // In network mode, test if all player sections are present
                 if (pname.empty()) {
                     VS_LOG_AND_FLUSH(fatal, (boost::format("Missing or incomplete section for player %1%") % p));
                     cleanexit = true;
@@ -645,15 +649,15 @@ void bootstrap_main_loop() {
             playername.push_back(pname);
             playerpasswd.push_back(ppasswd);
         }
-        g_game.difficulty = XMLSupport::parse_float(mission->getVariable("difficulty", "1"));
-        string savegamefile = mission->getVariable("savegame", "");
-        vector<SavedUnits> savedun;
-        vector<string> playersaveunit;
+        g_game.difficulty                 = XMLSupport::parse_float(mission->getVariable("difficulty", "1"));
+        string               savegamefile = mission->getVariable("savegame", "");
+        vector<SavedUnits>   savedun;
+        vector<string>       playersaveunit;
         vector<StarSystem *> ss;
-        vector<string> starsysname;
-        vector<QVector> playerNloc;
+        vector<string>       starsysname;
+        vector<QVector>      playerNloc;
 
-        vector<vector<std::string> > savefiles;
+        vector<vector<std::string>> savefiles;
 
         _Universe->SetupCockpits(playername);
 
@@ -661,7 +665,7 @@ void bootstrap_main_loop() {
 
         Cockpit *cp = _Universe->AccessCockpit(k);
         SetStartupView(cp);
-        bool setplayerXloc = false;
+        bool        setplayerXloc = false;
         std::string psu;
         if (k == 0) {
             QVector myVec;
@@ -674,27 +678,22 @@ void bootstrap_main_loop() {
             }
         }
         vector<SavedUnits> saved;
-        
+
 
         if (configuration().general.load_last_savegame) {
             vector<string> packedInfo;
-            ComponentsManager::credits = _Universe->AccessCockpit(k)->savegame->ParseSaveGame(savegamefile,
-                    mysystem,
-                    mysystem,
-                    pos,
-                    setplayerXloc,
-                    packedInfo,
-                    k);
+            ComponentsManager::credits = _Universe->AccessCockpit(k)->savegame->ParseSaveGame(
+                    savegamefile, mysystem, mysystem, pos, setplayerXloc, packedInfo, k);
             _Universe->AccessCockpit(k)->UnpackUnitInfo(packedInfo);
         } else {
             _Universe->AccessCockpit(k)->savegame->SetOutputFileName(savegamefile);
         }
-        
+
         // Pushes the dummy ship unless loading something from the command line
         std::string ship_name = "Dummy";
         try {
             ship_name = PlayerShip::GetActiveShip().GetName();
-        } catch(const std::runtime_error& e) {
+        } catch (const std::runtime_error &e) {
             // Do nothing. This is the default behavior.
         }
         playersaveunit.push_back(ship_name);
@@ -711,7 +710,7 @@ void bootstrap_main_loop() {
         SetStarSystemLoading(true);
         InitializeInput();
 
-        vs_config->bindKeys();         //gotta do this before we do AI
+        vs_config->bindKeys();  // gotta do this before we do AI
 
         createObjects(playersaveunit, ss, playerNloc, savefiles);
         while (!savedun.empty()) {
@@ -723,22 +722,18 @@ void bootstrap_main_loop() {
         UpdateTime();
         FactionUtil::LoadContrabandLists();
         {
-            const std::string intro_text = boost::algorithm::replace_all_copy(
-                configuration().game_start.introduction, "\\n", "\n");
+            const std::string intro_text =
+                    boost::algorithm::replace_all_copy(configuration().game_start.introduction, "\\n", "\n");
             std::vector<std::string> intro_lines;
 
-            boost::split(intro_lines, intro_text, [](char c){
-                return c == '\n';
-            });
+            boost::split(intro_lines, intro_text, [](char c) { return c == '\n'; });
 
-            for(const std::string& line : intro_lines) {
+            for (const std::string &line : intro_lines) {
                 UniverseUtil::IOmessage(0, "game", "all", line);
             }
         }
 
-        if (mission->getVariable("savegame",
-                "").length() != 0
-                && configuration().ai.dock_on_load) {
+        if (mission->getVariable("savegame", "").length() != 0 && configuration().ai.dock_on_load) {
             for (size_t i = 0; i < _Universe->numPlayers(); i++) {
                 QVector vec;
                 DockToSavedBases(i, vec);
@@ -750,17 +745,18 @@ void bootstrap_main_loop() {
             _Universe->AccessCockpit(i)->savegame->LoadSavedMissions();
         }
         _Universe->Loop(main_loop);
-        ///return to idle func which now should call main_loop mohahahah
+        /// return to idle func which now should call main_loop mohahahah
         if (configuration().splash.auto_hide) {
             UniverseUtil::hideSplashScreen();
         }
     }
-    ///Draw Texture
+    /// Draw Texture
 }
 
 const char versionmessage[] =
         // (BenjamenMeyer) this will be `major.minor.patch+githash` once all is said and done
-        "Vega Strike Engine Version " VEGASTRIKE_VERSION_STR "\n"
+        "Vega Strike Engine Version " VEGASTRIKE_VERSION_STR
+        "\n"
         "\n";
 
 std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine) {
@@ -768,31 +764,25 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     std::string mission_name;
     g_game.vsdebug = '0';
 
-    boost::program_options::options_description vs_switches("Command line options for vegastrike; short options are case insensitive");
-    vs_switches.add_options()
-        ("target,D", boost::program_options::value<std::string>(), "Specify data directory, full path expected")
-        ("num-players,n", boost::program_options::value<int>(), "Number of players")
-        ("mod,m", boost::program_options::value<std::string>(), "Specify a mod to play")
-        ("start-in-system,j", boost::program_options::value<std::string>(), "Start in a specific system")
-        ("location,l", boost::program_options::value<std::string>(), "Specify player location")
-        ("h", "Medium-low resolution (1024x768)")
-        ("v", "Medium resolution (1280x1024)")
-        ("help,h", "Show this help")
-        ("version", "Print the version and exit")
-        ("debug", boost::program_options::value<char>()->default_value('0'), "Enable debugging output, 1 major warnings, 2 medium, 3 developer notes")
-        ("benchmark", boost::program_options::value<double>(), "Benchmark")
-        ("test-audio", "Run audio tests")  // is handled in readCommandLineOptions, here is serves only for help message
-        ("r", "No-op")
-        ("f", "No-op")
-        ("p", "No-op")
-        ("g", "No-op")
-        ("u", "No-op")
-        ;
+    boost::program_options::options_description vs_switches(
+            "Command line options for vegastrike; short options are case insensitive");
+    vs_switches.add_options()("target,D", boost::program_options::value<std::string>(),
+                              "Specify data directory, full path expected")(
+            "num-players,n", boost::program_options::value<int>(), "Number of players")(
+            "mod,m", boost::program_options::value<std::string>(), "Specify a mod to play")(
+            "start-in-system,j", boost::program_options::value<std::string>(), "Start in a specific system")(
+            "location,l", boost::program_options::value<std::string>(), "Specify player location")(
+            "h", "Medium-low resolution (1024x768)")("v", "Medium resolution (1280x1024)")("help,h", "Show this help")(
+            "version", "Print the version and exit")(
+            "debug", boost::program_options::value<char>()->default_value('0'),
+            "Enable debugging output, 1 major warnings, 2 medium, 3 developer notes")(
+            "benchmark", boost::program_options::value<double>(), "Benchmark")(
+            "test-audio",
+            "Run audio tests")  // is handled in readCommandLineOptions, here is serves only for help message
+            ("r", "No-op")("f", "No-op")("p", "No-op")("g", "No-op")("u", "No-op");
 
     boost::program_options::options_description vs_modules;
-    vs_modules.add_options()
-        ("mission_name", boost::program_options::value<std::string>(), "Mission name")
-        ;
+    vs_modules.add_options()("mission_name", boost::program_options::value<std::string>(), "Mission name");
 
     boost::program_options::options_description vs_options;
     vs_options.add(vs_switches).add(vs_modules);
@@ -800,16 +790,19 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     boost::program_options::positional_options_description vs_positionals;
     vs_positionals.add("mission_name", 1);
 
-    auto style = static_cast<boost::program_options::command_line_style::style_t>(boost::program_options::command_line_style::unix_style
-                                                                                | boost::program_options::command_line_style::case_insensitive);
+    auto style = static_cast<boost::program_options::command_line_style::style_t>(
+            boost::program_options::command_line_style::unix_style |
+            boost::program_options::command_line_style::case_insensitive);
     boost::program_options::variables_map cmd_args;
     try {
-        boost::program_options::store(
-            boost::program_options::command_line_parser(argc, lpCmdLine).options(vs_options).positional(vs_positionals).style(style).run(),
-            cmd_args
-        );
+        boost::program_options::store(boost::program_options::command_line_parser(argc, lpCmdLine)
+                                              .options(vs_options)
+                                              .positional(vs_positionals)
+                                              .style(style)
+                                              .run(),
+                                      cmd_args);
         boost::program_options::notify(cmd_args);
-    } catch (const boost::program_options::error& e) {
+    } catch (const boost::program_options::error &e) {
         VS_LOG(fatal, (boost::format("Failed to parse arguments: %1%") % e.what()));
         VS_LOG_FLUSH_EXIT(fatal, (boost::format("%1%") % vs_switches), EXIT_FAILURE);
     }
@@ -831,9 +824,12 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
             VS_LOG_FLUSH_EXIT(fatal, "Target-data-directory option requires an argument", EXIT_FAILURE);
         } else if (VSFileSystem::DirectoryExists(datatmp)) {
             VSFileSystem::datadir = datatmp;
-            VS_LOG(important_info, (boost::format("Using target data directory specified on command line: '%1%'") % datatmp));
+            VS_LOG(important_info,
+                   (boost::format("Using target data directory specified on command line: '%1%'") % datatmp));
         } else {
-            VS_LOG_FLUSH_EXIT(fatal, (boost::format("Specified target data directory '%1%' not found... exiting") % datatmp), EXIT_FAILURE);
+            VS_LOG_FLUSH_EXIT(fatal,
+                              (boost::format("Specified target data directory '%1%' not found... exiting") % datatmp),
+                              EXIT_FAILURE);
         }
     }
 
@@ -860,7 +856,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     if (cmd_args.count("location")) {
         QVector PlayerLocation;
         try {
-            std::string input = cmd_args["location"].as<std::string>();
+            std::string        input = cmd_args["location"].as<std::string>();
             std::istringstream iStringStream(input);
             iStringStream.ignore(2);
             iStringStream >> PlayerLocation.i;
@@ -869,8 +865,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
             iStringStream.ignore(1, ',');
             iStringStream >> PlayerLocation.k;
         } catch (std::ios_base::failure &inputFailure) {
-            std::cout << "Error reading coordinates for player location: " << inputFailure.what()
-                    << std::endl;
+            std::cout << "Error reading coordinates for player location: " << inputFailure.what() << std::endl;
             exit(EXIT_FAILURE);
         }
         SetPlayerLoc(PlayerLocation, true);
@@ -886,7 +881,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     }
 
     if (cmd_args.count("net")) {
-        //don't ignore the network section of the config file
+        // don't ignore the network section of the config file
         ignore_network = false;
     }
 
@@ -900,12 +895,12 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     }
 
     if (cmd_args.count("h")) {
-        (configuration()).graphics.resolution_x = 1024;
+        (configuration()).graphics.resolution_x = 1'024;
         (configuration()).graphics.resolution_y = 768;
     }
     if (cmd_args.count("v")) {
-        (configuration()).graphics.resolution_x = 1280;
-        (configuration()).graphics.resolution_y = 1024;
+        (configuration()).graphics.resolution_x = 1'280;
+        (configuration()).graphics.resolution_y = 1'024;
     }
 
     if (cmd_args.count("mission_name")) {

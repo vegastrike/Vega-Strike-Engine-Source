@@ -32,11 +32,10 @@
 //
 
 #include "../../Exceptions.h"
-#include "../../Types.h"
 #include "../../Format.h"
 #include "../../SimpleSound.h"
 #include "../../SoundBuffer.h"
-
+#include "../../Types.h"
 #include "al.h"
 
 namespace Audio {
@@ -75,6 +74,6 @@ protected:
     virtual void unloadImpl();
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_SIMPLESOUND_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_SIMPLESOUND_H

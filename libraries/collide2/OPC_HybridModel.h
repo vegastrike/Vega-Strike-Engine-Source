@@ -27,7 +27,7 @@
 
 //! Leaf descriptor
 struct LeafTriangles {
-    uint32_t Data;        //!< Packed data
+    uint32_t Data;  //!< Packed data
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -35,7 +35,7 @@ struct LeafTriangles {
      *	\return		number of triangles N, with 0 < N <= 16
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    uint32_t GetNbTriangles() const {
+    inline_ uint32_t GetNbTriangles() const {
         return (Data & 15) + 1;
     }
 
@@ -45,11 +45,11 @@ struct LeafTriangles {
      *	\return		triangle index
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_    uint32_t GetTriangleIndex() const {
+    inline_ uint32_t GetTriangleIndex() const {
         return Data >> 4;
     }
 
-    inline_    void SetData(uint32_t nb, uint32_t index) {
+    inline_ void SetData(uint32_t nb, uint32_t index) {
         OPASSERT(nb > 0 && nb <= 16);
         nb--;
         Data = (index << 4) | (nb & 15);
@@ -60,7 +60,7 @@ class OPCODE_API HybridModel : public BaseModel {
 public:
     // Constructor/Destructor
     HybridModel();
-    virtual                                        ~HybridModel();
+    virtual ~HybridModel();
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -95,7 +95,7 @@ public:
      *	\return		array of triangles
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                const LeafTriangles *GetLeafTriangles() const {
+    inline_ const LeafTriangles *GetLeafTriangles() const {
         return mTriangles;
     }
 
@@ -105,18 +105,18 @@ public:
      *	\return		array of indices
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    inline_                const uint32_t *GetIndices() const {
+    inline_ const uint32_t *GetIndices() const {
         return mIndices;
     }
 
 private:
-    uint32_t mNbLeaves;        //!< Number of leaf nodes in the model
-    LeafTriangles *mTriangles;        //!< Array of mNbLeaves leaf descriptors
-    uint32_t mNbPrimitives;    //!< Number of primitives in the model
-    uint32_t *mIndices;        //!< Array of primitive indices
+    uint32_t       mNbLeaves;      //!< Number of leaf nodes in the model
+    LeafTriangles *mTriangles;     //!< Array of mNbLeaves leaf descriptors
+    uint32_t       mNbPrimitives;  //!< Number of primitives in the model
+    uint32_t      *mIndices;       //!< Array of primitive indices
 
     // Internal methods
     void Release();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_HYBRIDMODEL_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_OPC_HYBRIDMODEL_H

@@ -4,8 +4,8 @@
  * Vega Strike - Space Simulation, Combat and Trading
  * Copyright (C) 2001-2026 The Vega Strike Contributors:
  * Project creator: Daniel Horn
- * Original development team: As listed in the AUTHORS file. Specifically: hellcatv, ace123, surfdargent, klaussfreire, jacks, pyramid3d
- * Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
+ * Original development team: As listed in the AUTHORS file. Specifically: hellcatv, ace123, surfdargent, klaussfreire,
+ * jacks, pyramid3d Current development team: Roy Falk, Benjamen R. Meyer, Stephen G. Tuggy
  *
  * https://github.com/vegastrike/Vega-Strike-Engine-Source
  *
@@ -26,40 +26,32 @@
  */
 
 #include "system_draw_node.h"
+
 #include "drawgalaxy.h"
 
-SystemDrawNode::SystemDrawNode(int type,
-        float size,
-        float x,
-        float y,
-        std::string source,
-        unsigned index,
-        navscreenoccupied *so,
-        bool moused,
-        GFXColor race)
-        : type(type),
-        size(size),
-        x(x),
-        y(y),
-        index(index),
-        source(source),
-        moused(moused),
-        color(GetSystemColor(source)),
-        race(race),
-        screenoccupation(so) {
-}
+SystemDrawNode::SystemDrawNode(int type, float size, float x, float y, std::string source, unsigned index,
+                               navscreenoccupied *so, bool moused, GFXColor race)
+    : type(type),
+      size(size),
+      x(x),
+      y(y),
+      index(index),
+      source(source),
+      moused(moused),
+      color(GetSystemColor(source)),
+      race(race),
+      screenoccupation(so) {}
 
 SystemDrawNode::SystemDrawNode()
-        : size(SYSTEM_DEFAULT_SIZE),
-        x(0),
-        y(0),
-        index(0),
-        source(),
-        moused(false),
-        color('v'),
-        race(GrayColor),
-        screenoccupation(NULL) {
-}
+    : size(SYSTEM_DEFAULT_SIZE),
+      x(0),
+      y(0),
+      index(0),
+      source(),
+      moused(false),
+      color('v'),
+      race(GrayColor),
+      screenoccupation(NULL) {}
 
 void SystemDrawNode::Draw(bool mouseover, bool willclick) {
     DrawNode(type, size, x, y, source, screenoccupation, moused, race, mouseover, willclick);
@@ -68,7 +60,6 @@ void SystemDrawNode::Draw(bool mouseover, bool willclick) {
 unsigned SystemDrawNode::GetIndex() const {
     return index;
 }
-
 
 bool operator<(const SystemDrawNode &lhs, const SystemDrawNode &rhs) {
     return lhs.source < rhs.source;

@@ -27,29 +27,27 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_BASECOMPUTER_H
 #define VEGA_STRIKE_ENGINE_CMD_BASECOMPUTER_H
 
-#include "gui/windowcontroller.h"
-#include "cmd/unit_generic.h"
-#include "gui/simplepicker.h"
 #include "cmd/cargo_color.h"
+#include "cmd/unit_generic.h"
 #include "common/enum_iterator.h"
+#include "gui/simplepicker.h"
+#include "gui/windowcontroller.h"
 
 enum class DisplayMode {
-    CARGO = 0,                          //Buy and sell cargo.
-    UPGRADE,                            //Buy and sell ship upgrades.
-    SHIP_DEALER,                        //Replace current ship.
-    MISSIONS,                           //Show available missions.
-    NEWS,                               //Show news items.
-    INFO,                               //Show basic info.
-    LOADSAVE,                           //LOAD SAVE
-    NETWORK,                            //Network submenu of Loadsave.
-    DISPLAY_MODE_COUNT,                 //Number of display modes.
-    NULL_DISPLAY = DISPLAY_MODE_COUNT,  //No display.
+    CARGO = 0,                          // Buy and sell cargo.
+    UPGRADE,                            // Buy and sell ship upgrades.
+    SHIP_DEALER,                        // Replace current ship.
+    MISSIONS,                           // Show available missions.
+    NEWS,                               // Show news items.
+    INFO,                               // Show basic info.
+    LOADSAVE,                           // LOAD SAVE
+    NETWORK,                            // Network submenu of Loadsave.
+    DISPLAY_MODE_COUNT,                 // Number of display modes.
+    NULL_DISPLAY = DISPLAY_MODE_COUNT,  // No display.
 };
 
-inline bool IsEnumValid(const DisplayMode value)
-{
-    switch(value)
-    {
+inline bool IsEnumValid(const DisplayMode value) {
+    switch (value) {
         case DisplayMode::CARGO:
         case DisplayMode::UPGRADE:
         case DisplayMode::SHIP_DEALER:
@@ -71,267 +69,259 @@ using Iter_DisplayMode = EnumIterator<DisplayMode, DisplayMode::CARGO, DisplayMo
 
 void InitBaseComputer();
 
-//The BaseComputer class displays an interactive screen that supports a
-//number of functions in a base.
-//Current list:
-//Buying and selling cargo.
-//Upgrading and downgrading your ship.
-//Replacing your current ship with a new one.
-//News articles.
-//Mission bulletin board.
-//Player info.
+// The BaseComputer class displays an interactive screen that supports a
+// number of functions in a base.
+// Current list:
+// Buying and selling cargo.
+// Upgrading and downgrading your ship.
+// Replacing your current ship with a new one.
+// News articles.
+// Mission bulletin board.
+// Player info.
 
 class BaseComputer : public WctlBase<BaseComputer> {
     friend class WctlBase<BaseComputer>;
-public:
 
+public:
     static int dirty;
 
-//Set up the window and get everything ready.
+    // Set up the window and get everything ready.
     void init(void) override;
 
-//Start it up!
+    // Start it up!
     void run(void) override;
 
-//Check if we are dirty.
+    // Check if we are dirty.
     void draw(void) override;
 
-//Process a command event from the window. Handled in parent class's WctlCommandTable.
-//virtual bool processWindowCommand(const EventCommandId& command, Control* control);
+    // Process a command event from the window. Handled in parent class's WctlCommandTable.
+    // virtual bool processWindowCommand(const EventCommandId& command, Control* control);
 
-//CONSTRUCTION
+    // CONSTRUCTION
     BaseComputer(Unit *player, Unit *base, const vector<DisplayMode> &modes);
 
     ~BaseComputer(void) override;
 
-//These are the transactions that can happen using this object.
-//Transactions are operations that modify the player's state.  Reading news isn't
-//a transaction.
+    // These are the transactions that can happen using this object.
+    // Transactions are operations that modify the player's state.  Reading news isn't
+    // a transaction.
     enum TransactionType {
-        BUY_CARGO,              //Buy item and put in ship.
-        SELL_CARGO,             //Sell item to base.
-        BUY_UPGRADE,            //Buy an improvement for current ship.
-        SELL_UPGRADE,           //Sell an improvement on current ship.
-        BUY_SHIP,               //Replace our current ship with a new one.
-        ACCEPT_MISSION,         //Accept a mission.
-        NULL_TRANSACTION,       //Not initialized yet.
+        BUY_CARGO,         // Buy item and put in ship.
+        SELL_CARGO,        // Sell item to base.
+        BUY_UPGRADE,       // Buy an improvement for current ship.
+        SELL_UPGRADE,      // Sell an improvement on current ship.
+        BUY_SHIP,          // Replace our current ship with a new one.
+        ACCEPT_MISSION,    // Accept a mission.
+        NULL_TRANSACTION,  // Not initialized yet.
     };
 
 protected:
-
-//Association between CargoColor list, picker, and transaction type.
+    // Association between CargoColor list, picker, and transaction type.
     struct TransactionList {
-        vector<CargoColor> masterList;          //All the items that could be in the picker.
-        Picker *picker;                         //The picker loaded with the list.
-        TransactionType transaction;        //The kind of transaction these items will generate.
-        TransactionList() : picker(nullptr), transaction(NULL_TRANSACTION) {
-        }
+        vector<CargoColor> masterList;   // All the items that could be in the picker.
+        Picker            *picker;       // The picker loaded with the list.
+        TransactionType    transaction;  // The kind of transaction these items will generate.
+
+        TransactionList() : picker(nullptr), transaction(NULL_TRANSACTION) {}
     };
 
     class LoadSaveQuitConfirm : public WindowController {
         BaseComputer *m_parent;
-        std::string type;
-        std::string text;
-        std::string savefile;
+        std::string   type;
+        std::string   text;
+        std::string   savefile;
+
     public:
-//CONSTRUCTION.
+        // CONSTRUCTION.
         LoadSaveQuitConfirm(BaseComputer *player, std::string confirmtype, std::string text)
-                : m_parent(player), type(confirmtype), text(text) {
-        }
+            : m_parent(player), type(confirmtype), text(text) {}
 
-        ~LoadSaveQuitConfirm(void) override {
-        }
+        ~LoadSaveQuitConfirm(void) override {}
 
-//Set up the window and get everything ready.
+        // Set up the window and get everything ready.
         void init(void) override;
 
-//Process a command event from the window.
+        // Process a command event from the window.
         bool processWindowCommand(const EventCommandId &command, Control *control) override;
     };
     friend class LoadSaveQuitConfirm;
-//HANDLERS
-//The selection in the News picker changed.
+    // HANDLERS
+    // The selection in the News picker changed.
     bool newsPickerChangedSelection(const EventCommandId &command, Control *control);
-//The selection in the News picker changed.
+    // The selection in the News picker changed.
     bool loadSavePickerChangedSelection(const EventCommandId &command, Control *control);
-//Something in a Picker was selected.
+    // Something in a Picker was selected.
     bool pickerChangedSelection(const EventCommandId &command, Control *control);
-//Buy an item from the cargo list.
+    // Buy an item from the cargo list.
     bool buyCargo(const EventCommandId &command, Control *control);
-//Buy an item (quantity 10) from the cargo list.
+    // Buy an item (quantity 10) from the cargo list.
     bool buy10Cargo(const EventCommandId &command, Control *control);
-//Buy all of an item from the cargo list.
+    // Buy all of an item from the cargo list.
     bool buyAllCargo(const EventCommandId &command, Control *control);
-//Sell an item from ship's cargo.
+    // Sell an item from ship's cargo.
     bool sellCargo(const EventCommandId &command, Control *control);
-//Sell an item (quantity 10) from ship's cargo.
+    // Sell an item (quantity 10) from ship's cargo.
     bool sell10Cargo(const EventCommandId &command, Control *control);
-//Sell all of an item from ship's cargo.
+    // Sell all of an item from ship's cargo.
     bool sellAllCargo(const EventCommandId &command, Control *control);
-//Buy a ship upgrade.
+    // Buy a ship upgrade.
     bool buyUpgrade(const EventCommandId &command, Control *control);
-//Sell an upgrade on your ship.
+    // Sell an upgrade on your ship.
     bool sellUpgrade(const EventCommandId &command, Control *control);
-//Fix an upgrade on your ship.
+    // Fix an upgrade on your ship.
     bool fixUpgrade(const EventCommandId &command, Control *control);
-//Reload a gun on your ship.
+    // Reload a gun on your ship.
     bool reloadUpgrade(const EventCommandId &command, Control *control);
-//Buy ship from the base.
+    // Buy ship from the base.
     bool buyShip(const EventCommandId &command, Control *control);
-//Sell ship from your stock
+    // Sell ship from your stock
     bool sellShip(const EventCommandId &command, Control *control);
-//Accept a mission.
+    // Accept a mission.
     bool acceptMission(const EventCommandId &command, Control *control);
-//Quit Game
+    // Quit Game
     bool actionConfirmedLoadGame();
     bool actionLoadGame(const EventCommandId &command, Control *control);
-//Save Game
+    // Save Game
     bool actionConfirmedSaveGame();
     bool actionSaveGame(const EventCommandId &command, Control *control);
     bool actionNewGame(const EventCommandId &command, Control *control);
-//Load Game
+    // Load Game
     bool actionConfirmedQuitGame();
     bool actionQuitGame(const EventCommandId &command, Control *control);
 
     bool actionDone(const EventCommandId &command, Control *control);
 
-//Show the player's basic information.
+    // Show the player's basic information.
     bool showPlayerInfo(const EventCommandId &command, Control *control);
-//Show the stats on the player's current ship.
+    // Show the stats on the player's current ship.
     bool showShipStats(const EventCommandId &command, Control *control);
-//Change display mode to CARGO.
+    // Change display mode to CARGO.
     bool changeToCargoMode(const EventCommandId &command, Control *control);
-//Change display mode to UPGRADE.
+    // Change display mode to UPGRADE.
     bool changeToUpgradeMode(const EventCommandId &command, Control *control);
-//Change display mode to SHIP_DEALER.
+    // Change display mode to SHIP_DEALER.
     bool changeToShipDealerMode(const EventCommandId &command, Control *control);
-//Change display mode to NEWS.
+    // Change display mode to NEWS.
     bool changeToNewsMode(const EventCommandId &command, Control *control);
-//Change display mode to MISSIONS.
+    // Change display mode to MISSIONS.
     bool changeToMissionsMode(const EventCommandId &command, Control *control);
-//Change display mode to INFO.
+    // Change display mode to INFO.
     bool changeToInfoMode(const EventCommandId &command, Control *control);
-//Change display mode to LOAD/SAVE
+    // Change display mode to LOAD/SAVE
     bool changeToLoadSaveMode(const EventCommandId &command, Control *control);
-//Change display mode to NETWORK.
+    // Change display mode to NETWORK.
     bool changeToNetworkMode(const EventCommandId &command, Control *control);
 
-//Redo the title string.
+    // Redo the title string.
     void recalcTitle(void);
 
-//Refresh both picker lists and the title.
+    // Refresh both picker lists and the title.
     void refresh(void);
 
-//Return whether this transaction is possible for the player now.
+    // Return whether this transaction is possible for the player now.
     bool isTransactionOK(const Cargo &original_item, TransactionType transaction_type, int quantity = 1);
 
-//Create whatever cells are needed to add a category to the picker.
-    SimplePickerCell *createCategoryCell(SimplePickerCells &cells, const string &original_category, bool skip_first_category);
+    // Create whatever cells are needed to add a category to the picker.
+    SimplePickerCell *createCategoryCell(SimplePickerCells &cells, const string &original_category,
+                                         bool skip_first_category);
 
-//Load a picker with a list of items.
-    void loadListPicker(TransactionList &transaction_list,
-            SimplePicker &picker,
-            TransactionType transaction_type,
-            bool skip_first_category = false);
+    // Load a picker with a list of items.
+    void loadListPicker(TransactionList &transaction_list, SimplePicker &picker, TransactionType transaction_type,
+                        bool skip_first_category = false);
 
-//Scroll to a specific item in a picker, and optionally select it.
-//Returns true if the specified item is found.
+    // Scroll to a specific item in a picker, and optionally select it.
+    // Returns true if the specified item is found.
     bool scrollToItem(Picker *picker, const Cargo &item, bool select, bool skipFirstCategory);
 
 public:
-//Update the transaction controls after a transaction.
+    // Update the transaction controls after a transaction.
     void updateTransactionControls(const Cargo &item, bool skipFirstCategory = false);
 
-//Update the controls when the selection for a transaction changes.
+    // Update the controls when the selection for a transaction changes.
     void updateTransactionControlsForSelection(TransactionList *list);
-//Load the controls for the MISSIONS display.
+    // Load the controls for the MISSIONS display.
     void loadShipDealerControls(void);
 
 protected:
-
-//Hide the controls that commit transactions.
+    // Hide the controls that commit transactions.
     void hideCommitControls(void);
 
-//Update the commit controls in the Cargo screen, since we have three of them.
+    // Update the commit controls in the Cargo screen, since we have three of them.
     void configureCargoCommitControls(const Cargo &item, TransactionType trans);
 
-//Update the commit controls in the Cargo screen, since we have three of them.
-//returns the state of whether the description should have a warning.
+    // Update the commit controls in the Cargo screen, since we have three of them.
+    // returns the state of whether the description should have a warning.
     bool configureUpgradeCommitControls(const Cargo &item, TransactionType trans);
 
-//Make sure the info in the transaction lists is gone.
+    // Make sure the info in the transaction lists is gone.
     void resetTransactionLists(void);
 
-//Load the controls for the CARGO display.
+    // Load the controls for the CARGO display.
     void loadCargoControls(void);
 
-//Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
+    // Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
     bool buySelectedCargo(int requestedQuantity);
 
-//The max number of a particular item this player can buy.  Limits by price, cargo space, etc.
+    // The max number of a particular item this player can buy.  Limits by price, cargo space, etc.
     int maxQuantityForPlayer(const Cargo &item, int suggestedQuantity);
 
-//Sell some items from the Cargo list.  Use -1 for quantity to buy all of the item.
+    // Sell some items from the Cargo list.  Use -1 for quantity to buy all of the item.
     bool sellSelectedCargo(int requestedQuantity);
 
-//Load the controls for the NEWS display.
+    // Load the controls for the NEWS display.
     void loadNewsControls(void);
 
     void loadLoadSaveControls(void);
 
-    void loadNetworkControls(void) {
-    }
+    void loadNetworkControls(void) {}
 
-    //Load the controls for the MISSIONS display.
+    // Load the controls for the MISSIONS display.
     void loadMissionsControls(void);
 
-//Load the controls for the UPGRADE display.
+    // Load the controls for the UPGRADE display.
     void loadUpgradeControls(void);
     void loadBuyUpgradeControls(void);
     void loadSellUpgradeControls(void);
 
-//Return a pointer to the selected Cargo struct.
+    // Return a pointer to the selected Cargo struct.
     Cargo *selectedItem(void) const;
 
-//Switch to the set of controls used for the specified mode.
+    // Switch to the set of controls used for the specified mode.
     void switchToControls(DisplayMode mode);
 
-//Create the mode buttons.
+    // Create the mode buttons.
     void createModeButtons(void);
 
-//Create the controls that will be used for this window.
+    // Create the controls that will be used for this window.
     void createControls(void);
 
-//Contruct the controls in code.
+    // Contruct the controls in code.
     void constructControls(void);
 
     GFXColor getColorForGroup(std::string id);
 
-//Get a filtered list of items from a unit.
-    void loadMasterList(Unit *un, CargoHold &hold,
-            const vector<string> &filter_vec,
-            const vector<string> &inverse_filter_vec,
-            bool remove_zero,
-            TransactionList &transaction_list);
+    // Get a filtered list of items from a unit.
+    void loadMasterList(Unit *un, CargoHold &hold, const vector<string> &filter_vec,
+                        const vector<string> &inverse_filter_vec, bool remove_zero, TransactionList &transaction_list);
 
-//Load a master list with missions.
+    // Load a master list with missions.
     void loadMissionsMasterList(TransactionList &transaction_list);
 
-//VARIABLES
-    vector<DisplayMode> m_displayModes;    //List of diaplays to provide.
+    // VARIABLES
+    vector<DisplayMode> m_displayModes;                 // List of diaplays to provide.
 public:
-
-    UnitContainer m_player;              //Ship info, etc.
-    UnitContainer m_base;                //The base we are in.
+    UnitContainer m_player;                             // Ship info, etc.
+    UnitContainer m_base;                               // The base we are in.
 protected:
-    DisplayMode m_currentDisplay;      //The current display mode.
-    TransactionList m_transList1;          //The commonly-used list/picker.
-    TransactionList m_transList2;          //If there are two pickers, the second one.
-    TransactionList *m_selectedList;        //Which transaction list has the selection. NULL = none.
-    Control *m_modeGroups[RAW_DISPLAY_MODE(DisplayMode::DISPLAY_MODE_COUNT)]; //Array of GroupControls, one for each mode.
-    bool m_playingMuzak;                //True = We are playing muzak for some mode.
+    DisplayMode      m_currentDisplay;                  // The current display mode.
+    TransactionList  m_transList1;                      // The commonly-used list/picker.
+    TransactionList  m_transList2;                      // If there are two pickers, the second one.
+    TransactionList *m_selectedList;                    // Which transaction list has the selection. NULL = none.
+    Control         *m_modeGroups[RAW_DISPLAY_MODE(
+            DisplayMode::DISPLAY_MODE_COUNT)];  // Array of GroupControls, one for each mode.
+    bool             m_playingMuzak;                    // True = We are playing muzak for some mode.
 
-//INTERNAL CLASSES.
+                                                        // INTERNAL CLASSES.
     class UpgradeOperation;
     class BuyUpgradeOperation;
     class SellUpgradeOperation;
@@ -340,7 +330,8 @@ protected:
     friend class BuyUpgradeOperation;
     friend class SellUpgradeOperation;
 };
-bool buyShip(Unit *baseUnit, Unit *playerUnit, Cargo* item, BaseComputer *base_computer);
-bool sellShip(Unit *base, Unit *player, Cargo* item, BaseComputer *);
 
-#endif   //VEGA_STRIKE_ENGINE_CMD_BASECOMPUTER_H
+bool buyShip(Unit *baseUnit, Unit *playerUnit, Cargo *item, BaseComputer *base_computer);
+bool sellShip(Unit *base, Unit *player, Cargo *item, BaseComputer *);
+
+#endif  // VEGA_STRIKE_ENGINE_CMD_BASECOMPUTER_H

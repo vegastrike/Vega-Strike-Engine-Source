@@ -21,13 +21,13 @@
 
 /*
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	You could use a complex sweep-and-prune as implemented in I-Collide.
-	You could use a complex hashing scheme as implemented in V-Clip or recently in ODE it seems.
-	You could use a "Recursive Dimensional Clustering" algorithm as implemented in GPG2.
+    You could use a complex sweep-and-prune as implemented in I-Collide.
+    You could use a complex hashing scheme as implemented in V-Clip or recently in ODE it seems.
+    You could use a "Recursive Dimensional Clustering" algorithm as implemented in GPG2.
 
-	Or you could use this.
-	Faster ? I don't know. Probably not. It would be a shame. But who knows ?
-	Easier ? Definitely. Enjoy the sheer simplicity.
+    Or you could use this.
+    Faster ? I don't know. Probably not. It would be a shame. But who knows ?
+    Easier ? Definitely. Enjoy the sheer simplicity.
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 */
 
@@ -47,15 +47,16 @@ inline_ void FindRunningIndex(uint32_t &index, float *array, uint32_t *sorted, i
         }
     }
 }
+
 // ### could be log(n) !
 // and maybe use cmp integers
 
 // InsertionSort has better coherence, RadixSort is better for one-shot queries.
-#define PRUNING_SORTER    RadixSort
-//#define PRUNING_SORTER	InsertionSort
+#define PRUNING_SORTER RadixSort
+// #define PRUNING_SORTER	InsertionSort
 
 // Static for coherence
-static PRUNING_SORTER *gCompletePruningSorter = nullptr;
+static PRUNING_SORTER *gCompletePruningSorter   = nullptr;
 static PRUNING_SORTER *gBipartitePruningSorter0 = nullptr;
 static PRUNING_SORTER *gBipartitePruningSorter1 = nullptr;
 
@@ -86,10 +87,10 @@ void ReleasePruningSorters() {
     DELETESINGLE(gCompletePruningSorter);
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- *	Bipartite box pruning. Returns a list of overlapping pairs of boxes, each box of the pair belongs to a different set.
+ *	Bipartite box pruning. Returns a list of overlapping pairs of boxes, each box of the pair belongs to a different
+ *set.
  *  \param		nb0		[in] number of boxes in the first set
  *  \param		array0	[in] array of boxes for the first set
  *  \param		nb1		[in] number of boxes in the second set
@@ -99,12 +100,8 @@ void ReleasePruningSorters() {
  *  \return		true if success.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Opcode::BipartiteBoxPruning(uint32_t nb0,
-        const AABB **array0,
-        uint32_t nb1,
-        const AABB **array1,
-        Pairs &pairs,
-        const Axes &axes) {
+bool Opcode::BipartiteBoxPruning(uint32_t nb0, const AABB **array0, uint32_t nb1, const AABB **array1, Pairs &pairs,
+                                 const Axes &axes) {
     // Checkings
     if (!nb0 || !array0 || !nb1 || !array1) {
         return false;
@@ -129,18 +126,18 @@ bool Opcode::BipartiteBoxPruning(uint32_t nb0,
     }
 
     // 2) Sort the lists
-    PRUNING_SORTER *RS0 = GetBipartitePruningSorter0();
-    PRUNING_SORTER *RS1 = GetBipartitePruningSorter1();
+    PRUNING_SORTER *RS0     = GetBipartitePruningSorter0();
+    PRUNING_SORTER *RS1     = GetBipartitePruningSorter1();
     const uint32_t *Sorted0 = RS0->Sort(MinPosList0, nb0).GetRanks();
     const uint32_t *Sorted1 = RS1->Sort(MinPosList1, nb1).GetRanks();
 
     // 3) Prune the lists
     uint32_t Index0, Index1;
 
-    const uint32_t *const LastSorted0 = &Sorted0[nb0];
-    const uint32_t *const LastSorted1 = &Sorted1[nb1];
-    const uint32_t *RunningAddress0 = Sorted0;
-    const uint32_t *RunningAddress1 = Sorted1;
+    const uint32_t *const LastSorted0     = &Sorted0[nb0];
+    const uint32_t *const LastSorted1     = &Sorted1[nb1];
+    const uint32_t       *RunningAddress0 = Sorted0;
+    const uint32_t       *RunningAddress1 = Sorted1;
 
     while (RunningAddress1 < LastSorted1 && Sorted0 < LastSorted0) {
         Index0 = *Sorted0++;
@@ -151,8 +148,8 @@ bool Opcode::BipartiteBoxPruning(uint32_t nb0,
 
         const uint32_t *RunningAddress2_1 = RunningAddress1;
 
-        while (RunningAddress2_1 < LastSorted1
-                && MinPosList1[Index1 = *RunningAddress2_1++] <= array0[Index0]->GetMax(Axis0)) {
+        while (RunningAddress2_1 < LastSorted1 &&
+               MinPosList1[Index1 = *RunningAddress2_1++] <= array0[Index0]->GetMax(Axis0)) {
             if (array0[Index0]->Intersect(*array1[Index1], Axis1)) {
                 if (array0[Index0]->Intersect(*array1[Index1], Axis2)) {
                     pairs.AddPair(Index0, Index1);
@@ -172,14 +169,13 @@ bool Opcode::BipartiteBoxPruning(uint32_t nb0,
 
         const uint32_t *RunningAddress2_0 = RunningAddress0;
 
-        while (RunningAddress2_0 < LastSorted0
-                && MinPosList0[Index1 = *RunningAddress2_0++] <= array1[Index0]->GetMax(Axis0)) {
+        while (RunningAddress2_0 < LastSorted0 &&
+               MinPosList0[Index1 = *RunningAddress2_0++] <= array1[Index0]->GetMax(Axis0)) {
             if (array0[Index1]->Intersect(*array1[Index0], Axis1)) {
                 if (array0[Index1]->Intersect(*array1[Index0], Axis2)) {
                     pairs.AddPair(Index1, Index0);
                 }
             }
-
         }
     }
 
@@ -190,7 +186,8 @@ bool Opcode::BipartiteBoxPruning(uint32_t nb0,
 }
 
 #define ORIGINAL_VERSION
-//#define JOAKIM
+
+// #define JOAKIM
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -215,7 +212,7 @@ bool Opcode::CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, c
 
 #ifdef ORIGINAL_VERSION
     // Allocate some temporary data
-//	float* PosList = new float[nb];
+    //	float* PosList = new float[nb];
     float *PosList = new float[nb + 1];
 
     // 1) Build main list using the primary axis
@@ -225,33 +222,34 @@ bool Opcode::CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, c
     PosList[nb++] = MAX_FLOAT;
 
     // 2) Sort the list
-    PRUNING_SORTER *RS = GetCompletePruningSorter();
+    PRUNING_SORTER *RS     = GetCompletePruningSorter();
     const uint32_t *Sorted = RS->Sort(PosList, nb).GetRanks();
 
     // 3) Prune the list
-    const uint32_t *const LastSorted = &Sorted[nb];
-    const uint32_t *RunningAddress = Sorted;
-    uint32_t Index0, Index1;
+    const uint32_t *const LastSorted     = &Sorted[nb];
+    const uint32_t       *RunningAddress = Sorted;
+    uint32_t              Index0, Index1;
     while (RunningAddress < LastSorted && Sorted < LastSorted) {
         Index0 = *Sorted++;
 
-//		while(RunningAddress<LastSorted && PosList[*RunningAddress++]<PosList[Index0]);
+        //		while(RunningAddress<LastSorted && PosList[*RunningAddress++]<PosList[Index0]);
         while (PosList[*RunningAddress++] < PosList[Index0]) {
         }
 
         if (RunningAddress < LastSorted) {
             const uint32_t *RunningAddress2 = RunningAddress;
 
-//			while(RunningAddress2<LastSorted && PosList[Index1 = *RunningAddress2++]<=array[Index0]->GetMax(Axis0))
+            //			while(RunningAddress2<LastSorted && PosList[Index1 =
+            //*RunningAddress2++]<=array[Index0]->GetMax(Axis0))
             while (PosList[Index1 = *RunningAddress2++] <= array[Index0]->GetMax(Axis0)) {
-//				if(Index0!=Index1)
-//				{
+                //				if(Index0!=Index1)
+                //				{
                 if (array[Index0]->Intersect(*array[Index1], Axis1)) {
                     if (array[Index0]->Intersect(*array[Index1], Axis2)) {
                         pairs.AddPair(Index0, Index1);
                     }
                 }
-//				}
+                //				}
             }
         }
     }
@@ -261,59 +259,60 @@ bool Opcode::CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, c
 
 #ifdef JOAKIM
     // Allocate some temporary data
-//	float* PosList = new float[nb];
-    float* MinList = new float[nb+1];
+    //	float* PosList = new float[nb];
+    float *MinList = new float[nb + 1];
 
     // 1) Build main list using the primary axis
-    for(uint32_t i=0;i<nb;i++)	MinList[i] = array[i]->GetMin(Axis0);
+    for (uint32_t i = 0; i < nb; i++) {
+        MinList[i] = array[i]->GetMin(Axis0);
+    }
     MinList[nb] = MAX_FLOAT;
 
     // 2) Sort the list
-    PRUNING_SORTER* RS = GetCompletePruningSorter();
-    uint32_t* Sorted = RS->Sort(MinList, nb+1).GetRanks();
+    PRUNING_SORTER *RS     = GetCompletePruningSorter();
+    uint32_t       *Sorted = RS->Sort(MinList, nb + 1).GetRanks();
 
     // 3) Prune the list
-//	const uint32_t* const LastSorted = &Sorted[nb];
-//	const uint32_t* const LastSorted = &Sorted[nb-1];
-    const uint32_t* RunningAddress = Sorted;
-    uint32_t Index0, Index1;
+    //	const uint32_t* const LastSorted = &Sorted[nb];
+    //	const uint32_t* const LastSorted = &Sorted[nb-1];
+    const uint32_t *RunningAddress = Sorted;
+    uint32_t        Index0, Index1;
 
-//	while(RunningAddress<LastSorted && Sorted<LastSorted)
-//	while(RunningAddress<LastSorted)
-    while(RunningAddress<&Sorted[nb])
-//	while(Sorted<LastSorted)
+    //	while(RunningAddress<LastSorted && Sorted<LastSorted)
+    //	while(RunningAddress<LastSorted)
+    while (RunningAddress < &Sorted[nb])
+    //	while(Sorted<LastSorted)
     {
-//		Index0 = *Sorted++;
+        //		Index0 = *Sorted++;
         Index0 = *RunningAddress++;
 
-//		while(RunningAddress<LastSorted && PosList[*RunningAddress++]<PosList[Index0]);
-//		while(PosList[*RunningAddress++]<PosList[Index0]);
-//RunningAddress = Sorted;
-//		if(RunningAddress<LastSorted)
+        //		while(RunningAddress<LastSorted && PosList[*RunningAddress++]<PosList[Index0]);
+        //		while(PosList[*RunningAddress++]<PosList[Index0]);
+        // RunningAddress = Sorted;
+        //		if(RunningAddress<LastSorted)
         {
-            const uint32_t* RunningAddress2 = RunningAddress;
+            const uint32_t *RunningAddress2 = RunningAddress;
 
-//			while(RunningAddress2<LastSorted && PosList[Index1 = *RunningAddress2++]<=array[Index0]->GetMax(Axis0))
+            //			while(RunningAddress2<LastSorted && PosList[Index1 =
+            //*RunningAddress2++]<=array[Index0]->GetMax(Axis0))
 
-//			float CurrentMin = array[Index0]->GetMin(Axis0);
+            //			float CurrentMin = array[Index0]->GetMin(Axis0);
             float CurrentMax = array[Index0]->GetMax(Axis0);
 
-            while(MinList[Index1 = *RunningAddress2] <= CurrentMax)
-//			while(PosList[Index1 = *RunningAddress] <= CurrentMax)
+            while (MinList[Index1 = *RunningAddress2] <= CurrentMax)
+            //			while(PosList[Index1 = *RunningAddress] <= CurrentMax)
             {
-//				if(Index0!=Index1)
-//				{
-                    if(array[Index0]->Intersect(*array[Index1], Axis1))
-                    {
-                        if(array[Index0]->Intersect(*array[Index1], Axis2))
-                        {
-                            pairs.AddPair(Index0, Index1);
-                        }
+                //				if(Index0!=Index1)
+                //				{
+                if (array[Index0]->Intersect(*array[Index1], Axis1)) {
+                    if (array[Index0]->Intersect(*array[Index1], Axis2)) {
+                        pairs.AddPair(Index0, Index1);
                     }
-//				}
+                }
+                //				}
 
                 RunningAddress2++;
-//				RunningAddress++;
+                //				RunningAddress++;
             }
         }
     }
@@ -332,7 +331,8 @@ bool Opcode::CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, c
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- *	Brute-force bipartite box pruning. Returns a list of overlapping pairs of boxes, each box of the pair belongs to a different set.
+ *	Brute-force bipartite box pruning. Returns a list of overlapping pairs of boxes, each box of the pair belongs to a
+ *different set.
  *  \param		nb0		[in] number of boxes in the first set
  *  \param		array0	[in] array of boxes for the first set
  *  \param		nb1		[in] number of boxes in the second set
@@ -341,11 +341,8 @@ bool Opcode::CompleteBoxPruning(uint32_t nb, const AABB **array, Pairs &pairs, c
  *  \return		true if success.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool Opcode::BruteForceBipartiteBoxTest(uint32_t nb0,
-        const AABB **array0,
-        uint32_t nb1,
-        const AABB **array1,
-        Pairs &pairs) {
+bool Opcode::BruteForceBipartiteBoxTest(uint32_t nb0, const AABB **array0, uint32_t nb1, const AABB **array1,
+                                        Pairs &pairs) {
     // Checkings
     if (!nb0 || !array0 || !nb1 || !array1) {
         return false;
@@ -387,4 +384,3 @@ bool Opcode::BruteForceCompleteBoxTest(uint32_t nb, const AABB **array, Pairs &p
     }
     return true;
 }
-

@@ -27,10 +27,10 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_PARTICLE_H
 #define VEGA_STRIKE_ENGINE_GFX_PARTICLE_H
 
-#include <vector>
-#include <string>
 #include <memory>
 #include <string>
+#include <vector>
+
 #include "aligned.h"
 #include "gfx_generic/vec.h"
 #include "src/gfxlib_struct.h"
@@ -38,16 +38,16 @@
 class Texture;
 
 struct ParticlePoint {
-    QVector loc;
+    QVector  loc;
     GFXColor col;
-    float size;
+    float    size;
 };
 
 struct Particle {
-    Vector velocity{};
-    QVector location{};
+    Vector   velocity{};
+    QVector  location{};
     GFXColor color{};
-    float size{};
+    float    size{};
 };
 
 /**
@@ -58,27 +58,27 @@ struct Particle {
  */
 class ParticleTrail {
     std::vector<Particle, aligned_allocator<Particle>> particles;
-    std::vector<float> particleVert;
-    std::vector<float> distances;
-    std::vector<unsigned short> pointIndices;
-    std::vector<unsigned short> indices;
-    unsigned int max_particles{};
-    BLENDFUNC blendsrc, blenddst;
-    float alphaMask;
-    bool writeDepth, fadeColor;
+    std::vector<float>                                 particleVert;
+    std::vector<float>                                 distances;
+    std::vector<unsigned short>                        pointIndices;
+    std::vector<unsigned short>                        indices;
+    unsigned int                                       max_particles{};
+    BLENDFUNC                                          blendsrc, blenddst;
+    float                                              alphaMask;
+    bool                                               writeDepth, fadeColor;
 
     struct Config {
         std::string prefix;
-        bool initialized;
+        bool        initialized;
 
-        bool use;
-        bool use_points;
-        bool pblend;
-        bool psmooth;
-        float pgrow;
-        float ptrans;
-        float pfade;
-        float psize;
+        bool     use;
+        bool     use_points;
+        bool     pblend;
+        bool     psmooth;
+        float    pgrow;
+        float    ptrans;
+        float    pfade;
+        float    psize;
         Texture *texture;
 
         explicit Config(const std::string &prefix);
@@ -89,20 +89,15 @@ class ParticleTrail {
     } config{};
 
 public:
-    ParticleTrail(const std::string &configPrefix,
-            unsigned int max,
-            BLENDFUNC blendsrc = ONE,
-            BLENDFUNC blenddst = ONE,
-            float alphaMask = 0,
-            bool writeDepth = false,
-            bool fadeColor = false)
-            : config(configPrefix) {
+    ParticleTrail(const std::string &configPrefix, unsigned int max, BLENDFUNC blendsrc = ONE, BLENDFUNC blenddst = ONE,
+                  float alphaMask = 0, bool writeDepth = false, bool fadeColor = false)
+        : config(configPrefix) {
         ChangeMax(max);
-        this->blendsrc = blendsrc;
-        this->blenddst = blenddst;
-        this->alphaMask = alphaMask;
+        this->blendsrc   = blendsrc;
+        this->blenddst   = blenddst;
+        this->alphaMask  = alphaMask;
         this->writeDepth = writeDepth;
-        this->fadeColor = fadeColor;
+        this->fadeColor  = fadeColor;
     }
 
     void DrawAndUpdate();
@@ -132,8 +127,7 @@ public:
         void init(const std::string &prefix);
     } config{};
 
-    explicit ParticleEmitter(ParticleTrail *particleType) : particles(particleType) {
-    }
+    explicit ParticleEmitter(ParticleTrail *particleType) : particles(particleType) {}
 
     explicit ParticleEmitter(ParticleTrail *particleType, const std::string &prefix) : particles(particleType) {
         config.init(prefix);
@@ -151,17 +145,12 @@ public:
      * @param color Particle color
      *
      */
-    void doParticles(const QVector &pos,
-            float rSize,
-            float percent,
-            const Vector &basevelocity,
-            const Vector &velocity,
-            float pSize,
-            const GFXColor &color) const;
+    void doParticles(const QVector &pos, float rSize, float percent, const Vector &basevelocity, const Vector &velocity,
+                     float pSize, const GFXColor &color) const;
 };
 
 extern ParticleTrail particleTrail;
 extern ParticleTrail smokeTrail;
 extern ParticleTrail debrisTrail;
 
-#endif //VEGA_STRIKE_ENGINE_GFX_PARTICLE_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_PARTICLE_H

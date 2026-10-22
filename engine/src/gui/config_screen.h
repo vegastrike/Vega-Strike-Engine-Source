@@ -26,6 +26,6 @@ void HandleConfigEvent(const SDL_Event *event);
 // hot-apply anything. Called from winsys on a settled window resize.
 void PersistWindowResolution(int w, int h);
 
-} // namespace vs_settings_ng
+}  // namespace vs_settings_ng
 
 #endif

@@ -21,7 +21,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.0
  *  \date		08.15.98
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "collide2/Opcode.h"
 
@@ -30,7 +30,7 @@ using namespace Opcode;
 // Static members
 #ifdef CONTAINER_STATS
 uint32_t Container::mNbContainers = 0;
-uint32_t Container::mUsedRam = 0;
+uint32_t Container::mUsedRam      = 0;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ Container::Container() : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), 
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Container::Container(uint32_t size, float growth_factor)
-        : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(growth_factor) {
+    : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(growth_factor) {
 #ifdef CONTAINER_STATS
     mNbContainers++;
     mUsedRam += sizeof(Container);
@@ -65,7 +65,7 @@ Container::Container(uint32_t size, float growth_factor)
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Container::Container(const Container &object)
-        : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(2.0f) {
+    : mMaxNbEntries(0), mCurNbEntries(0), mEntries(nullptr), mGrowthFactor(2.0f) {
 #ifdef CONTAINER_STATS
     mNbContainers++;
     mUsedRam += sizeof(Container);
@@ -116,7 +116,7 @@ bool Container::Resize(uint32_t needed) {
 #endif
 
     // Get more entries
-    mMaxNbEntries = mMaxNbEntries ? uint32_t(float(mMaxNbEntries) * mGrowthFactor) : 2;    // Default nb Entries = 2
+    mMaxNbEntries = mMaxNbEntries ? uint32_t(float(mMaxNbEntries) * mGrowthFactor) : 2;  // Default nb Entries = 2
     if (mMaxNbEntries < mCurNbEntries + needed) {
         mMaxNbEntries = mCurNbEntries + needed;
     }
@@ -249,7 +249,8 @@ bool Container::Delete(uint32_t entry) {
     // Look for the entry
     for (uint32_t i = 0; i < mCurNbEntries; i++) {
         if (mEntries[i] == entry) {
-            // Entry has been found at index i. The strategy is to copy the last current entry at index i, and decrement the current number of entries.
+            // Entry has been found at index i. The strategy is to copy the last current entry at index i, and decrement
+            // the current number of entries.
             DeleteIndex(i);
             return true;
         }
@@ -336,4 +337,3 @@ void Container::operator=(const Container &object) {
     CopyMemory(mEntries, object.GetEntries(), mMaxNbEntries * sizeof(uint32_t));
     mCurNbEntries = mMaxNbEntries;
 }
-

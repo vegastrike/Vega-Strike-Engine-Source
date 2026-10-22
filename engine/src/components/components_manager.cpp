@@ -28,16 +28,19 @@
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
 #include "components_manager.h"
+
+#include <iostream>
+
+#include <boost/format.hpp>
+
+#include "cmd/unit_csv_factory.h"
 #include "component_utils.h"
+#include "configuration/configuration.h"
+#include "resource/manifest.h"
 #include "resource/random_utils.h"
 #include "root_generic/vega_random.h"
-#include "configuration/configuration.h"
-#include "cmd/unit_csv_factory.h"
-#include "vs_logging.h"
-#include "resource/manifest.h"
 #include "src/vega_cast_utils.h"
-#include <boost/format.hpp>
-#include <iostream>
+#include "vs_logging.h"
 
 Resource<double> ComponentsManager::credits = Resource<double>(0.0, 0.0);
 
@@ -45,9 +48,10 @@ void ComponentsManager::Load(std::string unit_key) {
     mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
 
     // Consumer
-    std::string prohibited_upgrades_string = UnitCSVFactory::GetVariable(unit_key, "Prohibited_Upgrades", std::string());
+    std::string prohibited_upgrades_string =
+            UnitCSVFactory::GetVariable(unit_key, "Prohibited_Upgrades", std::string());
 
-    if(prohibited_upgrades_string.empty()) {
+    if (prohibited_upgrades_string.empty()) {
         return;
     }
 
@@ -56,29 +60,30 @@ void ComponentsManager::Load(std::string unit_key) {
     std::vector<std::string> upgrades;
 
     boost::split(upgrades, prohibited_upgrades_string, boost::is_any_of(";"));
-    for (const std::string& upgrade : upgrades) {
+    for (const std::string &upgrade : upgrades) {
         std::vector<std::string> parts;
         boost::split(parts, upgrade, boost::is_any_of(":"));
         if (parts.size() == 1) {
-            const std::string& category = parts[0];
+            const std::string &category = parts[0];
             prohibited_upgrades.insert({category, 0});
         } else if (parts.size() == 2) {
-            const std::string& category = parts[0];
-            const int limit = locale_aware_stoi(parts[1]);
+            const std::string &category = parts[0];
+            const int          limit    = locale_aware_stoi(parts[1]);
             prohibited_upgrades.insert({category, limit});
         } else {
-            VS_LOG(error, (boost::format("%1%: Invalid format in prohibited upgrades string: %2%") % __FUNCTION__ % upgrade));
+            VS_LOG(error,
+                   (boost::format("%1%: Invalid format in prohibited upgrades string: %2%") % __FUNCTION__ % upgrade));
         }
     }
 }
 
-void ComponentsManager::Serialize(std::map<std::string, std::string>& unit) const {
+void ComponentsManager::Serialize(std::map<std::string, std::string> &unit) const {
     unit["Mass"] = std::to_string(base_mass);
 
     // Serialize prohibited upgrades
     if (!prohibited_upgrades.empty()) {
         std::string prohibited_upgrades_string;
-        for (const auto& upgrade : prohibited_upgrades) {
+        for (const auto &upgrade : prohibited_upgrades) {
             if (!prohibited_upgrades_string.empty()) {
                 prohibited_upgrades_string += ";";
             }
@@ -87,7 +92,6 @@ void ComponentsManager::Serialize(std::map<std::string, std::string>& unit) cons
         unit["Prohibited_Upgrades"] = prohibited_upgrades_string;
     }
 }
-
 
 double ComponentsManager::GetMass() const {
     return mass;
@@ -108,15 +112,14 @@ bool ComponentsManager::IsPlayerShip() const {
 void ComponentsManager::DamageRandomSystem() {
     double percent = 1 - hull.Percent();
 
-    Component* components[] = {&fuel, &energy, &ftl_energy, &reactor,
-                               &afterburner, &cloak, &drive, &ftl_drive,
-                               &jump_drive, &computer, &radar, &shield,
-                               &ecm, &repair_bot, &ship_functions};
+    Component *components[] = {&fuel,  &energy, &ftl_energy, &reactor,    &afterburner,
+                               &cloak, &drive,  &ftl_drive,  &jump_drive, &computer,
+                               &radar, &shield, &ecm,        &repair_bot, &ship_functions};
 
-    for(Component* component : components) {
+    for (Component *component : components) {
         double chance_to_damage = randomDouble();
         if (chance_to_damage < percent) {
-            component->DamageByPercent(chance_to_damage/10.0);
+            component->DamageByPercent(chance_to_damage / 10.0);
         }
     }
 
@@ -182,13 +185,12 @@ void ComponentsManager::DamageRandomSystem() {
 }
 
 bool ComponentsManager::ShipDamaged() const {
-    const Component* components[] = {&fuel, &energy, &ftl_energy, &reactor,
-                               &afterburner, &cloak, &drive, &ftl_drive,
-                               &jump_drive, &computer, &radar, &shield,
-                               &ecm, &repair_bot, &ship_functions};
-    
-    for(const Component* component : components) {
-        if(component->Damaged()) {
+    const Component *components[] = {&fuel,  &energy, &ftl_energy, &reactor,    &afterburner,
+                                     &cloak, &drive,  &ftl_drive,  &jump_drive, &computer,
+                                     &radar, &shield, &ecm,        &repair_bot, &ship_functions};
+
+    for (const Component *component : components) {
+        if (component->Damaged()) {
             return true;
         }
     }
@@ -199,18 +201,20 @@ bool ComponentsManager::ShipDamaged() const {
 /** This function works by category only.
  *  The previous implementation also worked by specific upgrades.
  */
-bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
-    for(const std::pair<const std::string, const int>& prohibited_upgrade : prohibited_upgrades) {
-        if(prohibited_upgrade.first != upgrade.GetCategory()) {
+bool ComponentsManager::AllowedUpgrade(const Cargo &upgrade) const {
+    for (const std::pair<const std::string, const int> &prohibited_upgrade : prohibited_upgrades) {
+        if (prohibited_upgrade.first != upgrade.GetCategory()) {
             continue;
         }
 
         Manifest category_upgrades = upgrade_space.GetCategoryManifest(prohibited_upgrade.first);
 
-        if(category_upgrades.Size() > prohibited_upgrade.second) {
-            VS_LOG_FLUSH_EXIT(fatal,(boost::format("ComponentsManager::AllowedUpgrade: %1% is greater than %2%\n") % category_upgrades.Size() 
-                      % prohibited_upgrade.second), EXIT_FAILURE);
-        } else if(category_upgrades.Size() == prohibited_upgrade.second) {
+        if (category_upgrades.Size() > prohibited_upgrade.second) {
+            VS_LOG_FLUSH_EXIT(fatal,
+                              (boost::format("ComponentsManager::AllowedUpgrade: %1% is greater than %2%\n") %
+                               category_upgrades.Size() % prohibited_upgrade.second),
+                              EXIT_FAILURE);
+        } else if (category_upgrades.Size() == prohibited_upgrade.second) {
             return false;
         }
     }
@@ -218,10 +222,10 @@ bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
     return true;
 }
 
-bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
+bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo &upgrade) const {
     const ComponentType component_type = GetComponentTypeFromName(upgrade.GetName());
-    const Component *component = GetComponentByType(component_type);
-    if(component) {
+    const Component    *component      = GetComponentByType(component_type);
+    if (component) {
         return component->Installed();
     }
 
@@ -232,12 +236,12 @@ bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
 
 /** A convenience struct to hold the data used below */
 struct HudText {
-    const Component *component;
+    const Component  *component;
     const std::string name;
-    const bool damageable;
+    const bool        damageable;
 
-    HudText(Component *component, std::string name, bool damageable):
-        component(component), name(name), damageable(damageable) {}
+    HudText(Component *component, std::string name, bool damageable)
+        : component(component), name(name), damageable(damageable) {}
 };
 
 /* This function is run when:
@@ -253,32 +257,29 @@ void ComponentsManager::GenerateHudText(std::string getDamageColor(double)) {
     report += configuration().graphics.hud.damage_report_heading + "\n\n";
 
     // TODO: this should be taken from assets so "FTL Drive" would be "SPEC Drive"
-    const HudText hud_texts[] = {
-        HudText(&hull, "Hull", true),
-        HudText(&armor, "Armor", true),
-        HudText(&shield, "Shield", true),
-        HudText(&reactor, "Reactor", true),
-        HudText(&fuel, "Fuel", true),
-        HudText(&energy, "Capacitor", true),
-        HudText(&ftl_energy, "FTL capacitor", true),
-        HudText(&drive, "Drive", true),
-        HudText(&ftl_drive, "FTL Drive", false),
-        HudText(&jump_drive, "Jump Drive", false),
-        HudText(&afterburner, "Afterburner", true),
-        HudText(&computer, "Computer", true),
-        HudText(&radar, "Radar", true),
-        HudText(&ecm, "ECM", true),
-        HudText(&cloak, "Cloak", true),
-        HudText(&repair_bot, "Repair System", false)
-    };
+    const HudText hud_texts[] = {HudText(&hull, "Hull", true),
+                                 HudText(&armor, "Armor", true),
+                                 HudText(&shield, "Shield", true),
+                                 HudText(&reactor, "Reactor", true),
+                                 HudText(&fuel, "Fuel", true),
+                                 HudText(&energy, "Capacitor", true),
+                                 HudText(&ftl_energy, "FTL capacitor", true),
+                                 HudText(&drive, "Drive", true),
+                                 HudText(&ftl_drive, "FTL Drive", false),
+                                 HudText(&jump_drive, "Jump Drive", false),
+                                 HudText(&afterburner, "Afterburner", true),
+                                 HudText(&computer, "Computer", true),
+                                 HudText(&radar, "Radar", true),
+                                 HudText(&ecm, "ECM", true),
+                                 HudText(&cloak, "Cloak", true),
+                                 HudText(&repair_bot, "Repair System", false)};
 
 
-    for(const HudText& text : hud_texts) {
-        if(text.component->Installed()) {
-            std::string new_hud_text = PrintFormattedComponentInHud(
-                text.component->PercentOperational(),
-                text.name, text.damageable, getDamageColor);
-            report += new_hud_text;
+    for (const HudText &text : hud_texts) {
+        if (text.component->Installed()) {
+            std::string new_hud_text  = PrintFormattedComponentInHud(text.component->PercentOperational(), text.name,
+                                                                     text.damageable, getDamageColor);
+            report                   += new_hud_text;
         }
     }
 
@@ -293,30 +294,24 @@ std::string ComponentsManager::GetHudText() {
 }
 
 std::string ComponentsManager::GetTitle(bool show_cargo, bool show_star_date, std::string date) {
-    const double empty_volume = show_cargo ? cargo_hold.MaxCapacity()
-                                : upgrade_space.MaxCapacity();
-    const double available_volume = show_cargo ? cargo_hold.AvailableCapacity()
-                                : upgrade_space.AvailableCapacity();
-    
+    const double empty_volume     = show_cargo ? cargo_hold.MaxCapacity() : upgrade_space.MaxCapacity();
+    const double available_volume = show_cargo ? cargo_hold.AvailableCapacity() : upgrade_space.AvailableCapacity();
+
     // Cargo mass renders your ship harder to manoeuver. Display it.
-    double mass_percent = mass / base_mass * 100;
-    const std::string mass_string = (boost::format("base %1%/ current %2% (%3$.0f%%)") % base_mass % mass % mass_percent).str();
-    
+    double            mass_percent = mass / base_mass * 100;
+    const std::string mass_string =
+            (boost::format("base %1%/ current %2% (%3$.0f%%)") % base_mass % mass % mass_percent).str();
+
     if (show_star_date) {
         return (boost::format("Stardate: %1$s      Credits: %2$.2f      "
-                              "Space left: %3$.6g of %4$.6g cubic meters   Mass: %5%")
-                              % date
-                              % credits.Value()
-                              % available_volume
-                              % empty_volume
-                              % mass_string).str();
+                              "Space left: %3$.6g of %4$.6g cubic meters   Mass: %5%") %
+                date % credits.Value() % available_volume % empty_volume % mass_string)
+                .str();
     } else {
         return (boost::format("Credits: %1$.2f      "
-                              "Space left: %2$.6g of %3$.6g cubic meters   Mass: %4%")
-                              % credits.Value()
-                              % available_volume
-                              % empty_volume
-                              % mass_string).str();
+                              "Space left: %2$.6g of %3$.6g cubic meters   Mass: %4%") %
+                credits.Value() % available_volume % empty_volume % mass_string)
+                .str();
     }
 }
 
@@ -339,7 +334,7 @@ bool ComponentsManager::SellUpgrade(ComponentsManager *buyer, Cargo *item, int q
 bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity) {
     // Some sanity checks
     int index = seller->cargo_hold.GetIndex(*item);
-    if(index == -1) {
+    if (index == -1) {
         return false;
     }
 
@@ -348,21 +343,22 @@ bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *
 
     // Check the maximum you can afford
     const double price = seller->PriceCargo(item->GetName());
-    VS_LOG(trace, (boost::format("Buy price: %1% seller price: %2% percent: %3%%%") 
-        % item->GetPrice() % price % (price/item->GetPrice())).str());
+    VS_LOG(trace, (boost::format("Buy price: %1% seller price: %2% percent: %3%%%") % item->GetPrice() % price %
+                   (price / item->GetPrice()))
+                          .str());
 
     int max_affordable_quantity = static_cast<int>(std::floor(credits / price));
-    quantity = std::min(max_affordable_quantity, quantity);
+    quantity                    = std::min(max_affordable_quantity, quantity);
 
     // Check the maximum you can fit in your hold, but only if volume != 0 and not a weapon.
     // Weapons go on hard points and don't count for volume calculations.
-    if(item->GetVolume() > 0 && !item->IsWeapon()) {
+    if (item->GetVolume() > 0 && !item->IsWeapon()) {
         int max_stackable_quantity = static_cast<int>(std::floor(hold->AvailableCapacity() / item->GetVolume()));
-        quantity = std::min(max_stackable_quantity, quantity);
+        quantity                   = std::min(max_stackable_quantity, quantity);
     }
-    
+
     // Sanity check of the quantity - isn't 0 or negative
-    if(quantity <= 0) {
+    if (quantity <= 0) {
         return false;
     }
 
@@ -370,12 +366,12 @@ bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *
     Cargo sold_cargo = seller->cargo_hold.RemoveCargo(seller, index, quantity);
 
     // We're upgrading, not just bying cargo
-    if(hold == &upgrade_space) {
+    if (hold == &upgrade_space) {
         // Installed components should be marked as such
         sold_cargo.SetInstalled(true);
 
         // Weapons in upgrade space don't take upgrade volume
-        if(sold_cargo.IsWeapon()) {
+        if (sold_cargo.IsWeapon()) {
             sold_cargo.SetVolume(0);
         }
     }
@@ -387,12 +383,12 @@ bool ComponentsManager::_Buy(CargoHold *hold, ComponentsManager *seller, Cargo *
 
 /** This function is called by SellCargo to add variability to the sale price */
 double ComponentsManager::PriceCargo(const std::string &cargo_name) {
-    if(cargo_hold.HasCargo(cargo_name)) {
+    if (cargo_hold.HasCargo(cargo_name)) {
         Cargo cargo = cargo_hold.GetCargoByName(cargo_name);
         return cargo.GetPrice();
     }
 
-    if(Manifest::MPL().HasCargo(cargo_name)) {
+    if (Manifest::MPL().HasCargo(cargo_name)) {
         Cargo cargo = Manifest::MPL().GetCargoByName(cargo_name);
         return cargo.GetPrice();
     }
@@ -404,15 +400,15 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
     CargoHold *buyer_hold = &buyer->cargo_hold;
 
     int index = hold->GetIndex(*item);
-    if(index == -1) {
+    if (index == -1) {
         return false;
     }
 
     // Note: For now, NPCs can always afford to buy our stuff
     // Check the maximum you can fit in your hold
     // Disabled. Check returns a negative number for small items
-    //int max_stackable_quantity = static_cast<int>(std::floor(buyer->cargo_hold.AvailableCapacity() / item->GetVolume()));
-    //quantity = std::min(max_stackable_quantity, quantity);
+    // int max_stackable_quantity = static_cast<int>(std::floor(buyer->cargo_hold.AvailableCapacity() /
+    // item->GetVolume())); quantity = std::min(max_stackable_quantity, quantity);
 
     // Quantity sanity check - must be positive
     if (quantity <= 0) {
@@ -424,13 +420,14 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
     quantity = std::min(quantity, cargo.GetQuantity());
 
     const double price = buyer->PriceCargo(item->GetName());
-    VS_LOG(trace, (boost::format("Sell price: %1% buyer price: %2% percent: %3%%%") 
-        % item->GetPrice() % price % (price/item->GetPrice())).str());
+    VS_LOG(trace, (boost::format("Sell price: %1% buyer price: %2% percent: %3%%%") % item->GetPrice() % price %
+                   (price / item->GetPrice()))
+                          .str());
 
 
     // Only get paid if not selling "mission" cargo.
     // i.e. other peoples' money
-    if(!cargo.IsMissionFlag()) {
+    if (!cargo.IsMissionFlag()) {
         credits += price * quantity;
     }
 
@@ -438,32 +435,48 @@ bool ComponentsManager::_Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *
     return true;
 }
 
-Component* ComponentsManager::GetComponentByType(const ComponentType type) {
-    return const_cast<Component*>(
-        static_cast<const ComponentsManager&>(*this).GetComponentByType(type)
-    );
+Component *ComponentsManager::GetComponentByType(const ComponentType type) {
+    return const_cast<Component *>(static_cast<const ComponentsManager &>(*this).GetComponentByType(type));
 }
 
-const Component* ComponentsManager::GetComponentByType(const ComponentType type) const {
-    switch(type) {
-        case ComponentType::Hull: return &hull;
-        case ComponentType::Armor: return &armor;
-        case ComponentType::Shield: return &shield;
-        case ComponentType::Afterburner: return &afterburner;
-        case ComponentType::AfterburnerUpgrade: return &afterburner_upgrade;
-        case ComponentType::Drive: return &drive;
-        case ComponentType::DriveUpgrade: return &drive_upgrade;
-        case ComponentType::FtlDrive: return &ftl_drive;
-        case ComponentType::JumpDrive: return &jump_drive;
-        case ComponentType::Reactor: return &reactor;
-        case ComponentType::Fuel: return &fuel;
-        case ComponentType::Capacitor: return &energy;
-        case ComponentType::FtlCapacitor: return &ftl_energy;
-        
-        case ComponentType::Cloak: return &cloak;
-        case ComponentType::Radar: return &radar;
-        case ComponentType::ECM: return &ecm;
-        case ComponentType::RepairBot: return &repair_bot;
-        default: return nullptr;
+const Component *ComponentsManager::GetComponentByType(const ComponentType type) const {
+    switch (type) {
+        case ComponentType::Hull:
+            return &hull;
+        case ComponentType::Armor:
+            return &armor;
+        case ComponentType::Shield:
+            return &shield;
+        case ComponentType::Afterburner:
+            return &afterburner;
+        case ComponentType::AfterburnerUpgrade:
+            return &afterburner_upgrade;
+        case ComponentType::Drive:
+            return &drive;
+        case ComponentType::DriveUpgrade:
+            return &drive_upgrade;
+        case ComponentType::FtlDrive:
+            return &ftl_drive;
+        case ComponentType::JumpDrive:
+            return &jump_drive;
+        case ComponentType::Reactor:
+            return &reactor;
+        case ComponentType::Fuel:
+            return &fuel;
+        case ComponentType::Capacitor:
+            return &energy;
+        case ComponentType::FtlCapacitor:
+            return &ftl_energy;
+
+        case ComponentType::Cloak:
+            return &cloak;
+        case ComponentType::Radar:
+            return &radar;
+        case ComponentType::ECM:
+            return &ecm;
+        case ComponentType::RepairBot:
+            return &repair_bot;
+        default:
+            return nullptr;
     }
 }

@@ -72,7 +72,7 @@ public:
     // Get the relative distance between the track and me
     float GetDistance() const;
     // Get the absolute size of the track
-    float GetSize() const;
+    float       GetSize() const;
     Type::Value GetType() const;
 
     // Track is exploding
@@ -105,13 +105,13 @@ protected:
     Type::Value IdentifyType() const;
 
 protected:
-    Unit *player;
+    Unit       *player;
     const Unit *target;
-    Vector position;
-    float distance;
+    Vector      position;
+    float       distance;
     Type::Value type;
 };
 
-} // namespace Radar
+}  // namespace Radar
 
-#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_TRACK_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_RADAR_TRACK_H

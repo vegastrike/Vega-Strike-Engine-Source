@@ -28,11 +28,11 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_RADAR_SPHERE_DISPLAY_H
 #define VEGA_STRIKE_ENGINE_GFX_RADAR_SPHERE_DISPLAY_H
 
-#include "sensor.h"
-#include "gfx/radar/radar.h"
-#include "dual_display.h"
-
 #include <memory>
+
+#include "dual_display.h"
+#include "gfx/radar/radar.h"
+#include "sensor.h"
 
 struct GFXColor;
 
@@ -58,9 +58,9 @@ protected:
 
 protected:
     const float innerSphere;
-    float radarTime;
+    float       radarTime;
 };
 
-} // namespace Radar
+}  // namespace Radar
 
-#endif //VEGA_STRIKE_ENGINE_GFX_RADAR_SPHERE_DISPLAY_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_RADAR_SPHERE_DISPLAY_H

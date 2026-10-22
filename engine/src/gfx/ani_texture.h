@@ -29,61 +29,61 @@
 #ifndef VEGA_STRIKE_ENGINE_GFX_ANI_TEXTURE_H
 #define VEGA_STRIKE_ENGINE_GFX_ANI_TEXTURE_H
 
+#include <stdio.h>
+
+#include "audio/Source.h"
+#include "audio/Types.h"
 #include "gfx/aux_texture.h"
+#include "src/SharedPool.h"
 #include "vegadisk/vsfilesystem.h"
 #include "vid_file.h"
 
-#include <stdio.h>
-#include "src/SharedPool.h"
-
-#include "audio/Types.h"
-#include "audio/Source.h"
-
 class AnimatedTexture : public Texture {
-    Texture **Decal;
-    unsigned int activebound; //For video mode
-    double physicsactive;
-    bool loadSuccess;
+    Texture    **Decal;
+    unsigned int activebound;  // For video mode
+    double       physicsactive;
+    bool         loadSuccess;
 
     void AniInit();
 
-    //For video mode
-    bool vidMode;
-    bool detailTex;
-    enum FILTER ismipmapped;
-    int texstage;
+    // For video mode
+    bool                     vidMode;
+    bool                     detailTex;
+    enum FILTER              ismipmapped;
+    int                      texstage;
     SharedPtr<Audio::Source> timeSource;
 
-    vector<StringPool::Reference> frames; //Filenames for each frame
-    vector<Vector> frames_maxtc; //Maximum tcoords for each frame
-    vector<Vector> frames_mintc; //Minimum tcoords for each frame
+    vector<StringPool::Reference> frames;        // Filenames for each frame
+    vector<Vector>                frames_maxtc;  // Maximum tcoords for each frame
+    vector<Vector>                frames_mintc;  // Minimum tcoords for each frame
 
     VidFile *vidSource;
 
-    StringPool::Reference wrapper_file_path;
+    StringPool::Reference    wrapper_file_path;
     VSFileSystem::VSFileType wrapper_file_type;
 
-    //Options
+    // Options
     enum optionenum {
         optInterpolateFrames = 0x01,
         optInterpolateTCoord = 0x02,
-        optLoopInterp = 0x04,
-        optLoop = 0x08,
-        optSoundTiming = 0x10
+        optLoopInterp        = 0x04,
+        optLoop              = 0x08,
+        optSoundTiming       = 0x10
     };
+
     unsigned char options;
 
-    //Implementation
-    GFXColor multipass_interp_basecolor;
-    enum ADDRESSMODE defaultAddressMode; //default texture address mode, read from .ani
+    // Implementation
+    GFXColor         multipass_interp_basecolor;
+    enum ADDRESSMODE defaultAddressMode;  // default texture address mode, read from .ani
 
 protected:
     unsigned int numframes;
-    float timeperframe;
+    float        timeperframe;
     unsigned int active;
-    unsigned int nextactive; //It is computable, but it's much more convenient this way
-    float active_fraction; //For interpolated animations
-    double curtime;
+    unsigned int nextactive;       // It is computable, but it's much more convenient this way
+    float        active_fraction;  // For interpolated animations
+    double       curtime;
 
     // for video de-jittering
     double lastcurtime;
@@ -133,7 +133,7 @@ public:
 
     void LoadVideoSource(VSFileSystem::VSFile &f);
 
-    virtual void LoadFrame(int num); //For video mode
+    virtual void LoadFrame(int num);  // For video mode
 
     void Destroy();
 
@@ -147,11 +147,11 @@ public:
 
     void MakeActive() override {
         MakeActive(texstage, 0);
-    }                                                   //MSVC bug seems to hide MakeActive() if we define MakeActive(int,int) - the suckers!
+    }  // MSVC bug seems to hide MakeActive() if we define MakeActive(int,int) - the suckers!
 
     void MakeActive(int stage) override {
         MakeActive(stage, 0);
-    }                                                         //MSVC bug seems to hide MakeActive(int) if we define MakeActive(int,int) - the suckers!
+    }  // MSVC bug seems to hide MakeActive(int) if we define MakeActive(int,int) - the suckers!
 
     void MakeActive(int stage, int pass) override;
 
@@ -205,18 +205,16 @@ public:
 
     static void UpdateAllFrame();
 
-    //resets the animation to beginning
+    // resets the animation to beginning
     void Reset();
 
     bool Done() const;
 
     bool LoadSuccess() override;
 
-    //Some useful factory methods -- also defined in ani_texture.cpp
-    static AnimatedTexture *CreateVideoTexture(const std::string &fname,
-            int stage = 0,
-            enum FILTER ismipmapped = BILINEAR,
-            bool detailtex = false);
+    // Some useful factory methods -- also defined in ani_texture.cpp
+    static AnimatedTexture *CreateVideoTexture(const std::string &fname, int stage = 0,
+                                               enum FILTER ismipmapped = BILINEAR, bool detailtex = false);
 };
 
-#endif //VEGA_STRIKE_ENGINE_GFX_ANI_TEXTURE_H
+#endif  // VEGA_STRIKE_ENGINE_GFX_ANI_TEXTURE_H

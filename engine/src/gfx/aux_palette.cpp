@@ -27,7 +27,7 @@
 
 
 #include <math.h>
-#define UNDEFINED -99999
+#define UNDEFINED -99'999
 
 double Maximum(double r, double g, double b) {
     if (r > g && r > b) {
@@ -50,31 +50,31 @@ double Minimum(double r, double g, double b) {
 }
 
 void RGB_To_HSV(double r, double g, double b, double *h, double *s, double *v) {
-/*
- * given: rgb, each in [0,1]
- * desired: h in [0,360), s and v in [0,1] except if s = 0 then h = undefined
- */
+    /*
+     * given: rgb, each in [0,1]
+     * desired: h in [0,360), s and v in [0,1] except if s = 0 then h = undefined
+     */
     double max = Maximum(r, g, b);
     double min = Minimum(r, g, b);
-    *v = max;                           /*This is the value v. */
+    *v         = max; /*This is the value v. */
     /* Next calculate saturation, s. Saturation is 0 if red, green and blue are all 0 */
     *s = (max != 0.0) ? ((max - min) / max) : 0.0;
     if (*s == 0.0) {
         *h = UNDEFINED;
     } else {
         /*Chromatic case: Saturation is not 0*/
-        double delta = max - min;           /*Determine Hue*/
+        double delta = max - min;       /*Determine Hue*/
         if (r == max) {
-            *h = (g - b) / delta;                  /* resulting color is between yellow and magenta */
+            *h = (g - b) / delta;       /* resulting color is between yellow and magenta */
         } else if (g == max) {
-            *h = 2.0 + (b - r) / delta;                    /* resulting color is between cyan and yellow */
+            *h = 2.0 + (b - r) / delta; /* resulting color is between cyan and yellow */
         } else if (b == max) {
             *h = 4.0 + (r - g) / delta;
-        }                   /* resulting color is between magenta and cyan */
-        *h *= 60.0;                             /*convert hue to degrees*/
+        } /* resulting color is between magenta and cyan */
+        *h *= 60.0; /*convert hue to degrees*/
         if (*h < 0.0) {
             *h += 360.0;
-        }                        /*make sure its not negative*/
+        } /*make sure its not negative*/
     }
 }
 
@@ -85,26 +85,26 @@ void HSV_To_RGB(double *r, double *g, double *b, double h, double s, double v) {
          *******************************achromatic color: there is no hue.
          */
         if (h == UNDEFINED) {
-            *r = v;             /* this is the achromatic case. */
+            *r = v; /* this is the achromatic case. */
             *g = v;
             *b = v;
         } else {
-            *r = v;             /* this is the achromatic case. */
+            *r = v; /* this is the achromatic case. */
             *g = v;
             *b = v;
         }
     } else {
-        double f, p, q, t;         /*chromatic color: s != 0, so there is a hue*/
-        int i;
-        if (h == 360.0) {          /*360 degrees is equivalent to 0 degrees. */
+        double f, p, q, t; /*chromatic color: s != 0, so there is a hue*/
+        int    i;
+        if (h == 360.0) {  /*360 degrees is equivalent to 0 degrees. */
             h = 0.0;
         }
         h /= 60.0;         /* h is now in [0,6).*/
-        i = (int) (h);           /*Floor returns the greatest integer <= h*/
-        f = h - i;               /*f is the fractional part of h.*/
-        p = v * (1.0 - s);
-        q = v * (1.0 - (s * f));
-        t = v * (1.0 - (s * (1.0 - f)));
+        i  = (int)(h);     /*Floor returns the greatest integer <= h*/
+        f  = h - i;        /*f is the fractional part of h.*/
+        p  = v * (1.0 - s);
+        q  = v * (1.0 - (s * f));
+        t  = v * (1.0 - (s * (1.0 - f)));
         switch (i) {
             case 0:
                 *r = v;
@@ -137,17 +137,17 @@ void HSV_To_RGB(double *r, double *g, double *b, double h, double s, double v) {
                 *b = q;
                 break;
         }
-    }     /*Chromatic case */
+    } /*Chromatic case */
 }
 
-//desired: h in [0,360), s and v in [0,1] except if s = 0 then h = undefined
+// desired: h in [0,360), s and v in [0,1] except if s = 0 then h = undefined
 void ShiftPalette(unsigned char Palette[769], double DH, double DS, double DV, double DsH, double DsS, double DsV) {
     double r, g, b, h, s, v;
-    int i;
+    int    i;
     for (i = 192; i < 224; i++) {
-        r = ((double) .003921568627) * Palette[i * 3];
-        g = ((double) .003921568627) * Palette[i * 3 + 1];
-        b = ((double) .003921568627) * Palette[i * 3 + 2];
+        r = ((double).003921568627) * Palette[i * 3];
+        g = ((double).003921568627) * Palette[i * 3 + 1];
+        b = ((double).003921568627) * Palette[i * 3 + 2];
         RGB_To_HSV(r, g, b, &h, &s, &v);
         h += DH;
         s += DS;
@@ -174,14 +174,14 @@ void ShiftPalette(unsigned char Palette[769], double DH, double DS, double DV, d
             v += 1;
         }
         HSV_To_RGB(&r, &g, &b, h, s, v);
-        Palette[i * 3] = (unsigned char) (r * 255);
-        Palette[i * 3 + 1] = (unsigned char) (g * 255);
-        Palette[i * 3 + 2] = (unsigned char) (b * 255);
+        Palette[i * 3]     = (unsigned char)(r * 255);
+        Palette[i * 3 + 1] = (unsigned char)(g * 255);
+        Palette[i * 3 + 2] = (unsigned char)(b * 255);
     }
     for (i = 224; i < 256; i++) {
-        r = ((double) .003921568627) * Palette[i * 3];
-        g = ((double) .003921568627) * Palette[i * 3 + 1];
-        b = ((double) .003921568627) * Palette[i * 3 + 2];
+        r = ((double).003921568627) * Palette[i * 3];
+        g = ((double).003921568627) * Palette[i * 3 + 1];
+        b = ((double).003921568627) * Palette[i * 3 + 2];
         RGB_To_HSV(r, g, b, &h, &s, &v);
         h += DsH;
         s += DsS;
@@ -208,9 +208,8 @@ void ShiftPalette(unsigned char Palette[769], double DH, double DS, double DV, d
             v += 1;
         }
         HSV_To_RGB(&r, &g, &b, h, s, v);
-        Palette[i * 3] = (unsigned char) (r * 255);
-        Palette[i * 3 + 1] = (unsigned char) (g * 255);
-        Palette[i * 3 + 2] = (unsigned char) (b * 255);
+        Palette[i * 3]     = (unsigned char)(r * 255);
+        Palette[i * 3 + 1] = (unsigned char)(g * 255);
+        Palette[i * 3 + 2] = (unsigned char)(b * 255);
     }
 }
-

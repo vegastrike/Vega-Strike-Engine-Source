@@ -28,12 +28,12 @@
 
 #include <gtest/gtest.h>
 
-#include "damage/damageable_layer.h"
 #include "damage/core_vector.h"
+#include "damage/damageable_layer.h"
 
 // Demonstrate some basic assertions.
 TEST(Layer, Sanity) {
-    DamageableLayer layer = DamageableLayer(0, FacetConfiguration::four, 10, Damage(1.0,1.0), true);
+    DamageableLayer layer = DamageableLayer(0, FacetConfiguration::four, 10, Damage(1.0, 1.0), true);
 
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(0, 0, 0)), 0);
 
@@ -52,5 +52,4 @@ TEST(Layer, Sanity) {
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(-1, 0, -1)), 3);
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(-1, 0, -2)), 3);
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(-2, 0, -1)), 1);
-
 }

@@ -27,8 +27,8 @@
 #ifndef VEGA_STRIKE_ENGINE_CMD_TURRET_H
 #define VEGA_STRIKE_ENGINE_CMD_TURRET_H
 
-#include <string>
 #include <map>
+#include <string>
 
 class Unit;
 
@@ -38,7 +38,7 @@ public:
 };
 
 std::map<std::string, std::string> parseTurretSizes();
-std::string getTurretSize(const std::string &size);
-Unit *CreateGenericTurret(std::string tur, int faction);
+std::string                        getTurretSize(const std::string &size);
+Unit                              *CreateGenericTurret(std::string tur, int faction);
 
-#endif //VEGA_STRIKE_ENGINE_CMD_TURRET_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_TURRET_H

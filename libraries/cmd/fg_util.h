@@ -24,17 +24,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
-// NO HEADER GUARD
+
+#ifndef VEGA_STRIKE_LIBRARIES_CMD_FG_UTIL_H
+#define VEGA_STRIKE_LIBRARIES_CMD_FG_UTIL_H
+
+#include <string>
+#include <vector>
+
+class SaveGame;
 
 namespace fg_util {
-std::string MakeFactionKey(int faction);
-std::string MakeFGKey(const std::string &fgname, int faction);
-std::string MakeStarSystemFGKey(const std::string &starsystem);
+std::string  MakeFactionKey(int faction);
+std::string  MakeFGKey(const std::string &fgname, int faction);
+std::string  MakeStarSystemFGKey(const std::string &starsystem);
 unsigned int ShipListOffset();
 unsigned int PerShipDataSize();
-bool IsFGKey(const std::string &fgcandidate);
-bool CheckFG(std::vector<std::string> &data);
-void PurgeZeroShips(SaveGame *sg, unsigned int faction);
-void PurgeZeroShips(SaveGame *sg);
-}
-
+bool         IsFGKey(const std::string &fgcandidate);
+bool         CheckFG(std::vector<std::string> &data);
+void         PurgeZeroShips(SaveGame *sg, unsigned int faction);
+void         PurgeZeroShips(SaveGame *sg);
+}  // namespace fg_util
+#endif  // VEGA_STRIKE_LIBRARIES_CMD_FG_UTIL_H

@@ -26,11 +26,11 @@
  */
 
 
-#include "src/in_kb.h"
+#include "configuration/configuration.h"
+#include "gfx/vsimage.h"
 #include "root_generic/vs_globals.h"
 #include "root_generic/xml_support.h"
-#include "gfx/vsimage.h"
-#include "configuration/configuration.h"
+#include "src/in_kb.h"
 // See https://github.com/vegastrike/Vega-Strike-Engine-Source/pull/851#discussion_r1589254766
 #include <glut.h>
 
@@ -39,21 +39,21 @@ using namespace VSFileSystem;
 void Screenshot(const KBData &, KBSTATE state) {
     if (state == PRESS) {
         GLint xywh[4] = {0, 0, 0, 0};
-        xywh[2] = configuration().graphics.resolution_x;
-        xywh[3] = configuration().graphics.resolution_y;
+        xywh[2]       = configuration().graphics.resolution_x;
+        xywh[3]       = configuration().graphics.resolution_y;
         glGetIntegerv(GL_VIEWPORT, xywh);
-        unsigned char *tmp = static_cast<unsigned char *>(malloc(
-            static_cast<size_t>(xywh[2]) * static_cast<size_t>(xywh[3]) * 4 * sizeof(unsigned char)));
-        //memset(tmp,0x7f,xywh[2]*xywh[3]*4*sizeof(char));
+        unsigned char *tmp = static_cast<unsigned char *>(
+                malloc(static_cast<size_t>(xywh[2]) * static_cast<size_t>(xywh[3]) * 4 * sizeof(unsigned char)));
+        // memset(tmp,0x7f,xywh[2]*xywh[3]*4*sizeof(char));
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         glPixelStorei(GL_PACK_ROW_LENGTH, xywh[2]);
         glFinish();
         glReadPixels(0, 0, xywh[2], xywh[3], GL_RGB, GL_UNSIGNED_BYTE, tmp);
         glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-        ::VSImage image;
+        ::VSImage            image;
         VSFileSystem::VSFile f;
-        static int count = 0;
-        std::string filename = "Screenshot" + XMLSupport::tostring(count) + ".png";
+        static int           count    = 0;
+        std::string          filename = "Screenshot" + XMLSupport::tostring(count) + ".png";
         for (;;) {
             if (f.OpenReadOnly(filename, TextureFile) <= VSFileSystem::Ok) {
                 f.Close();
@@ -67,4 +67,3 @@ void Screenshot(const KBData &, KBSTATE state) {
         free(tmpchar);
     }
 }
-

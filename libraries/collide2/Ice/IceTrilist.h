@@ -18,18 +18,16 @@
 class ICEMATHS_API TriList : public Container {
 public:
     // Constructor / Destructor
-    TriList() {
-    }
+    TriList() {}
 
-    ~TriList() {
-    }
+    ~TriList() {}
 
-    inline_    uint32_t GetNbTriangles() const {
+    inline_ uint32_t GetNbTriangles() const {
         return GetNbEntries() / 9;
     }
 
-    inline_    Triangle *GetTriangles() const {
-        return (Triangle *) GetEntries();
+    inline_ Triangle *GetTriangles() const {
+        return (Triangle *)GetEntries();
     }
 
     void AddTri(const Triangle &tri) {
@@ -48,18 +46,16 @@ public:
 class ICEMATHS_API TriangleList : public Container {
 public:
     // Constructor / Destructor
-    TriangleList() {
-    }
+    TriangleList() {}
 
-    ~TriangleList() {
-    }
+    ~TriangleList() {}
 
-    inline_    uint32_t GetNbTriangles() const {
+    inline_ uint32_t GetNbTriangles() const {
         return GetNbEntries() / 3;
     }
 
-    inline_    IndexedTriangle *GetTriangles() const {
-        return (IndexedTriangle *) GetEntries();
+    inline_ IndexedTriangle *GetTriangles() const {
+        return (IndexedTriangle *)GetEntries();
     }
 
     void AddTriangle(const IndexedTriangle &tri) {
@@ -71,4 +67,4 @@ public:
     }
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TRILIST_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_TRILIST_H

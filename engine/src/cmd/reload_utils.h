@@ -31,7 +31,7 @@
 
 class Unit;
 
-bool canReload(Unit *unit, const std::string& weapon_unit_name);
-std::string getReloadDescription(Unit *unit, const double price, const std::string& weapon_unit_name);
+bool        canReload(Unit *unit, const std::string &weapon_unit_name);
+std::string getReloadDescription(Unit *unit, const double price, const std::string &weapon_unit_name);
 
-#endif // VEGA_STRIKE_ENGINE_CMD_RELOAD_UTILS_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_RELOAD_UTILS_H

@@ -27,23 +27,23 @@
 
 struct OPCODE_API LSSCache : VolumeCache {
     LSSCache() {
-        Previous.mP0 = Point(0.0f, 0.0f, 0.0f);
-        Previous.mP1 = Point(0.0f, 0.0f, 0.0f);
+        Previous.mP0     = Point(0.0f, 0.0f, 0.0f);
+        Previous.mP1     = Point(0.0f, 0.0f, 0.0f);
         Previous.mRadius = 0.0f;
-        FatCoeff = 1.1f;
+        FatCoeff         = 1.1f;
     }
 
     // Cached faces signature
-    LSS Previous;    //!< LSS used when performing the query resulting in cached faces
+    LSS Previous;  //!< LSS used when performing the query resulting in cached faces
     // User settings
-    float FatCoeff;    //!< mRadius2 multiplier used to create a fat LSS
+    float FatCoeff;  //!< mRadius2 multiplier used to create a fat LSS
 };
 
 class OPCODE_API LSSCollider : public VolumeCollider {
 public:
     // Constructor / Destructor
     LSSCollider();
-    virtual                                ~LSSCollider();
+    virtual ~LSSCollider();
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -61,17 +61,15 @@ public:
      *	\warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
      */
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    bool Collide(LSSCache &cache,
-            const LSS &lss,
-            const Model &model,
-            const Matrix4x4 *worldl = nullptr,
-            const Matrix4x4 *worldm = nullptr);
+    bool Collide(LSSCache &cache, const LSS &lss, const Model &model, const Matrix4x4 *worldl = nullptr,
+                 const Matrix4x4 *worldm = nullptr);
     //
     bool Collide(LSSCache &cache, const LSS &lss, const AABBTree *tree);
+
 protected:
     // LSS in model space
-    Segment mSeg;            //!< Segment
-    float mRadius2;        //!< LSS radius squared
+    Segment mSeg;      //!< Segment
+    float   mRadius2;  //!< LSS radius squared
     // Internal methods
     void _Collide(const AABBCollisionNode *node);
     void _Collide(const AABBNoLeafNode *node);
@@ -83,29 +81,25 @@ protected:
     void _CollideNoPrimitiveTest(const AABBQuantizedNode *node);
     void _CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node);
     // Overlap tests
-    inline_                bool LSSContainsBox(const Point &bc, const Point &be);
-    inline_                bool LSSAABBOverlap(const Point &center, const Point &extents);
-    inline_                bool LSSTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2);
+    inline_ bool LSSContainsBox(const Point &bc, const Point &be);
+    inline_ bool LSSAABBOverlap(const Point &center, const Point &extents);
+    inline_ bool LSSTriOverlap(const Point &vert0, const Point &vert1, const Point &vert2);
     // Init methods
-    bool InitQuery(LSSCache &cache,
-            const LSS &lss,
-            const Matrix4x4 *worldl = nullptr,
-            const Matrix4x4 *worldm = nullptr);
+    bool InitQuery(LSSCache &cache, const LSS &lss, const Matrix4x4 *worldl = nullptr,
+                   const Matrix4x4 *worldm = nullptr);
 };
 
 class OPCODE_API HybridLSSCollider : public LSSCollider {
 public:
     // Constructor / Destructor
     HybridLSSCollider();
-    virtual                                ~HybridLSSCollider();
+    virtual ~HybridLSSCollider();
 
-    bool Collide(LSSCache &cache,
-            const LSS &lss,
-            const HybridModel &model,
-            const Matrix4x4 *worldl = nullptr,
-            const Matrix4x4 *worldm = nullptr);
+    bool Collide(LSSCache &cache, const LSS &lss, const HybridModel &model, const Matrix4x4 *worldl = nullptr,
+                 const Matrix4x4 *worldm = nullptr);
+
 protected:
     Container mTouchedBoxes;
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_LSS_COLLIDER_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_LSS_COLLIDER_H

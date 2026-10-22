@@ -26,26 +26,25 @@
  */
 // NO HEADER GUARD
 
-#include <string>
-#include <vector>
 #include <gnuhash.h>
 #include <map>
+#include <string>
+#include <vector>
 
 #include "src/hashtable.h"
 #include "vegadisk/vsfilesystem.h"
 
-// delim should be read as separator and not to be confused with text delimiter see http://creativyst.com/Doc/Articles/CSV/CSV01.htm
-// separator values , and ; while delimiter is listed as quote or "
+// delim should be read as separator and not to be confused with text delimiter see
+// http://creativyst.com/Doc/Articles/CSV/CSV01.htm separator values , and ; while delimiter is listed as quote or "
 std::vector<std::string> readCSV(const std::string &line, std::string delim = ",;");
-std::string writeCSV(const std::map<std::string, std::string> &unit,
-        std::string delim = ",");
+std::string              writeCSV(const std::map<std::string, std::string> &unit, std::string delim = ",");
 
 class CSVTable {
 private:
     void Init(const std::string &data);
 
 public:
-    std::string rootdir;
+    std::string              rootdir;
     vsUMap<std::string, int> columns;
     vsUMap<std::string, int> rows;
     std::vector<std::string> key;
@@ -59,20 +58,24 @@ public:
     void Merge(const CSVTable &other);
 
 public:
-    //Optimizer toolbox
-    enum optimizer_enum { optimizer_undefined = 0x7fffffff };
+    // Optimizer toolbox
+    enum optimizer_enum {
+        optimizer_undefined = 0x7fffffff
+    };
+
     void SetupOptimizer(const std::vector<std::string> &keys, unsigned int type);
 
-    //Opaque Optimizers - use the optimizer toolbox to set them up
-    bool optimizer_setup;
-    unsigned int optimizer_type;
-    std::vector<std::string> optimizer_keys;
+    // Opaque Optimizers - use the optimizer toolbox to set them up
+    bool                      optimizer_setup;
+    unsigned int              optimizer_type;
+    std::vector<std::string>  optimizer_keys;
     std::vector<unsigned int> optimizer_indexes;
 };
 
 class CSVRow {
     std::string::size_type iter;
-    CSVTable *parent;
+    CSVTable              *parent;
+
 public:
     std::string getRoot();
 
@@ -84,12 +87,12 @@ public:
 
     CSVRow() {
         parent = NULL;
-        iter = std::string::npos;
+        iter   = std::string::npos;
     }
 
-    const std::string &operator[](const std::string &) const;
-    const std::string &operator[](unsigned int) const;
-    const std::string &getKey(unsigned int which) const;
+    const std::string                 &operator[](const std::string &) const;
+    const std::string                 &operator[](unsigned int) const;
+    const std::string                 &getKey(unsigned int which) const;
     std::vector<std::string>::iterator begin();
     std::vector<std::string>::iterator end();
 
@@ -113,4 +116,3 @@ public:
 CSVTable *loadCSVTableList(const std::string &csvfiles, VSFileSystem::VSFileType fileType, bool critical);
 
 extern std::vector<CSVTable *> unitTables;
-

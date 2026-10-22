@@ -26,24 +26,25 @@
  */
 
 
-#include "src/vegastrike.h"
-#include "cmd/unit_generic.h"
 #include "order.h"
+
 #include "cmd/collection.h"
+#include "cmd/unit_generic.h"
 #include "communication.h"
-#include "src/config_xml.h"
 #include "root_generic/vs_globals.h"
+#include "src/config_xml.h"
+#include "src/vegastrike.h"
 #include "src/vs_logging.h"
 
-using std::vector;
 using std::list;
+using std::vector;
 
-//#define ORDERDEBUG  // FIXME ?
+// #define ORDERDEBUG  // FIXME ?
 void Order::Execute() {
     const float airesptime = configuration().ai.comm_response_time_flt;
     ProcessCommunicationMessages(airesptime, true);
-    int completed = 0;
-    unsigned int i = 0;
+    int          completed = 0;
+    unsigned int i         = 0;
     for (i = 0; i < suborders.size(); i++) {
         if ((completed & ((suborders[i])->getType() & (ALLTYPES))) == 0) {
             (suborders[i])->Execute();
@@ -133,7 +134,7 @@ bool Order::AttachOrder(Unit *targets1) {
     if (!(subtype & STARGET)) {
         if (subtype & SSELF) {
             return AttachSelfOrder(targets1);
-        }              //can use attach order to do shit
+        }  // can use attach order to do shit
 
         return false;
     }
@@ -275,10 +276,7 @@ void ExecuteFor::Execute() {
 }
 
 Join::Join(Unit *parent, Order *first, Order *second)
-        : Order(first->getType() | second->getType(),
-        first->getSubType()),
-        first(first),
-        second(second) {
+    : Order(first->getType() | second->getType(), first->getSubType()), first(first), second(second) {
     assert((first->getType() & second->getType()) == 0);
     assert(first->getSubType() == second->getSubType());
 
@@ -297,9 +295,7 @@ void Join::Execute() {
 }
 
 Sequence::Sequence(Unit *parent, Order *order, unsigned int excludeTypes)
-        : Order(order->getType() | excludeTypes,
-        order->getSubType()),
-        order(order) {
+    : Order(order->getType() | excludeTypes, order->getSubType()), order(order) {
     SetParent(parent);
     EnqueueOrder(order);
 }
@@ -311,4 +307,4 @@ void Sequence::Execute() {
     }
 }
 
-} // namespace Orders
+}  // namespace Orders

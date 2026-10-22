@@ -33,11 +33,12 @@
  */
 
 #include <stdio.h>
-#include "cmd/unit_generic.h"
+#include <string>
+#include <vector>
+
 #include "cmd/ai/order.h"
 #include "cmd/collection.h"
-#include <vector>
-#include <string>
+#include "cmd/unit_generic.h"
 
 struct GFXMaterial;
 /* Orbits in the xy plane with the given radius. Depends on a reorientation of coordinate bases */
@@ -55,63 +56,34 @@ private:
 protected:
     Atmosphere *atmosphere = nullptr;
 
-    ContinuousTerrain *terrain = nullptr;
+    ContinuousTerrain  *terrain      = nullptr;
     PlanetaryTransform *terraintrans = nullptr;
-    Vector TerrainUp;
-    Vector TerrainH;
-    bool inside = false;
-    bool atmospheric = false; //then users can go inside!
-    float radius = 0.0f;
-    float gravity{};
-    float days{};
-    UnitCollection insiders;
-    std::vector<int> lights;
+    Vector              TerrainUp;
+    Vector              TerrainH;
+    bool                inside      = false;
+    bool                atmospheric = false;  // then users can go inside!
+    float               radius      = 0.0f;
+    float               gravity{};
+    float               days{};
+    UnitCollection      insiders;
+    std::vector<int>    lights;
+
 public:
     UnitCollection satellites = UnitCollection();
 
 public:
     Planet();
 
-    Planet(QVector x,
-            QVector y,
-            float vely,
-            const Vector &rotvel,
-            float pos,
-            float gravity,
-            float radius,
-            const std::string &filename,
-            const std::string &technique,
-            const std::string &unitname,
-            BLENDFUNC blendsrc,
-            BLENDFUNC blenddst,
-            const std::vector<std::string> &dest,
-            const QVector &orbitcent,
-            Unit *parent,
-            const GFXMaterial &ourmat,
-            const std::vector<GFXLightLocal> &,
-            int faction,
-            string fullname,
-            bool inside_out = false,
-            float days = 0.0F);
+    Planet(QVector x, QVector y, float vely, const Vector &rotvel, float pos, float gravity, float radius,
+           const std::string &filename, const std::string &technique, const std::string &unitname, BLENDFUNC blendsrc,
+           BLENDFUNC blenddst, const std::vector<std::string> &dest, const QVector &orbitcent, Unit *parent,
+           const GFXMaterial &ourmat, const std::vector<GFXLightLocal> &, int faction, string fullname,
+           bool inside_out = false, float days = 0.0F);
 
-    void InitPlanet(QVector x,
-                    QVector y,
-                    float vely,
-                    const Vector &rotvel,
-                    float pos,
-                    float gravity,
-                    float radius,
-                    const string &filename,
-                    const string &technique,
-                    const string &unitname,
-                    const vector<string> &dest,
-                    const QVector &orbitcent,
-                    Unit *parent,
-                    int faction,
-                    string fullname,
-                    bool inside_out,
-                    unsigned int lights_num,
-                    float days = 0.0F);
+    void InitPlanet(QVector x, QVector y, float vely, const Vector &rotvel, float pos, float gravity, float radius,
+                    const string &filename, const string &technique, const string &unitname, const vector<string> &dest,
+                    const QVector &orbitcent, Unit *parent, int faction, string fullname, bool inside_out,
+                    unsigned int lights_num, float days = 0.0F);
 
     ~Planet() override;
 
@@ -126,53 +98,21 @@ public:
     }
 
     // Methods
-    void AddAtmosphere(const std::string &texture,
-            float radius,
-            BLENDFUNC blendSrc,
-            BLENDFUNC blendDst,
-            bool inside_out);
-    void AddCity(const std::string &texture,
-            float radius,
-            int numwrapx,
-            int numwrapy,
-            BLENDFUNC blendSrc,
-            BLENDFUNC blendDst,
-            bool inside_out = false,
-            bool reverse_normals = true);
+    void         AddAtmosphere(const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst,
+                               bool inside_out);
+    void         AddCity(const std::string &texture, float radius, int numwrapx, int numwrapy, BLENDFUNC blendSrc,
+                         BLENDFUNC blendDst, bool inside_out = false, bool reverse_normals = true);
     virtual void AddFog(const std::vector<AtmosphericFogMesh> &, bool optical_illusion);
-    void AddRing(const std::string &texture,
-            float iradius,
-            float oradius,
-            const QVector &r,
-            const QVector &s,
-            int slices,
-            int numwrapx,
-            int numwrapy,
-            BLENDFUNC blendSrc,
-            BLENDFUNC blendDst);
-    void AddSatellite(Unit *orbiter);
+    void         AddRing(const std::string &texture, float iradius, float oradius, const QVector &r, const QVector &s,
+                         int slices, int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst);
+    void         AddSatellite(Unit *orbiter);
 
     Vector AddSpaceElevator(const std::string &name, const std::string &faction, char direction);
 
-    Unit *beginElement(QVector x,
-                       QVector y,
-                       float vely,
-                       const Vector &rotvel,
-                       float pos,
-                       float gravity,
-                       float radius,
-                       const string &filename,
-                       const string &technique,
-                       const string &unitname,
-                       BLENDFUNC blendsrc,
-                       BLENDFUNC blenddst,
-                       const vector<string> &dest,
-                       int level,
-                       const GFXMaterial &ourmat,
-                       const std::vector<GFXLightLocal> &ligh,
-                       bool isunit,
-                       int faction,
-                       string fullname,
+    Unit *beginElement(QVector x, QVector y, float vely, const Vector &rotvel, float pos, float gravity, float radius,
+                       const string &filename, const string &technique, const string &unitname, BLENDFUNC blendsrc,
+                       BLENDFUNC blenddst, const vector<string> &dest, int level, const GFXMaterial &ourmat,
+                       const std::vector<GFXLightLocal> &ligh, bool isunit, int faction, string fullname,
                        bool inside_out, float days);
 
     void DisableLights();
@@ -206,7 +146,7 @@ public:
 
     static void ProcessTerrains();
 
-    void setAtmosphere(Atmosphere *);
+    void                setAtmosphere(Atmosphere *);
     PlanetaryTransform *setTerrain(ContinuousTerrain *, float ratiox, int numwraps, float scaleatmos);
 
     bool is_nav_point() const {
@@ -220,8 +160,7 @@ public:
             pos = localCollection.createIterator();
         }
 
-        ~PlanetIterator() {
-        }
+        ~PlanetIterator() {}
 
         void preinsert(Unit *unit) {
             abort();
@@ -246,7 +185,7 @@ public:
             if (current() != NULL) {
                 Unit *cur = *pos;
                 if (cur->getUnitType() == Vega_UnitType::planet) {
-                    for (un_iter tmp(((Planet *) cur)->satellites.createIterator()); !tmp.isDone(); ++tmp) {
+                    for (un_iter tmp(((Planet *)cur)->satellites.createIterator()); !tmp.isDone(); ++tmp) {
                         localCollection.append((*tmp));
                     }
                 }
@@ -269,7 +208,7 @@ public:
         }
 
         UnitCollection localCollection;
-        un_iter pos;
+        un_iter        pos;
     };
 
     PlanetIterator createIterator() {
@@ -302,4 +241,4 @@ private:
     friend bool operator==(const Planet &lhs, const Planet &rhs);
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_PLANET_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_PLANET_H

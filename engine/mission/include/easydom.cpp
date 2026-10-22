@@ -30,28 +30,28 @@
 */
 
 
-#include <expat.h>
-#include "mission/include/xml_support.h"
 #include "mission/include/easydom.h"
 
-#include <assert.h>    /// needed for assert() calls.
+#include <assert.h>  /// needed for assert() calls.
+#include <expat.h>
 
-using XMLSupport::EnumMap;
+#include "mission/include/xml_support.h"
+
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
+using XMLSupport::EnumMap;
 
-easyDomNode::easyDomNode() {
-}
+easyDomNode::easyDomNode() {}
 
 void easyDomNode::set(easyDomNode *_parent, string _name, AttributeList *_attributes) {
-    parent = _parent;
+    parent     = _parent;
     attributes = _attributes;
 
     if (_attributes != NULL) {
         for (AttributeList::const_iterator iter = _attributes->begin(); iter != _attributes->end(); iter++) {
             //    cout <<  _name << "::" << (*iter).name << endl;
             //    printf("iter=%x *iter=%x\n",iter,*iter);
-            //cout << " " << (*iter).name << "=\"" << (*iter).value << "\"" << endl;
+            // cout << " " << (*iter).name << "=\"" << (*iter).value << "\"" << endl;
 #if 0
             att_name.push_back((*iter).name);
             att_value.push_back((*iter).value);
@@ -73,7 +73,7 @@ string easyDomNode::attr_value(string search_name) {
 
 void easyDomNode::printNode(ostream &out, int recurse_level, int level) {
     map<string, string>::const_iterator iter;
-    //vector<string>::const_iterator iter2;
+    // vector<string>::const_iterator iter2;
 
     out << "<" << name;
 
@@ -94,4 +94,3 @@ void easyDomNode::printNode(ostream &out, int recurse_level, int level) {
         out << "</" << name << ">" << endl;
     }
 }
-

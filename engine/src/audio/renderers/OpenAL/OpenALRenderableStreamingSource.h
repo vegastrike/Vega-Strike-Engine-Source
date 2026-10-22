@@ -31,12 +31,10 @@
 // C++ Interface: Audio::OpenALRenderableSource
 //
 
-#include "al.h"
-
-#include "../../RenderableSource.h"
-
 #include "../../Exceptions.h"
+#include "../../RenderableSource.h"
 #include "../../Types.h"
+#include "al.h"
 
 namespace Audio {
 
@@ -49,10 +47,10 @@ namespace Audio {
  */
 class OpenALRenderableStreamingSource : public RenderableSource {
     ALuint alSource;
-    bool atEos;
-    bool shouldPlay;
-    bool startedPlaying;
-    bool buffering;
+    bool   atEos;
+    bool   shouldPlay;
+    bool   startedPlaying;
+    bool   buffering;
 
 public:
     OpenALRenderableStreamingSource(Source *source);
@@ -101,6 +99,6 @@ protected:
     void queueALBuffers();
 };
 
-};
+};  // namespace Audio
 
-#endif //VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERABLE_STREAMING_SOURCE_H
+#endif  // VEGA_STRIKE_ENGINE_AUDIO_RENDERERS_OPENAL_RENDERABLE_STREAMING_SOURCE_H

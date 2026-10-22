@@ -24,40 +24,33 @@ inline_ float OPC_PointAABBSqrDist(const Point &point, const Point &center, cons
     float SqrDistance = 0.0f;
 
     if (Closest.x < -extents.x) {
-        float Delta = Closest.x + extents.x;
+        float Delta  = Closest.x + extents.x;
         SqrDistance += Delta * Delta;
     } else if (Closest.x > extents.x) {
-        float Delta = Closest.x - extents.x;
+        float Delta  = Closest.x - extents.x;
         SqrDistance += Delta * Delta;
     }
 
     if (Closest.y < -extents.y) {
-        float Delta = Closest.y + extents.y;
+        float Delta  = Closest.y + extents.y;
         SqrDistance += Delta * Delta;
     } else if (Closest.y > extents.y) {
-        float Delta = Closest.y - extents.y;
+        float Delta  = Closest.y - extents.y;
         SqrDistance += Delta * Delta;
     }
 
     if (Closest.z < -extents.z) {
-        float Delta = Closest.z + extents.z;
+        float Delta  = Closest.z + extents.z;
         SqrDistance += Delta * Delta;
     } else if (Closest.z > extents.z) {
-        float Delta = Closest.z - extents.z;
+        float Delta  = Closest.z - extents.z;
         SqrDistance += Delta * Delta;
     }
     return SqrDistance;
 }
 
-static void Face(int i0,
-        int i1,
-        int i2,
-        Point &rkPnt,
-        const Point &rkDir,
-        const Point &extents,
-        const Point &rkPmE,
-        float *pfLParam,
-        float &rfSqrDistance) {
+static void Face(int i0, int i1, int i2, Point &rkPnt, const Point &rkDir, const Point &extents, const Point &rkPmE,
+                 float *pfLParam, float &rfSqrDistance) {
     Point kPpE;
     float fLSqr, fInv, fTmp, fParam, fT, fDelta;
 
@@ -67,22 +60,22 @@ static void Face(int i0,
         if (rkDir[i0] * kPpE[i2] >= rkDir[i2] * rkPmE[i0]) {
             // v[i1] >= -e[i1], v[i2] >= -e[i2] (distance = 0)
             if (pfLParam) {
-                rkPnt[i0] = extents[i0];
-                fInv = 1.0f / rkDir[i0];
+                rkPnt[i0]  = extents[i0];
+                fInv       = 1.0f / rkDir[i0];
                 rkPnt[i1] -= rkDir[i1] * rkPmE[i0] * fInv;
                 rkPnt[i2] -= rkDir[i2] * rkPmE[i0] * fInv;
-                *pfLParam = -rkPmE[i0] * fInv;
+                *pfLParam  = -rkPmE[i0] * fInv;
             }
         } else {
             // v[i1] >= -e[i1], v[i2] < -e[i2]
             fLSqr = rkDir[i0] * rkDir[i0] + rkDir[i2] * rkDir[i2];
-            fTmp = fLSqr * kPpE[i1] - rkDir[i1] * (rkDir[i0] * rkPmE[i0] + rkDir[i2] * kPpE[i2]);
+            fTmp  = fLSqr * kPpE[i1] - rkDir[i1] * (rkDir[i0] * rkPmE[i0] + rkDir[i2] * kPpE[i2]);
             if (fTmp <= 2.0f * fLSqr * extents[i1]) {
-                fT = fTmp / fLSqr;
-                fLSqr += rkDir[i1] * rkDir[i1];
-                fTmp = kPpE[i1] - fT;
-                fDelta = rkDir[i0] * rkPmE[i0] + rkDir[i1] * fTmp + rkDir[i2] * kPpE[i2];
-                fParam = -fDelta / fLSqr;
+                fT             = fTmp / fLSqr;
+                fLSqr         += rkDir[i1] * rkDir[i1];
+                fTmp           = kPpE[i1] - fT;
+                fDelta         = rkDir[i0] * rkPmE[i0] + rkDir[i1] * fTmp + rkDir[i2] * kPpE[i2];
+                fParam         = -fDelta / fLSqr;
                 rfSqrDistance += rkPmE[i0] * rkPmE[i0] + fTmp * fTmp + kPpE[i2] * kPpE[i2] + fDelta * fParam;
 
                 if (pfLParam) {
@@ -92,9 +85,9 @@ static void Face(int i0,
                     rkPnt[i2] = -extents[i2];
                 }
             } else {
-                fLSqr += rkDir[i1] * rkDir[i1];
-                fDelta = rkDir[i0] * rkPmE[i0] + rkDir[i1] * rkPmE[i1] + rkDir[i2] * kPpE[i2];
-                fParam = -fDelta / fLSqr;
+                fLSqr         += rkDir[i1] * rkDir[i1];
+                fDelta         = rkDir[i0] * rkPmE[i0] + rkDir[i1] * rkPmE[i1] + rkDir[i2] * kPpE[i2];
+                fParam         = -fDelta / fLSqr;
                 rfSqrDistance += rkPmE[i0] * rkPmE[i0] + rkPmE[i1] * rkPmE[i1] + kPpE[i2] * kPpE[i2] + fDelta * fParam;
 
                 if (pfLParam) {
@@ -109,13 +102,13 @@ static void Face(int i0,
         if (rkDir[i0] * kPpE[i2] >= rkDir[i2] * rkPmE[i0]) {
             // v[i1] < -e[i1], v[i2] >= -e[i2]
             fLSqr = rkDir[i0] * rkDir[i0] + rkDir[i1] * rkDir[i1];
-            fTmp = fLSqr * kPpE[i2] - rkDir[i2] * (rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1]);
+            fTmp  = fLSqr * kPpE[i2] - rkDir[i2] * (rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1]);
             if (fTmp <= 2.0f * fLSqr * extents[i2]) {
-                fT = fTmp / fLSqr;
-                fLSqr += rkDir[i2] * rkDir[i2];
-                fTmp = kPpE[i2] - fT;
-                fDelta = rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1] + rkDir[i2] * fTmp;
-                fParam = -fDelta / fLSqr;
+                fT             = fTmp / fLSqr;
+                fLSqr         += rkDir[i2] * rkDir[i2];
+                fTmp           = kPpE[i2] - fT;
+                fDelta         = rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1] + rkDir[i2] * fTmp;
+                fParam         = -fDelta / fLSqr;
                 rfSqrDistance += rkPmE[i0] * rkPmE[i0] + kPpE[i1] * kPpE[i1] + fTmp * fTmp + fDelta * fParam;
 
                 if (pfLParam) {
@@ -125,9 +118,9 @@ static void Face(int i0,
                     rkPnt[i2] = fT - extents[i2];
                 }
             } else {
-                fLSqr += rkDir[i2] * rkDir[i2];
-                fDelta = rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1] + rkDir[i2] * rkPmE[i2];
-                fParam = -fDelta / fLSqr;
+                fLSqr         += rkDir[i2] * rkDir[i2];
+                fDelta         = rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1] + rkDir[i2] * rkPmE[i2];
+                fParam         = -fDelta / fLSqr;
                 rfSqrDistance += rkPmE[i0] * rkPmE[i0] + kPpE[i1] * kPpE[i1] + rkPmE[i2] * rkPmE[i2] + fDelta * fParam;
 
                 if (pfLParam) {
@@ -140,15 +133,15 @@ static void Face(int i0,
         } else {
             // v[i1] < -e[i1], v[i2] < -e[i2]
             fLSqr = rkDir[i0] * rkDir[i0] + rkDir[i2] * rkDir[i2];
-            fTmp = fLSqr * kPpE[i1] - rkDir[i1] * (rkDir[i0] * rkPmE[i0] + rkDir[i2] * kPpE[i2]);
+            fTmp  = fLSqr * kPpE[i1] - rkDir[i1] * (rkDir[i0] * rkPmE[i0] + rkDir[i2] * kPpE[i2]);
             if (fTmp >= 0.0f) {
                 // v[i1]-edge is closest
                 if (fTmp <= 2.0f * fLSqr * extents[i1]) {
-                    fT = fTmp / fLSqr;
-                    fLSqr += rkDir[i1] * rkDir[i1];
-                    fTmp = kPpE[i1] - fT;
-                    fDelta = rkDir[i0] * rkPmE[i0] + rkDir[i1] * fTmp + rkDir[i2] * kPpE[i2];
-                    fParam = -fDelta / fLSqr;
+                    fT             = fTmp / fLSqr;
+                    fLSqr         += rkDir[i1] * rkDir[i1];
+                    fTmp           = kPpE[i1] - fT;
+                    fDelta         = rkDir[i0] * rkPmE[i0] + rkDir[i1] * fTmp + rkDir[i2] * kPpE[i2];
+                    fParam         = -fDelta / fLSqr;
                     rfSqrDistance += rkPmE[i0] * rkPmE[i0] + fTmp * fTmp + kPpE[i2] * kPpE[i2] + fDelta * fParam;
 
                     if (pfLParam) {
@@ -158,9 +151,9 @@ static void Face(int i0,
                         rkPnt[i2] = -extents[i2];
                     }
                 } else {
-                    fLSqr += rkDir[i1] * rkDir[i1];
-                    fDelta = rkDir[i0] * rkPmE[i0] + rkDir[i1] * rkPmE[i1] + rkDir[i2] * kPpE[i2];
-                    fParam = -fDelta / fLSqr;
+                    fLSqr  += rkDir[i1] * rkDir[i1];
+                    fDelta  = rkDir[i0] * rkPmE[i0] + rkDir[i1] * rkPmE[i1] + rkDir[i2] * kPpE[i2];
+                    fParam  = -fDelta / fLSqr;
                     rfSqrDistance +=
                             rkPmE[i0] * rkPmE[i0] + rkPmE[i1] * rkPmE[i1] + kPpE[i2] * kPpE[i2] + fDelta * fParam;
 
@@ -175,15 +168,15 @@ static void Face(int i0,
             }
 
             fLSqr = rkDir[i0] * rkDir[i0] + rkDir[i1] * rkDir[i1];
-            fTmp = fLSqr * kPpE[i2] - rkDir[i2] * (rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1]);
+            fTmp  = fLSqr * kPpE[i2] - rkDir[i2] * (rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1]);
             if (fTmp >= 0.0f) {
                 // v[i2]-edge is closest
                 if (fTmp <= 2.0f * fLSqr * extents[i2]) {
-                    fT = fTmp / fLSqr;
-                    fLSqr += rkDir[i2] * rkDir[i2];
-                    fTmp = kPpE[i2] - fT;
-                    fDelta = rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1] + rkDir[i2] * fTmp;
-                    fParam = -fDelta / fLSqr;
+                    fT             = fTmp / fLSqr;
+                    fLSqr         += rkDir[i2] * rkDir[i2];
+                    fTmp           = kPpE[i2] - fT;
+                    fDelta         = rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1] + rkDir[i2] * fTmp;
+                    fParam         = -fDelta / fLSqr;
                     rfSqrDistance += rkPmE[i0] * rkPmE[i0] + kPpE[i1] * kPpE[i1] + fTmp * fTmp + fDelta * fParam;
 
                     if (pfLParam) {
@@ -193,9 +186,9 @@ static void Face(int i0,
                         rkPnt[i2] = fT - extents[i2];
                     }
                 } else {
-                    fLSqr += rkDir[i2] * rkDir[i2];
-                    fDelta = rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1] + rkDir[i2] * rkPmE[i2];
-                    fParam = -fDelta / fLSqr;
+                    fLSqr  += rkDir[i2] * rkDir[i2];
+                    fDelta  = rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1] + rkDir[i2] * rkPmE[i2];
+                    fParam  = -fDelta / fLSqr;
                     rfSqrDistance +=
                             rkPmE[i0] * rkPmE[i0] + kPpE[i1] * kPpE[i1] + rkPmE[i2] * rkPmE[i2] + fDelta * fParam;
 
@@ -210,9 +203,9 @@ static void Face(int i0,
             }
 
             // (v[i1],v[i2])-corner is closest
-            fLSqr += rkDir[i2] * rkDir[i2];
-            fDelta = rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1] + rkDir[i2] * kPpE[i2];
-            fParam = -fDelta / fLSqr;
+            fLSqr         += rkDir[i2] * rkDir[i2];
+            fDelta         = rkDir[i0] * rkPmE[i0] + rkDir[i1] * kPpE[i1] + rkDir[i2] * kPpE[i2];
+            fParam         = -fDelta / fLSqr;
             rfSqrDistance += rkPmE[i0] * rkPmE[i0] + kPpE[i1] * kPpE[i1] + kPpE[i2] * kPpE[i2] + fDelta * fParam;
 
             if (pfLParam) {
@@ -255,16 +248,10 @@ static void CaseNoZeros(Point &rkPnt, const Point &rkDir, const Point &extents, 
     }
 }
 
-static void Case0(int i0,
-        int i1,
-        int i2,
-        Point &rkPnt,
-        const Point &rkDir,
-        const Point &extents,
-        float *pfLParam,
-        float &rfSqrDistance) {
-    float fPmE0 = rkPnt[i0] - extents[i0];
-    float fPmE1 = rkPnt[i1] - extents[i1];
+static void Case0(int i0, int i1, int i2, Point &rkPnt, const Point &rkDir, const Point &extents, float *pfLParam,
+                  float &rfSqrDistance) {
+    float fPmE0  = rkPnt[i0] - extents[i0];
+    float fPmE1  = rkPnt[i1] - extents[i1];
     float fProd0 = rkDir[i1] * fPmE0;
     float fProd1 = rkDir[i0] * fPmE1;
     float fDelta, fInvLSqr, fInv;
@@ -274,9 +261,9 @@ static void Case0(int i0,
         rkPnt[i0] = extents[i0];
 
         float fPpE1 = rkPnt[i1] + extents[i1];
-        fDelta = fProd0 - rkDir[i0] * fPpE1;
+        fDelta      = fProd0 - rkDir[i0] * fPpE1;
         if (fDelta >= 0.0f) {
-            fInvLSqr = 1.0f / (rkDir[i0] * rkDir[i0] + rkDir[i1] * rkDir[i1]);
+            fInvLSqr       = 1.0f / (rkDir[i0] * rkDir[i0] + rkDir[i1] * rkDir[i1]);
             rfSqrDistance += fDelta * fDelta * fInvLSqr;
             if (pfLParam) {
                 rkPnt[i1] = -extents[i1];
@@ -284,9 +271,9 @@ static void Case0(int i0,
             }
         } else {
             if (pfLParam) {
-                fInv = 1.0f / rkDir[i0];
+                fInv       = 1.0f / rkDir[i0];
                 rkPnt[i1] -= fProd0 * fInv;
-                *pfLParam = -fPmE0 * fInv;
+                *pfLParam  = -fPmE0 * fInv;
             }
         }
     } else {
@@ -294,9 +281,9 @@ static void Case0(int i0,
         rkPnt[i1] = extents[i1];
 
         float fPpE0 = rkPnt[i0] + extents[i0];
-        fDelta = fProd1 - rkDir[i1] * fPpE0;
+        fDelta      = fProd1 - rkDir[i1] * fPpE0;
         if (fDelta >= 0.0f) {
-            fInvLSqr = 1.0f / (rkDir[i0] * rkDir[i0] + rkDir[i1] * rkDir[i1]);
+            fInvLSqr       = 1.0f / (rkDir[i0] * rkDir[i0] + rkDir[i1] * rkDir[i1]);
             rfSqrDistance += fDelta * fDelta * fInvLSqr;
             if (pfLParam) {
                 rkPnt[i0] = -extents[i0];
@@ -304,32 +291,26 @@ static void Case0(int i0,
             }
         } else {
             if (pfLParam) {
-                fInv = 1.0f / rkDir[i1];
+                fInv       = 1.0f / rkDir[i1];
                 rkPnt[i0] -= fProd1 * fInv;
-                *pfLParam = -fPmE1 * fInv;
+                *pfLParam  = -fPmE1 * fInv;
             }
         }
     }
 
     if (rkPnt[i2] < -extents[i2]) {
-        fDelta = rkPnt[i2] + extents[i2];
+        fDelta         = rkPnt[i2] + extents[i2];
         rfSqrDistance += fDelta * fDelta;
-        rkPnt[i2] = -extents[i2];
+        rkPnt[i2]      = -extents[i2];
     } else if (rkPnt[i2] > extents[i2]) {
-        fDelta = rkPnt[i2] - extents[i2];
+        fDelta         = rkPnt[i2] - extents[i2];
         rfSqrDistance += fDelta * fDelta;
-        rkPnt[i2] = extents[i2];
+        rkPnt[i2]      = extents[i2];
     }
 }
 
-static void Case00(int i0,
-        int i1,
-        int i2,
-        Point &rkPnt,
-        const Point &rkDir,
-        const Point &extents,
-        float *pfLParam,
-        float &rfSqrDistance) {
+static void Case00(int i0, int i1, int i2, Point &rkPnt, const Point &rkDir, const Point &extents, float *pfLParam,
+                   float &rfSqrDistance) {
     float fDelta;
 
     if (pfLParam) {
@@ -339,23 +320,23 @@ static void Case00(int i0,
     rkPnt[i0] = extents[i0];
 
     if (rkPnt[i1] < -extents[i1]) {
-        fDelta = rkPnt[i1] + extents[i1];
+        fDelta         = rkPnt[i1] + extents[i1];
         rfSqrDistance += fDelta * fDelta;
-        rkPnt[i1] = -extents[i1];
+        rkPnt[i1]      = -extents[i1];
     } else if (rkPnt[i1] > extents[i1]) {
-        fDelta = rkPnt[i1] - extents[i1];
+        fDelta         = rkPnt[i1] - extents[i1];
         rfSqrDistance += fDelta * fDelta;
-        rkPnt[i1] = extents[i1];
+        rkPnt[i1]      = extents[i1];
     }
 
     if (rkPnt[i2] < -extents[i2]) {
-        fDelta = rkPnt[i2] + extents[i2];
+        fDelta         = rkPnt[i2] + extents[i2];
         rfSqrDistance += fDelta * fDelta;
-        rkPnt[i1] = -extents[i2];
+        rkPnt[i1]      = -extents[i2];
     } else if (rkPnt[i2] > extents[i2]) {
-        fDelta = rkPnt[i2] - extents[i2];
+        fDelta         = rkPnt[i2] - extents[i2];
         rfSqrDistance += fDelta * fDelta;
-        rkPnt[i2] = extents[i2];
+        rkPnt[i2]      = extents[i2];
     }
 }
 
@@ -363,41 +344,41 @@ static void Case000(Point &rkPnt, const Point &extents, float &rfSqrDistance) {
     float fDelta;
 
     if (rkPnt.x < -extents.x) {
-        fDelta = rkPnt.x + extents.x;
+        fDelta         = rkPnt.x + extents.x;
         rfSqrDistance += fDelta * fDelta;
-        rkPnt.x = -extents.x;
+        rkPnt.x        = -extents.x;
     } else if (rkPnt.x > extents.x) {
-        fDelta = rkPnt.x - extents.x;
+        fDelta         = rkPnt.x - extents.x;
         rfSqrDistance += fDelta * fDelta;
-        rkPnt.x = extents.x;
+        rkPnt.x        = extents.x;
     }
 
     if (rkPnt.y < -extents.y) {
-        fDelta = rkPnt.y + extents.y;
+        fDelta         = rkPnt.y + extents.y;
         rfSqrDistance += fDelta * fDelta;
-        rkPnt.y = -extents.y;
+        rkPnt.y        = -extents.y;
     } else if (rkPnt.y > extents.y) {
-        fDelta = rkPnt.y - extents.y;
+        fDelta         = rkPnt.y - extents.y;
         rfSqrDistance += fDelta * fDelta;
-        rkPnt.y = extents.y;
+        rkPnt.y        = extents.y;
     }
 
     if (rkPnt.z < -extents.z) {
-        fDelta = rkPnt.z + extents.z;
+        fDelta         = rkPnt.z + extents.z;
         rfSqrDistance += fDelta * fDelta;
-        rkPnt.z = -extents.z;
+        rkPnt.z        = -extents.z;
     } else if (rkPnt.z > extents.z) {
-        fDelta = rkPnt.z - extents.z;
+        fDelta         = rkPnt.z - extents.z;
         rfSqrDistance += fDelta * fDelta;
-        rkPnt.z = extents.z;
+        rkPnt.z        = extents.z;
     }
 }
 
 static float SqrDistance(const Ray &rkLine, const Point &center, const Point &extents, float *pfLParam) {
     // compute coordinates of line in box coordinate system
     Point kDiff = rkLine.mOrig - center;
-    Point kPnt = kDiff;
-    Point kDir = rkLine.mDir;
+    Point kPnt  = kDiff;
+    Point kDir  = rkLine.mDir;
 
     // Apply reflections so that direction vector has nonnegative components.
     for (int i = 0; i < 3; i++) {
@@ -412,29 +393,29 @@ static float SqrDistance(const Ray &rkLine, const Point &center, const Point &ex
     if (kDir.x > 0.0f) {
         if (kDir.y > 0.0f) {
             if (kDir.z > 0.0f) {
-                CaseNoZeros(kPnt, kDir, extents, pfLParam, fSqrDistance);        // (+,+,+)
+                CaseNoZeros(kPnt, kDir, extents, pfLParam, fSqrDistance);  // (+,+,+)
             } else {
                 Case0(0, 1, 2, kPnt, kDir, extents, pfLParam, fSqrDistance);
-            }    // (+,+,0)
+            }  // (+,+,0)
         } else {
             if (kDir.z > 0.0f) {
-                Case0(0, 2, 1, kPnt, kDir, extents, pfLParam, fSqrDistance);    // (+,0,+)
+                Case0(0, 2, 1, kPnt, kDir, extents, pfLParam, fSqrDistance);  // (+,0,+)
             } else {
                 Case00(0, 1, 2, kPnt, kDir, extents, pfLParam, fSqrDistance);
-            }    // (+,0,0)
+            }  // (+,0,0)
         }
     } else {
         if (kDir.y > 0.0f) {
             if (kDir.z > 0.0f) {
-                Case0(1, 2, 0, kPnt, kDir, extents, pfLParam, fSqrDistance);    // (0,+,+)
+                Case0(1, 2, 0, kPnt, kDir, extents, pfLParam, fSqrDistance);  // (0,+,+)
             } else {
                 Case00(1, 0, 2, kPnt, kDir, extents, pfLParam, fSqrDistance);
-            }    // (0,+,0)
+            }  // (0,+,0)
         } else {
             if (kDir.z > 0.0f) {
-                Case00(2, 0, 1, kPnt, kDir, extents, pfLParam, fSqrDistance);    // (0,0,+)
+                Case00(2, 0, 1, kPnt, kDir, extents, pfLParam, fSqrDistance);  // (0,0,+)
             } else {
-                Case000(kPnt, extents, fSqrDistance);                            // (0,0,0)
+                Case000(kPnt, extents, fSqrDistance);                          // (0,0,0)
                 if (pfLParam) {
                     *pfLParam = 0.0f;
                 }

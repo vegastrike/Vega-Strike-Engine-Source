@@ -25,32 +25,32 @@
  * along with Vega Strike.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "src/vegastrike.h"
-#include "src/star_system.h"
-#include "cmd/planet.h"
-#include "root_generic/lin_time.h"
-#include "src/hashtable.h"
-#include "gfx/animation.h"
-#include "root_generic/vs_globals.h"
-#include "src/config_xml.h"
-#include "cmd/container.h"
-#include "root_generic/xml_support.h"
 #include <assert.h>
-#include "gfx/cockpit.h"
-#include "src/audiolib.h"
-#include "cmd/images.h"
-#include "cmd/script/flightgroup.h"
 #include <string>
 #include <vector>
 
+#include "cmd/container.h"
+#include "cmd/images.h"
+#include "cmd/planet.h"
+#include "cmd/script/flightgroup.h"
+#include "gfx/animation.h"
+#include "gfx/cockpit.h"
+#include "root_generic/lin_time.h"
 #include "root_generic/options.h"
+#include "root_generic/vs_globals.h"
+#include "root_generic/xml_support.h"
+#include "src/audiolib.h"
+#include "src/config_xml.h"
+#include "src/hashtable.h"
+#include "src/star_system.h"
+#include "src/vegastrike.h"
 
 void CacheJumpStar(bool destroy) {
-    static Animation* cached_ani = nullptr;
-    static bool initialized = false;
+    static Animation *cached_ani  = nullptr;
+    static bool       initialized = false;
     if (!initialized) {
         initialized = true;
-        cached_ani = new Animation(configuration().graphics.jump_gate.c_str(), true, 0.1, MIPMAP, false);
+        cached_ani  = new Animation(configuration().graphics.jump_gate.c_str(), true, 0.1, MIPMAP, false);
     }
     if (destroy) {
         delete cached_ani;
@@ -60,16 +60,18 @@ void CacheJumpStar(bool destroy) {
 
 extern std::vector<unorigdest *> pendingjump;
 static std::vector<unsigned int> AnimationNulls;
+
 class ResizeAni {
 public:
     Animation *a;
-    float percent;
+    float      percent;
 
     ResizeAni(Animation *ani, float percent) {
-        a = ani;
+        a             = ani;
         this->percent = percent;
     }
 };
+
 static std::vector<ResizeAni> JumpAnimations;
 static std::vector<ResizeAni> VolatileJumpAnimations;
 
@@ -80,14 +82,11 @@ Animation *GetVolatileAni(unsigned int which) {
     return NULL;
 }
 
-unsigned int AddAnimation(const QVector &pos,
-        const float size,
-        bool mvolatile,
-        const std::string &name,
-        float percentgrow) {
+unsigned int AddAnimation(const QVector &pos, const float size, bool mvolatile, const std::string &name,
+                          float percentgrow) {
     std::vector<ResizeAni> *ja = mvolatile ? &VolatileJumpAnimations : &JumpAnimations;
 
-    Animation *ani = new Animation(name.c_str(), true, .1, MIPMAP, false);
+    Animation   *ani = new Animation(name.c_str(), true, .1, MIPMAP, false);
     unsigned int i;
     if (mvolatile || AnimationNulls.empty()) {
         i = ja->size();
@@ -95,7 +94,7 @@ unsigned int AddAnimation(const QVector &pos,
     } else {
         assert(JumpAnimations[AnimationNulls.back()].a == NULL);
         JumpAnimations[AnimationNulls.back()] = ResizeAni(ani, percentgrow);
-        i = AnimationNulls.back();
+        i                                     = AnimationNulls.back();
         AnimationNulls.pop_back();
     }
     (*ja)[i].a->SetDimensions(size, size);
@@ -116,30 +115,28 @@ void StarSystem::VolitalizeJumpAnimation(const int ani) {
 }
 
 void StarSystem::DrawJumpStars() {
-    for (const auto& jump : pendingjump) {
+    for (const auto &jump : pendingjump) {
         const int k = jump->animation;
         if (k != -1) {
-            const Unit* un = jump->un.GetUnit();
+            const Unit *un = jump->un.GetUnit();
             if (un) {
                 Vector p, q, r;
                 un->GetOrientation(p, q, r);
 
-                JumpAnimations[k].a
-                                 ->SetPosition(
-                                     un->Position() + r.Cast() * un->rSize() * (jump->delay + .25));
+                JumpAnimations[k].a->SetPosition(un->Position() + r.Cast() * un->rSize() * (jump->delay + .25));
                 JumpAnimations[k].a->SetOrientation(p, q, r);
-                const float dd = un->rSize() * configuration().graphics.jump_gate_size_dbl
-                        * (un->jump_drive.Delay() - jump->delay) / un->jump_drive.Delay();
+                const float dd = un->rSize() * configuration().graphics.jump_gate_size_dbl *
+                                 (un->jump_drive.Delay() - jump->delay) / un->jump_drive.Delay();
                 JumpAnimations[k].a->SetDimensions(dd, dd);
             }
         }
     }
-    for (const auto& jump_animation : JumpAnimations) {
+    for (const auto &jump_animation : JumpAnimations) {
         if (jump_animation.a) {
             jump_animation.a->Draw();
         }
     }
-    for (const auto& jump_animation : VolatileJumpAnimations) {
+    for (const auto &jump_animation : VolatileJumpAnimations) {
         if (jump_animation.a) {
             float width;
             float height;
@@ -151,9 +148,7 @@ void StarSystem::DrawJumpStars() {
         }
     }
     const auto first_to_remove = std::stable_partition(VolatileJumpAnimations.begin(), VolatileJumpAnimations.end(),
-                                                 [](ResizeAni& ani) -> bool {
-                                                     return !ani.a->Done();
-                                                 });
+                                                       [](ResizeAni &ani) -> bool { return !ani.a->Done(); });
     for (auto iter = first_to_remove; iter != VolatileJumpAnimations.end(); ++iter) {
         delete iter->a;
     }
@@ -163,16 +158,16 @@ void StarSystem::DrawJumpStars() {
 void StarSystem::DoJumpingComeSightAndSound(Unit *un) {
     Vector p, q, r;
     un->GetOrientation(p, q, r);
-    unsigned int myani = AddJumpAnimation(un->LocalPosition(), un->rSize() * configuration().graphics.jump_gate_size_flt, true);
+    unsigned int myani =
+            AddJumpAnimation(un->LocalPosition(), un->rSize() * configuration().graphics.jump_gate_size_flt, true);
     VolatileJumpAnimations[myani].a->SetOrientation(p, q, r);
 }
 
 int StarSystem::DoJumpingLeaveSightAndSound(Unit *un) {
-    int ani;
+    int    ani;
     Vector p, q, r;
     un->GetOrientation(p, q, r);
-    ani = AddJumpAnimation(un->Position() + r.Cast() * un->rSize() * (un->jump_drive.Delay() + .25),
-            10 * un->rSize());
+    ani = AddJumpAnimation(un->Position() + r.Cast() * un->rSize() * (un->jump_drive.Delay() + .25), 10 * un->rSize());
     static boost::optional<int> jump_leave{};
     if (jump_leave == boost::none) {
         jump_leave = AUDCreateSound(configuration().audio.unit_audio.jump_leave, false);
@@ -180,4 +175,3 @@ int StarSystem::DoJumpingLeaveSightAndSound(Unit *un) {
     AUDPlay(jump_leave.get(), un->LocalPosition(), un->GetVelocity(), 1);
     return ani;
 }
-

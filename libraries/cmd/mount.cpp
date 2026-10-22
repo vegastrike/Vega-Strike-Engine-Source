@@ -26,49 +26,47 @@
  */
 
 
-#include "cmd/unit_generic.h"
-#include "cmd/missile.h"
+#include "cmd/ai/aggressive.h"
+#include "cmd/ai/fireall.h"
+#include "cmd/ai/flybywire.h"
+#include "cmd/ai/navigation.h"
+#include "cmd/ai/order.h"
+#include "cmd/ai/script.h"
 #include "cmd/beam.h"
 #include "cmd/bolt.h"
-#include "src/audiolib.h"
 #include "cmd/missile.h"
-#include "cmd/ai/order.h"
-#include "cmd/ai/fireall.h"
-#include "cmd/ai/script.h"
-#include "cmd/ai/navigation.h"
-#include "cmd/ai/flybywire.h"
-#include "root_generic/configxml.h"
+#include "cmd/unit_generic.h"
+#include "cmd/weapon_info.h"
+#include "gfx_generic/boltdrawmanager.h"
 #include "gfx_generic/cockpit_generic.h"
-#include "src/force_feedback.h"
-#include "cmd/ai/aggressive.h"
+#include "resource/resource.h"
+#include "root_generic/configxml.h"
 #include "root_generic/lin_time.h"
-#include "vegadisk/vsfilesystem.h"
+#include "src/audiolib.h"
+#include "src/force_feedback.h"
 #include "src/star_system.h"
 #include "src/universe.h"
-#include "cmd/weapon_info.h"
-#include "resource/resource.h"
-#include "gfx_generic/boltdrawmanager.h"
-#include "root_generic/configxml.h"
+#include "vegadisk/vsfilesystem.h"
 
 extern char SERVER;
 
 Mount::Mount() {
     static WeaponInfo wi(WEAPON_TYPE::BEAM);
-    functionality = 1;
+    functionality    = 1;
     maxfunctionality = 1;
-    type = &wi;
-    size = as_integer(MOUNT_SIZE::NOWEAP);
+    type             = &wi;
+    size             = as_integer(MOUNT_SIZE::NOWEAP);
     functionality = maxfunctionality = 1.0f;
-    ammo = -1;
-    status = UNCHOSEN;
-    processed = Mount::PROCESSED;
-    sound = -1;
-    last_sound_refire_time = 0.0;
-    const float xyscalestat = configuration().graphics.weapon_xyscale_flt;
+    ammo                             = -1;
+    status                           = UNCHOSEN;
+    processed                        = Mount::PROCESSED;
+    sound                            = -1;
+    last_sound_refire_time           = 0.0;
+    const float xyscalestat          = configuration().graphics.weapon_xyscale_flt;
 
     const float zscalestat = configuration().graphics.weapon_zscale_flt;
-    xyscale = xyscalestat;
-    zscale = zscalestat;
+    xyscale                = xyscalestat;
+    zscale                 = zscalestat;
 }
 
 extern double interpolation_blend_factor;
@@ -83,8 +81,8 @@ float Mount::ComputeAnimatedFrame(Mesh *gun) {
     if (type->type == WEAPON_TYPE::BEAM) {
         if (ref.gun) {
             if (ref.gun->Ready()) {
-                return getNewTime() + type->Refire() - ref.gun->refireTime()
-                        - interpolation_blend_factor * simulation_atom_var;
+                return getNewTime() + type->Refire() - ref.gun->refireTime() -
+                       interpolation_blend_factor * simulation_atom_var;
             } else {
                 return getNewTime() * gun->getFramesPerSecond();
             }
@@ -101,12 +99,13 @@ float Mount::ComputeAnimatedFrame(Mesh *gun) {
 }
 
 Mount::Mount(const string &filename, int am, int vol, float xyscale, float zscale, float func, float maxfunc,
-        bool banked) : bank(banked) {
-    //short fix
-    functionality = func;
+             bool banked)
+    : bank(banked) {
+    // short fix
+    functionality    = func;
     maxfunctionality = maxfunc;
     static WeaponInfo wi(WEAPON_TYPE::BEAM);
-    size = as_integer(MOUNT_SIZE::NOWEAP);
+    size                    = as_integer(MOUNT_SIZE::NOWEAP);
     const float xyscalestat = configuration().graphics.weapon_xyscale_flt;
 
     const float zscalestat = configuration().graphics.weapon_zscale_flt;
@@ -116,22 +115,22 @@ Mount::Mount(const string &filename, int am, int vol, float xyscale, float zscal
     if (zscale == -1) {
         zscale = zscalestat;
     }
-    this->zscale = zscale;
-    this->xyscale = xyscale;
-    ammo = am;
-    sound = -1;
-    type = &wi;
-    this->volume = vol;
-    ref.gun = NULL;
-    status = (UNCHOSEN);
-    processed = Mount::PROCESSED;
+    this->zscale     = zscale;
+    this->xyscale    = xyscale;
+    ammo             = am;
+    sound            = -1;
+    type             = &wi;
+    this->volume     = vol;
+    ref.gun          = NULL;
+    status           = (UNCHOSEN);
+    processed        = Mount::PROCESSED;
     WeaponInfo *temp = getWeapon(filename);
     if (temp == NULL) {
-        status = UNCHOSEN;
+        status       = UNCHOSEN;
         time_to_lock = 0;
     } else {
-        type = temp;
-        status = ACTIVE;
+        type         = temp;
+        status       = ACTIVE;
         time_to_lock = temp->lock_time;
         if (type->type != WEAPON_TYPE::BEAM) {
             ref.refire = type->Refire();
@@ -154,22 +153,22 @@ void Mount::UnFire() {
 }
 
 void Mount::ReplaceMounts(Unit *un, const Mount *other) {
-    int thisvol = volume;     //short fix
-    int thissize = size;     //short fix
-    float xyscale = this->xyscale;
-    float zscale = this->zscale;
-    bool thisbank = this->bank;
-    Quaternion q = this->GetMountOrientation();
-    Vector v = this->GetMountLocation();
-    *this = *other;
-    this->size = thissize;
-    volume = thisvol;
+    int        thisvol  = volume;  // short fix
+    int        thissize = size;    // short fix
+    float      xyscale  = this->xyscale;
+    float      zscale   = this->zscale;
+    bool       thisbank = this->bank;
+    Quaternion q        = this->GetMountOrientation();
+    Vector     v        = this->GetMountLocation();
+    *this               = *other;
+    this->size          = thissize;
+    volume              = thisvol;
     this->SetMountPosition(v);
     this->SetMountOrientation(q);
     this->xyscale = xyscale;
-    this->zscale = zscale;
-    this->bank = thisbank;
-    ref.gun = NULL;
+    this->zscale  = zscale;
+    this->bank    = thisbank;
+    ref.gun       = NULL;
     if (type->type != WEAPON_TYPE::BEAM) {
         ref.refire = type->Refire();
     }
@@ -178,13 +177,13 @@ void Mount::ReplaceMounts(Unit *un, const Mount *other) {
         ammo = -1;
     } else if (other->ammo != -1 && ammo == -1) {
         ammo = 0;
-    }          //zero ammo if other was not zero earlier.
+    }  // zero ammo if other was not zero earlier.
     un->setAverageGunSpeed();
 }
 
 double Mount::Percentage(const Mount *newammo) const {
-    float percentage = 1. / 1024;
-    int thingstocompare = 0;
+    float percentage      = 1. / 1'024;
+    int   thingstocompare = 0;
     if (status == UNCHOSEN || status == DESTROYED) {
         return percentage;
     }
@@ -192,9 +191,8 @@ double Mount::Percentage(const Mount *newammo) const {
         if (ammo != -1) {
             thingstocompare++;
         } else {
-            if (newammo->type->range == type->range && newammo->type->damage == type->damage
-                    && newammo->type->phase_damage
-                            == type->phase_damage) {
+            if (newammo->type->range == type->range && newammo->type->damage == type->damage &&
+                newammo->type->phase_damage == type->phase_damage) {
                 return 1;
             }
             if (newammo->type->name == type->name) {
@@ -205,9 +203,8 @@ double Mount::Percentage(const Mount *newammo) const {
         percentage += .25;
         thingstocompare++;
         if (ammo > 0) {
-            if (newammo->type->range == type->range && newammo->type->damage == type->damage
-                    && newammo->type->phase_damage
-                            == type->phase_damage) {
+            if (newammo->type->range == type->range && newammo->type->damage == type->damage &&
+                newammo->type->phase_damage == type->phase_damage) {
                 return 1;
             }
             if (newammo->type->name == type->name) {
@@ -230,22 +227,16 @@ double Mount::Percentage(const Mount *newammo) const {
     if (thingstocompare) {
         return percentage / thingstocompare;
     } else {
-        return 1. / 1024;
+        return 1. / 1'024;
     }
 }
 
 extern void GetMadAt(Unit *un, Unit *parent, int numhits = 0);
 
-//bool returns whether to refund the cost of firing
-bool Mount::PhysicsAlignedFire(Unit *caller,
-        const Transformation &Cumulative,
-        const Matrix &m,
-        const Vector &velocity,
-        void *owner,
-        Unit *target,
-        signed char autotrack,
-        float trackingcone,
-        CollideMap::iterator hint[]) {
+// bool returns whether to refund the cost of firing
+bool Mount::PhysicsAlignedFire(Unit *caller, const Transformation &Cumulative, const Matrix &m, const Vector &velocity,
+                               void *owner, Unit *target, signed char autotrack, float trackingcone,
+                               CollideMap::iterator hint[]) {
     using namespace VSFileSystem;
     if (time_to_lock > 0) {
         target = NULL;
@@ -256,19 +247,19 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
     }
     if (processed == FIRED) {
         if (type->type == WEAPON_TYPE::BEAM || type->isMissile()) {
-            //Missiles and beams set to processed.
+            // Missiles and beams set to processed.
             processed = PROCESSED;
         } else if (ref.refire < type->Refire() || type->energy_rate > caller->energy.Level()) {
-            //Wait until refire has expired and reactor has produced enough energy for the next bolt.
+            // Wait until refire has expired and reactor has produced enough energy for the next bolt.
             return true;
-        }              //Not ready to refire yet.  But don't stop firing.
+        }  // Not ready to refire yet.  But don't stop firing.
 
-        Unit *temp;
+        Unit          *temp;
         Transformation tmp(orient, pos.Cast());
         tmp.Compose(Cumulative, m);
         Matrix mat;
         tmp.to_matrix(mat);
-        mat.p = Transform(mat, (type->offset + Vector(0, 0, zscale)).Cast());
+        mat.p                              = Transform(mat, (type->offset + Vector(0, 0, zscale)).Cast());
         const bool firemissingautotrackers = configuration().physics.fire_missing_autotrackers;
         if (autotrack && NULL != target) {
             if (!AdjustMatrix(mat, velocity, target, type->speed, autotrack >= 2, trackingcone)) {
@@ -303,11 +294,9 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                 break;
             case WEAPON_TYPE::BOLT:
                 caller->energy.Deplete(true, type->energy_rate);
-                hint[Unit::UNIT_BOLT] = Bolt(type,
-                        mat,
-                        velocity,
-                        owner,
-                        hint[Unit::UNIT_BOLT]).location;             //FIXME turrets won't work! Velocity
+                hint[Unit::UNIT_BOLT] = Bolt(type, mat, velocity, owner,
+                                             hint[Unit::UNIT_BOLT])
+                                                .location;  // FIXME turrets won't work! Velocity
                 break;
 
             case WEAPON_TYPE::BALL: {
@@ -318,21 +307,14 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
             }
             case WEAPON_TYPE::PROJECTILE:
                 const bool match_speed_with_target = configuration().physics.match_speed_with_target;
-                string skript = /*string("ai/script/")+*/ type->file + string(".xai");
-                VSError err = LookForFile(skript, AiFile);
+                string     skript                  = /*string("ai/script/")+*/ type->file + string(".xai");
+                VSError    err                     = LookForFile(skript, AiFile);
                 if (err <= Ok) {
-                    temp = new Missile(
-                            type->file.c_str(),
-                            caller->faction,
-                            "",
-                            type->damage,
-                            type->phase_damage,
-                            type->range / type->speed,
-                            type->radius,
-                            type->radial_speed,
-                            type->pulse_speed /*detonation_radius*/);
+                    temp = new Missile(type->file.c_str(), caller->faction, "", type->damage, type->phase_damage,
+                                       type->range / type->speed, type->radius, type->radial_speed,
+                                       type->pulse_speed /*detonation_radius*/);
                     if (!match_speed_with_target) {
-                        temp->drive.speed = type->speed + velocity.Magnitude();
+                        temp->drive.speed       = type->speed + velocity.Magnitude();
                         temp->afterburner.speed = type->speed + velocity.Magnitude();
                     }
                 } else {
@@ -340,33 +322,27 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                     if (testfg == NULL) {
                         static Flightgroup bas;
                         bas.name = "Base";
-                        testfg = &bas;
+                        testfg   = &bas;
                     }
                     if (testfg->name == "Base") {
-                        int fgsnumber = 0;
-                        Flightgroup *fg = Flightgroup::newFlightgroup("Base_Patrol",
-                                type->file,
-                                FactionUtil::GetFactionName(caller->faction),
-                                "deafult",
-                                1,
-                                1,
-                                "",
-                                "",
-                                mission);
+                        int          fgsnumber = 0;
+                        Flightgroup *fg        = Flightgroup::newFlightgroup("Base_Patrol", type->file,
+                                                                             FactionUtil::GetFactionName(caller->faction),
+                                                                             "deafult", 1, 1, "", "", mission);
                         if (fg != NULL) {
                             fg->target.SetUnit(caller->Target());
                             fg->directive = "a";
-                            fg->name =
-                                    "Base_Patrol";                               //this fixes base-spawned fighters becoming navpoints, which happens sometimes
+                            fg->name = "Base_Patrol";  // this fixes base-spawned fighters becoming navpoints, which
+                                                       // happens sometimes
 
-                            fgsnumber = fg->nr_ships;
-                            fg->nr_ships = 1;
+                            fgsnumber         = fg->nr_ships;
+                            fg->nr_ships      = 1;
                             fg->nr_ships_left = 1;
                         }
                         temp = new Unit(type->file.c_str(), false, caller->faction, "", fg, fgsnumber);
                     } else {
-                        Flightgroup *fg = caller->getFlightgroup();
-                        int fgsnumber = 0;
+                        Flightgroup *fg        = caller->getFlightgroup();
+                        int          fgsnumber = 0;
                         if (fg != NULL) {
                             fgsnumber = fg->nr_ships;
                             fg->nr_ships++;
@@ -390,13 +366,12 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                     } else {
                         temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml"));
                         temp->SetTurretAI();
-                        temp->TurretFAW();                         //turrets are for DEFENSE damnit!
-                        temp->owner =
-                                caller;                         //spawned wingmen act as cargo (owned) wingmen, not as hired wingmen
+                        temp->TurretFAW();     // turrets are for DEFENSE damnit!
+                        temp->owner = caller;  // spawned wingmen act as cargo (owned) wingmen, not as hired wingmen
                         float relat;
                         relat = caller->getRelation(target);
                         if (caller->isSubUnit() && relat >= 0) {
-                            relat = -1;
+                            relat       = -1;
                             temp->owner = caller->owner;
                         }
                         if (relat < 0) {
@@ -405,14 +380,14 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
                                 GetMadAt(target, temp, 2);
                             }
                         }
-                        //pissed off					getMadAt(target, 10); // how do I cause an attack here?
+                        // pissed off					getMadAt(target, 10); // how do I cause an attack here?
                     }
                 } else {
-                    temp->EnqueueAI(new Orders::MatchLinearVelocity(Vector(0, 0, 100000), true, false));
+                    temp->EnqueueAI(new Orders::MatchLinearVelocity(Vector(0, 0, 100'000), true, false));
                     temp->EnqueueAI(new Orders::FireAllYouGot);
                 }
-                temp->SetOwner((Unit *) owner);
-                temp->Velocity = velocity + adder;
+                temp->SetOwner((Unit *)owner);
+                temp->Velocity            = velocity + adder;
                 temp->curr_physical_state = temp->prev_physical_state = temp->cumulative_transformation = tmp;
                 CopyMatrix(temp->cumulative_transformation_matrix, m);
                 _Universe->activeStarSystem()->AddUnit(temp);
@@ -425,40 +400,38 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
 
                 break;
         }
-        const bool use_separate_sound = configuration().audio.high_quality_weapon;
-        const bool ai_use_separate_sound = configuration().audio.ai_high_quality_weapon;
-        static bool ai_sound = configuration().audio.ai_sound;
-        Cockpit *cp;
-        bool ips = ((cp = _Universe->isPlayerStarshipVoid(owner)) != NULL);
-        double distancesqr = (tmp.position - AUDListenerLocation()).MagnitudeSquared();
-        const double maxdistancesqr =
-                configuration().audio.max_range_to_hear_weapon_fire_dbl
-                        * configuration().audio.max_range_to_hear_weapon_fire_dbl;
-        const float weapon_gain = configuration().audio.weapon_gain_flt;
-        const float exterior_weapon_gain = configuration().audio.exterior_weapon_gain_flt;
+        const bool   use_separate_sound    = configuration().audio.high_quality_weapon;
+        const bool   ai_use_separate_sound = configuration().audio.ai_high_quality_weapon;
+        static bool  ai_sound              = configuration().audio.ai_sound;
+        Cockpit     *cp;
+        bool         ips            = ((cp = _Universe->isPlayerStarshipVoid(owner)) != NULL);
+        double       distancesqr    = (tmp.position - AUDListenerLocation()).MagnitudeSquared();
+        const double maxdistancesqr = configuration().audio.max_range_to_hear_weapon_fire_dbl *
+                                      configuration().audio.max_range_to_hear_weapon_fire_dbl;
+        const float weapon_gain             = configuration().audio.weapon_gain_flt;
+        const float exterior_weapon_gain    = configuration().audio.exterior_weapon_gain_flt;
         const float min_weapon_sound_refire = configuration().audio.min_weapon_sound_refire_flt;
-        float curtime = realTime();
-        bool tooquick = ((curtime - last_sound_refire_time) < min_weapon_sound_refire);
+        float       curtime                 = realTime();
+        bool        tooquick                = ((curtime - last_sound_refire_time) < min_weapon_sound_refire);
         if (!tooquick) {
             last_sound_refire_time = curtime;
 
             QVector sound_pos;
-            Vector sound_vel;
-            float sound_gain;
+            Vector  sound_vel;
+            float   sound_gain;
 
             if (ips && cp != NULL && cp->GetView() <= CP_RIGHT) {
-                sound_pos = QVector(0, 0, 0);
-                sound_vel = Vector(0, 0, 0);
+                sound_pos  = QVector(0, 0, 0);
+                sound_vel  = Vector(0, 0, 0);
                 sound_gain = weapon_gain;
             } else {
-                sound_pos = tmp.position;
-                sound_vel = velocity;
+                sound_pos  = tmp.position;
+                sound_vel  = velocity;
                 sound_gain = exterior_weapon_gain;
             }
 
-            if ((((!use_separate_sound)
-                    || type->type == WEAPON_TYPE::BEAM)
-                    || ((!ai_use_separate_sound) && !ips)) && !type->isMissile()) {
+            if ((((!use_separate_sound) || type->type == WEAPON_TYPE::BEAM) || ((!ai_use_separate_sound) && !ips)) &&
+                !type->isMissile()) {
                 if (ai_sound || (ips && type->type == WEAPON_TYPE::BEAM)) {
                     if (!AUDIsPlaying(sound)) {
                         AUDPlay(sound, sound_pos, sound_vel, sound_gain);
@@ -498,7 +471,7 @@ bool Mount::NextMountCloser(Mount *nextmount, Unit *firer) {
         nextmount->orient.to_matrix(mat);
         Vector nextR = mat.getR();
         this->orient.to_matrix(mat);
-        Vector diff = firer->LocalCoordinates(target);
+        Vector diff          = firer->LocalCoordinates(target);
         Vector nextmountnorm = diff - nextmount->pos;
         nextmountnorm.Normalize();
         Vector thismountnorm = diff - this->pos;
@@ -539,7 +512,7 @@ bool Mount::Fire(Unit *firer, void *owner, bool Missile, bool listen_to_owner) {
 }
 
 void Mount::PhysicsAlignedUnfire() {
-    //Stop Playing SOund?? No, that's done in the beam, must not be aligned
+    // Stop Playing SOund?? No, that's done in the beam, must not be aligned
     if (processed == UNFIRED) {
         if (AUDIsPlaying(sound)) {
             AUDStopPlaying(sound);
@@ -548,7 +521,7 @@ void Mount::PhysicsAlignedUnfire() {
 }
 
 void Mount::ReplaceSound() {
-    sound = AUDCreateSound(sound, false);     //copy constructor basically
+    sound = AUDCreateSound(sound, false);  // copy constructor basically
 }
 
 void Mount::Activate(bool Missile) {
@@ -559,7 +532,7 @@ void Mount::Activate(bool Missile) {
     }
 }
 
-///Sets this gun to inactive, unless unchosen or destroyed
+/// Sets this gun to inactive, unless unchosen or destroyed
 void Mount::DeActive(bool Missile) {
     if (type->isMissile() == Missile) {
         if (status == ACTIVE) {
@@ -576,30 +549,29 @@ void Mount::SetMountOrientation(const Quaternion &t) {
     orient = t;
 }
 
-bool Mount::AddAmmo(const Mount *upgrading_mount, const Unit* weapon, bool perform_action) {
+bool Mount::AddAmmo(const Mount *upgrading_mount, const Unit *weapon, bool perform_action) {
     // Weapons don't match so ammo doesn't either
-    if(upgrading_mount->type->name != type->name) {
+    if (upgrading_mount->type->name != type->name) {
         return false;
     }
 
     // If either is unlimited?
-    if(upgrading_mount->ammo == -1 || ammo == -1) {
+    if (upgrading_mount->ammo == -1 || ammo == -1) {
         return false;
     }
 
-    int tmp_ammo = this->ammo;
-    tmp_ammo += upgrading_mount->ammo;
+    int tmp_ammo  = this->ammo;
+    tmp_ammo     += upgrading_mount->ammo;
 
-    if(type->isMissile()) {
+    if (type->isMissile()) {
         if (tmp_ammo * this->type->volume > this->volume) {
-            tmp_ammo = (int) floor(0.125 + ((0 + this->volume) / this->type->volume));
+            tmp_ammo = (int)floor(0.125 + ((0 + this->volume) / this->type->volume));
         }
     } else {
         // TODO: make load_failed a single variable throughout
         if (weapon == nullptr || weapon->name == "LOAD_FAILED") {
             // this should not happen
-            VS_LOG(info,(boost::format("UpgradeMount(): FAILED to obtain weapon: %1%")
-                    % weapon->name));
+            VS_LOG(info, (boost::format("UpgradeMount(): FAILED to obtain weapon: %1%") % weapon->name));
             return false;
         }
 
@@ -615,63 +587,54 @@ bool Mount::AddAmmo(const Mount *upgrading_mount, const Unit* weapon, bool perfo
     }
 
     if (perform_action) {
-            this->ammo = tmp_ammo;
+        this->ammo = tmp_ammo;
     }
 
     return true;
 }
 
-
 // Almost certain the parameter is not required
 // A beam weapon has ammo=-1, everything else is >=0
 void Mount::Deactivate(bool is_ammo, bool is_missile_mount) {
     status = Mount::UNCHOSEN;
-    if(!is_missile_mount) {
+    if (!is_missile_mount) {
         ammo = -1;
     }
 }
 
-
 bool Mount::IsMissileMount() const {
     int mount_size = as_integer(this->type->size);
-    return (mount_size & (
-            as_integer(MOUNT_SIZE::LIGHTMISSILE) |
-                    as_integer(MOUNT_SIZE::MEDIUMMISSILE) |
-                    as_integer(MOUNT_SIZE::HEAVYMISSILE) |
-                    as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE) |
-                    as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE) |
-                    as_integer(MOUNT_SIZE::SPECIALMISSILE))) != 0;
+    return (mount_size & (as_integer(MOUNT_SIZE::LIGHTMISSILE) | as_integer(MOUNT_SIZE::MEDIUMMISSILE) |
+                          as_integer(MOUNT_SIZE::HEAVYMISSILE) | as_integer(MOUNT_SIZE::CAPSHIPLIGHTMISSILE) |
+                          as_integer(MOUNT_SIZE::CAPSHIPHEAVYMISSILE) | as_integer(MOUNT_SIZE::SPECIALMISSILE))) != 0;
 }
 
 bool Mount::MountFits(const Mount upgrading_mount) const {
-    return ((unsigned int) (as_integer(upgrading_mount.type->size))
-                           == (as_integer(upgrading_mount.type->size) & this->size));
+    return ((unsigned int)(as_integer(upgrading_mount.type->size)) ==
+            (as_integer(upgrading_mount.type->size) & this->size));
 }
 
-bool Mount::SameWeapon(const Mount* other_mount) const {
+bool Mount::SameWeapon(const Mount *other_mount) const {
     return other_mount->type->name == this->type->name;
 }
 
-bool Mount::CanUpgradeMount(const Mount* other_mount,
-                            Unit* unit,
-                            const bool is_ammo,
-                            int &numave,        // number of used parts?
-                            double &percentage,
-                            bool perform_upgrade) {
-    //If missile, can upgrade directly, if other type of ammo, needs actual gun to be present.
+bool Mount::CanUpgradeMount(const Mount *other_mount, Unit *unit, const bool is_ammo,
+                            int    &numave,  // number of used parts?
+                            double &percentage, bool perform_upgrade) {
+    // If missile, can upgrade directly, if other type of ammo, needs actual gun to be present.
     if (is_ammo && !other_mount->IsMissileMount()) {
         return false;
     }
 
-    ++numave;                                 //ok now we can compute percentage of used parts
+    ++numave;  // ok now we can compute percentage of used parts
     Mount upmount(*other_mount);
 
-    //compute here
+    // compute here
     percentage += Percentage(&upmount);
 
-    //if we wish to modify the mounts
+    // if we wish to modify the mounts
     if (perform_upgrade) {
-        //switch this mount with the upgrador mount
+        // switch this mount with the upgrador mount
         ReplaceMounts(unit, &upmount);
     }
 

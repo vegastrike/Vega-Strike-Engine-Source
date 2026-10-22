@@ -28,7 +28,7 @@
  *  \author		Pierre Terdiman
  *  \version	1.3
  *  \date		January, 1st, 2002
-*/
+ */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "collide2/Opcode.h"
@@ -38,19 +38,18 @@ using namespace Opcode;
 #include "OPC_PlanesAABBOverlap.h"
 #include "OPC_PlanesTriOverlap.h"
 
-#define SET_CONTACT(prim_index, flag)           \
-    /* Set contact status */                    \
-    mFlags |= flag;                             \
+#define SET_CONTACT(prim_index, flag) \
+    /* Set contact status */          \
+    mFlags |= flag;                   \
     mTouchedPrimitives->Add(prim_index);
 
 //! Planes-triangle test
-#define PLANES_PRIM(prim_index, flag)           \
-    /* Request vertices from the app */         \
-    mIMesh->GetTriangle(mVP, prim_index);       \
-    /* Perform triangle-box overlap test */     \
-    if(PlanesTriOverlap(clip_mask))             \
-    {                                           \
-        SET_CONTACT(prim_index, flag)           \
+#define PLANES_PRIM(prim_index, flag)       \
+    /* Request vertices from the app */     \
+    mIMesh->GetTriangle(mVP, prim_index);   \
+    /* Perform triangle-box overlap test */ \
+    if (PlanesTriOverlap(clip_mask)) {      \
+        SET_CONTACT(prim_index, flag)       \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,10 +57,7 @@ using namespace Opcode;
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-PlanesCollider::PlanesCollider() :
-        mNbPlanes(0),
-        mPlanes(nullptr) {
-}
+PlanesCollider::PlanesCollider() : mNbPlanes(0), mPlanes(nullptr) {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
@@ -80,7 +76,9 @@ PlanesCollider::~PlanesCollider() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const char *PlanesCollider::ValidateSettings() {
     if (TemporalCoherenceEnabled() && !FirstContactEnabled()) {
-        return "Temporal coherence only works with ""First contact"" mode!";
+        return "Temporal coherence only works with "
+               "First contact"
+               " mode!";
     }
 
     return VolumeCollider::ValidateSettings();
@@ -102,11 +100,8 @@ const char *PlanesCollider::ValidateSettings() {
  *  \warning	SCALE NOT SUPPORTED. The matrices must contain rotation & translation parts only.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool PlanesCollider::Collide(PlanesCache &cache,
-        const Plane *planes,
-        uint32_t nb_planes,
-        const Model &model,
-        const Matrix4x4 *worldm) {
+bool PlanesCollider::Collide(PlanesCache &cache, const Plane *planes, uint32_t nb_planes, const Model &model,
+                             const Matrix4x4 *worldm) {
     // Checkings
     if (!Setup(&model)) {
         return false;
@@ -121,10 +116,10 @@ bool PlanesCollider::Collide(PlanesCache &cache,
 
     if (!model.HasLeafNodes()) {
         if (model.IsQuantized()) {
-            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree *) model.GetTree();
+            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree *)model.GetTree();
 
             // Setup dequantization coeffs
-            mCenterCoeff = Tree->mCenterCoeff;
+            mCenterCoeff  = Tree->mCenterCoeff;
             mExtentsCoeff = Tree->mExtentsCoeff;
 
             // Perform collision query
@@ -134,7 +129,7 @@ bool PlanesCollider::Collide(PlanesCache &cache,
                 _Collide(Tree->GetNodes(), PlaneMask);
             }
         } else {
-            const AABBNoLeafTree *Tree = (const AABBNoLeafTree *) model.GetTree();
+            const AABBNoLeafTree *Tree = (const AABBNoLeafTree *)model.GetTree();
 
             // Perform collision query
             if (SkipPrimitiveTests()) {
@@ -145,10 +140,10 @@ bool PlanesCollider::Collide(PlanesCache &cache,
         }
     } else {
         if (model.IsQuantized()) {
-            const AABBQuantizedTree *Tree = (const AABBQuantizedTree *) model.GetTree();
+            const AABBQuantizedTree *Tree = (const AABBQuantizedTree *)model.GetTree();
 
             // Setup dequantization coeffs
-            mCenterCoeff = Tree->mCenterCoeff;
+            mCenterCoeff  = Tree->mCenterCoeff;
             mExtentsCoeff = Tree->mExtentsCoeff;
 
             // Perform collision query
@@ -158,7 +153,7 @@ bool PlanesCollider::Collide(PlanesCache &cache,
                 _Collide(Tree->GetNodes(), PlaneMask);
             }
         } else {
-            const AABBCollisionTree *Tree = (const AABBCollisionTree *) model.GetTree();
+            const AABBCollisionTree *Tree = (const AABBCollisionTree *)model.GetTree();
 
             // Perform collision query
             if (SkipPrimitiveTests()) {
@@ -201,7 +196,7 @@ bool PlanesCollider::InitQuery(PlanesCache &cache, const Plane *planes, uint32_t
         Matrix4x4 InvWorldM;
         InvertPRMatrix(InvWorldM, *worldm);
 
-//		for(uint32_t i=0;i<nb_planes;i++)	mPlanes[i] = planes[i] * InvWorldM;
+        //		for(uint32_t i=0;i<nb_planes;i++)	mPlanes[i] = planes[i] * InvWorldM;
         for (uint32_t i = 0; i < nb_planes; i++) {
             TransformPlane(mPlanes[i], planes[i], InvWorldM);
         }
@@ -264,15 +259,14 @@ bool PlanesCollider::InitQuery(PlanesCache &cache, const Plane *planes, uint32_t
     return FALSE;
 }
 
-#define TEST_CLIP_MASK                                                                                      \
-    /* If the box is completely included, so are its children. We don't need to do extra tests, we */       \
-    /* can immediately output a list of visible children. Those ones won't need to be clipped. */           \
-    if(!OutClipMask)                                                                                        \
-    {                                                                                                       \
-        /* Set contact status */                                                                            \
-        mFlags |= OPC_CONTACT;                                                                              \
-        _Dump(node);                                                                                        \
-        return;                                                                                             \
+#define TEST_CLIP_MASK                                                                                \
+    /* If the box is completely included, so are its children. We don't need to do extra tests, we */ \
+    /* can immediately output a list of visible children. Those ones won't need to be clipped. */     \
+    if (!OutClipMask) {                                                                               \
+        /* Set contact status */                                                                      \
+        mFlags |= OPC_CONTACT;                                                                        \
+        _Dump(node);                                                                                  \
+        return;                                                                                       \
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -342,12 +336,10 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBCollisionNode *node, uint
 void PlanesCollider::_Collide(const AABBQuantizedNode *node, uint32_t clip_mask) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
     uint32_t OutClipMask;
@@ -380,12 +372,10 @@ void PlanesCollider::_Collide(const AABBQuantizedNode *node, uint32_t clip_mask)
 void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNode *node, uint32_t clip_mask) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
     uint32_t OutClipMask;
@@ -484,12 +474,10 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBNoLeafNode *node, uint32_
 void PlanesCollider::_Collide(const AABBQuantizedNoLeafNode *node, uint32_t clip_mask) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
     uint32_t OutClipMask;
@@ -526,12 +514,10 @@ void PlanesCollider::_Collide(const AABBQuantizedNoLeafNode *node, uint32_t clip
 void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node, uint32_t clip_mask) {
     // Dequantize box
     const QuantizedAABB &Box = node->mAABB;
-    const Point Center(float(Box.mCenter[0]) * mCenterCoeff.x,
-            float(Box.mCenter[1]) * mCenterCoeff.y,
-            float(Box.mCenter[2]) * mCenterCoeff.z);
-    const Point Extents(float(Box.mExtents[0]) * mExtentsCoeff.x,
-            float(Box.mExtents[1]) * mExtentsCoeff.y,
-            float(Box.mExtents[2]) * mExtentsCoeff.z);
+    const Point          Center(float(Box.mCenter[0]) * mCenterCoeff.x, float(Box.mCenter[1]) * mCenterCoeff.y,
+                                float(Box.mCenter[2]) * mCenterCoeff.z);
+    const Point          Extents(float(Box.mExtents[0]) * mExtentsCoeff.x, float(Box.mExtents[1]) * mExtentsCoeff.y,
+                                 float(Box.mExtents[2]) * mExtentsCoeff.z);
 
     // Test the box against the planes. If the box is completely culled, so are its children, hence we exit.
     uint32_t OutClipMask;
@@ -559,33 +545,22 @@ void PlanesCollider::_CollideNoPrimitiveTest(const AABBQuantizedNoLeafNode *node
     }
 }
 
-
-
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Constructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-HybridPlanesCollider::HybridPlanesCollider() {
-}
+HybridPlanesCollider::HybridPlanesCollider() {}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  *	Destructor.
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-HybridPlanesCollider::~HybridPlanesCollider() {
-}
+HybridPlanesCollider::~HybridPlanesCollider() {}
 
-bool HybridPlanesCollider::Collide(PlanesCache &cache,
-        const Plane *planes,
-        uint32_t nb_planes,
-        const HybridModel &model,
-        const Matrix4x4 *worldm) {
+bool HybridPlanesCollider::Collide(PlanesCache &cache, const Plane *planes, uint32_t nb_planes,
+                                   const HybridModel &model, const Matrix4x4 *worldm) {
     // We don't want primitive tests here!
     mFlags |= OPC_NO_PRIMITIVE_TESTS;
 
@@ -621,32 +596,32 @@ bool HybridPlanesCollider::Collide(PlanesCache &cache,
     // Now, do the actual query against leaf boxes
     if (!model.HasLeafNodes()) {
         if (model.IsQuantized()) {
-            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree *) model.GetTree();
+            const AABBQuantizedNoLeafTree *Tree = (const AABBQuantizedNoLeafTree *)model.GetTree();
 
             // Setup dequantization coeffs
-            mCenterCoeff = Tree->mCenterCoeff;
+            mCenterCoeff  = Tree->mCenterCoeff;
             mExtentsCoeff = Tree->mExtentsCoeff;
 
             // Perform collision query - we don't want primitive tests here!
             _CollideNoPrimitiveTest(Tree->GetNodes(), PlaneMask);
         } else {
-            const AABBNoLeafTree *Tree = (const AABBNoLeafTree *) model.GetTree();
+            const AABBNoLeafTree *Tree = (const AABBNoLeafTree *)model.GetTree();
 
             // Perform collision query - we don't want primitive tests here!
             _CollideNoPrimitiveTest(Tree->GetNodes(), PlaneMask);
         }
     } else {
         if (model.IsQuantized()) {
-            const AABBQuantizedTree *Tree = (const AABBQuantizedTree *) model.GetTree();
+            const AABBQuantizedTree *Tree = (const AABBQuantizedTree *)model.GetTree();
 
             // Setup dequantization coeffs
-            mCenterCoeff = Tree->mCenterCoeff;
+            mCenterCoeff  = Tree->mCenterCoeff;
             mExtentsCoeff = Tree->mExtentsCoeff;
 
             // Perform collision query - we don't want primitive tests here!
             _CollideNoPrimitiveTest(Tree->GetNodes(), PlaneMask);
         } else {
-            const AABBCollisionTree *Tree = (const AABBCollisionTree *) model.GetTree();
+            const AABBCollisionTree *Tree = (const AABBCollisionTree *)model.GetTree();
 
             // Perform collision query - we don't want primitive tests here!
             _CollideNoPrimitiveTest(Tree->GetNodes(), PlaneMask);
@@ -663,11 +638,11 @@ bool HybridPlanesCollider::Collide(PlanesCache &cache,
         mTouchedPrimitives = &cache.TouchedPrimitives;
 
         // Read touched leaf boxes
-        uint32_t Nb = mTouchedBoxes.GetNbEntries();
+        uint32_t        Nb      = mTouchedBoxes.GetNbEntries();
         const uint32_t *Touched = mTouchedBoxes.GetEntries();
 
-        const LeafTriangles *LT = model.GetLeafTriangles();
-        const uint32_t *Indices = model.GetIndices();
+        const LeafTriangles *LT      = model.GetLeafTriangles();
+        const uint32_t      *Indices = model.GetIndices();
 
         // Loop through touched leaves
         uint32_t clip_mask = (1 << mNbPlanes) - 1;
@@ -698,4 +673,3 @@ bool HybridPlanesCollider::Collide(PlanesCache &cache,
 
     return true;
 }
-

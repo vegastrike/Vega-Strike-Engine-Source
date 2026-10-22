@@ -48,7 +48,7 @@
  *  \return		TRUE to continue enumeration
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-typedef BOOL    (*PairCallback)(uint32_t id0, uint32_t id1, void *user_data);
+typedef BOOL (*PairCallback)(uint32_t id0, uint32_t id1, void *user_data);
 
 class SAP_Element;
 class SAP_EndPoint;
@@ -66,18 +66,19 @@ public:
 
     void DumpPairs(Pairs &pairs) const;
     void DumpPairs(PairCallback callback, void *user_data) const;
-private:
-    uint32_t mNbElements;        //!< Total number of elements in the pool
-    uint32_t mNbUsedElements;    //!< Number of used elements
-    SAP_Element *mElementPool;        //!< Array of mNbElements elements
-    SAP_Element *mFirstFree;            //!< First free element in the pool
 
-    uint32_t mNbObjects;            //!< Max number of objects we can handle
-    SAP_Element **mArray;                //!< Pointers to pool
+private:
+    uint32_t     mNbElements;      //!< Total number of elements in the pool
+    uint32_t     mNbUsedElements;  //!< Number of used elements
+    SAP_Element *mElementPool;     //!< Array of mNbElements elements
+    SAP_Element *mFirstFree;       //!< First free element in the pool
+
+    uint32_t      mNbObjects;      //!< Max number of objects we can handle
+    SAP_Element **mArray;          //!< Pointers to pool
     // Internal methods
     SAP_Element *GetFreeElem(uint32_t id, SAP_Element *next, uint32_t *remap = nullptr);
-    inline_    void FreeElem(SAP_Element *elem);
-    void Release();
+    inline_ void FreeElem(SAP_Element *elem);
+    void         Release();
 };
 
 class OPCODE_API SweepAndPrune {
@@ -90,14 +91,15 @@ public:
 
     void GetPairs(Pairs &pairs) const;
     void GetPairs(PairCallback callback, void *user_data) const;
+
 private:
     SAP_PairData mPairs;
 
-    uint32_t mNbObjects;
-    SAP_Box *mBoxes;
+    uint32_t      mNbObjects;
+    SAP_Box      *mBoxes;
     SAP_EndPoint *mList[3];
     // Internal methods
     bool CheckListsIntegrity();
 };
 
-#endif //VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_SWEEP_AND_PRUNE_H
+#endif  // VEGA_STRIKE_ENGINE_CMD_COLLSION2_ICE_OPC_SWEEP_AND_PRUNE_H

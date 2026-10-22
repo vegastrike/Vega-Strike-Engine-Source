@@ -31,25 +31,25 @@
 //
 #include "SceneManager.h"
 
-#include "Renderer.h"
-#include "RenderableSource.h"
+#include <algorithm>
+#include <cassert>
+#include <limits>
+#include <vector>
+
 #include "RenderableListener.h"
-#include "SourceTemplate.h"
-#include "SimpleSource.h"
+#include "RenderableSource.h"
+#include "Renderer.h"
 #include "SimpleScene.h"
+#include "SimpleSource.h"
 #include "Sound.h"
 #include "SourceListener.h"
-
-#include <limits>
-#include <cassert>
-#include <vector>
-#include <algorithm>
-
-#include "utils.h"
-#include "src/vs_math.h"
+#include "SourceTemplate.h"
 #include "src/vega_cast_utils.h"
+#include "src/vs_math.h"
+#include "utils.h"
 
-template<> Audio::SceneManager *Singleton<Audio::SceneManager>::_singletonInstance = 0;
+template <>
+Audio::SceneManager *Singleton<Audio::SceneManager>::_singletonInstance = 0;
 
 namespace Audio {
 
@@ -58,20 +58,17 @@ namespace __impl {
 struct SceneManagerData {
     struct SourceRef {
         SharedPtr<Source> source;
-        SharedPtr<Scene> scene;
+        SharedPtr<Scene>  scene;
 
         /**
          * If true, an update phase will start playing the source.
          * Set when the activation phase attaches a renderable (or decides to resume one),
          * since it cannot do so immediately or positional glitches would be apparent.
          */
-        mutable int needsActivation: 1;
+        mutable int needsActivation : 1;
 
-        SourceRef(const SharedPtr<Source> &src, const SharedPtr<Scene> &scn) :
-                source(src),
-                scene(scn),
-                needsActivation(0) {
-        }
+        SourceRef(const SharedPtr<Source> &src, const SharedPtr<Scene> &scn)
+            : source(src), scene(scn), needsActivation(0) {}
 
         bool operator==(const SourceRef &o) const {
             // Ignore scene...
@@ -85,8 +82,8 @@ struct SceneManagerData {
     };
 
     // The many required indexes
-    typedef std::map<std::string, SharedPtr<Scene> > SceneMap;
-    typedef std::set<SourceRef> SourceRefSet;
+    typedef std::map<std::string, SharedPtr<Scene>> SceneMap;
+    typedef std::set<SourceRef>                     SourceRefSet;
 
     SceneMap activeScenes;
     SceneMap inactiveScenes;
@@ -98,8 +95,8 @@ struct SceneManagerData {
     SharedPtr<Listener> rootListener;
 
     unsigned int maxSources;
-    float minGain;
-    double maxDistance;
+    float        minGain;
+    double       maxDistance;
 
     Timestamp lastPositionUpdateTime;
     Timestamp lastAttributeUpdateTime;
@@ -112,36 +109,32 @@ struct SceneManagerData {
     Duration listenerUpdateFrequency;
     Duration activationFrequency;
 
-    SceneManagerData() :
-            rootListener(new Listener()),
+    SceneManagerData()
+        : rootListener(new Listener()),
 
-            maxSources(16),
-            minGain(1.0 / 16384.0),
-            maxDistance(std::numeric_limits<double>::infinity()),
+          maxSources(16),
+          minGain(1.0 / 16384.0),
+          maxDistance(std::numeric_limits<double>::infinity()),
 
-            lastPositionUpdateTime(-std::numeric_limits<Timestamp>::infinity()),
-            lastAttributeUpdateTime(-std::numeric_limits<Timestamp>::infinity()),
-            lastListenerUpdateTime(-std::numeric_limits<Timestamp>::infinity()),
-            lastListenerAttUpdateTime(-std::numeric_limits<Timestamp>::infinity()),
-            lastActivationTime(-std::numeric_limits<Timestamp>::infinity()),
+          lastPositionUpdateTime(-std::numeric_limits<Timestamp>::infinity()),
+          lastAttributeUpdateTime(-std::numeric_limits<Timestamp>::infinity()),
+          lastListenerUpdateTime(-std::numeric_limits<Timestamp>::infinity()),
+          lastListenerAttUpdateTime(-std::numeric_limits<Timestamp>::infinity()),
+          lastActivationTime(-std::numeric_limits<Timestamp>::infinity()),
 
-            positionUpdateFrequency(1.0 / 20.0),
-            attributeUpdateFrequency(1.0 / 5.0),
-            listenerUpdateFrequency(1.0 / 30.0),
-            activationFrequency(1.0 / 10.0) {
-    }
+          positionUpdateFrequency(1.0 / 20.0),
+          attributeUpdateFrequency(1.0 / 5.0),
+          listenerUpdateFrequency(1.0 / 30.0),
+          activationFrequency(1.0 / 10.0) {}
 };
 
-};
+};  // namespace __impl
 
 using namespace __impl;
 
-SceneManager::SceneManager() :
-        data(new SceneManagerData) {
-}
+SceneManager::SceneManager() : data(new SceneManagerData) {}
 
-SceneManager::~SceneManager() {
-}
+SceneManager::~SceneManager() {}
 
 const SharedPtr<Renderer> &SceneManager::internalRenderer() const {
     if (!data->renderer.get()) {
@@ -163,12 +156,8 @@ SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl) {
 }
 
 SharedPtr<Source> SceneManager::createSource(SharedPtr<SourceTemplate> tpl, const std::string &name) {
-    SharedPtr<Source> source = createSource(
-            internalRenderer()->getSound(
-                    name,
-                    tpl->getSoundType(),
-                    tpl->isStreaming()),
-            tpl->isLooping());
+    SharedPtr<Source> source =
+            createSource(internalRenderer()->getSound(name, tpl->getSoundType(), tpl->isStreaming()), tpl->isLooping());
 
     source->setCosAngleRange(tpl->getCosAngleRange());
     source->setPerFrequencyRadiusRatios(tpl->getPerFrequencyRadiusRatios());
@@ -201,9 +190,8 @@ void SceneManager::destroySource(SharedPtr<Source> source) {
 }
 
 void SceneManager::addScene(SharedPtr<Scene> scene) {
-    if (data->activeScenes.count(scene->getName())
-            || data->inactiveScenes.count(scene->getName())) {
-        throw (DuplicateObjectException(scene->getName()));
+    if (data->activeScenes.count(scene->getName()) || data->inactiveScenes.count(scene->getName())) {
+        throw(DuplicateObjectException(scene->getName()));
     }
 
     data->inactiveScenes[scene->getName()] = scene;
@@ -228,7 +216,7 @@ SharedPtr<Scene> SceneManager::getScene(const std::string &name) const {
         return it->second;
     }
 
-    throw (NotFoundException(name));
+    throw(NotFoundException(name));
 }
 
 void SceneManager::destroyScene(const std::string &name) {
@@ -261,7 +249,7 @@ void SceneManager::setRenderer(SharedPtr<Renderer> renderer) {
     if (data->renderer.get()) {
         // Detach all active sources
         for (SceneManagerData::SourceRefSet::const_iterator it = data->activeSources.begin();
-                it != data->activeSources.end(); ++it) {
+             it != data->activeSources.end(); ++it) {
             data->renderer->detach(it->source);
         }
 
@@ -278,7 +266,7 @@ void SceneManager::setRenderer(SharedPtr<Renderer> renderer) {
 
         // Attach all active sources
         for (SceneManagerData::SourceRefSet::const_iterator it = data->activeSources.begin();
-                it != data->activeSources.end(); ++it) {
+             it != data->activeSources.end(); ++it) {
             data->renderer->attach(it->source);
         }
     }
@@ -296,15 +284,10 @@ void SceneManager::setMaxSources(unsigned int n) {
     data->maxSources = n;
 }
 
-void SceneManager::playSource(
-        SharedPtr<SourceTemplate> tpl,
-        const std::string &sceneName,
-        LVector3 position,
-        Vector3 direction,
-        Vector3 velocity,
-        Scalar radius) {
+void SceneManager::playSource(SharedPtr<SourceTemplate> tpl, const std::string &sceneName, LVector3 position,
+                              Vector3 direction, Vector3 velocity, Scalar radius) {
     if (tpl->isLooping()) {
-        throw (Exception("Cannot fire a looping source and forget!"));
+        throw(Exception("Cannot fire a looping source and forget!"));
     }
 
     SharedPtr<Source> src = createSource(tpl);
@@ -319,16 +302,10 @@ void SceneManager::playSource(
     src->startPlaying();
 }
 
-void SceneManager::playSource(
-        SharedPtr<SourceTemplate> tpl,
-        const std::string &soundName,
-        const std::string &sceneName,
-        LVector3 position,
-        Vector3 direction,
-        Vector3 velocity,
-        Scalar radius) {
+void SceneManager::playSource(SharedPtr<SourceTemplate> tpl, const std::string &soundName, const std::string &sceneName,
+                              LVector3 position, Vector3 direction, Vector3 velocity, Scalar radius) {
     if (tpl->isLooping()) {
-        throw (Exception("Cannot fire a looping source and forget!"));
+        throw(Exception("Cannot fire a looping source and forget!"));
     }
 
     SharedPtr<Source> src = createSource(tpl, soundName);
@@ -362,32 +339,25 @@ void SceneManager::setMaxDistance(double distance) {
 }
 
 SharedPtr<SceneManager::SceneIterator> SceneManager::getSceneIterator() const {
-    return SharedPtr<SceneIterator>(
-            new ChainingIterator<VirtualValuesIterator<SceneManagerData::SceneMap::iterator> >(
-                    VirtualValuesIterator<SceneManagerData::SceneMap::iterator>(
-                            data->activeScenes.begin(),
-                            data->activeScenes.end()),
-                    VirtualValuesIterator<SceneManagerData::SceneMap::iterator>(
-                            data->inactiveScenes.begin(),
-                            data->inactiveScenes.end())
-            )
-    );
+    return SharedPtr<SceneIterator>(new ChainingIterator<VirtualValuesIterator<SceneManagerData::SceneMap::iterator>>(
+            VirtualValuesIterator<SceneManagerData::SceneMap::iterator>(data->activeScenes.begin(),
+                                                                        data->activeScenes.end()),
+            VirtualValuesIterator<SceneManagerData::SceneMap::iterator>(data->inactiveScenes.begin(),
+                                                                        data->inactiveScenes.end())));
 }
 
 SharedPtr<SceneManager::SceneIterator> SceneManager::getActiveSceneIterator() const {
-    return SharedPtr<SceneIterator>(
-            new VirtualValuesIterator<SceneManagerData::SceneMap::iterator>(
-                    data->activeScenes.begin(),
-                    data->activeScenes.end()));
+    return SharedPtr<SceneIterator>(new VirtualValuesIterator<SceneManagerData::SceneMap::iterator>(
+            data->activeScenes.begin(), data->activeScenes.end()));
 }
 
 void SceneManager::commit() {
-    Timestamp realTime = getRealTime();
-    bool needActivation = ((realTime - getActivationFrequency()) >= data->lastActivationTime);
-    bool needPosUpdates = ((realTime - getPositionUpdateFrequency()) >= data->lastPositionUpdateTime);
-    bool needAttUpdates = ((realTime - getAttributeUpdateFrequency()) >= data->lastAttributeUpdateTime);
-    bool needListenerUpdate = ((realTime - getListenerUpdateFrequency()) >= data->lastListenerUpdateTime);
-    bool needListenerAttUpdate = ((realTime - getAttributeUpdateFrequency()) >= data->lastListenerAttUpdateTime);
+    Timestamp realTime              = getRealTime();
+    bool      needActivation        = ((realTime - getActivationFrequency()) >= data->lastActivationTime);
+    bool      needPosUpdates        = ((realTime - getPositionUpdateFrequency()) >= data->lastPositionUpdateTime);
+    bool      needAttUpdates        = ((realTime - getAttributeUpdateFrequency()) >= data->lastAttributeUpdateTime);
+    bool      needListenerUpdate    = ((realTime - getListenerUpdateFrequency()) >= data->lastListenerUpdateTime);
+    bool      needListenerAttUpdate = ((realTime - getAttributeUpdateFrequency()) >= data->lastListenerAttUpdateTime);
 
     // If we have an activation phase, in order for it to be effective
     // we'll need an update phase as well.
@@ -424,17 +394,13 @@ void SceneManager::commit() {
 
 struct SourcePriorityRef {
     SimpleScene::SourceIterator iter;
-    SimpleScene *scene;
-    Scalar gain;
+    SimpleScene                *scene;
+    Scalar                      gain;
 
-    SourcePriorityRef() {
-    }
+    SourcePriorityRef() {}
 
-    SourcePriorityRef(SimpleScene::SourceIterator itr, const Listener &listener, SimpleScene *scn) :
-            iter(itr),
-            scene(scn),
-            gain(estimateGain(**iter, listener)) {
-    }
+    SourcePriorityRef(SimpleScene::SourceIterator itr, const Listener &listener, SimpleScene *scn)
+        : iter(itr), scene(scn), gain(estimateGain(**iter, listener)) {}
 
     bool operator<(const SourcePriorityRef &o) const {
         return gain > o.gain;
@@ -453,19 +419,15 @@ void SceneManager::activationPhaseImpl() {
     LScalar maxDistanceSq = data->maxDistance * data->maxDistance;
 
     std::vector<SourcePriorityRef> selection;
-    bool heapified = false;
+    bool                           heapified = false;
     selection.reserve(data->maxSources + 1);
 
-    for (SceneManagerData::SceneMap::iterator it = data->activeScenes.begin();
-            it != data->activeScenes.end();
-            ++it) {
-        SimpleScene *scene = vega_dynamic_cast_ptr<SimpleScene>(it->second.get());
-        Listener &listener = scene->getListener();
+    for (SceneManagerData::SceneMap::iterator it = data->activeScenes.begin(); it != data->activeScenes.end(); ++it) {
+        SimpleScene *scene    = vega_dynamic_cast_ptr<SimpleScene>(it->second.get());
+        Listener    &listener = scene->getListener();
 
-        for (SimpleScene::SourceIterator sit = scene->getActiveSources(),
-                send = scene->getActiveSourcesEnd();
-                sit != send;
-                ++sit) {
+        for (SimpleScene::SourceIterator sit = scene->getActiveSources(), send = scene->getActiveSourcesEnd();
+             sit != send; ++sit) {
             if ((*sit)->getSourceListener().get()) {
                 // Must invoke the listener to get updated positions
                 (*sit)->getSourceListener()->onUpdate(**sit, RenderableSource::UPDATE_LOCATION);
@@ -495,15 +457,12 @@ void SceneManager::activationPhaseImpl() {
     SceneManagerData::SourceRefSet newSources;
     for (std::vector<SourcePriorityRef>::const_iterator it = selection.begin(); it != selection.end(); ++it) {
         SimpleScene *p_simple_scene = vega_dynamic_cast_ptr<SimpleScene>(it->scene);
-        newSources.insert(
-                SceneManagerData::SourceRef(
-                        *(it->iter),
-                        p_simple_scene->shared_from_this()
-                ));
+        newSources.insert(SceneManagerData::SourceRef(*(it->iter), p_simple_scene->shared_from_this()));
     }
 
     // Detach deactivated sources
-    for (SceneManagerData::SourceRefSet::iterator sit = data->activeSources.begin(); sit != data->activeSources.end(); ++sit) {
+    for (SceneManagerData::SourceRefSet::iterator sit = data->activeSources.begin(); sit != data->activeSources.end();
+         ++sit) {
         if (newSources.find(*sit) == newSources.end()) {
             renderer->detach(sit->source);
         }
@@ -553,20 +512,16 @@ void SceneManager::updateSourcesImpl(bool withAttributes) {
 
     // First, update attributes (mostly location)
     RenderableSource::UpdateFlags updateFlags =
-            withAttributes ?
-                    RenderableSource::UPDATE_ALL :
-                    RenderableSource::UPDATE_LOCATION;
+            withAttributes ? RenderableSource::UPDATE_ALL : RenderableSource::UPDATE_LOCATION;
     for (SceneManagerData::SourceRefSet::const_iterator it = data->activeSources.begin();
-            it != data->activeSources.end(); ++it) {
+         it != data->activeSources.end(); ++it) {
         // Update the renderable (attributes)
-        it->source->updateRenderable(
-                updateFlags | (it->needsActivation ? RenderableSource::UPDATE_ALL : 0),
-                it->scene->getListener());
+        it->source->updateRenderable(updateFlags | (it->needsActivation ? RenderableSource::UPDATE_ALL : 0),
+                                     it->scene->getListener());
 
         // Then, start playing if not playing and should be playing
         if (it->needsActivation) {
-            it->source->getRenderable()->startPlaying(
-                    it->source->getWouldbePlayingTime());
+            it->source->getRenderable()->startPlaying(it->source->getWouldbePlayingTime());
             it->needsActivation = false;
         }
     }
@@ -575,16 +530,14 @@ void SceneManager::updateSourcesImpl(bool withAttributes) {
 void SceneManager::updateListenerImpl(bool withAttributes) {
     // Update root listener
     RenderableListener::UpdateFlags updateFlags =
-            withAttributes ?
-                    RenderableListener::UPDATE_ALL :
-                    RenderableListener::UPDATE_LOCATION;
+            withAttributes ? RenderableListener::UPDATE_ALL : RenderableListener::UPDATE_LOCATION;
     if (data->rootListener.get()) {
         data->rootListener->update(updateFlags);
     }
 
     // And all scene listeners
     for (SceneManagerData::SceneMap::const_iterator i = data->activeScenes.begin(); i != data->activeScenes.end();
-            ++i) {
+         ++i) {
         i->second->getListener().update(updateFlags);
     }
 }
@@ -628,13 +581,12 @@ SharedPtr<Listener> SceneManager::getRootListener() const {
 void SceneManager::notifySourcePlaying(SharedPtr<Source> source, SharedPtr<Scene> scene, bool playing) {
     // If the source is within maxDistance from its scene's listener,
     // schedule an immediate activation phase
-    double maxDistanceSq = getMaxDistance();
-    maxDistanceSq *= maxDistanceSq;
+    double maxDistanceSq  = getMaxDistance();
+    maxDistanceSq        *= maxDistanceSq;
 
     if (scene->getListener().getPosition().distanceSquared(source->getPosition()) <= maxDistanceSq) {
         data->lastActivationTime = -std::numeric_limits<Timestamp>::infinity();
     }
 }
 
-};
-
+};  // namespace Audio

@@ -26,17 +26,18 @@
  */
 
 
-#include <string>
 #include <stdlib.h>
-#include "cmd/unit_generic.h"
+#include <string>
+
 #include "cmd/base_util.h"
+#include "cmd/unit_generic.h"
+
 namespace BaseUtil {
 int Room(std::string text) {
     return 0;
 }
 
-void Texture(int room, std::string index, std::string file, float x, float y) {
-}
+void Texture(int room, std::string index, std::string file, float x, float y) {}
 
 bool Video(int room, std::string index, std::string file, float x, float y) {
     return false;
@@ -46,87 +47,48 @@ bool VideoStream(int room, std::string index, std::string file, float x, float y
     return false;
 }
 
-void PlayVideo(int room, std::string index) {
-}
+void PlayVideo(int room, std::string index) {}
 
-void StopVideo(int room, std::string index) {
-}
+void StopVideo(int room, std::string index) {}
 
-void SetDJEnabled(bool enabled) {
-}
+void SetDJEnabled(bool enabled) {}
 
-void Ship(int room, std::string index, QVector pos, Vector Q, Vector R) {
-}
+void Ship(int room, std::string index, QVector pos, Vector Q, Vector R) {}
 
 void Link(int room, std::string index, float x, float y, float wid, float hei, std::string text, int to) {
     LinkPython(room, index, "", x, y, wid, hei, text, to);
 }
 
-void LinkPython(int room,
-        std::string index,
-        std::string pythonfile,
-        float x,
-        float y,
-        float wid,
-        float hei,
-        std::string text,
-        int to) {
-}
+void LinkPython(int room, std::string index, std::string pythonfile, float x, float y, float wid, float hei,
+                std::string text, int to) {}
 
 void Launch(int room, std::string index, float x, float y, float wid, float hei, std::string text) {
     LaunchPython(room, index, "", x, y, wid, hei, text);
 }
 
-void LaunchPython(int room,
-        std::string index,
-        std::string pythonfile,
-        float x,
-        float y,
-        float wid,
-        float hei,
-        std::string text) {
-}
+void LaunchPython(int room, std::string index, std::string pythonfile, float x, float y, float wid, float hei,
+                  std::string text) {}
 
 void EjectPython(int room, std::string index, std::string pythonfile, float x, float y, float wid, float hei,
-        std::string text) {
-}
+                 std::string text) {}
 
 void Comp(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string modes) {
     CompPython(room, index, "", x, y, wid, hei, text, modes);
 }
 
-void CompPython(int room,
-        std::string index,
-        std::string pythonfile,
-        float x,
-        float y,
-        float wid,
-        float hei,
-        std::string text,
-        std::string modes) {
-}
+void CompPython(int room, std::string index, std::string pythonfile, float x, float y, float wid, float hei,
+                std::string text, std::string modes) {}
 
-void Python(int room,
-        std::string index,
-        float x,
-        float y,
-        float wid,
-        float hei,
-        std::string text,
-        std::string pythonfile) {
-}
+void Python(int room, std::string index, float x, float y, float wid, float hei, std::string text,
+            std::string pythonfile) {}
 
-void Message(std::string text) {
-}
+void Message(std::string text) {}
 
-void EnqueueMessage(std::string text) {
-}
+void EnqueueMessage(std::string text) {}
 
-void EraseLink(int room, std::string index) {
-}
+void EraseLink(int room, std::string index) {}
 
-void EraseObj(int room, std::string index) {
-}
+void EraseObj(int room, std::string index) {}
 
 int GetCurRoom() {
     return 0;
@@ -140,7 +102,5 @@ bool HasObject(int room, std::string index) {
     return false;
 }
 
-void refreshBaseComputerUI(const class Cargo *carg) {
-}
-}
-
+void refreshBaseComputerUI(const class Cargo *carg) {}
+}  // namespace BaseUtil

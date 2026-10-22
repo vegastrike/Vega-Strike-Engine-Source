@@ -30,7 +30,7 @@
 #include "eventresponder.h"
 #include "font.h"
 
-//See cpp file for detailed descriptions of classes, functions, etc.
+// See cpp file for detailed descriptions of classes, functions, etc.
 
 /* The control virtual base class manages a rectangle in a window.
  * It handles input events (like mouse events) if necessary.  It draws the
@@ -38,8 +38,7 @@
  */
 class Control : public EventResponder {
 public:
-
-//The outside boundaries of the control.
+    // The outside boundaries of the control.
     virtual Rect rect(void) {
         return m_rect;
     }
@@ -48,10 +47,10 @@ public:
         m_rect = r;
     }
 
-//Whether the specified point is inside this control.
+    // Whether the specified point is inside this control.
     virtual bool hitTest(const Point &p);
 
-//Whether to show the control or not.
+    // Whether to show the control or not.
     virtual bool hidden(void) {
         return m_hidden;
     }
@@ -60,8 +59,8 @@ public:
         m_hidden = h;
     }
 
-//Control have id's.  This makes it easy to find them programmatically.
-//See window::findControlById.
+    // Control have id's.  This makes it easy to find them programmatically.
+    // See window::findControlById.
     virtual const std::string &id(void) {
         return m_id;
     }
@@ -70,8 +69,8 @@ public:
         m_id = newId;
     }
 
-//The color of the control.
-//Meaning depends on control.  Often background color.
+    // The color of the control.
+    // Meaning depends on control.  Often background color.
     virtual GFXColor color(void) {
         return m_color;
     }
@@ -80,7 +79,7 @@ public:
         m_color = c;
     }
 
-//The color of the outline around the control.
+    // The color of the outline around the control.
     virtual GFXColor outlineColor(void) {
         return m_outlineColor;
     }
@@ -89,7 +88,7 @@ public:
         m_outlineColor = c;
     }
 
-//Color of text in control.
+    // Color of text in control.
     virtual GFXColor textColor(void) {
         return m_textColor;
     }
@@ -98,7 +97,7 @@ public:
         m_textColor = c;
     }
 
-//Font for text in control.
+    // Font for text in control.
     virtual Font font(void) {
         return m_font;
     }
@@ -107,37 +106,36 @@ public:
         m_font = f;
     }
 
-//The list of controls "grouped" into this control.
+    // The list of controls "grouped" into this control.
     virtual bool hasGroupChildren(void) {
         return false;
     }
 
-//Draw the control.
-//This should not draw outside its rectangle!
+    // Draw the control.
+    // This should not draw outside its rectangle!
     virtual void draw(void) = 0;
 
-//CONSTRUCTION
+    // CONSTRUCTION
 public:
     Control(void);
 
-    virtual ~Control(void) {
-    }
+    virtual ~Control(void) {}
 
 protected:
-//INTERNAL IMPLEMENTATION
+    // INTERNAL IMPLEMENTATION
 
-//Draw background.
+    // Draw background.
     virtual void drawBackground(void);
 
-//VARIABLES
+    // VARIABLES
 protected:
-    Rect m_rect;         //Boundary rectangle of this control.
-    std::string m_id;           //ID of the control.  See window::findControlByName.
-    GFXColor m_color;        //Color of control.  Meaning depends on control.
-    GFXColor m_outlineColor;         //Color of outline around control.
-    GFXColor m_textColor;    //Text color, if control uses text.
-    Font m_font;         //Font for the text, if text is needed.
-    bool m_hidden;       //False = show the control on the window.
+    Rect        m_rect;          // Boundary rectangle of this control.
+    std::string m_id;            // ID of the control.  See window::findControlByName.
+    GFXColor    m_color;         // Color of control.  Meaning depends on control.
+    GFXColor    m_outlineColor;  // Color of outline around control.
+    GFXColor    m_textColor;     // Text color, if control uses text.
+    Font        m_font;          // Font for the text, if text is needed.
+    bool        m_hidden;        // False = show the control on the window.
 };
 
-#endif   //VEGA_STRIKE_ENGINE_GUI_CONTROL_H
+#endif                           // VEGA_STRIKE_ENGINE_GUI_CONTROL_H

@@ -24,10 +24,11 @@
  */
 
 
-#define MIN(a, b) ((a)<(b)?(a):(b))
-#define MAX(a, b) ((a)>(b)?(a):(b))
-#include <cmath>
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 #include "collide2/csgeom2/opbox.h"
+
+#include <cmath>
 
 //---------------------------------------------------------------------------
 
@@ -55,77 +56,71 @@ struct Outline {
     int num_sides;
     int sides[3];
 };
+
 /// Outline lookup table.
-static Outline outlines[27] =
-        {
-                {7, {3, 2, 6, 4, 5, 1, 0}, 3, {BOX_SIDE_x, BOX_SIDE_y, BOX_SIDE_z}},    // 0,0,0
-                {6, {3, 2, 0, 4, 5, 1, -1}, 2, {BOX_SIDE_x, BOX_SIDE_y, -1}},        // 0,0,1
-                {7, {7, 3, 2, 0, 4, 5, 1}, 3, {BOX_SIDE_x, BOX_SIDE_y, BOX_SIDE_Z}},    // 0,0,2
-                {6, {3, 2, 6, 4, 0, 1, -1}, 2, {BOX_SIDE_x, BOX_SIDE_z, -1}},        // 0,1,0
-                {4, {3, 2, 0, 1, -1, -1, -1}, 1, {BOX_SIDE_x, -1, -1}},            // 0,1,1
-                {6, {7, 3, 2, 0, 1, 5, -1}, 2, {BOX_SIDE_x, BOX_SIDE_Z, -1}},        // 0,1,2
-                {7, {3, 7, 6, 4, 0, 1, 2}, 3, {BOX_SIDE_x, BOX_SIDE_Y, BOX_SIDE_z}},    // 0,2,0
-                {6, {3, 7, 6, 2, 0, 1, -1}, 2, {BOX_SIDE_x, BOX_SIDE_Y, -1}},        // 0,2,1
-                {7, {7, 6, 2, 0, 1, 5, 3}, 3, {BOX_SIDE_x, BOX_SIDE_Y, BOX_SIDE_Z}},    // 0,2,2
-                {6, {2, 6, 4, 5, 1, 0, -1}, 2, {BOX_SIDE_y, BOX_SIDE_z, -1}},        // 1,0,0
-                {4, {0, 4, 5, 1, -1, -1, -1}, 1, {BOX_SIDE_y, -1, -1}},            // 1,0,1
-                {6, {3, 1, 0, 4, 5, 7, -1}, 2, {BOX_SIDE_y, BOX_SIDE_Z, -1}},        // 1,0,2
-                {4, {2, 6, 4, 0, -1, -1, -1}, 1, {BOX_SIDE_z, -1, -1}},            // 1,1,0
-                {0, {-1, -1, -1, -1, -1, -1, -1}, 0, {-1, -1, -1}},                // 1,1,1
-                {4, {7, 3, 1, 5, -1, -1, -1}, 1, {BOX_SIDE_Z, -1, -1}},            // 1,1,2
-                {6, {3, 7, 6, 4, 0, 2, -1}, 2, {BOX_SIDE_Y, BOX_SIDE_z, -1}},        // 1,2,0
-                {4, {3, 7, 6, 2, -1, -1, -1}, 1, {BOX_SIDE_Y, -1, -1}},            // 1,2,1
-                {6, {2, 3, 1, 5, 7, 6, -1}, 2, {BOX_SIDE_Y, BOX_SIDE_Z, -1}},        // 1,2,2
-                {7, {2, 6, 7, 5, 1, 0, 4}, 3, {BOX_SIDE_X, BOX_SIDE_y, BOX_SIDE_z}},    // 2,0,0
-                {6, {6, 7, 5, 1, 0, 4, -1}, 2, {BOX_SIDE_X, BOX_SIDE_y, -1}},        // 2,0,1
-                {7, {6, 7, 3, 1, 0, 4, 5}, 3, {BOX_SIDE_X, BOX_SIDE_y, BOX_SIDE_Z}},    // 2,0,2
-                {6, {2, 6, 7, 5, 4, 0, -1}, 2, {BOX_SIDE_X, BOX_SIDE_z, -1}},        // 2,1,0
-                {4, {6, 7, 5, 4, -1, -1, -1}, 1, {BOX_SIDE_X, -1, -1}},            // 2,1,1
-                {6, {6, 7, 3, 1, 5, 4, -1}, 2, {BOX_SIDE_X, BOX_SIDE_Z, -1}},        // 2,1,2
-                {7, {2, 3, 7, 5, 4, 0, 6}, 3, {BOX_SIDE_X, BOX_SIDE_Y, BOX_SIDE_z}},    // 2,2,0
-                {6, {2, 3, 7, 5, 4, 6, -1}, 2, {BOX_SIDE_X, BOX_SIDE_Y, -1}},        // 2,2,1
-                {7, {6, 2, 3, 1, 5, 4, 7}, 3, {BOX_SIDE_X, BOX_SIDE_Y, BOX_SIDE_Z}}    // 2,2,2
-        };
+static Outline outlines[27] = {
+        {7, {3, 2, 6, 4, 5, 1, 0}, 3, {BOX_SIDE_x, BOX_SIDE_y, BOX_SIDE_z}},  // 0,0,0
+        {6, {3, 2, 0, 4, 5, 1, -1}, 2, {BOX_SIDE_x, BOX_SIDE_y, -1}},         // 0,0,1
+        {7, {7, 3, 2, 0, 4, 5, 1}, 3, {BOX_SIDE_x, BOX_SIDE_y, BOX_SIDE_Z}},  // 0,0,2
+        {6, {3, 2, 6, 4, 0, 1, -1}, 2, {BOX_SIDE_x, BOX_SIDE_z, -1}},         // 0,1,0
+        {4, {3, 2, 0, 1, -1, -1, -1}, 1, {BOX_SIDE_x, -1, -1}},               // 0,1,1
+        {6, {7, 3, 2, 0, 1, 5, -1}, 2, {BOX_SIDE_x, BOX_SIDE_Z, -1}},         // 0,1,2
+        {7, {3, 7, 6, 4, 0, 1, 2}, 3, {BOX_SIDE_x, BOX_SIDE_Y, BOX_SIDE_z}},  // 0,2,0
+        {6, {3, 7, 6, 2, 0, 1, -1}, 2, {BOX_SIDE_x, BOX_SIDE_Y, -1}},         // 0,2,1
+        {7, {7, 6, 2, 0, 1, 5, 3}, 3, {BOX_SIDE_x, BOX_SIDE_Y, BOX_SIDE_Z}},  // 0,2,2
+        {6, {2, 6, 4, 5, 1, 0, -1}, 2, {BOX_SIDE_y, BOX_SIDE_z, -1}},         // 1,0,0
+        {4, {0, 4, 5, 1, -1, -1, -1}, 1, {BOX_SIDE_y, -1, -1}},               // 1,0,1
+        {6, {3, 1, 0, 4, 5, 7, -1}, 2, {BOX_SIDE_y, BOX_SIDE_Z, -1}},         // 1,0,2
+        {4, {2, 6, 4, 0, -1, -1, -1}, 1, {BOX_SIDE_z, -1, -1}},               // 1,1,0
+        {0, {-1, -1, -1, -1, -1, -1, -1}, 0, {-1, -1, -1}},                   // 1,1,1
+        {4, {7, 3, 1, 5, -1, -1, -1}, 1, {BOX_SIDE_Z, -1, -1}},               // 1,1,2
+        {6, {3, 7, 6, 4, 0, 2, -1}, 2, {BOX_SIDE_Y, BOX_SIDE_z, -1}},         // 1,2,0
+        {4, {3, 7, 6, 2, -1, -1, -1}, 1, {BOX_SIDE_Y, -1, -1}},               // 1,2,1
+        {6, {2, 3, 1, 5, 7, 6, -1}, 2, {BOX_SIDE_Y, BOX_SIDE_Z, -1}},         // 1,2,2
+        {7, {2, 6, 7, 5, 1, 0, 4}, 3, {BOX_SIDE_X, BOX_SIDE_y, BOX_SIDE_z}},  // 2,0,0
+        {6, {6, 7, 5, 1, 0, 4, -1}, 2, {BOX_SIDE_X, BOX_SIDE_y, -1}},         // 2,0,1
+        {7, {6, 7, 3, 1, 0, 4, 5}, 3, {BOX_SIDE_X, BOX_SIDE_y, BOX_SIDE_Z}},  // 2,0,2
+        {6, {2, 6, 7, 5, 4, 0, -1}, 2, {BOX_SIDE_X, BOX_SIDE_z, -1}},         // 2,1,0
+        {4, {6, 7, 5, 4, -1, -1, -1}, 1, {BOX_SIDE_X, -1, -1}},               // 2,1,1
+        {6, {6, 7, 3, 1, 5, 4, -1}, 2, {BOX_SIDE_X, BOX_SIDE_Z, -1}},         // 2,1,2
+        {7, {2, 3, 7, 5, 4, 0, 6}, 3, {BOX_SIDE_X, BOX_SIDE_Y, BOX_SIDE_z}},  // 2,2,0
+        {6, {2, 3, 7, 5, 4, 6, -1}, 2, {BOX_SIDE_X, BOX_SIDE_Y, -1}},         // 2,2,1
+        {7, {6, 2, 3, 1, 5, 4, 7}, 3, {BOX_SIDE_X, BOX_SIDE_Y, BOX_SIDE_Z}}   // 2,2,2
+};
 
-csBox3::bEdge csBox3::edges[24] =
-        {
-                {BOX_CORNER_Xyz, BOX_CORNER_xyz, BOX_SIDE_y, BOX_SIDE_z},
-                {BOX_CORNER_xyz, BOX_CORNER_Xyz, BOX_SIDE_z, BOX_SIDE_y},
-                {BOX_CORNER_xyz, BOX_CORNER_xYz, BOX_SIDE_x, BOX_SIDE_z},
-                {BOX_CORNER_xYz, BOX_CORNER_xyz, BOX_SIDE_z, BOX_SIDE_x},
-                {BOX_CORNER_xYz, BOX_CORNER_XYz, BOX_SIDE_Y, BOX_SIDE_z},
-                {BOX_CORNER_XYz, BOX_CORNER_xYz, BOX_SIDE_z, BOX_SIDE_Y},
-                {BOX_CORNER_XYz, BOX_CORNER_Xyz, BOX_SIDE_X, BOX_SIDE_z},
-                {BOX_CORNER_Xyz, BOX_CORNER_XYz, BOX_SIDE_z, BOX_SIDE_X},
+csBox3::bEdge csBox3::edges[24] = {{BOX_CORNER_Xyz, BOX_CORNER_xyz, BOX_SIDE_y, BOX_SIDE_z},
+                                   {BOX_CORNER_xyz, BOX_CORNER_Xyz, BOX_SIDE_z, BOX_SIDE_y},
+                                   {BOX_CORNER_xyz, BOX_CORNER_xYz, BOX_SIDE_x, BOX_SIDE_z},
+                                   {BOX_CORNER_xYz, BOX_CORNER_xyz, BOX_SIDE_z, BOX_SIDE_x},
+                                   {BOX_CORNER_xYz, BOX_CORNER_XYz, BOX_SIDE_Y, BOX_SIDE_z},
+                                   {BOX_CORNER_XYz, BOX_CORNER_xYz, BOX_SIDE_z, BOX_SIDE_Y},
+                                   {BOX_CORNER_XYz, BOX_CORNER_Xyz, BOX_SIDE_X, BOX_SIDE_z},
+                                   {BOX_CORNER_Xyz, BOX_CORNER_XYz, BOX_SIDE_z, BOX_SIDE_X},
 
-                {BOX_CORNER_Xyz, BOX_CORNER_XyZ, BOX_SIDE_X, BOX_SIDE_y},
-                {BOX_CORNER_XyZ, BOX_CORNER_Xyz, BOX_SIDE_y, BOX_SIDE_X},
-                {BOX_CORNER_XyZ, BOX_CORNER_XYZ, BOX_SIDE_X, BOX_SIDE_Z},
-                {BOX_CORNER_XYZ, BOX_CORNER_XyZ, BOX_SIDE_Z, BOX_SIDE_X},
-                {BOX_CORNER_XYZ, BOX_CORNER_XYz, BOX_SIDE_X, BOX_SIDE_Y},
-                {BOX_CORNER_XYz, BOX_CORNER_XYZ, BOX_SIDE_Y, BOX_SIDE_X},
-                {BOX_CORNER_XYZ, BOX_CORNER_xYZ, BOX_SIDE_Y, BOX_SIDE_Z},
-                {BOX_CORNER_xYZ, BOX_CORNER_XYZ, BOX_SIDE_Z, BOX_SIDE_Y},
+                                   {BOX_CORNER_Xyz, BOX_CORNER_XyZ, BOX_SIDE_X, BOX_SIDE_y},
+                                   {BOX_CORNER_XyZ, BOX_CORNER_Xyz, BOX_SIDE_y, BOX_SIDE_X},
+                                   {BOX_CORNER_XyZ, BOX_CORNER_XYZ, BOX_SIDE_X, BOX_SIDE_Z},
+                                   {BOX_CORNER_XYZ, BOX_CORNER_XyZ, BOX_SIDE_Z, BOX_SIDE_X},
+                                   {BOX_CORNER_XYZ, BOX_CORNER_XYz, BOX_SIDE_X, BOX_SIDE_Y},
+                                   {BOX_CORNER_XYz, BOX_CORNER_XYZ, BOX_SIDE_Y, BOX_SIDE_X},
+                                   {BOX_CORNER_XYZ, BOX_CORNER_xYZ, BOX_SIDE_Y, BOX_SIDE_Z},
+                                   {BOX_CORNER_xYZ, BOX_CORNER_XYZ, BOX_SIDE_Z, BOX_SIDE_Y},
 
-                {BOX_CORNER_xYZ, BOX_CORNER_xYz, BOX_SIDE_Y, BOX_SIDE_x},
-                {BOX_CORNER_xYz, BOX_CORNER_xYZ, BOX_SIDE_x, BOX_SIDE_Y},
-                {BOX_CORNER_xYZ, BOX_CORNER_xyZ, BOX_SIDE_x, BOX_SIDE_Z},
-                {BOX_CORNER_xyZ, BOX_CORNER_xYZ, BOX_SIDE_Z, BOX_SIDE_x},
-                {BOX_CORNER_xyZ, BOX_CORNER_xyz, BOX_SIDE_x, BOX_SIDE_y},
-                {BOX_CORNER_xyz, BOX_CORNER_xyZ, BOX_SIDE_y, BOX_SIDE_x},
-                {BOX_CORNER_xyZ, BOX_CORNER_XyZ, BOX_SIDE_y, BOX_SIDE_Z},
-                {BOX_CORNER_XyZ, BOX_CORNER_xyZ, BOX_SIDE_Z, BOX_SIDE_y}
-        };
+                                   {BOX_CORNER_xYZ, BOX_CORNER_xYz, BOX_SIDE_Y, BOX_SIDE_x},
+                                   {BOX_CORNER_xYz, BOX_CORNER_xYZ, BOX_SIDE_x, BOX_SIDE_Y},
+                                   {BOX_CORNER_xYZ, BOX_CORNER_xyZ, BOX_SIDE_x, BOX_SIDE_Z},
+                                   {BOX_CORNER_xyZ, BOX_CORNER_xYZ, BOX_SIDE_Z, BOX_SIDE_x},
+                                   {BOX_CORNER_xyZ, BOX_CORNER_xyz, BOX_SIDE_x, BOX_SIDE_y},
+                                   {BOX_CORNER_xyz, BOX_CORNER_xyZ, BOX_SIDE_y, BOX_SIDE_x},
+                                   {BOX_CORNER_xyZ, BOX_CORNER_XyZ, BOX_SIDE_y, BOX_SIDE_Z},
+                                   {BOX_CORNER_XyZ, BOX_CORNER_xyZ, BOX_SIDE_Z, BOX_SIDE_y}};
 // Index by BOX_SIDE_? number.
-csBox3::bFace csBox3::faces[6] =
-        {
-                {BOX_EDGE_xyz_xyZ, BOX_EDGE_xyZ_xYZ, BOX_EDGE_xYZ_xYz, BOX_EDGE_xYz_xyz},
-                {BOX_EDGE_XYz_XYZ, BOX_EDGE_XYZ_XyZ, BOX_EDGE_XyZ_Xyz, BOX_EDGE_Xyz_XYz},
-                {BOX_EDGE_xyz_Xyz, BOX_EDGE_Xyz_XyZ, BOX_EDGE_XyZ_xyZ, BOX_EDGE_xyZ_xyz},
-                {BOX_EDGE_xYZ_XYZ, BOX_EDGE_XYZ_XYz, BOX_EDGE_XYz_xYz, BOX_EDGE_xYz_xYZ},
-                {BOX_EDGE_xYz_XYz, BOX_EDGE_XYz_Xyz, BOX_EDGE_Xyz_xyz, BOX_EDGE_xyz_xYz},
-                {BOX_EDGE_XYZ_xYZ, BOX_EDGE_xYZ_xyZ, BOX_EDGE_xyZ_XyZ, BOX_EDGE_XyZ_XYZ}
-        };
+csBox3::bFace csBox3::faces[6] = {{BOX_EDGE_xyz_xyZ, BOX_EDGE_xyZ_xYZ, BOX_EDGE_xYZ_xYz, BOX_EDGE_xYz_xyz},
+                                  {BOX_EDGE_XYz_XYZ, BOX_EDGE_XYZ_XyZ, BOX_EDGE_XyZ_Xyz, BOX_EDGE_Xyz_XYz},
+                                  {BOX_EDGE_xyz_Xyz, BOX_EDGE_Xyz_XyZ, BOX_EDGE_XyZ_xyZ, BOX_EDGE_xyZ_xyz},
+                                  {BOX_EDGE_xYZ_XYZ, BOX_EDGE_XYZ_XYz, BOX_EDGE_XYz_xYz, BOX_EDGE_xYz_xYZ},
+                                  {BOX_EDGE_xYz_XYz, BOX_EDGE_XYz_Xyz, BOX_EDGE_Xyz_xyz, BOX_EDGE_xyz_xYz},
+                                  {BOX_EDGE_XYZ_xYZ, BOX_EDGE_xYZ_xyZ, BOX_EDGE_xyZ_XyZ, BOX_EDGE_XyZ_XYZ}};
 
 csVector3 csBox3::GetCorner(int corner) const {
     switch (corner) {
@@ -150,20 +145,19 @@ csVector3 csBox3::GetCorner(int corner) const {
 }
 
 void csBox3::SetCenter(const csVector3 &c) {
-    csVector3 move = c - GetCenter();
-    minbox += move;
-    maxbox += move;
+    csVector3 move  = c - GetCenter();
+    minbox         += move;
+    maxbox         += move;
 }
 
 void csBox3::SetSize(const csVector3 &s) {
     csVector3 center = GetCenter();
-    minbox = center - s * (float) .5;
-    maxbox = center + s * (float) .5;
+    minbox           = center - s * (float).5;
+    maxbox           = center + s * (float).5;
 }
 
 bool csBox3::AdjacentX(const csBox3 &other) const {
-    if (ABS (other.MinX() - MaxX()) < SMALL_EPSILON ||
-            ABS (other.MaxX() - MinX()) < SMALL_EPSILON) {
+    if (ABS(other.MinX() - MaxX()) < SMALL_EPSILON || ABS(other.MaxX() - MinX()) < SMALL_EPSILON) {
         if (MaxY() < other.MinY() || MinY() > other.MaxY()) {
             return false;
         }
@@ -176,8 +170,7 @@ bool csBox3::AdjacentX(const csBox3 &other) const {
 }
 
 bool csBox3::AdjacentY(const csBox3 &other) const {
-    if (ABS (other.MinY() - MaxY()) < SMALL_EPSILON ||
-            ABS (other.MaxY() - MinY()) < SMALL_EPSILON) {
+    if (ABS(other.MinY() - MaxY()) < SMALL_EPSILON || ABS(other.MaxY() - MinY()) < SMALL_EPSILON) {
         if (MaxX() < other.MinX() || MinX() > other.MaxX()) {
             return false;
         }
@@ -190,8 +183,7 @@ bool csBox3::AdjacentY(const csBox3 &other) const {
 }
 
 bool csBox3::AdjacentZ(const csBox3 &other) const {
-    if (ABS (other.MinZ() - MaxZ()) < SMALL_EPSILON ||
-            ABS (other.MaxZ() - MinZ()) < SMALL_EPSILON) {
+    if (ABS(other.MinZ() - MaxZ()) < SMALL_EPSILON || ABS(other.MaxZ() - MinZ()) < SMALL_EPSILON) {
         if (MaxX() < other.MinX() || MinX() > other.MaxX()) {
             return false;
         }
@@ -231,7 +223,7 @@ int csBox3::Adjacent(const csBox3 &other) const {
 int csBox3::GetVisibleSides(const csVector3 &pos, int *visible_sides) const {
     const csVector3 &bmin = Min();
     const csVector3 &bmax = Max();
-    int idx;
+    int              idx;
     // First select x part of coordinate.
     if (pos.x < bmin.x) {
         idx = 0 * 9;
@@ -256,20 +248,19 @@ int csBox3::GetVisibleSides(const csVector3 &pos, int *visible_sides) const {
     } else {
         idx += 1;
     }
-    const Outline &ol = outlines[idx];
-    int num_array = ol.num_sides;
-    int i;
+    const Outline &ol        = outlines[idx];
+    int            num_array = ol.num_sides;
+    int            i;
     for (i = 0; i < num_array; i++) {
         visible_sides[i] = ol.sides[i];
     }
     return num_array;
 }
 
-void csBox3::GetConvexOutline(const csVector3 &pos,
-        csVector3 *ar, int &num_array, bool bVisible) const {
+void csBox3::GetConvexOutline(const csVector3 &pos, csVector3 *ar, int &num_array, bool bVisible) const {
     const csVector3 &bmin = Min();
     const csVector3 &bmax = Max();
-    int idx;
+    int              idx;
     // First select x part of coordinate.
     if (pos.x < bmin.x) {
         idx = 0 * 9;
@@ -296,7 +287,7 @@ void csBox3::GetConvexOutline(const csVector3 &pos,
     }
 
     const Outline &ol = outlines[idx];
-    num_array = (bVisible ? ol.num : MIN (ol.num, 6));
+    num_array         = (bVisible ? ol.num : MIN(ol.num, 6));
     int i;
     for (i = 0; i < num_array; i++) {
         switch (ol.vertices[i]) {
@@ -348,11 +339,11 @@ bool csBox3::Between(const csBox3 &box1, const csBox3 &box2) const {
     // First the trival test to see if the coordinates are
     // at least within the right intervals.
     if (((maxbox.x >= box1.minbox.x && minbox.x <= box2.maxbox.x) ||
-            (maxbox.x >= box2.minbox.x && minbox.x <= box1.maxbox.x)) &&
-            ((maxbox.y >= box1.minbox.y && minbox.y <= box2.maxbox.y) ||
-                    (maxbox.y >= box2.minbox.y && minbox.y <= box1.maxbox.y)) &&
-            ((maxbox.z >= box1.minbox.z && minbox.z <= box2.maxbox.z) ||
-                    (maxbox.z >= box2.minbox.z && minbox.z <= box1.maxbox.z))) {
+         (maxbox.x >= box2.minbox.x && minbox.x <= box1.maxbox.x)) &&
+        ((maxbox.y >= box1.minbox.y && minbox.y <= box2.maxbox.y) ||
+         (maxbox.y >= box2.minbox.y && minbox.y <= box1.maxbox.y)) &&
+        ((maxbox.z >= box1.minbox.z && minbox.z <= box2.maxbox.z) ||
+         (maxbox.z >= box2.minbox.z && minbox.z <= box1.maxbox.z))) {
         // @@@ Ok, let's just return true here. Maybe this test is already
         // enough? We could have used the planes as well.
         return true;
@@ -415,21 +406,21 @@ float csBox3::SquaredOriginMaxDist() const {
     } else if (maxbox.x < 0) {
         res = minbox.x * minbox.x;
     } else {
-        res = MAX (maxbox.x * maxbox.x, minbox.x * minbox.x);
+        res = MAX(maxbox.x * maxbox.x, minbox.x * minbox.x);
     }
     if (minbox.y > 0) {
         res += maxbox.y * maxbox.y;
     } else if (maxbox.y < 0) {
         res += minbox.y * minbox.y;
     } else {
-        res += MAX (maxbox.y * maxbox.y, minbox.y * minbox.y);
+        res += MAX(maxbox.y * maxbox.y, minbox.y * minbox.y);
     }
     if (minbox.z > 0) {
         res += maxbox.z * maxbox.z;
     } else if (maxbox.z < 0) {
         res += minbox.z * minbox.z;
     } else {
-        res += MAX (maxbox.z * maxbox.z, minbox.z * minbox.z);
+        res += MAX(maxbox.z * maxbox.z, minbox.z * minbox.z);
     }
     return res;
 }
@@ -501,78 +492,45 @@ csBox3 &csBox3::operator*=(const csBox3 &box) {
 }
 
 csBox3 operator+(const csBox3 &box1, const csBox3 &box2) {
-    return csBox3(
-            MIN(box1.minbox.x, box2.minbox.x),
-            MIN(box1.minbox.y, box2.minbox.y),
-            MIN(box1.minbox.z, box2.minbox.z),
-            MAX(box1.maxbox.x, box2.maxbox.x),
-            MAX(box1.maxbox.y, box2.maxbox.y),
-            MAX(box1.maxbox.z, box2.maxbox.z));
+    return csBox3(MIN(box1.minbox.x, box2.minbox.x), MIN(box1.minbox.y, box2.minbox.y),
+                  MIN(box1.minbox.z, box2.minbox.z), MAX(box1.maxbox.x, box2.maxbox.x),
+                  MAX(box1.maxbox.y, box2.maxbox.y), MAX(box1.maxbox.z, box2.maxbox.z));
 }
 
 csBox3 operator+(const csBox3 &box, const csVector3 &point) {
-    return csBox3(
-            MIN(box.minbox.x, point.x),
-            MIN(box.minbox.y, point.y),
-            MIN(box.minbox.z, point.z),
-            MAX(box.maxbox.x, point.x),
-            MAX(box.maxbox.y, point.y),
-            MAX(box.maxbox.z, point.z));
+    return csBox3(MIN(box.minbox.x, point.x), MIN(box.minbox.y, point.y), MIN(box.minbox.z, point.z),
+                  MAX(box.maxbox.x, point.x), MAX(box.maxbox.y, point.y), MAX(box.maxbox.z, point.z));
 }
 
 csBox3 operator*(const csBox3 &box1, const csBox3 &box2) {
-    return csBox3(
-            MAX(box1.minbox.x, box2.minbox.x),
-            MAX(box1.minbox.y, box2.minbox.y),
-            MAX(box1.minbox.z, box2.minbox.z),
-            MIN(box1.maxbox.x, box2.maxbox.x),
-            MIN(box1.maxbox.y, box2.maxbox.y),
-            MIN(box1.maxbox.z, box2.maxbox.z));
+    return csBox3(MAX(box1.minbox.x, box2.minbox.x), MAX(box1.minbox.y, box2.minbox.y),
+                  MAX(box1.minbox.z, box2.minbox.z), MIN(box1.maxbox.x, box2.maxbox.x),
+                  MIN(box1.maxbox.y, box2.maxbox.y), MIN(box1.maxbox.z, box2.maxbox.z));
 }
 
 bool operator==(const csBox3 &box1, const csBox3 &box2) {
-    return ((box1.minbox.x == box2.minbox.x)
-            && (box1.minbox.y == box2.minbox.y)
-            && (box1.minbox.z == box2.minbox.z)
-            && (box1.maxbox.x == box2.maxbox.x)
-            && (box1.maxbox.y == box2.maxbox.y)
-            && (box1.maxbox.z == box2.maxbox.z));
+    return ((box1.minbox.x == box2.minbox.x) && (box1.minbox.y == box2.minbox.y) && (box1.minbox.z == box2.minbox.z) &&
+            (box1.maxbox.x == box2.maxbox.x) && (box1.maxbox.y == box2.maxbox.y) && (box1.maxbox.z == box2.maxbox.z));
 }
 
 bool operator!=(const csBox3 &box1, const csBox3 &box2) {
-    return ((box1.minbox.x != box2.minbox.x)
-            || (box1.minbox.y != box2.minbox.y)
-            || (box1.minbox.z != box2.minbox.z)
-            || (box1.maxbox.x != box2.maxbox.x)
-            || (box1.maxbox.y != box2.maxbox.y)
-            || (box1.maxbox.z != box2.maxbox.z));
+    return ((box1.minbox.x != box2.minbox.x) || (box1.minbox.y != box2.minbox.y) || (box1.minbox.z != box2.minbox.z) ||
+            (box1.maxbox.x != box2.maxbox.x) || (box1.maxbox.y != box2.maxbox.y) || (box1.maxbox.z != box2.maxbox.z));
 }
 
 bool operator<(const csBox3 &box1, const csBox3 &box2) {
-    return ((box1.minbox.x >= box2.minbox.x)
-            && (box1.minbox.y >= box2.minbox.y)
-            && (box1.minbox.z >= box2.minbox.z)
-            && (box1.maxbox.x <= box2.maxbox.x)
-            && (box1.maxbox.y <= box2.maxbox.y)
-            && (box1.maxbox.z <= box2.maxbox.z));
+    return ((box1.minbox.x >= box2.minbox.x) && (box1.minbox.y >= box2.minbox.y) && (box1.minbox.z >= box2.minbox.z) &&
+            (box1.maxbox.x <= box2.maxbox.x) && (box1.maxbox.y <= box2.maxbox.y) && (box1.maxbox.z <= box2.maxbox.z));
 }
 
 bool operator>(const csBox3 &box1, const csBox3 &box2) {
-    return ((box2.minbox.x >= box1.minbox.x)
-            && (box2.minbox.y >= box1.minbox.y)
-            && (box2.minbox.z >= box1.minbox.z)
-            && (box2.maxbox.x <= box1.maxbox.x)
-            && (box2.maxbox.y <= box1.maxbox.y)
-            && (box2.maxbox.z <= box1.maxbox.z));
+    return ((box2.minbox.x >= box1.minbox.x) && (box2.minbox.y >= box1.minbox.y) && (box2.minbox.z >= box1.minbox.z) &&
+            (box2.maxbox.x <= box1.maxbox.x) && (box2.maxbox.y <= box1.maxbox.y) && (box2.maxbox.z <= box1.maxbox.z));
 }
 
 bool operator<(const csVector3 &point, const csBox3 &box) {
-    return ((point.x >= box.minbox.x)
-            && (point.x <= box.maxbox.x)
-            && (point.y >= box.minbox.y)
-            && (point.y <= box.maxbox.y)
-            && (point.z >= box.minbox.z)
-            && (point.z <= box.maxbox.z));
+    return ((point.x >= box.minbox.x) && (point.x <= box.maxbox.x) && (point.y >= box.minbox.y) &&
+            (point.y <= box.maxbox.y) && (point.z >= box.minbox.z) && (point.z <= box.maxbox.z));
 }
 
 //---------------------------------------------------------------------------
