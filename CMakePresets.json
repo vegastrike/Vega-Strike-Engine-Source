@@ -193,10 +193,6 @@
         "VCPKG_TARGET_TRIPLET": "x64-win10",
         "VCPKG_HOST_TRIPLET": "x64-win10"
       },
-      "debug": {
-        "output": true,
-        "find": true
-      },
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
