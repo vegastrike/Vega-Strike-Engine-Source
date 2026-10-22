@@ -35,6 +35,7 @@ jobs:
 
     env:
       CMAKE_FIND_DEBUG_MODE: "OFF"
+      CMAKE_VERBOSE_MAKEFILE: "OFF"
       VCPKG_DISABLE_METRICS: 'ON'
       VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
       VCPKG_ASSET_SOURCES: "${{ github.workspace }}/vcpkgAssets"
