@@ -716,9 +716,11 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    // Distance where the autopilot terminates and docking begins: the target's docking distance,
-    // where SPEC also stops, so the autopilot hands over dockable rather than short of it.
-    const float distance_to_stop = static_cast<float>(DockingDistance(target));
+    // The autopilot hands over at the further of the configured termination distance and the target's
+    // docking distance, where SPEC also stops, so it stops where the game asks it to without stopping
+    // short of dockable.
+    const float configured_distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt;
+    const float distance_to_stop = mymax(configured_distance_to_stop, static_cast<float>(DockingDistance(target)));
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
     if (do_auto_finish
