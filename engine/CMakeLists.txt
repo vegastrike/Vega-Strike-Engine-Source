@@ -29,7 +29,6 @@ MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 # One version header generator to rule them all
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
-CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/version.h)
 
 SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 INCLUDE(InstallRequiredSystemLibraries)
@@ -787,6 +786,9 @@ IF (WIN32)
     INSTALL(
             TARGETS vegastrike-engine
             RUNTIME_DEPENDENCIES
+            DIRECTORIES $ENV{PATH}
+            PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+            POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
             DESTINATION bin)
 ELSE ()
     INSTALL(
@@ -794,8 +796,6 @@ ELSE ()
             DESTINATION bin)
 ENDIF()
 
-
-ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/doc" "./doc")
 
 IF (USE_GTEST)
     SET(TEST_NAME ${PROJECT_NAME}_tests)

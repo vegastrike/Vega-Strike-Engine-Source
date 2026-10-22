@@ -91,8 +91,6 @@ brew install \
     boost-python3 \
     jpeg \
     libpng \
-    gtk+3 \
-    gtkglext \
     sdl3 \
     sdl3_image \
     ninja
