@@ -29,9 +29,14 @@
 
 #define PY_SSIZE_T_CLEAN
 
+#include <boost/filesystem.hpp>
 #include <boost/python.hpp>
+#include <iostream>
+#include <utility>
 
 #include "python_utils.h"
+
+#include <boost/format.hpp>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/filesystem.hpp>
@@ -185,57 +190,38 @@ std::string GetPythonPath() {
 #endif
 }
 
-// A utility function to call a function and get a PyObject as a result
-PyObject* GetClassFromPython(
-    const std::string build_path,
-    const std::string path_string,
-    const std::string datadir,
-    const std::string module_name,
-    const std::string function_name) {
-    boost::filesystem::path full_path = boost::filesystem::path(path_string);
-    boost::filesystem::current_path(full_path);
-
-    if(!boost::filesystem::exists(module_name + ".py")) {
-        // TODO: throw exception
-        return nullptr;
-    }
-
+void InitPython(bool &was_already_initialized) {
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
     py_pre_config.coerce_c_locale = 1;
+    was_already_initialized = Py_IsInitialized() != 0;
 
-    PyStatus status = Py_PreInitialize(&py_pre_config);
-    if (PyStatus_Exception(status) != 0) {
-        PyErr_Print();
-        Py_ExitStatusException(status);
-    }
+    if (!was_already_initialized) {
+        PyStatus status = Py_PreInitialize(&py_pre_config);
+        if (PyStatus_Exception(status) != 0) {
+            PyErr_Print();
+            Py_ExitStatusException(status);
+        }
 
-    PyConfig config;
-    PyConfig_InitPythonConfig(&config);
-    config.isolated = 0;
-    config.site_import = 1;
+        PyConfig config;
+        PyConfig_InitPythonConfig(&config);
+        config.isolated = 0;
 
-#ifdef _WIN32
-    std::wstring resolved_home = FindPythonPath();
-
-    // Assign the determined fallback explicitly to the PyConfig structure
-    status = PyConfig_SetString(&config, &config.home, resolved_home.c_str());
-    if (PyStatus_Exception(status) != 0) {
-        PyConfig_Clear(&config);
-        Py_ExitStatusException(status);
-    }
-#endif
-
-    status = Py_InitializeFromConfig(&config);
-    PyConfig_Clear(&config); // Free configuration memory
-    if (PyStatus_Exception(status) != 0) {
-        PyErr_Print();
-        Py_ExitStatusException(status);
+        status = Py_InitializeFromConfig(&config);
+        PyConfig_Clear(&config); // Free configuration memory
+        if (PyStatus_Exception(status) != 0) {
+            PyErr_Print();
+            Py_ExitStatusException(status);
+        }
     }
 }
 
 UniquePyRef GetMethodFromPython(std::string module_name, std::string function_name
                                    , const std::list<fs::path> &search_paths) {
+    bool py_was_initialized{};
+
+    InitPython(py_was_initialized);
+
     PyObject* sys_path = PySys_GetObject("path");
     if (sys_path == nullptr) {
         std::cerr << boost::format("%1%: %2%: PySys_GetObject(\"path\") returned nullptr")
@@ -264,6 +250,9 @@ UniquePyRef GetMethodFromPython(std::string module_name, std::string function_na
     UniquePyRef module{PyImport_ImportModule(module_name.c_str())};
     if (module == nullptr) {
         PyErr_Print();
+        if (!py_was_initialized) {
+            Py_Finalize();
+        }
         std::cerr << boost::format("%1%: %2%: PyImport_ImportModule() returned nullptr for module %3%")
                 % __FILE__ % __FUNCTION__ % module_name << std::endl;
         return nullptr;
@@ -274,13 +263,16 @@ UniquePyRef GetMethodFromPython(std::string module_name, std::string function_na
         std::cerr << boost::format("%1%: %2%: PyObject_GetAttrString returned nullptr for function %3%")
             % __FILE__ % __FUNCTION__ % function_name << std::endl;
         PyErr_Print();
+        if (!py_was_initialized) {
+            Py_Finalize();
+        }
+        std::cerr << boost::format("%1%: %2%: PyObject_GetAttrString returned nullptr for function %3%")
+            % __FILE__ % __FUNCTION__ % function_name << std::endl;
         return nullptr;
     }
-    if (!PyCallable_Check(func.get())) {
-        std::cerr << boost::format("%1%: %2%: PyObject_GetAttrString did not return a callable object for function %3%")
-            % __FILE__ % __FUNCTION__ % function_name << std::endl;
-        PyErr_Print();
-        return nullptr;
+
+    if (!py_was_initialized) {
+        Py_Finalize();
     }
 
     return func;
