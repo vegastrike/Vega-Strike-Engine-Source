@@ -67,27 +67,27 @@ TEST(Python, Sanity) {
 
 TEST(Python, Call_Function) {
     // Structural, platform-agnostic path building
-    boost::filesystem::path current_dir = boost::filesystem::current_path();
-    std::cout << "Original structural path: " << current_dir << std::endl;
+    boost::filesystem::path const current_dir = boost::filesystem::current_path();
+    std::cout << "Original structural path: " << current_dir << '\n';
 
     // Use structural appending '/=' instead of a flat string concat
-    boost::filesystem::path target_path = current_dir / ".." / "test_assets";
+    boost::filesystem::path const target_path = current_dir / ".." / "test_assets";
 
     // Normalize path to clean out the relative '..' steps into an absolute path
-    boost::filesystem::path test_assets_path = boost::filesystem::canonical(target_path);
-    std::cout << "Normalized test assets directory: " << test_assets_path << std::endl;
+    boost::filesystem::path const test_assets_path = boost::filesystem::canonical(target_path);
+    std::cout << "Normalized test assets directory: " << test_assets_path << '\n';
 
     // Shift context location explicitly
     boost::filesystem::current_path(test_assets_path);
-    bool exists = boost::filesystem::exists("python_tests.py");
-    std::cout << "python_tests.py exists locally: " << exists << std::endl;
+    bool const exists = boost::filesystem::exists("python_tests.py");
+    std::cout << "python_tests.py exists locally: " << exists << '\n';
 
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
     py_pre_config.coerce_c_locale = 1;
 
     PyStatus status = Py_PreInitialize(&py_pre_config);
-    if (PyStatus_Exception(status)) {
+    if (PyStatus_Exception(status) != 0) {
         Py_ExitStatusException(status);
     }
 
@@ -97,12 +97,12 @@ TEST(Python, Call_Function) {
 
     status = Py_InitializeFromConfig(&config);
     PyConfig_Clear(&config); // Free configuration memory
-    if (PyStatus_Exception(status)) {
+    if (PyStatus_Exception(status) != 0) {
         Py_ExitStatusException(status);
     }
 
     // Convert path cleanly
-    std::wstring test_assets_str = test_assets_path.lexically_normal().generic_wstring();
+    std::wstring const test_assets_str = test_assets_path.lexically_normal().generic_wstring();
 
     // Grab the live sys.path list object
     PyObject* sys_path = PySys_GetObject("path");
@@ -113,7 +113,7 @@ TEST(Python, Call_Function) {
     ASSERT_NE(path_element, nullptr) << "Failed to allocate Unicode path string.";
 
     // Safely append directly into Python's runtime search paths array
-    int append_status = PyList_Append(sys_path, path_element);
+    int const append_status = PyList_Append(sys_path, path_element);
     Py_DECREF(path_element); // Clean up temporary reference allocation
     ASSERT_EQ(append_status, 0) << "Failed to append test directory to sys.path.";
 
@@ -129,10 +129,10 @@ TEST(Python, Call_Function) {
                                   PyUnicode_FromString("World\n"));
     ASSERT_NE(args, nullptr) << "Failed to create parameter tuple pack.";
 
-    PyObject* pyResult = PyObject_CallObject(function, args);
-    ASSERT_NE(pyResult, nullptr) << "Python function call returned a null pointer evaluation result.";
+    PyObject* py_result = PyObject_CallObject(function, args);
+    ASSERT_NE(py_result, nullptr) << "Python function call returned a null pointer evaluation result.";
 
-    std::string result = PyUnicode_AsUTF8(pyResult);
+    std::string const result = PyUnicode_AsUTF8(py_result);
     Py_Finalize();
 
     EXPECT_EQ(result, hello_world);
