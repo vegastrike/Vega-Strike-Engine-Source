@@ -51,7 +51,7 @@ echo "Number of threads to build with after capping: $num_threads_to_build_with"
 [String]$baseDir = (Get-Location -PSProvider "FileSystem").Path
 [String]$binaryDir = "$baseDir/build/$PresetName"
 cmake --preset $PresetName "-DNUM_THREADS_TO_BUILD_WITH=$num_threads_to_build_with"
-cmake --build --preset "build-$PresetName" -v
+cmake --build --preset "build-$PresetName"
 
 New-Item bin -ItemType Directory -Force
 $aPossibleBinaryDirs = @("$binaryDir","$binaryDir/$BuildType", "$binaryDir/$BuildType/objconv", "$binaryDir/objconv/$BuildType", "$binaryDir/$BuildType/setup", "$binaryDir/setup/$BuildType")

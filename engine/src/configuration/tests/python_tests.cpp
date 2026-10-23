@@ -66,95 +66,74 @@ TEST(Python, Sanity) {
 }
 
 TEST(Python, Call_Function) {
-    boost::filesystem::path full_path(boost::filesystem::current_path());
-    std::cout << full_path << std::endl;
+    // Structural, platform-agnostic path building
+    boost::filesystem::path const current_dir = boost::filesystem::current_path();
+    std::cout << "Original structural path: " << current_dir << '\n';
 
-    bool exists = boost::filesystem::exists("../test_assets/python_tests.py");
-    std::cout << "python_tests.py exists " << exists << std::endl;
+    // Use structural appending '/=' instead of a flat string concat
+    boost::filesystem::path const target_path = current_dir / ".." / "test_assets";
 
-    boost::filesystem::current_path(full_path.concat("/../test_assets"));
-    full_path = boost::filesystem::current_path();
-    std::cout << full_path << std::endl;
+    // Normalize path to clean out the relative '..' steps into an absolute path
+    boost::filesystem::path const test_assets_path = boost::filesystem::canonical(target_path);
+    std::cout << "Normalized test assets directory: " << test_assets_path << '\n';
 
-    exists = boost::filesystem::exists("python_tests.py");
-    std::cout << "python_tests.py exists in current folder " << exists << std::endl;
+    // Shift context location explicitly
+    boost::filesystem::current_path(test_assets_path);
+    bool const exists = boost::filesystem::exists("python_tests.py");
+    std::cout << "python_tests.py exists locally: " << exists << '\n';
 
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
-
     py_pre_config.coerce_c_locale = 1;
 
-    PyStatus status;
-
-    status = Py_PreInitialize(&py_pre_config);
-    if (PyStatus_Exception(status)) {
-        Py_ExitStatusException(status);
-    }
-
-    const std::string python_path = GetPythonPath();
-    const std::wstring python_path_w(python_path.begin(), python_path.end());
-
-    PyWideStringList python_path_py_wide_string_list{};
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
-    if (PyStatus_Exception(status)) {
+    PyStatus status = Py_PreInitialize(&py_pre_config);
+    if (PyStatus_Exception(status) != 0) {
         Py_ExitStatusException(status);
     }
 
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
-
-    config.module_search_paths = python_path_py_wide_string_list;
     config.isolated = 0;
 
     status = Py_InitializeFromConfig(&config);
-    if (PyStatus_Exception(status)) {
-        PyConfig_Clear(&config);
+    PyConfig_Clear(&config); // Free configuration memory
+    if (PyStatus_Exception(status) != 0) {
         Py_ExitStatusException(status);
     }
 
-    PyObject* module = PyImport_ImportModule("python_tests");
-    std::cout << "PyImport_ImportModule did not crash\n" << std::flush;
-    if(!module) {
-        std::cout << "PyImport_ImportModule is null\n" << std::flush;
-        PyErr_Print();
-        Py_Finalize();
-        return;
-    } else {
-        std::cout << "PyImport_ImportModule is not null\n" << std::flush;
-    }
+    // Convert path cleanly
+    std::wstring const test_assets_str = test_assets_path.lexically_normal().generic_wstring();
 
-    PyObject* function = PyObject_GetAttrString(module,"append");
-    std::cout << "PyObject_GetAttrString did not crash\n" << std::flush;
-    if(function == nullptr) {
-        std::cout << "PyObject_GetAttrString is null\n" << std::flush;
-        //PyErr_Print();
-        Py_Finalize();
-        return;
-    } else {
-        std::cout << "PyObject_GetAttrString is not null\n" << std::flush;
-    }
+    // Grab the live sys.path list object
+    PyObject* sys_path = PySys_GetObject("path");
+    ASSERT_NE(sys_path, nullptr) << "Failed to access Python sys.path!";
+
+    // Create a Python string element matching our path type
+    PyObject* path_element = PyUnicode_FromWideChar(test_assets_str.c_str(), test_assets_str.length());
+    ASSERT_NE(path_element, nullptr) << "Failed to allocate Unicode path string.";
+
+    // Safely append directly into Python's runtime search paths array
+    int const append_status = PyList_Append(sys_path, path_element);
+    Py_DECREF(path_element); // Clean up temporary reference allocation
+    ASSERT_EQ(append_status, 0) << "Failed to append test directory to sys.path.";
+
+    // Test execution (Fail early and loudly if things go missing)
+    PyObject* module = PyImport_ImportModule("python_tests");
+    ASSERT_NE(module, nullptr) << "Failed to import python_tests module! Check module paths.";
+
+    PyObject* function = PyObject_GetAttrString(module, "append");
+    ASSERT_NE(function, nullptr) << "Failed to load 'append' attribute from Python script.";
 
     PyObject* args = PyTuple_Pack(2,
                                   PyUnicode_FromString("Hello "),
                                   PyUnicode_FromString("World\n"));
-    std::cout << "PyTuple_Pack did not crash\n" << std::flush;
-    if(args == nullptr) {
-        std::cout << "PyTuple_Pack is null\n" << std::flush;
-        PyErr_Print();
-        Py_Finalize();
-        return;
-    } else {
-        std::cout << "PyTuple_Pack is not null\n" << std::flush;
-    }
+    ASSERT_NE(args, nullptr) << "Failed to create parameter tuple pack.";
 
-    PyObject* pyResult = PyObject_CallObject(function, args);
-    std::cout << "PyObject_CallObject\n";
-    std::string result = PyUnicode_AsUTF8(pyResult);
-    std::cout << result << std::endl << std::flush;
+    PyObject* py_result = PyObject_CallObject(function, args);
+    ASSERT_NE(py_result, nullptr) << "Python function call returned a null pointer evaluation result.";
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
     Py_Finalize();
 
     EXPECT_EQ(result, hello_world);
-
-    // Uncomment to see prints
-    //EXPECT_FALSE(true);
 }
