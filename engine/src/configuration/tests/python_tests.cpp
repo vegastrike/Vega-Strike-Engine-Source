@@ -66,7 +66,7 @@ TEST(Python, Sanity) {
 }
 
 TEST(Python, Call_Function) {
-    // 1. Structural, platform-agnostic path building
+    // Structural, platform-agnostic path building
     boost::filesystem::path current_dir = boost::filesystem::current_path();
     std::cout << "Original structural path: " << current_dir << std::endl;
 
@@ -82,7 +82,6 @@ TEST(Python, Call_Function) {
     bool exists = boost::filesystem::exists("python_tests.py");
     std::cout << "python_tests.py exists locally: " << exists << std::endl;
 
-    // 2. Clear Initialization Environment Config
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
     py_pre_config.coerce_c_locale = 1;
@@ -96,9 +95,9 @@ TEST(Python, Call_Function) {
     PyConfig_InitPythonConfig(&config);
     config.isolated = 0;
 
-    status = PyConfig_Read(&config);
+    status = Py_InitializeFromConfig(&config);
+    PyConfig_Clear(&config); // Free configuration memory
     if (PyStatus_Exception(status)) {
-        PyConfig_Clear(&config);
         Py_ExitStatusException(status);
     }
 
@@ -111,20 +110,20 @@ TEST(Python, Call_Function) {
     std::wstring test_assets_str(native_path.begin(), native_path.end());
 #endif
 
-    status = PyWideStringList_Append(&config.module_search_paths, test_assets_str.c_str());
-    if (PyStatus_Exception(status)) {
-        PyConfig_Clear(&config);
-        Py_ExitStatusException(status);
-    }
+    // Grab the live sys.path list object
+    PyObject* sys_path = PySys_GetObject("path");
+    ASSERT_NE(sys_path, nullptr) << "Failed to access Python sys.path!";
 
-    // 4. Fire up the interpreter with our unified path set
-    status = Py_InitializeFromConfig(&config);
-    PyConfig_Clear(&config); // Free configuration memory
-    if (PyStatus_Exception(status)) {
-        Py_ExitStatusException(status);
-    }
+    // Create a Python string element matching our path type
+    PyObject* path_element = PyUnicode_FromWideChar(test_assets_str.c_str(), test_assets_str.length());
+    ASSERT_NE(path_element, nullptr) << "Failed to allocate Unicode path string.";
 
-    // 5. Test execution (Fail early and loudly if things go missing)
+    // Safely append directly into Python's runtime search paths array
+    int append_status = PyList_Append(sys_path, path_element);
+    Py_DECREF(path_element); // Clean up temporary reference allocation
+    ASSERT_EQ(append_status, 0) << "Failed to append test directory to sys.path.";
+
+    // Test execution (Fail early and loudly if things go missing)
     PyObject* module = PyImport_ImportModule("python_tests");
     ASSERT_NE(module, nullptr) << "Failed to import python_tests module! Check module paths.";
 
