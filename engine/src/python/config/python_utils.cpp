@@ -27,14 +27,15 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#include "python_utils.h"
+#define PY_SSIZE_T_CLEAN
 
-#include <iostream>
-#include <boost/python.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/python.hpp>
+#include <iostream>
+#include <utility>
 
-//#include "vegadisk/vsfilesystem.h"
-//#include "src/vs_logging.h"
+#include "python_utils.h"
+#include "src/vs_logging.h"
 
 using namespace boost::python;
 using namespace boost::filesystem;
@@ -46,7 +47,7 @@ using namespace boost::filesystem;
 // just to get the python paths.
 std::string GetPythonPath() {
     Py_Initialize();
-    wchar_t* w_path_ptr = Py_GetPath();
+    wchar_t const* w_path_ptr = Py_GetPath();
     Py_Finalize();
 
     std::wstring w_path_w( w_path_ptr );
@@ -55,112 +56,318 @@ std::string GetPythonPath() {
     return path;
 }
 
+void InitPython(bool &was_already_initialized) {
+    PyPreConfig py_pre_config;
+    PyPreConfig_InitPythonConfig(&py_pre_config);
+    py_pre_config.coerce_c_locale = 1;
+    was_already_initialized = Py_IsInitialized() != 0;
 
+    if (!was_already_initialized) {
+        PyStatus status = Py_PreInitialize(&py_pre_config);
+        if (PyStatus_Exception(status) != 0) {
+            VS_LOG(fatal, (boost::format("%1%: %2%: Exception calling Py_PreInitialize: %3%")
+                    % __FILE__ % __FUNCTION__ % status.err_msg));
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+            Py_ExitStatusException(status);
+        }
 
-// A utility function to call a function and get a PyObject as a result
-PyObject* GetClassFromPython(
-    const std::string build_path,
-    const std::string path_string,
-    const std::string datadir,
-    const std::string module_name,
-    const std::string function_name) {
-    boost::filesystem::path full_path = boost::filesystem::path(path_string);
+        PyConfig config;
+        PyConfig_InitPythonConfig(&config);
+        config.isolated = 0;
+
+        status = Py_InitializeFromConfig(&config);
+        PyConfig_Clear(&config); // Free configuration memory
+        if (PyStatus_Exception(status) != 0) {
+            VS_LOG(fatal, (boost::format("%1%: %2%: Exception calling Py_InitializeFromConfig: %3%")
+                    % __FILE__ % __FUNCTION__ % status.err_msg));
+            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+            Py_ExitStatusException(status);
+        }
+    }
+}
+
+PyObject * GetMethodFromPython(std::string module_name, std::string function_name
+                               , const std::list<boost::filesystem::path>& search_paths) {
+    bool py_was_initialized{};
+
+    InitPython(py_was_initialized);
+
+    PyObject* sys_path = PySys_GetObject("path");
+    if (sys_path == nullptr) {
+        VS_LOG_FLUSH_EXIT(fatal, (boost::format("%1%: %2%: PySys_GetObject(\"path\") returned nullptr")
+                % __FILE__ % __FUNCTION__), -45);
+    }
+
+    for (const auto& search_path : search_paths) {
+        boost::filesystem::path const canonical_path = boost::filesystem::canonical(search_path);
+        std::string const canonical_path_str = canonical_path.lexically_normal().generic_string();
+        std::wstring const canonical_path_wstr = canonical_path.lexically_normal().generic_wstring();
+        PyObject* path_element = PyUnicode_FromWideChar(canonical_path_wstr.c_str(), canonical_path_wstr.length());
+        if (path_element == nullptr) {
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("%1%: %2%: PyUnicode_FromWideChar returned nullptr")
+                    % __FILE__ % __FUNCTION__), -46);
+        }
+        int const append_status = PyList_Append(sys_path, path_element);
+        Py_DECREF(path_element); // Clean up temporary reference allocation
+        if (append_status != 0) {
+            VS_LOG_FLUSH_EXIT(fatal, (boost::format("%1%: %2%: PyList_Append returned %3% for path %4%")
+                    % __FILE__ % __FUNCTION__ % append_status % canonical_path_str), -47);
+        }
+    }
+
+    PyObject* module = PyImport_ImportModule(module_name.c_str());
+    if (module == nullptr) {
+        PyErr_Print();
+        if (!py_was_initialized) {
+            Py_Finalize();
+        }
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: %2%: PyImport_ImportModule() returned nullptr for module %3%")
+                % __FILE__ % __FUNCTION__ % module_name));
+        return nullptr;
+    }
+
+    PyObject* function = PyObject_GetAttrString(module,function_name.c_str());
+    if (function == nullptr) {
+        PyErr_Print();
+        if (!py_was_initialized) {
+            Py_Finalize();
+        }
+        VS_LOG_AND_FLUSH(error, (boost::format("%1%: %2%: PyObject_GetAttrString returned nullptr for function %3%")
+            % __FILE__ % __FUNCTION__ % function_name));
+        return nullptr;
+    }
+
+    if (!py_was_initialized) {
+        Py_Finalize();
+    }
+
+    return function;
+}
+
+PyObject * GetMethodFromPython(std::string module_name,
+        std::string function_name,
+        const std::list<std::string> &search_paths) {
+    std::list<boost::filesystem::path> paths;
+    for (const auto& path : search_paths) {
+        boost::filesystem::path const canonical_path = boost::filesystem::canonical(path);
+        boost::filesystem::path const lexically_normal = canonical_path.lexically_normal();
+        paths.push_back(canonical_path);
+    }
+
+    return GetMethodFromPython(std::move(module_name), std::move(function_name), paths);
+}
+
+PyObject * GetMethodFromPython(std::string module_name,
+        std::string function_name,
+        const std::list<std::wstring> &search_paths) {
+    std::list<boost::filesystem::path> paths;
+    for (const auto& path : search_paths) {
+        boost::filesystem::path const canonical_path = boost::filesystem::canonical(path);
+        boost::filesystem::path const lexically_normal = canonical_path.lexically_normal();
+        paths.push_back(canonical_path);
+    }
+
+    return GetMethodFromPython(std::move(module_name), std::move(function_name), paths);
+}
+
+PyObject * GetMethodFromPython(const std::string &build_path, const std::wstring &path_string
+        , const std::string &datadir, const std::string &module_name, const std::string &function_name) {
+    boost::filesystem::path const full_path = boost::filesystem::path(path_string);
     boost::filesystem::current_path(full_path);
 
     if(!boost::filesystem::exists(module_name + ".py")) {
+        VS_LOG(warning, (boost::format("%1%: %2%: Can't find module %3%.") % __FILE__ % __FUNCTION__ % module_name));
         // TODO: throw exception
         return nullptr;
     }
 
-    PyPreConfig py_pre_config;
-    PyPreConfig_InitPythonConfig(&py_pre_config);
-
-    py_pre_config.coerce_c_locale = 1;
-
-    PyStatus status;
-
-    status = Py_PreInitialize(&py_pre_config);
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python pre-initialization failed" << std::endl << std::flush;
-        Py_ExitStatusException(status);
-    }
-
-    const std::string python_path = GetPythonPath();
-    const std::wstring python_path_w(python_path.begin(), python_path.end());
     const std::wstring path_string_w = std::wstring(path_string.begin(), path_string.end());
     const std::string python_sitelib_path = QUOTE(Python_SITELIB);
     const std::wstring python_sitelib_path_wstring = std::wstring(python_sitelib_path.begin(), python_sitelib_path.end());
     const std::wstring build_path_w = std::wstring(build_path.begin(), build_path.end());
     const std::wstring data_path_w = std::wstring(datadir.begin(), datadir.end());
 
-    PyWideStringList python_path_py_wide_string_list{};
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 1 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
-    }
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, path_string_w.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 2 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
-    }
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_sitelib_path_wstring.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 3 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
-    }
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, build_path_w.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 4 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
-    }
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, data_path_w.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 5 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
+    std::list<std::wstring> const path_wstrs{path_string_w, python_sitelib_path_wstring, build_path_w, data_path_w};
+    std::list<boost::filesystem::path> paths;
+    for (const auto& path : path_wstrs) {
+        boost::filesystem::path const canonical_path = boost::filesystem::canonical(path);
+        boost::filesystem::path const lexically_normal = canonical_path.lexically_normal();
+        paths.push_back(canonical_path);
     }
 
-    PyConfig config;
-    PyConfig_InitPythonConfig(&config);
+    return GetMethodFromPython(module_name, function_name, paths);
+}
 
-    config.module_search_paths = python_path_py_wide_string_list;
-    config.isolated = 0;
+PyObject * CallPythonFnNullArgs(std::string module_name, std::string function_name
+                                , const std::list<boost::filesystem::path> &search_paths) {
+    bool py_was_initialized{};
 
-    status = Py_InitializeFromConfig(&config);
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python config initialization failed" << std::endl << std::flush;
-        PyErr_Print();
-        PyConfig_Clear(&config);
-        Py_ExitStatusException(status);
-    }
+    InitPython(py_was_initialized);
 
-    PyObject* module = PyImport_ImportModule(module_name.c_str());
+    PyObject* py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
 
-    if(!module) {
-        std::cerr << "Python module import failed (PyImport_ImportModule is null)" << std::endl << std::flush;
-        PyErr_Print();
+    PyObject* py_result = PyObject_CallObject(py_fn, nullptr);
+
+    if (!py_was_initialized) {
         Py_Finalize();
-        // TODO: throw exception
-        return nullptr;
     }
 
-    PyObject* function = PyObject_GetAttrString(module,function_name.c_str());
-    if(!function) {
-        std::cerr << "PyObject_GetAttrString is null" << std::endl << std::flush;
-        PyErr_Print();
+    return py_result;
+}
+
+PyObject * CallPythonFnNullArgs(PyObject *py_fn) {
+    bool py_was_initialized{};
+
+    InitPython(py_was_initialized);
+
+    PyObject* py_result = PyObject_CallObject(py_fn, nullptr);
+
+    if (!py_was_initialized) {
         Py_Finalize();
-        // TODO: throw exception
-        return nullptr;
     }
 
+    return py_result;
+}
 
-    PyObject* pyResult = PyObject_CallObject(function, nullptr);
-    Py_Finalize();
+PyObject * PrepareStringArgsForPython(const std::list<std::string> &args) {
+    bool py_was_initialized{};
+    std::vector<PyObject*> py_arg_vec{};
 
-    return pyResult;
+    InitPython(py_was_initialized);
+
+    for (const auto& arg : args) {
+        py_arg_vec.push_back(PyUnicode_FromString(arg.c_str()));
+    }
+
+    PyObject* py_args = PyTuple_New(static_cast<Py_ssize_t>(py_arg_vec.size()));
+    if (py_args == nullptr) {
+        VS_LOG(error, (boost::format("%1%: %2%: Failed to create PyTuple") % __FILE__ % __FUNCTION__));
+        for (auto& py_arg : py_arg_vec) {
+            Py_DECREF(py_arg);
+        }
+        return nullptr;
+    };
+
+    for (Py_ssize_t index = 0; index < py_arg_vec.size(); ++index) {
+        int const err = PyTuple_SetItem(py_args, index, py_arg_vec.at(index));
+        if (err < 0) {
+            PyErr_Print();
+            VS_LOG(error, (boost::format("%1%: %2%: Failed to add argument #%3% to PyTuple") % __FILE__ % __FUNCTION__ % index));
+        }
+    }
+    return py_args;
+}
+
+PyObject * PrepareWStringArgsForPython(const std::list<std::wstring> &args) {
+    bool py_was_initialized{};
+    std::vector<PyObject*> py_arg_vec{};
+
+    InitPython(py_was_initialized);
+
+    for (const auto& arg : args) {
+        py_arg_vec.push_back(PyUnicode_FromWideChar(arg.c_str(), static_cast<Py_ssize_t>(arg.length())));
+    }
+
+    PyObject* py_args = PyTuple_New(static_cast<Py_ssize_t>(py_arg_vec.size()));
+    if (py_args == nullptr) {
+        VS_LOG(error, (boost::format("%1%: %2%: Failed to create PyTuple") % __FILE__ % __FUNCTION__));
+        for (auto& py_arg : py_arg_vec) {
+            Py_DECREF(py_arg);
+        }
+        return nullptr;
+    };
+
+    for (Py_ssize_t index = 0; index < py_arg_vec.size(); ++index) {
+        int const err = PyTuple_SetItem(py_args, index, py_arg_vec.at(index));
+        if (err < 0) {
+            PyErr_Print();
+            VS_LOG(error, (boost::format("%1%: %2%: Failed to add argument #%3% to PyTuple") % __FILE__ % __FUNCTION__ % index));
+        }
+    }
+    return py_args;
+}
+
+PyObject * CallPythonFnStringArgs(std::string module_name, std::string function_name
+                                  , const std::list<boost::filesystem::path> &search_paths, const std::list<std::string> &args) {
+    bool py_was_initialized{};
+
+    InitPython(py_was_initialized);
+
+    PyObject* py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
+
+    PyObject* py_args = PrepareStringArgsForPython(args);
+
+    PyObject* py_result = PyObject_CallObject(py_fn, py_args);
+
+    if (!py_was_initialized) {
+        Py_Finalize();
+    }
+
+    return py_result;
+}
+
+PyObject * CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string> &args) {
+    PyObject* py_args = PrepareStringArgsForPython(args);
+
+    PyObject* py_result = PyObject_CallObject(py_fn, py_args);
+
+    return py_result;
+}
+
+PyObject * CallPythonFnPyArgs(PyObject *py_fn, PyObject *args) {
+    bool py_was_initialized{};
+
+    InitPython(py_was_initialized);
+
+    PyObject* py_result = PyObject_CallObject(py_fn, args);
+
+    if (!py_was_initialized) {
+        Py_Finalize();
+    }
+
+    return py_result;
+}
+
+PyObject * CallPythonFnWStringArgs(std::string module_name, std::string function_name
+                                   , const std::list<boost::filesystem::path> &search_paths, const std::list<std::wstring> &args) {
+    bool py_was_initialized{};
+
+    InitPython(py_was_initialized);
+
+    PyObject* py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
+
+    PyObject* py_args = PrepareWStringArgsForPython(args);
+
+    PyObject* py_result = PyObject_CallObject(py_fn, py_args);
+
+    if (!py_was_initialized) {
+        Py_Finalize();
+    }
+
+    return py_result;
+}
+
+PyObject * CallPythonFnWStringArgs(PyObject *py_fn, const std::list<std::wstring> &args) {
+    PyObject* py_args = PrepareWStringArgsForPython(args);
+
+    PyObject* py_result = PyObject_CallObject(py_fn, py_args);
+
+    return py_result;
+}
+
+// A utility function to call a function and get a PyObject as a result
+PyObject* GetClassFromPython(
+    const std::string build_path,
+    const std::wstring path_string,
+    const std::string datadir,
+    const std::string module_name,
+    const std::string function_name) {
+
+    PyObject* py_method = GetMethodFromPython(build_path, path_string, datadir, module_name, function_name);
+    return CallPythonFnNullArgs(py_method);
+}
+
+PyObject * GetClassFromPythonPathRefs(const std::string &build_path, const std::wstring &path_string, const std::string &datadir
+                                      , const std::string &module_name, const std::string &function_name) {
+    return GetClassFromPython(build_path, path_string, datadir, module_name, function_name);
 }

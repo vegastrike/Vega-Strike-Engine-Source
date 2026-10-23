@@ -56,13 +56,13 @@ BOOST_PYTHON_MODULE(python_sanity)
     ;
 }
 
-const std::string hello_world = "Hello World\n";
-
+const std::string kHelloWorldPascalCase = "Hello World\n";
+const std::string kHelloWorldLowercase = "hello world";
 
 TEST(Python, Sanity) {
-    World world(hello_world);
+    World world(kHelloWorldPascalCase);
 
-    EXPECT_EQ(world.greet(), hello_world);
+    EXPECT_EQ(world.greet(), kHelloWorldPascalCase);
 }
 
 TEST(Python, Call_Function) {
@@ -80,7 +80,7 @@ TEST(Python, Call_Function) {
     // Shift context location explicitly
     boost::filesystem::current_path(test_assets_path);
     bool const exists = boost::filesystem::exists("python_tests.py");
-    std::cout << "python_tests.py exists locally: " << exists << '\n';
+    ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
 
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
@@ -135,5 +135,346 @@ TEST(Python, Call_Function) {
     std::string const result = PyUnicode_AsUTF8(py_result);
     Py_Finalize();
 
-    EXPECT_EQ(result, hello_world);
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST(Python, InitPython) {
+    bool python_was_initialized{};
+    InitPython(python_was_initialized);
+    Py_Finalize();
+}
+
+namespace {
+std::vector<boost::filesystem::path> TestPathsHelper() {
+    // Structural, platform-agnostic path building
+    boost::filesystem::path const current_dir = boost::filesystem::current_path();
+    std::cout << "Original structural path: " << current_dir << '\n';
+
+    boost::filesystem::path const up_one_level = current_dir / "..";
+    boost::filesystem::path const up_one_level_canonical = boost::filesystem::canonical(up_one_level).lexically_normal();
+    std::cout << "Up one level: " << up_one_level_canonical << '\n';
+
+    boost::filesystem::path const test_assets_path = up_one_level_canonical / "test_assets";
+    boost::filesystem::path const test_assets_path_canonical = boost::filesystem::canonical(test_assets_path).lexically_normal();
+    std::cout << "Normalized test assets directory: " << test_assets_path_canonical << '\n';
+
+    boost::filesystem::path const build_path = up_one_level_canonical / "..";
+    boost::filesystem::path const build_path_canonical = boost::filesystem::canonical(build_path).lexically_normal();
+
+    // Shift context location explicitly
+    boost::filesystem::current_path(test_assets_path_canonical);
+    bool const exists = boost::filesystem::exists("python_tests.py");
+    std::cout << "python_tests.py exists locally: " << exists << '\n';
+
+    boost::filesystem::path const data_path = up_one_level_canonical / ".." / ".." / ".." / "Assets-Production";
+    boost::filesystem::path const data_path_canonical = boost::filesystem::canonical(data_path).lexically_normal();
+    std::cout << "data_path: " << data_path_canonical << '\n';
+
+    std::vector<boost::filesystem::path> const search_paths{build_path_canonical, test_assets_path_canonical, data_path_canonical};
+    return search_paths;
+}
+}
+
+TEST(Python, GetClassFromPython) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    const boost::filesystem::path& build_path = search_paths.at(0);
+    const boost::filesystem::path& test_assets_path = search_paths.at(1);
+    const boost::filesystem::path& data_path = search_paths.at(2);
+
+    // Shift context location explicitly
+    boost::filesystem::current_path(test_assets_path);
+    bool const exists = boost::filesystem::exists("python_tests.py");
+    ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
+
+    PyObject* py_result = GetClassFromPython(build_path.generic_string(), test_assets_path.generic_wstring(), data_path.generic_string(), "python_tests", "append_no_args");
+    ASSERT_NE(py_result, nullptr) << "Python result is null";
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST(Python, GetClassFromPythonPathRefs) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    const boost::filesystem::path& build_path = search_paths.at(0);
+    const boost::filesystem::path& test_assets_path = search_paths.at(1);
+    const boost::filesystem::path& data_path = search_paths.at(2);
+
+    // Shift context location explicitly
+    boost::filesystem::current_path(test_assets_path);
+    bool const exists = boost::filesystem::exists("python_tests.py");
+    ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
+
+    PyObject* py_result = GetClassFromPython(build_path.generic_string(), test_assets_path.generic_wstring(), data_path.generic_string(), "python_tests", "append_no_args");
+    ASSERT_NE(py_result, nullptr) << "Python result is null";
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST(Python, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    const boost::filesystem::path& build_path = search_paths.at(0);
+    const boost::filesystem::path& test_assets_path = search_paths.at(1);
+    const boost::filesystem::path& data_path = search_paths.at(2);
+
+    // Shift context location explicitly
+    boost::filesystem::current_path(test_assets_path);
+    bool const exists = boost::filesystem::exists("python_tests.py");
+    ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
+
+    std::list<boost::filesystem::path> const search_path_list{test_assets_path, build_path, data_path};
+
+    PyObject* py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    PyObject* py_result = CallPythonFnNullArgs(py_method);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST(Python, GetMethodFromPython_with_list_of_strings) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<std::string> search_path_strings{};
+    for (const auto& search_path : search_paths) {
+        search_path_strings.emplace_back(search_path.generic_string());
+    }
+
+    PyObject* py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_strings);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    PyObject* py_result = CallPythonFnNullArgs(py_method);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST(Python, GetMethodFromPython_with_list_of_wstrings) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<std::wstring> search_path_strings{};
+    for (const auto& search_path : search_paths) {
+        search_path_strings.emplace_back(search_path.generic_wstring());
+    }
+
+    PyObject* py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_strings);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    PyObject* py_result = CallPythonFnNullArgs(py_method);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST(Python, GetMethodFromPython_with_individual_paths) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    const boost::filesystem::path& build_path = search_paths.at(0);
+    const boost::filesystem::path& test_assets_path = search_paths.at(1);
+    const boost::filesystem::path& data_path = search_paths.at(2);
+
+    // Shift context location explicitly
+    boost::filesystem::current_path(test_assets_path);
+    bool const exists = boost::filesystem::exists("python_tests.py");
+    ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
+
+    PyObject* py_method = GetMethodFromPython(build_path.generic_string(), test_assets_path.generic_wstring(), data_path.generic_string(), "python_tests", "append_no_args");
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    PyObject* py_result = CallPythonFnNullArgs(py_method);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST(Python, PrepareStringArgsForPython) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<boost::filesystem::path> search_path_list{};
+    for (const auto& search_path : search_paths) {
+        search_path_list.emplace_back(search_path);
+    }
+
+    PyObject* py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    const std::list<std::string> arg_string_list{"Hello", " World\n"};
+    PyObject* py_args = PrepareStringArgsForPython(arg_string_list);
+    ASSERT_NE(py_args, nullptr) << "PrepareStringArgsForPython returned a null pointer" << '\n';
+
+    PyObject* py_result = CallPythonFnPyArgs(py_method, py_args);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST(Python, PrepareWStringArgsForPython) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<boost::filesystem::path> search_path_list{};
+    for (const auto& search_path : search_paths) {
+        search_path_list.emplace_back(search_path);
+    }
+
+    PyObject* py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
+    PyObject* py_args = PrepareWStringArgsForPython(arg_wstring_list);
+    ASSERT_NE(py_args, nullptr) << "PrepareWStringArgsForPython returned a null pointer" << '\n';
+
+    PyObject* py_result = CallPythonFnPyArgs(py_method, py_args);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST(Python, CallPythonFnNullArgs_with_module_name_fn_name_and_search_paths) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<boost::filesystem::path> search_path_list{};
+    for (const auto& search_path : search_paths) {
+        search_path_list.emplace_back(search_path);
+    }
+
+    PyObject* py_result = CallPythonFnNullArgs("python_tests", "append_no_args", search_path_list);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST(Python, CallPythonFnNullArgs_with_fn_pointer) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<boost::filesystem::path> search_path_list{};
+    for (const auto& search_path : search_paths) {
+        search_path_list.emplace_back(search_path);
+    }
+
+    PyObject* py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
+
+    PyObject* py_result = CallPythonFnNullArgs(py_method);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST(Python, CallPythonFnStringArgs_with_module_name_fn_name_and_search_paths) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<boost::filesystem::path> search_path_list{};
+    for (const auto& search_path : search_paths) {
+        search_path_list.emplace_back(search_path);
+    }
+
+    const std::list<std::string> arg_string_list{"Hello", " World\n"};
+    PyObject* py_result = CallPythonFnStringArgs("python_tests", "append", search_path_list, arg_string_list);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnStringArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST(Python, CallPythonFnStringArgs_with_fn_pointer) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<boost::filesystem::path> search_path_list{};
+    for (const auto& search_path : search_paths) {
+        search_path_list.emplace_back(search_path);
+    }
+
+    PyObject* py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
+
+    const std::list<std::string> arg_string_list{"Hello", " World\n"};
+    PyObject* py_result = CallPythonFnStringArgs(py_method, arg_string_list);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnStringArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST(Python, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_paths) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<boost::filesystem::path> search_path_list{};
+    for (const auto& search_path : search_paths) {
+        search_path_list.emplace_back(search_path);
+    }
+
+    const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
+    PyObject* py_result = CallPythonFnWStringArgs("python_tests", "append", search_path_list, arg_wstring_list);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnWStringArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST(Python, CallPythonFnWstringArgs_with_fn_pointer) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<boost::filesystem::path> search_path_list{};
+    for (const auto& search_path : search_paths) {
+        search_path_list.emplace_back(search_path);
+    }
+
+    PyObject* py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
+
+    const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
+    PyObject* py_result = CallPythonFnWStringArgs(py_method, arg_wstring_list);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnWStringArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST(Python, CallPythonFnPyArgs) {
+    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::list<boost::filesystem::path> search_path_list{};
+    for (const auto& search_path : search_paths) {
+        search_path_list.emplace_back(search_path);
+    }
+
+    PyObject* py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
+
+    const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
+    PyObject* py_args = PrepareWStringArgsForPython(arg_wstring_list);
+    ASSERT_NE(py_args, nullptr) << "PrepareWStringArgsForPython returned a null pointer" << '\n';
+
+    PyObject* py_result = CallPythonFnPyArgs(py_method, py_args);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
+
+    std::string const result = PyUnicode_AsUTF8(py_result);
+    Py_Finalize();
+
+    EXPECT_EQ(result, kHelloWorldPascalCase);
 }
