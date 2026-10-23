@@ -101,14 +101,8 @@ TEST(Python, Call_Function) {
         Py_ExitStatusException(status);
     }
 
-    // 3. Convert path cleanly depending on platform context type
-#if defined(_WIN32)
-    std::wstring test_assets_str = test_assets_path.wstring();
-#else
-    // On Linux/macOS, convert native std::string path into a safe wstring for the C-API
-    std::string native_path = test_assets_path.string();
-    std::wstring test_assets_str(native_path.begin(), native_path.end());
-#endif
+    // Convert path cleanly
+    std::wstring test_assets_str = test_assets_path.lexically_normal().generic_wstring();
 
     // Grab the live sys.path list object
     PyObject* sys_path = PySys_GetObject("path");
