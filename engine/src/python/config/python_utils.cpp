@@ -35,7 +35,8 @@
 #include <utility>
 
 #include "python_utils.h"
-#include "src/vs_logging.h"
+
+#include <boost/format.hpp>
 
 using namespace boost::python;
 using namespace boost::filesystem;
@@ -65,9 +66,7 @@ void InitPython(bool &was_already_initialized) {
     if (!was_already_initialized) {
         PyStatus status = Py_PreInitialize(&py_pre_config);
         if (PyStatus_Exception(status) != 0) {
-            VS_LOG(fatal, (boost::format("%1%: %2%: Exception calling Py_PreInitialize: %3%")
-                    % __FILE__ % __FUNCTION__ % status.err_msg));
-            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+            PyErr_Print();
             Py_ExitStatusException(status);
         }
 
@@ -78,9 +77,7 @@ void InitPython(bool &was_already_initialized) {
         status = Py_InitializeFromConfig(&config);
         PyConfig_Clear(&config); // Free configuration memory
         if (PyStatus_Exception(status) != 0) {
-            VS_LOG(fatal, (boost::format("%1%: %2%: Exception calling Py_InitializeFromConfig: %3%")
-                    % __FILE__ % __FUNCTION__ % status.err_msg));
-            VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+            PyErr_Print();
             Py_ExitStatusException(status);
         }
     }
@@ -94,8 +91,9 @@ PyObject * GetMethodFromPython(std::string module_name, std::string function_nam
 
     PyObject* sys_path = PySys_GetObject("path");
     if (sys_path == nullptr) {
-        VS_LOG_FLUSH_EXIT(fatal, (boost::format("%1%: %2%: PySys_GetObject(\"path\") returned nullptr")
-                % __FILE__ % __FUNCTION__), -45);
+        std::cerr << boost::format("%1%: %2%: PySys_GetObject(\"path\") returned nullptr")
+                % __FILE__ % __FUNCTION__ << std::endl;
+        return nullptr;
     }
 
     for (const auto& search_path : search_paths) {
@@ -104,14 +102,15 @@ PyObject * GetMethodFromPython(std::string module_name, std::string function_nam
         std::wstring const canonical_path_wstr = canonical_path.lexically_normal().generic_wstring();
         PyObject* path_element = PyUnicode_FromWideChar(canonical_path_wstr.c_str(), canonical_path_wstr.length());
         if (path_element == nullptr) {
-            VS_LOG_FLUSH_EXIT(fatal, (boost::format("%1%: %2%: PyUnicode_FromWideChar returned nullptr")
-                    % __FILE__ % __FUNCTION__), -46);
+            std::cerr << boost::format("%1%: %2%: PyUnicode_FromWideChar returned nullptr")
+                    % __FILE__ % __FUNCTION__ << std::endl;
+            return nullptr;
         }
         int const append_status = PyList_Append(sys_path, path_element);
         Py_DECREF(path_element); // Clean up temporary reference allocation
         if (append_status != 0) {
-            VS_LOG_FLUSH_EXIT(fatal, (boost::format("%1%: %2%: PyList_Append returned %3% for path %4%")
-                    % __FILE__ % __FUNCTION__ % append_status % canonical_path_str), -47);
+            std::cerr << boost::format("%1%: %2%: PyList_Append returned %3% for path %4%")
+                    % __FILE__ % __FUNCTION__ % append_status % canonical_path_str << std::endl;
         }
     }
 
@@ -121,8 +120,8 @@ PyObject * GetMethodFromPython(std::string module_name, std::string function_nam
         if (!py_was_initialized) {
             Py_Finalize();
         }
-        VS_LOG_AND_FLUSH(error, (boost::format("%1%: %2%: PyImport_ImportModule() returned nullptr for module %3%")
-                % __FILE__ % __FUNCTION__ % module_name));
+        std::cerr << boost::format("%1%: %2%: PyImport_ImportModule() returned nullptr for module %3%")
+                % __FILE__ % __FUNCTION__ % module_name << std::endl;
         return nullptr;
     }
 
@@ -132,8 +131,8 @@ PyObject * GetMethodFromPython(std::string module_name, std::string function_nam
         if (!py_was_initialized) {
             Py_Finalize();
         }
-        VS_LOG_AND_FLUSH(error, (boost::format("%1%: %2%: PyObject_GetAttrString returned nullptr for function %3%")
-            % __FILE__ % __FUNCTION__ % function_name));
+        std::cerr << boost::format("%1%: %2%: PyObject_GetAttrString returned nullptr for function %3%")
+            % __FILE__ % __FUNCTION__ % function_name << std::endl;
         return nullptr;
     }
 
@@ -176,7 +175,7 @@ PyObject * GetMethodFromPython(const std::string &build_path, const std::wstring
     boost::filesystem::current_path(full_path);
 
     if(!boost::filesystem::exists(module_name + ".py")) {
-        VS_LOG(warning, (boost::format("%1%: %2%: Can't find module %3%.") % __FILE__ % __FUNCTION__ % module_name));
+        std::cerr << boost::format("%1%: %2%: Can't find module %3%.") % __FILE__ % __FUNCTION__ % module_name << std::endl;
         // TODO: throw exception
         return nullptr;
     }
@@ -239,20 +238,21 @@ PyObject * PrepareStringArgsForPython(const std::list<std::string> &args) {
         py_arg_vec.push_back(PyUnicode_FromString(arg.c_str()));
     }
 
-    PyObject* py_args = PyTuple_New(static_cast<Py_ssize_t>(py_arg_vec.size()));
+    Py_ssize_t const size = static_cast<Py_ssize_t>(py_arg_vec.size());
+    PyObject* py_args = PyTuple_New(size);
     if (py_args == nullptr) {
-        VS_LOG(error, (boost::format("%1%: %2%: Failed to create PyTuple") % __FILE__ % __FUNCTION__));
+        std::cerr << boost::format("%1%: %2%: Failed to create PyTuple") % __FILE__ % __FUNCTION__ << std::endl;
         for (auto& py_arg : py_arg_vec) {
             Py_DECREF(py_arg);
         }
         return nullptr;
     };
 
-    for (Py_ssize_t index = 0; index < py_arg_vec.size(); ++index) {
+    for (Py_ssize_t index = 0; index < size; ++index) {
         int const err = PyTuple_SetItem(py_args, index, py_arg_vec.at(index));
         if (err < 0) {
             PyErr_Print();
-            VS_LOG(error, (boost::format("%1%: %2%: Failed to add argument #%3% to PyTuple") % __FILE__ % __FUNCTION__ % index));
+            std::cerr << boost::format("%1%: %2%: Failed to add argument #%3% to PyTuple") % __FILE__ % __FUNCTION__ % index << std::endl;
         }
     }
     return py_args;
@@ -268,20 +268,21 @@ PyObject * PrepareWStringArgsForPython(const std::list<std::wstring> &args) {
         py_arg_vec.push_back(PyUnicode_FromWideChar(arg.c_str(), static_cast<Py_ssize_t>(arg.length())));
     }
 
-    PyObject* py_args = PyTuple_New(static_cast<Py_ssize_t>(py_arg_vec.size()));
+    Py_ssize_t const size = static_cast<Py_ssize_t>(py_arg_vec.size());
+    PyObject* py_args = PyTuple_New(size);
     if (py_args == nullptr) {
-        VS_LOG(error, (boost::format("%1%: %2%: Failed to create PyTuple") % __FILE__ % __FUNCTION__));
+        std::cerr << boost::format("%1%: %2%: Failed to create PyTuple") % __FILE__ % __FUNCTION__ << std::endl;
         for (auto& py_arg : py_arg_vec) {
             Py_DECREF(py_arg);
         }
         return nullptr;
     };
 
-    for (Py_ssize_t index = 0; index < py_arg_vec.size(); ++index) {
+    for (Py_ssize_t index = 0; index < size; ++index) {
         int const err = PyTuple_SetItem(py_args, index, py_arg_vec.at(index));
         if (err < 0) {
             PyErr_Print();
-            VS_LOG(error, (boost::format("%1%: %2%: Failed to add argument #%3% to PyTuple") % __FILE__ % __FUNCTION__ % index));
+            std::cerr << boost::format("%1%: %2%: Failed to add argument #%3% to PyTuple") % __FILE__ % __FUNCTION__ % index << std::endl;
         }
     }
     return py_args;
