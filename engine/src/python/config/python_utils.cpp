@@ -42,7 +42,6 @@
 #include <boost/filesystem.hpp>
 
 #include <deque>
-#include <iostream>
 
 using namespace boost::python;
 namespace fs = boost::filesystem;
@@ -218,10 +217,6 @@ void InitPython(bool &was_already_initialized) {
 
 UniquePyRef GetMethodFromPython(std::string module_name, std::string function_name
                                    , const std::list<fs::path> &search_paths) {
-    bool py_was_initialized{};
-
-    InitPython(py_was_initialized);
-
     PyObject* sys_path = PySys_GetObject("path");
     if (sys_path == nullptr) {
         std::cerr << boost::format("%1%: %2%: PySys_GetObject(\"path\") returned nullptr")
@@ -250,9 +245,6 @@ UniquePyRef GetMethodFromPython(std::string module_name, std::string function_na
     UniquePyRef module{PyImport_ImportModule(module_name.c_str())};
     if (module == nullptr) {
         PyErr_Print();
-        if (!py_was_initialized) {
-            Py_Finalize();
-        }
         std::cerr << boost::format("%1%: %2%: PyImport_ImportModule() returned nullptr for module %3%")
                 % __FILE__ % __FUNCTION__ % module_name << std::endl;
         return nullptr;
@@ -263,16 +255,9 @@ UniquePyRef GetMethodFromPython(std::string module_name, std::string function_na
         std::cerr << boost::format("%1%: %2%: PyObject_GetAttrString returned nullptr for function %3%")
             % __FILE__ % __FUNCTION__ % function_name << std::endl;
         PyErr_Print();
-        if (!py_was_initialized) {
-            Py_Finalize();
-        }
         std::cerr << boost::format("%1%: %2%: PyObject_GetAttrString returned nullptr for function %3%")
             % __FILE__ % __FUNCTION__ % function_name << std::endl;
         return nullptr;
-    }
-
-    if (!py_was_initialized) {
-        Py_Finalize();
     }
 
     return func;
