@@ -59,6 +59,15 @@ BOOST_PYTHON_MODULE(python_sanity)
 const std::string kHelloWorldPascalCase = "Hello World\n";
 const std::string kHelloWorldLowercase = "hello world";
 
+static void SetUpTestSuite() {
+    bool python_was_initialized{};
+    InitPython(python_was_initialized);
+}
+
+static void TearDownTestSuite() {
+    Py_Finalize();
+}
+
 TEST(Python, Sanity) {
     World world(kHelloWorldPascalCase);
 
@@ -133,15 +142,15 @@ TEST(Python, Call_Function) {
     ASSERT_NE(py_result, nullptr) << "Python function call returned a null pointer evaluation result.";
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
 
 TEST(Python, InitPython) {
     bool python_was_initialized{};
+    // This function will be called even though Python was already init'ed at the test suite level. But that's OK,
+    // because InitPython checks to see if Python was already init'ed before initializing it again.
     InitPython(python_was_initialized);
-    Py_Finalize();
 }
 
 namespace {
@@ -190,7 +199,6 @@ TEST(Python, GetClassFromPython) {
     ASSERT_NE(py_result, nullptr) << "Python result is null";
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
@@ -210,7 +218,6 @@ TEST(Python, GetClassFromPythonPathRefs) {
     ASSERT_NE(py_result, nullptr) << "Python result is null";
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
@@ -235,7 +242,6 @@ TEST(Python, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
@@ -254,7 +260,6 @@ TEST(Python, GetMethodFromPython_with_list_of_strings) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
@@ -273,7 +278,6 @@ TEST(Python, GetMethodFromPython_with_list_of_wstrings) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
@@ -296,7 +300,6 @@ TEST(Python, GetMethodFromPython_with_individual_paths) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
@@ -319,7 +322,6 @@ TEST(Python, PrepareStringArgsForPython) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
@@ -342,7 +344,6 @@ TEST(Python, PrepareWStringArgsForPython) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
@@ -358,7 +359,6 @@ TEST(Python, CallPythonFnNullArgs_with_module_name_fn_name_and_search_paths) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
@@ -377,7 +377,6 @@ TEST(Python, CallPythonFnNullArgs_with_fn_pointer) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
@@ -394,7 +393,6 @@ TEST(Python, CallPythonFnStringArgs_with_module_name_fn_name_and_search_paths) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnStringArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
@@ -414,7 +412,6 @@ TEST(Python, CallPythonFnStringArgs_with_fn_pointer) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnStringArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
@@ -431,7 +428,6 @@ TEST(Python, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_paths) 
     ASSERT_NE(py_result, nullptr) << "CallPythonFnWStringArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
@@ -451,7 +447,6 @@ TEST(Python, CallPythonFnWstringArgs_with_fn_pointer) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnWStringArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
@@ -474,7 +469,6 @@ TEST(Python, CallPythonFnPyArgs) {
     ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
 
     std::string const result = PyUnicode_AsUTF8(py_result);
-    Py_Finalize();
 
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
