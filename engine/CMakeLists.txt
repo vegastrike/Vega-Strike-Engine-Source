@@ -895,19 +895,22 @@ IF (USE_GTEST)
         TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
-    FILE(
-        COPY "src/configuration/tests/vegastrike.config"
-        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    CONFIGURE_FILE(
+            "src/configuration/tests/vegastrike.config"
+            ${CMAKE_BINARY_DIR}/test_assets
+            COPYONLY
     )
 
-    FILE(
-        COPY "src/cmd/tests/units.json"
-        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    CONFIGURE_FILE(
+            "src/cmd/tests/units.json"
+            ${CMAKE_BINARY_DIR}/test_assets
+            COPYONLY
     )
 
-    FILE(
-        COPY "src/configuration/tests/python_tests.py"
-        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    CONFIGURE_FILE(
+            "src/configuration/tests/python_tests.py"
+            ${CMAKE_BINARY_DIR}/test_assets
+            COPYONLY
     )
 
     INCLUDE(GoogleTest)
