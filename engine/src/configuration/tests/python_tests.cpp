@@ -185,7 +185,9 @@ std::vector<boost::filesystem::path> TestPathsHelper() {
     std::cout << "python_tests.py exists locally: " << exists << '\n';
 
     boost::filesystem::path const data_path = up_one_level_canonical / ".." / ".." / ".." / "Assets-Production";
-    boost::filesystem::path const data_path_canonical = boost::filesystem::canonical(data_path).lexically_normal();
+    boost::filesystem::path const data_path_canonical = boost::filesystem::exists(data_path)
+                                                            ? boost::filesystem::canonical(data_path).lexically_normal()
+                                                            : test_assets_path_canonical;
     std::cout << "data_path: " << data_path_canonical << '\n';
 
     std::vector<boost::filesystem::path> const search_paths{build_path_canonical, test_assets_path_canonical, data_path_canonical};
