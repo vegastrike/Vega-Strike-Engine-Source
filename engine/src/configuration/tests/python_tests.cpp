@@ -34,6 +34,9 @@
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 #include <iostream>
+#include <list>
+#include <memory>
+#include <vector>
 
 #include "src/python/config/python_utils.h"
 
@@ -83,26 +86,81 @@ protected:
 
 bool PythonTests::python_was_initialized_ = false;
 
+namespace {
+std::shared_ptr<boost::filesystem::path> FindTestPath(const boost::filesystem::path &starting_path
+                                            , std::string const &relative_path) {
+    boost::filesystem::path const canonical_starting_path = boost::filesystem::canonical(starting_path).lexically_normal();
+    boost::filesystem::path const root_path = canonical_starting_path.root_path();
+    boost::filesystem::path base_path_to_try{canonical_starting_path};
+    for (; !boost::filesystem::exists(base_path_to_try / relative_path) && base_path_to_try != root_path;
+        base_path_to_try = boost::filesystem::canonical(base_path_to_try / "..").lexically_normal()) {
+    }
+    if (boost::filesystem::exists(base_path_to_try / relative_path)) {
+        std::shared_ptr<boost::filesystem::path> result = std::make_shared<boost::filesystem::path>(boost::filesystem::canonical(boost::filesystem::path(base_path_to_try / relative_path)).lexically_normal());
+        std::cout << "Found path: '" << relative_path << "' at '" << result->string() << "'\n";
+        return result;
+    } else {
+        std::cout << "Did not find path: '" << relative_path << "' starting from '" << starting_path << "'\n";
+        return nullptr;
+    }
+}
+
+std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> TestPathsHelper() {
+    // Structural, platform-agnostic path building
+    boost::filesystem::path const current_dir = boost::filesystem::current_path();
+    std::cout << "Original structural path: " << current_dir << '\n';
+    std::shared_ptr<boost::filesystem::path> current_dir_canonical_ptr = std::make_shared<boost::filesystem::path>(boost::filesystem::canonical(current_dir).lexically_normal());
+    std::cout << "Canonicalized original path: " << *current_dir_canonical_ptr << '\n';
+
+    boost::filesystem::path const up_one_level = *current_dir_canonical_ptr / "..";
+    std::shared_ptr<boost::filesystem::path> up_one_level_canonical_ptr = std::make_shared<boost::filesystem::path>(boost::filesystem::canonical(up_one_level).lexically_normal());
+    std::cout << "Up one level: " << *up_one_level_canonical_ptr << '\n';
+
+    std::shared_ptr<boost::filesystem::path> test_assets_path_canonical_ptr = FindTestPath(*current_dir_canonical_ptr, "test_assets");
+    if (test_assets_path_canonical_ptr == nullptr) {
+        return nullptr;
+    }
+    std::cout << "Normalized test assets directory: " << *test_assets_path_canonical_ptr << '\n';
+
+    boost::filesystem::path const build_path = *up_one_level_canonical_ptr;
+    std::shared_ptr<boost::filesystem::path> build_path_canonical_ptr = std::make_shared<boost::filesystem::path>(build_path);
+    std::cout << "Build path: " << *build_path_canonical_ptr << '\n';
+
+    // Shift context location explicitly
+    boost::filesystem::current_path(*test_assets_path_canonical_ptr);
+    bool const exists = boost::filesystem::exists("python_tests.py");
+    std::cout << "python_tests.py exists locally: " << exists << '\n';
+
+    std::shared_ptr<boost::filesystem::path> data_path_canonical_ptr = FindTestPath(*current_dir_canonical_ptr, "Assets-Production");
+    if (data_path_canonical_ptr == nullptr) {
+        return nullptr;
+    }
+    std::cout << "data_path: " << *data_path_canonical_ptr << '\n';
+
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = std::make_shared<std::vector<std::shared_ptr<boost::filesystem::path>>>();
+    search_paths_vec_ptr->emplace_back(build_path_canonical_ptr);
+    search_paths_vec_ptr->emplace_back(test_assets_path_canonical_ptr);
+    search_paths_vec_ptr->emplace_back(data_path_canonical_ptr);
+    return search_paths_vec_ptr;
+}
+}
+
 TEST_F(PythonTests, Sanity) {
     World world(kHelloWorldPascalCase);
 
     EXPECT_EQ(world.greet(), kHelloWorldPascalCase);
 }
 
-TEST_F(PythonTests, Call_Function) {
-    // Structural, platform-agnostic path building
+TEST_F(PythonTests, FindTestPath) {
     boost::filesystem::path const current_dir = boost::filesystem::current_path();
-    std::cout << "Original structural path: " << current_dir << '\n';
+    std::shared_ptr<boost::filesystem::path> current_dir_canonical_ptr = std::make_shared<boost::filesystem::path>(boost::filesystem::canonical(current_dir).lexically_normal());
+    std::shared_ptr<boost::filesystem::path> should_be_null = FindTestPath(*current_dir_canonical_ptr, "nonexistent");
+    ASSERT_EQ(should_be_null, nullptr) << "FindTestPath should return nullptr\n";
+}
 
-    // Use structural appending '/=' instead of a flat string concat
-    boost::filesystem::path const target_path = current_dir / ".." / "test_assets";
-
-    // Normalize path to clean out the relative '..' steps into an absolute path
-    boost::filesystem::path const test_assets_path = boost::filesystem::canonical(target_path);
-    std::cout << "Normalized test assets directory: " << test_assets_path << '\n';
-
-    // Shift context location explicitly
-    boost::filesystem::current_path(test_assets_path);
+TEST_F(PythonTests, Call_Function) {
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
+    std::shared_ptr<boost::filesystem::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
     bool const exists = boost::filesystem::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
 
@@ -126,7 +184,7 @@ TEST_F(PythonTests, Call_Function) {
     }
 
     // Convert path cleanly
-    std::wstring const test_assets_str = test_assets_path.lexically_normal().generic_wstring();
+    std::wstring const test_assets_str = test_assets_path_ptr->generic_wstring();
 
     // Grab the live sys.path list object
     PyObject *sys_path = PySys_GetObject("path");
@@ -168,55 +226,17 @@ TEST_F(PythonTests, InitPython) {
     InitPython(python_was_initialized);
 }
 
-namespace {
-std::vector<boost::filesystem::path> TestPathsHelper() {
-    // Structural, platform-agnostic path building
-    boost::filesystem::path const current_dir = boost::filesystem::current_path();
-    std::cout << "Original structural path: " << current_dir << '\n';
-
-    boost::filesystem::path const up_one_level = current_dir / "..";
-    boost::filesystem::path const up_one_level_canonical = boost::filesystem::canonical(up_one_level).
-            lexically_normal();
-    std::cout << "Up one level: " << up_one_level_canonical << '\n';
-
-    boost::filesystem::path const test_assets_path = up_one_level_canonical / "test_assets";
-    boost::filesystem::path const test_assets_path_canonical = boost::filesystem::canonical(test_assets_path).
-            lexically_normal();
-    std::cout << "Normalized test assets directory: " << test_assets_path_canonical << '\n';
-
-    boost::filesystem::path const build_path = up_one_level_canonical / "..";
-    boost::filesystem::path const build_path_canonical = boost::filesystem::canonical(build_path).lexically_normal();
-
-    // Shift context location explicitly
-    boost::filesystem::current_path(test_assets_path_canonical);
-    bool const exists = boost::filesystem::exists("python_tests.py");
-    std::cout << "python_tests.py exists locally: " << exists << '\n';
-
-    boost::filesystem::path const data_path = up_one_level_canonical / ".." / ".." / ".." / "Assets-Production";
-    boost::filesystem::path const data_path_canonical = boost::filesystem::exists(data_path)
-                                                            ? boost::filesystem::canonical(data_path).lexically_normal()
-                                                            : test_assets_path_canonical;
-    std::cout << "data_path: " << data_path_canonical << '\n';
-
-    std::vector<boost::filesystem::path> const search_paths{build_path_canonical, test_assets_path_canonical
-                                                            , data_path_canonical};
-    return search_paths;
-}
-}
-
 TEST_F(PythonTests, GetClassFromPython) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
-    const boost::filesystem::path &build_path = search_paths.at(0);
-    const boost::filesystem::path &test_assets_path = search_paths.at(1);
-    const boost::filesystem::path &data_path = search_paths.at(2);
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
+    std::shared_ptr<boost::filesystem::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    std::shared_ptr<boost::filesystem::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    std::shared_ptr<boost::filesystem::path> data_path_ptr = search_paths_vec_ptr->at(2);
 
-    // Shift context location explicitly
-    boost::filesystem::current_path(test_assets_path);
     bool const exists = boost::filesystem::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
 
-    PyObject *py_result = GetClassFromPython(build_path.generic_string(), test_assets_path.generic_wstring()
-                                             , data_path.generic_string(), "python_tests", "append_no_args");
+    PyObject *py_result = GetClassFromPython(build_path_ptr->generic_string(), test_assets_path_ptr->generic_wstring()
+                                             , data_path_ptr->generic_string(), "python_tests", "append_no_args");
     ASSERT_NE(py_result, nullptr) << "Python result is null";
 
     std::string const result = PyUnicode_AsUTF8(py_result);
@@ -225,18 +245,16 @@ TEST_F(PythonTests, GetClassFromPython) {
 }
 
 TEST_F(PythonTests, GetClassFromPythonPathRefs) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
-    const boost::filesystem::path &build_path = search_paths.at(0);
-    const boost::filesystem::path &test_assets_path = search_paths.at(1);
-    const boost::filesystem::path &data_path = search_paths.at(2);
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
+    std::shared_ptr<boost::filesystem::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    std::shared_ptr<boost::filesystem::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    std::shared_ptr<boost::filesystem::path> data_path_ptr = search_paths_vec_ptr->at(2);
 
-    // Shift context location explicitly
-    boost::filesystem::current_path(test_assets_path);
     bool const exists = boost::filesystem::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
 
-    PyObject *py_result = GetClassFromPython(build_path.generic_string(), test_assets_path.generic_wstring()
-                                             , data_path.generic_string(), "python_tests", "append_no_args");
+    PyObject *py_result = GetClassFromPython(build_path_ptr->generic_string(), test_assets_path_ptr->generic_wstring()
+                                             , data_path_ptr->generic_string(), "python_tests", "append_no_args");
     ASSERT_NE(py_result, nullptr) << "Python result is null";
 
     std::string const result = PyUnicode_AsUTF8(py_result);
@@ -245,17 +263,15 @@ TEST_F(PythonTests, GetClassFromPythonPathRefs) {
 }
 
 TEST_F(PythonTests, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
-    const boost::filesystem::path &build_path = search_paths.at(0);
-    const boost::filesystem::path &test_assets_path = search_paths.at(1);
-    const boost::filesystem::path &data_path = search_paths.at(2);
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
+    std::shared_ptr<boost::filesystem::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    std::shared_ptr<boost::filesystem::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    std::shared_ptr<boost::filesystem::path> data_path_ptr = search_paths_vec_ptr->at(2);
 
-    // Shift context location explicitly
-    boost::filesystem::current_path(test_assets_path);
     bool const exists = boost::filesystem::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
 
-    std::list<boost::filesystem::path> const search_path_list{test_assets_path, build_path, data_path};
+    std::list<boost::filesystem::path> search_path_list{*test_assets_path_ptr, *build_path_ptr, *data_path_ptr};
 
     PyObject *py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_list);
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
@@ -269,10 +285,10 @@ TEST_F(PythonTests, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
 }
 
 TEST_F(PythonTests, GetMethodFromPython_with_list_of_strings) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<std::string> search_path_strings{};
-    for (const auto &search_path : search_paths) {
-        search_path_strings.emplace_back(search_path.generic_string());
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_strings.emplace_back(search_path_ptr->generic_string());
     }
 
     PyObject *py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_strings);
@@ -287,10 +303,10 @@ TEST_F(PythonTests, GetMethodFromPython_with_list_of_strings) {
 }
 
 TEST_F(PythonTests, GetMethodFromPython_with_list_of_wstrings) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<std::wstring> search_path_strings{};
-    for (const auto &search_path : search_paths) {
-        search_path_strings.emplace_back(search_path.generic_wstring());
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_strings.emplace_back(search_path_ptr->generic_wstring());
     }
 
     PyObject *py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_strings);
@@ -305,18 +321,16 @@ TEST_F(PythonTests, GetMethodFromPython_with_list_of_wstrings) {
 }
 
 TEST_F(PythonTests, GetMethodFromPython_with_individual_paths) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
-    const boost::filesystem::path &build_path = search_paths.at(0);
-    const boost::filesystem::path &test_assets_path = search_paths.at(1);
-    const boost::filesystem::path &data_path = search_paths.at(2);
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
+    std::shared_ptr<boost::filesystem::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    std::shared_ptr<boost::filesystem::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    std::shared_ptr<boost::filesystem::path> data_path_ptr = search_paths_vec_ptr->at(2);
 
-    // Shift context location explicitly
-    boost::filesystem::current_path(test_assets_path);
     bool const exists = boost::filesystem::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
 
-    PyObject *py_method = GetMethodFromPython(build_path.generic_string(), test_assets_path.generic_wstring()
-                                              , data_path.generic_string(), "python_tests", "append_no_args");
+    PyObject *py_method = GetMethodFromPython(build_path_ptr->generic_string(), test_assets_path_ptr->generic_wstring()
+                                              , data_path_ptr->generic_string(), "python_tests", "append_no_args");
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
 
     PyObject *py_result = CallPythonFnNullArgs(py_method);
@@ -328,10 +342,10 @@ TEST_F(PythonTests, GetMethodFromPython_with_individual_paths) {
 }
 
 TEST_F(PythonTests, PrepareStringArgsForPython) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
-    for (const auto &search_path : search_paths) {
-        search_path_list.emplace_back(search_path);
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_list.emplace_back(*search_path_ptr);
     }
 
     PyObject *py_method = GetMethodFromPython("python_tests", "append", search_path_list);
@@ -350,10 +364,10 @@ TEST_F(PythonTests, PrepareStringArgsForPython) {
 }
 
 TEST_F(PythonTests, PrepareWStringArgsForPython) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
-    for (const auto &search_path : search_paths) {
-        search_path_list.emplace_back(search_path);
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_list.emplace_back(*search_path_ptr);
     }
 
     PyObject *py_method = GetMethodFromPython("python_tests", "append", search_path_list);
@@ -372,10 +386,10 @@ TEST_F(PythonTests, PrepareWStringArgsForPython) {
 }
 
 TEST_F(PythonTests, CallPythonFnNullArgs_with_module_name_fn_name_and_search_paths) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
-    for (const auto &search_path : search_paths) {
-        search_path_list.emplace_back(search_path);
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_list.emplace_back(*search_path_ptr);
     }
 
     PyObject *py_result = CallPythonFnNullArgs("python_tests", "append_no_args", search_path_list);
@@ -387,10 +401,10 @@ TEST_F(PythonTests, CallPythonFnNullArgs_with_module_name_fn_name_and_search_pat
 }
 
 TEST_F(PythonTests, CallPythonFnNullArgs_with_fn_pointer) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
-    for (const auto &search_path : search_paths) {
-        search_path_list.emplace_back(search_path);
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_list.emplace_back(*search_path_ptr);
     }
 
     PyObject *py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_list);
@@ -405,10 +419,10 @@ TEST_F(PythonTests, CallPythonFnNullArgs_with_fn_pointer) {
 }
 
 TEST_F(PythonTests, CallPythonFnStringArgs_with_module_name_fn_name_and_search_paths) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
-    for (const auto &search_path : search_paths) {
-        search_path_list.emplace_back(search_path);
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_list.emplace_back(*search_path_ptr);
     }
 
     const std::list<std::string> arg_string_list{"Hello", " World\n"};
@@ -421,10 +435,10 @@ TEST_F(PythonTests, CallPythonFnStringArgs_with_module_name_fn_name_and_search_p
 }
 
 TEST_F(PythonTests, CallPythonFnStringArgs_with_fn_pointer) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
-    for (const auto &search_path : search_paths) {
-        search_path_list.emplace_back(search_path);
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_list.emplace_back(*search_path_ptr);
     }
 
     PyObject *py_method = GetMethodFromPython("python_tests", "append", search_path_list);
@@ -440,10 +454,10 @@ TEST_F(PythonTests, CallPythonFnStringArgs_with_fn_pointer) {
 }
 
 TEST_F(PythonTests, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_paths) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
-    for (const auto &search_path : search_paths) {
-        search_path_list.emplace_back(search_path);
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_list.emplace_back(*search_path_ptr);
     }
 
     const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
@@ -456,10 +470,10 @@ TEST_F(PythonTests, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_
 }
 
 TEST_F(PythonTests, CallPythonFnWstringArgs_with_fn_pointer) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
-    for (const auto &search_path : search_paths) {
-        search_path_list.emplace_back(search_path);
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_list.emplace_back(*search_path_ptr);
     }
 
     PyObject *py_method = GetMethodFromPython("python_tests", "append", search_path_list);
@@ -475,10 +489,10 @@ TEST_F(PythonTests, CallPythonFnWstringArgs_with_fn_pointer) {
 }
 
 TEST_F(PythonTests, CallPythonFnPyArgs) {
-    std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
+    std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path>>> search_paths_vec_ptr = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
-    for (const auto &search_path : search_paths) {
-        search_path_list.emplace_back(search_path);
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        search_path_list.emplace_back(*search_path_ptr);
     }
 
     PyObject *py_method = GetMethodFromPython("python_tests", "append", search_path_list);
