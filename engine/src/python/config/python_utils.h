@@ -44,7 +44,8 @@ std::string GetPythonPath();
 /// Initialize Python if not already initialized
 void InitPython(bool& was_already_initialized);
 
-/// A utility function to call a Python function with no arguments and get a PyObject as a result
+/// A utility function to call a Python function with no arguments and get a PyObject as a result. Initializes Python
+/// and tears it down afterwards, if Python wasn't already initialized
 PyObject* GetClassFromPython(
     std::string build_path,
     std::wstring path_string,
@@ -52,8 +53,9 @@ PyObject* GetClassFromPython(
     std::string module_name,
     std::string function_name);
 
-/// A utility function to call a Python function with no arguments and get a PyObject as a result. Takes arguments as
-/// const references, which should be more efficient.
+/// A utility function to call a Python function with no arguments and get a PyObject as a result. Initializes Python
+/// and tears it down afterwards, if Python wasn't already initialized. Takes arguments as const references, which
+/// should be more efficient.
 PyObject* GetClassFromPythonPathRefs(
         const std::string& build_path,
         const std::wstring &path_string,
@@ -95,22 +97,28 @@ PyObject* CallPythonFnNullArgs(std::string module_name,
     std::string function_name,
     const std::list<boost::filesystem::path>& search_paths);
 
+/// Call a Python function/method with no arguments
 PyObject *CallPythonFnNullArgs(PyObject *py_fn);
 
+/// Call a Python function/method with a variable number of std::string arguments
 PyObject* CallPythonFnStringArgs(std::string module_name,
                                  std::string function_name,
                                  const std::list<boost::filesystem::path>& search_paths,
                                  const std::list<std::string>& args);
 
+/// Call a Python function/method with a variable number of std::string arguments
 PyObject* CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string>& args);
 
+/// Call a Python function/method with a variable number of std::wstring arguments
 PyObject* CallPythonFnWStringArgs(std::string module_name,
     std::string function_name,
     const std::list<boost::filesystem::path>& search_paths,
     const std::list<std::wstring>& args);
 
+/// Call a Python function/method with a variable number of std::wstring arguments
 PyObject* CallPythonFnWStringArgs(PyObject *py_fn, const std::list<std::wstring>& args);
 
+/// Call a Python function/method with a pre-packed Tuple of arguments
 PyObject* CallPythonFnPyArgs(PyObject *py_fn, PyObject *args);
 
 #endif //VEGA_STRIKE_ENGINE_SRC_PYTHON_CONFIG_PYTHON_UTILS_U
