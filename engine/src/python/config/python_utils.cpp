@@ -85,10 +85,6 @@ void InitPython(bool &was_already_initialized) {
 
 PyObject * GetMethodFromPython(std::string module_name, std::string function_name
                                , const std::list<boost::filesystem::path>& search_paths) {
-    bool py_was_initialized{};
-
-    InitPython(py_was_initialized);
-
     PyObject* sys_path = PySys_GetObject("path");
     if (sys_path == nullptr) {
         std::cerr << boost::format("%1%: %2%: PySys_GetObject(\"path\") returned nullptr")
@@ -117,9 +113,6 @@ PyObject * GetMethodFromPython(std::string module_name, std::string function_nam
     PyObject* module = PyImport_ImportModule(module_name.c_str());
     if (module == nullptr) {
         PyErr_Print();
-        if (!py_was_initialized) {
-            Py_Finalize();
-        }
         std::cerr << boost::format("%1%: %2%: PyImport_ImportModule() returned nullptr for module %3%")
                 % __FILE__ % __FUNCTION__ % module_name << std::endl;
         return nullptr;
@@ -128,16 +121,9 @@ PyObject * GetMethodFromPython(std::string module_name, std::string function_nam
     PyObject* function = PyObject_GetAttrString(module,function_name.c_str());
     if (function == nullptr) {
         PyErr_Print();
-        if (!py_was_initialized) {
-            Py_Finalize();
-        }
         std::cerr << boost::format("%1%: %2%: PyObject_GetAttrString returned nullptr for function %3%")
             % __FILE__ % __FUNCTION__ % function_name << std::endl;
         return nullptr;
-    }
-
-    if (!py_was_initialized) {
-        Py_Finalize();
     }
 
     return function;
@@ -199,40 +185,24 @@ PyObject * GetMethodFromPython(const std::string &build_path, const std::wstring
 
 PyObject * CallPythonFnNullArgs(std::string module_name, std::string function_name
                                 , const std::list<boost::filesystem::path> &search_paths) {
-    bool py_was_initialized{};
-
-    InitPython(py_was_initialized);
-
     PyObject* py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
+    if (py_fn == nullptr) {
+        std::cerr << boost::format("%1%: %2%: GetMethodFromPython() returned nullptr.") % __FILE__ % __FUNCTION__ << std::endl;
+    }
 
     PyObject* py_result = PyObject_CallObject(py_fn, nullptr);
-
-    if (!py_was_initialized) {
-        Py_Finalize();
-    }
 
     return py_result;
 }
 
 PyObject * CallPythonFnNullArgs(PyObject *py_fn) {
-    bool py_was_initialized{};
-
-    InitPython(py_was_initialized);
-
     PyObject* py_result = PyObject_CallObject(py_fn, nullptr);
-
-    if (!py_was_initialized) {
-        Py_Finalize();
-    }
 
     return py_result;
 }
 
 PyObject * PrepareStringArgsForPython(const std::list<std::string> &args) {
-    bool py_was_initialized{};
     std::vector<PyObject*> py_arg_vec{};
-
-    InitPython(py_was_initialized);
 
     for (const auto& arg : args) {
         py_arg_vec.push_back(PyUnicode_FromString(arg.c_str()));
@@ -253,16 +223,17 @@ PyObject * PrepareStringArgsForPython(const std::list<std::string> &args) {
         if (err < 0) {
             PyErr_Print();
             std::cerr << boost::format("%1%: %2%: Failed to add argument #%3% to PyTuple") % __FILE__ % __FUNCTION__ % index << std::endl;
+            for (Py_ssize_t j = index -1; j <= 0; --j) {
+                Py_DECREF(py_arg_vec.at(j));
+            }
+            return nullptr;
         }
     }
     return py_args;
 }
 
 PyObject * PrepareWStringArgsForPython(const std::list<std::wstring> &args) {
-    bool py_was_initialized{};
     std::vector<PyObject*> py_arg_vec{};
-
-    InitPython(py_was_initialized);
 
     for (const auto& arg : args) {
         py_arg_vec.push_back(PyUnicode_FromWideChar(arg.c_str(), static_cast<Py_ssize_t>(arg.length())));
@@ -283,6 +254,10 @@ PyObject * PrepareWStringArgsForPython(const std::list<std::wstring> &args) {
         if (err < 0) {
             PyErr_Print();
             std::cerr << boost::format("%1%: %2%: Failed to add argument #%3% to PyTuple") % __FILE__ % __FUNCTION__ % index << std::endl;
+            for (Py_ssize_t j = index -1; j <= 0; --j) {
+                Py_DECREF(py_arg_vec.at(j));
+            }
+            return nullptr;
         }
     }
     return py_args;
@@ -290,25 +265,29 @@ PyObject * PrepareWStringArgsForPython(const std::list<std::wstring> &args) {
 
 PyObject * CallPythonFnStringArgs(std::string module_name, std::string function_name
                                   , const std::list<boost::filesystem::path> &search_paths, const std::list<std::string> &args) {
-    bool py_was_initialized{};
-
-    InitPython(py_was_initialized);
-
     PyObject* py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
+    if (py_fn == nullptr) {
+        std::cerr << boost::format("%1%: %2%: GetMethodFromPython() returned nullptr.") % __FILE__ % __FUNCTION__ << std::endl;
+        return nullptr;
+    }
 
     PyObject* py_args = PrepareStringArgsForPython(args);
+    if (py_args == nullptr) {
+        std::cerr << boost::format("%1%: %2%: Failed to create PyTuple for arguments to function call") % __FILE__ % __FUNCTION__ << std::endl;
+        return nullptr;
+    }
 
     PyObject* py_result = PyObject_CallObject(py_fn, py_args);
-
-    if (!py_was_initialized) {
-        Py_Finalize();
-    }
 
     return py_result;
 }
 
 PyObject * CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string> &args) {
     PyObject* py_args = PrepareStringArgsForPython(args);
+    if (py_args == nullptr) {
+        std::cerr << boost::format("%1%: %2%: PrepareStringArgsForPython() returned nullptr") % __FILE__ % __FUNCTION__ << std::endl;
+        return nullptr;
+    }
 
     PyObject* py_result = PyObject_CallObject(py_fn, py_args);
 
@@ -316,40 +295,36 @@ PyObject * CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string> 
 }
 
 PyObject * CallPythonFnPyArgs(PyObject *py_fn, PyObject *args) {
-    bool py_was_initialized{};
-
-    InitPython(py_was_initialized);
-
     PyObject* py_result = PyObject_CallObject(py_fn, args);
-
-    if (!py_was_initialized) {
-        Py_Finalize();
-    }
 
     return py_result;
 }
 
 PyObject * CallPythonFnWStringArgs(std::string module_name, std::string function_name
                                    , const std::list<boost::filesystem::path> &search_paths, const std::list<std::wstring> &args) {
-    bool py_was_initialized{};
-
-    InitPython(py_was_initialized);
-
     PyObject* py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
+    if (py_fn == nullptr) {
+        std::cerr << boost::format("%1%: %2%: GetMethodFromPython() returned nullptr.") % __FILE__ % __FUNCTION__ << std::endl;
+        return nullptr;
+    }
 
     PyObject* py_args = PrepareWStringArgsForPython(args);
+    if (py_args == nullptr) {
+        std::cerr << boost::format("%1%: %2%: Failed to create PyTuple for arguments to function call") % __FILE__ % __FUNCTION__ << std::endl;
+        return nullptr;
+    }
 
     PyObject* py_result = PyObject_CallObject(py_fn, py_args);
-
-    if (!py_was_initialized) {
-        Py_Finalize();
-    }
 
     return py_result;
 }
 
 PyObject * CallPythonFnWStringArgs(PyObject *py_fn, const std::list<std::wstring> &args) {
     PyObject* py_args = PrepareWStringArgsForPython(args);
+    if (py_args == nullptr) {
+        std::cerr << boost::format("%1%: %2%: Failed to create PyTuple for arguments to function call") % __FILE__ % __FUNCTION__ << std::endl;
+        return nullptr;
+    }
 
     PyObject* py_result = PyObject_CallObject(py_fn, py_args);
 
@@ -364,7 +339,22 @@ PyObject* GetClassFromPython(
     const std::string module_name,
     const std::string function_name) {
 
+    bool py_was_initialized{};
+
+    InitPython(py_was_initialized);
+
     PyObject* py_method = GetMethodFromPython(build_path, path_string, datadir, module_name, function_name);
+    if (py_method == nullptr) {
+        std::cerr << boost::format("%1%: %2%: GetMethodFromPython returned a null pointer") % __FILE__ % __FUNCTION__ << std::endl;
+        if (!py_was_initialized) {
+            Py_Finalize();
+        }
+        return nullptr;
+    }
+
+    if (!py_was_initialized) {
+        Py_Finalize();
+    }
     return CallPythonFnNullArgs(py_method);
 }
 
