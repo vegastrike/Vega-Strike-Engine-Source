@@ -59,22 +59,31 @@ BOOST_PYTHON_MODULE(python_sanity)
 const std::string kHelloWorldPascalCase = "Hello World\n";
 const std::string kHelloWorldLowercase = "hello world";
 
-static void SetUpTestSuite() {
-    bool python_was_initialized{};
-    InitPython(python_was_initialized);
-}
+class PythonTests : public ::testing::Test {
+protected:
+    static bool python_was_initialized_;
+    static void SetUpTestSuite() {
+        std::cout << "Initializing Python..." << std::endl;
+        InitPython(python_was_initialized_);
+    }
 
-static void TearDownTestSuite() {
-    Py_Finalize();
-}
+    static void TearDownTestSuite() {
+        if (!python_was_initialized_) {
+            std::cout << "Tearing down Python..." << std::endl;
+            Py_Finalize();
+        }
+    }
+};
 
-TEST(Python, Sanity) {
+bool PythonTests::python_was_initialized_ = false;
+
+TEST_F(PythonTests, Sanity) {
     World world(kHelloWorldPascalCase);
 
     EXPECT_EQ(world.greet(), kHelloWorldPascalCase);
 }
 
-TEST(Python, Call_Function) {
+TEST_F(PythonTests, Call_Function) {
     // Structural, platform-agnostic path building
     boost::filesystem::path const current_dir = boost::filesystem::current_path();
     std::cout << "Original structural path: " << current_dir << '\n';
@@ -146,7 +155,7 @@ TEST(Python, Call_Function) {
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
 
-TEST(Python, InitPython) {
+TEST_F(PythonTests, InitPython) {
     bool python_was_initialized{};
     // This function will be called even though Python was already init'ed at the test suite level. But that's OK,
     // because InitPython checks to see if Python was already init'ed before initializing it again.
@@ -184,7 +193,7 @@ std::vector<boost::filesystem::path> TestPathsHelper() {
 }
 }
 
-TEST(Python, GetClassFromPython) {
+TEST_F(PythonTests, GetClassFromPython) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     const boost::filesystem::path& build_path = search_paths.at(0);
     const boost::filesystem::path& test_assets_path = search_paths.at(1);
@@ -203,7 +212,7 @@ TEST(Python, GetClassFromPython) {
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
 
-TEST(Python, GetClassFromPythonPathRefs) {
+TEST_F(PythonTests, GetClassFromPythonPathRefs) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     const boost::filesystem::path& build_path = search_paths.at(0);
     const boost::filesystem::path& test_assets_path = search_paths.at(1);
@@ -222,7 +231,7 @@ TEST(Python, GetClassFromPythonPathRefs) {
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
 
-TEST(Python, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
+TEST_F(PythonTests, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     const boost::filesystem::path& build_path = search_paths.at(0);
     const boost::filesystem::path& test_assets_path = search_paths.at(1);
@@ -246,7 +255,7 @@ TEST(Python, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
 
-TEST(Python, GetMethodFromPython_with_list_of_strings) {
+TEST_F(PythonTests, GetMethodFromPython_with_list_of_strings) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<std::string> search_path_strings{};
     for (const auto& search_path : search_paths) {
@@ -264,7 +273,7 @@ TEST(Python, GetMethodFromPython_with_list_of_strings) {
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
 
-TEST(Python, GetMethodFromPython_with_list_of_wstrings) {
+TEST_F(PythonTests, GetMethodFromPython_with_list_of_wstrings) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<std::wstring> search_path_strings{};
     for (const auto& search_path : search_paths) {
@@ -282,7 +291,7 @@ TEST(Python, GetMethodFromPython_with_list_of_wstrings) {
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
 
-TEST(Python, GetMethodFromPython_with_individual_paths) {
+TEST_F(PythonTests, GetMethodFromPython_with_individual_paths) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     const boost::filesystem::path& build_path = search_paths.at(0);
     const boost::filesystem::path& test_assets_path = search_paths.at(1);
@@ -304,7 +313,7 @@ TEST(Python, GetMethodFromPython_with_individual_paths) {
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
 
-TEST(Python, PrepareStringArgsForPython) {
+TEST_F(PythonTests, PrepareStringArgsForPython) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
     for (const auto& search_path : search_paths) {
@@ -326,7 +335,7 @@ TEST(Python, PrepareStringArgsForPython) {
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
 
-TEST(Python, PrepareWStringArgsForPython) {
+TEST_F(PythonTests, PrepareWStringArgsForPython) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
     for (const auto& search_path : search_paths) {
@@ -348,7 +357,7 @@ TEST(Python, PrepareWStringArgsForPython) {
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
 
-TEST(Python, CallPythonFnNullArgs_with_module_name_fn_name_and_search_paths) {
+TEST_F(PythonTests, CallPythonFnNullArgs_with_module_name_fn_name_and_search_paths) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
     for (const auto& search_path : search_paths) {
@@ -363,7 +372,7 @@ TEST(Python, CallPythonFnNullArgs_with_module_name_fn_name_and_search_paths) {
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
 
-TEST(Python, CallPythonFnNullArgs_with_fn_pointer) {
+TEST_F(PythonTests, CallPythonFnNullArgs_with_fn_pointer) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
     for (const auto& search_path : search_paths) {
@@ -381,7 +390,7 @@ TEST(Python, CallPythonFnNullArgs_with_fn_pointer) {
     EXPECT_EQ(result, kHelloWorldLowercase);
 }
 
-TEST(Python, CallPythonFnStringArgs_with_module_name_fn_name_and_search_paths) {
+TEST_F(PythonTests, CallPythonFnStringArgs_with_module_name_fn_name_and_search_paths) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
     for (const auto& search_path : search_paths) {
@@ -397,7 +406,7 @@ TEST(Python, CallPythonFnStringArgs_with_module_name_fn_name_and_search_paths) {
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
 
-TEST(Python, CallPythonFnStringArgs_with_fn_pointer) {
+TEST_F(PythonTests, CallPythonFnStringArgs_with_fn_pointer) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
     for (const auto& search_path : search_paths) {
@@ -416,7 +425,7 @@ TEST(Python, CallPythonFnStringArgs_with_fn_pointer) {
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
 
-TEST(Python, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_paths) {
+TEST_F(PythonTests, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_paths) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
     for (const auto& search_path : search_paths) {
@@ -432,7 +441,7 @@ TEST(Python, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_paths) 
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
 
-TEST(Python, CallPythonFnWstringArgs_with_fn_pointer) {
+TEST_F(PythonTests, CallPythonFnWstringArgs_with_fn_pointer) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
     for (const auto& search_path : search_paths) {
@@ -451,7 +460,7 @@ TEST(Python, CallPythonFnWstringArgs_with_fn_pointer) {
     EXPECT_EQ(result, kHelloWorldPascalCase);
 }
 
-TEST(Python, CallPythonFnPyArgs) {
+TEST_F(PythonTests, CallPythonFnPyArgs) {
     std::vector<boost::filesystem::path> const search_paths = TestPathsHelper();
     std::list<boost::filesystem::path> search_path_list{};
     for (const auto& search_path : search_paths) {
