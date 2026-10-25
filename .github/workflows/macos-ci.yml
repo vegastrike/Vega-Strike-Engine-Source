@@ -91,6 +91,8 @@ jobs:
         run: |
           find . -name 'test_assets' -type d
           find . -name 'python_tests.py' -type f
+          find . -name 'units.json' -type f
+          find . -name 'vegastrike.config' -type f
           script/test --preset-name="${{ matrix.preset-name }}"
 
       - name: Upload test results
