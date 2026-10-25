@@ -93,10 +93,10 @@ std::shared_ptr<boost::filesystem::path> FindTestPath(const boost::filesystem::p
             lexically_normal();
     boost::filesystem::path const root_path = canonical_starting_path.root_path();
     boost::filesystem::path base_path_to_try{canonical_starting_path};
-    for (; !boost::filesystem::exists(base_path_to_try / relative_path) && base_path_to_try != root_path;
-           base_path_to_try = boost::filesystem::canonical(base_path_to_try / "..").lexically_normal()) {
+    for (; !boost::filesystem::is_directory(base_path_to_try / relative_path) && base_path_to_try != root_path;
+           base_path_to_try = boost::filesystem::canonical(base_path_to_try.parent_path()).lexically_normal()) {
     }
-    if (boost::filesystem::exists(base_path_to_try / relative_path)) {
+    if (boost::filesystem::is_directory(base_path_to_try / relative_path)) {
         std::shared_ptr<boost::filesystem::path> result = std::make_shared<boost::filesystem::path>(
                 boost::filesystem::canonical(boost::filesystem::path(base_path_to_try / relative_path)).
                 lexically_normal());
@@ -116,7 +116,7 @@ std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > TestPat
             boost::filesystem::canonical(current_dir).lexically_normal());
     std::cout << "Canonicalized original path: " << *current_dir_canonical_ptr << '\n';
 
-    boost::filesystem::path const up_one_level = *current_dir_canonical_ptr / "..";
+    boost::filesystem::path const up_one_level = current_dir_canonical_ptr->parent_path();
     std::shared_ptr<boost::filesystem::path> up_one_level_canonical_ptr = std::make_shared<boost::filesystem::path>(
             boost::filesystem::canonical(up_one_level).lexically_normal());
     std::cout << "Up one level: " << *up_one_level_canonical_ptr << '\n';
@@ -160,12 +160,22 @@ TEST_F(PythonTests, Sanity) {
     EXPECT_EQ(world.greet(), kHelloWorldPascalCase);
 }
 
-TEST_F(PythonTests, FindTestPath) {
+TEST_F(PythonTests, FindTestPath_failure_case) {
     boost::filesystem::path const current_dir = boost::filesystem::current_path();
     std::shared_ptr<boost::filesystem::path> current_dir_canonical_ptr = std::make_shared<boost::filesystem::path>(
             boost::filesystem::canonical(current_dir).lexically_normal());
-    std::shared_ptr<boost::filesystem::path> should_be_null = FindTestPath(*current_dir_canonical_ptr, "nonexistent");
+    std::shared_ptr<boost::filesystem::path> should_be_null{};
+    ASSERT_NO_THROW(should_be_null = FindTestPath(*current_dir_canonical_ptr, "nonexistent"));
     ASSERT_EQ(should_be_null, nullptr) << "FindTestPath should return nullptr\n";
+}
+
+TEST_F(PythonTests, FindTestPath_success_case) {
+    boost::filesystem::path const current_dir = boost::filesystem::current_path();
+    std::shared_ptr<boost::filesystem::path> current_dir_canonical_ptr = std::make_shared<boost::filesystem::path>(
+            boost::filesystem::canonical(current_dir).lexically_normal());
+    std::shared_ptr<boost::filesystem::path> should_not_be_null{};
+    ASSERT_NO_THROW(should_not_be_null = FindTestPath(*current_dir_canonical_ptr, "test_assets"));
+    ASSERT_NE(should_not_be_null, nullptr) << "FindTestPath should not return nullptr\n";
 }
 
 TEST_F(PythonTests, Call_Function) {
