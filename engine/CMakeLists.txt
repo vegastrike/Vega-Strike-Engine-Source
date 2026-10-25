@@ -926,47 +926,30 @@ IF (USE_GTEST)
         TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
-    CONFIGURE_FILE(
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/configuration/tests/vegastrike.config"
-            "${CMAKE_BINARY_DIR}/test_assets/vegastrike.config"
-            COPYONLY
+    # 1. Map each source file to its final destination name
+    SET(ASSET_MAPPING
+            "${PROJECT_SOURCE_DIR}/engine/src/configuration/tests/python_tests.py" "${CMAKE_BINARY_DIR}/test_assets/python_tests.py"
+            "${PROJECT_SOURCE_DIR}/engine/src/configuration/tests/vegastrike.config" "${CMAKE_BINARY_DIR}/test_assets/vegastrike.config"
+            "${PROJECT_SOURCE_DIR}/engine/src/cmd/tests/units.json"               "${CMAKE_BINARY_DIR}/test_assets/units.json"
     )
 
-    CONFIGURE_FILE(
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/cmd/tests/units.json"
-            "${CMAKE_BINARY_DIR}/test_assets/units.json"
-            COPYONLY
-    )
+    # 2. Copy the files during the CMake configuration phase
+    WHILE(ASSET_MAPPING)
+        # Pop the first source and destination from the list pairs
+        LIST(POP_FRONT ASSET_MAPPING src_file dest_file)
 
-    CONFIGURE_FILE(
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/configuration/tests/python_tests.py"
-            "${CMAKE_BINARY_DIR}/test_assets/python_tests.py"
-            COPYONLY
-    )
+        CONFIGURE_FILE("${src_file}" "${dest_file}" COPYONLY)
 
-    ADD_CUSTOM_COMMAND(
-            TARGET ${TEST_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/configuration/tests/vegastrike.config"
-            "${CMAKE_BINARY_DIR}/test_assets/vegastrike.config"
-            COMMENT "Updating vegastrike.config in test_assets directory"
-    )
-
-    ADD_CUSTOM_COMMAND(
-            TARGET ${TEST_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/configuration/tests/units.json"
-            "${CMAKE_BINARY_DIR}/test_assets/units.json"
-            COMMENT "Updating units.json in test_assets directory"
-    )
-
-    ADD_CUSTOM_COMMAND(
-            TARGET ${TEST_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/configuration/tests/python_tests.py"
-            "${CMAKE_BINARY_DIR}/test_assets/python_tests.py"
-            COMMENT "Updating python_tests.py in test_assets directory"
-    )
+        # 3. Tie to the test target to ensure ctest updates the files if they change before execution
+        IF(TARGET Vega_Strike_tests)
+            GET_FILENAME_COMPONENT(filename "${src_file}" NAME)
+            ADD_CUSTOM_COMMAND(
+                    TARGET Vega_Strike_tests POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy "${src_file}" "${dest_file}"
+                    COMMENT "Syncing test asset: ${filename}"
+            )
+        ENDIF()
+    ENDWHILE()
 
     INCLUDE(GoogleTest)
     gtest_discover_tests(${TEST_NAME} PROPERTIES DISCOVERY_TIMEOUT 30)
