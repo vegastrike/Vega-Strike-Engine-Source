@@ -522,6 +522,9 @@ function bootstrapOnRedHat() {
         fribidi-devel \
         mesa-libGLU-devel \
         libtool-ltdl-devel
+
+        # The Python site-packages directory doesn't get created automatically. Create it manually.
+        mkdir -p /usr/local/lib/python3.12/site-packages
       ;;
     *)
       echo "Sorry, this version of Red Hat is unsupported"
@@ -593,6 +596,9 @@ function bootstrapOnRockyLinux() {
         fribidi-devel \
         mesa-libGLU-devel \
         libtool-ltdl-devel
+
+        # The Python site-packages directory doesn't get created automatically. Create it manually.
+        mkdir -p /usr/local/lib/python3.12/site-packages
       ;;
     *)
       echo "Sorry, this version of Rocky Linux is unsupported"
