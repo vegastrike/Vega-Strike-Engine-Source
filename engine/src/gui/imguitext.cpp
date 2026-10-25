@@ -485,13 +485,19 @@ FormattedLayout ImGuiText::parseText(const std::string& input, const float width
 
             // special news handling
             switch (input[curPos]) {
-                case '\\':
+                case '\\': {
                     addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));
-                    fragmentStartPos = curPos + 2;
+                    // Each backslash breaks the line and consumes only itself, so a run of
+                    // two is a blank line and the character after the run stays in the text.
+                    // "\n" is the escape form and consumes the n as well.
+                    const bool is_escape = curPos + 1 < input.size() && input[curPos + 1] == 'n';
+                    fragmentStartPos = curPos + (is_escape ? 2 : 1);
+                    if (is_escape) {
+                        curPos++;
+                    }
                     layout.endLine(currentLine);
-                    // we skipt the \\, +1 here and +1 at the end of the loop
-                    curPos++;
                     break;
+                }
                 case '\n':
                     // create a new line and continue
                     addFragment(input.substr(fragmentStartPos, curPos - fragmentStartPos));

@@ -60,12 +60,16 @@ public:
     bool Upgrade(const std::string upgrade_key) override;
 
     double PercentOperational() const override;
-    void CalculatePercentOperational();
 
     void Damage() override;
     void DamageByPercent(double percent) override;
     void Repair() override;
+    void Replace() override;
     bool Damaged() const override;
+    // The rated recharge: the figure the shields are ranked by in the shops.
+    double MaxRegeneration() const;
+    // The generator's own health, without the shield's charge. 1.0 on an undamaged generator.
+    double GeneratorPercent() const;
 
     void Regenerate(const bool player_ship);
 

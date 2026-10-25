@@ -3913,18 +3913,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
         const boost::json::value * economics_value_ptr = root_object.if_contains("economics");
         if (economics_value_ptr != nullptr) {
             boost::json::object economics_object = economics_value_ptr->get_object();
-            const boost::json::value * repair_price_value_ptr = economics_object.if_contains("repair_price");
-            if (repair_price_value_ptr != nullptr) {
-                economics.repair_price_dbl = boost::json::value_to<double>(*repair_price_value_ptr);
-                economics.repair_price_flt = boost::json::value_to<float>(*repair_price_value_ptr);
-            }
-
-            const boost::json::value * sellback_shipping_price_value_ptr = economics_object.if_contains("sellback_shipping_price");
-            if (sellback_shipping_price_value_ptr != nullptr) {
-                economics.sellback_shipping_price_dbl = boost::json::value_to<double>(*sellback_shipping_price_value_ptr);
-                economics.sellback_shipping_price_flt = boost::json::value_to<float>(*sellback_shipping_price_value_ptr);
-            }
-
             const boost::json::value * ship_sellback_price_value_ptr = economics_object.if_contains("ship_sellback_price");
             if (ship_sellback_price_value_ptr != nullptr) {
                 economics.ship_sellback_price_dbl = boost::json::value_to<double>(*ship_sellback_price_value_ptr);
@@ -7033,6 +7021,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.auto_pilot_planet_radius_percent_flt = boost::json::value_to<float>(*auto_pilot_planet_radius_percent_value_ptr);
             }
 
+            const boost::json::value * auto_pilot_spec_turn_speed_factor_value_ptr = physics_object.if_contains("auto_pilot_spec_turn_speed_factor");
+            if (auto_pilot_spec_turn_speed_factor_value_ptr != nullptr) {
+                physics.auto_pilot_spec_turn_speed_factor_dbl = boost::json::value_to<double>(*auto_pilot_spec_turn_speed_factor_value_ptr);
+                physics.auto_pilot_spec_turn_speed_factor_flt = boost::json::value_to<float>(*auto_pilot_spec_turn_speed_factor_value_ptr);
+            }
+
             const boost::json::value * auto_pilot_terminate_value_ptr = physics_object.if_contains("auto_pilot_terminate");
             if (auto_pilot_terminate_value_ptr != nullptr) {
                 physics.auto_pilot_terminate = boost::json::value_to<bool>(*auto_pilot_terminate_value_ptr);
@@ -7353,18 +7347,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             const boost::json::value * fire_missing_autotrackers_value_ptr = physics_object.if_contains("fire_missing_autotrackers");
             if (fire_missing_autotrackers_value_ptr != nullptr) {
                 physics.fire_missing_autotrackers = boost::json::value_to<bool>(*fire_missing_autotrackers_value_ptr);
-            }
-
-            const boost::json::value * flt_orthogonal_thrust_smoothing_time_value_ptr = physics_object.if_contains("flt_orthogonal_thrust_smoothing_time");
-            if (flt_orthogonal_thrust_smoothing_time_value_ptr != nullptr) {
-                physics.flt_orthogonal_thrust_smoothing_time_dbl = boost::json::value_to<double>(*flt_orthogonal_thrust_smoothing_time_value_ptr);
-                physics.flt_orthogonal_thrust_smoothing_time_flt = boost::json::value_to<float>(*flt_orthogonal_thrust_smoothing_time_value_ptr);
-            }
-
-            const boost::json::value * flt_orthogonal_thrust_speed_reduce_factor_value_ptr = physics_object.if_contains("flt_orthogonal_thrust_speed_reduce_factor");
-            if (flt_orthogonal_thrust_speed_reduce_factor_value_ptr != nullptr) {
-                physics.flt_orthogonal_thrust_speed_reduce_factor_dbl = boost::json::value_to<double>(*flt_orthogonal_thrust_speed_reduce_factor_value_ptr);
-                physics.flt_orthogonal_thrust_speed_reduce_factor_flt = boost::json::value_to<float>(*flt_orthogonal_thrust_speed_reduce_factor_value_ptr);
             }
 
             const boost::json::value * friendly_auto_radius_value_ptr = physics_object.if_contains("friendly_auto_radius");
@@ -7999,6 +7981,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             if (warp_curve_degree_value_ptr != nullptr) {
                 physics.warp_curve_degree_dbl = boost::json::value_to<double>(*warp_curve_degree_value_ptr);
                 physics.warp_curve_degree_flt = boost::json::value_to<float>(*warp_curve_degree_value_ptr);
+            }
+
+            const boost::json::value * warp_max_step_fraction_value_ptr = physics_object.if_contains("warp_max_step_fraction");
+            if (warp_max_step_fraction_value_ptr != nullptr) {
+                physics.warp_max_step_fraction_dbl = boost::json::value_to<double>(*warp_max_step_fraction_value_ptr);
+                physics.warp_max_step_fraction_flt = boost::json::value_to<float>(*warp_max_step_fraction_value_ptr);
             }
 
             const boost::json::value * warp_is_interstellar_value_ptr = physics_object.if_contains("warp_is_interstellar");

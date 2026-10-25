@@ -338,6 +338,8 @@ void LoadMissionScript(std::string scriptcontents);
 void LoadNamedMissionScript(std::string missiontitle, std::string scriptcontents);
 QVector SafeEntrancePoint(QVector, float radial_size = -1);
 QVector SafeStarSystemEntrancePoint(StarSystem *sts, QVector, float radial_size = -1);
+/// The fraction of a planet's radius above its surface that the interdiction treats as part of the
+/// body: how far out a warp field starts to be degraded. Its own setting, independent of docking.
 float getPlanetRadiusPercent();
 
 void cacheAnimation(std::string anim);
