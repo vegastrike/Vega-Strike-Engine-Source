@@ -897,19 +897,19 @@ IF (USE_GTEST)
 
     CONFIGURE_FILE(
             "src/configuration/tests/vegastrike.config"
-            ${CMAKE_BINARY_DIR}/test_assets
+            "${CMAKE_BINARY_DIR}/test_assets/vegastrike.config"
             COPYONLY
     )
 
     CONFIGURE_FILE(
             "src/cmd/tests/units.json"
-            ${CMAKE_BINARY_DIR}/test_assets
+            "${CMAKE_BINARY_DIR}/test_assets/units.json"
             COPYONLY
     )
 
     CONFIGURE_FILE(
             "src/configuration/tests/python_tests.py"
-            ${CMAKE_BINARY_DIR}/test_assets
+            "${CMAKE_BINARY_DIR}/test_assets/python_tests.py"
             COPYONLY
     )
 
