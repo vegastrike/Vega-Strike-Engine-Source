@@ -38,7 +38,7 @@
 set -e
 
 echo "------------------------------------------"
-echo "--- bootstrap-on-linux.sh | 2026-10-01 ---"
+echo "--- bootstrap-on-linux.sh | 2026-10-25 ---"
 echo "------------------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -507,8 +507,8 @@ function bootstrapOnOpenSuseLeap() {
       ;;
   esac
 
-  mkdir -p /usr/local/lib/python3.14/site-packages
-  mkdir -p /usr/lib/python3.14/site-packages
+  mkdir -p /usr/local/lib/python3.13/site-packages
+  mkdir -p /usr/lib/python3.13/site-packages
 }
 
 function bootstrapOnFedora() {
