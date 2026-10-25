@@ -141,7 +141,7 @@ std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > TestPat
     std::shared_ptr<boost::filesystem::path> data_path_canonical_ptr = FindTestPath(
             *current_dir_canonical_ptr, "Assets-Production");
     if (data_path_canonical_ptr == nullptr) {
-        return nullptr;
+        data_path_canonical_ptr = test_assets_path_canonical_ptr;
     }
     std::cout << "data_path: " << *data_path_canonical_ptr << '\n';
 
