@@ -154,7 +154,6 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     if (Guaranteed == Mission::AUTO_OFF) {
         return false;
     }
-    const float atd_no_enemies = configuration().physics.auto_pilot_termination_distance_no_enemies_flt;
     const float autopilot_no_enemies_multiplier = configuration().physics.auto_pilot_no_enemies_distance_multiplier_flt;
     if (unit->isSubUnit()) {
         static std::string err = "Return To Cockpit for Auto";
@@ -182,18 +181,22 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
     float totpercent = 1;
     if (totallength > 1) {
-        // The arrival is the further of the configured termination distance (plus a planet's own
-        // share of its radius) and the target's docking distance, and aptne is the same with the
-        // no-enemies distance, which stands off further when nothing is watching. percent /
-        // percentne turn them into the point along the path the ship flies to.
-        const float autopilot_term_distance = configuration().physics.auto_pilot_termination_distance_flt;
-        const float planet_share = (target->getUnitType() == Vega_UnitType::planet)
-                ? target->rSize() * UniverseUtil::getPlanetRadiusPercent() : 0.0F;
-        const float docking_distance = static_cast<float>(DockingDistance(target));
-        float apt = std::max(autopilot_term_distance + planet_share, docking_distance);
-        float aptne = std::max(atd_no_enemies + planet_share, docking_distance);
-        float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
-        float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
+        const double termination_distance = configuration().physics.auto_pilot_termination_distance_dbl;
+        const double no_enemies_termination_distance =
+                configuration().physics.auto_pilot_termination_distance_no_enemies_dbl;
+        // The part of a planet's radius the autopilot counts as its surface.
+        const double planet_radius_percent = (target->getUnitType() == Vega_UnitType::planet)
+                ? static_cast<double>(target->rSize()) * UniverseUtil::getPlanetRadiusPercent() : 0.0;
+        const double docking_distance = DockingDistance(target);
+        // Where the autopilot hands over: the configured distance, off a planet's surface, but never
+        // short of dockable.
+        const double apt = std::max(termination_distance + planet_radius_percent, docking_distance);
+        // The same when nothing is watching, which stands off further.
+        const double aptne = std::max(no_enemies_termination_distance + planet_radius_percent, docking_distance);
+        // The fraction of the approach each of those trims off the end, so the ship flies to that point.
+        const double percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
+        const double percentne =
+                (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
         if (percentne > 1) {
             endne = start;
         } else {

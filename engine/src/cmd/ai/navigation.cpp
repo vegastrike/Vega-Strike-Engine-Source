@@ -29,6 +29,7 @@
 #include "navigation.h"
 #include "cmd/dock_utils.h"
 #include "root_generic/macosx_math.h"
+#include <algorithm>
 #include <math.h>
 #ifndef _WIN32
 #include <assert.h>
@@ -534,10 +535,6 @@ QVector AutoLongHaul::NewDestination(const QVector &curnewdestination, double ma
     return curnewdestination;
 }
 
-static float mymax(float a, float b) {
-    return a > b ? a : b;
-}
-
 // TODO: move this kludge to FtlDrive
 inline void WarpRampOff(Unit *un, bool rampdown) {
     if (un->ftl_drive.Enabled()) {
@@ -620,8 +617,13 @@ void AutoLongHaul::Execute() {
             inside_landing_zone = currently_inside_landing_zone;
             MakeLinearVelocityOrder();
         }
-        // The destination is where we are going, so the unit itself is never steered around.
-        if (obstacle != NULL && obstacle != target) {
+        // The destination is never steered around. The autopilot target can be a subunit of a
+        // station, and then the unit that interdicts is its owner, so compare against the whole unit.
+        Unit *target_root = target;
+        if (target->isSubUnit()) {
+            target_root = UnitUtil::owner(target);
+        }
+        if (obstacle != NULL && obstacle != target_root) {
             //if it exists and is not our destination
             QVector obstacledirection =
                     (obstacle->LocalPosition() - myposition);               //find vector from us to obstacle
@@ -684,7 +686,7 @@ void AutoLongHaul::Execute() {
         deactivatewarp = true;
     }
     double maxspeed =
-            mymax(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
+            std::max(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
     // The autopilot stops at the docking distance, so measure the distance the way docking does:
     // from a planet's surface, from a unit's centre. The significant distance subtracts a fraction
     // of a planet's radius instead, which puts the stop 2500 past the docking distance at Atlantis.
@@ -719,9 +721,9 @@ void AutoLongHaul::Execute() {
     // The autopilot hands over at the further of the configured termination distance and the target's
     // docking distance, where SPEC also stops, so it stops where the game asks it to without stopping
     // short of dockable.
-    const float configured_distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt;
-    const float distance_to_stop = mymax(configured_distance_to_stop, static_cast<float>(DockingDistance(target)));
-    const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
+    const double configured_distance_to_stop = configuration().physics.auto_pilot_termination_distance_dbl;
+    const double distance_to_stop = std::max(configured_distance_to_stop, DockingDistance(target));
+    const double enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_dbl;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
     if (do_auto_finish
             && (dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
