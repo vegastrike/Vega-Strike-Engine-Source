@@ -90,5 +90,7 @@ if [ $IS_RELEASE -eq 1 ]
 then
   script/package --preset_name="${preset_name}" --build_type="${build_type}"
 else
+  find /usr/local/src/Vega-Strike-Engine-Source/ -name 'test_assets' -type d
+  find /usr/local/src/Vega-Strike-Engine-Source/ -name 'python_tests.py' -type f
   PYTHONUNBUFFERED=1 script/test --preset_name="${preset_name}" --build_type="${build_type}"
 fi
