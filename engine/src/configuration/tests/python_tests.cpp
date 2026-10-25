@@ -248,9 +248,14 @@ TEST_F(PythonTests, InitPython) {
 
 TEST_F(PythonTests, GetClassFromPython) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::shared_ptr<boost::filesystem::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    ASSERT_NE(build_path_ptr, nullptr) << "Test build path should not be null!";
     std::shared_ptr<boost::filesystem::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    ASSERT_NE(test_assets_path_ptr, nullptr) << "test_assets path should not be null!";
     std::shared_ptr<boost::filesystem::path> data_path_ptr = search_paths_vec_ptr->at(2);
+    ASSERT_NE(data_path_ptr, nullptr) << "data path should not be null!";
 
     bool const exists = boost::filesystem::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
@@ -266,9 +271,14 @@ TEST_F(PythonTests, GetClassFromPython) {
 
 TEST_F(PythonTests, GetClassFromPythonPathRefs) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::shared_ptr<boost::filesystem::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    ASSERT_NE(build_path_ptr, nullptr) << "Test build path should not be null!";
     std::shared_ptr<boost::filesystem::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    ASSERT_NE(test_assets_path_ptr, nullptr) << "test_assets path should not be null!";
     std::shared_ptr<boost::filesystem::path> data_path_ptr = search_paths_vec_ptr->at(2);
+    ASSERT_NE(data_path_ptr, nullptr) << "data path should not be null!";
 
     bool const exists = boost::filesystem::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
@@ -284,9 +294,14 @@ TEST_F(PythonTests, GetClassFromPythonPathRefs) {
 
 TEST_F(PythonTests, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::shared_ptr<boost::filesystem::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    ASSERT_NE(build_path_ptr, nullptr) << "Test build path should not be null!";
     std::shared_ptr<boost::filesystem::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    ASSERT_NE(test_assets_path_ptr, nullptr) << "test_assets path should not be null!";
     std::shared_ptr<boost::filesystem::path> data_path_ptr = search_paths_vec_ptr->at(2);
+    ASSERT_NE(data_path_ptr, nullptr) << "data path should not be null!";
 
     bool const exists = boost::filesystem::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
@@ -306,8 +321,11 @@ TEST_F(PythonTests, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
 
 TEST_F(PythonTests, GetMethodFromPython_with_list_of_strings) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<std::string> search_path_strings{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_strings.emplace_back(search_path_ptr->generic_string());
     }
 
@@ -324,8 +342,11 @@ TEST_F(PythonTests, GetMethodFromPython_with_list_of_strings) {
 
 TEST_F(PythonTests, GetMethodFromPython_with_list_of_wstrings) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<std::wstring> search_path_strings{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_strings.emplace_back(search_path_ptr->generic_wstring());
     }
 
@@ -342,9 +363,14 @@ TEST_F(PythonTests, GetMethodFromPython_with_list_of_wstrings) {
 
 TEST_F(PythonTests, GetMethodFromPython_with_individual_paths) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::shared_ptr<boost::filesystem::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    ASSERT_NE(build_path_ptr, nullptr) << "Test build path should not be null!";
     std::shared_ptr<boost::filesystem::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    ASSERT_NE(test_assets_path_ptr, nullptr) << "test_assets path should not be null!";
     std::shared_ptr<boost::filesystem::path> data_path_ptr = search_paths_vec_ptr->at(2);
+    ASSERT_NE(data_path_ptr, nullptr) << "data path should not be null!";
 
     bool const exists = boost::filesystem::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
@@ -363,8 +389,11 @@ TEST_F(PythonTests, GetMethodFromPython_with_individual_paths) {
 
 TEST_F(PythonTests, PrepareStringArgsForPython) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<boost::filesystem::path> search_path_list{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_list.emplace_back(*search_path_ptr);
     }
 
@@ -385,8 +414,11 @@ TEST_F(PythonTests, PrepareStringArgsForPython) {
 
 TEST_F(PythonTests, PrepareWStringArgsForPython) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<boost::filesystem::path> search_path_list{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_list.emplace_back(*search_path_ptr);
     }
 
@@ -407,8 +439,11 @@ TEST_F(PythonTests, PrepareWStringArgsForPython) {
 
 TEST_F(PythonTests, CallPythonFnNullArgs_with_module_name_fn_name_and_search_paths) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<boost::filesystem::path> search_path_list{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_list.emplace_back(*search_path_ptr);
     }
 
@@ -422,8 +457,11 @@ TEST_F(PythonTests, CallPythonFnNullArgs_with_module_name_fn_name_and_search_pat
 
 TEST_F(PythonTests, CallPythonFnNullArgs_with_fn_pointer) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<boost::filesystem::path> search_path_list{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_list.emplace_back(*search_path_ptr);
     }
 
@@ -440,8 +478,11 @@ TEST_F(PythonTests, CallPythonFnNullArgs_with_fn_pointer) {
 
 TEST_F(PythonTests, CallPythonFnStringArgs_with_module_name_fn_name_and_search_paths) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<boost::filesystem::path> search_path_list{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_list.emplace_back(*search_path_ptr);
     }
 
@@ -456,8 +497,11 @@ TEST_F(PythonTests, CallPythonFnStringArgs_with_module_name_fn_name_and_search_p
 
 TEST_F(PythonTests, CallPythonFnStringArgs_with_fn_pointer) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<boost::filesystem::path> search_path_list{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_list.emplace_back(*search_path_ptr);
     }
 
@@ -475,8 +519,11 @@ TEST_F(PythonTests, CallPythonFnStringArgs_with_fn_pointer) {
 
 TEST_F(PythonTests, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_paths) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<boost::filesystem::path> search_path_list{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_list.emplace_back(*search_path_ptr);
     }
 
@@ -491,8 +538,11 @@ TEST_F(PythonTests, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_
 
 TEST_F(PythonTests, CallPythonFnWstringArgs_with_fn_pointer) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<boost::filesystem::path> search_path_list{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_list.emplace_back(*search_path_ptr);
     }
 
@@ -510,8 +560,11 @@ TEST_F(PythonTests, CallPythonFnWstringArgs_with_fn_pointer) {
 
 TEST_F(PythonTests, CallPythonFnPyArgs) {
     std::shared_ptr<std::vector<std::shared_ptr<boost::filesystem::path> > > search_paths_vec_ptr = TestPathsHelper();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
     std::list<boost::filesystem::path> search_path_list{};
     for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
         search_path_list.emplace_back(*search_path_ptr);
     }
 
