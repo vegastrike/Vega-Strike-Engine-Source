@@ -927,21 +927,45 @@ IF (USE_GTEST)
     ENDIF()
 
     CONFIGURE_FILE(
-            "src/configuration/tests/vegastrike.config"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/configuration/tests/vegastrike.config"
             "${CMAKE_BINARY_DIR}/test_assets/vegastrike.config"
             COPYONLY
     )
 
     CONFIGURE_FILE(
-            "src/cmd/tests/units.json"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/cmd/tests/units.json"
             "${CMAKE_BINARY_DIR}/test_assets/units.json"
             COPYONLY
     )
 
     CONFIGURE_FILE(
-            "src/configuration/tests/python_tests.py"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/configuration/tests/python_tests.py"
             "${CMAKE_BINARY_DIR}/test_assets/python_tests.py"
             COPYONLY
+    )
+
+    ADD_CUSTOM_COMMAND(
+            TARGET ${TEST_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/configuration/tests/vegastrike.config"
+            "${CMAKE_BINARY_DIR}/test_assets/vegastrike.config"
+            COMMENT "Updating vegastrike.config in test_assets directory"
+    )
+
+    ADD_CUSTOM_COMMAND(
+            TARGET ${TEST_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/configuration/tests/units.json"
+            "${CMAKE_BINARY_DIR}/test_assets/units.json"
+            COMMENT "Updating units.json in test_assets directory"
+    )
+
+    ADD_CUSTOM_COMMAND(
+            TARGET ${TEST_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/configuration/tests/python_tests.py"
+            "${CMAKE_BINARY_DIR}/test_assets/python_tests.py"
+            COMMENT "Updating python_tests.py in test_assets directory"
     )
 
     INCLUDE(GoogleTest)
