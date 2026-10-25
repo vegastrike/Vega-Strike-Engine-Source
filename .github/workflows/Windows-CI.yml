@@ -107,6 +107,8 @@ jobs:
       - name: Test the code
         run: |
           Get-ChildItem -Recurse -Force -File -Filter "python_tests.py"
+          Get-ChildItem -Recurse -Force -File -Filter 'units.json'
+          Get-ChildItem -Recurse -Force -File -Filter 'vegastrike.config'
           Get-ChildItem -Recurse -Force -Filter "test_assets"
           & "${{ github.workspace }}\\script\\test.ps1" -PresetName "${{ matrix.preset-name }}"
         working-directory: "${{ github.workspace }}"

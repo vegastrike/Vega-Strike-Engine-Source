@@ -93,5 +93,7 @@ then
 else
   find /usr/local/src/Vega-Strike-Engine-Source/ -name 'test_assets' -type d
   find /usr/local/src/Vega-Strike-Engine-Source/ -name 'python_tests.py' -type f
+  find /usr/local/src/Vega-Strike-Engine-Source/ -name 'units.json' -type f
+  find /usr/local/src/Vega-Strike-Engine-Source/ -name 'vegastrike.config' -type f
   PYTHONUNBUFFERED=1 script/test --preset_name="${preset_name}" --build_type="${build_type}"
 fi
