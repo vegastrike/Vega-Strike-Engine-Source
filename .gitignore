@@ -16,7 +16,7 @@ packages/
 engine/.idea/
 .idea/
 .venv/
-
+*.patch
 engine/src/version.h
 engine/setup/src/include/version.h
 
