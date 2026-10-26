@@ -37,6 +37,7 @@
 #include "cmd/movable.h"
 #include "src/vegastrike.h"
 #include "root_generic/vs_globals.h"
+#include "gldrv/winsys.h"
 #include "src/in.h"
 #include "gfx_generic/mesh.h"
 #include "gfx/sprite.h"
@@ -1069,4 +1070,7 @@ void main_loop() {
     if (g_game.sound_enabled) {
         Audio::SceneManager::getSingleton()->commit();
     }
+
+    // Hold the frame back if a software frame-rate cap is set.
+    winsys_wait_for_frame();
 }

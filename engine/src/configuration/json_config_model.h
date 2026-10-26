@@ -28,16 +28,14 @@
 #ifndef VEGA_STRIKE_ENGINE_CONFIG_JSON_CONFIG_MODEL_H
 #define VEGA_STRIKE_ENGINE_CONFIG_JSON_CONFIG_MODEL_H
 
-// Standalone overlay config model for the vs-settings-ng config utility.
+// Standalone overlay config model for the JSON config files.
 //
-// Ported from the kivy settings app's ConfigBranch/ConfigLeaf dirty-tracking
-// model (Assets-Production/python/settings_app/game_config.py). It merges an
-// assets config (read-only defaults) with a user config (sparse overrides) and
-// tracks which leaves the user has changed ("dirty"), so the app can write only
-// the changed subset back to the user directory.
+// It merges an assets config (read-only defaults) with a user config (sparse
+// overrides) and tracks which leaves the user has changed ("dirty"), so only
+// the changed subset is written back to the user directory.
 //
-// This has no SDL/ImGui dependency, so it is unit-testable and reusable by both
-// the standalone vs-settings-ng binary and the future in-game settings panel.
+// This has no SDL/ImGui dependency, so it is unit-testable independently of the
+// in-game config screen.
 
 #include <boost/json.hpp>
 #include <memory>

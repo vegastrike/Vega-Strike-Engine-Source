@@ -947,7 +947,7 @@ void Drawable::Split(int level) {
                     VegaRandom::Instance().RandomDoubleUpTo(kVegaUInt32tMaxAsDouble),
                     VegaRandom::Instance().RandomDoubleUpTo(kVegaUInt32tMaxAsDouble) + 0.1);
             loc.Normalize();
-            splitsub->ApplyLocalTorque(loc * splitsub->GetMoment() * configuration().graphics.explosion_torque_flt
+            splitsub->ApplyLocalTorque(loc * static_cast<float>(splitsub->GetMass()) * configuration().graphics.explosion_torque_flt
                     * (1 + VegaRandom::Instance().RandomFloatUpTo(unit->rSize())));
         }
     }

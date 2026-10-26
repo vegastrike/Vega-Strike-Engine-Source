@@ -31,7 +31,7 @@
 set -e
 
 echo "-----------------------------------------"
-echo "--- docker-entrypoint.sh | 2025-11-27 ---"
+echo "--- docker-entrypoint.sh | 2026-10-01 ---"
 echo "-----------------------------------------"
 
 #----------------------------------
@@ -63,7 +63,7 @@ while [ $# -gt 0 ]; do
 done
 
 echo "Re-run bootstrap"
-script/bootstrap
+script/bootstrap 0
 
 if [ "$COMPILER" == "gcc" ]
 then
@@ -80,11 +80,16 @@ then
   preset_name="${PRESET_NAME}"
 fi
 
-script/build --preset_name="${preset_name}"
+if [ -z "$build_type" ] && [ -n "$BUILD_TYPE" ]
+then
+  build_type="${BUILD_TYPE}"
+fi
+
+script/build --preset_name="${preset_name}" --build_type="${build_type}"
 
 if [ $IS_RELEASE -eq 1 ]
 then
-  script/package --preset_name="${preset_name}"
+  script/package --preset_name="${preset_name}" --build_type="${build_type}"
 else
-  script/test --preset_name="${preset_name}"
+  PYTHONUNBUFFERED=1 script/test --preset_name="${preset_name}" --build_type="${build_type}"
 fi

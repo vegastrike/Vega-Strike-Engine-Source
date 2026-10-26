@@ -771,7 +771,7 @@ void EraseLink(const int room, std::string index) {
         return;
     }
     const auto first_to_remove = std::stable_partition(new_room->links.begin(), new_room->links.end(),
-            [index](const BaseInterface::Room::Link * link_ptr) { return link_ptr->index != index; });
+            [index](const BaseInterface::Room::Link * link_ptr) { return link_ptr != nullptr && link_ptr->index != index; });
     new_room->links.erase(first_to_remove, new_room->links.end());
 }
 
@@ -781,7 +781,7 @@ void EraseObj(const int room, std::string index) {
         return;
     }
     const auto first_to_remove = std::stable_partition(new_room->objs.begin(), new_room->objs.end(),
-            [index](const BaseInterface::Room::BaseObj * obj) { return obj->index != index; });
+            [index](const BaseInterface::Room::BaseObj * obj) { return obj != nullptr && obj->index != index; });
     new_room->objs.erase(first_to_remove, new_room->objs.end());
 }
 

@@ -92,7 +92,7 @@ public:
     }    
     // Draws the text
     void draw(int firstLineToDraw=0);
-    ImVec2 getTextWidth(const std::string text, const float fontSize);
+    ImVec2 getTextWidth(const std::string text);
 private:
     Rect m_rect;
     Font m_font;

@@ -316,10 +316,11 @@ void VSSprite::DrawWithImGui(ImDrawList *drawList = ImGui::GetBackgroundDrawList
 
     ImTextureID texID = static_cast<ImTextureID>(static_cast<uintptr_t>(actual_gl_id));
 
-    // Get current sprite position, we draw from top left, thus adjust Y
+    // xcenter/ycenter is the centre of the sprite, as DrawHere builds the corners
+    // around it. ImGui draws down from a top-left corner, so convert.
     ImVec2 topLeft(
-    Coordinates::normToPixelX(xcenter),
-    Coordinates::normToPixelY(ycenter + heighto2 * 2)
+    Coordinates::normToPixelX(xcenter - widtho2),
+    Coordinates::normToPixelY(ycenter + heighto2)
     );
     // Get the size of the sprite in pixels
     ImVec2 spriteSize(Coordinates::normToPixelW(widtho2 * 2), Coordinates::normToPixelH(heighto2 * 2)); 

@@ -39,6 +39,7 @@
  */
 
 
+#include <cmath>
 #include <assert.h>
 #include <sstream>
 
@@ -53,6 +54,7 @@
 #include "root_generic/options.h"
 #include "src/vs_exit.h"
 #include "configuration/configuration.h"
+#include "vegadisk/vsfilesystem.h"
 #include "libraries/gui/gui.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "gui/config_screen.h"
@@ -188,6 +190,86 @@ void winsys_set_passive_motion_func(winsys_motion_func_t func) {
 void winsys_swap_buffers() {
     SDL_Window* current_window = SDL_GL_GetCurrentWindow();
     SDL_GL_SwapWindow(current_window);
+}
+
+// The effective software frame cap (0 = none), recomputed from the config and the
+// monitor refresh whenever the setting or monitor changes.
+static int g_frame_rate_limit = 0;
+
+int winsys_frame_rate_limit() {
+    return g_frame_rate_limit;
+}
+
+int winsys_monitor_refresh() {
+    SDL_Window *window = SDL_GL_GetCurrentWindow();
+    if (!window) {
+        return 0;
+    }
+    const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(SDL_GetDisplayForWindow(window));
+    if (!mode) {
+        return 0;
+    }
+    // Refresh rates are floats (59.94 and the like) and the cap is whole Hz. The floating point
+    // rounding mode is the default round-to-nearest, and nothing in the engine changes it, so this
+    // is "round to the nearest whole Hz" spelled out.
+    return static_cast<int>(std::nearbyint(mode->refresh_rate));
+}
+
+// SDL's swap-interval values are exactly what these carry, so there is nothing to translate at the
+// point the mode is used.
+enum class VegaVSyncMode {
+    kOff = 0,
+    kOnMonitor = 1,
+    kAdaptive = -1,
+};
+
+// The config keeps vsync as a string, which is what the config file and the settings screen speak,
+// so turn it into the mode here.
+static VegaVSyncMode ParseVSyncMode(const std::string &mode) {
+    if (mode == "off") {
+        return VegaVSyncMode::kOff;
+    }
+    if (mode == "adaptive") {
+        return VegaVSyncMode::kAdaptive;
+    }
+    return VegaVSyncMode::kOnMonitor;      // "on", or anything not recognised
+}
+
+void winsys_apply_frame_limit() {
+    const auto &g = configuration().graphics;
+
+    const int interval = static_cast<int>(ParseVSyncMode(g.vsync));
+    SDL_ClearError();
+    if (SDL_GL_SetSwapInterval(interval) != 0) {
+        VS_LOG(warning, (boost::format("SDL_GL_SetSwapInterval(%1%) failed: %2%") % interval % SDL_GetError()).str());
+    }
+    int limit = 0;
+    if (g.frame_limit_mode == "half") {
+        limit = winsys_monitor_refresh() / 2;
+    } else if (g.frame_limit_mode == "fixed") {
+        limit = g.max_framerate;
+    }
+    g_frame_rate_limit = (limit > 0) ? limit : 0;
+}
+
+void winsys_wait_for_frame() {
+    if (g_frame_rate_limit <= 0) {
+        return;
+    }
+    const Uint64 now = SDL_GetTicks();
+    const Uint64 budget = 1000 / static_cast<Uint64>(g_frame_rate_limit);
+    static Uint64 next_frame = 0;
+    if (next_frame != 0 && now < next_frame + budget) {
+        // Within this frame's budget. Sleep only if we are ahead of schedule -- the
+        // remaining time is only positive then, so there is no unsigned underflow.
+        if (now < next_frame) {
+            SDL_Delay(static_cast<Uint32>(next_frame - now));
+        }
+        next_frame += budget;
+    } else {
+        // First frame, or we fell a whole frame behind: start a fresh schedule.
+        next_frame = now + budget;
+    }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -568,13 +650,23 @@ static bool setup_sdl_video_mode() {
         VS_LOG_FLUSH_EXIT(fatal, "Failed to make window context current", 1);
     }
 
+    // Apply the configured vsync/frame-rate limit now that the context is current.
+    winsys_apply_frame_limit();
+
     SDL_ShowWindow(window);
     SDL_SyncWindow(window);
 
     get_screen_measurements();
 
-    // Initialize imgui
-    InitGui(window, &context, configuration().graphics.font_point_dbl);
+    // Initialize imgui with the configured font. graphics.font is "Roboto" (the
+    // embedded engine font) or a .ttf filename in the data fonts/ directory.
+    std::string font_file;
+    const std::string &font_name = configuration().graphics.font;
+    if (!font_name.empty() && font_name != "Roboto") {
+        font_file = VSFileSystem::datadir + "/fonts/" + font_name;
+    }
+    InitGui(window, &context, configuration().graphics.font_point_dbl,
+            font_file.empty() ? nullptr : font_file.c_str());
 
     return true;
 }

@@ -350,6 +350,14 @@ void DrawGauges( GameCockpit *cockpit, Unit *un, Gauge *gauges[],
         text->background_color = static_cast<ImU32>(temp_background_color);
     }
     for (i = UnitImages< void >::KPS; i < UnitImages< void >::AUTOPILOT_MODAL; i++) {
+        //Some cockpits carry an FPS readout of their own, and it is one of the text-based
+        //gauges this loop draws (KPS marks their start, AUTOPILOT_MODAL the end), not a gauge
+        //sprite. The graphics option is the one place that decides whether an FPS counter is
+        //shown. Deciding it as the gauge is drawn - rather than as the cockpit is parsed,
+        //which happens once - is what lets the setting apply as soon as it is saved.
+        if ((int) i == (int) UnitImages< void >::COCKPIT_FPS && !configuration().graphics.show_fps) {
+            continue;
+        }
         if (gauges[i]) {
             float sx, sy, px, py;
             gauges[i]->GetSize( sx, sy );

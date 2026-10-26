@@ -192,8 +192,6 @@ voidWRAPPED1( SetAngularVelocity, Vector, v
 
 #if (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 2)
 #else // (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 2)
-WRAPPED0(float, GetMoment,
-0 )
 WRAPPED0(float, GetMass,
 0 )
 WRAPPED0(int, LockMissile,
@@ -326,6 +324,7 @@ WRAPPED0(int, RepairCost,
 0 )
 WRAPPED0(int, RepairUpgrade,
 0 )
+EXPORT_UTIL3(float, PercentOperational, std::string, name, std::string, category, bool, countHullAndArmorAsFull)
 WRAPPED1( Vector, MountPercentOperational,
 int, whichMount, Vector( -1.0f, -1.0f, -1.0f ))
 #endif // (WHICH_UNIT_EXPORT_NUMBER == 1) || (WHICH_UNIT_EXPORT_NUMBER == 2)

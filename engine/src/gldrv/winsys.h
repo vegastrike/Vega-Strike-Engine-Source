@@ -338,6 +338,13 @@ void winsys_set_motion_func(winsys_motion_func_t func);
 void winsys_set_passive_motion_func(winsys_motion_func_t func);
 
 void winsys_swap_buffers();
+// Apply the configured vsync mode and recompute the software frame cap (using the
+// monitor refresh for the "half monitor" mode). Call at startup and on config change.
+void winsys_apply_frame_limit();
+int winsys_frame_rate_limit();
+int winsys_monitor_refresh();
+// Sleep out the remainder of the frame budget when a software cap is set.
+void winsys_wait_for_frame();
 void winsys_warp_pointer(int x, int y);
 void winsys_show_cursor(bool visible);
 void winsys_apply_resolution(int width, int height, bool fullscreen);

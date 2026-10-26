@@ -248,7 +248,7 @@ void NavComputer::constructControls(void) {
         baseTitle->setText("Error");
         baseTitle->setTextColor(GFXColor(.4, 1, .4));
         baseTitle->setColor(GUI_CLEAR);
-        baseTitle->setFont(Font(.07, 1.75));
+        baseTitle->setFont(Font(.045, 1.75));
         baseTitle->setId("NavigationTitle");
         mainGroup->addChild(baseTitle);
 
@@ -262,7 +262,7 @@ void NavComputer::constructControls(void) {
         done->setDownColor(GFXColor(0, 1, 1, .6));
         done->setDownTextColor(GUI_OPAQUE_BLACK());
         done->setHighlightColor(GFXColor(0, 0, 1, .4));
-        done->setFont(Font(.08, BOLD_STROKE));
+        done->setFont(Font(.05, BOLD_STROKE));
         mainGroup->addChild(done);
 
         //Scroller for description.
@@ -279,7 +279,7 @@ void NavComputer::constructControls(void) {
         ms->setRect(Rect(.24, -.29, .67, .99));
         ms->setColor(GFXColor(color.r, color.g, color.b, .1));
         ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-        ms->setFont(Font(.07));
+        ms->setFont(Font(.045));
         ms->setMultiLine(true);
         ms->setTextColor(GUI_OPAQUE_WHITE());
         ms->setTextMargins(Size(.02, .01));
@@ -314,7 +314,7 @@ void NavComputer::constructControls(void) {
         pathList->setSelectionColor(GFXColor(0, .6, 0, .8));
         pathList->setHighlightColor(GFXColor(0, .6, 0, .35));
         pathList->setHighlightTextColor(GUI_OPAQUE_WHITE());
-        pathList->setFont(Font(.07));
+        pathList->setFont(Font(.045));
         pathList->setTextMargins(Size(0.02, 0.01));
         pathList->setId("PathLister");
         pathList->setScroller(pathScroller);
@@ -332,7 +332,7 @@ void NavComputer::constructControls(void) {
         up->setBorderColor(GFXColor(.2, .2, .2));
         up->setEndBorderColor(GFXColor(.4, .4, .4));
         up->setShadowWidth(2.0);
-        up->setFont(Font(.08, BOLD_STROKE));
+        up->setFont(Font(.05, BOLD_STROKE));
         up->setId("Up");
         up->setLabel("Up");
         up->setCommand("Up");
@@ -348,7 +348,7 @@ void NavComputer::constructControls(void) {
         add->setBorderColor(GFXColor(.2, .2, .2));
         add->setEndBorderColor(GFXColor(.4, .4, .4));
         add->setShadowWidth(2.0);
-        add->setFont(Font(.08, BOLD_STROKE));
+        add->setFont(Font(.05, BOLD_STROKE));
         add->setId("Add");
         add->setLabel("Add");
         add->setCommand("Add");
@@ -364,7 +364,7 @@ void NavComputer::constructControls(void) {
         edit->setBorderColor(GFXColor(.2, .2, .2));
         edit->setEndBorderColor(GFXColor(.4, .4, .4));
         edit->setShadowWidth(2.0);
-        edit->setFont(Font(.08, BOLD_STROKE));
+        edit->setFont(Font(.05, BOLD_STROKE));
         edit->setId(displayModeInfo[EDIT].button);
         edit->setLabel(displayModeInfo[EDIT].button);
         edit->setCommand(displayModeInfo[EDIT].command);
@@ -380,7 +380,7 @@ void NavComputer::constructControls(void) {
         showpath->setBorderColor(GFXColor(.2, .2, .2));
         showpath->setEndBorderColor(GFXColor(.4, .4, .4));
         showpath->setShadowWidth(2.0);
-        showpath->setFont(Font(.08, BOLD_STROKE));
+        showpath->setFont(Font(.05, BOLD_STROKE));
         showpath->setId("ShowPath");
         showpath->setLabel("Show");
         showpath->setCommand("ShowPath");
@@ -396,7 +396,7 @@ void NavComputer::constructControls(void) {
         rename->setBorderColor(GFXColor(.2, .2, .2));
         rename->setEndBorderColor(GFXColor(.4, .4, .4));
         rename->setShadowWidth(2.0);
-        rename->setFont(Font(.08, BOLD_STROKE));
+        rename->setFont(Font(.05, BOLD_STROKE));
         rename->setId("Rename");
         rename->setLabel("Rename");
         rename->setCommand("Rename");
@@ -412,7 +412,7 @@ void NavComputer::constructControls(void) {
         remove->setBorderColor(GFXColor(.2, .2, .2));
         remove->setEndBorderColor(GFXColor(.4, .4, .4));
         remove->setShadowWidth(2.0);
-        remove->setFont(Font(.08, BOLD_STROKE));
+        remove->setFont(Font(.05, BOLD_STROKE));
         remove->setId("Remove");
         remove->setLabel("Remove");
         remove->setCommand("Remove");
@@ -428,7 +428,7 @@ void NavComputer::constructControls(void) {
         down->setBorderColor(GFXColor(.2, .2, .2));
         down->setEndBorderColor(GFXColor(.4, .4, .4));
         down->setShadowWidth(2.0);
-        down->setFont(Font(.08, BOLD_STROKE));
+        down->setFont(Font(.05, BOLD_STROKE));
         down->setId("Down");
         down->setLabel("Down");
         down->setCommand("Down");
@@ -444,7 +444,7 @@ void NavComputer::constructControls(void) {
         showall->setBorderColor(GFXColor(.2, .2, .2));
         showall->setEndBorderColor(GFXColor(.4, .4, .4));
         showall->setShadowWidth(2.0);
-        showall->setFont(Font(.08, BOLD_STROKE));
+        showall->setFont(Font(.05, BOLD_STROKE));
         showall->setId("ShowAll");
         showall->setLabel("Show All");
         showall->setCommand("ShowAll");
@@ -460,7 +460,7 @@ void NavComputer::constructControls(void) {
         shownone->setBorderColor(GFXColor(.2, .2, .2));
         shownone->setEndBorderColor(GFXColor(.4, .4, .4));
         shownone->setShadowWidth(2.0);
-        shownone->setFont(Font(.08, BOLD_STROKE));
+        shownone->setFont(Font(.05, BOLD_STROKE));
         shownone->setId("ShowNone");
         shownone->setLabel("Show None");
         shownone->setCommand("ShowNone");
@@ -479,7 +479,7 @@ void NavComputer::constructControls(void) {
         applyHint->setText("Apply To:");
         applyHint->setTextColor(GFXColor(.4, 1, .4));
         applyHint->setColor(GUI_CLEAR);
-        applyHint->setFont(Font(.07, 1.75));
+        applyHint->setFont(Font(.045, 1.75));
         applyHint->setId("ApplyHint");
         editGroup->addChild(applyHint);
 
@@ -493,7 +493,7 @@ void NavComputer::constructControls(void) {
         source->setBorderColor(GFXColor(.2, .2, .2));
         source->setEndBorderColor(GFXColor(.4, .4, .4));
         source->setShadowWidth(2.0);
-        source->setFont(Font(.08, BOLD_STROKE));
+        source->setFont(Font(.05, BOLD_STROKE));
         source->setId("Source");
         source->setLabel("Source");
         source->setCommand("Source");
@@ -509,7 +509,7 @@ void NavComputer::constructControls(void) {
         destination->setBorderColor(GFXColor(.2, .2, .2));
         destination->setEndBorderColor(GFXColor(.4, .4, .4));
         destination->setShadowWidth(2.0);
-        destination->setFont(Font(.08, BOLD_STROKE));
+        destination->setFont(Font(.05, BOLD_STROKE));
         destination->setId("Destination");
         destination->setLabel("Destination");
         destination->setCommand("Destination");
@@ -525,7 +525,7 @@ void NavComputer::constructControls(void) {
         targetMode->setBorderColor(GFXColor(.2, .2, .2));
         targetMode->setEndBorderColor(GFXColor(.4, .4, .4));
         targetMode->setShadowWidth(2.0);
-        targetMode->setFont(Font(.08, BOLD_STROKE));
+        targetMode->setFont(Font(.05, BOLD_STROKE));
         targetMode->setId(selectorModeInfo[TARGET].button);
         targetMode->setLabel(selectorModeInfo[TARGET].button);
         targetMode->setCommand(selectorModeInfo[TARGET].command);
@@ -541,7 +541,7 @@ void NavComputer::constructControls(void) {
         stringMode->setBorderColor(GFXColor(.2, .2, .2));
         stringMode->setEndBorderColor(GFXColor(.4, .4, .4));
         stringMode->setShadowWidth(2.0);
-        stringMode->setFont(Font(.08, BOLD_STROKE));
+        stringMode->setFont(Font(.05, BOLD_STROKE));
         stringMode->setId(selectorModeInfo[CRITERIA].button);
         stringMode->setLabel(selectorModeInfo[CRITERIA].button);
         stringMode->setCommand(selectorModeInfo[CRITERIA].command);
@@ -557,7 +557,7 @@ void NavComputer::constructControls(void) {
         chainMode->setBorderColor(GFXColor(.2, .2, .2));
         chainMode->setEndBorderColor(GFXColor(.4, .4, .4));
         chainMode->setShadowWidth(2.0);
-        chainMode->setFont(Font(.08, BOLD_STROKE));
+        chainMode->setFont(Font(.05, BOLD_STROKE));
         chainMode->setId(selectorModeInfo[CHAIN].button);
         chainMode->setLabel(selectorModeInfo[CHAIN].button);
         chainMode->setCommand(selectorModeInfo[CHAIN].command);
@@ -573,7 +573,7 @@ void NavComputer::constructControls(void) {
         finished->setBorderColor(GFXColor(.2, .2, .2));
         finished->setEndBorderColor(GFXColor(.4, .4, .4));
         finished->setShadowWidth(2.0);
-        finished->setFont(Font(.08, BOLD_STROKE));
+        finished->setFont(Font(.05, BOLD_STROKE));
         finished->setId(displayModeInfo[LIST].button);
         finished->setLabel(displayModeInfo[LIST].button);
         finished->setCommand(displayModeInfo[LIST].command);
@@ -593,7 +593,7 @@ void NavComputer::constructControls(void) {
         ms->setRect(Rect(.24, -.95, .67, .62));
         ms->setColor(GFXColor(color.r, color.g, color.b, .1));
         ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-        ms->setFont(Font(.07));
+        ms->setFont(Font(.045));
         ms->setMultiLine(true);
         ms->setTextColor(GUI_OPAQUE_WHITE());
         ms->setTextMargins(Size(.02, .01));
@@ -619,7 +619,7 @@ void NavComputer::constructControls(void) {
         absolute->setBorderColor(GFXColor(.2, .2, .2));
         absolute->setEndBorderColor(GFXColor(.4, .4, .4));
         absolute->setShadowWidth(2.0);
-        absolute->setFont(Font(.08, BOLD_STROKE));
+        absolute->setFont(Font(.05, BOLD_STROKE));
         absolute->setId("Absolute");
         absolute->setLabel("ERROR");
         absolute->setCommand("Absolute");
@@ -635,7 +635,7 @@ void NavComputer::constructControls(void) {
         target->setBorderColor(GFXColor(.2, .2, .2));
         target->setEndBorderColor(GFXColor(.4, .4, .4));
         target->setShadowWidth(2.0);
-        target->setFont(Font(.08, BOLD_STROKE));
+        target->setFont(Font(.05, BOLD_STROKE));
         target->setId("Target");
         target->setLabel("Target");
         target->setCommand("Target");
@@ -651,7 +651,7 @@ void NavComputer::constructControls(void) {
         current->setBorderColor(GFXColor(.2, .2, .2));
         current->setEndBorderColor(GFXColor(.4, .4, .4));
         current->setShadowWidth(2.0);
-        current->setFont(Font(.08, BOLD_STROKE));
+        current->setFont(Font(.05, BOLD_STROKE));
         current->setId("Current");
         current->setLabel("Current");
         current->setCommand("Current");
@@ -682,7 +682,7 @@ void NavComputer::constructControls(void) {
         parameterList->setSelectionColor(GFXColor(0, .6, 0, .8));
         parameterList->setHighlightColor(GFXColor(0, .6, 0, .35));
         parameterList->setHighlightTextColor(GUI_OPAQUE_WHITE());
-        parameterList->setFont(Font(.07));
+        parameterList->setFont(Font(.045));
         parameterList->setTextMargins(Size(0.02, 0.01));
         parameterList->setId("ParameterLister");
         parameterList->setScroller(parameterScroller);
@@ -699,7 +699,7 @@ void NavComputer::constructControls(void) {
         valueBox->setRect(Rect(-.66, .01, .86, .10));
         valueBox->setColor(GFXColor(color.r, color.g, color.b, .1));
         valueBox->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-        valueBox->setFont(Font(.07));
+        valueBox->setFont(Font(.045));
         valueBox->setMultiLine(true);
         valueBox->setTextColor(GUI_OPAQUE_WHITE());
         valueBox->setTextMargins(Size(.02, .01));
@@ -716,7 +716,7 @@ void NavComputer::constructControls(void) {
         andButton->setBorderColor(GFXColor(.2, .2, .2));
         andButton->setEndBorderColor(GFXColor(.4, .4, .4));
         andButton->setShadowWidth(2.0);
-        andButton->setFont(Font(.08, BOLD_STROKE));
+        andButton->setFont(Font(.05, BOLD_STROKE));
         andButton->setId("And");
         andButton->setLabel("And");
         andButton->setCommand("And");
@@ -732,7 +732,7 @@ void NavComputer::constructControls(void) {
         orButton->setBorderColor(GFXColor(.2, .2, .2));
         orButton->setEndBorderColor(GFXColor(.4, .4, .4));
         orButton->setShadowWidth(2.0);
-        orButton->setFont(Font(.08, BOLD_STROKE));
+        orButton->setFont(Font(.05, BOLD_STROKE));
         orButton->setId("Or");
         orButton->setLabel("Or");
         orButton->setCommand("Or");
@@ -748,7 +748,7 @@ void NavComputer::constructControls(void) {
         notButton->setBorderColor(GFXColor(.2, .2, .2));
         notButton->setEndBorderColor(GFXColor(.4, .4, .4));
         notButton->setShadowWidth(2.0);
-        notButton->setFont(Font(.08, BOLD_STROKE));
+        notButton->setFont(Font(.05, BOLD_STROKE));
         notButton->setId("Not");
         notButton->setLabel("Not");
         notButton->setCommand("Not");
@@ -764,7 +764,7 @@ void NavComputer::constructControls(void) {
         removeButton->setBorderColor(GFXColor(.2, .2, .2));
         removeButton->setEndBorderColor(GFXColor(.4, .4, .4));
         removeButton->setShadowWidth(2.0);
-        removeButton->setFont(Font(.08, BOLD_STROKE));
+        removeButton->setFont(Font(.05, BOLD_STROKE));
         removeButton->setId("RemoveCriteria");
         removeButton->setLabel("Remove");
         removeButton->setCommand("RemoveCriteria");
@@ -788,7 +788,7 @@ void NavComputer::constructControls(void) {
         criteriaList->setSelectionColor(GFXColor(0, .6, 0, .8));
         criteriaList->setHighlightColor(GFXColor(0, .6, 0, .35));
         criteriaList->setHighlightTextColor(GUI_OPAQUE_WHITE());
-        criteriaList->setFont(Font(.07));
+        criteriaList->setFont(Font(.045));
         criteriaList->setTextMargins(Size(0.02, 0.01));
         criteriaList->setId("CriteriaLister");
         criteriaList->setScroller(criteriaScroller);
@@ -821,7 +821,7 @@ void NavComputer::constructControls(void) {
         chainList->setSelectionColor(GFXColor(0, .6, 0, .8));
         chainList->setHighlightColor(GFXColor(0, .6, 0, .35));
         chainList->setHighlightTextColor(GUI_OPAQUE_WHITE());
-        chainList->setFont(Font(.07));
+        chainList->setFont(Font(.045));
         chainList->setTextMargins(Size(0.02, 0.01));
         chainList->setId("ChainLister");
         chainList->setScroller(chainScroller);
@@ -847,7 +847,7 @@ void NavComputer::constructControls(void) {
         chainTypeList->setSelectionColor(GFXColor(0, .6, 0, .8));
         chainTypeList->setHighlightColor(GFXColor(0, .6, 0, .35));
         chainTypeList->setHighlightTextColor(GUI_OPAQUE_WHITE());
-        chainTypeList->setFont(Font(.07));
+        chainTypeList->setFont(Font(.045));
         chainTypeList->setTextMargins(Size(0.02, 0.01));
         chainTypeList->setId("ChainTypeLister");
         chainTypeList->setScroller(chainTypeScroller);
@@ -870,7 +870,7 @@ void NavComputer::constructControls(void) {
         chain->setBorderColor(GFXColor(.2, .2, .2));
         chain->setEndBorderColor(GFXColor(.4, .4, .4));
         chain->setShadowWidth(2.0);
-        chain->setFont(Font(.08, BOLD_STROKE));
+        chain->setFont(Font(.05, BOLD_STROKE));
         chain->setId("Chain");
         chain->setLabel("Chain");
         chain->setCommand("Chain");
@@ -1059,7 +1059,7 @@ void NavComputer::RenameConfirm::init(void) {
     text->setTextColor(GFXColor(.7, 1, .4));
     text->setMultiLine(true);
     text->setColor(GUI_CLEAR);
-    text->setFont(Font(.07, 1.25));
+    text->setFont(Font(.045, 1.25));
     text->setId("Information");
     //Put it on the window.
     window->addControl(text);
@@ -1069,7 +1069,7 @@ void NavComputer::RenameConfirm::init(void) {
     pathNameBox->setRect(Rect(-.4, -.09, .8, .15));
     pathNameBox->setColor(GFXColor(0, 1, 1, .1));
     pathNameBox->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY());
-    pathNameBox->setFont(Font(.07));
+    pathNameBox->setFont(Font(.045));
     pathNameBox->setMultiLine(true);
     pathNameBox->setTextColor(GUI_OPAQUE_WHITE());
     pathNameBox->setTextMargins(Size(.02, .01));
@@ -1086,7 +1086,7 @@ void NavComputer::RenameConfirm::init(void) {
     confirm->setDownColor(GFXColor(1, .5, 0, .6));
     confirm->setDownTextColor(GUI_OPAQUE_BLACK());
     confirm->setHighlightColor(GFXColor(0, 1, 0, .4));
-    confirm->setFont(Font(.08, BOLD_STROKE));
+    confirm->setFont(Font(.05, BOLD_STROKE));
     //Put the button on the window.
     window->addControl(confirm);
 
@@ -1100,7 +1100,7 @@ void NavComputer::RenameConfirm::init(void) {
     resume->setDownColor(GFXColor(0, 1, 0, .6));
     resume->setDownTextColor(GUI_OPAQUE_BLACK());
     resume->setHighlightColor(GFXColor(0, 1, 0, .4));
-    resume->setFont(Font(.08, BOLD_STROKE));
+    resume->setFont(Font(.05, BOLD_STROKE));
     //Put the button on the window.
     window->addControl(resume);
 

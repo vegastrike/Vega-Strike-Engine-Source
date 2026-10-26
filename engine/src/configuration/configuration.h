@@ -58,17 +58,10 @@ namespace vega_config {
 		void parseAxes(const boost::json::object& root_object);
 
 
-    struct {
-        std::string details = "High";
-        std::string shaders = "Average";
-        std::string audio = "All Sounds";
-        std::string physics = "Default (1.0)";
-
-    } settings_app;
-
     // Preset selectors from config.json's "preset" section (e.g.
-    // computer="4000MHz", shaders="highshader"). Metadata for the settings app;
-    // the engine does not expand these itself. Key is the lowercase category.
+    // computer="4000MHz", shaders="highshader"). Written and consumed by the
+    // in-game config screen; the engine does not expand these itself. Key is
+    // the lowercase category.
     std::map<std::string, std::string> preset;
 
     struct {
@@ -1424,11 +1417,12 @@ namespace vega_config {
         float dock_planet_radius_percent_flt = 1.5;
         double planet_dock_port_min_size_dbl = 300.0;
         float planet_dock_port_min_size_flt = 300.0;
-        double planet_dock_port_size_dbl = 1.2;
-        float planet_dock_port_size_flt = 1.2;
         bool simple_dock = true;
         double simple_dock_range_dbl = 5000.0;
         float simple_dock_range_flt = 5000.0;
+        // "simple" or "zones". Empty means the setting is not in the config, and the older
+        // simple_dock boolean decides instead, so an overlay that only sets that still works.
+        std::string mode = "";
 
     } dock;
 
@@ -1724,6 +1718,12 @@ namespace vega_config {
         double fov_dbl = 37.5;
         float fov_flt = 37.5;
         bool framerate_changes_shader = false;
+        // Frame-rate limiting: vsync mode, and a software cap when it is below what
+        // the GPU would otherwise produce.
+        std::string vsync = "on";                    // "off" | "on" | "adaptive"
+        std::string frame_limit_mode = "unlimited";   // "unlimited" | "half" | "fixed"
+        int max_framerate = 0;                        // fixed cap, frames per second
+        bool show_fps = true;
         bool full_screen = false;
         std::string gauge_static = "static.ani";
         double generic_cargo_rotation_speed_dbl = 1.0;
@@ -2289,8 +2289,6 @@ namespace vega_config {
         float auto_pilot_no_enemies_distance_multiplier_flt = 4.0;
         double auto_pilot_planet_radius_percent_dbl = 0.495;
         float auto_pilot_planet_radius_percent_flt = 0.495;
-        double auto_pilot_spec_lining_up_angle_dbl = 3.0;
-        float auto_pilot_spec_lining_up_angle_flt = 3.0;
         bool auto_pilot_terminate = true;
         double auto_pilot_termination_distance_dbl = 2500.0;
         float auto_pilot_termination_distance_flt = 2500.0;
@@ -2381,6 +2379,10 @@ namespace vega_config {
         float extra_space_drag_for_cargo_flt = 0.005;
         bool face_target_on_auto = false;
         bool fire_missing_autotrackers = true;
+        double flt_orthogonal_thrust_smoothing_time_dbl = 1.0;
+        float flt_orthogonal_thrust_smoothing_time_flt = 1.0;
+        double flt_orthogonal_thrust_speed_reduce_factor_dbl = 1.0;
+        float flt_orthogonal_thrust_speed_reduce_factor_flt = 1.0;
         double friendly_auto_radius_dbl = 0.0;
         float friendly_auto_radius_flt = 0.0;
         double game_accel_dbl = 1.0;
@@ -2493,10 +2495,6 @@ namespace vega_config {
         double percent_missile_match_target_velocity_dbl = 1.0;
         float percent_missile_match_target_velocity_flt = 1.0;
         bool persistent_on_load = true;
-        double planet_dock_min_port_size_dbl = 300.0;
-        float planet_dock_min_port_size_flt = 300.0;
-        double planet_dock_port_size_dbl = 1.2;
-        float planet_dock_port_size_flt = 1.2;
         double planet_ejection_stophack_dbl = 100000.0;
         float planet_ejection_stophack_flt = 100000.0;
         bool planets_always_neutral = true;

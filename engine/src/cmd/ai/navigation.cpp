@@ -27,6 +27,7 @@
 
 
 #include "navigation.h"
+#include "cmd/dock_utils.h"
 #include "root_generic/macosx_math.h"
 #include <math.h>
 #ifndef _WIN32
@@ -269,16 +270,16 @@ MoveTo::~MoveTo() {
 }
 
 bool ChangeHeading::OptimizeAngSpeed(float optimal_speed_pos, float optimal_speed_neg, float v, float &a) {
-    v += (a / parent->GetMoment()) * simulation_atom_var;
+    v += (a / static_cast<float>(parent->GetMass())) * simulation_atom_var;
     if ((optimal_speed_pos == 0 && optimal_speed_neg == 0) || (v >= -optimal_speed_neg && v <= optimal_speed_pos)) {
         return true;
     }
     if (v > 0) {
-        float deltaa = parent->GetMoment() * (v - optimal_speed_pos)
+        float deltaa = static_cast<float>(parent->GetMass()) * (v - optimal_speed_pos)
                 / simulation_atom_var;           //clamping should take care of it
         a -= deltaa;
     } else {
-        float deltaa = parent->GetMoment() * (-v - optimal_speed_neg)
+        float deltaa = static_cast<float>(parent->GetMass()) * (-v - optimal_speed_neg)
                 / simulation_atom_var;           //clamping should take care of it
         a += deltaa;
     }
@@ -292,7 +293,7 @@ bool ChangeHeading::OptimizeAngSpeed(float optimal_speed_pos, float optimal_spee
 void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei) {
     //We need to end up at destination with positive velocity, but no more than we can decelerate from in a single simulation_atom_var
     if (1) {
-        float mass = parent->GetMoment();
+        float mass = static_cast<float>(parent->GetMass());
         float max_arrival_speed = torquei * simulation_atom_var / mass;
         float accel_needed = (atancalc / simulation_atom_var - ang_veli) / simulation_atom_var;
         float arrival_velocity = accel_needed * simulation_atom_var + ang_veli;
@@ -304,21 +305,21 @@ void ChangeHeading::TurnToward(float atancalc, float ang_veli, float &torquei) {
     float t = CalculateBalancedDecelTime(atancalc,
             ang_veli,
             torquei,
-            parent->GetMoment());     //calculate when we should decel
+            static_cast<float>(parent->GetMass()));     //calculate when we should decel
     if (t < 0) {
         //if it can't make it: try the other way
         torquei = fabs(torquei);         //copy sign again
         t = CalculateBalancedDecelTime(atancalc > 0 ? atancalc - 2 * PI : atancalc + 2 * PI,
                 ang_veli,
                 torquei,
-                parent->GetMoment());
+                static_cast<float>(parent->GetMass()));
     }
     if (t > 0) {
         if (t < simulation_atom_var) {
             torquei *= ((t / simulation_atom_var) - ((simulation_atom_var - t) / simulation_atom_var));
         }
     } else {
-        torquei = -parent->GetMoment() * ang_veli / simulation_atom_var;         //clamping should take care of it
+        torquei = -static_cast<float>(parent->GetMass()) * ang_veli / simulation_atom_var;         //clamping should take care of it
     }
 }
 
@@ -403,7 +404,7 @@ void ChangeHeading::Execute() {
             }
             return;
         }
-        torque = (-parent->GetMoment() / simulation_atom_var) * local_velocity;
+        torque = (-static_cast<float>(parent->GetMass()) / simulation_atom_var) * local_velocity;
     } else {
         TurnToward(atan2(local_heading.j, local_heading.k),
                 local_velocity.i,
@@ -418,7 +419,7 @@ void ChangeHeading::Execute() {
                 turningspeed * parent->drive.max_yaw_right,
                 local_velocity.j,
                 torque.j);
-        torque.k = -parent->GetMoment() * local_velocity.k / simulation_atom_var;         //try to counteract roll;
+        torque.k = -static_cast<float>(parent->GetMass()) * local_velocity.k / simulation_atom_var;         //try to counteract roll;
     }
     if (!cheater) {
         parent->ApplyLocalTorque(torque);
@@ -536,10 +537,6 @@ static float mymax(float a, float b) {
     return a > b ? a : b;
 }
 
-static float mymin(float a, float b) {
-    return a < b ? a : b;
-}
-
 // TODO: move this kludge to FtlDrive
 inline void WarpRampOff(Unit *un, bool rampdown) {
     if (un->ftl_drive.Enabled()) {
@@ -608,7 +605,9 @@ void AutoLongHaul::Execute() {
 
     StraightToTarget = true;    // free to fly
 
-    if ((parent->graphicOptions.WarpFieldStrength < enough_warp_for_cruise)
+    //Free to fly. Read the drive's capability here rather than what the ship is currently getting:
+    //the orthogonal thrust cost is self-inflicted and passes, so steering must not react to it.
+    if ((parent->GetMaxWarpFieldStrength() < enough_warp_for_cruise)
             && (parent->graphicOptions.RampCounter == 0)) {
         //face target unless warp ramping is done and warp is less than some intolerable ammt
         Unit *obstacle = NULL;
@@ -623,7 +622,14 @@ void AutoLongHaul::Execute() {
             inside_landing_zone = currently_inside_landing_zone;
             MakeLinearVelocityOrder();
         }
-        if (obstacle != NULL && obstacle != target) {
+        // The destination is where we are going, so it is never steered around. The autopilot
+        // target can be a subunit of a station, and then the unit that interdicts is its owner,
+        // so compare against the whole unit.
+        Unit *target_root = target;
+        if (target->isSubUnit()) {
+            target_root = UnitUtil::owner(target);
+        }
+        if (obstacle != NULL && obstacle != target && obstacle != target_root) {
             //if it exists and is not our destination
             QVector obstacledirection =
                     (obstacle->LocalPosition() - myposition);               //find vector from us to obstacle
@@ -672,23 +678,11 @@ void AutoLongHaul::Execute() {
         deactivatewarp = false;
     }
     double mass = parent->GetMass();
-    double minaccel =
-            mymin(parent->drive.lateral,
-                    mymin(parent->drive.vertical, mymin(parent->drive.forward, parent->drive.retro)));
-    if (mass) {
-        minaccel /= mass;
-    }
-    QVector cfacing = parent->cumulative_transformation_matrix.getR();         //velocity.Cast();
-    double speed = cfacing.Magnitude();
-    if (StraightToTarget && useJitteryAutopilot(parent, target, minaccel)) {
-        if (speed > .01) {
-            cfacing = cfacing * (1. / speed);
-        }
-        const float dotLimit = cos(M_PI_FLT * configuration().physics.auto_pilot_spec_lining_up_angle_flt / 180.0F);
-        if (cfacing.Dot(destinationdirection) < dotLimit) {          //if wanting to face target but overshooting.
-            deactivatewarp = true;
-        }              //turn off drive
-    }
+    // SPEC stays on while flying toward the destination, through any turn: lining up with the
+    // destination, or taking a detour, must not drop the ship out of warp. Dropping out on a
+    // brief deviation of the facing made SPEC flicker in and out whenever the ship turned --
+    // for instance leaving a planet, now behind it, to line up with a faraway object.
+    double speed = parent->cumulative_transformation_matrix.getR().Magnitude();
     const float min_warpfield_to_enter_warp = configuration().ai.min_warp_to_try_flt;
     if (parent->GetMaxWarpFieldStrength() < min_warpfield_to_enter_warp) {
         deactivatewarp = true;
@@ -722,7 +716,9 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    const float distance_to_stop = configuration().physics.auto_pilot_termination_distance_flt;
+    // Distance where the autopilot terminates and docking begins: the target's docking distance,
+    // where SPEC also stops, so the autopilot hands over dockable rather than short of it.
+    const float distance_to_stop = static_cast<float>(DockingDistance(target));
     const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
     bool stopnow = false;
