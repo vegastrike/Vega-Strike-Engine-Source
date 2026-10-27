@@ -75,7 +75,6 @@ void InitPython(bool &was_already_initialized) {
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
     config.isolated = 1;
-    config.site_import = 0;
 
     status = Py_InitializeFromConfig(&config);
     PyConfig_Clear(&config); // Free configuration memory
