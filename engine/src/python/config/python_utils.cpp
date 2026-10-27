@@ -62,24 +62,26 @@ void InitPython(bool &was_already_initialized) {
     PyPreConfig_InitPythonConfig(&py_pre_config);
     py_pre_config.coerce_c_locale = 1;
     was_already_initialized = Py_IsInitialized() != 0;
+    if (was_already_initialized) {
+        return;
+    }
 
-    if (!was_already_initialized) {
-        PyStatus status = Py_PreInitialize(&py_pre_config);
-        if (PyStatus_Exception(status) != 0) {
-            PyErr_Print();
-            Py_ExitStatusException(status);
-        }
+    PyStatus status = Py_PreInitialize(&py_pre_config);
+    if (PyStatus_Exception(status) != 0) {
+        PyErr_Print();
+        Py_ExitStatusException(status);
+    }
 
-        PyConfig config;
-        PyConfig_InitPythonConfig(&config);
-        config.isolated = 0;
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+    config.isolated = 1;
+    config.site_import = 0;
 
-        status = Py_InitializeFromConfig(&config);
-        PyConfig_Clear(&config); // Free configuration memory
-        if (PyStatus_Exception(status) != 0) {
-            PyErr_Print();
-            Py_ExitStatusException(status);
-        }
+    status = Py_InitializeFromConfig(&config);
+    PyConfig_Clear(&config); // Free configuration memory
+    if (PyStatus_Exception(status) != 0) {
+        PyErr_Print();
+        Py_ExitStatusException(status);
     }
 }
 
