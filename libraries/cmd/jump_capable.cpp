@@ -206,7 +206,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     const bool teleport_autopilot = configuration().physics.teleport_autopilot;
     bool unsafe = false;
     if ((!teleport_autopilot) && (!nanspace)) {
-        if (Guaranteed == Mission::AUTO_NORMAL && unit->cloak.Cloaked()) {
+        if (Guaranteed == Mission::AUTO_NORMAL && unit->cloak.Visibility() > .5) {
             Unit *un = nullptr;
             for (un_iter i = ss->getUnitList().createIterator(); (un = *i) != nullptr; ++i) {
                 const bool canflythruplanets = configuration().physics.can_auto_through_planets;
