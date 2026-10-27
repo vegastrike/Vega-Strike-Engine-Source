@@ -29,6 +29,7 @@
 #include "navigation.h"
 #include "cmd/dock_utils.h"
 #include "root_generic/macosx_math.h"
+#include <algorithm>
 #include <math.h>
 #ifndef _WIN32
 #include <assert.h>
@@ -533,10 +534,6 @@ QVector AutoLongHaul::NewDestination(const QVector &curnewdestination, double ma
     return curnewdestination;
 }
 
-static float mymax(float a, float b) {
-    return a > b ? a : b;
-}
-
 // TODO: move this kludge to FtlDrive
 inline void WarpRampOff(Unit *un, bool rampdown) {
     if (un->ftl_drive.Enabled()) {
@@ -593,7 +590,6 @@ void AutoLongHaul::Execute() {
     const bool compensate_for_interdiction = configuration().physics.auto_pilot_compensate_for_interdiction;
     const float enough_warp_for_cruise = configuration().physics.enough_warp_for_cruise_flt;
     const float go_perpendicular_speed = configuration().physics.warp_perpendicular_flt;
-    const float min_warp_orbit_radius = configuration().physics.min_warp_orbit_radius_flt;
     const float warp_orbit_multiplier = configuration().physics.warp_orbit_multiplier_flt;
     const float warp_behind_angle = cos(M_PI_FLT * configuration().physics.warp_behind_angle_flt / 180.0F);
     QVector myposition = parent->isSubUnit() ? parent->Position() : parent->LocalPosition();     //get unit pos
@@ -622,14 +618,13 @@ void AutoLongHaul::Execute() {
             inside_landing_zone = currently_inside_landing_zone;
             MakeLinearVelocityOrder();
         }
-        // The destination is where we are going, so it is never steered around. The autopilot
-        // target can be a subunit of a station, and then the unit that interdicts is its owner,
-        // so compare against the whole unit.
+        // The destination is never steered around. The autopilot target can be a subunit of a
+        // station, and then the unit that interdicts is its owner, so compare against the whole unit.
         Unit *target_root = target;
         if (target->isSubUnit()) {
             target_root = UnitUtil::owner(target);
         }
-        if (obstacle != NULL && obstacle != target && obstacle != target_root) {
+        if (obstacle != NULL && obstacle != target_root) {
             //if it exists and is not our destination
             QVector obstacledirection =
                     (obstacle->LocalPosition() - myposition);               //find vector from us to obstacle
@@ -638,8 +633,15 @@ void AutoLongHaul::Execute() {
             obstacledirection = obstacledirection
                     * (1. / obstacledistance);               //normalize the obstacle direction as well
             float angle = obstacledirection.Dot(destinationdirection);
+            // The berth this obstacle would be given, and with it the test of whether the course
+            // passes through the obstacle at all. Something standing beside the route is not in the
+            // way however close it is, and steering around it is a course change nobody asked for.
+            const double berth = static_cast<double>(obstacle->rSize()) * warp_orbit_multiplier;
+            const double off_course = obstacledirection.Cross(destinationdirection).Magnitude()
+                    * obstacledistance;
             if ((obstacledistance - obstacle->rSize() < destinationdistance - target->rSize())
-                    && (angle > warp_behind_angle)) {
+                    && (angle > warp_behind_angle)
+                    && (off_course < berth)) {
                 StraightToTarget = false;
                 //if our obstacle is closer than obj and the obstacle is not behind us
                 QVector planetdest =
@@ -652,22 +654,20 @@ void AutoLongHaul::Execute() {
                 if (renormalizedetour > .01) {
                     detourvector = detourvector * (1. / renormalizedetour);
                 }                     //normalize it
-                double finaldetourdistance = mymax(obstacle->rSize() * warp_orbit_multiplier,
-                        min_warp_orbit_radius);                //scale that direction by some multiplier of obstacle size and a constant
                 detourvector = detourvector
-                        * finaldetourdistance;                 //we want to go perpendicular to our transit direction by that ammt
+                        * berth;                 //we want to go perpendicular to our transit direction by that ammt
                 QVector newdestination = NewDestination(obstacle->LocalPosition() + detourvector,
-                        finaldetourdistance);                 //add to our position
+                        berth);                 //add to our position
                 float weight = (maxmultiplier - go_perpendicular_speed) / (enough_warp_for_cruise
                         - go_perpendicular_speed);                   //find out how close we are to our desired warp multiplier and weight our direction by that
                 weight *= weight;                 //
                 if (maxmultiplier < go_perpendicular_speed) {
-                    QVector perpendicular = myposition + planetme * (finaldetourdistance / planetme.Magnitude());
+                    QVector perpendicular = myposition + planetme * (berth / planetme.Magnitude());
                     weight = (go_perpendicular_speed - maxmultiplier) / go_perpendicular_speed;
                     destination = weight * perpendicular + (1 - weight) * newdestination;
                 } else {
                     QVector olddestination = myposition + destinationdirection
-                            * finaldetourdistance;                     //destination direction in the same magnitude as the newdestination from the ship
+                            * berth;                     //destination direction in the same magnitude as the newdestination from the ship
                     destination = newdestination * (1 - weight) + olddestination
                             * weight;                       //use the weight to combine our direction and the dest
                 }
@@ -677,7 +677,6 @@ void AutoLongHaul::Execute() {
     if (!parent->ftl_drive.Enabled() && parent->graphicOptions.RampCounter == 0) {
         deactivatewarp = false;
     }
-    double mass = parent->GetMass();
     // SPEC stays on while flying toward the destination, through any turn: lining up with the
     // destination, or taking a detour, must not drop the ship out of warp. Dropping out on a
     // brief deviation of the facing made SPEC flicker in and out whenever the ship turned --
@@ -688,7 +687,7 @@ void AutoLongHaul::Execute() {
         deactivatewarp = true;
     }
     double maxspeed =
-            mymax(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
+            std::max(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
     double dis = UnitUtil::getSignificantDistance(parent, target);
     float time_to_destination = dis / maxspeed;
 
@@ -716,22 +715,15 @@ void AutoLongHaul::Execute() {
     if (!finish) {
         ResetDone();
     }
-    // Distance where the autopilot terminates and docking begins: the target's docking distance,
-    // where SPEC also stops, so the autopilot hands over dockable rather than short of it.
-    const float distance_to_stop = static_cast<float>(DockingDistance(target));
-    const float enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_flt;
+    // The autopilot hands over at the further of the configured termination distance and the target's
+    // docking distance, where SPEC also stops, so it stops where the game asks it to without stopping
+    // short of dockable.
+    const double configured_distance_to_stop = configuration().physics.auto_pilot_termination_distance_dbl;
+    const double distance_to_stop = std::max(configured_distance_to_stop, DockingDistance(target));
+    const double enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_dbl;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
-    bool stopnow = false;
-    maxspeed = parent->afterburner.speed;
-    if (maxspeed && parent->drive.retro) {
-        double time_to_destination = dis / maxspeed;         //conservative
-        double time_to_stop = speed * mass / parent->drive.retro;
-        if (time_to_destination <= time_to_stop) {
-            stopnow = true;
-        }
-    }
     if (do_auto_finish
-            && (stopnow || dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
+            && (dis < distance_to_stop || (target->Target() == parent && dis < enemy_distance_to_stop))) {
         parent->autopilotactive = false;
         WarpRampOff(parent, rampdown);
         done = true;
