@@ -297,8 +297,9 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
         // place every shot passes through, including the repeat shots of a
         // held trigger (Mount::Fire only runs when the trigger is pressed).
         // Beams have their own continuous effect, see Beam::UpdatePhysics.
+        // isPlayerStarship() checks every cockpit without assuming one exists.
         if (type->type != WEAPON_TYPE::BEAM && forcefeedback != nullptr
-                && caller == _Universe->AccessCockpit()->GetParent()) {
+                && _Universe->isPlayerStarship(caller) != nullptr) {
             forcefeedback->playWeaponFire(type->name, type->isMissile());
         }
         switch (type->type) {

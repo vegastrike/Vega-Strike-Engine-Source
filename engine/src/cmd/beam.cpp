@@ -744,7 +744,8 @@ void Beam::UpdatePhysics(const Transformation &trans,
         return;
     }
     // The beam is on: keep the player's beam force feedback effect running.
-    if (forcefeedback != nullptr && firer == _Universe->AccessCockpit()->GetParent()) {
+    // isPlayerStarship() checks every cockpit without assuming one exists.
+    if (forcefeedback != nullptr && _Universe->isPlayerStarship(firer) != nullptr) {
         forcefeedback->playBeam(type->name);
     }
     if (stability && numframes * simulation_atom_var > stability) {

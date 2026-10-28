@@ -249,7 +249,9 @@ void FlyByWire::Afterburn(float per) {
     } else if (inertial_flight_model) {
         DirectThrust += Vector(0, 0, parent->afterburner.thrust * per);
     }
-    if (forcefeedback != nullptr && parent == _Universe->AccessCockpit()->GetParent()) {
+    // isPlayerStarship() checks every cockpit without assuming one exists,
+    // unlike AccessCockpit()->GetParent().
+    if (forcefeedback != nullptr && _Universe->isPlayerStarship(parent) != nullptr) {
         forcefeedback->playAfterburner(afterburn);
     }
 }
