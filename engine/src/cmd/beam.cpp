@@ -39,6 +39,8 @@ using std::vector;
 #include "cmd/weapon_info.h"
 #include "cmd/damageable.h"
 #include "src/universe.h"
+#include "src/force_feedback.h"
+#include "root_generic/vs_globals.h"
 
 #include <algorithm>
 #include <cmath>
@@ -740,6 +742,10 @@ void Beam::UpdatePhysics(const Transformation &trans,
         }
         refiretime += simulation_atom_var;
         return;
+    }
+    // The beam is on: keep the player's beam force feedback effect running.
+    if (forcefeedback != nullptr && firer == _Universe->AccessCockpit()->GetParent()) {
+        forcefeedback->playBeam(type->name);
     }
     if (stability && numframes * simulation_atom_var > stability) {
         impact |= UNSTABLE;
