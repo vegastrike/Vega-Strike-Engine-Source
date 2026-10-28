@@ -240,6 +240,14 @@ void /*GFXDRVAPI*/ GFXClear(const GFXBOOL colorbuffer, const GFXBOOL depthbuffer
             | (stencilbuffer ? GL_STENCIL_BUFFER_BIT : 0));
 }
 
+void /*GFXDRVAPI*/ GFXClearToColor(const GFXColor &color) {
+    GLfloat previous[4];
+    glGetFloatv(GL_COLOR_CLEAR_VALUE, previous);
+    glClearColor(color.r, color.g, color.b, color.a);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClearColor(previous[0], previous[1], previous[2], previous[3]);
+}
+
 GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename) {
     return GFXFALSE;
 }
