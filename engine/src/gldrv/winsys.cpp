@@ -43,6 +43,8 @@
 #include <assert.h>
 #include <sstream>
 
+#include <boost/filesystem.hpp>
+
 #include "gl_globals.h"
 #include "winsys.h"
 #include "root_generic/vs_globals.h"
@@ -664,6 +666,12 @@ static bool setup_sdl_video_mode() {
     const std::string &font_name = configuration().graphics.font;
     if (!font_name.empty() && font_name != "Roboto") {
         font_file = VSFileSystem::datadir + "/fonts/" + font_name;
+        boost::system::error_code ec;
+        if (!boost::filesystem::exists(font_file, ec)) {
+            VS_LOG(warning, (boost::format("Font file '%1%' is missing; using the embedded font")
+                    % font_file).str());
+            font_file.clear();
+        }
     }
     InitGui(window, &context, configuration().graphics.font_point_dbl,
             font_file.empty() ? nullptr : font_file.c_str());
