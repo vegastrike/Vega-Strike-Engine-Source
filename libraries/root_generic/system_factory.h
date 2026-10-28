@@ -89,6 +89,7 @@ public:
     Planet *processPlanet(Star_XML *xml, Object &object, Planet *owner);
     void processSpaceElevator(Object &object, Planet *owner);
     void processFog(Star_XML *xml, Object &object, Planet *owner);
+    void processBackdrop(Star_XML *xml, Object &object);
     void processEnhancement(string element, Star_XML *xml, Object &object, Planet *owner);
     void processAsteroid(Star_XML *xml, Object &object, Planet *owner);
 
@@ -108,6 +109,7 @@ public:
     void initializeAlpha(Object object, BLENDFUNC blend_source,
             BLENDFUNC blend_destination);
     GFXColor initializeColor(Object object);
+    bool parseColor(const string &value, GFXColor &color);
 };
 
 #endif //VEGA_STRIKE_ENGINE_SYSTEM_FACTORY_H
