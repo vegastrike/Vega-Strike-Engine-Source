@@ -54,6 +54,7 @@ public:
     double Percent() const override;
     bool Damaged() const override;
     void Repair() override;
+    void Replace() override;
 
     void Destroy() override;
 

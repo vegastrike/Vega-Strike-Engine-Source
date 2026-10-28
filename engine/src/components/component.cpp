@@ -126,6 +126,10 @@ void Component::Repair() {
     operational = 1.0;
 }
 
+void Component::Replace() {
+    operational = 1.0;
+}
+
 void Component::Destroy() {
     operational = 0;
 }
