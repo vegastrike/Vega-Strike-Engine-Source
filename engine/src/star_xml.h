@@ -28,7 +28,6 @@
 #define VEGA_STRIKE_ENGINE_STAR_XML_H
 
 #include "root_generic/xml_support.h"
-#include "gfx/background.h"
 
 using namespace XMLSupport;
 
@@ -47,10 +46,6 @@ struct Star_XML {
     std::string backgroundname;
     GFXColor backgroundColor;
     bool backgroundDegamma;
-    bool backgroundColorSet = false;      // backgroundColor was given in the system file
-    bool drawSkybox = true;               // skybox="false" in the system file
-    float starBrightnessExponent = 1;
-    std::vector<BackdropSpec> backdrops;  // <Backdrop> elements
     Vector systemcentroid;
     Vector cursun;
     float timeofyear;

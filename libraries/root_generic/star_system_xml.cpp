@@ -259,7 +259,6 @@ void StarSystem::LoadXML(const string filename, const Vector &centroid, const fl
     xml->backgroundname = string("cube");
     xml->backgroundColor = GFXColor(1.0, 1.0, 1.0, 1.0);
     xml->backgroundDegamma = false;
-    xml->starBrightnessExponent = configuration().graphics.far_stars_brightness_exponent_flt;
     xml->reflectivity = configuration().graphics.reflectivity_flt;
     xml->unitlevel = 0;
 

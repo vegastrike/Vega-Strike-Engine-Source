@@ -40,8 +40,6 @@
 #include "cmd/planetary_orbit.h"
 #include "root_generic/atmospheric_fog_mesh.h"
 #include "root_generic/configxml.h"
-#include "root_generic/xml_support.h"
-#include "src/vs_logging.h"
 
 
 #include "cmd/cont_terrain.h"
@@ -50,8 +48,6 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
-#include <boost/format.hpp>
-#include <boost/lexical_cast.hpp>
 #include <string>
 #include <map>
 #include <vector>
@@ -170,8 +166,6 @@ void SystemFactory::recursiveProcess(Star_XML *xml, Object &object, Planet *owne
         owner = processPlanet(xml, object, owner);
     } else if (boost::iequals(object.type, "fog")) {
         processFog(xml, object, owner);
-    } else if (boost::iequals(object.type, "backdrop")) {
-        processBackdrop(xml, object);
     } else if (boost::iequals(object.type, "unit") || boost::iequals(object.type, "asteroid") ||
             boost::iequals(object.type, "enhancement") || boost::iequals(object.type, "vehicle") ||
             boost::iequals(object.type, "building")) {
@@ -210,63 +204,11 @@ void SystemFactory::processSystem(Star_XML *xml, Object &object) {
     xml->reflectivity *= getFloatAttribute(object, "reflectivity");
     xml->backgroundDegamma = getBoolAttribute(object, "backgroundDegamma", xml->backgroundDegamma);
 
-    // What is drawn behind everything (see gfx/background.h). background still
-    // names the reflection map when skybox="false" turns the skybox off.
-    //   backgroundColor="r g b [a]"  tints the skybox; with no skybox, fills the sky
-    //   farStars="N"                 number of far stars, instead of graphics.num_far_stars
-    //   starBrightness="e"           instead of graphics.far_stars_brightness_exponent
-    xml->drawSkybox = getBoolAttribute(object, "skybox", xml->drawSkybox);
-    if (object.attributes.count("backgroundcolor")) {
-        xml->backgroundColorSet = parseColor(object.attributes["backgroundcolor"], xml->backgroundColor);
-    }
-    xml->numstars = getIntAttribute(object, "farStars", xml->numstars);
-    xml->starBrightnessExponent = getFloatAttribute(object, "starBrightness", xml->starBrightnessExponent);
-}
-
-// <Backdrop file="backdrops/andromeda.png" direction="0.3 0.8 -0.5" size="12"
-//           height="6" rotation="40" color="1 1 1 1" alpha="ONE ONE"/>
-// file and direction are required; size and height are degrees across the sky.
-void SystemFactory::processBackdrop(Star_XML *xml, Object &object) {
-    BackdropSpec backdrop;
-    backdrop.file = getStringAttribute(object, "file");
-    const string direction = getStringAttribute(object, "direction");
-    if (backdrop.file.empty() || direction.empty()) {
-        VS_LOG(warning, (boost::format("%1%: a Backdrop needs a file and a direction") % fullname));
-        return;
-    }
-    try {
-        parse_floatfv(direction, 3, &backdrop.direction.i, &backdrop.direction.j, &backdrop.direction.k);
-    } catch (const boost::bad_lexical_cast &) {
-        VS_LOG(warning, (boost::format("%1%: Backdrop %2% has a bad direction '%3%'")
-                % fullname % backdrop.file % direction));
-        return;
-    }
-    backdrop.size_degrees = getFloatAttribute(object, "size", backdrop.size_degrees);
-    backdrop.height_degrees = getFloatAttribute(object, "height", backdrop.height_degrees);
-    backdrop.rotation_degrees = getFloatAttribute(object, "rotation", backdrop.rotation_degrees);
-    if (object.attributes.count("color")) {
-        parseColor(object.attributes["color"], backdrop.color);
-    }
-    const string alpha = getStringAttribute(object, "alpha");
-    char source[64], destination[64];
-    if (2 == sscanf(alpha.c_str(), "%63s %63s", source, destination)) {
-        backdrop.blend_source = parse_alpha(source);
-        backdrop.blend_destination = parse_alpha(destination);
-    }
-    xml->backdrops.push_back(backdrop);
-}
-
-// Reads "r g b" or "r g b a" into color; returns false, leaving it alone, if it can't.
-bool SystemFactory::parseColor(const string &value, GFXColor &color) {
-    GFXColor parsed(color.r, color.g, color.b, 1);
-    try {
-        parse_floatfv(value, 4, &parsed.r, &parsed.g, &parsed.b, &parsed.a);
-    } catch (const boost::bad_lexical_cast &) {
-        VS_LOG(warning, (boost::format("%1%: bad color '%2%'") % fullname % value));
-        return false;
-    }
-    color = parsed;
-    return true;
+//    Object& backgroundColor = attributes["backgroundColor"];
+//    xml->backgroundColor.r = locale_aware_stof(backgroundColor["r"]);
+//    xml->backgroundColor.g = locale_aware_stof(backgroundColor["g"]);
+//    xml->backgroundColor.b = locale_aware_stof(backgroundColor["b"]);
+//    xml->backgroundColor.a = locale_aware_stof(backgroundColor["a"]);
 }
 
 void SystemFactory::processRing(Star_XML *xml, Object &object, Planet *owner) {

@@ -77,9 +77,6 @@ void /*GFXDRVAPI*/ GFXEndScene();
 void /*GFXDRVAPI*/ GFXClear(const GFXBOOL colorbuffer,
         const GFXBOOL depthbuffer = GFXTRUE,
         const GFXBOOL stencilbuffer = GFXTRUE);
-///Clears the color, Z and stencil buffers, the color buffer to the given color.
-///The clear color other code uses (space_background) is left as it was.
-void /*GFXDRVAPI*/ GFXClearToColor(const GFXColor &color);
 
 ///creates a light context (relevant to a star system) to add lights to
 void /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number);

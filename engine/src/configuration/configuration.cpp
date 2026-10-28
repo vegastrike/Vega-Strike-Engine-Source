@@ -4868,17 +4868,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 graphics.faction_dependent_textures = boost::json::value_to<bool>(*faction_dependent_textures_value_ptr);
             }
 
-            const boost::json::value * far_stars_brightness_exponent_value_ptr = graphics_object.if_contains("far_stars_brightness_exponent");
-            if (far_stars_brightness_exponent_value_ptr != nullptr) {
-                graphics.far_stars_brightness_exponent_dbl = boost::json::value_to<double>(*far_stars_brightness_exponent_value_ptr);
-                graphics.far_stars_brightness_exponent_flt = boost::json::value_to<float>(*far_stars_brightness_exponent_value_ptr);
-            }
-
-            const boost::json::value * far_stars_size_by_brightness_value_ptr = graphics_object.if_contains("far_stars_size_by_brightness");
-            if (far_stars_size_by_brightness_value_ptr != nullptr) {
-                graphics.far_stars_size_by_brightness = boost::json::value_to<bool>(*far_stars_size_by_brightness_value_ptr);
-            }
-
             const boost::json::value * far_stars_sprite_size_value_ptr = graphics_object.if_contains("far_stars_sprite_size");
             if (far_stars_sprite_size_value_ptr != nullptr) {
                 graphics.far_stars_sprite_size_dbl = boost::json::value_to<double>(*far_stars_sprite_size_value_ptr);

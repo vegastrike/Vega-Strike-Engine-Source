@@ -39,63 +39,35 @@
 #include "src/config_xml.h"
 #include "src/universe_util.h"
 #include "src/universe.h"
-#include "gfx/ani_texture.h"
-#include "src/vs_logging.h"
-
-#include <boost/format.hpp>
 
 #include <float.h>
-#include <algorithm>
-#include <cmath>
 const float size = 100;
 
 Background::Background(const char *file,
+        int numstars,
         float spread,
         const std::string &filename,
-        const BackgroundSettings &settings)
-        : Enabled(true), degamma(settings.degamma), color(settings.color), draw_skybox(settings.draw_skybox),
-        fill_color_set(settings.fill_color_set), stars(NULL) {
+        const GFXColor &color_,
+        bool degamma_)
+        : Enabled(true), degamma(degamma_), color(color_), stars(NULL) {
     string temp;
     const string starspritetextures = configuration().graphics.far_stars_sprite_texture;
     const float starspritesize = configuration().graphics.far_stars_sprite_size_flt;
     if (starspritetextures.length() == 0) {
         stars =
-                new PointStarVlist(settings.num_stars, 200 /*spread*/,
-                        configuration().graphics.use_star_coords ? filename : "",
-                        settings.star_brightness_exponent);
+                new PointStarVlist(numstars, 200 /*spread*/,
+                        configuration().graphics.use_star_coords ? filename : "");
     } else {
         stars =
-                new SpriteStarVlist(settings.num_stars,
+                new SpriteStarVlist(numstars,
                         200 /*spread*/,
                         configuration().graphics.use_star_coords ? filename : "",
                         starspritetextures,
-                        starspritesize,
-                        settings.star_brightness_exponent,
-                        configuration().graphics.far_stars_size_by_brightness);
+                        starspritesize);
     }
     up = left = down = front = right = back = NULL;
 
     SphereBackground = NULL;
-
-    for (const BackdropSpec &spec : settings.backdrops) {
-        Texture *texture;
-        // Bilinear rather than mipmapped: mipmapping replaces images whose sides
-        // aren't powers of two with a placeholder, and backdrops often aren't.
-        if (spec.file.find(".ani") != string::npos) {
-            texture = new AnimatedTexture(spec.file.c_str(), 0, BILINEAR);
-        } else {
-            texture = new Texture(spec.file.c_str(), 0, BILINEAR, TEXTURE2D, TEXTURE_2D, GFXTRUE);
-        }
-        if (texture->LoadSuccess()) {
-            backdrops.push_back(Backdrop{spec, texture});
-        } else {
-            VS_LOG(error, (boost::format("Backdrop image %1% could not be loaded") % spec.file));
-            delete texture;
-        }
-    }
-    if (!draw_skybox) {
-        return;  // nothing else to load
-    }
 
 #ifndef NV_CUBE_MAP
     static int max_cube_size = configuration().graphics.max_cubemap_size;
@@ -194,10 +166,6 @@ Background::~Background() {
         delete stars;
         stars = nullptr;
     }
-    for (Backdrop &backdrop : backdrops) {
-        delete backdrop.texture;
-    }
-    backdrops.clear();
 }
 
 Background::BackgroundClone Background::Cache() {
@@ -230,17 +198,8 @@ void Background::BackgroundClone::FreeClone() {
 }
 
 void Background::Draw() {
-    // Enabled is the player's graphics.background setting; draw_skybox is the
-    // system's own. A system without a skybox is cleared to its fill color.
-    const bool skybox = Enabled && draw_skybox;
-    if (skybox) {
-        GFXClear(GFXFALSE);
-    } else if (Enabled && fill_color_set) {
-        GFXClearToColor(color);
-    } else {
-        GFXClear(GFXTRUE);
-    }
-    if (skybox) {
+    GFXClear(Enabled ? GFXFALSE : GFXTRUE);
+    if (Enabled) {
         if (degamma) {
             GFXBlendMode(SRCCOLOR, ZERO);
         } else {
@@ -514,9 +473,6 @@ void Background::Draw() {
             GFXCenterCamera(false);
         }
     }
-    if (Enabled) {
-        DrawBackdrops();
-    }
     //GFXLoadIdentity(MODEL);
     //GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition());
     GFXCenterCamera(true);
@@ -537,88 +493,3 @@ void Background::Draw() {
     //_Universe->AccessCamera()->UpdateGFX(false);
 }
 
-
-// Draws each backdrop as a quad facing the camera, centred on the camera like
-// the skybox so it stays at the same place in the sky however far the ship
-// flies. They are drawn in file order, after the skybox and before the far
-// stars, with depth testing off, so later backdrops cover earlier ones.
-void Background::DrawBackdrops() {
-    if (backdrops.empty()) {
-        return;
-    }
-    const float distance = size * 0.9F;  // inside the skybox
-    GFXCenterCamera(true);
-    GFXLoadMatrixModel(identity_matrix);
-    GFXDisable(LIGHTING);
-    GFXDisable(DEPTHWRITE);
-    GFXDisable(DEPTHTEST);
-    GFXDisable(TEXTURE1);
-    GFXEnable(TEXTURE0);
-    for (Backdrop &backdrop : backdrops) {
-        const BackdropSpec &spec = backdrop.spec;
-        Texture *texture = backdrop.texture;
-
-        // A frame across the line of sight: right and up on screen as seen
-        // from the centre. Up follows the system's +y (or +z when looking
-        // straight up or down), matching how the skybox images are laid out.
-        Vector forward = spec.direction;
-        if (forward.MagnitudeSquared() < 1e-12) {
-            continue;
-        }
-        forward.Normalize();
-        Vector reference = std::fabs(forward.j) > 0.99F ? Vector(0, 0, 1) : Vector(0, 1, 0);
-        Vector up = reference - forward * forward.Dot(reference);
-        up.Normalize();
-        Vector right = forward.Cross(up);  // +x is screen left in Vega Strike
-        const float turn = spec.rotation_degrees * static_cast<float>(M_PI) / 180.0F;
-        const Vector turned_up = up * std::cos(turn) - right * std::sin(turn);
-        const Vector turned_right = right * std::cos(turn) + up * std::sin(turn);
-
-        // Angular size to half-widths on a quad at that distance; under 180
-        // degrees, beyond which the quad would have to wrap behind the camera.
-        float height_degrees = spec.height_degrees;
-        if (height_degrees <= 0) {
-            height_degrees = spec.size_degrees;
-            if (texture->boundSizeX > 0 && texture->boundSizeY > 0) {
-                height_degrees *= static_cast<float>(texture->boundSizeY) / static_cast<float>(texture->boundSizeX);
-            }
-        }
-        auto half_extent = [distance](float degrees) {
-            const float clamped = std::min(std::max(degrees, 0.0F), 170.0F);
-            return distance * std::tan(clamped * static_cast<float>(M_PI) / 360.0F);
-        };
-        const Vector centre = forward * distance;
-        const Vector across = turned_right * half_extent(spec.size_degrees);
-        const Vector down = turned_up * half_extent(height_degrees);
-
-        GFXBlendMode(spec.blend_source, spec.blend_destination);
-        GFXColorf(spec.color);
-        GFXToggleTexture(true, 0);
-        GFXTextureCoordGenMode(0, NO_GEN, NULL, NULL);
-        texture->MakeActive(0, 0);  // also picks an animation's current frame
-        GFXTextureAddressMode(CLAMP);
-        GFXTextureEnv(0, GFXMODULATETEXTURE);
-
-        // Texture coordinates: s grows to the image's right, t downwards, as
-        // the skybox faces use them. Read after MakeActive, which sets them
-        // for an animation's frame.
-        const float ms = texture->mintcoord.i, Ms = texture->maxtcoord.i;
-        const float mt = texture->mintcoord.j, Mt = texture->maxtcoord.j;
-        const Vector top_left = centre - across + down;
-        const Vector top_right = centre + across + down;
-        const Vector bottom_right = centre + across - down;
-        const Vector bottom_left = centre - across - down;
-        // Counterclockwise as seen from the centre, like the skybox faces.
-        const float verts[4 * (3 + 2)] = {
-                top_right.i, top_right.j, top_right.k, Ms, mt,
-                top_left.i, top_left.j, top_left.k, ms, mt,
-                bottom_left.i, bottom_left.j, bottom_left.k, ms, Mt,
-                bottom_right.i, bottom_right.j, bottom_right.k, Ms, Mt,
-        };
-        GFXDraw(GFXQUAD, verts, 4, 3, 0, 2);
-    }
-    GFXTextureAddressMode(WRAP);
-    GFXColor4f(1, 1, 1, 1);
-    GFXBlendMode(ONE, ZERO);
-    GFXCenterCamera(false);
-}
