@@ -52,8 +52,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           update-environment: false
 
-      # The following dependencies are already present within macos-* images:
-      # MacOS has a Developers Tools package from Apple that gets installed which
+      # The following dependencies are already present within macOS-* images:
+      # macOS has a Developers Tools package from Apple that gets installed which
       # provides some minimal functionality:
       #   XCode (which uses CLang/LLVM)
       #   git

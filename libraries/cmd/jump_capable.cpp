@@ -27,6 +27,7 @@
 
 
 #include "cmd/jump_capable.h"
+#include "cmd/dock_utils.h"
 #include "cmd/ai/order.h"
 #include "cmd/unit_find.h"
 #include "src/universe.h"
@@ -152,7 +153,6 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     if (Guaranteed == Mission::AUTO_OFF) {
         return false;
     }
-    const float autopilot_term_distance = configuration().physics.auto_pilot_termination_distance_flt;
     const float atd_no_enemies = configuration().physics.auto_pilot_termination_distance_no_enemies_flt;
     const float autopilot_no_enemies_multiplier = configuration().physics.auto_pilot_no_enemies_distance_multiplier_flt;
     if (unit->isSubUnit()) {
@@ -181,12 +181,11 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
     float totpercent = 1;
     if (totallength > 1) {
-        float apt =
-                (target->getUnitType() == Vega_UnitType::planet) ? (autopilot_term_distance + target->rSize()
-                        * UniverseUtil::getPlanetRadiusPercent()) : autopilot_term_distance;
-        float aptne =
-                (target->getUnitType() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
-                        * UniverseUtil::getPlanetRadiusPercent()) : atd_no_enemies;
+        // The arrival is the docking distance itself, and aptne is the no-enemies one, which stands
+        // off further when nothing is watching. percent / percentne turn them into the point along
+        // the path the ship flies to.
+        float apt = static_cast<float>(DockingDistance(target));
+        float aptne = atd_no_enemies + static_cast<float>(DockingDistance(target));
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
         float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
         if (percentne > 1) {
@@ -371,17 +370,25 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     return ok;
 }
 
-// ftl is space compression: how much space can be compressed depends on what is in
-// it. The relevant quantity for the compression model is the significant distance to
-// the nearest object in space (the closest thing the warp bubble has to contend
-// with). Anything counts -- planets, bases, asteroids, and other ships -- and only the
-// nearest one matters.
-float JumpCapable::GetNearestObjectSignificantDistance(Unit **nearest_unit) const {
+float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
+        Unit **nearest_unit,
+        bool count_negative_warp_units) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
-    float nearest = FLT_MAX;
-    if (nearest_unit) {
-        *nearest_unit = nullptr;
-    }
+
+    const float smallwarphack = configuration().physics.min_warp_effect_size_flt;
+    const float bigwarphack = configuration().physics.max_warp_effect_size_flt;
+    //Boundary between multiplier regions 1&2. 2 is "high" mult
+    const double warpregion1 = configuration().physics.warp_region1_dbl;
+    //Boundary between multiplier regions 0&1 0 is mult=1
+    const double warpregion0 = configuration().physics.warp_region0_dbl;
+    //Mult at 1-2 boundary
+    const double warpcruisemult = configuration().physics.warp_cruise_mult_dbl;
+    //degree of curve
+    const double curvedegree = configuration().physics.warp_curve_degree_dbl;
+    //coefficient so as to agree with above
+    const double upcurvek = warpcruisemult / std::pow((warpregion1 - warpregion0), curvedegree);
+    //inverse fractional effect of ship vs real big object
+    const float def_inv_interdiction = 1.0 / configuration().physics.default_interdiction_flt;
     Unit *planet;
     Unit *testthis = nullptr;
     {
@@ -402,19 +409,58 @@ float JumpCapable::GetNearestObjectSignificantDistance(Unit **nearest_unit) cons
             if (planet == this) {
                 continue;
             }
-            float sigdist = UnitUtil::getSignificantDistance(unit, planet);
-            if (sigdist < nearest) {
-                nearest = sigdist;
-                if (nearest_unit) {
-                    *nearest_unit = planet;
+            float shiphack = 1;
+            if (planet->getUnitType() != Vega_UnitType::planet) {
+                shiphack = def_inv_interdiction;
+                double spec_interdiction = planet->ship_functions.Value(Function::ftl_interdiction);
+                if (spec_interdiction != 0 && planet->graphicOptions.specInterdictionOnline != 0
+                        && (spec_interdiction > 0 || count_negative_warp_units)) {
+                    shiphack = 1 / fabs(spec_interdiction);
+                    if (unit->ship_functions.Value(Function::ftl_interdiction) != 0 && unit->graphicOptions.specInterdictionOnline != 0) {
+                        //only counters artificial interdiction ... or maybe it cheap ones shouldn't counter expensive ones!? or
+                        // expensive ones should counter planets...this is safe now, for gameplay
+                        shiphack *= fabs(spec_interdiction);
+                    }
                 }
             }
+            float multipliertemp = 1;
+            float minsizeeffect = (planet->rSize() > smallwarphack) ? planet->rSize() : smallwarphack;
+            float effectiverad = minsizeeffect * (1.0f + UniverseUtil::getPlanetRadiusPercent()) + unit->rSize();
+            if (effectiverad > bigwarphack) {
+                effectiverad = bigwarphack;
+            }
+            QVector dir = unit->Position() - planet->Position();
+            double udist = dir.Magnitude();
+            float sigdist = UnitUtil::getSignificantDistance(unit, planet);
+            if (planet->isPlanet() && udist < (1 << 28)) {
+                //If distance is viable as a float approximation and it's an actual celestial body
+                udist = sigdist;
+            }
+            do {
+                double dist = udist;
+                if (dist < 0) {
+                    dist = 0;
+                }
+                dist *= shiphack;
+                if (dist > (effectiverad + warpregion0)) {
+                    multipliertemp = std::pow((dist - effectiverad - warpregion0), curvedegree) * upcurvek;
+                } else {
+                    multipliertemp = 1;
+                }
+                if (multipliertemp < minmultiplier) {
+                    minmultiplier = multipliertemp;
+                    *nearest_unit = planet;
+                    //eventually use new multiplier to compute
+                } else {
+                    break;
+                }
+            } while (false);
             if (!testthis) {
                 break;
-            }
+            } //don't want the ++
         }
     }
-    return nearest;
+    return minmultiplier;
 }
 
 float JumpCapable::CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const {

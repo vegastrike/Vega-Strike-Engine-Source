@@ -701,10 +701,7 @@ void StarSystem::AddUnit(Unit *unit) {
     if (stats.system_faction == FactionUtil::GetNeutralFaction()) {
         stats.CheckVitals(this);
     }
-    if (unit->isPlanet() || unit->isJumppoint() || unit->getUnitType() == Vega_UnitType::asteroid
-            || unit->getUnitType() == Vega_UnitType::building  // permanent bases
-            || (UnitUtil::isDockableUnit(unit) && unit->getFlightgroup() != nullptr
-                    && UnitUtil::isSignificant(unit))) {  // transitory bases (moving bases/carriers)
+    if (unit->isPlanet() || unit->isJumppoint() || unit->getUnitType() == Vega_UnitType::asteroid) {
         if (!gravitationalUnits().contains(unit)) {
             gravitationalUnits().prepend(unit);
         }
