@@ -84,14 +84,14 @@ jobs:
           USE_GTEST: 0
           INSTALL_SDL3: 0
           INSTALL_SDL3_IMAGE: 0
-        run: script/cibuild --preset-name="${{ matrix.preset-name }}"
+        run: script/cibuild --preset-name="${{ matrix.preset-name }}" --build-type="${{ matrix.build-type }}"
 
       - name: Package it
         working-directory: "${{ github.workspace }}"
-        run: cpack -V --preset-name="package-${{ matrix.preset-name }}"
+        run: cpack -V --preset-name="package-${{ matrix.preset-name }}" -G DragNDrop
 
       - name: Upload the artifacts
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

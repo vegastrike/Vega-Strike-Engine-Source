@@ -28,11 +28,13 @@ jobs:
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
             python-version:  3.13.13
             is-release:      1
+            install-nsis:    0
           - os:              windows-2025-vs2026
             triplet:         x64-win10
             preset-name:     VS2026Win64-pie-enabled-RelWithDebInfo
             python-version:  3.13.13
             is-release:      1
+            install-nsis:    1
 
     env:
       VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
@@ -100,6 +102,12 @@ jobs:
       - name: Install CMake
         uses: lukka/get-cmake@fffaaafeea488556c2c12dad60690008bc1caacb # v4.4.2
 
+      - name: Install NSIS
+        if: ${{ matrix.install-nsis }}
+        uses: repolevedavaj/install-nsis@1ab2f7ba2fe9408db612029be0bb3c0088b0d3e9 # v1.2.1
+        with:
+          nsis-version: '3.12'
+
       - name: Install vcpkg
         uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
         with:
@@ -136,7 +144,7 @@ jobs:
         if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Upload the artifacts
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
