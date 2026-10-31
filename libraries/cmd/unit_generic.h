@@ -266,6 +266,10 @@ public:
 #define NO_MOUNT_STAR
     bool inertialmode = false;
     bool autopilotactive = false;
+    // The speed the autopilot may hold and still turn onto what it is steering for, in the units the
+    // ship moves in; 0 means no cap. Set by AutoLongHaul, applied by Movable, which is where the
+    // ship's own speed -- and so the warp multiplier that speed implies -- is known.
+    float autopilot_speed_cap = 0.0F;
 
     bool isSubUnit() const {
         return graphicOptions.SubUnit ? true : false;
