@@ -98,7 +98,7 @@ jobs:
           update-environment: false
 
       - name: Install CMake
-        uses: lukka/get-cmake@f86dd60acae0d132056913e248bdabf0e0580b7a #v4.4.5
+        uses: lukka/get-cmake@f86dd60acae0d132056913e248bdabf0e0580b7a # v4.4.5
 
       - name: Install NSIS
         if: ${{ matrix.install-nsis }}
@@ -143,7 +143,7 @@ jobs:
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
 
       - name: Upload the artifacts
-        uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         if: startsWith(github.ref, 'refs/tags/')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
