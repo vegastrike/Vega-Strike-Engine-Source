@@ -111,7 +111,18 @@ jobs:
         with:
           binaryCachePath: "${{ github.workspace }}/vcpkgBCache"
           runVcpkgInstall: true
-          runVcpkgFormatString: '[`install`, `--recurse`, `--clean-after-build`, `--x-install-root`, `$[env.VCPKG_INSTALLED_DIR]`, `--triplet`, `$[env.VCPKG_DEFAULT_TRIPLET]`]'
+
+      - name: Save vcpkg cache
+        id: cache-vcpkg-save
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ${{ github.workspace }}\vcpkgAssets
+            ${{ github.workspace }}\vcpkgBCache
+            ${{ github.workspace }}\vcpkgBin
+            ${{ github.workspace }}\vcpkgBuild
+          key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
+        if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Build the code
         run: |
@@ -130,18 +141,6 @@ jobs:
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           Python_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
-
-      - name: Save vcpkg cache
-        id: cache-vcpkg-save
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            ${{ github.workspace }}\vcpkgAssets
-            ${{ github.workspace }}\vcpkgBCache
-            ${{ github.workspace }}\vcpkgBin
-            ${{ github.workspace }}\vcpkgBuild
-          key: ${{ steps.cache-vcpkg-restore.outputs.cache-primary-key }}
-        if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Upload the artifacts
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
