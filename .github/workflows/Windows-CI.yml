@@ -86,7 +86,7 @@ jobs:
           update-environment: false
 
       - name: Install CMake
-        uses: lukka/get-cmake@f86dd60acae0d132056913e248bdabf0e0580b7a #v4.4.5
+        uses: lukka/get-cmake@f86dd60acae0d132056913e248bdabf0e0580b7a # v4.4.5
 
       - name: Install vcpkg
         uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
