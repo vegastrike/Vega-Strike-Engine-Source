@@ -175,20 +175,20 @@ void Python::init() {
     // initialize python library
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
-
     py_pre_config.coerce_c_locale = 1;
 
-    PyStatus status;
+    bool was_already_initialized = Py_IsInitialized() != 0;
+    if (was_already_initialized) {
+        return;
+    }
 
-    status = Py_PreInitialize(&py_pre_config);
-    if (PyStatus_Exception(status)) {
+    PyStatus status = Py_PreInitialize(&py_pre_config);
+    if (PyStatus_Exception(status) != 0) {
         VS_LOG_AND_FLUSH(fatal, "Python::init(): PyPreInitialize failed");
         PyErr_Print();
         VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         Py_ExitStatusException(status);
     }
-
-    Py_NoSiteFlag = 1;
 
     // These functions add these modules to the builtin package
     InitVS();
@@ -199,21 +199,20 @@ void Python::init() {
 
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
-
     config.isolated = 1;
+    config.site_import = 0;
 
     // Now we can do python things about them and initialize them
-    Py_Initialize();
     status = Py_InitializeFromConfig(&config);
+    PyConfig_Clear(&config);
     if (PyStatus_Exception(status)) {
         VS_LOG_AND_FLUSH(fatal, "Python::init(): Py_InitializeFromConfig failed");
         PyErr_Print();
         VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
-        PyConfig_Clear(&config);
         Py_ExitStatusException(status);
     }
 
-    boost::python::import("base_computer"); // REQUIRED 
+    boost::python::import("base_computer"); // REQUIRED
     initpaths();
 
 #if BOOST_VERSION != 102800
