@@ -30,8 +30,11 @@
 #include "python_utils.h"
 
 #include <iostream>
+#include <list>
+#include <string>
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 
 //#include "vegadisk/vsfilesystem.h"
 //#include "src/vs_logging.h"
@@ -85,58 +88,56 @@ PyObject* GetClassFromPython(
         Py_ExitStatusException(status);
     }
 
-    const std::string python_path = GetPythonPath();
-    const std::wstring python_path_w(python_path.begin(), python_path.end());
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+
+    config.isolated = 0;
+
+    status = Py_InitializeFromConfig(&config);
+    PyConfig_Clear(&config); // Free configuration memory
+    if (PyStatus_Exception(status)) {
+        std::cerr << "Python config initialization failed" << std::endl << std::flush;
+        PyErr_Print();
+        Py_ExitStatusException(status);
+    }
+
     const std::wstring path_string_w = std::wstring(path_string.begin(), path_string.end());
     const std::string python_sitelib_path = QUOTE(Python_SITELIB);
     const std::wstring python_sitelib_path_wstring = std::wstring(python_sitelib_path.begin(), python_sitelib_path.end());
     const std::wstring build_path_w = std::wstring(build_path.begin(), build_path.end());
     const std::wstring data_path_w = std::wstring(datadir.begin(), datadir.end());
 
-    PyWideStringList python_path_py_wide_string_list{};
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 1 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
-    }
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, path_string_w.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 2 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
-    }
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_sitelib_path_wstring.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 3 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
-    }
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, build_path_w.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 4 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
-    }
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, data_path_w.c_str());
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python path list append 5 failed" << std::endl << std::flush;
-        PyErr_Print();
-        Py_ExitStatusException(status);
+    std::list<std::wstring> const path_wstrs{path_string_w, python_sitelib_path_wstring, build_path_w, data_path_w};
+    std::list<boost::filesystem::path> paths;
+    for (const auto& path : path_wstrs) {
+        boost::filesystem::path const canonical_path = boost::filesystem::canonical(path);
+        boost::filesystem::path const lexically_normal = canonical_path.lexically_normal();
+        paths.push_back(lexically_normal);
     }
 
-    PyConfig config;
-    PyConfig_InitPythonConfig(&config);
+    PyObject* sys_path = PySys_GetObject("path");
+    if (sys_path == nullptr) {
+        std::cerr << boost::format("%1%: %2%: PySys_GetObject(\"path\") returned nullptr")
+                % __FILE__ % __FUNCTION__ << std::endl;
+        return nullptr;
+    }
 
-    config.module_search_paths = python_path_py_wide_string_list;
-    config.isolated = 0;
-
-    status = Py_InitializeFromConfig(&config);
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python config initialization failed" << std::endl << std::flush;
-        PyErr_Print();
-        PyConfig_Clear(&config);
-        Py_ExitStatusException(status);
+    for (const auto& search_path : paths) {
+        boost::filesystem::path const canonical_path = boost::filesystem::canonical(search_path);
+        std::string const canonical_path_str = canonical_path.lexically_normal().generic_string();
+        std::wstring const canonical_path_wstr = canonical_path.lexically_normal().generic_wstring();
+        PyObject* path_element = PyUnicode_FromWideChar(canonical_path_wstr.c_str(), canonical_path_wstr.length());
+        if (path_element == nullptr) {
+            std::cerr << boost::format("%1%: %2%: PyUnicode_FromWideChar returned nullptr")
+                    % __FILE__ % __FUNCTION__ << std::endl;
+            return nullptr;
+        }
+        int const append_status = PyList_Append(sys_path, path_element);
+        Py_DECREF(path_element); // Clean up temporary reference allocation
+        if (append_status != 0) {
+            std::cerr << boost::format("%1%: %2%: PyList_Append returned %3% for path %4%")
+                    % __FILE__ % __FUNCTION__ % append_status % canonical_path_str << std::endl;
+        }
     }
 
     PyObject* module = PyImport_ImportModule(module_name.c_str());
