@@ -23,15 +23,18 @@ jobs:
           - os:              windows-2022
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-debug
-            python-version:  3.13.13
+            python-version:  3.14
             is-release:      0
-          - os:              windows-2025-vs2026
+          - os:              windows-2025
             triplet:         x64-win10
             preset-name:     VS2026Win64-pie-enabled-RelWithDebInfo
-            python-version:  3.13.13
+            python-version:  3.14
             is-release:      0
 
     env:
+      CMAKE_FIND_DEBUG_MODE: "OFF"
+      CMAKE_VERBOSE_MAKEFILE: "OFF"
+      VCPKG_DISABLE_METRICS: 'ON'
       VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
       VCPKG_ASSET_SOURCES: "${{ github.workspace }}/vcpkgAssets"
       X_VCPKG_ASSET_SOURCES: clear;x-azurl,file:///${{ github.workspace }}/vcpkgAssets,,readwrite
@@ -74,14 +77,14 @@ jobs:
         if: steps.cache-vcpkg-restore.outputs.cache-hit != 'true'
 
       - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         id: vega-py-setup
         with:
           python-version: ${{ matrix.python-version }}
           update-environment: false
 
       - name: Install CMake
-        uses: lukka/get-cmake@f5b8fbb4d77cec1acc5a5f9f0df4beffaf5d98d9 # v4.3.4
+        uses: lukka/get-cmake@f86dd60acae0d132056913e248bdabf0e0580b7a #v4.4.5
 
       - name: Install vcpkg
         uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11.6
@@ -112,7 +115,12 @@ jobs:
 
       - name: Test the code
         run: |
+          Get-ChildItem -Recurse -Force -File -Filter "python_tests.py"
+          Get-ChildItem -Recurse -Force -File -Filter 'units.json'
+          Get-ChildItem -Recurse -Force -File -Filter 'vegastrike.config'
+          Get-ChildItem -Recurse -Force -Filter "test_assets"
           & "${{ github.workspace }}\\script\\test.ps1" -PresetName "${{ matrix.preset-name }}"
+        working-directory: "${{ github.workspace }}"
         shell: pwsh
         env:
           Python3_ROOT_DIR: ${{ steps.vega-py-setup.outputs.python-path }}
@@ -120,7 +128,7 @@ jobs:
           pythonLocation: ${{ steps.vega-py-setup.outputs.python-path }}
 
       - name: Upload test results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: test_results_xml
