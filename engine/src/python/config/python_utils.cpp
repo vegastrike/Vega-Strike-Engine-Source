@@ -30,6 +30,8 @@
 #include "python_utils.h"
 
 #include <iostream>
+#include <list>
+#include <string>
 #include <boost/python.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
