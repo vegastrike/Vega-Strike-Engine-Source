@@ -16,9 +16,6 @@ on:
   schedule:
     - cron: '38 20 * * 0'
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   analyze:
     name: Analyze
