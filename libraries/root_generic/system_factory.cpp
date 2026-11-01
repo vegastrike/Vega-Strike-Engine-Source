@@ -758,7 +758,7 @@ void SystemFactory::initializeMaterial(Object object, GFXMaterial &material) {
 // If we do but it's invalid, we use ONE/ZERO
 // Otherwise we actually parse it
 // This doesn't seem right
-void SystemFactory::initializeAlpha(Object object, BLENDFUNC blend_source, BLENDFUNC blend_destination) {
+void SystemFactory::initializeAlpha(Object object, BLENDFUNC &blend_source, BLENDFUNC &blend_destination) {
     if (!object.attributes.count("alpha")) {
         return;
     }
