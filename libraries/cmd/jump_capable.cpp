@@ -37,6 +37,7 @@
 #include "src/vs_exit.h"
 #include "src/vega_cast_utils.h"
 #include "root_generic/configxml.h"
+#include "cmd/dock_utils.h"
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);
@@ -153,6 +154,7 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     if (Guaranteed == Mission::AUTO_OFF) {
         return false;
     }
+    const float autopilot_term_distance = configuration().physics.auto_pilot_termination_distance_flt;
     const float atd_no_enemies = configuration().physics.auto_pilot_termination_distance_no_enemies_flt;
     const float autopilot_no_enemies_multiplier = configuration().physics.auto_pilot_no_enemies_distance_multiplier_flt;
     if (unit->isSubUnit()) {
@@ -181,11 +183,18 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
     float totpercent = 1;
     if (totallength > 1) {
-        // The arrival is the docking distance itself, and aptne is the no-enemies one, which stands
-        // off further when nothing is watching. percent / percentne turn them into the point along
-        // the path the ship flies to.
-        float apt = static_cast<float>(DockingDistance(target));
-        float aptne = atd_no_enemies + static_cast<float>(DockingDistance(target));
+        float apt =
+                (target->getUnitType() == Vega_UnitType::planet) ? (autopilot_term_distance + target->rSize()
+                        * UniverseUtil::getPlanetRadiusPercent()) : autopilot_term_distance;
+        float aptne =
+                (target->getUnitType() == Vega_UnitType::planet) ? (atd_no_enemies + target->rSize()
+                        * UniverseUtil::getPlanetRadiusPercent()) : atd_no_enemies;
+        // apt / aptne are the auto-pilot termination distances: apt the normal one, aptne
+        // the no-enemies one (auto_pilot_termination_distance / _no_enemies). percent /
+        // percentne turn them into the point along the path the ship flies to, and the
+        // docking distance keeps that point outside docking range.
+        apt += static_cast<float>(DockingDistance(target));
+        aptne += static_cast<float>(DockingDistance(target));
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
         float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
         if (percentne > 1) {
