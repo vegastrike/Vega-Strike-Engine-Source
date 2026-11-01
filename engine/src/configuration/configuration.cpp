@@ -3892,15 +3892,14 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 dock.planet_dock_port_min_size_flt = boost::json::value_to<float>(*planet_dock_port_min_size_value_ptr);
             }
 
-            const boost::json::value * planet_dock_port_size_value_ptr = dock_object.if_contains("planet_dock_port_size");
-            if (planet_dock_port_size_value_ptr != nullptr) {
-                dock.planet_dock_port_size_dbl = boost::json::value_to<double>(*planet_dock_port_size_value_ptr);
-                dock.planet_dock_port_size_flt = boost::json::value_to<float>(*planet_dock_port_size_value_ptr);
-            }
-
             const boost::json::value * simple_dock_value_ptr = dock_object.if_contains("simple_dock");
             if (simple_dock_value_ptr != nullptr) {
                 dock.simple_dock = boost::json::value_to<bool>(*simple_dock_value_ptr);
+            }
+
+            const boost::json::value * mode_value_ptr = dock_object.if_contains("mode");
+            if (mode_value_ptr != nullptr) {
+                dock.mode = boost::json::value_to<std::string>(*mode_value_ptr);
             }
 
             const boost::json::value * simple_dock_range_value_ptr = dock_object.if_contains("simple_dock_range");
@@ -7034,6 +7033,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.auto_pilot_planet_radius_percent_flt = boost::json::value_to<float>(*auto_pilot_planet_radius_percent_value_ptr);
             }
 
+            const boost::json::value * auto_pilot_spec_turn_speed_factor_value_ptr = physics_object.if_contains("auto_pilot_spec_turn_speed_factor");
+            if (auto_pilot_spec_turn_speed_factor_value_ptr != nullptr) {
+                physics.auto_pilot_spec_turn_speed_factor_dbl = boost::json::value_to<double>(*auto_pilot_spec_turn_speed_factor_value_ptr);
+                physics.auto_pilot_spec_turn_speed_factor_flt = boost::json::value_to<float>(*auto_pilot_spec_turn_speed_factor_value_ptr);
+            }
+
             const boost::json::value * auto_pilot_terminate_value_ptr = physics_object.if_contains("auto_pilot_terminate");
             if (auto_pilot_terminate_value_ptr != nullptr) {
                 physics.auto_pilot_terminate = boost::json::value_to<bool>(*auto_pilot_terminate_value_ptr);
@@ -7354,18 +7359,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             const boost::json::value * fire_missing_autotrackers_value_ptr = physics_object.if_contains("fire_missing_autotrackers");
             if (fire_missing_autotrackers_value_ptr != nullptr) {
                 physics.fire_missing_autotrackers = boost::json::value_to<bool>(*fire_missing_autotrackers_value_ptr);
-            }
-
-            const boost::json::value * flt_orthogonal_thrust_smoothing_time_value_ptr = physics_object.if_contains("flt_orthogonal_thrust_smoothing_time");
-            if (flt_orthogonal_thrust_smoothing_time_value_ptr != nullptr) {
-                physics.flt_orthogonal_thrust_smoothing_time_dbl = boost::json::value_to<double>(*flt_orthogonal_thrust_smoothing_time_value_ptr);
-                physics.flt_orthogonal_thrust_smoothing_time_flt = boost::json::value_to<float>(*flt_orthogonal_thrust_smoothing_time_value_ptr);
-            }
-
-            const boost::json::value * flt_orthogonal_thrust_speed_reduce_factor_value_ptr = physics_object.if_contains("flt_orthogonal_thrust_speed_reduce_factor");
-            if (flt_orthogonal_thrust_speed_reduce_factor_value_ptr != nullptr) {
-                physics.flt_orthogonal_thrust_speed_reduce_factor_dbl = boost::json::value_to<double>(*flt_orthogonal_thrust_speed_reduce_factor_value_ptr);
-                physics.flt_orthogonal_thrust_speed_reduce_factor_flt = boost::json::value_to<float>(*flt_orthogonal_thrust_speed_reduce_factor_value_ptr);
             }
 
             const boost::json::value * friendly_auto_radius_value_ptr = physics_object.if_contains("friendly_auto_radius");
@@ -7752,18 +7745,6 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
                 physics.persistent_on_load = boost::json::value_to<bool>(*persistent_on_load_value_ptr);
             }
 
-            const boost::json::value * planet_dock_min_port_size_value_ptr = physics_object.if_contains("planet_dock_min_port_size");
-            if (planet_dock_min_port_size_value_ptr != nullptr) {
-                physics.planet_dock_min_port_size_dbl = boost::json::value_to<double>(*planet_dock_min_port_size_value_ptr);
-                physics.planet_dock_min_port_size_flt = boost::json::value_to<float>(*planet_dock_min_port_size_value_ptr);
-            }
-
-            const boost::json::value * planet_dock_port_size_value_ptr = physics_object.if_contains("planet_dock_port_size");
-            if (planet_dock_port_size_value_ptr != nullptr) {
-                physics.planet_dock_port_size_dbl = boost::json::value_to<double>(*planet_dock_port_size_value_ptr);
-                physics.planet_dock_port_size_flt = boost::json::value_to<float>(*planet_dock_port_size_value_ptr);
-            }
-
             const boost::json::value * planet_ejection_stophack_value_ptr = physics_object.if_contains("planet_ejection_stophack");
             if (planet_ejection_stophack_value_ptr != nullptr) {
                 physics.planet_ejection_stophack_dbl = boost::json::value_to<double>(*planet_ejection_stophack_value_ptr);
@@ -8012,6 +7993,12 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
             if (warp_curve_degree_value_ptr != nullptr) {
                 physics.warp_curve_degree_dbl = boost::json::value_to<double>(*warp_curve_degree_value_ptr);
                 physics.warp_curve_degree_flt = boost::json::value_to<float>(*warp_curve_degree_value_ptr);
+            }
+
+            const boost::json::value * warp_max_step_fraction_value_ptr = physics_object.if_contains("warp_max_step_fraction");
+            if (warp_max_step_fraction_value_ptr != nullptr) {
+                physics.warp_max_step_fraction_dbl = boost::json::value_to<double>(*warp_max_step_fraction_value_ptr);
+                physics.warp_max_step_fraction_flt = boost::json::value_to<float>(*warp_max_step_fraction_value_ptr);
             }
 
             const boost::json::value * warp_is_interstellar_value_ptr = physics_object.if_contains("warp_is_interstellar");

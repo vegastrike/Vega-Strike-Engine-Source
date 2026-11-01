@@ -27,6 +27,7 @@
 
 
 #include "cmd/jump_capable.h"
+#include "cmd/dock_utils.h"
 #include "cmd/ai/order.h"
 #include "cmd/unit_find.h"
 #include "src/universe.h"
@@ -191,9 +192,9 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
         // apt / aptne are the auto-pilot termination distances: apt the normal one, aptne
         // the no-enemies one (auto_pilot_termination_distance / _no_enemies). percent /
         // percentne turn them into the point along the path the ship flies to, and the
-        // docking clearance keeps that point outside docking range.
-        apt += static_cast<float>(DockingClearance(target));
-        aptne += static_cast<float>(DockingClearance(target));
+        // docking distance keeps that point outside docking range.
+        apt += static_cast<float>(DockingDistance(target));
+        aptne += static_cast<float>(DockingDistance(target));
         float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
         float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
         if (percentne > 1) {
@@ -380,7 +381,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
 float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
         Unit **nearest_unit,
-        bool count_negative_warp_units) const {
+        bool count_negative_warp_units,
+        double *nearest_distance) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     const float smallwarphack = configuration().physics.min_warp_effect_size_flt;
@@ -405,6 +407,11 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 unit->location[Unit::UNIT_ONLY],
                 &locatespec);
         testthis = locatespec.retval.unit;
+        if (nearest_distance != nullptr) {
+            // The surface-to-surface gap to the closest unit anywhere in the system, which is what
+            // the caller needs to keep an atom from crossing it. 0 when there is nothing to report.
+            *nearest_distance = (testthis != nullptr) ? locatespec.NearestDistance() : 0.0;
+        }
     }
     for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
             (planet = *iter) || testthis;
@@ -437,7 +444,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
             if (effectiverad > bigwarphack) {
                 effectiverad = bigwarphack;
             }
-            QVector dir = unit->Position() - planet->Position();
+            QVector dir = unit->LocalPosition() - planet->LocalPosition();
             double udist = dir.Magnitude();
             float sigdist = UnitUtil::getSignificantDistance(unit, planet);
             if (planet->isPlanet() && udist < (1 << 28)) {
