@@ -374,7 +374,7 @@ ENDIF (INSTALL_GTEST OR USE_GTEST)
 
 INCLUDE(GNUInstallDirs)
 
-SET(VS_SUBDIRECTORIES "libraries" "engine")
+SET(VS_SUBDIRECTORIES "libraries" "engine" "doc")
 FOREACH(VS_SUBDIR IN LISTS VS_SUBDIRECTORIES)
     ADD_SUBDIRECTORY(${VS_SUBDIR})
 ENDFOREACH(VS_SUBDIR)
@@ -577,7 +577,7 @@ ELSEIF (CMAKE_SYSTEM_NAME STREQUAL Linux)
     ELSEIF (VS_CAN_BUILD_RPM)
         MESSAGE(STATUS "Configuring RPM Packaging")
         # See https://cmake.org/cmake/help/v3.3/module/CPackRPM.html
-        SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See ../LICENSE
+        SET(CPACK_RPM_PACKAGE_LICENSE "GPLv3") # See LICENSE file
         SET(CPACK_RPM_PACKAGE_URL "https://www.vega-strike.org")
         SET(CPACK_RPM_PACKAGE_NAME "Vega-Strike")
 
