@@ -1706,7 +1706,7 @@ namespace vega_config {
         float fog_fade_in_percent_flt = 0.5;
         double fog_time_dbl = 0.01;
         float fog_time_flt = 0.01;
-        std::string font = "helvetica12";
+        std::string font = "Roboto";
         bool font_antialias = false;
         double font_point_dbl = 16.0;
         float font_point_flt = 16.0;
