@@ -422,6 +422,9 @@ Planet *SystemFactory::processPlanet(Star_XML *xml, Object &object, Planet *owne
         owner->satellites.prepend(planet);
         planet->SetOwner(owner);
         owner->SetOwner(getTopLevelOwner());
+        // A satellite is placed against its owner, and stays there. The orbit order used to do this
+        // on its first execution, which is when the player arrives beside the body.
+        planet->SetPosAndCumPos(owner->LocalPosition() + R + S + xml->cursun.Cast());
     }
 
     planet->applyTechniqueOverrides(paramOverrides);
@@ -648,6 +651,9 @@ void SystemFactory::processEnhancement(string element, Star_XML *xml, Object &ob
         // Some kind of satellite.
         owner->AddSatellite(unit);
         unit->SetOwner(owner);
+        // A satellite is placed against its owner, and stays there. The orbit order used to do this
+        // on its first execution, which is when the player arrives beside the body.
+        unit->SetPosAndCumPos(owner->LocalPosition() + R + S + xml->cursun.Cast());
         //cheating so nothing collides at top level - is this comment still relevant?
         // FIXME un de-referenced before allocation - is this comment still relevant?
         unit->SetAngularVelocity(ComputeRotVel(rotational_velocity, R, S));
