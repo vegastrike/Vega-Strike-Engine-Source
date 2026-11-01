@@ -23,17 +23,20 @@ jobs:
           - os:              windows-2022
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
-            python-version:  3.13.13
+            python-version:  3.14
             is-release:      1
             install-nsis:    0
-          - os:              windows-2025-vs2026
+          - os:              windows-2025
             triplet:         x64-win10
             preset-name:     VS2026Win64-pie-enabled-RelWithDebInfo
-            python-version:  3.13.13
+            python-version:  3.14
             is-release:      1
             install-nsis:    1
 
     env:
+      CMAKE_FIND_DEBUG_MODE: "OFF"
+      CMAKE_VERBOSE_MAKEFILE: "OFF"
+      VCPKG_DISABLE_METRICS: 'ON'
       VCPKG_ROOT: "${{ github.workspace }}/vcpkg"
       VCPKG_ASSET_SOURCES: "${{ github.workspace }}/vcpkgAssets"
       X_VCPKG_ASSET_SOURCES: clear;x-azurl,file:///${{ github.workspace }}/vcpkgAssets,,readwrite
