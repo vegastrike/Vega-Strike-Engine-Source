@@ -1190,8 +1190,9 @@ static void draw_joystick_dialog() {
             }
         }
         if (ImGui::Checkbox("Force feedback", &joy_ffb)) dirty = true;
-        ImGui::Text("FFB device"); ImGui::SameLine(); ImGui::SetNextItemWidth(50);
+        ImGui::Text("FFB joystick"); ImGui::SameLine(); ImGui::SetNextItemWidth(50);
         if (ImGui::InputText("##jff", joy_ff_device, sizeof(joy_ff_device), ImGuiInputTextFlags_CharsDecimal)) dirty = true;
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Number of the joystick (as in the bindings) that plays force feedback effects");
         ImGui::Separator();
         if (ImGui::Button("Reset Axis")) {
             for (int r = 0; r < 4; ++r) { joy_bind_stick[r] = -1; joy_bind_axis[r] = -1; joy_bind_inv[r] = false; }

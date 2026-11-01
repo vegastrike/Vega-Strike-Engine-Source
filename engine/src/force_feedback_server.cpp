@@ -35,7 +35,7 @@
 #include "vegadisk/vsfilesystem.h"
 #include "root_generic/vs_globals.h"
 
-#define FF_DOIT 1
+// Stand-in for builds without a display or joystick: every effect is a no-op.
 
 ForceFeedback::ForceFeedback() {
 }
@@ -47,32 +47,17 @@ bool ForceFeedback::haveFF() {
     return false;
 }
 
-void ForceFeedback::updateForce(float angle, float strength) {
+void ForceFeedback::playWeaponFire(const std::string &weapon, bool missile) {
 }
 
-void ForceFeedback::updateSpeedEffect(float strength) {
-}
-
-void ForceFeedback::playHit(float angle, float strength) {
+void ForceFeedback::playBeam(const std::string &weapon) {
 }
 
 void ForceFeedback::playAfterburner(bool activate) {
 }
 
-void ForceFeedback::playLaser() {
+void ForceFeedback::playHit(int layer, float local_x, float local_z) {
 }
 
-void ForceFeedback::playDurationEffect(unsigned int eff_nr, bool activate) {
+void ForceFeedback::update() {
 }
-
-void ForceFeedback::playShortEffect(unsigned int eff_nr) {
-}
-
-#if HAVE_FORCE_FEEDBACK
-
-void ForceFeedback::playEffect( unsigned int eff_nr ) {}
-void ForceFeedback::stopEffect( unsigned int eff_nr ) {}
-void ForceFeedback::init() {}
-
-#endif
-

@@ -48,6 +48,7 @@
 
 #include <algorithm>
 #include "configuration/configuration.h"
+#include "src/force_feedback.h"
 
 
 float Damageable::DealDamageToHull(const Vector &pnt, float damage) {
@@ -261,6 +262,12 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
     // The second condition should always be met, but if not, at least we won't crash
     if (shot_at_is_player && shot_at_cockpit) {
+        // Jolt the stick away from the side that was hit (layers: 0 hull, 1 armor, 2 shield)
+        if (forcefeedback != nullptr) {
+            const int layer = inflicted_damage.inflicted_damage_by_layer[0] > 0 ? 0
+                            : inflicted_damage.inflicted_damage_by_layer[1] > 0 ? 1 : 2;
+            forcefeedback->playHit(layer, localpnt.i, localpnt.k);
+        }
         if (inflicted_damage.inflicted_damage_by_layer[0] > 0) {
             // Hull is hit - shake hardest
             shot_at_cockpit->Shake(inflicted_damage.total_damage, 2);
