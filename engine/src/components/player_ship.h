@@ -66,6 +66,15 @@ struct PlayerShip {
     static int GetActiveShipIndex();
     std::string GetName();
     std::string GetPurchaseHeader();
+    /** How much of the ship is damaged, from 0.0 to 1.0 */
+    double DamagePercent();
+    /** What the ship is worth. The price list's placeholder price for a ship that is not for
+        sale - the campaign's inherited starter ship, say - is replaced by the price of the same
+        ship's stock variant. */
+    double ShipPrice();
+    /** What the dealer pays for this ship: its resale value less a share of the damage it carries,
+        and never less than its weight in scrap. */
+    double SalePrice();
     static PlayerShip& GetShipByIndex(int index);
     // Caution! Will return first ship to match ship_name
     static PlayerShip& GetShipByName(const std::string ship_name);
@@ -85,5 +94,10 @@ struct PlayerShip {
 };
 
 extern std::vector<PlayerShip> player_fleet;
+
+/** What a thing is worth as scrap: its weight in the cheapest metal, and never more than a share
+    of what it cost. The floor a dealer will not go below for anything too damaged to be worth
+    putting right. */
+double ScrapValue(double price, double mass);
 
 #endif // VEGA_STRIKE_ENGINE_COMPONENTS_PLAYER_SHIP_H

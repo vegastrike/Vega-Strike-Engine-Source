@@ -127,6 +127,14 @@ public:
     void setOffset(float x, float y) {
         m_offX = x; m_offY = y;
     }
+    // The layout resolution/offset set above, for callers that lay the text out
+    // themselves (e.g. through vega_draw).
+    void layoutResolution(float &w, float &h) const {
+        w = m_resW; h = m_resH;
+    }
+    void layoutOffset(float &x, float &y) const {
+        x = m_offX; y = m_offY;
+    }
 };
 
 #endif //VEGA_STRIKE_ENGINE_GFX_HUD_H

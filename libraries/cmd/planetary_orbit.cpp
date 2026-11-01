@@ -77,6 +77,10 @@ PlanetaryOrbit::~PlanetaryOrbit() {
     parent->SetResolveForces(true);
 }
 
+QVector PlanetaryOrbit::orbitPoint(double t) const {
+    return targetlocation - focus + (std::cos(t) * x_size) + (std::sin(t) * y_size);
+}
+
 //A point on the orbit, as an offset from the orbit's centre.
 static QVector OrbitOffset(double t, const QVector &x_size, const QVector &y_size) {
     return (std::cos(t) * x_size) + (std::sin(t) * y_size);

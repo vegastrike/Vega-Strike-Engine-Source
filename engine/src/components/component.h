@@ -118,6 +118,8 @@ public:
     virtual void Damage();
     virtual void DamageByPercent(double percent);
     virtual void Repair();
+    /** Puts the component right even when it is destroyed, which Repair() cannot do. */
+    virtual void Replace();
     virtual void Destroy();
 
     virtual bool Damaged() const;

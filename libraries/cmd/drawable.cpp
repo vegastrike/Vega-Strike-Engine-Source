@@ -381,7 +381,7 @@ void Drawable::AnimationStep() {
 #endif
 }
 
-void Drawable::DrawNow(const Matrix &mato, float lod) {
+void Drawable::DrawNow(const Matrix &mato, float lod, bool draw_shield) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
     static const void *rootunit = nullptr;
@@ -412,6 +412,9 @@ void Drawable::DrawNow(const Matrix &mato, float lod) {
 
     for (i = 0; i <= this->nummesh(); ++i) {
         //NOTE LESS THAN OR EQUALS...to cover shield mesh
+        if (!draw_shield && i == this->nummesh()) {
+            continue;       //the shield mesh, and the last entry is where it lives
+        }
         if (this->meshdata[i] == nullptr) {
             continue;
         }
@@ -981,8 +984,9 @@ Matrix Drawable::WarpMatrix(const Matrix &ctm) const {
     const Unit *unit = vega_dynamic_const_cast_ptr<const Unit>(this);
 
     if (unit->GetWarpVelocity().MagnitudeSquared() < (configuration().graphics.warp_stretch_cutoff_flt)
-            * configuration().graphics.warp_stretch_cutoff_flt * configuration().physics.game_speed_flt
-            || (configuration().graphics.only_stretch_in_warp && unit->ftl_drive.Enabled())) {
+            * configuration().graphics.warp_stretch_cutoff_flt
+            * configuration().physics.game_speed_flt * configuration().physics.game_speed_flt
+            || (configuration().graphics.only_stretch_in_warp && !unit->ftl_drive.Enabled())) {
         return ctm;
     } else {
         Matrix k(ctm);
