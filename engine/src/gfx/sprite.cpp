@@ -134,9 +134,56 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter, GFXBOOL force) {
         char texturea[127] = {0};
         f.Fscanf("%126s %126s", texture, texturea);
         f.Fscanf("%f %f", &widtho2, &heighto2);
-        f.Fscanf("%f %f", &xcenter, &ycenter);
         texture[sizeof(texture) - sizeof(*texture) - 1] = 0;
         texturea[sizeof(texturea) - sizeof(*texturea) - 1] = 0;
+        const int name_len = static_cast<int>(strlen(texture));
+        const bool animated_name = name_len > 4 && texture[name_len - 1] == 'i'
+                && texture[name_len - 2] == 'n' && texture[name_len - 3] == 'a'
+                && texture[name_len - 4] == '.';
+        if (!animated_name) {
+            // A still sprite's third line is its own centre.
+            f.Fscanf("%f %f", &xcenter, &ycenter);
+        } else {
+            // An animated sprite's third line is either the sprite's own centre - the stock
+            // cockpit sprites carry one - or the animation header, for files written without
+            // it, as the main menu's button sprites are. Reading a header as the centre gave a
+            // centre like (1, 1000), and graphics.offset_sprites_by_pos adds that centre to the
+            // position the base places the sprite at, so the sprite was drawn a thousand units
+            // above the screen. Tell them apart by what follows: after a centre comes the header,
+            // which is numbers; after a header comes a frame, which is a filename.
+            char third[512] = {0};
+            char throwaway[512];
+            // Read the lines from the beginning rather than from wherever the two Fscanfs above
+            // left the stream: those stop at the end of the size line with its newline still
+            // pending, so a ReadLine there returns the tail of that line, not the next one.
+            f.Begin();
+            f.ReadLine(throwaway, sizeof(throwaway) - 1);
+            f.ReadLine(throwaway, sizeof(throwaway) - 1);
+            f.ReadLine(third, sizeof(third) - 1);
+            float cx = 0, cy = 0;
+            int header_frames = 0;
+            float header_seconds = 0;
+            const bool third_is_two_numbers = sscanf(third, "%f %f", &cx, &cy) == 2;
+            // Line three says which it is on its own: an animation header starts with a frame
+            // count of one or more, and a centre is a pair of small fractions. Looking at the
+            // line after it does not work - light_jump has a blank line there, the file reader
+            // skips blanks, and what comes back is a frame, which reads as "line three was the
+            // header" and loses the centre.
+            const bool third_is_a_header = third_is_two_numbers
+                    && sscanf(third, "%d %f", &header_frames, &header_seconds) == 2 && header_frames >= 1;
+            if (!third_is_a_header) {
+                xcenter = cx;
+                ycenter = cy;
+            }
+            // Hand AnimatedTexture the file from the right line: line three when that is the
+            // header, line four when line three was the centre.
+            f.Begin();
+            const int lines_to_skip = third_is_a_header ? 2 : 3;
+            char skipped[512];
+            for (int i = 0; i < lines_to_skip; ++i) {
+                f.ReadLine(skipped, sizeof(skipped) - 1);
+            }
+        }
 
         widtho2 /= 2;
         heighto2 /= -2;
