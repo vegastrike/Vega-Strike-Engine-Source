@@ -27,6 +27,11 @@
 
 
 #define PY_SSIZE_T_CLEAN
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <boost/version.hpp>
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #define Vector Vactor
@@ -74,6 +79,31 @@ class Unit;
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
+
+// Reusable Windows helper to pull the default Python install path from the registry
+#ifdef _WIN32
+std::wstring GetPythonPathFromRegistry() {
+    // Check both HKCU (current user) and HKLM (system-wide)
+    HKEY root_keys[] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
+    const wchar_t* subkey = L"SOFTWARE\\Python\\PythonCore\\3.14\\InstallPath";
+    wchar_t path_buffer[MAX_PATH];
+    DWORD buffer_size = sizeof(path_buffer);
+
+    for (HKEY root : root_keys) {
+        HKEY h_key;
+        if (RegOpenKeyExW(root, subkey, 0, KEY_READ, &h_key) == ERROR_SUCCESS) {
+            // Passing nullptr queries the default value name (the path string)
+            LONG result = RegQueryValueExW(h_key, nullptr, nullptr, nullptr,
+                                           reinterpret_cast<LPBYTE>(path_buffer), &buffer_size);
+            RegCloseKey(h_key);
+            if (result == ERROR_SUCCESS) {
+                return std::wstring(path_buffer);
+            }
+        }
+    }
+    return L""; // Not found in registry
+}
+#endif
 
 void Python::initpaths() {
     /*
@@ -199,6 +229,42 @@ void Python::init() {
     PyConfig_InitPythonConfig(&config);
     config.isolated = 0;
     config.site_import = 1;
+
+#ifdef _WIN32
+    std::wstring resolved_home = L"";
+
+    // Step 1: Check Python_ROOT_DIR / Python3_ROOT_DIR / pythonLocation (CI consistency)
+    const char* env_root = std::getenv("Python3_ROOT_DIR");
+    if (!env_root) {
+        env_root = std::getenv("Python_ROOT_DIR");
+    }
+    if (!env_root) {
+        env_root = std::getenv("pythonLocation");
+    }
+    if (!env_root) {
+        env_root = std::getenv("PYTHONHOME");
+    }
+
+    if (env_root != nullptr) {
+        std::string env_str(env_root);
+        resolved_home = std::wstring(env_str.begin(), env_str.end());
+    } else {
+        // Step 2: Fall back to PEP 514 Windows Registry Lookup
+        resolved_home = GetPythonPathFromRegistry();
+    }
+
+    // Step 3: Hard Fallback to the standard 64-bit installation route
+    if (resolved_home.empty()) {
+        resolved_home = L"C:\\Program Files\\Python314";
+    }
+
+    // Assign the determined fallback explicitly to the PyConfig structure
+    status = PyConfig_SetString(&config, &config.home, resolved_home.c_str());
+    if (PyStatus_Exception(status)) {
+        PyConfig_Clear(&config);
+        Py_ExitStatusException(status);
+    }
+#endif
 
     // Now we can do python things about them and initialize them
     status = Py_InitializeFromConfig(&config);
