@@ -171,15 +171,15 @@ void Python::init() {
     }
     isinit = true;
 
-    // initialize python library
-    PyPreConfig py_pre_config;
-    PyPreConfig_InitPythonConfig(&py_pre_config);
-    py_pre_config.coerce_c_locale = 1;
-
     bool was_already_initialized = Py_IsInitialized() != 0;
     if (was_already_initialized) {
         return;
     }
+
+    // initialize python library
+    PyPreConfig py_pre_config;
+    PyPreConfig_InitPythonConfig(&py_pre_config);
+    py_pre_config.coerce_c_locale = 1;
 
     PyStatus status = Py_PreInitialize(&py_pre_config);
     if (PyStatus_Exception(status) != 0) {
@@ -197,8 +197,8 @@ void Python::init() {
 
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
-    config.isolated = 1;
-    config.site_import = 0;
+    config.isolated = 0;
+    config.site_import = 1;
 
     // Now we can do python things about them and initialize them
     status = Py_InitializeFromConfig(&config);
