@@ -62,22 +62,22 @@ void InitPython(bool& was_already_initialized);
 
 /// A utility function to call a Python function with no arguments and get a PyObject as a result. Initializes Python
 /// and tears it down afterwards, if Python wasn't already initialized
-PyObject* GetClassFromPython(
-    std::string build_path,
-    std::wstring path_string,
-    std::string datadir,
-    std::string module_name,
-    std::string function_name);
+UniquePyObject GetClassFromPython(
+        std::string build_path,
+        std::wstring path_string,
+        std::string datadir,
+        std::string module_name,
+        std::string function_name);
 
 /// A utility function to call a Python function with no arguments and get a PyObject as a result. Initializes Python
 /// and tears it down afterwards, if Python wasn't already initialized. Takes arguments as const references, which
 /// should be more efficient.
-PyObject* GetClassFromPythonPathRefs(
-        const std::string& build_path,
+UniquePyObject GetClassFromPythonPathRefs(
+        const std::string &build_path,
         const std::wstring &path_string,
-        const std::string& datadir,
-        const std::string& module_name,
-        const std::string& function_name);
+        const std::string &datadir,
+        const std::string &module_name,
+        const std::string &function_name);
 
 /// Get a pointer to a Python function/method
 UniquePyObject GetMethodFromPython(std::string module_name,
@@ -126,33 +126,33 @@ UniquePyObject CallPythonFnStringArgs(std::string module_name,
                                       const std::list<std::string> &args);
 
 /// Call a Python function/method with a variable number of std::string arguments
-PyObject* CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string>& args);
+UniquePyObject CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string> &args);
 
 /// Call a Python function/method with a variable number of std::string arguments
-PyObject* CallPythonFnStringArgs(UniquePyObject py_fn, const std::list<std::string>& args);
+UniquePyObject CallPythonFnStringArgs(UniquePyObject py_fn, const std::list<std::string> &args);
 
 /// Call a Python function/method with a variable number of std::wstring arguments
-PyObject* CallPythonFnWStringArgs(std::string module_name,
-    std::string function_name,
-    const std::list<boost::filesystem::path>& search_paths,
-    const std::list<std::wstring>& args);
+UniquePyObject CallPythonFnWStringArgs(std::string module_name,
+                                       std::string function_name,
+                                       const std::list<boost::filesystem::path> &search_paths,
+                                       const std::list<std::wstring> &args);
 
 /// Call a Python function/method with a variable number of std::wstring arguments
-PyObject* CallPythonFnWStringArgs(PyObject *py_fn, const std::list<std::wstring>& args);
+UniquePyObject CallPythonFnWStringArgs(PyObject *py_fn, const std::list<std::wstring> &args);
 
 /// Call a Python function/method with a variable number of std::wstring arguments
-PyObject* CallPythonFnWStringArgs(UniquePyObject py_fn, const std::list<std::wstring>& args);
+UniquePyObject CallPythonFnWStringArgs(UniquePyObject py_fn, const std::list<std::wstring> &args);
 
 /// Call a Python function/method with a pre-packed Tuple of arguments
-PyObject* CallPythonFnPyArgs(PyObject *py_fn, PyObject *args);
+UniquePyObject CallPythonFnPyArgs(PyObject *py_fn, PyObject *args);
 
 /// Call a Python function/method with a pre-packed Tuple of arguments
-PyObject* CallPythonFnPyArgs(UniquePyObject py_fn, PyObject *args);
+UniquePyObject CallPythonFnPyArgs(UniquePyObject py_fn, PyObject *args);
 
 /// Call a Python function/method with a pre-packed Tuple of arguments
-PyObject* CallPythonFnPyArgs(PyObject *py_fn, UniquePyObject args);
+UniquePyObject CallPythonFnPyArgs(PyObject *py_fn, UniquePyObject args);
 
 /// Call a Python function/method with a pre-packed Tuple of arguments
-PyObject* CallPythonFnPyArgs(UniquePyObject py_fn, UniquePyObject args);
+UniquePyObject CallPythonFnPyArgs(UniquePyObject py_fn, UniquePyObject args);
 
 #endif //VEGA_STRIKE_ENGINE_SRC_PYTHON_CONFIG_PYTHON_UTILS_U

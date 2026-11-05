@@ -285,42 +285,38 @@ UniquePyObject CallPythonFnStringArgs(std::string module_name, std::string funct
     return UniquePyObject(PyObject_CallObject(py_fn.get(), py_args.get()));
 }
 
-PyObject * CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string> &args) {
+UniquePyObject CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string> &args) {
     UniquePyObject py_args = PrepareStringArgsForPython(args);
     if (py_args == nullptr) {
         std::cerr << boost::format("%1%: %2%: PrepareStringArgsForPython() returned nullptr") % __FILE__ % __FUNCTION__ << std::endl;
         return nullptr;
     }
 
-    PyObject* py_result = PyObject_CallObject(py_fn, py_args.get());
-
-    return py_result;
+    return UniquePyObject(PyObject_CallObject(py_fn, py_args.get()));
 }
 
-PyObject * CallPythonFnStringArgs(UniquePyObject py_fn, const std::list<std::string> &args) {
+UniquePyObject CallPythonFnStringArgs(UniquePyObject py_fn, const std::list<std::string> &args) {
     return CallPythonFnStringArgs(py_fn.get(), args);
 }
 
-PyObject * CallPythonFnPyArgs(PyObject *py_fn, PyObject *args) {
-    PyObject* py_result = PyObject_CallObject(py_fn, args);
-
-    return py_result;
+UniquePyObject CallPythonFnPyArgs(PyObject *py_fn, PyObject *args) {
+    return UniquePyObject(PyObject_CallObject(py_fn, args));
 }
 
-PyObject * CallPythonFnPyArgs(UniquePyObject py_fn, PyObject *args) {
+UniquePyObject CallPythonFnPyArgs(UniquePyObject py_fn, PyObject *args) {
     return CallPythonFnPyArgs(py_fn.get(), args);
 }
 
-PyObject * CallPythonFnPyArgs(PyObject *py_fn, UniquePyObject args) {
+UniquePyObject CallPythonFnPyArgs(PyObject *py_fn, UniquePyObject args) {
     return CallPythonFnPyArgs(py_fn, args.get());
 }
 
-PyObject * CallPythonFnPyArgs(UniquePyObject py_fn, UniquePyObject args) {
+UniquePyObject CallPythonFnPyArgs(UniquePyObject py_fn, UniquePyObject args) {
     return CallPythonFnPyArgs(py_fn.get(), args.get());
 }
 
-PyObject * CallPythonFnWStringArgs(std::string module_name, std::string function_name
-                                   , const std::list<fs::path> &search_paths, const std::list<std::wstring> &args) {
+UniquePyObject CallPythonFnWStringArgs(std::string module_name, std::string function_name
+                                       , const std::list<fs::path> &search_paths, const std::list<std::wstring> &args) {
     UniquePyObject py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
     if (py_fn == nullptr) {
         std::cerr << boost::format("%1%: %2%: GetMethodFromPython() returned nullptr.") % __FILE__ % __FUNCTION__ << std::endl;
@@ -333,44 +329,40 @@ PyObject * CallPythonFnWStringArgs(std::string module_name, std::string function
         return nullptr;
     }
 
-    PyObject* py_result = PyObject_CallObject(py_fn.get(), py_args.get());
-
-    return py_result;
+    return UniquePyObject(PyObject_CallObject(py_fn.get(), py_args.get()));
 }
 
-PyObject * CallPythonFnWStringArgs(PyObject *py_fn, const std::list<std::wstring> &args) {
+UniquePyObject CallPythonFnWStringArgs(PyObject *py_fn, const std::list<std::wstring> &args) {
     UniquePyObject py_args = PrepareWStringArgsForPython(args);
     if (py_args == nullptr) {
         std::cerr << boost::format("%1%: %2%: Failed to create PyTuple for arguments to function call") % __FILE__ % __FUNCTION__ << std::endl;
         return nullptr;
     }
 
-    PyObject* py_result = PyObject_CallObject(py_fn, py_args.get());
-
-    return py_result;
+    return UniquePyObject(PyObject_CallObject(py_fn, py_args.get()));
 }
 
-PyObject * CallPythonFnWStringArgs(UniquePyObject py_fn, const std::list<std::wstring> &args) {
+UniquePyObject CallPythonFnWStringArgs(UniquePyObject py_fn, const std::list<std::wstring> &args) {
     return CallPythonFnWStringArgs(py_fn.get(), args);
 }
 
-/// A utility function to call a function and get a PyObject as a result.
-/// Note: No longer calls InitPython or Py_Finalize. These were dangerous and buggy behaviors. The caller should take care of these tasks.
-PyObject* GetClassFromPython(
-    const std::string build_path,
-    const std::wstring path_string,
-    const std::string datadir,
-    const std::string module_name,
-    const std::string function_name) {
+UniquePyObject GetClassFromPython(
+        const std::string build_path,
+        const std::wstring path_string,
+        const std::string datadir,
+        const std::string module_name,
+        const std::string function_name) {
     UniquePyObject py_method = GetMethodFromPython(build_path, path_string, datadir, module_name, function_name);
     if (py_method == nullptr) {
         std::cerr << boost::format("%1%: %2%: GetMethodFromPython returned a null pointer") % __FILE__ % __FUNCTION__ << std::endl;
         return nullptr;
     }
-    return CallPythonFnNullArgs(std::move(py_method)).get();
+    // FIXED: Safely return the UniquePyObject instead of using .get()
+    return CallPythonFnNullArgs(std::move(py_method));
 }
 
-PyObject * GetClassFromPythonPathRefs(const std::string &build_path, const std::wstring &path_string, const std::string &datadir
-                                      , const std::string &module_name, const std::string &function_name) {
+UniquePyObject GetClassFromPythonPathRefs(const std::string &build_path, const std::wstring &path_string
+                                          , const std::string &datadir
+                                          , const std::string &module_name, const std::string &function_name) {
     return GetClassFromPython(build_path, path_string, datadir, module_name, function_name);
 }
