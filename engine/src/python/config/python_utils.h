@@ -109,21 +109,21 @@ UniquePyObject PrepareStringArgsForPython(const std::list<std::string> &args);
 UniquePyObject PrepareWStringArgsForPython(const std::list<std::wstring> &args);
 
 /// Call a Python function/method with no arguments
-PyObject* CallPythonFnNullArgs(std::string module_name,
-    std::string function_name,
-    const std::list<boost::filesystem::path>& search_paths);
+UniquePyObject CallPythonFnNullArgs(std::string module_name,
+                                    std::string function_name,
+                                    const std::list<boost::filesystem::path> &search_paths);
 
 /// Call a Python function/method with no arguments
-PyObject *CallPythonFnNullArgs(PyObject *py_fn);
+UniquePyObject CallPythonFnNullArgs(PyObject *py_fn);
 
 /// Call a Python function/method with no arguments
-PyObject *CallPythonFnNullArgs(UniquePyObject py_fn);
+UniquePyObject CallPythonFnNullArgs(UniquePyObject py_fn);
 
 /// Call a Python function/method with a variable number of std::string arguments
-PyObject* CallPythonFnStringArgs(std::string module_name,
-                                 std::string function_name,
-                                 const std::list<boost::filesystem::path>& search_paths,
-                                 const std::list<std::string>& args);
+UniquePyObject CallPythonFnStringArgs(std::string module_name,
+                                      std::string function_name,
+                                      const std::list<boost::filesystem::path> &search_paths,
+                                      const std::list<std::string> &args);
 
 /// Call a Python function/method with a variable number of std::string arguments
 PyObject* CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string>& args);
