@@ -46,6 +46,8 @@
 #undef Vector
 #endif
 
+#include "config/python_utils.h"
+
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
@@ -86,108 +88,6 @@ class Unit;
 #define QUOTE(x) Q(x)
 
 namespace fs = boost::filesystem;
-
-#ifdef _WIN32
-namespace {
-/// Reusable Windows helper to pull the default Python install path from the registry
-std::wstring GetPythonPathFromRegistry() {
-    // Check both HKCU (current user) and HKLM (system-wide)
-    HKEY root_keys[] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
-    const wchar_t* subkey = L"SOFTWARE\\Python\\PythonCore\\3.14\\InstallPath";
-    wchar_t path_buffer[MAX_PATH];
-    DWORD buffer_size = sizeof(path_buffer);
-
-    for (HKEY root : root_keys) {
-        HKEY h_key;
-        if (RegOpenKeyExW(root, subkey, 0, KEY_READ, &h_key) == ERROR_SUCCESS) {
-            // Passing nullptr queries the default value name (the path string)
-            LONG result = RegQueryValueExW(h_key, nullptr, nullptr, nullptr,
-                                           reinterpret_cast<LPBYTE>(path_buffer), &buffer_size);
-            RegCloseKey(h_key);
-            if (result == ERROR_SUCCESS) {
-                return std::wstring(path_buffer);
-            }
-        }
-    }
-    return L""; // Not found in registry
-}
-
-std::wstring GetEnvVar(const std::wstring &env_var_name) {
-    wchar_t path_buffer[MAX_PATH];
-    size_t required_size = 0;
-
-    // _wgetenv_s expects the size in CHARACTER COUNT (elements), not bytes!
-    errno_t err = _wgetenv_s(&required_size, path_buffer, MAX_PATH, env_var_name.c_str());
-
-    // If the variable doesn't exist or an error occurred, return an empty string safely
-    if (err != 0 || required_size == 0) {
-        return L"";
-    }
-    return std::wstring(path_buffer);
-}
-
-std::wstring FindPythonPath() {
-    // Step 1: Check Python_ROOT_DIR / Python3_ROOT_DIR / pythonLocation (CI consistency)
-    std::wstring return_value = GetEnvVar(L"Python3_ROOT_DIR");
-    if (return_value.empty()) {
-        return_value = GetEnvVar(L"Python_ROOT_DIR");
-    }
-    if (return_value.empty()) {
-        return_value = GetEnvVar(L"pythonLocation");
-    }
-    if (return_value.empty()) {
-        return_value = GetEnvVar(L"PYTHONHOME");
-    }
-
-    // CRITICAL FIX: If any variable points to 'python.exe' or 'python_d.exe', strip it to get the directory!
-    if (!return_value.empty()) {
-        fs::path path_checker(return_value);
-        if (path_checker.has_filename() &&
-            (path_checker.filename() == "python.exe" || path_checker.filename() == "python_d.exe")) {
-            return_value = path_checker.parent_path().generic_wstring();
-            }
-    }
-
-    // Step 2: Fall back to PEP 514 Windows Registry Lookup
-    if (return_value.empty()) {
-        return_value = GetPythonPathFromRegistry();
-    }
-
-    boost::system::error_code ec;
-
-    // Step 3: Hard Fallback to the standard user local AppData path
-    if (return_value.empty()) {
-        std::wstring local_app_data = GetEnvVar(L"LOCALAPPDATA");
-        if (!local_app_data.empty()) {
-            fs::path candidate = fs::path(local_app_data) / L"Python" / L"pythoncore-3.14-64";
-            fs::path canonical_path = fs::canonical(candidate, ec);
-            if (!ec) {
-                return_value = canonical_path.generic_wstring();
-            }
-        }
-    }
-
-    // Step 4: Hard Fallback to the standard Program Files path
-    if (return_value.empty()) {
-        std::wstring program_files = GetEnvVar(L"ProgramFiles");
-        if (program_files.empty()) {
-            program_files = L"C:\\Program Files";
-        }
-        fs::path candidate = fs::path(program_files) / L"Python314";
-        fs::path canonical_path = fs::canonical(candidate, ec);
-        if (!ec) {
-            return_value = canonical_path.generic_wstring();
-        }
-    }
-
-    if (return_value.empty()) {
-        VS_LOG_FLUSH_EXIT(fatal, "Unable to locate Python!", -1);
-    }
-
-    return return_value;
-}
-}
-#endif
 
 void Python::initpaths() {
     /*
