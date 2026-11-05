@@ -28,7 +28,6 @@
 
 #include "flykeyboard.h"
 #include "cmd/unit_generic.h"
-#include "autodocking.h"
 #include "src/config_xml.h"
 #include "root_generic/xml_support.h"
 #include "root_generic/vs_globals.h"

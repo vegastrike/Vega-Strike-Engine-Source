@@ -31,6 +31,7 @@
 #include <string>
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
+#include "cmd/dock_utils.h"
 #include "root_generic/configxml.h"
 #include "root_generic/vs_globals.h"
 #include "gfx_generic/cockpit_generic.h"
@@ -680,23 +681,22 @@ bool isDockableUnit(const Unit *my_unit) {
 }
 
 bool isCloseEnoughToDock(const Unit *my_unit, const Unit *un) {
-    const bool superdock = configuration().physics.dock_within_base_shield;
-    float dis =
-            (un->getUnitType() == Vega_UnitType::planet || superdock) ? UnitUtil::getSignificantDistance(my_unit, un)
-                    : UnitUtil::getDistance(
-                    my_unit,
-                    un);
-    if (dis < un->rSize()) {
-        return true;
+    if (my_unit == nullptr || un == nullptr) {
+        return false;
     }
-    return false;
+    // The docking distance, measured the way the docking test measures it: from a planet's
+    // surface, or from anything else's hull.
+    const double distance = (un->getUnitType() == Vega_UnitType::planet)
+            ? std::max(0.0, (my_unit->LocalPosition() - un->LocalPosition()).Magnitude() - un->rSize())
+            : UnitUtil::getDistance(my_unit, un);
+    return distance < DockingDistance(un);
 }
 
 float getDistance(const Unit *my_unit, const Unit *un) {
     if (my_unit == NULL || un == NULL) {
         return FLT_MAX;
     }
-    return (my_unit->Position() - un->Position()).Magnitude() - my_unit->rSize() - un->rSize();
+    return (my_unit->LocalPosition() - un->LocalPosition()).Magnitude() - my_unit->rSize() - un->rSize();
 }
 
 float getSignificantDistance(const Unit *un, const Unit *sig) {
@@ -802,6 +802,10 @@ void performDockingOperations(Unit *un, Unit *unitToDockWith, int actually_dock)
     }
 }
 
+float PercentOperational(Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull) {
+    return PercentOperational(GetCargo(un, name), un, name, category, countHullAndArmorAsFull);
+}
+
 float PercentOperational(const Cargo item, Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull) {
     if (!un) {
         return 0;
@@ -871,11 +875,11 @@ float PercentOperational(const Cargo item, Unit *un, std::string name, std::stri
         return un->radar.PercentOperational();
     }
     if(upgrade_category == "ECM") {
-        return un->ftl_drive.PercentOperational();
+        return un->ecm.PercentOperational();
     }
 
     if(upgrade_category == "Repair_Bot") {
-        return un->cloak.PercentOperational();
+        return un->repair_bot.PercentOperational();
     }
 
 

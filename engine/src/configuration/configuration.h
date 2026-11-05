@@ -1417,11 +1417,12 @@ namespace vega_config {
         float dock_planet_radius_percent_flt = 1.5;
         double planet_dock_port_min_size_dbl = 300.0;
         float planet_dock_port_min_size_flt = 300.0;
-        double planet_dock_port_size_dbl = 1.2;
-        float planet_dock_port_size_flt = 1.2;
         bool simple_dock = true;
         double simple_dock_range_dbl = 5000.0;
         float simple_dock_range_flt = 5000.0;
+        // "simple" or "zones". Empty means the setting is not in the config, and the older
+        // simple_dock boolean decides instead, so an overlay that only sets that still works.
+        std::string mode = "";
 
     } dock;
 
@@ -1705,7 +1706,7 @@ namespace vega_config {
         float fog_fade_in_percent_flt = 0.5;
         double fog_time_dbl = 0.01;
         float fog_time_flt = 0.01;
-        std::string font = "helvetica12";
+        std::string font = "Roboto";
         bool font_antialias = false;
         double font_point_dbl = 16.0;
         float font_point_flt = 16.0;
@@ -2288,6 +2289,10 @@ namespace vega_config {
         float auto_pilot_no_enemies_distance_multiplier_flt = 4.0;
         double auto_pilot_planet_radius_percent_dbl = 0.495;
         float auto_pilot_planet_radius_percent_flt = 0.495;
+        // How many times the speed at which the ship can still turn onto its aim in time it may keep:
+        // 1 is that speed exactly, lower holds it back further, 0 turns the rule off.
+        double auto_pilot_spec_turn_speed_factor_dbl = 1.0;
+        float auto_pilot_spec_turn_speed_factor_flt = 1.0;
         bool auto_pilot_terminate = true;
         double auto_pilot_termination_distance_dbl = 2500.0;
         float auto_pilot_termination_distance_flt = 2500.0;
@@ -2378,10 +2383,6 @@ namespace vega_config {
         float extra_space_drag_for_cargo_flt = 0.005;
         bool face_target_on_auto = false;
         bool fire_missing_autotrackers = true;
-        double flt_orthogonal_thrust_smoothing_time_dbl = 1.0;
-        float flt_orthogonal_thrust_smoothing_time_flt = 1.0;
-        double flt_orthogonal_thrust_speed_reduce_factor_dbl = 1.0;
-        float flt_orthogonal_thrust_speed_reduce_factor_flt = 1.0;
         double friendly_auto_radius_dbl = 0.0;
         float friendly_auto_radius_flt = 0.0;
         double game_accel_dbl = 1.0;
@@ -2494,10 +2495,6 @@ namespace vega_config {
         double percent_missile_match_target_velocity_dbl = 1.0;
         float percent_missile_match_target_velocity_flt = 1.0;
         bool persistent_on_load = true;
-        double planet_dock_min_port_size_dbl = 300.0;
-        float planet_dock_min_port_size_flt = 300.0;
-        double planet_dock_port_size_dbl = 1.2;
-        float planet_dock_port_size_flt = 1.2;
         double planet_ejection_stophack_dbl = 100000.0;
         float planet_ejection_stophack_flt = 100000.0;
         bool planets_always_neutral = true;
@@ -2568,6 +2565,10 @@ namespace vega_config {
         float warp_cruise_mult_flt = 15000.0;
         double warp_curve_degree_dbl = 1.3;
         float warp_curve_degree_flt = 1.3;
+        // The largest fraction of the gap to the nearest unit that one simulation atom may cover at
+        // warp: 0.5 keeps any body at least two atoms away, 0 turns the limit off.
+        double warp_max_step_fraction_dbl = 0.5;
+        float warp_max_step_fraction_flt = 0.5;
         bool warp_is_interstellar = false;
         double warp_orbit_multiplier_dbl = 20.0;
         float warp_orbit_multiplier_flt = 20.0;
