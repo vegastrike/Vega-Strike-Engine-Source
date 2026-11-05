@@ -210,55 +210,63 @@ UniquePyObject CallPythonFnNullArgs(UniquePyObject py_fn) {
 }
 
 UniquePyObject PrepareStringArgsForPython(const std::list<std::string> &args) {
-    std::vector<PyObject*> py_arg_vec{};
-
-    for (const auto& arg : args) {
-        py_arg_vec.push_back(PyUnicode_FromString(arg.c_str()));
-    }
-
-    Py_ssize_t const size = static_cast<Py_ssize_t>(py_arg_vec.size());
+    Py_ssize_t const size = static_cast<Py_ssize_t>(args.size());
     UniquePyObject py_args{PyTuple_New(size)};
     if (py_args == nullptr) {
         std::cerr << boost::format("%1%: %2%: Failed to create PyTuple") % __FILE__ % __FUNCTION__ << std::endl;
         return nullptr;
-    };
+    }
 
-    for (Py_ssize_t index = 0; index < size; ++index) {
-        int const err = PyTuple_SetItem(py_args.get(), index, py_arg_vec.at(index));
+    Py_ssize_t index = 0;
+    for (const auto& arg : args) {
+        PyObject* py_str = PyUnicode_FromString(arg.c_str());
+        if (py_str == nullptr) {
+            std::cerr << boost::format("%1%: %2%: Failed to convert string argument #%3%") % __FILE__ % __FUNCTION__ % index << std::endl;
+            return nullptr; // py_args destructor cleans up any items already set
+        }
+
+        // PyTuple_SetItem steals the reference to py_str on success
+        int const err = PyTuple_SetItem(py_args.get(), index, py_str);
         if (err < 0) {
+            Py_DECREF(py_str); // Clean up manually if the steal failed
             PyErr_Print();
             std::cerr << boost::format("%1%: %2%: Failed to add argument #%3% to PyTuple") % __FILE__ % __FUNCTION__ % index << std::endl;
             return nullptr;
         }
+        ++index;
     }
     return py_args;
 }
 
 UniquePyObject PrepareWStringArgsForPython(const std::list<std::wstring> &args) {
-    std::vector<PyObject*> py_arg_vec{};
-
-    for (const auto& arg : args) {
-        py_arg_vec.push_back(PyUnicode_FromWideChar(arg.c_str(), static_cast<Py_ssize_t>(arg.length())));
-    }
-
-    Py_ssize_t const size = static_cast<Py_ssize_t>(py_arg_vec.size());
+    Py_ssize_t const size = static_cast<Py_ssize_t>(args.size());
     UniquePyObject py_args{PyTuple_New(size)};
     if (py_args == nullptr) {
         std::cerr << boost::format("%1%: %2%: Failed to create PyTuple") % __FILE__ % __FUNCTION__ << std::endl;
         return nullptr;
-    };
+    }
 
-    for (Py_ssize_t index = 0; index < size; ++index) {
-        int const err = PyTuple_SetItem(py_args.get(), index, py_arg_vec.at(index));
+    Py_ssize_t index = 0;
+    for (const auto& arg : args) {
+        PyObject* py_wstr = PyUnicode_FromWideChar(arg.c_str(), static_cast<Py_ssize_t>(arg.length()));
+        if (py_wstr == nullptr) {
+            std::cerr << boost::format("%1%: %2%: Failed to convert wstring argument #%3%") % __FILE__ % __FUNCTION__ % index << std::endl;
+            return nullptr;
+        }
+
+        int const err = PyTuple_SetItem(py_args.get(), index, py_wstr);
         if (err < 0) {
+            Py_DECREF(py_wstr); // Clean up manually if the steal failed
             PyErr_Print();
             std::cerr << boost::format("%1%: %2%: Failed to add argument #%3% to PyTuple") % __FILE__ % __FUNCTION__ % index << std::endl;
             return nullptr;
         }
+        ++index;
     }
     return py_args;
 }
 
+// FIXED: Changed return signature to UniquePyObject to plug caller-side leaks
 UniquePyObject CallPythonFnStringArgs(std::string module_name, std::string function_name
                                       , const std::list<fs::path> &search_paths, const std::list<std::string> &args) {
     UniquePyObject py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
@@ -273,9 +281,8 @@ UniquePyObject CallPythonFnStringArgs(std::string module_name, std::string funct
         return nullptr;
     }
 
-    UniquePyObject py_result{PyObject_CallObject(py_fn.get(), py_args.get())};
-
-    return py_result;
+    // Safely wrap the result pointer right out of invocation
+    return UniquePyObject(PyObject_CallObject(py_fn.get(), py_args.get()));
 }
 
 PyObject * CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string> &args) {
