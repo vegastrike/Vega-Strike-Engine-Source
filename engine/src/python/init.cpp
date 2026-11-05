@@ -29,6 +29,9 @@
 #define PY_SSIZE_T_CLEAN
 
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #endif
 
@@ -81,8 +84,9 @@ class Unit;
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 
-// Reusable Windows helper to pull the default Python install path from the registry
 #ifdef _WIN32
+namespace {
+/// Reusable Windows helper to pull the default Python install path from the registry
 std::wstring GetPythonPathFromRegistry() {
     // Check both HKCU (current user) and HKLM (system-wide)
     HKEY root_keys[] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE };
@@ -103,6 +107,7 @@ std::wstring GetPythonPathFromRegistry() {
         }
     }
     return L""; // Not found in registry
+}
 }
 #endif
 
