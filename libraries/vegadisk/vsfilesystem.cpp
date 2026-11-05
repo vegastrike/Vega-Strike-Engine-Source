@@ -492,7 +492,7 @@ void InitHomeDirectory()
     boost::filesystem::path home_path{userdir};
     boost::filesystem::path home_sub_path{HOMESUBDIR};
     boost::filesystem::path absolute_home_path{boost::filesystem::absolute(home_sub_path, home_path)};
-    homedir = absolute_home_path.string();
+    homedir = absolute_home_path.generic_string();
     CreateDirectoryAbs( homedir );
 
     VS_LOG(info, (boost::format("USING HOMEDIR : %1% as the home directory ") % homedir));
@@ -739,7 +739,7 @@ void InitMods() {
         boost::filesystem::path p(selectcurrentdir);
         for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(p)) {
             const boost::filesystem::path& filename = entry.path().filename();
-            const std::string filename_string = filename.string();
+            const std::string filename_string = filename.generic_string();
             if (filename_string == configuration().data.hqtextures && is_directory(entry.status())) {
                 curpath.clear();
                 curpath.append(selectcurrentdir);
@@ -772,7 +772,7 @@ void InitMods() {
     if (exists(mod_path)) {
         for (boost::filesystem::directory_entry &entry : boost::filesystem::directory_iterator(mod_path)) {
             const boost::filesystem::path &filename = entry.path().filename();
-            const std::string filename_string = filename.string();
+            const std::string filename_string = filename.generic_string();
             if (filename_string == modname && is_directory(entry.status())) {
                 curpath.clear();
                 curpath.append(selectcurrentdir);
@@ -809,7 +809,7 @@ void InitMods() {
     if (exists(mods_subtree_path)) {
         for (boost::filesystem::directory_entry &entry : boost::filesystem::directory_iterator(mods_subtree_path)) {
             const boost::filesystem::path &filename = entry.path().filename();
-            const std::string filename_string = filename.string();
+            const std::string filename_string = filename.generic_string();
             if (filename_string == modname && is_directory(entry.status())) {
                 curpath = curmodpath + filename_string;
                 VS_LOG(important_info, (boost::format("Adding mod path : %1%") % curpath));
