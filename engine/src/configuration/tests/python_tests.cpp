@@ -86,7 +86,7 @@ std::shared_ptr<fs::path> FindTestPath(const fs::path &starting_path, std::strin
             fs::path canonical_candidate = fs::canonical(candidate, ec);
             if (!ec) {
                 auto result = std::make_shared<fs::path>(std::move(canonical_candidate));
-                std::cout << "Found path: '" << relative_path << "' at '" << result->string() << "'\n";
+                std::cout << "Found path: '" << relative_path << "' at '" << result->generic_string() << "'\n";
                 return result;
             }
         }
