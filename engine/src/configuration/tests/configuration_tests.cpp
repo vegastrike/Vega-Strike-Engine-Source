@@ -196,7 +196,7 @@ TEST(LoadConfig, Sanity) {
     // ... rest of your test
 
     // Read the configuration from the config file
-    const std::string filename = config_file.string();
+    const std::string filename = config_file.generic_string();
     vega_config::GetGameConfig().LoadGameConfig(filename);
 
     // Test again
