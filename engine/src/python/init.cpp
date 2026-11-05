@@ -113,10 +113,16 @@ std::wstring GetPythonPathFromRegistry() {
 
 std::wstring GetEnvVar(const std::wstring &env_var_name) {
     wchar_t path_buffer[MAX_PATH];
-    size_t buffer_size = sizeof(path_buffer);
+    size_t required_size = 0;
 
-    _wgetenv_s(&buffer_size, path_buffer, env_var_name.c_str());
-    return path_buffer;
+    // _wgetenv_s expects the size in CHARACTER COUNT (elements), not bytes!
+    errno_t err = _wgetenv_s(&required_size, path_buffer, MAX_PATH, env_var_name.c_str());
+
+    // If the variable doesn't exist or an error occurred, return an empty string safely
+    if (err != 0 || required_size == 0) {
+        return L"";
+    }
+    return std::wstring(path_buffer);
 }
 
 std::wstring FindPythonPath() {
@@ -137,21 +143,31 @@ std::wstring FindPythonPath() {
         return_value = GetPythonPathFromRegistry();
     }
 
-    // Step 3: Hard Fallback to the standard 64-bit installation route
+    boost::system::error_code ec;
+
+    // Step 3: Hard Fallback to the standard user local AppData path
     if (return_value.empty()) {
-        std::wstring env_var = GetEnvVar(L"LOCALAPPDATA");
-        if (!env_var.empty()) {
-            return_value = fs::canonical(env_var.append(L"\\Python\\pythoncore-3.14-64")).generic_wstring();
+        std::wstring local_app_data = GetEnvVar(L"LOCALAPPDATA");
+        if (!local_app_data.empty()) {
+            fs::path candidate = fs::path(local_app_data) / L"Python" / L"pythoncore-3.14-64";
+            fs::path canonical_path = fs::canonical(candidate, ec);
+            if (!ec) {
+                return_value = canonical_path.generic_wstring();
+            }
         }
     }
 
+    // Step 4: Hard Fallback to the standard Program Files path
     if (return_value.empty()) {
-        std::wstring env_var = GetEnvVar(L"ProgramFiles");
-        if (env_var.empty()) {
-            // resolved_home = L"C:\\Program Files\\Python314";
-            env_var = L"C:\\Program Files";
+        std::wstring program_files = GetEnvVar(L"ProgramFiles");
+        if (program_files.empty()) {
+            program_files = L"C:\\Program Files";
         }
-        return_value = fs::canonical(env_var.append(L"\\Python314")).generic_wstring();
+        fs::path candidate = fs::path(program_files) / L"Python314";
+        fs::path canonical_path = fs::canonical(candidate, ec);
+        if (!ec) {
+            return_value = canonical_path.generic_wstring();
+        }
     }
 
     if (return_value.empty()) {
