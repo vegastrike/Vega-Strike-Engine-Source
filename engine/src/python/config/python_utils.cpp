@@ -332,7 +332,8 @@ PyObject * CallPythonFnWStringArgs(PyObject *py_fn, const std::list<std::wstring
     return py_result;
 }
 
-// A utility function to call a function and get a PyObject as a result
+/// A utility function to call a function and get a PyObject as a result.
+/// Note: No longer calls InitPython or Py_Finalize. These were dangerous and buggy behaviors. The caller should take care of these tasks.
 PyObject* GetClassFromPython(
     const std::string build_path,
     const std::wstring path_string,
@@ -340,21 +341,10 @@ PyObject* GetClassFromPython(
     const std::string module_name,
     const std::string function_name) {
 
-    bool py_was_initialized{};
-
-    InitPython(py_was_initialized);
-
     PyObject* py_method = GetMethodFromPython(build_path, path_string, datadir, module_name, function_name);
     if (py_method == nullptr) {
         std::cerr << boost::format("%1%: %2%: GetMethodFromPython returned a null pointer") % __FILE__ % __FUNCTION__ << std::endl;
-        if (!py_was_initialized) {
-            Py_Finalize();
-        }
         return nullptr;
-    }
-
-    if (!py_was_initialized) {
-        Py_Finalize();
     }
     return CallPythonFnNullArgs(py_method);
 }
