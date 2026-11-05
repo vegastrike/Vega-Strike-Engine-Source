@@ -124,7 +124,6 @@ std::string SafeExtractString(const UniquePyRef& py_obj) {
 
     return std::string(utf8_str);
 }
-}
 
 std::shared_ptr<std::vector<std::shared_ptr<fs::path>>> GetTestPaths() {
     // Global cache variables with internal linkage
