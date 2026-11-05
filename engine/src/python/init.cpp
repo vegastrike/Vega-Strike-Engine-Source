@@ -139,6 +139,15 @@ std::wstring FindPythonPath() {
         return_value = GetEnvVar(L"PYTHONHOME");
     }
 
+    // CRITICAL FIX: If any variable points to 'python.exe' or 'python_d.exe', strip it to get the directory!
+    if (!return_value.empty()) {
+        fs::path path_checker(return_value);
+        if (path_checker.has_filename() &&
+            (path_checker.filename() == "python.exe" || path_checker.filename() == "python_d.exe")) {
+            return_value = path_checker.parent_path().generic_wstring();
+            }
+    }
+
     // Step 2: Fall back to PEP 514 Windows Registry Lookup
     if (return_value.empty()) {
         return_value = GetPythonPathFromRegistry();
