@@ -601,13 +601,19 @@ void StarSystem::createBackground(Star_XML *xml) {
     light_map[0] = new Texture( bgfile.c_str(), 1, MIPMAP, TEXTURE2D, TEXTURE_2D, GFXTRUE );
 #endif
 
+    BackgroundSettings background_settings;
+    background_settings.draw_skybox = xml->drawSkybox;
+    background_settings.fill_color_set = xml->backgroundColorSet;
+    background_settings.color = xml->backgroundColor;
+    background_settings.degamma = xml->backgroundDegamma;
+    background_settings.num_stars = xml->numstars;
+    background_settings.star_brightness_exponent = xml->starBrightnessExponent;
+    background_settings.backdrops = xml->backdrops;
     background = new Background(
             xml->backgroundname.c_str(),
-            xml->numstars,
             configuration().graphics.zfar_flt * 0.9F,
             filename,
-            xml->backgroundColor,
-            xml->backgroundDegamma);
+            background_settings);
     stars = new Stars(xml->numnearstars, xml->starsp);
     stars->SetBlend(configuration().graphics.star_blend, configuration().graphics.star_blend);
 }

@@ -171,7 +171,11 @@ StarVlist::StarVlist(float spread) {
     this->spread = spread;
 }
 
-static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float spread, int *num, int repetition) {
+// brightness_exponent shapes how bright the random stars are: 1 spreads them
+// evenly from dim to bright; higher values make most stars faint and only a
+// few bright, as in a real sky.
+static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float spread, int *num, int repetition,
+        float brightness_exponent = 1) {
     const float staroverlap = configuration().graphics.star_overlap_flt;
     float xyzspread = spread * 2 * staroverlap;
     const string allowedSectors = configuration().graphics.star_allowable_sectors;
@@ -274,6 +278,9 @@ static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float
         tmpvertex[j + repetition - 1].y = VegaRandom::Instance().RandomFloatInRange(-0.5 * xyzspread, 0.5 * xyzspread);
         tmpvertex[j + repetition - 1].z = VegaRandom::Instance().RandomFloatInRange(-0.5 * xyzspread, 0.5 * xyzspread);
         float brightness = VegaRandom::Instance().RandomFloatInRange(0.1F, 1.0F);
+        if (brightness_exponent != 1) {
+            brightness = 0.1F + 0.9F * std::pow((brightness - 0.1F) / 0.9F, brightness_exponent);
+        }
         tmpvertex[j + repetition - 1].r = brightness;
         tmpvertex[j + repetition - 1].g = brightness;
         tmpvertex[j + repetition - 1].b = brightness;
@@ -342,9 +349,10 @@ static GFXColorVertex *AllocVerticesForSystem(std::string our_system_name, float
     return tmpvertex;
 }
 
-PointStarVlist::PointStarVlist(int num, float spread, const std::string &sysnam) : StarVlist(spread) {
+PointStarVlist::PointStarVlist(int num, float spread, const std::string &sysnam, float brightness_exponent)
+        : StarVlist(spread) {
     smoothstreak = 0;
-    GFXColorVertex *tmpvertex = AllocVerticesForSystem(sysnam, this->spread, &num, 2);
+    GFXColorVertex *tmpvertex = AllocVerticesForSystem(sysnam, this->spread, &num, 2, brightness_exponent);
     vlist = new GFXVertexList(GFXLINE, num, tmpvertex, num, true, nullptr);
     for (int i = 0, j = 1; i < num / 2; ++i, j += 2) {
         tmpvertex[i] = tmpvertex[j];
@@ -637,7 +645,7 @@ static Vector GetConstVertex(const GFXColorVertex &c) {
 }
 
 SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std::string texturenames,
-        float size) : StarVlist(spread) {
+        float size, float brightness_exponent, bool face_center) : StarVlist(spread) {
     size_t cur_texture = 0;
     vector<AnimatedTexture *> animations;
     const bool near_stars_alpha = configuration().graphics.near_stars_alpha;
@@ -673,8 +681,12 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
             decal[cur_texture] = new Texture(texturename.c_str());
         }
     }
-    int numVerticesPer = near_stars_alpha ? 4 : 12;
-    GFXColorVertex *tmpvertex = AllocVerticesForSystem(sysnam, this->spread, &num, numVerticesPer);
+    // Near stars (space dust) are three crossed quads, or one at a random angle,
+    // so they look solid as the ship flies among them. Background stars are only
+    // ever seen from the centre, so they get one quad facing it.
+    int numVerticesPer = (near_stars_alpha || face_center) ? 4 : 12;
+    GFXColorVertex *tmpvertex = AllocVerticesForSystem(sysnam, this->spread, &num, numVerticesPer,
+            brightness_exponent);
     for (int LC = 0; LC < num; LC += numVerticesPer) {
         int LAST = LC + numVerticesPer - 1;
         for (int i = LC; i <= LAST; ++i) {
@@ -701,10 +713,27 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
         if (K.MagnitudeSquared() < .00001) {
             K.k += .5;
         }
-        Orthogonize(I, J, K);
-        I = I * size;
-        J = J * size;
-        K = K * size;
+        if (face_center) {
+            // Lay the quad flat across the line of sight, and size it by the
+            // star's brightness: a faint star's glow is smaller as well as dimmer.
+            K = GetConstVertex(tmpvertex[LAST]);
+            if (K.MagnitudeSquared() < .00001) {
+                K.k += .5;
+            }
+        }
+        Orthogonize(I, J, K);  // keeps K's direction; I and J span the quad
+        float star_size = size;
+        if (face_center) {
+            // Grow the quad with the star's distance, so every star of a given
+            // brightness looks the same size: the stars are scattered through a
+            // cube, and the few close to the centre would otherwise be blobs.
+            // size is the half-width of a full-brightness star at distance spread.
+            star_size *= std::max(tmpvertex[LAST].r, std::max(tmpvertex[LAST].g, tmpvertex[LAST].b));
+            star_size *= GetConstVertex(tmpvertex[LAST]).Magnitude() / this->spread;
+        }
+        I = I * star_size;
+        J = J * star_size;
+        K = K * star_size;
         tmpvertex[LC + 0].SetVertex(GetConstVertex(tmpvertex[LC + 0]) - I + J);
         tmpvertex[LC + 0].s = 0.15625;
         tmpvertex[LC + 0].t = .984375;

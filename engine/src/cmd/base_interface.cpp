@@ -138,6 +138,8 @@ bool BaseInterface::Room::BaseTalk::hastalked = false;
 #ifdef NEW_GUI
 #include "cmd/basecomputer.h"
 #include "../gui/eventmanager.h"
+#include "src/force_feedback.h"
+#include "root_generic/vs_globals.h"
 #endif
 
 using namespace VSFileSystem;
@@ -804,6 +806,9 @@ bool RefreshGUI() {
 void base_main_loop() {
     UpdateTime();
     Music::MuzakCycle();
+    if (forcefeedback != nullptr) {
+        forcefeedback->update();  // stops a beam effect left running when we landed
+    }
 
     GFXBeginScene();
     if (createdbase) {
