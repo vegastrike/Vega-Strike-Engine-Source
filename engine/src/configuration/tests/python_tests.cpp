@@ -211,9 +211,9 @@ TEST_F(PythonTests, FindTestPath_success_case) {
 
 TEST_F(PythonTests, Call_Function) {
     std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
-    std::shared_ptr<fs::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
-    bool const exists = fs::exists("python_tests.py");
-    ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
+    ASSERT_NE(search_paths_vec_ptr, nullptr);
+    const fs::path& assets_path = *search_paths_vec_ptr->at(1);
+    ASSERT_TRUE(fs::exists(assets_path / "python_tests.py")) << "python_tests.py exists locally";
 
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
@@ -221,21 +221,24 @@ TEST_F(PythonTests, Call_Function) {
 
     PyStatus status = Py_PreInitialize(&py_pre_config);
     if (PyStatus_Exception(status) != 0) {
+        PyErr_Print();
         Py_ExitStatusException(status);
     }
 
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
     config.isolated = 0;
+    config.site_import = 1;
 
     status = Py_InitializeFromConfig(&config);
     PyConfig_Clear(&config); // Free configuration memory
     if (PyStatus_Exception(status) != 0) {
+        PyErr_Print();
         Py_ExitStatusException(status);
     }
 
     // Convert path cleanly
-    std::wstring const test_assets_str = test_assets_path_ptr->generic_wstring();
+    std::wstring const test_assets_str = assets_path.generic_wstring();
 
     // Grab the live sys.path list object
     PyObject *sys_path = PySys_GetObject("path");
