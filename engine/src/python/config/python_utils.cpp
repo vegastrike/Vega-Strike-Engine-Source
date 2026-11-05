@@ -39,13 +39,14 @@
 #include <boost/format.hpp>
 
 using namespace boost::python;
-using namespace boost::filesystem;
+namespace fs = boost::filesystem;
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
 
 // This is a kludge. It runs python before
 // just to get the python paths.
+[[deprecated("This was always a kludge. It also uses a wide string returned from Python after Py_Finalize() has been called, which isn't safe.")]]
 std::string GetPythonPath() {
     Py_Initialize();
     wchar_t const* w_path_ptr = Py_GetPath();
@@ -58,13 +59,14 @@ std::string GetPythonPath() {
 }
 
 void InitPython(bool &was_already_initialized) {
-    PyPreConfig py_pre_config;
-    PyPreConfig_InitPythonConfig(&py_pre_config);
-    py_pre_config.coerce_c_locale = 1;
     was_already_initialized = Py_IsInitialized() != 0;
     if (was_already_initialized) {
         return;
     }
+
+    PyPreConfig py_pre_config;
+    PyPreConfig_InitPythonConfig(&py_pre_config);
+    py_pre_config.coerce_c_locale = 1;
 
     PyStatus status = Py_PreInitialize(&py_pre_config);
     if (PyStatus_Exception(status) != 0) {
@@ -75,6 +77,7 @@ void InitPython(bool &was_already_initialized) {
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
     config.isolated = 0;
+    config.site_import = 1;
 
     status = Py_InitializeFromConfig(&config);
     PyConfig_Clear(&config); // Free configuration memory
@@ -85,7 +88,7 @@ void InitPython(bool &was_already_initialized) {
 }
 
 PyObject * GetMethodFromPython(std::string module_name, std::string function_name
-                               , const std::list<boost::filesystem::path>& search_paths) {
+                               , const std::list<fs::path>& search_paths) {
     PyObject* sys_path = PySys_GetObject("path");
     if (sys_path == nullptr) {
         std::cerr << boost::format("%1%: %2%: PySys_GetObject(\"path\") returned nullptr")
@@ -94,9 +97,9 @@ PyObject * GetMethodFromPython(std::string module_name, std::string function_nam
     }
 
     for (const auto& search_path : search_paths) {
-        boost::filesystem::path const canonical_path = boost::filesystem::canonical(search_path);
-        std::string const canonical_path_str = canonical_path.lexically_normal().generic_string();
-        std::wstring const canonical_path_wstr = canonical_path.lexically_normal().generic_wstring();
+        fs::path const canonical_path = fs::canonical(search_path);
+        std::string const canonical_path_str = canonical_path.generic_string();
+        std::wstring const canonical_path_wstr = canonical_path.generic_wstring();
         PyObject* path_element = PyUnicode_FromWideChar(canonical_path_wstr.c_str(), canonical_path_wstr.length());
         if (path_element == nullptr) {
             std::cerr << boost::format("%1%: %2%: PyUnicode_FromWideChar returned nullptr")
@@ -133,10 +136,9 @@ PyObject * GetMethodFromPython(std::string module_name, std::string function_nam
 PyObject * GetMethodFromPython(std::string module_name,
         std::string function_name,
         const std::list<std::string> &search_paths) {
-    std::list<boost::filesystem::path> paths;
+    std::list<fs::path> paths;
     for (const auto& path : search_paths) {
-        boost::filesystem::path const canonical_path = boost::filesystem::canonical(path);
-        boost::filesystem::path const lexically_normal = canonical_path.lexically_normal();
+        fs::path const canonical_path = fs::canonical(path);
         paths.push_back(canonical_path);
     }
 
@@ -146,10 +148,9 @@ PyObject * GetMethodFromPython(std::string module_name,
 PyObject * GetMethodFromPython(std::string module_name,
         std::string function_name,
         const std::list<std::wstring> &search_paths) {
-    std::list<boost::filesystem::path> paths;
+    std::list<fs::path> paths;
     for (const auto& path : search_paths) {
-        boost::filesystem::path const canonical_path = boost::filesystem::canonical(path);
-        boost::filesystem::path const lexically_normal = canonical_path.lexically_normal();
+        fs::path const canonical_path = fs::canonical(path);
         paths.push_back(canonical_path);
     }
 
@@ -158,10 +159,10 @@ PyObject * GetMethodFromPython(std::string module_name,
 
 PyObject * GetMethodFromPython(const std::string &build_path, const std::wstring &path_string
         , const std::string &datadir, const std::string &module_name, const std::string &function_name) {
-    boost::filesystem::path const full_path = boost::filesystem::path(path_string);
-    boost::filesystem::current_path(full_path);
+    fs::path const full_path = fs::path(path_string);
+    fs::current_path(full_path);
 
-    if(!boost::filesystem::exists(module_name + ".py")) {
+    if(!fs::exists(module_name + ".py")) {
         std::cerr << boost::format("%1%: %2%: Can't find module %3%.") % __FILE__ % __FUNCTION__ % module_name << std::endl;
         // TODO: throw exception
         return nullptr;
@@ -174,10 +175,9 @@ PyObject * GetMethodFromPython(const std::string &build_path, const std::wstring
     const std::wstring data_path_w = std::wstring(datadir.begin(), datadir.end());
 
     std::list<std::wstring> const path_wstrs{path_string_w, python_sitelib_path_wstring, build_path_w, data_path_w};
-    std::list<boost::filesystem::path> paths;
+    std::list<fs::path> paths;
     for (const auto& path : path_wstrs) {
-        boost::filesystem::path const canonical_path = boost::filesystem::canonical(path);
-        boost::filesystem::path const lexically_normal = canonical_path.lexically_normal();
+        fs::path const canonical_path = fs::canonical(path);
         paths.push_back(canonical_path);
     }
 
@@ -185,7 +185,7 @@ PyObject * GetMethodFromPython(const std::string &build_path, const std::wstring
 }
 
 PyObject * CallPythonFnNullArgs(std::string module_name, std::string function_name
-                                , const std::list<boost::filesystem::path> &search_paths) {
+                                , const std::list<fs::path> &search_paths) {
     PyObject* py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
     if (py_fn == nullptr) {
         std::cerr << boost::format("%1%: %2%: GetMethodFromPython() returned nullptr.") % __FILE__ % __FUNCTION__ << std::endl;
@@ -265,7 +265,7 @@ PyObject * PrepareWStringArgsForPython(const std::list<std::wstring> &args) {
 }
 
 PyObject * CallPythonFnStringArgs(std::string module_name, std::string function_name
-                                  , const std::list<boost::filesystem::path> &search_paths, const std::list<std::string> &args) {
+                                  , const std::list<fs::path> &search_paths, const std::list<std::string> &args) {
     PyObject* py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
     if (py_fn == nullptr) {
         std::cerr << boost::format("%1%: %2%: GetMethodFromPython() returned nullptr.") % __FILE__ % __FUNCTION__ << std::endl;
@@ -302,7 +302,7 @@ PyObject * CallPythonFnPyArgs(PyObject *py_fn, PyObject *args) {
 }
 
 PyObject * CallPythonFnWStringArgs(std::string module_name, std::string function_name
-                                   , const std::list<boost::filesystem::path> &search_paths, const std::list<std::wstring> &args) {
+                                   , const std::list<fs::path> &search_paths, const std::list<std::wstring> &args) {
     PyObject* py_fn = GetMethodFromPython(std::move(module_name), std::move(function_name), search_paths);
     if (py_fn == nullptr) {
         std::cerr << boost::format("%1%: %2%: GetMethodFromPython() returned nullptr.") % __FILE__ % __FUNCTION__ << std::endl;
