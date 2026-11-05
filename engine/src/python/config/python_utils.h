@@ -115,6 +115,9 @@ PyObject* CallPythonFnNullArgs(std::string module_name,
 /// Call a Python function/method with no arguments
 PyObject *CallPythonFnNullArgs(PyObject *py_fn);
 
+/// Call a Python function/method with no arguments
+PyObject *CallPythonFnNullArgs(UniquePyObject py_fn);
+
 /// Call a Python function/method with a variable number of std::string arguments
 PyObject* CallPythonFnStringArgs(std::string module_name,
                                  std::string function_name,
@@ -123,6 +126,9 @@ PyObject* CallPythonFnStringArgs(std::string module_name,
 
 /// Call a Python function/method with a variable number of std::string arguments
 PyObject* CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string>& args);
+
+/// Call a Python function/method with a variable number of std::string arguments
+PyObject* CallPythonFnStringArgs(UniquePyObject py_fn, const std::list<std::string>& args);
 
 /// Call a Python function/method with a variable number of std::wstring arguments
 PyObject* CallPythonFnWStringArgs(std::string module_name,
@@ -133,7 +139,19 @@ PyObject* CallPythonFnWStringArgs(std::string module_name,
 /// Call a Python function/method with a variable number of std::wstring arguments
 PyObject* CallPythonFnWStringArgs(PyObject *py_fn, const std::list<std::wstring>& args);
 
+/// Call a Python function/method with a variable number of std::wstring arguments
+PyObject* CallPythonFnWStringArgs(UniquePyObject py_fn, const std::list<std::wstring>& args);
+
 /// Call a Python function/method with a pre-packed Tuple of arguments
 PyObject* CallPythonFnPyArgs(PyObject *py_fn, PyObject *args);
+
+/// Call a Python function/method with a pre-packed Tuple of arguments
+PyObject* CallPythonFnPyArgs(UniquePyObject py_fn, PyObject *args);
+
+/// Call a Python function/method with a pre-packed Tuple of arguments
+PyObject* CallPythonFnPyArgs(PyObject *py_fn, UniquePyObject args);
+
+/// Call a Python function/method with a pre-packed Tuple of arguments
+PyObject* CallPythonFnPyArgs(UniquePyObject py_fn, UniquePyObject args);
 
 #endif //VEGA_STRIKE_ENGINE_SRC_PYTHON_CONFIG_PYTHON_UTILS_U
