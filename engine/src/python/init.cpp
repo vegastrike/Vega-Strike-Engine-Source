@@ -117,8 +117,6 @@ std::wstring GetEnvVar(const std::wstring &env_var_name) {
 }
 
 std::wstring GetPythonPath() {
-    std::wstring return_value = L"";
-
     // Step 1: Check Python_ROOT_DIR / Python3_ROOT_DIR / pythonLocation (CI consistency)
     std::wstring return_value = GetEnvVar(L"Python3_ROOT_DIR");
     if (return_value.empty()) {
