@@ -84,7 +84,7 @@ std::wstring GetEnvVar(const std::wstring &env_var_name) {
     return path_buffer;
 }
 
-std::wstring GetPythonPath() {
+std::wstring FindPythonPath() {
     // Step 1: Check Python_ROOT_DIR / Python3_ROOT_DIR / pythonLocation (CI consistency)
     std::wstring return_value = GetEnvVar(L"Python3_ROOT_DIR");
     if (return_value.empty()) {
@@ -106,7 +106,7 @@ std::wstring GetPythonPath() {
     if (return_value.empty()) {
         std::wstring env_var = GetEnvVar(L"LOCALAPPDATA");
         if (!env_var.empty()) {
-            return_value = fs::canonical(env_var / L"Python" / L"pythoncore-3.14-64").generic_wstring();
+            return_value = fs::canonical(env_var.append(L"\\Python\\pythoncore-3.14-64")).generic_wstring();
         }
     }
 
@@ -116,7 +116,7 @@ std::wstring GetPythonPath() {
             // resolved_home = L"C:\\Program Files\\Python314";
             env_var = L"C:\\Program Files";
         }
-        return_value = fs::canonical(env_var / L"Python314").generic_wstring();
+        return_value = fs::canonical(env_var.append(L"\\Python314")).generic_wstring();
     }
 
     if (return_value.empty()) {
@@ -165,7 +165,7 @@ void InitPython(bool &was_already_initialized) {
     config.site_import = 1;
 
 #ifdef _WIN32
-    std::wstring resolved_home = GetPythonPath();
+    std::wstring resolved_home = FindPythonPath();
 
     // Assign the determined fallback explicitly to the PyConfig structure
     status = PyConfig_SetString(&config, &config.home, resolved_home.c_str());
