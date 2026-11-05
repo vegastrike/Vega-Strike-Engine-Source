@@ -107,6 +107,58 @@ std::wstring GetPythonPathFromRegistry() {
     }
     return L""; // Not found in registry
 }
+
+std::wstring GetEnvVar(const std::wstring &env_var_name) {
+    wchar_t path_buffer[MAX_PATH];
+    size_t buffer_size = sizeof(path_buffer);
+
+    _wgetenv_s(&buffer_size, path_buffer, env_var_name.c_str());
+    return path_buffer;
+}
+
+std::wstring GetPythonPath() {
+    std::wstring return_value = L"";
+
+    // Step 1: Check Python_ROOT_DIR / Python3_ROOT_DIR / pythonLocation (CI consistency)
+    std::wstring return_value = GetEnvVar(L"Python3_ROOT_DIR");
+    if (return_value.empty()) {
+        return_value = GetEnvVar(L"Python_ROOT_DIR");
+    }
+    if (return_value.empty()) {
+        return_value = GetEnvVar(L"pythonLocation");
+    }
+    if (return_value.empty()) {
+        return_value = GetEnvVar(L"PYTHONHOME");
+    }
+
+    // Step 2: Fall back to PEP 514 Windows Registry Lookup
+    if (return_value.empty()) {
+        return_value = GetPythonPathFromRegistry();
+    }
+
+    // Step 3: Hard Fallback to the standard 64-bit installation route
+    if (return_value.empty()) {
+        std::wstring env_var = GetEnvVar(L"LOCALAPPDATA");
+        if (!env_var.empty()) {
+            return_value = fs::canonical(env_var / L"Python" / L"pythoncore-3.14-64").generic_wstring();
+        }
+    }
+
+    if (return_value.empty()) {
+        std::wstring env_var = GetEnvVar(L"ProgramFiles");
+        if (env_var.empty()) {
+            // resolved_home = L"C:\\Program Files\\Python314";
+            env_var = L"C:\\Program Files";
+        }
+        return_value = fs::canonical(env_var / L"Python314").generic_wstring();
+    }
+
+    if (return_value.empty()) {
+        VS_LOG_FLUSH_EXIT(fatal, "Unable to locate Python!", -1);
+    }
+
+    return return_value;
+}
 }
 #endif
 
@@ -236,37 +288,14 @@ void Python::init() {
     config.site_import = 1;
 
 #ifdef _WIN32
-    std::wstring resolved_home = L"";
-
-    // Step 1: Check Python_ROOT_DIR / Python3_ROOT_DIR / pythonLocation (CI consistency)
-    const char* env_root = std::getenv("Python3_ROOT_DIR");
-    if (!env_root) {
-        env_root = std::getenv("Python_ROOT_DIR");
-    }
-    if (!env_root) {
-        env_root = std::getenv("pythonLocation");
-    }
-    if (!env_root) {
-        env_root = std::getenv("PYTHONHOME");
-    }
-
-    if (env_root != nullptr) {
-        std::string env_str(env_root);
-        resolved_home = std::wstring(env_str.begin(), env_str.end());
-    } else {
-        // Step 2: Fall back to PEP 514 Windows Registry Lookup
-        resolved_home = GetPythonPathFromRegistry();
-    }
-
-    // Step 3: Hard Fallback to the standard 64-bit installation route
-    if (resolved_home.empty()) {
-        resolved_home = L"C:\\Program Files\\Python314";
-    }
+    std::wstring resolved_home = GetPythonPath();
 
     // Assign the determined fallback explicitly to the PyConfig structure
     status = PyConfig_SetString(&config, &config.home, resolved_home.c_str());
-    if (PyStatus_Exception(status)) {
+    if (PyStatus_Exception(status) != 0) {
         PyConfig_Clear(&config);
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): PyConfig_SetString failed");
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         Py_ExitStatusException(status);
     }
 #endif
@@ -274,7 +303,7 @@ void Python::init() {
     // Now we can do python things about them and initialize them
     status = Py_InitializeFromConfig(&config);
     PyConfig_Clear(&config);
-    if (PyStatus_Exception(status)) {
+    if (PyStatus_Exception(status) != 0) {
         VS_LOG_AND_FLUSH(fatal, "Python::init(): Py_InitializeFromConfig failed");
         PyErr_Print();
         VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
