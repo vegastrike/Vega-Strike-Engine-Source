@@ -73,6 +73,10 @@ Track::Type::Value Track::GetType() const {
     return type;
 }
 
+const Unit *Track::GetUnit() const {
+    return target;
+}
+
 float Track::GetSize() const {
     assert(target);
 
