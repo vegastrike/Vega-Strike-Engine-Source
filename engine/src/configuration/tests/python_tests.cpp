@@ -105,10 +105,10 @@ std::shared_ptr<fs::path> FindTestPath(const fs::path &starting_path, std::strin
     return nullptr;
 }
 
-// Helper to safely extract a C++ string from a UniquePyObject inside tests
-std::string SafeExtractString(const UniquePyObject& py_obj) {
+// Helper to safely extract a C++ string from a UniquePyRef inside tests
+std::string SafeExtractString(const UniquePyRef& py_obj) {
     if (!py_obj) {
-        ADD_FAILURE() << "SafeExtractString received a null UniquePyObject!";
+        ADD_FAILURE() << "SafeExtractString received a null UniquePyRef!";
         return "";
     }
 
@@ -316,7 +316,7 @@ TEST_F(PythonTests, GetClassFromPython) {
     bool const exists = fs::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
 
-    UniquePyObject py_result = GetClassFromPython(build_path_ptr->generic_string()
+    UniquePyRef py_result = GetClassFromPython(build_path_ptr->generic_string()
                                                   , test_assets_path_ptr->generic_wstring()
                                                   , data_path_ptr->generic_string(), "python_tests", "append_no_args");
     ASSERT_NE(py_result, nullptr) << "Python result is null";
@@ -339,7 +339,7 @@ TEST_F(PythonTests, GetClassFromPythonPathRefs) {
     bool const exists = fs::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
 
-    UniquePyObject py_result = GetClassFromPython(build_path_ptr->generic_string()
+    UniquePyRef py_result = GetClassFromPython(build_path_ptr->generic_string()
                                                   , test_assets_path_ptr->generic_wstring()
                                                   , data_path_ptr->generic_string(), "python_tests", "append_no_args");
     ASSERT_NE(py_result, nullptr) << "Python result is null";
@@ -364,10 +364,10 @@ TEST_F(PythonTests, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
 
     std::list<fs::path> search_path_list{*test_assets_path_ptr, *build_path_ptr, *data_path_ptr};
 
-    UniquePyObject py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_list);
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_list);
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
 
-    UniquePyObject py_result = CallPythonFnNullArgs(std::move(py_method));
+    UniquePyRef py_result = CallPythonFnNullArgs(std::move(py_method));
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -384,10 +384,10 @@ TEST_F(PythonTests, GetMethodFromPython_with_list_of_strings) {
         search_path_strings.emplace_back(search_path_ptr->generic_string());
     }
 
-    UniquePyObject py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_strings);
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_strings);
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
 
-    UniquePyObject py_result = CallPythonFnNullArgs(std::move(py_method));
+    UniquePyRef py_result = CallPythonFnNullArgs(std::move(py_method));
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -404,10 +404,10 @@ TEST_F(PythonTests, GetMethodFromPython_with_list_of_wstrings) {
         search_path_strings.emplace_back(search_path_ptr->generic_wstring());
     }
 
-    UniquePyObject py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_strings);
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_strings);
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
 
-    UniquePyObject py_result = CallPythonFnNullArgs(std::move(py_method));
+    UniquePyRef py_result = CallPythonFnNullArgs(std::move(py_method));
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -428,11 +428,11 @@ TEST_F(PythonTests, GetMethodFromPython_with_individual_paths) {
     bool const exists = fs::exists("python_tests.py");
     ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
 
-    UniquePyObject py_method = GetMethodFromPython(build_path_ptr->generic_string(), test_assets_path_ptr->generic_wstring()
+    UniquePyRef py_method = GetMethodFromPython(build_path_ptr->generic_string(), test_assets_path_ptr->generic_wstring()
                                               , data_path_ptr->generic_string(), "python_tests", "append_no_args");
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
 
-    UniquePyObject py_result = CallPythonFnNullArgs(std::move(py_method));
+    UniquePyRef py_result = CallPythonFnNullArgs(std::move(py_method));
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -449,14 +449,14 @@ TEST_F(PythonTests, PrepareStringArgsForPython) {
         search_path_list.emplace_back(*search_path_ptr);
     }
 
-    UniquePyObject py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append", search_path_list);
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
 
     const std::list<std::string> arg_string_list{"Hello", " World\n"};
-    UniquePyObject py_args = PrepareStringArgsForPython(arg_string_list);
+    UniquePyRef py_args = PrepareStringArgsForPython(arg_string_list);
     ASSERT_NE(py_args, nullptr) << "PrepareStringArgsForPython returned a null pointer" << '\n';
 
-    UniquePyObject py_result = CallPythonFnPyArgs(std::move(py_method), std::move(py_args));
+    UniquePyRef py_result = CallPythonFnPyArgs(std::move(py_method), std::move(py_args));
     ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -473,14 +473,14 @@ TEST_F(PythonTests, PrepareWStringArgsForPython) {
         search_path_list.emplace_back(*search_path_ptr);
     }
 
-    UniquePyObject py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append", search_path_list);
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
 
     const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
-    UniquePyObject py_args = PrepareWStringArgsForPython(arg_wstring_list);
+    UniquePyRef py_args = PrepareWStringArgsForPython(arg_wstring_list);
     ASSERT_NE(py_args, nullptr) << "PrepareWStringArgsForPython returned a null pointer" << '\n';
 
-    UniquePyObject py_result = CallPythonFnPyArgs(std::move(py_method), std::move(py_args));
+    UniquePyRef py_result = CallPythonFnPyArgs(std::move(py_method), std::move(py_args));
     ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -497,7 +497,7 @@ TEST_F(PythonTests, CallPythonFnNullArgs_with_module_name_fn_name_and_search_pat
         search_path_list.emplace_back(*search_path_ptr);
     }
 
-    UniquePyObject py_result = CallPythonFnNullArgs("python_tests", "append_no_args", search_path_list);
+    UniquePyRef py_result = CallPythonFnNullArgs("python_tests", "append_no_args", search_path_list);
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -514,10 +514,10 @@ TEST_F(PythonTests, CallPythonFnNullArgs_with_fn_pointer) {
         search_path_list.emplace_back(*search_path_ptr);
     }
 
-    UniquePyObject py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_list);
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_list);
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
 
-    UniquePyObject py_result = CallPythonFnNullArgs(std::move(py_method));
+    UniquePyRef py_result = CallPythonFnNullArgs(std::move(py_method));
     ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -535,7 +535,7 @@ TEST_F(PythonTests, CallPythonFnStringArgs_with_module_name_fn_name_and_search_p
     }
 
     const std::list<std::string> arg_string_list{"Hello", " World\n"};
-    UniquePyObject py_result = CallPythonFnStringArgs("python_tests", "append", search_path_list, arg_string_list);
+    UniquePyRef py_result = CallPythonFnStringArgs("python_tests", "append", search_path_list, arg_string_list);
     ASSERT_NE(py_result, nullptr) << "CallPythonFnStringArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -552,11 +552,11 @@ TEST_F(PythonTests, CallPythonFnStringArgs_with_fn_pointer) {
         search_path_list.emplace_back(*search_path_ptr);
     }
 
-    UniquePyObject py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append", search_path_list);
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
 
     const std::list<std::string> arg_string_list{"Hello", " World\n"};
-    UniquePyObject py_result = CallPythonFnStringArgs(std::move(py_method), arg_string_list);
+    UniquePyRef py_result = CallPythonFnStringArgs(std::move(py_method), arg_string_list);
     ASSERT_NE(py_result, nullptr) << "CallPythonFnStringArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -574,7 +574,7 @@ TEST_F(PythonTests, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_
     }
 
     const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
-    UniquePyObject py_result = CallPythonFnWStringArgs("python_tests", "append", search_path_list, arg_wstring_list);
+    UniquePyRef py_result = CallPythonFnWStringArgs("python_tests", "append", search_path_list, arg_wstring_list);
     ASSERT_NE(py_result, nullptr) << "CallPythonFnWStringArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -591,11 +591,11 @@ TEST_F(PythonTests, CallPythonFnWstringArgs_with_fn_pointer) {
         search_path_list.emplace_back(*search_path_ptr);
     }
 
-    UniquePyObject py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append", search_path_list);
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
 
     const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
-    UniquePyObject py_result = CallPythonFnWStringArgs(std::move(py_method), arg_wstring_list);
+    UniquePyRef py_result = CallPythonFnWStringArgs(std::move(py_method), arg_wstring_list);
     ASSERT_NE(py_result, nullptr) << "CallPythonFnWStringArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
@@ -612,14 +612,14 @@ TEST_F(PythonTests, CallPythonFnPyArgs) {
         search_path_list.emplace_back(*search_path_ptr);
     }
 
-    UniquePyObject py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append", search_path_list);
     ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
 
     const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
-    UniquePyObject py_args = PrepareWStringArgsForPython(arg_wstring_list);
+    UniquePyRef py_args = PrepareWStringArgsForPython(arg_wstring_list);
     ASSERT_NE(py_args, nullptr) << "PrepareWStringArgsForPython returned a null pointer" << '\n';
 
-    UniquePyObject py_result = CallPythonFnPyArgs(std::move(py_method), std::move(py_args));
+    UniquePyRef py_result = CallPythonFnPyArgs(std::move(py_method), std::move(py_args));
     ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
 
     std::string const result = SafeExtractString(py_result);
