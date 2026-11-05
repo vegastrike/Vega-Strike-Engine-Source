@@ -168,11 +168,11 @@ PyObject * GetMethodFromPython(const std::string &build_path, const std::wstring
         return nullptr;
     }
 
-    const std::wstring path_string_w = std::wstring(path_string.begin(), path_string.end());
+    const std::wstring path_string_w = fs::canonical(path_string).generic_wstring();
     const std::string python_sitelib_path = QUOTE(Python_SITELIB);
-    const std::wstring python_sitelib_path_wstring = std::wstring(python_sitelib_path.begin(), python_sitelib_path.end());
-    const std::wstring build_path_w = std::wstring(build_path.begin(), build_path.end());
-    const std::wstring data_path_w = std::wstring(datadir.begin(), datadir.end());
+    const std::wstring python_sitelib_path_wstring = fs::canonical(python_sitelib_path).generic_wstring();
+    const std::wstring build_path_w = fs::canonical(build_path).generic_wstring();
+    const std::wstring data_path_w = fs::canonical(datadir).generic_wstring();
 
     std::list<std::wstring> const path_wstrs{path_string_w, python_sitelib_path_wstring, build_path_w, data_path_w};
     std::list<fs::path> paths;
