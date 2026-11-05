@@ -209,7 +209,7 @@ PyObject * CallPythonFnNullArgs(PyObject *py_fn) {
     return py_result;
 }
 
-PyObject * CallPythonFnNullArgs(const UniquePyObject &py_fn) {
+PyObject * CallPythonFnNullArgs(UniquePyObject py_fn) {
     return CallPythonFnNullArgs(py_fn.get());
 }
 
@@ -294,10 +294,26 @@ PyObject * CallPythonFnStringArgs(PyObject *py_fn, const std::list<std::string> 
     return py_result;
 }
 
+PyObject * CallPythonFnStringArgs(UniquePyObject py_fn, const std::list<std::string> &args) {
+    return CallPythonFnStringArgs(py_fn.get(), args);
+}
+
 PyObject * CallPythonFnPyArgs(PyObject *py_fn, PyObject *args) {
     PyObject* py_result = PyObject_CallObject(py_fn, args);
 
     return py_result;
+}
+
+PyObject * CallPythonFnPyArgs(UniquePyObject py_fn, PyObject *args) {
+    return CallPythonFnPyArgs(py_fn.get(), args);
+}
+
+PyObject * CallPythonFnPyArgs(PyObject *py_fn, UniquePyObject args) {
+    return CallPythonFnPyArgs(py_fn, args.get());
+}
+
+PyObject * CallPythonFnPyArgs(UniquePyObject py_fn, UniquePyObject args) {
+    return CallPythonFnPyArgs(py_fn.get(), args.get());
 }
 
 PyObject * CallPythonFnWStringArgs(std::string module_name, std::string function_name
@@ -329,6 +345,10 @@ PyObject * CallPythonFnWStringArgs(PyObject *py_fn, const std::list<std::wstring
     PyObject* py_result = PyObject_CallObject(py_fn, py_args.get());
 
     return py_result;
+}
+
+PyObject * CallPythonFnWStringArgs(UniquePyObject py_fn, const std::list<std::wstring> &args) {
+    return CallPythonFnWStringArgs(py_fn.get(), args);
 }
 
 /// A utility function to call a function and get a PyObject as a result.
