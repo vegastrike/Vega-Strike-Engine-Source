@@ -70,7 +70,7 @@
 
 #define MAX_RECENT_HISTORY "5"
 
-Music *muzak = NULL;
+Music *muzak = nullptr;
 int muzak_count = 0;
 int muzak_cross_index = 0;
 
@@ -693,10 +693,20 @@ void Music::InitMuzak() {
 }
 
 void Music::CleanupMuzak() {
-    if (muzak) {
-        //Multithreading issues... don't care to waste time here waiting to get the lock back.
-        //Let the OS clean up this mess!
-        muzak = NULL;
+    if (muzak != nullptr) {
+        int trylock_ret = 0;
+#ifdef _WIN32
+        while ((trylock_ret = WaitForSingleObject( muzak->musicinfo_mutex, 10)) == WAIT_TIMEOUT) {
+#else
+        while ((trylock_ret = pthread_mutex_trylock(&muzak->musicinfo_mutex)) == EBUSY) {
+#endif
+            micro_sleep(10'000);
+        }
+#ifndef _WIN32
+        checkerr(trylock_ret);
+#endif
+        delete muzak;
+        muzak = nullptr;
         muzak_count = 0;
     }
 }
@@ -821,4 +831,3 @@ void Music::SetLoops(int numloops, int layer) {
         }
     }
 }
-
