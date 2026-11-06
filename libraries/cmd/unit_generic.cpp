@@ -2010,6 +2010,15 @@ int Unit::ForceDock(Unit *utdw, unsigned int whichdockport) {
     }
     pImage->DockedTo.SetUnit(utdw);
     computer.set_speed = 0;
+    // Docking ends the flight the autopilot was flying. It is stood down here, and not on launch,
+    // because a ship docked inside a base leaves the system: its orders do not run again to notice,
+    // and would resume the moment the ship launches.
+    if (autopilotactive) {
+        autopilotactive = false;
+        if (Order *ai = getAIState()) {
+            ai->eraseType(Order::FACING | Order::MOVEMENT);
+        }
+    }
     if (this == _Universe->AccessCockpit()->GetParent()) {
         this->RestoreGodliness();
     }
