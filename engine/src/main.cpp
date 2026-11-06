@@ -154,10 +154,18 @@ void VSExit(int code) {
     Music::CleanupMuzak();
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     STATIC_VARS_DESTROYED = true;
+#if defined (CG_SUPPORT)
+    if (cloak_cg->vertexProgram) cgDestroyProgram( cloak_cg->vertexProgram );
+    if (cloak_cg->shaderContext) cgDestroyContext( cloak_cg->shaderContext );
+#endif
     AUDDestroy();
     if (splash_screen != nullptr) {
         delete splash_screen;
         splash_screen = nullptr;
+    }
+    if (forcefeedback != nullptr) {
+        delete forcefeedback;
+        forcefeedback = nullptr;
     }
     winsys_exit(code);
 }
@@ -194,6 +202,10 @@ void cleanup() {
     if (splash_screen != nullptr) {
         delete splash_screen;
         splash_screen = nullptr;
+    }
+    if (forcefeedback != nullptr) {
+        delete forcefeedback;
+        forcefeedback = nullptr;
     }
 }
 
