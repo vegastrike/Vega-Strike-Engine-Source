@@ -123,7 +123,7 @@ static void refresh_font_list() {
         std::vector<std::string> ttf;
         for (fs::directory_iterator it(fonts_dir), end; it != end; ++it) {
             if (it->path().extension() == ".ttf") {
-                ttf.push_back(it->path().filename().string());
+                ttf.push_back(it->path().filename().generic_string());
             }
         }
         std::sort(ttf.begin(), ttf.end());

@@ -31,7 +31,7 @@
 # along with Vega Strike. If not, see <https://www.gnu.org/licenses/>.
 
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.21 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.21...4.3 FATAL_ERROR)
 
 IF (POLICY CMP0054)
     CMAKE_POLICY(SET CMP0054 NEW)
@@ -45,6 +45,10 @@ ENDIF ()
 # We should do something about it instead.
 IF (POLICY CMP0102)
     CMAKE_POLICY(SET CMP0102 OLD)
+ENDIF ()
+
+IF (POLICY CMP0156)
+    CMAKE_POLICY(SET CMP0156 NEW)
 ENDIF ()
 
 IF (POLICY CMP0167)
@@ -112,6 +116,10 @@ PROJECT(Vega_Strike
     LANGUAGES
     CXX C
 )
+
+# Force-unset or disable find debug modes globally
+SET(CMAKE_FIND_DEBUG_MODE OFF CACHE BOOL "Disable verbose find logs" FORCE)
+SET(CMAKE_VERBOSE_MAKEFILE OFF FORCE)
 
 MESSAGE("== Vega Strike Version: ${VEGASTRIKE_VERSION_LONG_STR}")
 
