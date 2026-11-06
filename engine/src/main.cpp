@@ -159,7 +159,6 @@ void VSExit(int code) {
 #endif
     Music::CleanupMuzak();
     AUDDestroy();
-    winsys_shutdown();
     if (Py_IsInitialized()) {
         Py_Finalize();
     }
@@ -202,7 +201,6 @@ void cleanup() {
 #endif
     Music::CleanupMuzak();
     AUDDestroy();
-    winsys_shutdown();
     if (Py_IsInitialized()) {
         Py_Finalize();
     }
@@ -214,6 +212,7 @@ void cleanup() {
         delete forcefeedback;
         forcefeedback = nullptr;
     }
+    winsys_shutdown();
 }
 
 LeakVector<Mission *> active_missions;
