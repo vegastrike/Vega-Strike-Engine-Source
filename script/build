@@ -36,7 +36,7 @@
 set -e
 
 echo "--------------------------"
-echo "--- build | 2026-07-12 ---"
+echo "--- build | 2026-10-31 ---"
 echo "--------------------------"
 
 #----------------------------------
@@ -86,7 +86,7 @@ then
     num_threads_to_build_with=${MAX_THREADS_TO_BUILD_WITH}
 fi
 
-VERBOSE=1 cmake --build --preset="build-${preset_name}" -j ${num_threads_to_build_with}
+cmake --build --preset="build-${preset_name}" -j ${num_threads_to_build_with}
 
 cd "${ROOT_DIR}"
 
