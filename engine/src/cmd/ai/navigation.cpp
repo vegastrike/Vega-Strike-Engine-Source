@@ -686,7 +686,10 @@ void AutoLongHaul::Execute() {
     }
     double maxspeed =
             std::max(speed, parent->graphicOptions.WarpFieldStrength * parent->afterburner.speed);
-    double dis = UnitUtil::getSignificantDistance(parent, target);
+    // The autopilot stops at the docking distance, so measure the distance the way docking does:
+    // from a planet's surface, from a unit's centre. The significant distance subtracts a fraction
+    // of a planet's radius instead, which puts the stop 2500 past the docking distance at Atlantis.
+    const double dis = DistanceTwoTargets(target, parent);
     float time_to_destination = dis / maxspeed;
 
     const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
