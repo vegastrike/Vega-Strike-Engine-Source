@@ -384,9 +384,9 @@ int main(int argc, char *argv[]) {
         VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
-    int exitcode;
-    if ((exitcode = readCommandLineOptions(argc, argv)) >= 0) {
-        return exitcode;
+    int exitcode = readCommandLineOptions(argc, argv);
+    if (exitcode >= 0) {
+        VSExit(exitcode);
     }
 
     //might overwrite the default mission with the command line
