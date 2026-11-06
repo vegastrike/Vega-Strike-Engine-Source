@@ -64,8 +64,9 @@ std::wstring FindPythonPath();
 /// Initialize Python if not already initialized
 void InitPython(bool& was_already_initialized);
 
-/// A utility function to call a Python function with no arguments and get a PyObject as a result. Initializes Python
-/// and tears it down afterwards, if Python wasn't already initialized
+/// A utility function to call a Python function with no arguments and get a PyObject as a result.
+/// NOTE: No longer initializes Python or finalizes it after the function call. Doing this wasn't safe. These tasks are
+/// now the caller's responsibility.
 UniquePyRef GetClassFromPython(
         std::string build_path,
         std::wstring path_string,
@@ -73,9 +74,10 @@ UniquePyRef GetClassFromPython(
         std::string module_name,
         std::string function_name);
 
-/// A utility function to call a Python function with no arguments and get a PyObject as a result. Initializes Python
-/// and tears it down afterwards, if Python wasn't already initialized. Takes arguments as const references, which
-/// should be more efficient.
+/// A utility function to call a Python function with no arguments and get a PyObject as a result. Takes arguments as
+/// const references, which should be more efficient.
+/// NOTE: No longer initializes Python or finalizes it after the function call. Doing this wasn't safe. These tasks are
+/// now the caller's responsibility.
 UniquePyRef GetClassFromPythonPathRefs(
         const std::string &build_path,
         const std::wstring &path_string,
