@@ -43,6 +43,7 @@
 #ifdef _WIN32
 #include <direct.h>
 #endif
+#include <memory>
 #include "src/gfxlib.h"
 #include "src/in_kb.h"
 #include "root_generic/lin_time.h"
@@ -96,7 +97,7 @@
  * Globals
  */
 Universe *_Universe;
-TextPlane *bs_tp = nullptr;
+std::unique_ptr<TextPlane> bs_tp = nullptr;
 char SERVER = 0;
 
 //false if command line option --net is given to start without network
@@ -588,7 +589,7 @@ void bootstrap_first_loop() {
         if (!sa.empty() && sa[0].length()) {
             muzak->GotoSong(sa[snum % sa.size()]);
         }
-        bs_tp = new TextPlane();
+        bs_tp = std::make_unique<TextPlane>();
     }
     bootstrap_draw("Vegastrike Loading...", splash_screen);
     if (i++ > 4) {
