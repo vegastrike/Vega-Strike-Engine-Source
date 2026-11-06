@@ -151,14 +151,18 @@ static bool bootstrap_my_star_system_loading = true;
 
 // FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
 void VSExit(int code) {
-    Music::CleanupMuzak();
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     STATIC_VARS_DESTROYED = true;
 #if defined (CG_SUPPORT)
     if (cloak_cg->vertexProgram) cgDestroyProgram( cloak_cg->vertexProgram );
     if (cloak_cg->shaderContext) cgDestroyContext( cloak_cg->shaderContext );
 #endif
+    Music::CleanupMuzak();
     AUDDestroy();
+    winsys_shutdown();
+    if (Py_IsInitialized()) {
+        Py_Finalize();
+    }
     if (splash_screen != nullptr) {
         delete splash_screen;
         splash_screen = nullptr;
@@ -197,8 +201,11 @@ void cleanup() {
     if (cloak_cg->shaderContext) cgDestroyContext( cloak_cg->shaderContext );
 #endif
     Music::CleanupMuzak();
-    winsys_shutdown();
     AUDDestroy();
+    winsys_shutdown();
+    if (Py_IsInitialized()) {
+        Py_Finalize();
+    }
     if (splash_screen != nullptr) {
         delete splash_screen;
         splash_screen = nullptr;
