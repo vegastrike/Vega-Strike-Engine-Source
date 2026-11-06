@@ -30,6 +30,8 @@
 #ifndef VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H
 #define VEGA_STRIKE_ENGINE_RESOURCE_PYTHON_UTILS_H
 
+#define PY_SSIZE_T_CLEAN
+
 #include <string>
 
 // See https://stackoverflow.com/q/804894/5276890
