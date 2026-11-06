@@ -61,3 +61,33 @@ We also have the following among the community:
   - Tester
 - [JP aka www2000](https://github.com/www2000)
   - Server Infrastructure (forums, email, etc)
+
+Joining the Team
+================
+
+As an open source project all are welcome to contribute. As a community we would like to be able to recognize
+when community members should be eligible for an officially recognized role within the community to help
+maintain the project.
+
+Being officially recognized starts with community involvement and being recognized by the current maintainers
+through your work and community contributions. The current maintainers will be looking for people that have
+over an extended time period been part of the conversations with the team, and with respect to GitHub made
+signficant contributions via pull requests.
+
+What is a significant contribution?
+
+Significant contributions could be many many small PRs or a series of larger PRs that when combined contribute
+towards features, bug fixes, documentation, or other activities to help improve the project with meaningful
+recognition by the team - in other words, the work stands out to the team.
+
+When someone has met the contribution threshold then a current team member will propose to the other members
+that someone be asked if they would like to join the team. A second team member will need to confirm agreement
+that the person should be extended an offer. Once two team members have agreed then one of the team members
+will reach out to confirm the person is interested in the proposed role.
+
+NOTE: The proposing team member can optionally verify if the person is interested in such a role before making
+the proposal to the team in order to gauge an interest level.
+
+Once the team members have agreed, and the person has accepted then the team will grant appropriate
+permissions for the proposed role, team documentation will be updated, and a community announcement will be
+made to recognize their work, contributions, and new role.
