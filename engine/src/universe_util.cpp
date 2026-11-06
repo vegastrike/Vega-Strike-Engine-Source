@@ -57,7 +57,7 @@ extern void RespawnNow(Cockpit *cp);
 extern void TerminateCurrentBase(void);
 extern void SetStarSystemLoading(bool value);
 extern bool GetStarSystemLoading();
-extern void bootstrap_draw(const std::string &message, Animation *newSplashScreen);
+extern void bootstrap_draw(const std::string &message, Animation *new_splash_screen);
 extern Animation *GetSplashScreen();
 extern const vector<string> &ParseDestinations(const string &value);
 

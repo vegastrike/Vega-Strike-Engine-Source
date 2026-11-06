@@ -145,16 +145,23 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **CmdLine);
  */
 int readCommandLineOptions(int argc, char **argv);
 
+static Animation *splash_screen = nullptr;
+static bool bootstrap_my_star_system_loading = true;
+
 // FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
 void VSExit(int code) {
     Music::CleanupMuzak();
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     STATIC_VARS_DESTROYED = true;
     AUDDestroy();
+    if (splash_screen != nullptr) {
+        delete splash_screen;
+        splash_screen = nullptr;
+    }
     winsys_exit(code);
 }
 
-void cleanup(void) {
+void cleanup() {
     // stephengtuggy 2020-10-30: Output message both to the console and to the logs
     printf("Thank you for playing!\n");
     VS_LOG(info, "Thank you for playing!");
@@ -183,6 +190,10 @@ void cleanup(void) {
     Music::CleanupMuzak();
     winsys_shutdown();
     AUDDestroy();
+    if (splash_screen != nullptr) {
+        delete splash_screen;
+        splash_screen = nullptr;
+    }
 }
 
 LeakVector<Mission *> active_missions;
@@ -397,49 +408,46 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-static Animation *SplashScreen = nullptr;
-static bool BootstrapMyStarSystemLoading = true;
-
-void SetStarSystemLoading(bool value) {
-    BootstrapMyStarSystemLoading = value;
+void SetStarSystemLoading(const bool value) {
+    bootstrap_my_star_system_loading = value;
 }
 
 bool GetStarSystemLoading() {
-    return BootstrapMyStarSystemLoading;
+    return bootstrap_my_star_system_loading;
 }
 
 void SetSplashScreen(Animation *ss) {
-    SplashScreen = ss;
+    splash_screen = ss;
 }
 
 Animation *GetSplashScreen() {
-    return SplashScreen;
+    return splash_screen;
 }
 
-void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
+void bootstrap_draw(const std::string &message, Animation *new_splash_screen) {
     static Animation *ani = nullptr;
-    static bool reentryWatchdog = false;
-    if (!BootstrapMyStarSystemLoading || reentryWatchdog) {
+    static bool reentry_watchdog = false;
+    if (!bootstrap_my_star_system_loading || reentry_watchdog) {
         return;
     }
     Music::MuzakCycle();     //Allow for loading music...
-    if (SplashScreen == nullptr && newSplashScreen == nullptr) {
+    if (splash_screen == nullptr && new_splash_screen == nullptr) {
         //if there's no splashscreen, we don't draw on it
         //this happens, when the splash screens texture is loaded
         return;
     }
 
-    reentryWatchdog = true;
-    if (newSplashScreen != nullptr) {
-        ani = newSplashScreen;
+    reentry_watchdog = true;
+    if (new_splash_screen != nullptr) {
+        ani = new_splash_screen;
     }
     UpdateTime();
 
     Matrix tmp;
     Identity(tmp);
-    BootstrapMyStarSystemLoading = false;
+    bootstrap_my_star_system_loading = false;
     static Texture dummy("white.bmp", 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1);
-    BootstrapMyStarSystemLoading = true;
+    bootstrap_my_star_system_loading = true;
     dummy.MakeActive();
     GFXDisable(LIGHTING);
     GFXDisable(DEPTHTEST);
@@ -524,7 +532,7 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     GFXHudMode(GFXFALSE);
     GFXEndScene();
 
-    reentryWatchdog = false;
+    reentry_watchdog = false;
 }
 
 extern Unit **fighters;
@@ -576,13 +584,13 @@ void bootstrap_first_loop() {
         vector<string> s = parse_space_string(configuration().graphics.splash_screen);
         vector<string> sa = parse_space_string(configuration().graphics.splash_audio);
         int snum = time(nullptr) % s.size();
-        SplashScreen = new Animation(s[snum].c_str(), false);
+        splash_screen = new Animation(s[snum].c_str(), false);
         if (!sa.empty() && sa[0].length()) {
             muzak->GotoSong(sa[snum % sa.size()]);
         }
         bs_tp = new TextPlane();
     }
-    bootstrap_draw("Vegastrike Loading...", SplashScreen);
+    bootstrap_draw("Vegastrike Loading...", splash_screen);
     if (i++ > 4) {
         if (_Universe) {
             _Universe->Loop(bootstrap_main_loop);
