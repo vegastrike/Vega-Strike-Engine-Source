@@ -183,7 +183,6 @@ void cleanup(void) {
     Music::CleanupMuzak();
     winsys_shutdown();
     AUDDestroy();
-    delete[] CONFIGFILE;
 }
 
 LeakVector<Mission *> active_missions;
@@ -276,7 +275,7 @@ int main(int argc, char *argv[]) {
         boost::filesystem::current_path(program_directory_path);
     }
 
-    CONFIGFILE = nullptr;
+    config_file = "";
     {
         char pwd[8192] = "";
         if (nullptr != getcwd(pwd, 8191)) {
@@ -317,15 +316,13 @@ int main(int argc, char *argv[]) {
         mission_name = pair.second;
 
         VS_LOG(info, (boost::format("GOT SUBDIR ARG = %1%") % subdir));
-        if (CONFIGFILE == nullptr) {
-            CONFIGFILE = new char[42];
+        if (config_file.empty()) {
             // The engine reads the merged JSON config (config.json in the
             // assets); vegastrike.config is no longer parsed.
-            snprintf(CONFIGFILE, 41, "config.json");
-            CONFIGFILE[41] = '\0';
+            config_file = "config.json";
         }
         //Specify the config file and the possible mod subdir to play
-        VSFileSystem::InitPaths(CONFIGFILE, subdir);
+        VSFileSystem::InitPaths(config_file, subdir);
         // home_subdir_path = boost::filesystem::canonical(boost::filesystem::path(subdir));
     }
 
@@ -606,7 +603,7 @@ void bootstrap_main_loop() {
     static bool LoadMission = true;
     // InitTime();
 
-    // TODO: refactor this. 
+    // TODO: refactor this.
     // This code runs once but is called from above 4 times.
     if (LoadMission) {
         LoadMission = false;
@@ -674,7 +671,7 @@ void bootstrap_main_loop() {
             }
         }
         vector<SavedUnits> saved;
-        
+
 
         if (configuration().general.load_last_savegame) {
             vector<string> packedInfo;
@@ -689,7 +686,7 @@ void bootstrap_main_loop() {
         } else {
             _Universe->AccessCockpit(k)->savegame->SetOutputFileName(savegamefile);
         }
-        
+
         // Pushes the dummy ship unless loading something from the command line
         std::string ship_name = "Dummy";
         try {
@@ -840,8 +837,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     if (cmd_args.count("num-players")) {
         int num_players = cmd_args["num-players"].as<int>();
         if (num_players > 1 && num_players <= 9) {
-            CONFIGFILE = new char[42];
-            snprintf(CONFIGFILE, 42, "config.json.%dplayer", num_players);
+            config_file = (boost::format("config.json.%1%player") % num_players).str();
         } else if (num_players != 1) {
             VS_LOG(warning, "Specified number of players out of range (1-9)");
         }

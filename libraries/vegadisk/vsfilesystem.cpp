@@ -93,7 +93,7 @@ int VSFS_DEBUG() {
     return 0;
 }
 
-char *CONFIGFILE;
+std::string config_file;
 const size_t VS_PATH_BUF_SIZE = 65536;
 char pwd[VS_PATH_BUF_SIZE];
 VSVolumeType isin_bigvolumes = VSFSNone;
@@ -831,7 +831,7 @@ void InitMods() {
 //    free(dirlist);
 }
 
-void InitPaths(string conf, string subdir) {
+void InitPaths(std::string conf, std::string subdir) {
     config_file = std::move(conf);
 
     current_path.emplace_back("");

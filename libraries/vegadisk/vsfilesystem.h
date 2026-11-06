@@ -43,7 +43,7 @@
 class VegaConfig;
 class VSImage;
 
-extern char *CONFIGFILE;
+extern std::string config_file;
 extern VegaConfig *createVegaConfig(const char *file);
 
 #define DELIM '/'
