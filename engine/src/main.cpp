@@ -109,15 +109,15 @@ static bool ignore_network = true;
 // NOTE: This is tied to the executable name. `vegastrike` -> true; `vegastrike-engine` -> false
 bool legacy_data_dir_mode;
 
-void enableNetwork(bool usenetwork) {
-    ignore_network = !usenetwork;
+void EnableNetwork(bool use_network) {
+    ignore_network = !use_network;
 }
 
 /*
  * Function definitions
  */
 
-void setup_game_data() {
+void SetupGameData() {
     //pass in config file l8r??
     g_game.audio_frequency_mode = 4;     //22050/16
     g_game.sound_enabled = 1;
@@ -136,7 +136,7 @@ void setup_game_data() {
     g_game.MouseSensitivityY = 4;
 }
 
-VegaConfig *createVegaConfig(const char *file) {
+VegaConfig *CreateVegaConfig(const char *file) {
     return new GameVegaConfig(file);
 }
 
@@ -145,14 +145,14 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **CmdLine);
  * Returns an exit code >= 0 if the game is supposed to exit right away
  * Returns an exit code < 0 if the game can continue loading.
  */
-int readCommandLineOptions(int argc, char **argv);
+int ReadCommandLineOptions(int argc, char **argv);
 
 static Animation *splash_screen = nullptr;
 static bool bootstrap_my_star_system_loading = true;
 
 static std::once_flag game_cleanup_flag;
 
-static void do_game_cleanup(const bool should_be_clean_exit) {
+static void DoGameCleanup(const bool should_be_clean_exit) {
     if (should_be_clean_exit) {
         // Output this message both to the console and to the logs
         VS_LOG(important_info, "Thank you for playing!");
@@ -200,28 +200,28 @@ static void do_game_cleanup(const bool should_be_clean_exit) {
 }
 
 // FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
-void VSExit(int code) {
+void VSExit(const int code) {
     const bool should_be_clean_exit = code == 0;
     cleanup(should_be_clean_exit);
     winsys_exit(code);
 }
 
 void cleanup(const bool should_be_clean_exit) {
-    std::call_once(game_cleanup_flag, do_game_cleanup, should_be_clean_exit);
+    std::call_once(game_cleanup_flag, DoGameCleanup, should_be_clean_exit);
 }
 
 LeakVector<Mission *> active_missions;
 
-void bootstrap_main_loop();
-void bootstrap_first_loop();
+void BootstrapMainLoop();
+void BootstrapFirstLoop();
 #if defined (WITH_MACOSX_BUNDLE)
 //WTF! this causes windowed creation to fail... please justify yourself ;-)  #undef main
 #endif
 
-void nothinghappens(unsigned int, unsigned int, bool, int, int) {
+void NothingHappens(unsigned int, unsigned int, bool, int, int) {
 }
 
-void initSceneManager() {
+void InitSceneManager() {
     VS_LOG(info, "Creating scene manager...");
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
@@ -232,7 +232,7 @@ void initSceneManager() {
     sm->setMaxSources(g_game.max_sound_sources);
 }
 
-void initALRenderer() {
+void InitAlRenderer() {
     VS_LOG(info, "  Initializing renderer...");
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
@@ -245,7 +245,7 @@ void initALRenderer() {
     }
 }
 
-void initScenes() {
+void InitScenes() {
     Audio::SceneManager *sm = Audio::SceneManager::getSingleton();
 
     sm->createScene("video");
@@ -257,15 +257,16 @@ void initScenes() {
     sm->setSceneActive("video", true);
 }
 
-void closeRenderer() {
+void CloseRenderer() {
     VS_LOG(info, "Shutting down renderer...");
     Audio::SceneManager::getSingleton()->setRenderer(SharedPtr<Audio::Renderer>());
 }
 
 extern void InitUnitTables();
 extern void CleanupUnitTables();
-bool isVista = false;
+bool is_vista = false;
 
+// ReSharper disable once CppInconsistentNaming
 Unit *TheTopLevelUnit;
 
 int main(int argc, char *argv[]) {
@@ -316,7 +317,7 @@ int main(int argc, char *argv[]) {
     osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
 
     GetVersionEx( &osvi );
-    isVista = (osvi.dwMajorVersion == 6);
+    is_vista = (osvi.dwMajorVersion == 6);
     VS_LOG(info, (boost::format("Windows version %1% %2%") % osvi.dwMajorVersion % osvi.dwMinorVersion));
 #endif
     /* Print copyright notice */
@@ -334,7 +335,7 @@ int main(int argc, char *argv[]) {
     // Usually loaded from config.json
     std::string mission_name;
 
-    setup_game_data();  // TODO: Combine with vega_config::config settings object
+    SetupGameData();  // TODO: Combine with vega_config::config settings object
     {
         std::pair<std::string, std::string> pair = ParseCommandLine(argc, argv);
         std::string subdir = pair.first;
@@ -379,9 +380,9 @@ int main(int argc, char *argv[]) {
         VS_LOG(info, (boost::format("MISSION_NAME is empty using : %1%") % mission_name));
     }
 
-    int exitcode = readCommandLineOptions(argc, argv);
-    if (exitcode >= 0) {
-        VSExit(exitcode);
+    const int exit_code = ReadCommandLineOptions(argc, argv);
+    if (exit_code >= 0) {
+        VSExit(exit_code);
     }
 
     //might overwrite the default mission with the command line
@@ -403,15 +404,15 @@ int main(int argc, char *argv[]) {
     AUDListenerGain(configuration().audio.sound_gain_flt);
     Music::InitMuzak();
 
-    initSceneManager();
-    initALRenderer();
-    initScenes();
+    InitSceneManager();
+    InitAlRenderer();
+    InitScenes();
 
     _Universe = new Universe(argc, argv, configuration().game_start.galaxy.c_str());
     TheTopLevelUnit = new Unit(0);
-    _Universe->Loop(bootstrap_first_loop);
+    _Universe->Loop(BootstrapFirstLoop);
 
-    closeRenderer();
+    CloseRenderer();
 
     cleanup();
 
@@ -552,30 +553,30 @@ void bootstrap_draw(const std::string &message, Animation *new_splash_screen) {
 extern Unit **fighters;
 
 bool SetPlayerLoc(QVector &sys, bool set) {
-    static QVector mysys;
+    static QVector my_sys;
     static bool isset = false;
     if (set) {
         isset = true;
-        mysys = sys;
+        my_sys = sys;
         return true;
     } else {
         if (isset) {
-            sys = mysys;
+            sys = my_sys;
         }
         return isset;
     }
 }
 
 bool SetPlayerSystem(std::string &sys, bool set) {
-    static std::string mysys;
+    static std::string my_sys;
     static bool isset = false;
     if (set) {
         isset = true;
-        mysys = sys;
+        my_sys = sys;
         return true;
     } else {
         if (isset) {
-            sys = mysys;
+            sys = my_sys;
         }
         return isset;
     }
@@ -592,7 +593,7 @@ vector<string> parse_space_string(std::string s) {
     return ret;
 }
 
-void bootstrap_first_loop() {
+void BootstrapFirstLoop() {
     static int i = 0;
     if (i == 0) {
         vector<string> s = parse_space_string(configuration().graphics.splash_screen);
@@ -607,7 +608,7 @@ void bootstrap_first_loop() {
     bootstrap_draw("Vegastrike Loading...", splash_screen);
     if (i++ > 4) {
         if (_Universe) {
-            _Universe->Loop(bootstrap_main_loop);
+            _Universe->Loop(BootstrapMainLoop);
         }
     }
 }
@@ -621,7 +622,7 @@ void SetStartupView(Cockpit *cp) {
             : CP_FRONT)));
 }
 
-void bootstrap_main_loop() {
+void BootstrapMainLoop() {
     static bool LoadMission = true;
     // InitTime();
 
@@ -639,17 +640,17 @@ void bootstrap_main_loop() {
         UniverseUtil::showSplashScreen("");
 
         QVector pos;
-        string planetname;
+        std::string planet_name;
 
-        mission->GetOrigin(pos, planetname);
-        string mysystem = mission->getVariable("system", "sol.system");
+        mission->GetOrigin(pos, planet_name);
+        std::string my_system = mission->getVariable("system", "sol.system");
 
-        int numplayers;
-        numplayers = XMLSupport::parse_int(mission->getVariable("num_players", "1"));
-        vector<std::string> playername;
-        vector<std::string> playerpasswd;
+        int num_players;
+        num_players = XMLSupport::parse_int(mission->getVariable("num_players", "1"));
+        vector<std::string> player_name;
+        vector<std::string> player_password;
         string pname, ppasswd;
-        for (int p = 0; p < numplayers; p++) {
+        for (int p = 0; p < num_players; p++) {
             pname = game_options()->getPlayer(p);
             ppasswd = game_options()->getPassword(p);
 
@@ -661,26 +662,26 @@ void bootstrap_main_loop() {
                     VSExit(1);
                 }
             }
-            playername.push_back(pname);
-            playerpasswd.push_back(ppasswd);
+            player_name.push_back(pname);
+            player_password.push_back(ppasswd);
         }
         g_game.difficulty = XMLSupport::parse_float(mission->getVariable("difficulty", "1"));
-        string savegamefile = mission->getVariable("savegame", "");
-        vector<SavedUnits> savedun;
-        vector<string> playersaveunit;
-        vector<StarSystem *> ss;
-        vector<string> starsysname;
-        vector<QVector> playerNloc;
+        std::string save_game_file = mission->getVariable("savegame", "");
+        std::vector<SavedUnits> saved_units;
+        std::vector<string> player_saved_units;
+        std::vector<StarSystem *> ss;
+        std::vector<string> star_sys_name;
+        std::vector<QVector> player_n_loc;
 
-        vector<vector<std::string> > savefiles;
+        std::vector<std::vector<std::string>> save_files;
 
-        _Universe->SetupCockpits(playername);
+        _Universe->SetupCockpits(player_name);
 
         unsigned int k = 0;
 
         Cockpit *cp = _Universe->AccessCockpit(k);
         SetStartupView(cp);
-        bool setplayerXloc = false;
+        bool set_player_x_loc = false;
         std::string psu;
         if (k == 0) {
             QVector myVec;
@@ -697,16 +698,16 @@ void bootstrap_main_loop() {
 
         if (configuration().general.load_last_savegame) {
             vector<string> packedInfo;
-            ComponentsManager::credits = _Universe->AccessCockpit(k)->savegame->ParseSaveGame(savegamefile,
-                    mysystem,
-                    mysystem,
+            ComponentsManager::credits = _Universe->AccessCockpit(k)->savegame->ParseSaveGame(save_game_file,
+                    my_system,
+                    my_system,
                     pos,
-                    setplayerXloc,
+                    set_player_x_loc,
                     packedInfo,
                     k);
             _Universe->AccessCockpit(k)->UnpackUnitInfo(packedInfo);
         } else {
-            _Universe->AccessCockpit(k)->savegame->SetOutputFileName(savegamefile);
+            _Universe->AccessCockpit(k)->savegame->SetOutputFileName(save_game_file);
         }
 
         // Pushes the dummy ship unless loading something from the command line
@@ -716,15 +717,15 @@ void bootstrap_main_loop() {
         } catch(const std::runtime_error& e) {
             // Do nothing. This is the default behavior.
         }
-        playersaveunit.push_back(ship_name);
-        ss.push_back(_Universe->Init(mysystem, Vector(0, 0, 0), planetname));
-        if (setplayerXloc) {
-            playerNloc.push_back(pos);
+        player_saved_units.push_back(ship_name);
+        ss.push_back(_Universe->Init(my_system, Vector(0, 0, 0), planet_name));
+        if (set_player_x_loc) {
+            player_n_loc.push_back(pos);
         } else {
-            playerNloc.push_back(QVector(FLT_MAX, FLT_MAX, FLT_MAX));
+            player_n_loc.push_back(QVector(FLT_MAX, FLT_MAX, FLT_MAX));
         }
         for (unsigned int j = 0; j < saved.size(); j++) {
-            savedun.push_back(saved[j]);
+            saved_units.push_back(saved[j]);
         }
 
         SetStarSystemLoading(true);
@@ -732,10 +733,10 @@ void bootstrap_main_loop() {
 
         vs_config->bindKeys();         //gotta do this before we do AI
 
-        createObjects(playersaveunit, ss, playerNloc, savefiles);
-        while (!savedun.empty()) {
-            AddUnitToSystem(&savedun.back());
-            savedun.pop_back();
+        createObjects(player_saved_units, ss, player_n_loc, save_files);
+        while (!saved_units.empty()) {
+            AddUnitToSystem(&saved_units.back());
+            saved_units.pop_back();
         }
         forcefeedback = new ForceFeedback();
 
@@ -777,13 +778,13 @@ void bootstrap_main_loop() {
     ///Draw Texture
 }
 
-const char versionmessage[] =
+constexpr char kVersionMessage[] =
         // (BenjamenMeyer) this will be `major.minor.patch+githash` once all is said and done
         "Vega Strike Engine Version " VEGASTRIKE_VERSION_STR "\n"
         "\n";
 
 std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine) {
-    std::string retstr;
+    std::string return_string;
     std::string mission_name;
     g_game.vsdebug = '0';
 
@@ -839,7 +840,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     }
 
     if (cmd_args.count("version")) {
-        std::cout << versionmessage << std::endl;
+        std::cout << kVersionMessage << std::endl;
         exit(0);
     }
 
@@ -866,7 +867,7 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
     }
 
     if (cmd_args.count("mod")) {
-        retstr = cmd_args["mod"].as<std::string>();
+        return_string = cmd_args["mod"].as<std::string>();
     }
 
     if (cmd_args.count("start-in-system")) {
@@ -936,12 +937,12 @@ std::pair<std::string, std::string> ParseCommandLine(int argc, char **lpCmdLine)
         }
     }
 
-    return std::pair<std::string, std::string>(retstr, mission_name);
+    return std::pair<std::string, std::string>(return_string, mission_name);
 }
 
 #undef main
 
-int readCommandLineOptions(int argc, char **argv) {
+int ReadCommandLineOptions(int argc, char **argv) {
     for (int i = 1; i < argc; ++i) {
         if (argv[i][0] == '-') {
             if (strcmp("--test-audio", argv[i]) == 0) {

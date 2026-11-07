@@ -708,7 +708,7 @@ void LoadConfig(string subdir) {
         delete vs_config;
     }
 
-    vs_config = createVegaConfig(config_file.c_str());
+    vs_config = CreateVegaConfig(config_file.c_str());
 
     std::string universe_file = datadir + "/" \
             + configuration().data.universe_path + "/" \
