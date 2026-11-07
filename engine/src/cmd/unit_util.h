@@ -56,7 +56,6 @@ bool setFgDirective(Unit *my_unit, string inp);
 uint_fast32_t getPhysicsPriority(Unit *un);
 int getFgSubnumber(const Unit *my_unit);
 int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero);
-bool repair(Unit *my_unit);
 int removeWeapon(Unit *my_unit, string weapon, int mountoffset, bool loop_through_mounts); // -1 tells no weapon removed
 float upgrade(Unit *my_unit, string file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
 int addCargo(Unit *my_unit, Cargo carg);

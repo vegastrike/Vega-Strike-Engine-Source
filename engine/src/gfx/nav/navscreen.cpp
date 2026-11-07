@@ -67,6 +67,10 @@
 #include "gldrv/winsys.h"
 #include "gui/imgui_support.h"
 
+// The nav buttons are rounded rectangles, measured in pixels.
+static const float kNavButtonRounding = 3.0f;
+static const float kNavButtonOutlineThickness = 1.5f;
+
 //This sets up the items in the navscreen
 //**********************************
 
@@ -133,24 +137,27 @@ void NavigationSystem::mouseClick(int button, int state, int x, int y) {
 void NavigationSystem::Setup() {
     _Universe->AccessCockpit()->visitSystem(_Universe->activeStarSystem()->getFileName());
 
-    configmode = 0;
-
     rotations = 0;
 
     minimumitemscaledown = 0.2;
     maximumitemscaleup = 3.0;
 
-    axis = 3;
+
+    //Both cameras are framed to their content the first time they are drawn, and
+    //then keep whatever position and orientation the player gives them.
+    system_needs_refit = true;
+    galaxy_needs_refit = true;
+    nav_near_dist = 1e30;         //replaced with the real distance as the view draws
 
     rx = -0.5;              //galaxy mode settings
     ry = 0.5;
     rz = 0.0;
-    zoom = 1.8;
+    zoom = 1.0;             //open zoomed out far enough that the whole map fits
 
     rx_s = -0.5;              //system mode settings
     ry_s = 1.5;
     rz_s = 0.0;
-    zoom_s = 1.8;
+    zoom_s = 1.0;             //as above, for the system map
 
     scrolloffset = 0;
 
@@ -160,12 +167,6 @@ void NavigationSystem::Setup() {
     center_z = 0.0;     //updated after a pass
 
     path_view = PATH_ON;
-    const bool start_sys_ortho = configuration().graphics.system_map_ortho_view;
-    const bool start_sec_ortho = configuration().graphics.sector_map_ortho_view;
-    system_view = start_sys_ortho ? VIEW_ORTHO : VIEW_2D;
-    galaxy_view = start_sec_ortho ? VIEW_ORTHO : VIEW_2D;
-    system_multi_dimensional = 1;
-    galaxy_multi_dimensional = 1;
 
     zshiftmultiplier = 2.5;     //shrink the output
     item_zscalefactor = 1.0;            //camera distance prespective multiplier for affecting item sizes
@@ -237,10 +238,11 @@ void NavigationSystem::Setup() {
 //HERE GOES THE PARSING
 
 //*************************
-    screenskipby4[0] = .3;
-    screenskipby4[1] = .7;
-    screenskipby4[2] = .3;
-    screenskipby4[3] = .7;
+    // The map fills the whole screen. The button column is drawn over its right edge.
+    screenskipby4[0] = 0;
+    screenskipby4[1] = 1;
+    screenskipby4[2] = 0;
+    screenskipby4[3] = 1;
 
     buttonskipby4_1[0] = .75;
     buttonskipby4_1[1] = .95;
@@ -277,53 +279,9 @@ void NavigationSystem::Setup() {
     buttonskipby4_7[2] = .25;
     buttonskipby4_7[3] = .30;
     if (!ParseFile("navdata.xml")) {
-        //start DUMMP VARS
-        screenskipby4[0] = .3;
-        screenskipby4[1] = .7;
-        screenskipby4[2] = .3;
-        screenskipby4[3] = .7;
-
-        buttonskipby4_1[0] = .75;
-        buttonskipby4_1[1] = .95;
-        buttonskipby4_1[2] = .85;
-        buttonskipby4_1[3] = .90;
-
-        buttonskipby4_2[0] = .75;
-        buttonskipby4_2[1] = .95;
-        buttonskipby4_2[2] = .75;
-        buttonskipby4_2[3] = .80;
-
-        buttonskipby4_3[0] = .75;
-        buttonskipby4_3[1] = .95;
-        buttonskipby4_3[2] = .65;
-        buttonskipby4_3[3] = .70;
-
-        buttonskipby4_4[0] = .75;
-        buttonskipby4_4[1] = .95;
-        buttonskipby4_4[2] = .55;
-        buttonskipby4_4[3] = .60;
-
-        buttonskipby4_5[0] = .75;
-        buttonskipby4_5[1] = .95;
-        buttonskipby4_5[2] = .45;
-        buttonskipby4_5[3] = .50;
-
-        buttonskipby4_6[0] = .75;
-        buttonskipby4_6[1] = .95;
-        buttonskipby4_6[2] = .35;
-        buttonskipby4_6[3] = .40;
-
-        buttonskipby4_7[0] = .75;
-        buttonskipby4_7[1] = .95;
-        buttonskipby4_7[2] = .25;
-        buttonskipby4_7[3] = .30;
-
+        // Without the file there are no system item scaling parameters.
         unsetbit(whattodraw, 4);
-        for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
-            mesh[i] = NULL;
-        }
-        VS_LOG(error, "ERROR: Map mesh file not found!!! Using default: blank mesh.");
-        //end DUMMY VARS
+        VS_LOG(error, "ERROR: navdata.xml not found. Nav system items will not be scaled.");
     }
     ScreenToCoord(screenskipby4[0]);
     ScreenToCoord(screenskipby4[1]);
@@ -399,55 +357,6 @@ void NavigationSystem::Draw() {
         return;
     }
 
-    //DRAW THE SCREEN MODEL
-    //**********************************
-    Vector p, q, r;
-    const float zrange = configuration().graphics.cockpit_nav_zrange_flt;
-    const float zfloor = configuration().graphics.cockpit_nav_zfloor_flt;
-    _Universe->AccessCamera()->GetOrientation(p, q, r);
-    _Universe->AccessCamera()->UpdateGFX(GFXTRUE,
-            GFXTRUE,
-            GFXFALSE,
-            GFXTRUE,
-            zfloor,
-            zfloor + zrange);
-
-    _Universe->activateLightMap();
-    for (int i = 0; i < NAVTOTALMESHCOUNT; i++) {
-        float screen_x = 0.0;
-        float screen_y = 0.0;
-        float screen_z = 0.0;
-
-        screen_x = meshcoordinate_x[i];
-        screen_y = meshcoordinate_y[i];
-        screen_z = meshcoordinate_z[i];
-        if (checkbit(buttonstates, (i - 1))) {          //button1 = 0, starts at -1, returning 0, no addition done
-            screen_z += meshcoordinate_z_delta[i];
-        }
-        QVector pos = _Universe->AccessCamera()->GetPosition();
-
-        //offset horizontal
-        //***************
-        pos = (p.Cast() * screen_x) + pos;
-        //***************
-
-        //offset vertical
-        //***************
-        pos = (q.Cast() * screen_y) + pos;
-        //***************
-
-        //offset sink
-        //***************
-        pos = (r.Cast() * screen_z) + pos;
-        //***************
-
-        Matrix mat(p, q, r, pos);
-        if (mesh[i]) {
-            mesh[i]->Draw(FLT_MAX, mat);
-        }
-    }
-    Mesh::ProcessZFarMeshes(true);
-    Mesh::ProcessUndrawnMeshes(false, true);
     GFXBlendMode(SRCALPHA, INVSRCALPHA);
     GFXColor4f(1, 1, 1, 1);
     GFXDisable(TEXTURE0);
@@ -459,11 +368,18 @@ void NavigationSystem::Draw() {
     GFXDisable(DEPTHWRITE);
     StartGUIFrame();
  
-    // Obscure cockpit almost completely.
+    // The map is drawn with the same field of view as the world around it, so that it
+    // reads as a view of the same place rather than a differently-lensed one. It stays
+    // fixed: moving closer or further away is the camera moving, not the lens changing.
+    const float nav_fov = static_cast<float>(configuration().graphics.fov_flt * M_PI / 180.0);
+    system_cam.setFov(nav_fov);
+    galaxy_cam.setFov(nav_fov);
+
+    // The nav computer is a flat interface drawn over the game, so hide the game completely.
     const ImVec2 start_position(0,0);
     const ImVec2 end_position(configuration().graphics.resolution_x,
                               configuration().graphics.resolution_y);
-    const ImU32 background_color = IM_COL32(0,0,0,224);
+    const ImU32 background_color = IM_COL32(0,0,0,255);
     ImGui::GetBackgroundDrawList()->AddRectFilled(start_position, end_position, background_color,
                     0.0f // No rounded borders
     );
@@ -485,39 +401,14 @@ void NavigationSystem::Draw() {
     //Draw the Navscreen Functions
     //**********************************
     if (checkbit(whattodraw, 1)) {
+        DrawGrid(screenskipby4[0],
+                screenskipby4[1],
+                screenskipby4[2],
+                screenskipby4[3],
+                GFXColor(1, 1, 1, 0.2));
         if (checkbit(whattodraw, 2)) {
-            if (galaxy_view == VIEW_3D) {
-                DrawNavCircle(((screenskipby4[0] + screenskipby4[1]) / 2.0),
-                        ((screenskipby4[2] + screenskipby4[3]) / 2.0),
-                        0.6,
-                        rx,
-                        ry,
-                        GFXColor(1, 1, 1,
-                                0.2));
-            } else {
-                DrawGrid(screenskipby4[0],
-                        screenskipby4[1],
-                        screenskipby4[2],
-                        screenskipby4[3],
-                        GFXColor(1, 1, 1, 0.2));
-            }
             DrawGalaxy();
         } else {
-            if (system_view == VIEW_3D) {
-                DrawNavCircle(((screenskipby4[0] + screenskipby4[1]) / 2.0),
-                        ((screenskipby4[2] + screenskipby4[3]) / 2.0),
-                        0.6,
-                        rx_s,
-                        ry_s,
-                        GFXColor(1, 1, 1,
-                                0.2));
-            } else {
-                DrawGrid(screenskipby4[0],
-                        screenskipby4[1],
-                        screenskipby4[2],
-                        screenskipby4[3],
-                        GFXColor(1, 1, 1, 0.2));
-            }
             DrawSystem();
         }
     } else {
@@ -535,18 +426,30 @@ void NavigationSystem::Draw() {
 
     //Draw Button Outlines
     //**********************************
-    bool outlinebuttons = 0;
-    if (configmode > 0) {
-        outlinebuttons = 1;
-    }
+    const bool outlinebuttons = true;
     DrawButton(buttonskipby4_1[0], buttonskipby4_1[1], buttonskipby4_1[2], buttonskipby4_1[3], 1, outlinebuttons);
     DrawButton(buttonskipby4_2[0], buttonskipby4_2[1], buttonskipby4_2[2], buttonskipby4_2[3], 2, outlinebuttons);
     DrawButton(buttonskipby4_3[0], buttonskipby4_3[1], buttonskipby4_3[2], buttonskipby4_3[3], 3, outlinebuttons);
     DrawButton(buttonskipby4_4[0], buttonskipby4_4[1], buttonskipby4_4[2], buttonskipby4_4[3], 4, outlinebuttons);
     DrawButton(buttonskipby4_5[0], buttonskipby4_5[1], buttonskipby4_5[2], buttonskipby4_5[3], 5, outlinebuttons);
-    DrawButton(buttonskipby4_6[0], buttonskipby4_6[1], buttonskipby4_6[2], buttonskipby4_6[3], 6, outlinebuttons);
-    DrawButton(buttonskipby4_7[0], buttonskipby4_7[1], buttonskipby4_7[2], buttonskipby4_7[3], 7, outlinebuttons);
     //**********************************
+
+    // A short reminder of the controls, along the bottom of the screen.
+    static const bool draw_nav_help =
+            XMLSupport::parse_bool(vs_config->getVariable("graphics", "draw_nav_help", "true"));
+    if (draw_nav_help) {
+        // drawdescription() centres its text on the position it is given, so these are
+        // placed around the middle of the screen rather than at the left edge, and far
+        // enough up that neither line is cut off by the bottom.
+        const float help_y = screenskipby4[2] + 0.10f;
+        const float help_x = (screenskipby4[0] + screenskipby4[1]) * 0.5f;
+        const GFXColor helpcol(0.7f, 0.7f, 0.7f, 0.85f);
+        drawdescription("Mouse:  click selects    left-drag circles the target    middle-drag moves the map    "
+                        "right-drag looks around    wheel moves in/out",
+                help_x, help_y, 0.6f, 0.6f, true, screenoccupation, helpcol);
+        drawdescription("Keys:   arrows move the map    Shift+arrows look around    Alt+arrows move in/out and sideways",
+                help_x, help_y + 0.05f, 0.6f, 0.6f, true, screenoccupation, helpcol);
+    }
 
     //Save current mouse location as previous for next cycle
     //**********************************
@@ -588,8 +491,8 @@ void NavigationSystem::DrawMission() {
             GFXColor(.3, 1, .3, 1));
     drawdescription(" ", (originx + (0.1 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
 
-    drawdescription(" ", (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
-    drawdescription(" ", (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
+    drawdescription(" ", (originx + (0.2 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
+    drawdescription(" ", (originx + (0.2 * deltax)), (originy), 1, 1, 0, screenoccupation, GFXColor(.3, 1, .3, 1));
 
     size_t numfactions = FactionUtil::GetNumFactions();
     size_t i = 0;
@@ -645,7 +548,7 @@ void NavigationSystem::DrawMission() {
                 relationtext += " | ";
                 relationtext += XMLSupport::tostring((int) (*killlist)[i]);
             }
-            drawdescription(relationtext, (originx + (0.3 * deltax)), (originy), 1, 1, 0, screenoccupation,
+            drawdescription(relationtext, (originx + (0.2 * deltax)), (originy), 1, 1, 0, screenoccupation,
                     GFXColor((1.0 - relation01), (relation01), (1.0 - (2.0 * Delta(relation01, 0.5))), 1));
         }
     }
@@ -950,9 +853,9 @@ void NavigationSystem::ClearPriorities() {
 //this is an FF test. not a state test.
 //**********************************
 void NavigationSystem::SetMouseFlipStatus() {
-//getMouseButtonStatus()&1 = mouse button 1 standard = button 1 VS
-//getMouseButtonStatus()&2 = mouse button 3 standard = button 2 VS
-//getMouseButtonStatus()&4 = mouse button 2 standard = button 3 VS
+//getMouseButtonStatus()&1 = left button
+//getMouseButtonStatus()&2 = middle button
+//getMouseButtonStatus()&4 = right button
 //getMouseButtonStatus()&8 = mouse wheel up
 //getMouseButtonStatus()&16 = mouse wheel down
 
@@ -1034,13 +937,9 @@ void NavigationSystem::setCurrentSystem(string newSystem) {
 void NavigationSystem::setFocusedSystemIndex(unsigned newSystemIndex) {
     focusedsystemindex = newSystemIndex;
     themaxvalue = 0;
-    if (galaxy_view != VIEW_3D) {
-        //This resets the panning position when not in 3d view.
-        //Otehrwise, the focused system may end up off screen which will cause a lot of confusion.
-        rx = -0.5;                      //galaxy mode settings
-        ry = 0.5;
-        rz = 0.0;
-    }
+    // Frame the galaxy on the newly focused system, which is what resetting the old pan
+    // position used to achieve.
+    galaxy_needs_refit = true;
     camera_z = 0;     //calculate camera distance again... it may have changed.
 }
 
@@ -1109,8 +1008,6 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
         label = "Nav/Info";
     } else if (button_number == 3) {
         label = "Target Selected";
-    } else if (button_number == 7) {
-        label = "2D/Ortho/3D";
     } else if (checkbit(whattodraw, 1)) {
         if (button_number == 2) {
             label = "Path On/Off/Only";
@@ -1118,8 +1015,6 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
             label = "Up";
         } else if (button_number == 5) {
             label = "Down";
-        } else if (button_number == 6) {
-            label = "Axis Swap";
         }
     } else {
         if (button_number == 2) {
@@ -1141,6 +1036,11 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
     float yl = (y1 + y2) / 2.0;
     a_label.SetPos((xl - offset) - (checkbit(buttonstates, button_number - 1) ? 0.006 : 0), (yl + 0.025));
     a_label.SetText(label);
+
+    // A subtle dark fill so the button reads as a button rather than as bare text.
+    ImDrawList *draw_list = GetNavDrawList();
+    draw_list->AddRectFilled(NormToPixel(x1, y2), NormToPixel(x2, y1), IM_COL32(0, 0, 0, 153), kNavButtonRounding);
+
     const bool nav_button_labels = configuration().graphics.draw_nav_button_labels;
     if (nav_button_labels) {
         const float background_alpha = configuration().graphics.hud.text_background_alpha_flt;
@@ -1245,41 +1145,13 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
         //******************************************************
         if (button_number == 6) {
             //releasing #1, toggle the draw (nav / mission)
-            if (checkbit(whattodraw, 1)) {
-                //if in nav system NOT mission
-                zoom = 1.8;
-                zoom_s = 1.8;
-
-                axis = axis - 1;
-                if (axis == 0) {
-                    axis = 3;
-                }
-                camera_z = 0;
-            } else {
+            if (!checkbit(whattodraw, 1)) {
                 //if in mission mode
 
                 flipbit(whattodraw, 1);
             }
         }
         //******************************************************
-        //******************************************************
-        //**                 BUTTON 7 FUNCTION                **	2D/3D
-        //******************************************************
-        if (button_number == 7) {
-            if ((checkbit(whattodraw, 1)) && (checkbit(whattodraw, 2)) && galaxy_multi_dimensional) {
-                galaxy_view = (galaxy_view + 1) % VIEW_MAX;
-                rx = -0.5;
-                ry = 0.5;
-                rz = 0.0;
-            }
-            if ((checkbit(whattodraw, 1)) && (!checkbit(whattodraw, 2)) && system_multi_dimensional) {
-                system_view = (system_view + 1) % VIEW_MAX;
-                rx_s = -0.5;
-                ry_s = 0.5;
-                rz_s = 0.0;
-            }
-            camera_z = 0;
-        }
         //******************************************************
     }
     //!!! OUT OF BOUNDS !!!
@@ -1315,24 +1187,8 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 //Draws the actual button outline
 //**********************************
 void NavigationSystem::DrawButtonOutline(float &x1, float &x2, float &y1, float &y2, const GFXColor &col) {
-    GFXColorf(col);
-    GFXDisable(TEXTURE0);
-    GFXDisable(LIGHTING);
-    GFXBlendMode(SRCALPHA, INVSRCALPHA);
-
-    const float verts[8 * 3] = {
-            x1, y1, 0,
-            x1, y2, 0,
-            x2, y1, 0,
-            x2, y2, 0,
-            x1, y1, 0,
-            x2, y1, 0,
-            x1, y2, 0,
-            x2, y2, 0,
-    };
-    GFXDraw(GFXLINE, verts, 8);
-
-    GFXEnable(TEXTURE0);
+    GetNavDrawList()->AddRect(NormToPixel(x1, y2), NormToPixel(x2, y1), ToImColor(col), kNavButtonRounding, 0,
+            kNavButtonOutlineThickness);
 }
 //**********************************
 
@@ -1504,163 +1360,118 @@ bool NavigationSystem::CheckDraw() {
 }
 //**********************************
 
-void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galaxy) {
-    //Adjust transformation
-    //**********************************
-    if ((mouse_previous_state[0] == 1)
-            && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
-                    mouse_y_current)) {
-        if (system_vs_galaxy) {
-            if (three_d) {
-                float ndx = -1.0 * (mouse_y_current - mouse_y_previous);
-                float ndy = -4.0 * (mouse_x_current - mouse_x_previous);
-                float ndz = 0.0;
-
-                rx_s += ndx;
-                ry_s += ndy;
-                rz_s += ndz;
-                if (rx_s > 0.0 / 2) {
-                    rx_s = 0.0 / 2;
-                }
-                if (rx_s < -6.28 / 2) {
-                    rx_s = -6.28 / 2;
-                }
-                if (ry_s >= 6.28) {
-                    ry_s -= 6.28;
-                }
-                if (ry_s <= -6.28) {
-                    ry_s += 6.28;
-                }
-                if (rz_s >= 6.28) {
-                    rz_s -= 6.28;
-                }
-                if (rz_s <= -6.28) {
-                    rz_s += 6.28;
-                }
-            } else {
-                //rotation switches to panning
-                float ndy = -1.0 * (mouse_y_current - mouse_y_previous);
-                float ndx = -1.0 * (mouse_x_current - mouse_x_previous);
-                float ndz = 0.0;
-
-                //shift less when zoomed in more
-                //float zoom_modifier = ( (1-(((zoom_s-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / 1 );
-//float _l2 = log(2.0);
-                float zoom_modifier = 1.;                 //(log(zoom_s)/_l2);
-
-                rx_s -= ((ndx * camera_z) / zoom_modifier);
-                ry_s -= ((ndy * camera_z) / zoom_modifier);
-                rz_s -= ((ndz * camera_z) / zoom_modifier);
-            }
-        } else {
-            //galaxy
-            if (three_d) {
-                float ndx = -1.0 * (mouse_y_current - mouse_y_previous);
-                float ndy = -4.0 * (mouse_x_current - mouse_x_previous);
-                float ndz = 0.0;
-
-                rx += ndx;
-                ry += ndy;
-                rz += ndz;
-                if (rx > 0.0 / 2) {
-                    rx = 0.0 / 2;
-                }
-                if (rx < -6.28 / 2) {
-                    rx = -6.28 / 2;
-                }
-                if (ry >= 6.28) {
-                    ry -= 6.28;
-                }
-                if (ry <= -6.28) {
-                    ry += 6.28;
-                }
-                if (rz >= 6.28) {
-                    rz -= 6.28;
-                }
-                if (rz <= -6.28) {
-                    rz += 6.28;
-                }
-            } else {
-                //rotation switches to panning
-                float ndy = -1.0 * (mouse_y_current - mouse_y_previous);
-                float ndx = -1.0 * (mouse_x_current - mouse_x_previous);
-                float ndz = 0.0;
-
-                //shift less when zoomed in more
-                //float zoom_modifier = ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / 1 );
-//float _l2 = log(2.0);
-                float zoom_modifier = 1.;                 //(log(zoom)/_l2);
-
-                rx -= ((ndx * camera_z) / zoom_modifier);
-                ry -= ((ndy * camera_z) / zoom_modifier);
-                rz -= ((ndz * camera_z) / zoom_modifier);
-            }
-        }
+void NavigationSystem::Adjust3dTransformation(bool is_system_not_galaxy) {
+    // Drives the camera of whichever view is showing, with the same bindings in both:
+    // the right button looks around, the left and middle buttons move the map, and the
+    // wheel moves in towards it or back out.
+    //
+    // The indices are the bits lookupMouseButton() sets: 0 is the left button, 1 the
+    // middle one and 2 the right (see in_mouse.cpp).
+    NavMap &camera = is_system_not_galaxy ? system_cam : galaxy_cam;
+    if (!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
+            mouse_y_current)) {
+        return;
     }
-    //**********************************
-    //Set the prespective zoom level
-    //**********************************
-    if (((mouse_previous_state[1] == 1)
-            && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current,
-                    mouse_y_current)) || (mouse_wentdown[3] || mouse_wentdown[4])) {
-        const float wheel_zoom_level = configuration().graphics.wheel_zoom_amount_flt;
-        if (system_vs_galaxy) {
-            if (mouse_wentdown[3]) {
-                zoom_s += wheel_zoom_level;
-            } else if (mouse_wentdown[4]) {
-                zoom_s -= wheel_zoom_level;
-            } else {
-                zoom_s = zoom_s + ( /*1.0 +*/ 8 * (mouse_y_current - mouse_y_previous));
-            }
-            if (zoom_s < 1.2) {
-                zoom_s = 1.2;
-            }
-            if (zoom_s > MAXZOOM) {
-                zoom_s = MAXZOOM;
-            }
-        } else {
-            if (mouse_wentdown[3]) {
-                zoom += wheel_zoom_level;
-            } else if (mouse_wentdown[4]) {
-                zoom -= wheel_zoom_level;
-            } else {
-                zoom = zoom + ( /*1.0 +*/ 8 * (mouse_y_current - mouse_y_previous));
-            }
-            if (zoom < .5) {
-                zoom = .5;
-            }
-            if (zoom > MAXZOOM / 2) {
-                zoom = MAXZOOM / 2;
-            }
-        }
+
+    if (mouse_previous_state[2] == 1) {
+        // Right-drag looks around from where the camera is.
+        const float ndx = mouse_x_current - mouse_x_previous;
+        const float ndy = mouse_y_current - mouse_y_previous;
+        camera.orbitBy(ndx * 0.6f, -ndy * 0.6f);      //y flipped, so that dragging up looks up
     }
-    //**********************************
+
+    // Panning, and moving in and out, scale with the distance to the nearest thing in
+    // view, which is only known once the view has been drawn: fall back to the framing
+    // distance for the first frame, or when there was nothing in view.
+    const double scale = (nav_near_dist < 1e30) ? nav_near_dist : camera.nominalDistance();
+
+    if (mouse_previous_state[0] == 1) {
+        // Left-drag turns the map about the selected object, which is what the player is
+        // pointing at when they do this. The object keeps the place it has on the screen
+        // and everything else swings around it. With nothing selected there is no pivot to
+        // work about, so turn about the point the camera is looking at.
+        QVector pivot = camera.focusPoint();
+        if (is_system_not_galaxy) {
+            Unit *target = _Universe->AccessCockpit()->GetParent()->Target();
+            if (target != nullptr) {
+                pivot = target->Position();
+            }
+        } else if (systemselectionindex < systemIter.size()) {
+            // The system selected on the map. The focused one only changes when a
+            // selection is clicked twice, so it lags behind.
+            pivot = systemIter[systemselectionindex].Position();
+        }
+        const float ndx = mouse_x_current - mouse_x_previous;
+        const float ndy = mouse_y_current - mouse_y_previous;
+        camera.orbitAround(pivot, ndx * 0.6f, -ndy * 0.6f);
+    }
+
+    if (mouse_previous_state[1] == 1) {
+        // Middle-drag moves the map.
+        const float ndx = mouse_x_current - mouse_x_previous;
+        const float ndy = mouse_y_current - mouse_y_previous;
+        const double step = scale * 0.5;
+        camera.panBy(-ndx * step, -ndy * step);
+    }
+
+    const float wheel_zoom_level = configuration().graphics.wheel_zoom_amount_flt;
+    if (mouse_wentdown[3] || mouse_wentdown[4]) {
+        // The wheel moves the camera in and out. The lens does not change.
+        const double step = scale * wheel_zoom_level;
+        camera.zoomBy(mouse_wentdown[3] ? step : -step);
+    }
 }
 
-void NavigationSystem::ReplaceAxes(QVector &pos) {
-    //replace axes
-    //*************************
-    if (axis != 3) {
-        //3 == z == default
-        if (axis == 2) {
-            float old_i = pos.i;
-            float old_j = pos.j;
-            float old_k = pos.k;
-            pos.i = old_i;
-            pos.j = -old_k;
-            pos.k = old_j;
+void NavigationSystem::arrowKey(int dir, unsigned int mods) {
+    // Keyboard camera control, for while the nav computer is open: the caller gates
+    // the ship's own arrow-key handlers, so these never steer the ship.
+    //   arrows         = move the map
+    //   Shift+arrows   = look around
+    //   Alt+up/down    = move in towards the map, or back out
+    //   Alt+left/right = move the map sideways
+    NavMap &camera = checkbit(whattodraw, 2) ? galaxy_cam : system_cam;
+
+    const bool shift = (mods & KB_MOD_SHIFT) != 0;
+    const bool alt = (mods & KB_MOD_ALT) != 0;
+
+    // As with the mouse, steps scale with the distance to the nearest object in view.
+    const double scale = (nav_near_dist < 1e30) ? nav_near_dist : camera.nominalDistance();
+    const double step = scale * 0.5;
+
+    if (shift) {
+        const float amount = 0.05f;
+        if (dir == 0) {
+            camera.orbitBy(0.0f, amount);
+        } else if (dir == 1) {
+            camera.orbitBy(0.0f, -amount);
+        } else if (dir == 2) {
+            camera.orbitBy(amount, 0.0f);
         } else {
-            //(axis == 1)
-            float old_i = pos.i;
-            float old_j = pos.j;
-            float old_k = pos.k;
-            pos.i = old_j;
-            pos.j = -old_k;
-            pos.k = old_i;
+            camera.orbitBy(-amount, 0.0f);
+        }
+    } else if (alt) {
+        if (dir == 0) {
+            camera.zoomBy(step);
+        } else if (dir == 1) {
+            camera.zoomBy(-step);
+        } else if (dir == 2) {
+            camera.panBy(-step, 0.0);
+        } else {
+            camera.panBy(step, 0.0);
+        }
+    } else {
+        if (dir == 0) {
+            camera.panBy(0.0, step);
+        } else if (dir == 1) {
+            camera.panBy(0.0, -step);
+        } else if (dir == 2) {
+            camera.panBy(-step, 0.0);
+        } else {
+            camera.panBy(step, 0.0);
         }
     }
-    //*************************
 }
+
 
 void NavigationSystem::RecordMinAndMax(const QVector &pos,
         float &min_x,
@@ -1708,336 +1519,10 @@ void NavigationSystem::RecordMinAndMax(const QVector &pos,
     //**********************************
 }
 
-/*
- * Draws the origin orientation triad (X, Y, Z axes widget) using ImGui DrawList
- * and normalized-to-pixel coordinate conversion.
- */
-void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool system_not_galaxy) {
-    // Determine basis vectors based on active axis alignment
-    QVector directionx, directiony, directionz;
-
-    if (axis == 2) {
-        directionx = QVector(0.1f, 0.0f, 0.0f);
-        directionz = QVector(0.0f, 0.1f, 0.0f);
-        directiony = QVector(0.0f, 0.0f, 0.1f);
-    } else if (axis == 1) {
-        directiony = QVector(0.1f, 0.0f, 0.0f);
-        directionz = QVector(0.0f, 0.1f, 0.0f);
-        directionx = QVector(0.0f, 0.0f, 0.1f);
-    } else {
-        // (axis == 3)
-        directionx = QVector(0.1f, 0.0f, 0.0f);
-        directiony = QVector(0.0f, 0.1f, 0.0f);
-        directionz = QVector(0.0f, 0.0f, 0.1f);
-    }
-
-    // Apply 3D rotation matrix transformations if in 3D view mode
-    if (system_not_galaxy) {
-        if (system_view == VIEW_3D) {
-            directionx = dxyz(directionx, 0, 0, ry_s);
-            directionx = dxyz(directionx, rx_s, 0, 0);
-
-            directiony = dxyz(directiony, 0, 0, ry_s);
-            directiony = dxyz(directiony, rx_s, 0, 0);
-
-            directionz = dxyz(directionz, 0, 0, ry_s);
-            directionz = dxyz(directionz, rx_s, 0, 0);
-        }
-    } else if (galaxy_view == VIEW_3D) {
-        directionx = dxyz(directionx, 0, 0, ry);
-        directionx = dxyz(directionx, rx, 0, 0);
-
-        directiony = dxyz(directiony, 0, 0, ry);
-        directiony = dxyz(directiony, rx, 0, 0);
-
-        directionz = dxyz(directionz, 0, 0, ry);
-        directionz = dxyz(directionz, rx, 0, 0);
-    }
-
-    // Compute normalized origin and axis endpoint coordinates
-    float x0 = center_nav_x - 0.8f * ((screenskipby4[1] - screenskipby4[0]) / 2.0f);
-    float y0 = center_nav_y - 0.8f * ((screenskipby4[3] - screenskipby4[2]) / 2.0f);
-
-    float x1 = x0 + (directionx.i * (0.3f / (0.3f - directionx.k)));
-    float y1 = y0 + (directionx.j * (0.3f / (0.3f - directionx.k)));
-
-    float x2 = x0 + (directiony.i * (0.3f / (0.3f - directiony.k)));
-    float y2 = y0 + (directiony.j * (0.3f / (0.3f - directiony.k)));
-
-    float x3 = x0 + (directionz.i * (0.3f / (0.3f - directionz.k)));
-    float y3 = y0 + (directionz.j * (0.3f / (0.3f - directionz.k)));
-
-    // Convert normalized coordinates to screen pixels
-    ImVec2 p0(static_cast<float>(Coordinates::normToPixelX(x0)), static_cast<float>(Coordinates::normToPixelY(y0)));
-    ImVec2 p1(static_cast<float>(Coordinates::normToPixelX(x1)), static_cast<float>(Coordinates::normToPixelY(y1)));
-    ImVec2 p2(static_cast<float>(Coordinates::normToPixelX(x2)), static_cast<float>(Coordinates::normToPixelY(y2)));
-    ImVec2 p3(static_cast<float>(Coordinates::normToPixelX(x3)), static_cast<float>(Coordinates::normToPixelY(y3)));
-
-    ImDrawList* drawList = ImGui::GetForegroundDrawList();
-
-    // Packed RGB colors with 0.5 (128) Alpha
-    const ImU32 red   = IM_COL32(255,   0,   0, 128); // X Axis
-    const ImU32 green = IM_COL32(  0, 255,   0, 128); // Y Axis
-    const ImU32 blue  = IM_COL32(  0,   0, 255, 128); // Z Axis
-
-    // Draw origin triad lines
-    drawList->AddLine(p0, p1, red,   2.0f);
-    drawList->AddLine(p0, p2, green, 2.0f);
-    drawList->AddLine(p0, p3, blue,  2.0f);
-}
-
-float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale,
-        float &zdistance,
-        QVector &pos,
-        QVector &pos_flat,
-        float &system_item_scale_temp,
-        bool system_not_galaxy) {
-    pos_flat.i = pos.i;
-    pos_flat.j = pos.j;
-    pos_flat.k = center_z;
-
-    //Modify by rotation amount
-    //*************************
-
-    pos.i -= center_x;
-    pos.j -= center_y;
-    pos.k -= center_z;
-
-    pos_flat.i -= center_x;
-    pos_flat.j -= center_y;
-    pos_flat.k -= center_z;
-    if (system_not_galaxy) {
-        if (system_view == VIEW_3D) {
-            //3d = rotate
-            pos = dxyz(pos, 0, 0, ry_s);
-            pos = dxyz(pos, rx_s, 0, 0);
-
-            pos_flat = dxyz(pos_flat, 0, 0, ry_s);
-            pos_flat = dxyz(pos_flat, rx_s, 0, 0);
-        } else {
-            //2d = pan
-            pos.i += rx_s;
-            pos.j += ry_s;
-
-            pos_flat.i += rx_s;
-            pos_flat.j += ry_s;
-        }
-    } else {
-        if (galaxy_view == VIEW_3D) {
-            //3d = rotate
-            pos = dxyz(pos, 0, 0, ry);
-            pos = dxyz(pos, rx, 0, 0);
-
-            pos_flat = dxyz(pos_flat, 0, 0, ry);
-            pos_flat = dxyz(pos_flat, rx, 0, 0);
-        } else {
-            //2d = pan
-            pos.i += rx;
-            pos.j += ry;
-
-            pos_flat.i += rx;
-            pos_flat.j += ry;
-        }
-    }
-    //*************************
-
-    //CALCULATE PRESPECTIVE ADJUSTMENT
-    //**********************************
-
-    float standard_unit = 0.25 * camera_z;    //maxvalue=X, camera_z=4X
-
-    zdistance = (camera_z - pos.k);       //3-5 standard_unit
-    double zdistance_flat = (camera_z - pos_flat.k);
-
-    zscale = standard_unit / zdistance;        //1 / (zdistance/standard_unit)
-    double zscale_flat = standard_unit / zdistance_flat;
-
-    double real_zoom = 0.0;
-    double real_zoom_flat = 0.0;
-//float _l2 = log(2.0f);
-    if (system_not_galaxy) {
-        const double zoom_s_tmp = zoom_s;
-        real_zoom = zoom_s_tmp * zoom_s_tmp * zscale;
-        real_zoom_flat = zoom_s_tmp * zoom_s_tmp * zscale_flat;
-//real_zoom = zoom_s*zscale;
-//real_zoom_flat = zoom_s*zscale_flat;
-///		real_zoom = (log(zoom_s)/_l2)*zscale;
-///		real_zoom_flat = (log(zoom_s)/_l2)*zscale_flat;
-    } else {
-        const double zoom_tmp = zoom;
-        real_zoom = zoom_tmp * zoom_tmp * zscale;
-        real_zoom_flat = zoom_tmp * zoom_tmp * zscale_flat;
-//real_zoom = (log(zoom)/_l2)*zscale;
-//real_zoom_flat = (log(zoom)/_l2)*zscale_flat;
-    }
-    pos.i *= real_zoom;
-    pos.j *= real_zoom;
-    pos.k *= real_zoom;
-
-    pos_flat.i *= real_zoom_flat;
-    pos_flat.j *= real_zoom_flat;
-    pos_flat.k *= real_zoom_flat;
-
-    float itemscale = real_zoom * item_zscalefactor;
-    if (itemscale < minimumitemscaledown) {       //dont shrink into nonexistance
-        itemscale = minimumitemscaledown;
-    }
-    if (itemscale > maximumitemscaleup) {         //dont expand too far
-        itemscale = maximumitemscaleup;
-    }
-    system_item_scale_temp = system_item_scale * itemscale;
-    //**********************************
-    return itemscale;
-}
-
-void NavigationSystem::TranslateCoordinates(QVector &pos,
-        QVector &pos_flat,
-        float center_nav_x,
-        float center_nav_y,
-        float themaxvalue,
-        float &zscale,
-        float &zdistance,
-        float &the_x,
-        float &the_y,
-        float &the_x_flat,
-        float &the_y_flat,
-        float &system_item_scale_temp,
-        bool system_not_galaxy) {
-
-    // This code is necessary to pan and zoom the nav star map
-    // as well as to display system names and make systems
-    // highlight their names on mouse hover
-    // and also make them clickable for setting jump routes
-    CalculatePerspectiveAdjustment(
-            zscale,
-            zdistance,
-            pos,
-            pos_flat,
-            system_item_scale_temp,
-            system_not_galaxy);
-
-    //TRANSLATE INTO SCREEN DISPLAY COORDINATES
-    //**********************************
-    the_x = (float) pos.i;
-    the_y = (float) pos.j;
-    the_x_flat = (float) pos_flat.i;
-    the_y_flat = (float) pos_flat.j;
-
-    the_x = (the_x / (themaxvalue));
-    the_y = (the_y / (themaxvalue));
-
-    the_x_flat = (the_x_flat / (themaxvalue));
-    the_y_flat = (the_y_flat / (themaxvalue));
-
-    float navscreen_width_delta = (screenskipby4[1] - screenskipby4[0]);
-    float navscreen_height_delta = (screenskipby4[3] - screenskipby4[2]);
-    float navscreen_small_delta = std::min(navscreen_width_delta, navscreen_height_delta);
-
-    the_x = (the_x * navscreen_small_delta);
-    the_x = the_x + center_nav_x;
-    the_y = (the_y * navscreen_small_delta);
-    the_y = the_y + center_nav_y;
-
-    the_x_flat = (the_x_flat * navscreen_small_delta);
-    the_x_flat = the_x_flat + center_nav_x;
-    the_y_flat = (the_y_flat * navscreen_small_delta);
-    the_y_flat = the_y_flat + center_nav_y;
-    //**********************************
-    if ((system_not_galaxy ? system_view : galaxy_view) == VIEW_ORTHO) {
-        the_x = the_x_flat;
-        the_y = the_y_flat;
-        pos = pos_flat;
-    }
-}
-
-void NavigationSystem::TranslateAndDisplay(QVector &pos,
-        QVector &pos_flat,
-        float center_nav_x,
-        float center_nav_y,
-        float themaxvalue,
-        float &zscale,
-        float &zdistance,
-        float &the_x,
-        float &the_y,
-        float &system_item_scale_temp,
-        bool system_not_galaxy) {
-    float the_x_flat;
-    float the_y_flat;
-    if ((system_not_galaxy ? system_view : galaxy_view) == VIEW_ORTHO) {
-        TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance,
-                the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, system_not_galaxy);
-        return;
-    } else {
-        TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance,
-                the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, system_not_galaxy);
-    }
-    DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, system_not_galaxy);
-}
 
 /*
  * Display orientation projection lines using ImGui DrawList and pixel projection.
  */
-void NavigationSystem::DisplayOrientationLines(float the_x,
-        float the_y,
-        float the_x_flat,
-        float the_y_flat,
-        bool system_not_galaxy) {
-    if ((system_not_galaxy ? system_view : galaxy_view) == VIEW_ORTHO) {
-        return;
-    }
-
-    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-
-    // Default line color: Grey with ~15% Alpha
-    GFXColor lineCol(0.5f, 0.5f, 0.5f, 0.15f);
-
-    bool display_flat_circle = true;
-    if ((the_y_flat > screenskipby4[3])
-            || (the_y_flat < screenskipby4[2])
-            || (the_x_flat > screenskipby4[1])
-            || (the_x_flat < screenskipby4[0])) {
-        // Cyan tint with 5% Alpha if flat point is out of screen bounds
-        lineCol = GFXColor(0.0f, 1.0f, 1.0f, 0.05f);
-        display_flat_circle = false;
-    }
-
-    bool display_flat = true;
-    if ((the_x > screenskipby4[1])
-            || (the_x < screenskipby4[0])
-            || (the_y > screenskipby4[3])
-            || (the_y < screenskipby4[2])) {
-        // Yellow tint with 5% Alpha if main point is out of screen bounds
-        lineCol = GFXColor(1.0f, 1.0f, 0.0f, 0.05f);
-        display_flat = false;
-    }
-
-    if (display_flat) {
-        IntersectBorder(the_x_flat, the_y_flat, the_x, the_y);
-
-        // Draw the orientation vector line
-        ImVec2 p1 = ImVec2(
-            static_cast<float>(Coordinates::normToPixelX(the_x_flat)),
-            static_cast<float>(Coordinates::normToPixelY(the_y_flat))
-        );
-        ImVec2 p2 = ImVec2(
-            static_cast<float>(Coordinates::normToPixelX(the_x)),
-            static_cast<float>(Coordinates::normToPixelY(the_y))
-        );
-
-        ImU32 colPacked = IM_COL32(
-            static_cast<int>(lineCol.r * 255.0f),
-            static_cast<int>(lineCol.g * 255.0f),
-            static_cast<int>(lineCol.b * 255.0f),
-            static_cast<int>(lineCol.a * 255.0f)
-        );
-
-        drawList->AddLine(p1, p2, colPacked, 1.0f);
-
-        if (display_flat_circle) {
-            DrawCircle(the_x_flat, the_y_flat, (0.005f * system_item_scale), GFXColor(1.0f, 1.0f, 1.0f, 0.2f));
-        }
-    }
-}
 
 void Beautify(string systemfile, string &sector, string &system) {
     string::size_type slash = systemfile.find("/");

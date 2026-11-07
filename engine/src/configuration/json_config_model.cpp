@@ -266,6 +266,13 @@ const JsonConfigNode* JsonConfigModel::get(const std::vector<std::string>& path)
     return nullptr;
 }
 
+JsonConfigNode* JsonConfigModel::get(const std::vector<std::string>& path) {
+    if (auto branch = dynamic_cast<JsonConfigBranch*>(root_.get())) {
+        return branch->get_node(path);
+    }
+    return nullptr;
+}
+
 void JsonConfigModel::set(const std::vector<std::string>& path, const boost::json::value& v) {
     if (auto branch = dynamic_cast<JsonConfigBranch*>(root_.get())) {
         branch->set(path, v);

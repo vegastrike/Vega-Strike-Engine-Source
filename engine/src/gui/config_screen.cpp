@@ -34,8 +34,11 @@
 #include <fstream>
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 
 namespace fs = boost::filesystem;
+
+#include "config_file_editor.h"
 
 namespace vs_settings_ng {
 
@@ -74,6 +77,15 @@ static const char *dock_mode_opts[] = { "Simple docking", "Docking zones" };
 int  sel_dock_mode = 0;
 char dock_range_buf[16] = "5000";
 char planet_dock_buf[16] = "1.5";
+// Warp: the ceiling is a velocity, and the engine flies in m/s; the field shows it in whole
+// multiples of light speed, which is the unit the HUD reads speed out in. The conversion is display
+// only.
+static constexpr double kSpeedOfLight = 299792458.0;
+char warp_speed_buf[16] = "800";
+// The text the field was filled with. The field shows a whole c value, so re-deriving the stored
+// velocity from it on every Save would write a slightly different speed each time, pinning the
+// ceiling into the player's overlay even when it was never touched.
+std::string warp_speed_text_shown;
 bool display_inited = false;
 
 bool rendered_crosshair = true;
@@ -82,6 +94,14 @@ bool cfg_full_screen = true;
 // Mouse / Joystick dialog open flags.
 static bool mouse_dialog_open = false;
 static bool joy_dialog_open = false;
+
+// The JSON files the screen can edit directly: the rest of the config split. bindings.json has its
+// own dialog and config.json is what the screen itself edits, so these are engine.json and
+// theme.json.
+static vs_settings_ng::ConfigFileEditor engine_file_editor("engine.json", "Engine Config");
+static vs_settings_ng::ConfigFileEditor theme_file_editor("theme.json", "Color Config");
+static bool engine_dialog_open = false;
+static bool theme_dialog_open = false;
 
 // Forward declarations (defined below; used by draw_display_frame).
 static void load_mouse_staging();
@@ -358,6 +378,9 @@ static void load_display_from_config() {
     sel_dock_mode = (dk.mode == "zones") ? 1 : (dk.mode == "simple" ? 0 : (dk.simple_dock ? 0 : 1));
     snprintf(dock_range_buf, sizeof(dock_range_buf), "%g", dk.simple_dock_range_dbl);
     snprintf(planet_dock_buf, sizeof(planet_dock_buf), "%g", dk.dock_planet_radius_percent_dbl);
+    snprintf(warp_speed_buf, sizeof(warp_speed_buf), "%.0f",
+            configuration().warp.max_effective_velocity_dbl / kSpeedOfLight);
+    warp_speed_text_shown = warp_speed_buf;
     display_inited = true;
 }
 
@@ -402,6 +425,23 @@ static void apply_display_to_config() {
         mark_dirty("dock.mode");
         mark_dirty("dock.simple_dock_range");
         mark_dirty("dock.dock_planet_radius_percent");
+    }
+    // Warp ceiling: stored as a velocity, which is what the engine flies by; the field is in whole
+    // multiples of light speed, a quantity too rough to care about the digits after the point. Only
+    // a value the player actually changed is stored, and text that does not parse leaves the ceiling
+    // where it was.
+    {
+        auto &w = configuration().warp;
+        const std::string text = warp_speed_buf;
+        const double speed_c = std::round(locale_aware_stod(text));
+        if (text != warp_speed_text_shown && speed_c >= 1.0) {
+            w.max_effective_velocity_dbl = speed_c * kSpeedOfLight;
+            w.max_effective_velocity_flt = static_cast<float>(w.max_effective_velocity_dbl);
+            // Show the value that was stored, not the text that was typed.
+            snprintf(warp_speed_buf, sizeof(warp_speed_buf), "%.0f", speed_c);
+            warp_speed_text_shown = warp_speed_buf;
+            mark_dirty("warp.max_effective_velocity");
+        }
     }
     // Persist the selected font ("Roboto" sentinel or a .ttf filename); only hot-apply
     // a font change when the selection actually differs from the current font, so a
@@ -581,6 +621,14 @@ void draw_display_frame() {
     if (ImGui::InputText("##planetdock", planet_dock_buf, sizeof(planet_dock_buf), ImGuiInputTextFlags_CharsDecimal))
         dirty = true;
     ImGui::TextDisabled("A planet's own zone: its radius times this, if that is further out.");
+    // Warp ceiling. The top speed is the ship's own sublight speed times its warp multiplier, held
+    // under this ceiling; near a body the interdiction and the step cap hold it lower.
+    ImGui::SeparatorText("Warp");
+    ImGui::Text("Max warp speed (c)"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(90);
+    if (ImGui::InputText("##warpspeed", warp_speed_buf, sizeof(warp_speed_buf), ImGuiInputTextFlags_CharsDecimal))
+        dirty = true;
+    ImGui::TextDisabled("The open-space ceiling, in multiples of light speed.");
     // Vsync (monitor sync).
     if (ImGui::Button("Vsync")) ImGui::OpenPopup("##pick_vsync");
     ImGui::SameLine(); ImGui::TextUnformatted(vsync_opts[sel_vsync]);
@@ -634,7 +682,10 @@ void draw_display_frame() {
     // Right column: Flight Control + Input buttons + Rendered Crosshair, side by
     // side with the monitor/resolution/display controls (as vs-05).
     ImGui::SameLine();
-    ImGui::BeginChild("dpybtns", ImVec2(side_w, 8 * btn_h), ImGuiChildFlags_Borders);
+    // Let the right column measure itself too: the two file buttons fill its fixed eight-button
+    // height, and a scrollbar to reach a setting is worse than a taller frame.
+    ImGui::BeginChild("dpybtns", ImVec2(side_w, 0.0f),
+            ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
     if (ImGui::Button(("Flight Control: " + std::string(fc_names[flight_control])).c_str(), ImVec2(-1, 0)))
         ImGui::OpenPopup("##flight");
     if (ImGui::BeginPopup("##flight")) {
@@ -656,6 +707,8 @@ void draw_display_frame() {
     if (ImGui::Button("Joystick Settings", ImVec2(-1, 0))) { load_joystick_staging(); joy_dialog_open = true; }
     if (flight_control != FC_JOYSTICK) ImGui::EndDisabled();
     if (ImGui::Button("Bindings", ImVec2(-1, 0))) { load_bindings_staging(); bind_capture_cmd.clear(); bind_rebind_row = -1; bind_capturing = false; bind_dialog_open = true; }
+    if (ImGui::Button("Engine Config", ImVec2(-1, 0))) { engine_file_editor.Load(); engine_dialog_open = true; }
+    if (ImGui::Button("Color Config", ImVec2(-1, 0))) { theme_file_editor.Load(); theme_dialog_open = true; }
     if (ImGui::Checkbox("Rendered Crosshair", &rendered_crosshair)) dirty = true;
     ImGui::EndChild();   // end dpybtns (right column)
 }
@@ -1822,6 +1875,9 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"dock.mode",                       [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.dock.mode);},        nullptr},
     {"dock.simple_dock_range",          [](const vega_config::Configuration&c)->boost::json::value{return c.dock.simple_dock_range_dbl;},             nullptr},
     {"dock.dock_planet_radius_percent", [](const vega_config::Configuration&c)->boost::json::value{return c.dock.dock_planet_radius_percent_dbl;},   nullptr},
+    // ---- warp ----
+    // Set by the warp group's apply function, so no preset setter.
+    {"warp.max_effective_velocity",     [](const vega_config::Configuration&c)->boost::json::value{return c.warp.max_effective_velocity_dbl;},      nullptr},
     // ---- splash / test ----
     {"splash.loading_sprite",            [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.splash.loading_sprite);},          [](vega_config::Configuration&c,const std::string&v){c.splash.loading_sprite=v;}},
     {"test.autodocker",                  [](const vega_config::Configuration&c)->boost::json::value{return c.test.autodocker;},                [](vega_config::Configuration&c,const std::string&v){c.test.autodocker=(v=="true"||v=="1");}},
@@ -2098,6 +2154,22 @@ void DrawConfigScreen() {
             const auto shader_before = shader_values_snapshot();
             apply_all();
             write_out_dirty();   // persist the dirty paths to the user overlay
+            // The file editors write their own overlays: only the leaves that differ from the
+            // shipped file. Written whole rather than merged, so a key the player had overridden
+            // and has now reset to the shipped value is cleared out of their file instead of being
+            // left behind. Keys the shipped file does not have are kept: the model holds whatever
+            // the player's file contained, and writes it back.
+            for (vs_settings_ng::ConfigFileEditor *editor : {&engine_file_editor, &theme_file_editor}) {
+                const boost::json::value changes = editor->Changes();
+                const std::string path = VSFileSystem::homedir + "/" + editor->FileName();
+                const bool has_content = changes.is_object() && !changes.as_object().empty();
+                if (!has_content && !std::ifstream(path).good()) {
+                    continue;   // nothing to write and nothing to clear
+                }
+                std::ofstream out(path);
+                out << boost::json::serialize(changes) << "\n";
+                fprintf(stderr, "[vs-settings-ng] wrote %s\n", path.c_str());
+            }
             if (shader_values_snapshot() != shader_before) {
                 // Tell the user the change takes effect on restart, and restore
                 // the running shader state so the current visuals are kept until
@@ -2148,6 +2220,8 @@ void DrawConfigScreen() {
 
     // Bindings dialog (modal on top).
     if (bind_dialog_open) ImGui::OpenPopup("Bindings");
+    if (engine_dialog_open) ImGui::OpenPopup("Engine Config");
+    if (theme_dialog_open) ImGui::OpenPopup("Color Config");
     draw_bindings_dialog();
 
     // Shader-change notice (modal on top). Shaders are written out but not
@@ -2155,6 +2229,37 @@ void DrawConfigScreen() {
     if (shader_restart_notice) {
         ImGui::OpenPopup("Shader Change");
     }
+    // The file editors take most of the screen: engine.json's keys are long, and a small dialog
+    // clips the names against their values.
+    const ImVec2 file_dialog_size(ImGui::GetIO().DisplaySize.x * 0.8f, ImGui::GetIO().DisplaySize.y * 0.8f);
+    const ImVec2 file_dialog_pos(ImGui::GetIO().DisplaySize.x * 0.5f, ImGui::GetIO().DisplaySize.y * 0.5f);
+    ImGui::SetNextWindowSize(file_dialog_size, ImGuiCond_Always);
+    ImGui::SetNextWindowPos(file_dialog_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("Engine Config", &engine_dialog_open)) {
+        if (engine_file_editor.Draw()) {
+            dirty = true;
+        }
+        ImGui::Separator();
+        if (ImGui::Button("Close", ImVec2(120, 0))) {
+            engine_dialog_open = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+    ImGui::SetNextWindowSize(file_dialog_size, ImGuiCond_Always);
+    ImGui::SetNextWindowPos(file_dialog_pos, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    if (ImGui::BeginPopupModal("Color Config", &theme_dialog_open)) {
+        if (theme_file_editor.Draw()) {
+            dirty = true;
+        }
+        ImGui::Separator();
+        if (ImGui::Button("Close", ImVec2(120, 0))) {
+            theme_dialog_open = false;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
     if (ImGui::BeginPopupModal("Shader Change", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::TextUnformatted("Shader changes take effect after a restart.");
         ImGui::TextUnformatted("The new settings were saved. Restart the game to apply them.");
