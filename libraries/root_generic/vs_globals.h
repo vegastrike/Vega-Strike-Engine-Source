@@ -45,7 +45,7 @@ extern Universe *_Universe;
 #define RESTRICT __restrict__
 #endif
 
-extern void cleanup();
+extern void cleanup(bool should_be_clean_exit = true);
 extern bool STATIC_VARS_DESTROYED;
 extern int loop_count;
 extern double avg_loop;

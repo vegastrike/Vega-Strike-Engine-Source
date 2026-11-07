@@ -44,6 +44,7 @@
 #include <direct.h>
 #endif
 #include <memory>
+#include <mutex>
 #include "src/gfxlib.h"
 #include "src/in_kb.h"
 #include "root_generic/lin_time.h"
@@ -149,49 +150,30 @@ int readCommandLineOptions(int argc, char **argv);
 static Animation *splash_screen = nullptr;
 static bool bootstrap_my_star_system_loading = true;
 
-// FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
-void VSExit(int code) {
-    VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
-    STATIC_VARS_DESTROYED = true;
-#if defined (CG_SUPPORT)
-    if (cloak_cg->vertexProgram) cgDestroyProgram( cloak_cg->vertexProgram );
-    if (cloak_cg->shaderContext) cgDestroyContext( cloak_cg->shaderContext );
-#endif
-    Music::CleanupMuzak();
-    AUDDestroy();
-    if (Py_IsInitialized()) {
-        Py_Finalize();
-    }
-    if (splash_screen != nullptr) {
-        delete splash_screen;
-        splash_screen = nullptr;
-    }
-    if (forcefeedback != nullptr) {
-        delete forcefeedback;
-        forcefeedback = nullptr;
-    }
-    winsys_exit(code);
-}
+static std::once_flag game_cleanup_flag;
 
-void cleanup() {
-    // stephengtuggy 2020-10-30: Output message both to the console and to the logs
-    printf("Thank you for playing!\n");
-    VS_LOG(info, "Thank you for playing!");
+static void do_game_cleanup(const bool should_be_clean_exit) {
+    if (should_be_clean_exit) {
+        // Output this message both to the console and to the logs
+        VS_LOG(important_info, "Thank you for playing!");
+    }
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     STATIC_VARS_DESTROYED = true;
-    if (_Universe != nullptr) {
+    if (should_be_clean_exit && _Universe != nullptr) {
         _Universe->WriteSaveGame(true);
     }
 #ifdef _WIN32
 #if defined (_MSC_VER) && defined (_DEBUG)
-    if (!cleanexit) {
+    if (should_be_clean_exit && !cleanexit) {
         _RPT0( _CRT_ERROR, "WARNING: Vega Strike exit not clean\n" );
     }
     return;
 #endif
 #else
-    while (!cleanexit) {
-        usleep(10000);
+    if (should_be_clean_exit) {
+        while (!cleanexit) {
+            usleep(10000);
+        }
     }
 #endif
 
@@ -199,8 +181,10 @@ void cleanup() {
     if (cloak_cg->vertexProgram) cgDestroyProgram( cloak_cg->vertexProgram );
     if (cloak_cg->shaderContext) cgDestroyContext( cloak_cg->shaderContext );
 #endif
+
     Music::CleanupMuzak();
     AUDDestroy();
+
     if (Py_IsInitialized()) {
         Py_Finalize();
     }
@@ -213,6 +197,17 @@ void cleanup() {
         forcefeedback = nullptr;
     }
     winsys_shutdown();
+}
+
+// FIXME: Code should throw exception instead of calling winsys_exit            // Should it really? - stephengtuggy 2020-10-25
+void VSExit(int code) {
+    const bool should_be_clean_exit = code == 0;
+    cleanup(should_be_clean_exit);
+    winsys_exit(code);
+}
+
+void cleanup(const bool should_be_clean_exit) {
+    std::call_once(game_cleanup_flag, do_game_cleanup, should_be_clean_exit);
 }
 
 LeakVector<Mission *> active_missions;
