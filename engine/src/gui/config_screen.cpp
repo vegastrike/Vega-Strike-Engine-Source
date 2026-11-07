@@ -34,6 +34,7 @@
 #include <fstream>
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 
 namespace fs = boost::filesystem;
 
@@ -76,6 +77,15 @@ static const char *dock_mode_opts[] = { "Simple docking", "Docking zones" };
 int  sel_dock_mode = 0;
 char dock_range_buf[16] = "5000";
 char planet_dock_buf[16] = "1.5";
+// Warp: the ceiling is a velocity, and the engine flies in m/s; the field shows it in whole
+// multiples of light speed, which is the unit the HUD reads speed out in. The conversion is display
+// only.
+static constexpr double kSpeedOfLight = 299792458.0;
+char warp_speed_buf[16] = "800";
+// The text the field was filled with. The field shows a whole c value, so re-deriving the stored
+// velocity from it on every Save would write a slightly different speed each time, pinning the
+// ceiling into the player's overlay even when it was never touched.
+std::string warp_speed_text_shown;
 bool display_inited = false;
 
 bool rendered_crosshair = true;
@@ -368,6 +378,9 @@ static void load_display_from_config() {
     sel_dock_mode = (dk.mode == "zones") ? 1 : (dk.mode == "simple" ? 0 : (dk.simple_dock ? 0 : 1));
     snprintf(dock_range_buf, sizeof(dock_range_buf), "%g", dk.simple_dock_range_dbl);
     snprintf(planet_dock_buf, sizeof(planet_dock_buf), "%g", dk.dock_planet_radius_percent_dbl);
+    snprintf(warp_speed_buf, sizeof(warp_speed_buf), "%.0f",
+            configuration().warp.max_effective_velocity_dbl / kSpeedOfLight);
+    warp_speed_text_shown = warp_speed_buf;
     display_inited = true;
 }
 
@@ -412,6 +425,23 @@ static void apply_display_to_config() {
         mark_dirty("dock.mode");
         mark_dirty("dock.simple_dock_range");
         mark_dirty("dock.dock_planet_radius_percent");
+    }
+    // Warp ceiling: stored as a velocity, which is what the engine flies by; the field is in whole
+    // multiples of light speed, a quantity too rough to care about the digits after the point. Only
+    // a value the player actually changed is stored, and text that does not parse leaves the ceiling
+    // where it was.
+    {
+        auto &w = configuration().warp;
+        const std::string text = warp_speed_buf;
+        const double speed_c = std::round(locale_aware_stod(text));
+        if (text != warp_speed_text_shown && speed_c >= 1.0) {
+            w.max_effective_velocity_dbl = speed_c * kSpeedOfLight;
+            w.max_effective_velocity_flt = static_cast<float>(w.max_effective_velocity_dbl);
+            // Show the value that was stored, not the text that was typed.
+            snprintf(warp_speed_buf, sizeof(warp_speed_buf), "%.0f", speed_c);
+            warp_speed_text_shown = warp_speed_buf;
+            mark_dirty("warp.max_effective_velocity");
+        }
     }
     // Persist the selected font ("Roboto" sentinel or a .ttf filename); only hot-apply
     // a font change when the selection actually differs from the current font, so a
@@ -591,6 +621,14 @@ void draw_display_frame() {
     if (ImGui::InputText("##planetdock", planet_dock_buf, sizeof(planet_dock_buf), ImGuiInputTextFlags_CharsDecimal))
         dirty = true;
     ImGui::TextDisabled("A planet's own zone: its radius times this, if that is further out.");
+    // Warp ceiling. The top speed is the ship's own sublight speed times its warp multiplier, held
+    // under this ceiling; near a body the interdiction and the step cap hold it lower.
+    ImGui::SeparatorText("Warp");
+    ImGui::Text("Max warp speed (c)"); ImGui::SameLine();
+    ImGui::SetNextItemWidth(90);
+    if (ImGui::InputText("##warpspeed", warp_speed_buf, sizeof(warp_speed_buf), ImGuiInputTextFlags_CharsDecimal))
+        dirty = true;
+    ImGui::TextDisabled("The open-space ceiling, in multiples of light speed.");
     // Vsync (monitor sync).
     if (ImGui::Button("Vsync")) ImGui::OpenPopup("##pick_vsync");
     ImGui::SameLine(); ImGui::TextUnformatted(vsync_opts[sel_vsync]);
@@ -1837,6 +1875,9 @@ static const ConfigAccessor kConfigAccessors[] = {
     {"dock.mode",                       [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.dock.mode);},        nullptr},
     {"dock.simple_dock_range",          [](const vega_config::Configuration&c)->boost::json::value{return c.dock.simple_dock_range_dbl;},             nullptr},
     {"dock.dock_planet_radius_percent", [](const vega_config::Configuration&c)->boost::json::value{return c.dock.dock_planet_radius_percent_dbl;},   nullptr},
+    // ---- warp ----
+    // Set by the warp group's apply function, so no preset setter.
+    {"warp.max_effective_velocity",     [](const vega_config::Configuration&c)->boost::json::value{return c.warp.max_effective_velocity_dbl;},      nullptr},
     // ---- splash / test ----
     {"splash.loading_sprite",            [](const vega_config::Configuration&c)->boost::json::value{return boost::json::value(c.splash.loading_sprite);},          [](vega_config::Configuration&c,const std::string&v){c.splash.loading_sprite=v;}},
     {"test.autodocker",                  [](const vega_config::Configuration&c)->boost::json::value{return c.test.autodocker;},                [](vega_config::Configuration&c,const std::string&v){c.test.autodocker=(v=="true"||v=="1");}},
