@@ -690,14 +690,17 @@ static bool setup_sdl_video_mode() {
  */
 static std::once_flag winsys_cleanup_flag;
 
-static void do_cleanup() {
+static void DoCleanup() {
+    // Revert resolution by exiting fullscreen
+    SDL_SetWindowFullscreen(window, false);
+
     CleanupGui();
     freeMouseCursors();
     SDL_Quit();
 }
 
 void winsys_cleanup() {
-    std::call_once(winsys_cleanup_flag, do_cleanup);
+    std::call_once(winsys_cleanup_flag, DoCleanup);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -1081,9 +1084,6 @@ void winsys_atexit(winsys_atexit_func_t func) {
  *  \date    Modified: 2000-10-20
  */
 void winsys_exit(int code) {
-    // Reverting resolution by exiting fullscreen
-    SDL_SetWindowFullscreen(window, false);
-
     winsys_shutdown();
     if (atexit_func) {
         (*atexit_func)();
