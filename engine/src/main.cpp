@@ -601,7 +601,7 @@ void BootstrapFirstLoop() {
         int snum = time(nullptr) % s.size();
         splash_screen = new Animation(s[snum].c_str(), false);
         if (!sa.empty() && sa[0].length()) {
-            muzak->GotoSong(sa[snum % sa.size()]);
+            Muzak::GotoSong(sa[snum % sa.size()]);
         }
         bs_tp = std::make_unique<TextPlane>();
     }

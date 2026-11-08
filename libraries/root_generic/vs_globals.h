@@ -89,7 +89,7 @@ typedef struct {
 
 extern game_data_t g_game;
 class Music;
-extern Music *muzak;
+extern std::vector<Music> muzak_collection;
 extern int muzak_count;
 class VegaConfig;
 extern VegaConfig *vs_config;

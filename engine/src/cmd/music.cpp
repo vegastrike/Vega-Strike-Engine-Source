@@ -70,9 +70,10 @@
 
 #define MAX_RECENT_HISTORY "5"
 
-Music *muzak = NULL;
+std::vector<Music> muzak_collection{};
 int muzak_count = 0;
 int muzak_cross_index = 0;
+std::mutex muzak_mutex;
 
 static void print_check_err(int errorcode, const char *str) {
 #ifndef _WIN32
@@ -93,11 +94,11 @@ static void print_check_err(int errorcode, const char *str) {
 Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initialized(false) {
     loopsleft = 0;
     socketw = socketr = -1;
-    music_load_info = NULL;
+    music_load_info = nullptr;
     music_loaded = false;
     music_loading = false;
-    killthread = 0;
-    threadalive = 0;
+    killthread = false;
+    threadalive = false;
     freeWav = true;
 #ifdef HAVE_AL
     music_load_info = new AUDSoundProperties;
@@ -122,7 +123,6 @@ Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initiali
         return;
     }
     lastlist = PEACELIST;
-    int i;
     // Playlist names now come from the merged JSON config (engine.json ->
     // audio.battle_playlist etc.), in the same order as the old XML.
     const std::string *config_playlists[MAXLIST] = {
@@ -130,8 +130,8 @@ Music::Music(Unit *parent) : random(false), p(parent), song(-1), thread_initiali
         &configuration().audio.panic_playlist, &configuration().audio.victory_playlist,
         &configuration().audio.loss_playlist,
     };
-    for (i = 0; i < MAXLIST; i++) {
-        LoadMusic((*config_playlists[i]).c_str());
+    for (int i = 0; i < MAXLIST; i++) {
+        LoadMusic(config_playlists[i]->c_str());
     }
     soft_vol_up_latency = configuration().audio.music_volume_up_latency_flt;
     soft_vol_down_latency = configuration().audio.music_volume_down_latency_flt;
@@ -145,13 +145,13 @@ void Music::ChangeVolume(float inc, int layer) {
     if (!configuration().audio.music) {
         return;
     }
-    if (muzak) {
+    if (!muzak_collection.empty()) {
         if (layer < 0) {
             for (int i = 0; i < muzak_count; i++) {
-                muzak[i]._SetVolume(muzak[i].soft_vol + inc, false, 0.1);
+                muzak_collection[i]._SetVolume(muzak_collection[i].soft_vol + inc, false, 0.1);
             }
         } else if ((layer >= 0) && (layer < muzak_count)) {
-            muzak[layer]._SetVolume(muzak[layer].soft_vol + inc, false, 0.1);
+            muzak_collection[layer]._SetVolume(muzak_collection[layer].soft_vol + inc, false, 0.1);
         }
     }
 }
@@ -165,7 +165,7 @@ void Music::_SetVolume(float vol, bool hardware, float latency_override) {
     }
     this->vol = vol;
     this->soft_vol = vol;     //for now fixme for fading
-    for (std::list<int>::const_iterator iter = playingSource.begin(); iter != playingSource.end(); iter++) {
+    for (auto iter = playingSource.begin(); iter != playingSource.end(); ++iter) {
         AUDSoundGain(*iter, soft_vol, true);
     }
 
@@ -236,7 +236,7 @@ int Music::SelectTracks(int layer) {
     const bool should_shuffle = configuration().audio.shuffle_songs;
     const size_t maxrecent = configuration().audio.shuffle_songs_section.history_depth;
     std::string dj_script = configuration().audio.dj_script;
-    if ((BaseInterface::CurrentBase || loopsleft > 0) && lastlist < (int) playlist.size() && lastlist >= 0) {
+    if ((BaseInterface::CurrentBase || loopsleft > 0) && lastlist < static_cast<int>(playlist.size()) && lastlist >= 0) {
         if (loopsleft > 0) {
             loopsleft--;
         }
@@ -245,7 +245,7 @@ int Music::SelectTracks(int layer) {
                     ? VegaRandom::Instance().RandomInt32UpTo(playlist[lastlist].size() - 1)
                     : playlist[lastlist].counter++ % playlist[lastlist].size();
             int spincount = 10;
-            std::list<std::string> &recent = muzak[(layer >= 0) ? layer : 0].recent_songs;
+            std::list<std::string> &recent = muzak_collection[(layer >= 0) ? layer : 0].recent_songs;
             while (should_shuffle && (--spincount > 0)
                     && (std::find(recent.begin(), recent.end(), playlist[lastlist][whichsong]) != recent.end())) {
                 whichsong = VegaRandom::Instance().RandomInt32UpTo(playlist[lastlist].size() - 1);
@@ -261,7 +261,7 @@ int Music::SelectTracks(int layer) {
             return whichsong;
         }
     }
-    if (_Universe && _Universe->activeStarSystem() != NULL && _Universe->numPlayers()) {
+    if (_Universe && _Universe->activeStarSystem() != nullptr && _Universe->numPlayers()) {
         CompileRunPython(dj_script);
     } else {
         std::string loading_tune = configuration().audio.loading_sound;
@@ -270,7 +270,7 @@ int Music::SelectTracks(int layer) {
     return 0;
 }
 
-namespace Muzak {
+namespace muzak {
 std::map<std::string, AUDSoundProperties> cachedSongs;
 
 #ifndef _WIN32
@@ -286,8 +286,8 @@ readerThread(
         void *
 #endif
         input) {
-    Music *me = (Music *) input;
-    me->threadalive = 1;
+    Music *me = static_cast<Music *>(input);
+    me->threadalive = true;
     while (!me->killthread) {
 #ifdef _WIN32
         WaitForSingleObject( me->musicinfo_mutex, INFINITE );
@@ -301,7 +301,7 @@ readerThread(
         me->music_loaded = false;
         me->music_load_info->success = false;
         size_t len = me->music_load_info->hashname.length();
-        char *songname = (char *) malloc(len + 1);
+        char *songname = static_cast<char *>(malloc(len + 1));
         songname[len] = '\0';
         memcpy(songname, me->music_load_info->hashname.data(), len);
         std::map<std::string, AUDSoundProperties>::iterator wherecache = cachedSongs.find(songname);
@@ -309,7 +309,7 @@ readerThread(
         std::string cachable_songs = configuration().audio.cache_songs;
         bool docacheme = cachable_songs.find(songname) != std::string::npos;
         if (foundcache == false && docacheme) {
-            me->music_load_info->wave = NULL;
+            me->music_load_info->wave = nullptr;
             cachedSongs[songname] = *me->music_load_info;
             wherecache = cachedSongs.find(songname);
         }
@@ -338,8 +338,8 @@ readerThread(
         }
     }
 
-    me->threadalive = 0;
-    return NULL;
+    me->threadalive = false;
+    return nullptr;
 }
 }
 
@@ -352,13 +352,13 @@ void Music::_LoadLastSongAsync() {
     }
     std::string song = music_load_list.back();
 
-    std::map<std::string, AUDSoundProperties>::iterator where = Muzak::cachedSongs.find(song);
-    if (where != Muzak::cachedSongs.end()) {
-        if (where->second.wave != NULL) {
+    std::map<std::string, AUDSoundProperties>::iterator where = muzak::cachedSongs.find(song);
+    if (where != muzak::cachedSongs.end()) {
+        if (where->second.wave != nullptr) {
             int source = AUDBufferSound(&where->second, true);
             AUDStreamingSound(source);
 
-            music_load_info->wave = NULL;
+            music_load_info->wave = nullptr;
             if (source != -1) {
                 playingSource.push_back(source);
             }
@@ -440,8 +440,8 @@ void Music::Listen() {
                 }
             }
         }
-        if (playingSource.empty() && muzak[muzak_cross_index].playingSource.empty()
-                && music_load_list.empty() && muzak[muzak_cross_index].music_load_list.empty()) {
+        if (playingSource.empty() && muzak_collection[muzak_cross_index].playingSource.empty()
+                && music_load_list.empty() && muzak_collection[muzak_cross_index].music_load_list.empty()) {
             cur_song_file = "";
             _Skip();
         }
@@ -455,20 +455,20 @@ void Music::GotoSong(std::string mus, int layer) {
     const bool cross = configuration().audio.cross_fade_music;
     if (cross && (muzak_count >= 2)) {
         if (layer < 0) {
-            if (mus == muzak[muzak_cross_index].cur_song_file) {
+            if (mus == muzak_collection[muzak_cross_index].cur_song_file) {
                 return;
             }
-            muzak[muzak_cross_index]._StopLater();
+            muzak_collection[muzak_cross_index]._StopLater();
             muzak_cross_index = (muzak_cross_index ^ 1);
-            muzak[muzak_cross_index]._GotoSong(mus);
+            muzak_collection[muzak_cross_index]._GotoSong(mus);
         } else if ((layer >= 0) && (layer < muzak_count)) {
-            if (mus == muzak[layer].cur_song_file) {
+            if (mus == muzak_collection[layer].cur_song_file) {
                 return;
             }
-            muzak[layer]._GotoSong(mus);
+            muzak_collection[layer]._GotoSong(mus);
         }
     } else {
-        muzak->_GotoSong(mus);
+        muzak_collection.front()._GotoSong(mus);
     }
 }
 
@@ -496,14 +496,14 @@ void Music::_GotoSong(std::string mus) {
         music_load_list = rsplit(mus, "|");         //reverse order.
         if (!thread_initialized) {
 #ifdef _WIN32
-            a_thread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE) Muzak::readerThread, (PVOID) this, 0, NULL );
+            a_thread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE) muzak::readerThread, (PVOID) this, 0, NULL );
             if (a_thread){
                 thread_initialized = true;
             } else {
                 VS_LOG(error, (boost::format("Error creating music load thread: %1$d\n") % GetLastError()));
             }
 #else
-            int thread_create_ret = pthread_create(&a_thread, NULL, Muzak::readerThread, this);
+            int thread_create_ret = pthread_create(&a_thread, nullptr, muzak::readerThread, this);
             if (thread_create_ret == 0) {
                 thread_initialized = true;
             } else {
@@ -518,16 +518,16 @@ void Music::_GotoSong(std::string mus) {
 
 void Music::GotoSong(int whichlist, int whichsong, bool skip, int layer) {
     if (configuration().audio.music) {
-        if (whichsong != NOLIST && whichlist != NOLIST && whichlist < (int) playlist.size() && whichsong
-                < (int) playlist[whichlist].size()) {
-            if (muzak[(layer >= 0) ? layer : 0].lastlist != whichlist) {
+        if (whichsong != NOLIST && whichlist != NOLIST && whichlist < static_cast<int>(playlist.size()) && whichsong
+                < static_cast<int>(playlist[whichlist].size())) {
+            if (muzak_collection[(layer >= 0) ? layer : 0].lastlist != whichlist) {
                 if (configuration().audio.shuffle_songs_section.clear_history_on_list_change) {
-                    std::list<std::string> &recent = muzak[(layer >= 0) ? layer : 0].recent_songs;
+                    std::list<std::string> &recent = muzak_collection[(layer >= 0) ? layer : 0].recent_songs;
                     recent.clear();
                 }
             }
             if ((layer < 0) && (muzak_count >= 2)) {
-                muzak[0].lastlist = muzak[1].lastlist = whichlist;
+                muzak_collection[0].lastlist = muzak_collection[1].lastlist = whichlist;
             } else {
                 lastlist = whichlist;
             }
@@ -539,15 +539,15 @@ void Music::GotoSong(int whichlist, int whichsong, bool skip, int layer) {
 }
 
 void Music::SkipRandSong(int whichlist, int layer) {
-    if (muzak) {
+    if (!muzak_collection.empty()) {
         if (layer < 0) {
             if (muzak_count >= 2) {
-                muzak[muzak_cross_index]._SkipRandSong(whichlist);
+                muzak_collection[muzak_cross_index]._SkipRandSong(whichlist);
             } else {
-                muzak->_SkipRandSong(whichlist);
+                muzak_collection.front()._SkipRandSong(whichlist);
             }
         } else if ((layer >= 0) && (layer < muzak_count)) {
-            muzak[layer]._SkipRandSong(whichlist, layer);
+            muzak_collection[layer]._SkipRandSong(whichlist, layer);
         }
     }
 }
@@ -556,7 +556,7 @@ void Music::_SkipRandSong(int whichlist, int layer) {
     if (!configuration().audio.music) {
         return;
     }
-    if (whichlist != NOLIST && whichlist >= 0 && whichlist < (int) playlist.size()) {
+    if (whichlist != NOLIST && whichlist >= 0 && whichlist < static_cast<int>(playlist.size())) {
         lastlist = whichlist;
         const bool random = configuration().audio.shuffle_songs;
         if (playlist[whichlist].size()) {
@@ -573,15 +573,15 @@ void Music::SkipRandList(int layer) {
     if (!configuration().audio.music) {
         return;
     }
-    if (muzak) {
+    if (!muzak_collection.empty()) {
         if (layer < 0) {
             if (muzak_count >= 2) {
-                muzak[muzak_cross_index]._SkipRandList();
+                muzak_collection[muzak_cross_index]._SkipRandList();
             } else {
-                muzak->_SkipRandList();
+                muzak_collection.front()._SkipRandList();
             }
         } else if ((layer >= 0) && (layer < muzak_count)) {
-            muzak[layer]._SkipRandList(layer);
+            muzak_collection[layer]._SkipRandList(layer);
         }
     }
 }
@@ -606,12 +606,12 @@ int Music::Addlist(std::string listfile) {
         return -1;
     }
     int res = -1;
-    if (muzak) {
-        res = muzak->_Addlist(listfile);
+    if (!muzak_collection.empty()) {
+        res = muzak_collection.front()._Addlist(listfile);
     }
-    if (muzak) {
+    if (!muzak_collection.empty()) {
         for (int i = 1; i < muzak_count; i++) {
-            muzak[i]._Addlist(listfile);
+            muzak_collection[i]._Addlist(listfile);
         }
     }
     return res;
@@ -633,15 +633,15 @@ void Music::Skip(int layer) {
     if (!configuration().audio.music) {
         return;
     }
-    if (muzak) {
+    if (!muzak_collection.empty()) {
         if (layer < 0) {
             if (muzak_count >= 2) {
-                muzak[muzak_cross_index]._Skip();
+                muzak_collection[muzak_cross_index]._Skip();
             } else {
-                muzak->_Skip();
+                muzak_collection.front()._Skip();
             }
         } else if ((layer >= 0) && (layer < muzak_count)) {
-            muzak[layer]._Skip(layer);
+            muzak_collection[layer]._Skip(layer);
         }
     }
 }
@@ -654,7 +654,7 @@ void Music::_Skip(int layer) {
 
 Music::~Music() {
     if (threadalive && thread_initialized) {
-        killthread = 1;
+        killthread = true;
 #ifdef _WIN32
         ReleaseMutex( musicinfo_mutex );
 #else
@@ -688,50 +688,53 @@ void Music::SetParent(Unit *parent) {
 }
 
 void Music::InitMuzak() {
+    muzak_mutex.lock();
     muzak_count = configuration().audio.music_layers;
-    muzak = new Music[muzak_count];
+    muzak_collection.resize(muzak_count);
+    muzak_mutex.unlock();
 }
 
 void Music::CleanupMuzak() {
-    if (muzak) {
-        //Multithreading issues... don't care to waste time here waiting to get the lock back.
-        //Let the OS clean up this mess!
-        muzak = NULL;
+    if (!muzak_collection.empty()) {
+        Muzak::Stop();
+        muzak_mutex.lock();
+        muzak_collection.clear();
         muzak_count = 0;
+        muzak_mutex.unlock();
     }
 }
 
 void Music::MuzakCycle() {
-    if (muzak) {
-        if (BaseInterface::CurrentBase != NULL) {
+    if (!muzak_collection.empty()) {
+        if (BaseInterface::CurrentBase != nullptr) {
             if (!BaseInterface::CurrentBase->isDJEnabled()) {
                 // Bail out... they don't want us running
                 return;
             }
         }
         for (int i = 0; i < muzak_count; i++) {
-            muzak[i].Listen();
+            muzak_collection[i].Listen();
         }
     }
 }
 
 void Music::Stop(int layer) {
-    if (muzak) {
+    if (!muzak_collection.empty()) {
         if (layer < 0) {
             if (muzak_count >= 2) {
-                muzak[muzak_cross_index]._Stop();
+                muzak_collection[muzak_cross_index]._Stop();
             } else {
-                muzak->_Stop();
+                muzak_collection.front()._Stop();
             }
         } else if ((layer >= 0) && (layer < muzak_count)) {
-            muzak[layer]._Stop();
+            muzak_collection[layer]._Stop();
         }
     }
 }
 
 void Music::_StopNow() {
     if (configuration().audio.music) {
-        for (std::vector<int>::const_iterator iter = sounds_to_stop.begin(); iter != sounds_to_stop.end(); iter++) {
+        for (std::vector<int>::const_iterator iter = sounds_to_stop.begin(); iter != sounds_to_stop.end(); ++iter) {
             int sound = *iter;
             AUDStopPlaying(sound);
             AUDDeleteSound(sound, true);
@@ -742,7 +745,7 @@ void Music::_StopNow() {
 
 void Music::_StopLater() {
     if (configuration().audio.music) {
-        for (std::list<int>::const_iterator iter = playingSource.begin(); iter != playingSource.end(); iter++) {
+        for (std::list<int>::const_iterator iter = playingSource.begin(); iter != playingSource.end(); ++iter) {
             int sound = *iter;
             sounds_to_stop.push_back(sound);
         }
@@ -752,8 +755,8 @@ void Music::_StopLater() {
 
 void Music::_Stop() {
     if (configuration().audio.music) {
-        for (std::list<int>::const_iterator iter = playingSource.begin(); iter != playingSource.end(); iter++) {
-            int sound = *iter;
+        for (std::list<int>::const_iterator iter = playingSource.begin(); iter != playingSource.end(); ++iter) {
+            const int sound = *iter;
             AUDStopPlaying(sound);
             AUDDeleteSound(sound, true);
         }
@@ -762,13 +765,13 @@ void Music::_Stop() {
 }
 
 void Music::SetVolume(float vol, int layer, bool hardware, float latency_override) {
-    if (muzak) {
+    if (!muzak_collection.empty()) {
         if (layer < 0) {
             for (int i = 0; i < muzak_count; i++) {
-                muzak[i]._SetVolume(vol, hardware, latency_override);
+                muzak_collection[i]._SetVolume(vol, hardware, latency_override);
             }
         } else if ((layer >= 0) && (layer < muzak_count)) {
-            muzak[layer]._SetVolume(vol, hardware, latency_override);
+            muzak_collection[layer]._SetVolume(vol, hardware, latency_override);
         }
     }
 }
@@ -779,28 +782,28 @@ void Music::Mute(bool mute, int layer) {
     if (!configuration().audio.music) {
         return;
     }
-    if (muzak) {
+    if (!muzak_collection.empty()) {
         const float muting_fadeout = configuration().audio.music_muting_fade_out_flt;
         const float muting_fadein = configuration().audio.music_muting_fade_in_flt;
         if (layer < 0) {
             for (int i = 0; i < muzak_count; i++) {
                 if (mute) {
-                    if (muzak[i].soft_vol != 0) {
-                        saved_vol[i] = muzak[i].soft_vol;
-                        muzak[i]._SetVolume(0, false, muting_fadeout);
+                    if (muzak_collection[i].soft_vol != 0) {
+                        saved_vol[i] = muzak_collection[i].soft_vol;
+                        muzak_collection[i]._SetVolume(0, false, muting_fadeout);
                     }
                 } else if (saved_vol[i] >= 0) {
-                    muzak[i]._SetVolume(saved_vol[i], false, muting_fadein);
+                    muzak_collection[i]._SetVolume(saved_vol[i], false, muting_fadein);
                 }
             }
         } else if ((layer >= 0) && (layer < muzak_count)) {
             if (mute) {
-                if (muzak[layer].soft_vol != 0) {
-                    saved_vol[layer] = muzak[layer].soft_vol;
-                    muzak[layer]._SetVolume(0, false, muting_fadeout);
+                if (muzak_collection[layer].soft_vol != 0) {
+                    saved_vol[layer] = muzak_collection[layer].soft_vol;
+                    muzak_collection[layer]._SetVolume(0, false, muting_fadeout);
                 }
             } else if (saved_vol[layer] >= 0) {
-                muzak[layer]._SetVolume(saved_vol[layer], false, muting_fadein);
+                muzak_collection[layer]._SetVolume(saved_vol[layer], false, muting_fadein);
             }
         }
     }
@@ -810,15 +813,14 @@ void Music::SetLoops(int numloops, int layer) {
     if (!configuration().audio.music) {
         return;
     }
-    if (muzak) {
+    if (!muzak_collection.empty()) {
         if (layer < 0) {
             //This only will apply to the crossfading channel (layers 0 && 1)
             SetLoops(numloops, 0);
             SetLoops(numloops, 1);
         } else if ((layer >= 0) && (layer < muzak_count)) {
             //Specific channel
-            muzak[layer].loopsleft = numloops;
+            muzak_collection[layer].loopsleft = numloops;
         }
     }
 }
-

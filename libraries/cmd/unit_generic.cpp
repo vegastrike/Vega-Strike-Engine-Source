@@ -478,7 +478,7 @@ void Unit::Init(const char *filename,
         unit_key = filename;
         std::cout << "Reverted unit_key to " << filename;
     }
-    
+
 
     if (unit_key.empty()) {
         // This is actually used for upgrade checks.
@@ -540,7 +540,7 @@ void Unit::Derelict() {
     fuel.Downgrade();
     energy.Downgrade();
     ftl_energy.Downgrade();
-    
+
     afterburner.Downgrade();
     afterburner_upgrade.Downgrade();
     armor.Downgrade();
@@ -1732,10 +1732,10 @@ bool Unit::Explode(bool drawit, float timeit) {
                             //No victory for missiles or spawned explosions
                             if (rel > configuration().audio.victory_relationship_flt) {
                                 lasttime = newtime;
-                                muzak->SkipRandSong(Music::LOSSLIST);
+                                Muzak::SkipRandSong(Music::LOSSLIST);
                             } else if (rel < configuration().audio.loss_relationship_flt) {
                                 lasttime = newtime;
-                                muzak->SkipRandSong(Music::VICTORYLIST);
+                                Muzak::SkipRandSong(Music::VICTORYLIST);
                             }
                         }
                     }
@@ -2156,7 +2156,7 @@ bool Unit::UnDock(Unit *utdw) {
                     }
                 }
             }
-           
+
             // Send notification that a ship has undocked from a station
             _Universe->AccessCockpit()->OnDockEnd(utdw, this);
 

@@ -69,33 +69,33 @@ void ClientServerSetLightContext(int lightcontext) {
 
 namespace UniverseUtil {
 void playVictoryTune() {
-    muzak->GotoSong(configuration().audio.mission_victory_song);
+    Muzak::GotoSong(configuration().audio.mission_victory_song);
 }
 
 int musicAddList(string str) {
-    return muzak->Addlist(str.c_str());
+    return Muzak::Addlist(str);
 }
 
 void musicLayerSkip(int layer) {
-    muzak->Skip(layer);
+    Muzak::Skip(layer);
 }
 
 void musicLayerStop(int layer) {
-    muzak->Stop(layer);
+    Muzak::Stop(layer);
 }
 
 void musicLayerPlaySong(string str, int layer) {
-    muzak->GotoSong(str, layer);
+    Muzak::GotoSong(str, layer);
 }
 
 void musicLayerPlayList(int which, int layer) {
     if (which != -1) {
-        muzak->SkipRandSong(which, layer);
+        Muzak::SkipRandSong(which, layer);
     }
 }
 
 void musicLayerLoopList(int numloops, int layer) {
-    muzak->SetLoops(numloops, layer);
+    Muzak::SetLoops(numloops, layer);
 }
 
 void musicLayerSetSoftVolume(float vol, float latency_override, int layer) {
@@ -115,7 +115,7 @@ void musicSetHardVolume(float vol) {
 }
 
 void musicMute(bool stopSound) {
-    muzak->Mute(stopSound);
+    Muzak::Mute(stopSound);
 }
 
 void playSound(string soundName, QVector loc, Vector speed) {
