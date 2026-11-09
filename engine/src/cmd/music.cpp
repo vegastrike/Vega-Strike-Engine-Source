@@ -339,7 +339,11 @@ readerThread(
     }
 
     me->threadalive = false;
+#ifdef _WIN32
+    return 0;
+#else
     return nullptr;
+#endif
 }
 }
 
