@@ -12,6 +12,7 @@ import sys
 import os
 import subprocess
 import argparse
+import tempfile
 
 # Specification of Branches, Steps, and Legacy Tags
 MIGRATION_PLAN = [
@@ -277,7 +278,53 @@ def create_tree_from_svn(svn_tags_dir, svn_tag_subpath, git_dir, temp_index):
         
     return tree_sha
 
-def execute(git_dir, svn_tags_dir, temp_index, dry_run=True):
+def resolve_svn_tags_dir(svn_path):
+    """
+    Resolve the Subversion tags directory from either an SVN root directory
+    (which contains a 'tags' subdirectory) or a direct path to 'tags'.
+    """
+    if not svn_path:
+        return None
+    abs_path = os.path.abspath(os.path.expanduser(svn_path))
+    # If the user passed the SVN root containing a 'tags' subdirectory
+    tags_subdir = os.path.join(abs_path, "tags")
+    if os.path.isdir(tags_subdir):
+        return tags_subdir
+    # If it's already the tags directory
+    if os.path.isdir(abs_path):
+        return abs_path
+    return None
+
+def find_default_svn_dir(repo_dir):
+    """
+    Discover default SVN location from environment variable or standard relative paths.
+    """
+    env_dir = os.environ.get("VEGA_SVN_DIR") or os.environ.get("SVN_DIR")
+    if env_dir:
+        resolved = resolve_svn_tags_dir(env_dir)
+        if resolved:
+            return resolved
+
+    candidates = [
+        os.path.join(repo_dir, "..", "vegastrike-code"),
+        os.path.join(repo_dir, "..", "research", "vegastrike-code"),
+        os.path.join(repo_dir, "..", "..", "research", "vegastrike-code"),
+    ]
+    for cand in candidates:
+        resolved = resolve_svn_tags_dir(cand)
+        if resolved:
+            return resolved
+    return None
+
+def execute(git_dir, svn_source_dir, temp_index, dry_run=True):
+    svn_tags_dir = resolve_svn_tags_dir(svn_source_dir)
+    if not svn_tags_dir or not os.path.isdir(svn_tags_dir):
+        print(f"Error: Subversion tags directory could not be resolved from: {svn_source_dir}", file=sys.stderr)
+        print("Please specify a valid SVN repository root (containing 'tags/') or 'tags/' directory directly", file=sys.stderr)
+        print("via --svn-dir <path> or the VEGA_SVN_DIR environment variable.", file=sys.stderr)
+        print("Example: python3 script/migrate_legacy_svn_history.py --svn-dir /path/to/vegastrike-code", file=sys.stderr)
+        sys.exit(1)
+
     print(f"=== Vega Strike Git Legacy Migration (Dry Run: {dry_run}) ===\n")
     print(f"  Git Repo: {git_dir}")
     print(f"  SVN Tags: {svn_tags_dir}\n")
@@ -373,18 +420,26 @@ def execute(git_dir, svn_tags_dir, temp_index, dry_run=True):
 
 if __name__ == "__main__":
     repo_default = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    svn_default = "/home/bmeyer/Devel/opensource/vegastrike/research/vegastrike-code/tags"
+    default_svn = find_default_svn_dir(repo_default)
+    temp_index_default = os.path.join(tempfile.gettempdir(), "vega_migration_git_index")
     
     parser = argparse.ArgumentParser(description="Vega Strike Git Legacy Tag & Branch Migration Tool")
     parser.add_argument("--git-dir", default=repo_default, help=f"Path to Git repository (default: {repo_default})")
-    parser.add_argument("--svn-tags-dir", default=svn_default, help=f"Path to Subversion tags directory (default: {svn_default})")
-    parser.add_argument("--temp-index", default="/tmp/vega_migration_git_index", help="Temporary index file path")
+    parser.add_argument(
+        "--svn-dir",
+        "--svn-tags-dir",
+        dest="svn_dir",
+        default=default_svn,
+        help="Path to Subversion repository root (containing 'tags/') or to 'tags/' directory directly. "
+             "Can also be set via VEGA_SVN_DIR environment variable."
+    )
+    parser.add_argument("--temp-index", default=temp_index_default, help=f"Temporary index file path (default: {temp_index_default})")
     parser.add_argument("--execute", action="store_true", help="Perform real changes (default is dry-run)")
     args = parser.parse_args()
     
     execute(
         git_dir=args.git_dir,
-        svn_tags_dir=args.svn_tags_dir,
+        svn_source_dir=args.svn_dir,
         temp_index=args.temp_index,
         dry_run=not args.execute
     )

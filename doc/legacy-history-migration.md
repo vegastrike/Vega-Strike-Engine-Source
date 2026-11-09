@@ -148,17 +148,23 @@ The existing `classic` and `0.5.x` branches continue to serve as the active base
 The script [`script/migrate_legacy_svn_history.py`](file:///home/bmeyer/Devel/opensource/vegastrike/engine/Vega-Strike-Engine-Source/script/migrate_legacy_svn_history.py) automates the recreation and validation of these branches and tags.
 
 ### Prerequisites
-A local checkout of the Subversion repository containing the `tags` folder:
+A local checkout of the Subversion repository containing either the entire repository or the `tags/` directory:
 ```bash
+# Full SVN repository checkout
+svn checkout https://svn.code.sf.net/p/vegastrike/code /path/to/vegastrike-code
+
+# Or checkout only the tags directory
 svn checkout https://svn.code.sf.net/p/vegastrike/code/tags /path/to/vegastrike-code/tags
 ```
 
+The script accepts `--svn-dir <path>` pointing either to the SVN root (containing `tags/`) or directly to the `tags/` folder. It also respects the `VEGA_SVN_DIR` environment variable and searches standard relative paths (`../vegastrike-code`, `../../research/vegastrike-code`).
+
 ### Dry Run (Validation Mode)
 ```bash
-python3 script/migrate_legacy_svn_history.py --svn-tags-dir /path/to/vegastrike-code/tags
+python3 script/migrate_legacy_svn_history.py --svn-dir /path/to/vegastrike-code
 ```
 
 ### Execution Mode
 ```bash
-python3 script/migrate_legacy_svn_history.py --svn-tags-dir /path/to/vegastrike-code/tags --execute
+python3 script/migrate_legacy_svn_history.py --svn-dir /path/to/vegastrike-code --execute
 ```
