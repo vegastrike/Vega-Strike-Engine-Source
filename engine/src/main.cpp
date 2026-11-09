@@ -155,7 +155,8 @@ static std::once_flag game_cleanup_flag;
 static void DoGameCleanup(const bool should_be_clean_exit) {
     if (should_be_clean_exit) {
         // Output this message both to the console and to the logs
-        VS_LOG(important_info, "Thank you for playing!");
+        std::cout << "Thank you for playing!" << std::endl;
+        VS_LOG(info, "Thank you for playing!");
     }
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
     STATIC_VARS_DESTROYED = true;
