@@ -45,27 +45,38 @@ using namespace boost::filesystem;
 // This is a kludge. It runs python before
 // just to get the python paths.
 std::string GetPythonPath() {
-    Py_Initialize();
-    wchar_t* w_path_ptr = Py_GetPath();
-    Py_Finalize();
+    bool py_was_already_initialized = Py_IsInitialized();
+    if (!py_was_already_initialized) {
+        Py_Initialize();
+    }
 
+    wchar_t* w_path_ptr = Py_GetPath();
     std::wstring w_path_w( w_path_ptr );
     std::string path( w_path_w.begin(), w_path_w.end() );
+
+    if (!py_was_already_initialized) {
+        Py_Finalize();
+    }
 
     return path;
 }
 
 
 
-// A utility function to call a function and get a PyObject as a result
+/// A utility function to call a function and get a PyObject as a result.
+/// NOTE: This function no longer calls Py_Finalize() before returning. That resulted in a dangling pointer being returned.
+/// The caller is now responsible to call Py_Finalize() when appropriate.
 PyObject* GetClassFromPython(
     const std::string build_path,
     const std::string path_string,
     const std::string datadir,
     const std::string module_name,
     const std::string function_name) {
+
     boost::filesystem::path full_path = boost::filesystem::path(path_string);
     boost::filesystem::current_path(full_path);
+
+    bool py_was_already_initialized = Py_IsInitialized();
 
     if(!boost::filesystem::exists(module_name + ".py")) {
         // TODO: throw exception
@@ -131,12 +142,14 @@ PyObject* GetClassFromPython(
     config.module_search_paths = python_path_py_wide_string_list;
     config.isolated = 0;
 
-    status = Py_InitializeFromConfig(&config);
-    if (PyStatus_Exception(status)) {
-        std::cerr << "Python config initialization failed" << std::endl << std::flush;
-        PyErr_Print();
-        PyConfig_Clear(&config);
-        Py_ExitStatusException(status);
+    if (!py_was_already_initialized) {
+        status = Py_InitializeFromConfig(&config);
+        if (PyStatus_Exception(status)) {
+            std::cerr << "Python config initialization failed" << std::endl << std::flush;
+            PyErr_Print();
+            PyConfig_Clear(&config);
+            Py_ExitStatusException(status);
+        }
     }
 
     PyObject* module = PyImport_ImportModule(module_name.c_str());
@@ -160,7 +173,6 @@ PyObject* GetClassFromPython(
 
 
     PyObject* pyResult = PyObject_CallObject(function, nullptr);
-    Py_Finalize();
 
     return pyResult;
 }
