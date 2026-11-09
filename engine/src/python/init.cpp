@@ -203,7 +203,7 @@ void Python::init() {
     config.isolated = 1;
 
     // Now we can do python things about them and initialize them
-    Py_Initialize();
+    // Py_Initialize();
     status = Py_InitializeFromConfig(&config);
     if (PyStatus_Exception(status)) {
         VS_LOG_AND_FLUSH(fatal, "Python::init(): Py_InitializeFromConfig failed");
@@ -213,7 +213,7 @@ void Python::init() {
         Py_ExitStatusException(status);
     }
 
-    boost::python::import("base_computer"); // REQUIRED 
+    boost::python::import("base_computer"); // REQUIRED
     initpaths();
 
 #if BOOST_VERSION != 102800
