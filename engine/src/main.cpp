@@ -185,9 +185,19 @@ static void DoGameCleanup(const bool should_be_clean_exit) {
     Music::CleanupMuzak();
     AUDDestroy();
 
-    if (Py_IsInitialized()) {
-        Py_Finalize();
-    }
+    // // Clear cached PyObject pointers before Py_Finalize() to prevent the
+    // // global compiled_python hashtable from holding dangling pointers that
+    // // corrupt Python's GC during static destruction after exit.
+    // // Decrement reference counts for all cached PyCodeObjects first.
+    // for (auto &pair : compiled_python) {
+    //     Py_XDECREF(pair.second);
+    // }
+    // compiled_python.clear();
+    //
+    // Don't call this explicitly -- leads to segfaults on exit
+    // if (Py_IsInitialized()) {
+    //     Py_Finalize();
+    // }
     if (splash_screen != nullptr) {
         delete splash_screen;
         splash_screen = nullptr;
