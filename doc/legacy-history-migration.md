@@ -168,3 +168,60 @@ python3 script/migrate_legacy_svn_history.py --svn-dir /path/to/vegastrike-code
 ```bash
 python3 script/migrate_legacy_svn_history.py --svn-dir /path/to/vegastrike-code --execute
 ```
+
+---
+
+## 7. Python Engine API Evolution (0.1.x – 0.5.0)
+
+The game assets (missions, base interfaces, campaigns, dynamic universe logic, AI behaviors) interface with the engine through embedded Python modules. This section records the architectural evolution of the Python API from its introduction in late 2001 up through the `0.5.0` milestone.
+
+For modern API revisions (0.6.x through 0.11.x / API Versions 1–3), see [doc/Engine-API.md](Engine-API.md).
+
+```mermaid
+flowchart LR
+    M01["0.1.x (2001)<br>Boost.Python Intro<br>Config Variables"] --> M02["0.2.x (2002)<br>VS, UnitWrapper, Briefing<br>AI Scripting, Director"]
+    M02 --> M03["0.3.x (2003)<br>Base System & Rooms<br>Cargo, Comm, Math"]
+    M03 --> M04["0.4.x (2003-2005)<br>Unit Iterator (un_iter)<br>Dynamic Base UI"]
+    M04 --> M05["0.5.0 (2008)<br>Ship Dealer, Video<br>Audio Layers, Repairs"]
+```
+
+### 7.1 Release Line Breakdown
+
+#### Branch `0.1.x` (1999–early 2002): Introduction of Embedded Python
+- **`legacy_vegastrike_0.1.0` (Nov 2001)**: Engine had no Python integration.
+- **`legacy_vegastrike_0.1.3` (Jan 2002)**: Python first integrated on **November 12, 2001** via Boost.Python (`src/python/init.cpp`), exposing `config_xml` variables to allow scripts to query and manipulate engine settings.
+
+#### Branch `0.2.x` (2002): Core Simulation & Unit Wrapper
+- **`legacy_release-0-2-0` through `legacy_vegastrike_0_2_9`**: Development of initial AI scripting bridge (`pythonai.cpp`) and unit bindings.
+- **`legacy_vegastrike_0_2_9_4` (Aug 2002 Milestone)**:
+  - **`VS` Module**: Introduced with 48 universe, player, and mission functions (`getPlayer`, `launch`, `AdjustRelation`, `GetFactionIndex`, `GetFactionName`, `GetAdjacentSystem`, `SafeEntrancePoint`, `SetDifficulty`, `numActiveMissions`).
+  - **`VS.Unit` Class**: First comprehensive `UnitWrapper` exposing 93 methods for navigation, shields, combat, docking, and flightgroup coordination (`AutoPilotTo`, `Position`, `GetVelocity`, `GetAngularVelocity`, `DealDamageToHull`, `Dock`, `UnDock`, `SetTurretAI`, `DisableTurretAI`, `LockMissile`, `FShieldData`, `BShieldData`, `rSize`, `isPlayerStarship`).
+  - **`Director` Module**: Introduced with 7 persistence and execution functions (`Execute`, `Pickle`, `UnPickle`, `getSaveData`, `putSaveData`, `getSaveDataLength`, `pushSaveData`).
+  - **`Briefing` Module**: Introduced with 10 cinematic camera and ship orchestration functions (`addShip`, `removeShip`, `enqueueOrder`, `replaceOrder`, `getShipPosition`, `setShipPosition`, `setCamPosition`, `setCamOrientation`, `setCloak`, `terminate`).
+
+#### Branch `0.3.x` (2003): Base Screen System, Cargo & Steering
+- **`legacy_vegastrike_0_3_0` (Jan 2003)**:
+  - **`Base` Module**: Introduced with 17 functions, providing the foundation for 2D/3D station and planetary base screens (`Room`, `Link`, `Texture`, `Comp`, `Ship`, `Launch`, `Message`, `EnqueueMessage`, `Python`, `LaunchPython`, `CompPython`, `GetCurRoom`, `GetNumRoom`).
+  - **`PythonAI` Class**: Expanded with 19 behavioral steering methods (`ChooseTarget`, `FaceTarget`, `FaceTargetITTS`, `MatchVelocity`, `MatchAngularVelocity`, `MoveTo`, `FormUp`, `XMLScript`, `LastPythonScript`).
+  - **`VS` Math Helpers**: Exposes native trigonometric and mathematical functions directly into `VS` (`sin`, `cos`, `tan`, `asin`, `acos`, `atan`, `sqrt`, `exp`, `log`).
+  - **`VS.Unit` Cargo & ECM**: Added cargo management (`addCargo`, `removeCargo`, `GetCargo`, `GetCargoIndex`, `hasCargo`, `incrementCargo`, `decrementCargo`), ship-to-ship communications (`communicateTo`, `commAnimation`), ECM controls (`getECM`, `setECM`), and interstellar jumping (`JumpTo`).
+- **`legacy_vegastrike_0_3_9` (Jun 2003)**:
+  - **`Director` String Persistence**: Added string-based save data storage (`pushSaveString`, `putSaveString`, `getSaveString`, `eraseSaveString`).
+  - **Galaxy Properties & Factions**: Added `VS.GetGalaxyFaction`, `VS.SetGalaxyFaction`, `VS.GetGalaxyPropertyDefault`, `VS.TargetEachOther`, `VS.StopTargettingEachOther`.
+  - **Targeting & Combat Geometry**: Added `Unit.ApplyDamage`, `Unit.GetOrientation`, `Unit.GetTarget`, `Unit.SetTarget`, `Unit.Kill`, `Unit.cosAngleTo`, `Unit.cosAngleToITTS`, `Unit.InsideCollideTree`.
+
+#### Branch `0.4.x` (2003–2005): Iterators & Dynamic Base UI
+- **`legacy_vegastrike_0_4_0` (Oct 2003)**:
+  - **Unit Iterator (`VS.un_iter`)**: Introduced `UniverseUtil::PythonUnitIter` wrapping game universe units for iteration (`advance`, `current`, `isDone`, `next`, `preinsert`, `remove`).
+- **`legacy_vegastrike_0_4_3` (Feb 2005)**:
+  - **Dynamic Base UI**: Added text boxes, scripts, and room messaging: `Base.TextBox`, `Base.SetTextBoxText`, `Base.RunScript`, `Base.SetCurRoom`, `Base.MessageToRoom`, `Base.EnqueueMessageToRoom`.
+  - **Combat Roles & Docking**: Added `Unit.forceAddCargo`, `Unit.removeWeapon`, `Unit.getCombatRole`, `Unit.isDockableUnit`.
+  - **Sound & Stat Lookups**: Added `VS.StopAllSounds`, `VS.LookupUnitStat`, `VS.precacheUnit`, `VS.vsConfig`.
+
+#### Release `0.5.0` (2008): Commercial Shipyards, Media & Maintenance
+- **Ship Dealer & Custom Base Interfaces**: Added `Base.LoadBaseInterface`, `Base.BuyShip`, `Base.SellShip`, `Base.ExitGame`, `Base.GlobalKeyPython`, `Base.SetLinkArea`, `Base.SetLinkText`, `Base.SetLinkRoom`, `Base.SetLinkPython`, `Base.SetMouseEventData`.
+- **Base Video Playback**: Introduced `Base.Video` and `Base.VideoStream` (video cutscenes in rooms).
+- **Dynamic Multi-Track Music Layering**: Added layered soundtrack control in `VS` (`musicLayerPlayList`, `musicLayerPlaySong`, `musicLayerLoopList`, `musicLayerStop`, `musicLayerSkip`, `musicLayerSetSoftVolume`, `musicLayerSetHardVolume`).
+- **Unit Maintenance & Damage Assessment**: Added `Unit.PercentOperational`, `Unit.MountPercentOperational`, `Unit.RepairCost`, `Unit.RepairUpgrade`, `Unit.RecomputeUnitUpgrades`.
+- **Specialized Unit Iterators**: Added categorized iterator traversal methods to `VS.un_iter`: `advancePlanet`, `advanceJumppoint`, `advanceSignificant`, `advanceInsignificant` (along with step multipliers `advanceN*`).
+- **Save Game Management**: Added `VS.saveGame`, `VS.loadGame`, `VS.getCurrentSaveGame`, `VS.getNewGameSaveName`, `VS.getSaveInfo`, `VS.getSaveDir`.
