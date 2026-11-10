@@ -23,38 +23,39 @@ Branches:
   `<SDL2/SDL.h>` on `master`.
 - `0.5.4` — an older LTS lineage that shares these repositories but diverged from `master` in 2013.
   It is not a branch of `master`; changes generally do not belong on both.
+- Every other `0.[n].x` / `0.[n].[m]` branch is historical and unmaintained. Do not target one with
+  new work, and do not open pull requests against them.
 
 ## Build and test
 
-Dependencies: `sudo script/bootstrap` on Linux/macOS (the README lists the packages for the manual
-route).
+Use the scripts in `script/`. They exist so that bootstrapping, building, testing, installing and
+packaging each have one canonical way of being done, and they are what CI calls:
 
 ```bash
-# configure and build with a preset
-cmake --preset linux-ninja-pie-enabled-glvnd-debug
-cmake --build build/linux-ninja-pie-enabled-glvnd-debug -j "$(nproc)"
-
-# or the wrapper, which also copies the results into bin/
-./script/build --preset-name=linux-unix-makefiles-pie-enabled-glvnd-RelWithDebInfo
+sudo script/bootstrap                    # install build dependencies
+script/build --preset-name=<preset-name> # configure, build, copy the results into bin/
+script/test  --preset-name=<preset-name> # run the GoogleTest suite
 ```
+
+`script/install`, `script/package`, `script/clean` and `script/setup` cover the remaining tasks, and
+`script/cibuild` is the CI entry point. PowerShell equivalents live alongside as `*.ps1`.
 
 Preset names follow `[platform]-[generator]-[pie]-[gl]-[build-type]`; `CMakePresets.json` is the
-source of truth. Build trees go under `build/<preset-name>/`. The engine binary is
-`vegastrike-engine` — older scripts and documentation may still call it `vegastrike`.
+source of truth, and both `script/build` and `script/test` pick their preset by that name. Build
+trees go under `build/<preset-name>/`. If no script fits the task, the underlying commands are
+`cmake --preset <preset-name>` and `cmake --build build/<preset-name>` — but prefer the script.
+
+The engine binary is `vegastrike-engine` — older scripts and documentation may still call it
+`vegastrike`.
 
 **Unit tests** use GoogleTest, enabled by default (`USE_GTEST=ON`), covering the engine and the
-`libraries/` subprojects:
+`libraries/` subprojects.
 
-```bash
-cmake --build build/<preset> -j "$(nproc)"
-ctest --test-dir build/<preset> --output-on-failure
-```
-
-**A manual playtest is mandatory.** CI proves the tree compiles and links on each platform; it
-cannot tell you whether the game still plays. A change is judged against the manual test list in
-[wiki: Pull Request Validation][prv]. State in the PR description which of those tests you ran. An
-untested PR is closed, so if you cannot playtest the change, say so plainly instead of implying that
-you did.
+**A manual playtest is mandatory.** CI compiles, links and runs the GoogleTest suite on Linux, macOS
+and Windows; it still cannot tell you whether the game plays. A change is judged against the manual
+test list in [wiki: Pull Request Validation][prv]. State in the PR description which of those tests
+you ran. An untested PR is closed, so if you cannot playtest the change, say so plainly instead of
+implying that you did.
 
 ## Code layout
 
@@ -88,9 +89,10 @@ change in one is visible in the other. Know which path you are in before you edi
   `jump_capable`). `engine/src/cmd/` holds the engine-side pieces: bases, briefings, AI, factories,
   mission scripting, rendering of those objects. Look in `libraries/cmd/` first for anything about
   how an object behaves; look in `engine/src/cmd/` for how it is driven and drawn.
-- **Files ending in `_server.cpp` are the headless twins** of the same classes, built when the client
-  is disabled (`DISABLE_CLIENT`). A behaviour change in one often has to be mirrored in the other,
-  and building with `DISABLE_CLIENT=ON` is the quickest way to catch a variant you missed.
+- **`*_server.cpp` files are a relic of the old multiplayer mode** and are largely unmaintained. Do
+  not extend them with new behaviour, and do not treat them as the reference for how a class works.
+  `DISABLE_CLIENT` is legacy in the same way and is a candidate for replacement with CMake components
+  or removal — ask before building anything on it.
 - **Configuration reads go through the `GameConfig` accessors** in
   `engine/src/configuration/game_config.h` (`GetBool`, `GetFloat`, `GetDouble`, `GetString`, … by
   path into `config.json`). Add a value to the JSON and read it by path; do not hard-code a value
@@ -105,9 +107,10 @@ change in one is visible in the other. Know which path you are in before you edi
 - **Asset tooling** lives in `engine/objconv/` (`vega-meshtool`, `vs-buildenv-trisort`,
   `vs-buildenv-asteroidgen`, `vs-buildenv-replace`) and `engine/tools/`; it converts the art pipeline's
   output into what the engine loads, so asset-format questions usually start there.
-- **The CI matrix is the definition of "it builds"**: five Linux distributions, macOS and Windows
-  (`.github/workflows/`). Building locally with the same preset name, including its exact
-  `RelWithDebInfo` casing, reproduces what CI does.
+- **The CI matrix is the definition of "it builds" and "the tests pass"**: five Linux
+  distributions, macOS and Windows, each building and running the suite (`.github/workflows/`).
+  Building locally with the same preset name, including its exact `RelWithDebInfo` casing, reproduces
+  what CI does.
 
 ## Style
 
