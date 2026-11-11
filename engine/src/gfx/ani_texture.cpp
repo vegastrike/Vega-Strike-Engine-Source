@@ -32,6 +32,8 @@
 
 #include <vector>
 #include <cstdio>
+#include <cstring>
+#include <sstream>
 #include "root_generic/lin_time.h"
 #include "src/vegastrike.h"
 #include "vegadisk/vsfilesystem.h"
@@ -593,7 +595,7 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
     }                                                                                     //Added by Klauss
 
     active = 0;
-    int nf = (vidMode ? 1 : numframes);
+    const int nf = (vidMode ? 1 : numframes);
     Decal = new Texture *[nf]{};
     if (vidMode) {
         Decal[0] = new Texture;
@@ -602,10 +604,10 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
     char file[512] = "white.bmp";
     char alp[512] = "white.bmp";
     char opt[512] = "";
-    int i = 0, j = 0;
-    for (; i < static_cast<int>(numframes); i++) {
-        if (loadall || (i == midframe)) { //FIXME midframe used without guaranteed initialization
-            //if() added by Klauss
+    int j = 0;
+    const int num_frames = numframes;
+    for (int i = 0; i < num_frames; i++) {
+        if (loadall || (i == midframe)) {
             int numgets = 0;
             while (numgets <= 0 && !f.Eof()) {
                 if (f.ReadLine(temp, 511) == Ok) {
@@ -697,7 +699,7 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
 }
 
 void AnimatedTexture::LoadFrame(int frame) {
-    if (!vidMode || (Decal == NULL) || (*Decal == NULL)) {
+    if (!vidMode || (Decal == nullptr) || (*Decal == nullptr)) {
         return;
     }
     if ((frame < 0) || (frame >= static_cast<int>(numframes))) {
