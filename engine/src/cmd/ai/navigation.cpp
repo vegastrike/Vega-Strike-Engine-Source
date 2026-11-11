@@ -696,8 +696,7 @@ void AutoLongHaul::Execute() {
     // the docking distance, which is the whole purpose of setting it.
     const double configured_distance_to_stop = configuration().physics.auto_pilot_termination_distance_dbl;
     const double distance_to_stop = std::max(configured_distance_to_stop, DockingDistance(target));
-    // Time left to fly before the stop point, not before the target. One simulation atom plus the
-    // ramp-down time, so the ramp finishes as the ship arrives rather than after it.
+    // Time left to fly before the stop point, not before the target.
     const float time_left_to_stop = static_cast<float>(std::max(0.0, dis - distance_to_stop) / maxspeed);
 
     const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
@@ -706,7 +705,13 @@ void AutoLongHaul::Execute() {
     if (rampdown) {
         time_to_stop += warprampdowntime;
     }
-    if (time_left_to_stop <= time_to_stop) {
+    // Warp goes off at the stop point itself: the player sets the docking distance, and the autopilot
+    // hands over there, so SPEC must end there too. The ramp-down that follows still carries the ship
+    // forward, which is harmless inside a planet's docking zone but not in front of a station, so the
+    // early trigger stays for targets whose zone is shorter than the distance the ramp covers.
+    const double ramp_distance = maxspeed * time_to_stop;
+    const bool ramp_fits_in_zone = ramp_distance < distance_to_stop;
+    if (time_left_to_stop <= 0.0F || (!ramp_fits_in_zone && time_left_to_stop <= time_to_stop)) {
         deactivatewarp = true;
     }
     if (DistanceWarrantsWarpTo(parent,
