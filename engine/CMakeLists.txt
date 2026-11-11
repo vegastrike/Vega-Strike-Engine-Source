@@ -347,6 +347,7 @@ SET(LIBCMDSERVER_SOURCES
 SET(LIBGFXCLIENT_SOURCES
     src/gfx/ani_texture.cpp
     src/gfx/ani_texture_utils.cpp
+    src/gfx/ani_texture_utils.h
     src/gfx/animation.cpp
     src/gfx/aux_logo.cpp
     src/gfx/aux_palette.cpp

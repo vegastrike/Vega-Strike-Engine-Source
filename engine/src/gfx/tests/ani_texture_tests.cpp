@@ -33,57 +33,57 @@
 
 
 // -------------------------------------------------------------------
-// isNoAlphamapToken tests
+// IsNoAlphamapToken tests
 // -------------------------------------------------------------------
 
 TEST(AniTextureUtils, IsNoAlphamapToken_empty_string) {
-    EXPECT_TRUE(isNoAlphamapToken(""));
+    EXPECT_TRUE(IsNoAlphamapToken(""));
 }
 
 TEST(AniTextureUtils, IsNoAlphamapToken_dash) {
-    EXPECT_TRUE(isNoAlphamapToken("-"));
+    EXPECT_TRUE(IsNoAlphamapToken("-"));
 }
 
 TEST(AniTextureUtils, IsNoAlphamapToken_true_lowercase) {
-    EXPECT_TRUE(isNoAlphamapToken("true"));
+    EXPECT_TRUE(IsNoAlphamapToken("true"));
 }
 
 TEST(AniTextureUtils, IsNoAlphamapToken_false_lowercase) {
-    EXPECT_TRUE(isNoAlphamapToken("false"));
+    EXPECT_TRUE(IsNoAlphamapToken("false"));
 }
 
 TEST(AniTextureUtils, IsNoAlphamapToken_true_uppercase) {
-    EXPECT_TRUE(isNoAlphamapToken("TRUE"));
+    EXPECT_TRUE(IsNoAlphamapToken("TRUE"));
 }
 
 TEST(AniTextureUtils, IsNoAlphamapToken_false_uppercase) {
-    EXPECT_TRUE(isNoAlphamapToken("FALSE"));
+    EXPECT_TRUE(IsNoAlphamapToken("FALSE"));
 }
 
 TEST(AniTextureUtils, IsNoAlphamapToken_true_mixed_case) {
-    EXPECT_TRUE(isNoAlphamapToken("TrUe"));
+    EXPECT_TRUE(IsNoAlphamapToken("TrUe"));
 }
 
 TEST(AniTextureUtils, IsNoAlphamapToken_false_mixed_case) {
-    EXPECT_TRUE(isNoAlphamapToken("FaLsE"));
+    EXPECT_TRUE(IsNoAlphamapToken("FaLsE"));
 }
 
 TEST(AniTextureUtils, IsNoAlphamapToken_filename) {
-    EXPECT_FALSE(isNoAlphamapToken("alphamap.bmp"));
+    EXPECT_FALSE(IsNoAlphamapToken("alphamap.bmp"));
 }
 
 TEST(AniTextureUtils, IsNoAlphamapToken_random_string) {
-    EXPECT_FALSE(isNoAlphamapToken("something_else"));
+    EXPECT_FALSE(IsNoAlphamapToken("something_else"));
 }
 
 
 // -------------------------------------------------------------------
-// parseAniLine tests
+// ParseAniLine tests
 // -------------------------------------------------------------------
 
 TEST(AniTextureUtils, ParseAniLine_single_token) {
     char file[512], alp[512], opt[512];
-    int count = parseAniLine("image.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int count = ParseAniLine("image.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 1);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "");
@@ -92,7 +92,7 @@ TEST(AniTextureUtils, ParseAniLine_single_token) {
 
 TEST(AniTextureUtils, ParseAniLine_two_tokens) {
     char file[512], alp[512], opt[512];
-    int count = parseAniLine("image.bmp alpha.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int count = ParseAniLine("image.bmp alpha.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 2);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "alpha.bmp");
@@ -101,7 +101,7 @@ TEST(AniTextureUtils, ParseAniLine_two_tokens) {
 
 TEST(AniTextureUtils, ParseAniLine_three_tokens) {
     char file[512], alp[512], opt[512];
-    int count = parseAniLine("image.bmp alpha.bmp addressMode=wrap", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int count = ParseAniLine("image.bmp alpha.bmp addressMode=wrap", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 3);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "alpha.bmp");
@@ -110,7 +110,7 @@ TEST(AniTextureUtils, ParseAniLine_three_tokens) {
 
 TEST(AniTextureUtils, ParseAniLine_options_with_spaces) {
     char file[512], alp[512], opt[512];
-    int count = parseAniLine("image.bmp alpha.bmp addressMode=wrap mins=0 mint=0",
+    int count = ParseAniLine("image.bmp alpha.bmp addressMode=wrap mins=0 mint=0",
                              file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 3);
     EXPECT_STREQ(file, "image.bmp");
@@ -120,7 +120,7 @@ TEST(AniTextureUtils, ParseAniLine_options_with_spaces) {
 
 TEST(AniTextureUtils, ParseAniLine_empty_line) {
     char file[512], alp[512], opt[512];
-    int count = parseAniLine("", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int count = ParseAniLine("", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 0);
     EXPECT_STREQ(file, "");
     EXPECT_STREQ(alp, "");
@@ -129,7 +129,7 @@ TEST(AniTextureUtils, ParseAniLine_empty_line) {
 
 TEST(AniTextureUtils, ParseAniLine_whitespace_only) {
     char file[512], alp[512], opt[512];
-    int count = parseAniLine("   \t  ", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int count = ParseAniLine("   \t  ", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 0);
     EXPECT_STREQ(file, "");
     EXPECT_STREQ(alp, "");
@@ -138,7 +138,7 @@ TEST(AniTextureUtils, ParseAniLine_whitespace_only) {
 
 TEST(AniTextureUtils, ParseAniLine_leading_whitespace) {
     char file[512], alp[512], opt[512];
-    int count = parseAniLine("  image.bmp alpha.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int count = ParseAniLine("  image.bmp alpha.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 2);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "alpha.bmp");
@@ -147,37 +147,37 @@ TEST(AniTextureUtils, ParseAniLine_leading_whitespace) {
 
 TEST(AniTextureUtils, ParseAniLine_two_tokens_with_dash_alphamap) {
     char file[512], alp[512], opt[512];
-    int count = parseAniLine("image.bmp -", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int count = ParseAniLine("image.bmp -", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 2);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "-");
     EXPECT_STREQ(opt, "");
     // The dash is a no-alphamap token
-    EXPECT_TRUE(isNoAlphamapToken(alp));
+    EXPECT_TRUE(IsNoAlphamapToken(alp));
 }
 
 TEST(AniTextureUtils, ParseAniLine_two_tokens_with_true_alphamap) {
     char file[512], alp[512], opt[512];
-    int count = parseAniLine("image.bmp true", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int count = ParseAniLine("image.bmp true", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 2);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "true");
-    EXPECT_TRUE(isNoAlphamapToken(alp));
+    EXPECT_TRUE(IsNoAlphamapToken(alp));
 }
 
 TEST(AniTextureUtils, ParseAniLine_two_tokens_with_false_alphamap) {
     char file[512], alp[512], opt[512];
-    int count = parseAniLine("image.bmp false", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int count = ParseAniLine("image.bmp false", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 2);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "false");
-    EXPECT_TRUE(isNoAlphamapToken(alp));
+    EXPECT_TRUE(IsNoAlphamapToken(alp));
 }
 
 TEST(AniTextureUtils, ParseAniLine_buffer_overflow_protection) {
     // Use tiny buffers to verify truncation works
     char file[4], alp[4], opt[4];
-    int count = parseAniLine("verylongfilename.bmp anotherlongalpha.bmp someoptions",
+    int count = ParseAniLine("verylongfilename.bmp anotherlongalpha.bmp someoptions",
                              file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 3);
     // Should be truncated to 3 characters + null
@@ -191,7 +191,7 @@ TEST(AniTextureUtils, ParseAniLine_buffer_overflow_protection) {
 
 TEST(AniTextureUtils, ParseAniLine_null_output_buffers) {
     // Should not crash when output buffers are null
-    int count = parseAniLine("image.bmp alpha.bmp opts", nullptr, 0, nullptr, 0, nullptr, 0);
+    int count = ParseAniLine("image.bmp alpha.bmp opts", nullptr, 0, nullptr, 0, nullptr, 0);
     EXPECT_EQ(count, 3);
 }
 
@@ -201,22 +201,22 @@ TEST(AniTextureUtils, ParseAniLine_combined_check) {
     char file[512], alp[512], opt[512];
 
     // Case: two tokens, but alp is "true" — should be cleared
-    int count = parseAniLine("image.bmp true", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
-    if ((count < 2) || isNoAlphamapToken(alp)) {
+    int count = ParseAniLine("image.bmp true", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    if ((count < 2) || IsNoAlphamapToken(alp)) {
         alp[0] = '\0';
     }
     EXPECT_STREQ(alp, "");
 
     // Case: two tokens, real alphamap — should survive
-    count = parseAniLine("image.bmp alpha.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
-    if ((count < 2) || isNoAlphamapToken(alp)) {
+    count = ParseAniLine("image.bmp alpha.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    if ((count < 2) || IsNoAlphamapToken(alp)) {
         alp[0] = '\0';
     }
     EXPECT_STREQ(alp, "alpha.bmp");
 
     // Case: only one token — should be cleared
-    count = parseAniLine("image.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
-    if ((count < 2) || isNoAlphamapToken(alp)) {
+    count = ParseAniLine("image.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    if ((count < 2) || IsNoAlphamapToken(alp)) {
         alp[0] = '\0';
     }
     EXPECT_STREQ(alp, "");

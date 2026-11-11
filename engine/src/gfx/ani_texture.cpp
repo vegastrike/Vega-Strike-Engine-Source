@@ -601,8 +601,8 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
                     opt[0] = 'z';
                     opt[1] = '\0';
 
-                    num_gets = parseAniLine(temp, file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
-                    if ((num_gets < 2) || isNoAlphamapToken(alp)) {
+                    num_gets = ParseAniLine(temp, file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+                    if ((num_gets < 2) || IsNoAlphamapToken(alp)) {
                         alp[0] = '\0';
                     }
                     alltrim(opt);
@@ -694,8 +694,8 @@ void AnimatedTexture::LoadFrame(int frame) {
     char file[512] = "white.bmp";
     char alp[512] = "white.bmp";
     char opt[512] = "";
-    int num_gets = parseAniLine(temp, file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
-    if ((num_gets < 2) || isNoAlphamapToken(alp)) {
+    int num_gets = ParseAniLine(temp, file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    if ((num_gets < 2) || IsNoAlphamapToken(alp)) {
         alp[0] = '\0';
     }
     string addr_mode_str = XMLSupport::parse_option_value(opt, "addressMode", "");

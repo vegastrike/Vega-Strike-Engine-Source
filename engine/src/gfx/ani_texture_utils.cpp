@@ -43,11 +43,11 @@ static bool tokenIs(const char *token, const char *word) {
     return *token == '\0';
 }
 
-bool isNoAlphamapToken(const char *token) {
+bool IsNoAlphamapToken(const char *token) {
     return token[0] == '\0' || strcmp(token, "-") == 0 || tokenIs(token, "true") || tokenIs(token, "false");
 }
 
-int parseAniLine(const char *line,
+int ParseAniLine(const char *line,
                  char *file_out, size_t file_size,
                  char *alp_out, size_t alp_size,
                  char *opt_out, size_t opt_size) {

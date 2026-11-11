@@ -34,7 +34,7 @@
 /// Parse a single line from an .ani file, extracting the image file, alphamap file,
 /// and options string.  Returns the number of tokens parsed (1, 2, or 3).
 /// This replaces the unsafe sscanf call that could overflow the fixed-size buffers.
-int parseAniLine(const char *line,
+int ParseAniLine(const char *line,
                  char *file_out, size_t file_size,
                  char *alp_out, size_t alp_size,
                  char *opt_out, size_t opt_size);
@@ -44,6 +44,6 @@ int parseAniLine(const char *line,
 /// carries its own alpha - but the line was being read as "image alphamapfile", so a
 /// flag became a filename to open, the alphamap load failed, and the frame never
 /// became a usable texture. Animated sprites drew nothing, silently.
-bool isNoAlphamapToken(const char *token);
+bool IsNoAlphamapToken(const char *token);
 
 #endif // VEGA_STRIKE_ENGINE_GFX_ANI_TEXTURE_UTILS_H
