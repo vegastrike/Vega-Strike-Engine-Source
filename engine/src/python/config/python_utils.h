@@ -27,8 +27,8 @@
 
 // -*- mode: c++; c-basic-offset: 4; indent-tabs-mode: nil -*-
 
-#ifndef VEGA_STRIKE_ENGINE_SRC_PYTHON_CONFIG_PYTHON_UTILS_U
-#define VEGA_STRIKE_ENGINE_SRC_PYTHON_CONFIG_PYTHON_UTILS_U
+#ifndef VEGA_STRIKE_ENGINE_SRC_PYTHON_CONFIG_PYTHON_UTILS_H
+#define VEGA_STRIKE_ENGINE_SRC_PYTHON_CONFIG_PYTHON_UTILS_H
 
 #define PY_SSIZE_T_CLEAN
 #include <boost/version.hpp>
@@ -161,4 +161,4 @@ UniquePyRef CallPythonFnPyArgs(PyObject *py_fn, UniquePyRef args);
 /// Call a Python function/method with a pre-packed Tuple of arguments
 UniquePyRef CallPythonFnPyArgs(UniquePyRef py_fn, UniquePyRef args);
 
-#endif //VEGA_STRIKE_ENGINE_SRC_PYTHON_CONFIG_PYTHON_UTILS_U
+#endif //VEGA_STRIKE_ENGINE_SRC_PYTHON_CONFIG_PYTHON_UTILS_H
