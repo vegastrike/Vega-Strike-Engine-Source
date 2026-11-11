@@ -26,11 +26,11 @@
  */
 
 
-#include <gtest/gtest.h>
-#include "gfx/ani_texture_utils.h"
-
 #include <cstring>
 
+#include <gtest/gtest.h>
+
+#include "gfx/ani_texture_utils.h"
 
 // -------------------------------------------------------------------
 // IsNoAlphamapToken tests
@@ -76,14 +76,13 @@ TEST(AniTextureUtils, IsNoAlphamapToken_random_string) {
     EXPECT_FALSE(IsNoAlphamapToken("something_else"));
 }
 
-
 // -------------------------------------------------------------------
 // ParseAniLine tests
 // -------------------------------------------------------------------
 
 TEST(AniTextureUtils, ParseAniLine_single_token) {
     char file[512], alp[512], opt[512];
-    int count = ParseAniLine("image.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int  count = ParseAniLine("image.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 1);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "");
@@ -92,7 +91,7 @@ TEST(AniTextureUtils, ParseAniLine_single_token) {
 
 TEST(AniTextureUtils, ParseAniLine_two_tokens) {
     char file[512], alp[512], opt[512];
-    int count = ParseAniLine("image.bmp alpha.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int  count = ParseAniLine("image.bmp alpha.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 2);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "alpha.bmp");
@@ -101,7 +100,8 @@ TEST(AniTextureUtils, ParseAniLine_two_tokens) {
 
 TEST(AniTextureUtils, ParseAniLine_three_tokens) {
     char file[512], alp[512], opt[512];
-    int count = ParseAniLine("image.bmp alpha.bmp addressMode=wrap", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int  count = ParseAniLine("image.bmp alpha.bmp addressMode=wrap", file, sizeof(file), alp, sizeof(alp), opt,
+                              sizeof(opt));
     EXPECT_EQ(count, 3);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "alpha.bmp");
@@ -110,8 +110,8 @@ TEST(AniTextureUtils, ParseAniLine_three_tokens) {
 
 TEST(AniTextureUtils, ParseAniLine_options_with_spaces) {
     char file[512], alp[512], opt[512];
-    int count = ParseAniLine("image.bmp alpha.bmp addressMode=wrap mins=0 mint=0",
-                             file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int count = ParseAniLine("image.bmp alpha.bmp addressMode=wrap mins=0 mint=0", file, sizeof(file), alp, sizeof(alp),
+                             opt, sizeof(opt));
     EXPECT_EQ(count, 3);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "alpha.bmp");
@@ -120,7 +120,7 @@ TEST(AniTextureUtils, ParseAniLine_options_with_spaces) {
 
 TEST(AniTextureUtils, ParseAniLine_empty_line) {
     char file[512], alp[512], opt[512];
-    int count = ParseAniLine("", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int  count = ParseAniLine("", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 0);
     EXPECT_STREQ(file, "");
     EXPECT_STREQ(alp, "");
@@ -129,7 +129,7 @@ TEST(AniTextureUtils, ParseAniLine_empty_line) {
 
 TEST(AniTextureUtils, ParseAniLine_whitespace_only) {
     char file[512], alp[512], opt[512];
-    int count = ParseAniLine("   \t  ", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int  count = ParseAniLine("   \t  ", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 0);
     EXPECT_STREQ(file, "");
     EXPECT_STREQ(alp, "");
@@ -138,7 +138,7 @@ TEST(AniTextureUtils, ParseAniLine_whitespace_only) {
 
 TEST(AniTextureUtils, ParseAniLine_leading_whitespace) {
     char file[512], alp[512], opt[512];
-    int count = ParseAniLine("  image.bmp alpha.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int  count = ParseAniLine("  image.bmp alpha.bmp", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 2);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "alpha.bmp");
@@ -147,7 +147,7 @@ TEST(AniTextureUtils, ParseAniLine_leading_whitespace) {
 
 TEST(AniTextureUtils, ParseAniLine_two_tokens_with_dash_alphamap) {
     char file[512], alp[512], opt[512];
-    int count = ParseAniLine("image.bmp -", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int  count = ParseAniLine("image.bmp -", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 2);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "-");
@@ -158,7 +158,7 @@ TEST(AniTextureUtils, ParseAniLine_two_tokens_with_dash_alphamap) {
 
 TEST(AniTextureUtils, ParseAniLine_two_tokens_with_true_alphamap) {
     char file[512], alp[512], opt[512];
-    int count = ParseAniLine("image.bmp true", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int  count = ParseAniLine("image.bmp true", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 2);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "true");
@@ -167,7 +167,7 @@ TEST(AniTextureUtils, ParseAniLine_two_tokens_with_true_alphamap) {
 
 TEST(AniTextureUtils, ParseAniLine_two_tokens_with_false_alphamap) {
     char file[512], alp[512], opt[512];
-    int count = ParseAniLine("image.bmp false", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int  count = ParseAniLine("image.bmp false", file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 2);
     EXPECT_STREQ(file, "image.bmp");
     EXPECT_STREQ(alp, "false");
@@ -177,8 +177,8 @@ TEST(AniTextureUtils, ParseAniLine_two_tokens_with_false_alphamap) {
 TEST(AniTextureUtils, ParseAniLine_buffer_overflow_protection) {
     // Use tiny buffers to verify truncation works
     char file[4], alp[4], opt[4];
-    int count = ParseAniLine("verylongfilename.bmp anotherlongalpha.bmp someoptions",
-                             file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    int  count = ParseAniLine("verylongfilename.bmp anotherlongalpha.bmp someoptions", file, sizeof(file), alp,
+                              sizeof(alp), opt, sizeof(opt));
     EXPECT_EQ(count, 3);
     // Should be truncated to 3 characters + null
     EXPECT_STRNE(file, "verylongfilename.bmp");
