@@ -690,7 +690,15 @@ void AutoLongHaul::Execute() {
     // from a planet's surface, from a unit's centre. The significant distance subtracts a fraction
     // of a planet's radius instead, which puts the stop 2500 past the docking distance at Atlantis.
     const double dis = DistanceTwoTargets(target, parent);
-    float time_to_destination = dis / maxspeed;
+    // Where the autopilot stops: the further of the configured termination distance and the target's
+    // docking distance. Declared here because SPEC must wind down before this point, not before the
+    // target -- otherwise the point at which SPEC switches off does not move when the player changes
+    // the docking distance, which is the whole purpose of setting it.
+    const double configured_distance_to_stop = configuration().physics.auto_pilot_termination_distance_dbl;
+    const double distance_to_stop = std::max(configured_distance_to_stop, DockingDistance(target));
+    // Time left to fly before the stop point, not before the target. One simulation atom plus the
+    // ramp-down time, so the ramp finishes as the ship arrives rather than after it.
+    const float time_left_to_stop = static_cast<float>(std::max(0.0, dis - distance_to_stop) / maxspeed);
 
     const bool rampdown = configuration().physics.auto_pilot_ramp_warp_down;
     const float warprampdowntime = configuration().physics.warp_ramp_down_time_flt;
@@ -698,7 +706,7 @@ void AutoLongHaul::Execute() {
     if (rampdown) {
         time_to_stop += warprampdowntime;
     }
-    if (time_to_destination <= time_to_stop) {
+    if (time_left_to_stop <= time_to_stop) {
         deactivatewarp = true;
     }
     if (DistanceWarrantsWarpTo(parent,
@@ -720,8 +728,6 @@ void AutoLongHaul::Execute() {
     // The autopilot hands over at the further of the configured termination distance and the target's
     // docking distance, where SPEC also stops, so it stops where the game asks it to without stopping
     // short of dockable.
-    const double configured_distance_to_stop = configuration().physics.auto_pilot_termination_distance_dbl;
-    const double distance_to_stop = std::max(configured_distance_to_stop, DockingDistance(target));
     const double enemy_distance_to_stop = configuration().physics.auto_pilot_termination_distance_enemy_dbl;
     const bool do_auto_finish = configuration().physics.auto_pilot_terminate;
     if (do_auto_finish
