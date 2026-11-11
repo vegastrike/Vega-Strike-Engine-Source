@@ -594,7 +594,7 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
 
     active = 0;
     int nf = (vidMode ? 1 : numframes);
-    Decal = new Texture *[nf];
+    Decal = new Texture *[nf]{};
     if (vidMode) {
         Decal[0] = new Texture;
     }
