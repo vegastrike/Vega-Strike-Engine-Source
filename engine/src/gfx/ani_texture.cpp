@@ -31,10 +31,10 @@
 #include "gfx/ani_texture_utils.h"
 #include "src/audiolib.h"
 
+#include <algorithm>
 #include <vector>
 #include <cstdio>
 #include <cstring>
-#include <sstream>
 #include "root_generic/lin_time.h"
 #include "src/vegastrike.h"
 #include "vegadisk/vsfilesystem.h"
@@ -43,20 +43,11 @@
 #include "root_generic/vega_random.h"
 #include "gldrv/gl_globals.h"
 #include <set>
-#include <cctype>
 #include <cmath>
 
 using std::set;
 
 static set<AnimatedTexture *> anis;
-
-static inline unsigned int intmin(unsigned int a, unsigned int b) {
-    return a < b ? a : b;
-}
-
-static inline unsigned int intmax(unsigned int a, unsigned int b) {
-    return a < b ? b : a;
-}
 
 static enum ADDRESSMODE parseAddressMode(const string &addrmodestr, ADDRESSMODE defaultAddressMode) {
     enum ADDRESSMODE addrmode = defaultAddressMode;
@@ -87,9 +78,9 @@ void AnimatedTexture::MakeActive(const int stage, const int pass) {
         if (GetLoop()) {
             active %= numframes;
         } else {
-            active = intmin(active, numframes - 1);
+            active = std::min(active, numframes - 1);
         }
-        unsigned int nextactive = (GetLoopInterp() ? ((active + 1) % numframes) : intmin(active + 1, numframes - 1));
+        unsigned int nextactive = (GetLoopInterp() ? ((active + 1) % numframes) : std::min(active + 1, numframes - 1));
         float fraction = (curtime / timeperframe) - static_cast<unsigned int>(curtime / timeperframe);
         if (fraction < 0) {
             fraction += 1.0f;
@@ -111,7 +102,7 @@ void AnimatedTexture::MakeActive(const int stage, const int pass) {
             }
         } else {
             if (GetInterpolateTCoord() && (active != nextactive)) {
-                if (frames_maxtc.size() < intmax(active, nextactive)) {
+                if (frames_maxtc.size() < std::max(active, nextactive)) {
                     this->maxtcoord = (1 - fraction) * frames_maxtc[active] + fraction * frames_maxtc[nextactive];
                     this->mintcoord = (1 - fraction) * frames_mintc[active] + fraction * frames_mintc[nextactive];
                 }
