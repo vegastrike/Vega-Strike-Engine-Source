@@ -32,7 +32,6 @@
 #include <cstring>
 #include <sstream>
 
-
 /// Case-insensitive token comparison: returns true if `token` equals `word`.
 static bool tokenIs(const char *token, const char *word) {
     for (; *word != '\0'; ++word, ++token) {
@@ -47,13 +46,11 @@ bool IsNoAlphamapToken(const char *token) {
     return token[0] == '\0' || strcmp(token, "-") == 0 || tokenIs(token, "true") || tokenIs(token, "false");
 }
 
-int ParseAniLine(const char *line,
-                 char *file_out, size_t file_size,
-                 char *alp_out, size_t alp_size,
-                 char *opt_out, size_t opt_size) {
+int ParseAniLine(const char *line, char *file_out, size_t file_size, char *alp_out, size_t alp_size, char *opt_out,
+                 size_t opt_size) {
     std::istringstream iss(line);
-    std::string file_str, alp_str, opt_str;
-    int num_gets = 0;
+    std::string        file_str, alp_str, opt_str;
+    int                num_gets = 0;
     if (iss >> file_str) {
         ++num_gets;
         if (iss >> alp_str) {
