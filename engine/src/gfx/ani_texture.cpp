@@ -623,25 +623,25 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
 
                     {
                         std::istringstream iss(temp);
-                        std::string fileStr, alpStr, optStr;
+                        std::string file_str, alp_str, opt_str;
                         num_gets = 0;
-                        if (iss >> fileStr) {
+                        if (iss >> file_str) {
                             ++num_gets;
-                            if (iss >> alpStr) {
+                            if (iss >> alp_str) {
                                 ++num_gets;
-                                std::getline(iss, optStr);
-                                auto firstNonSpace = optStr.find_first_not_of(" \t\r\n");
-                                if (firstNonSpace != std::string::npos) {
-                                    optStr = optStr.substr(firstNonSpace);
+                                std::getline(iss, opt_str);
+                                auto first_non_space = opt_str.find_first_not_of(" \t\r\n");
+                                if (first_non_space != std::string::npos) {
+                                    opt_str = opt_str.substr(first_non_space);
                                     ++num_gets;
                                 }
                             }
                         }
-                        strncpy(file, fileStr.c_str(), sizeof(file) - 1);
+                        strncpy(file, file_str.c_str(), sizeof(file) - 1);
                         file[sizeof(file) - 1] = '\0';
-                        strncpy(alp, alpStr.c_str(), sizeof(alp) - 1);
+                        strncpy(alp, alp_str.c_str(), sizeof(alp) - 1);
                         alp[sizeof(alp) - 1] = '\0';
-                        strncpy(opt, optStr.c_str(), sizeof(opt) - 1);
+                        strncpy(opt, opt_str.c_str(), sizeof(opt) - 1);
                         opt[sizeof(opt) - 1] = '\0';
                     }
                     if ((num_gets < 2) || IsNoAlphamapToken(alp)) {
@@ -737,27 +737,27 @@ void AnimatedTexture::LoadFrame(int frame) {
     char alp[512] = "white.bmp";
     char opt[512] = "";
     std::istringstream iss(temp);
-    std::string fileStr, alpStr, optStr;
+    std::string file_str, alp_str, opt_str;
     int num_gets = 0;
-    if (iss >> fileStr) {
+    if (iss >> file_str) {
         ++num_gets;
-        if (iss >> alpStr) {
+        if (iss >> alp_str) {
             ++num_gets;
-            std::getline(iss, optStr);
-            // Trim leading whitespace from optStr (getline picks up the space before the rest)
-            auto firstNonSpace = optStr.find_first_not_of(" \t\r\n");
-            if (firstNonSpace != std::string::npos) {
-                optStr = optStr.substr(firstNonSpace);
+            std::getline(iss, opt_str);
+            // Trim leading whitespace from opt_str (getline picks up the space before the rest)
+            auto first_non_space = opt_str.find_first_not_of(" \t\r\n");
+            if (first_non_space != std::string::npos) {
+                opt_str = opt_str.substr(first_non_space);
                 ++num_gets;
             }
         }
     }
     // Safely copy parsed strings into fixed-size buffers with bounds checking
-    strncpy(file, fileStr.c_str(), sizeof(file) - 1);
+    strncpy(file, file_str.c_str(), sizeof(file) - 1);
     file[sizeof(file) - 1] = '\0';
-    strncpy(alp, alpStr.c_str(), sizeof(alp) - 1);
+    strncpy(alp, alp_str.c_str(), sizeof(alp) - 1);
     alp[sizeof(alp) - 1] = '\0';
-    strncpy(opt, optStr.c_str(), sizeof(opt) - 1);
+    strncpy(opt, opt_str.c_str(), sizeof(opt) - 1);
     opt[sizeof(opt) - 1] = '\0';
     if ((num_gets < 2) || IsNoAlphamapToken(alp)) {
         alp[0] = '\0';
