@@ -28,6 +28,7 @@
 
 #include "cmd/unit_generic.h"
 #include "gfx/ani_texture.h"
+#include "gfx/ani_texture_utils.h"
 #include "src/audiolib.h"
 
 #include <vector>
@@ -46,27 +47,6 @@
 #include <cmath>
 
 using std::set;
-namespace {
-
-/// True for the tokens that stand in for "no alphamap" on a sprite's image line.
-/// The format puts a flag there - `-` for none, `true`/`false` for whether the image
-/// carries its own alpha - but the line was being read as "image alphamapfile", so a
-/// flag became a filename to open, the alphamap load failed, and the frame never
-/// became a usable texture. Animated sprites drew nothing, silently.
-bool TokenIs(const char *token, const char *word) {
-    for (; *word != '\0'; ++word, ++token) {
-        if (tolower(static_cast<unsigned char>(*token)) != *word) {
-            return false;
-        }
-    }
-    return *token == '\0';
-}
-
-bool IsNoAlphamapToken(const char *token) {
-    return token[0] == '\0' || strcmp(token, "-") == 0 || TokenIs(token, "true") || TokenIs(token, "false");
-}
-
-} // anonymous namespace
 
 static set<AnimatedTexture *> anis;
 
@@ -621,30 +601,8 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
                     opt[0] = 'z';
                     opt[1] = '\0';
 
-                    {
-                        std::istringstream iss(temp);
-                        std::string file_str, alp_str, opt_str;
-                        num_gets = 0;
-                        if (iss >> file_str) {
-                            ++num_gets;
-                            if (iss >> alp_str) {
-                                ++num_gets;
-                                std::getline(iss, opt_str);
-                                auto first_non_space = opt_str.find_first_not_of(" \t\r\n");
-                                if (first_non_space != std::string::npos) {
-                                    opt_str = opt_str.substr(first_non_space);
-                                    ++num_gets;
-                                }
-                            }
-                        }
-                        strncpy(file, file_str.c_str(), sizeof(file) - 1);
-                        file[sizeof(file) - 1] = '\0';
-                        strncpy(alp, alp_str.c_str(), sizeof(alp) - 1);
-                        alp[sizeof(alp) - 1] = '\0';
-                        strncpy(opt, opt_str.c_str(), sizeof(opt) - 1);
-                        opt[sizeof(opt) - 1] = '\0';
-                    }
-                    if ((num_gets < 2) || IsNoAlphamapToken(alp)) {
+                    num_gets = parseAniLine(temp, file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+                    if ((num_gets < 2) || isNoAlphamapToken(alp)) {
                         alp[0] = '\0';
                     }
                     alltrim(opt);
@@ -736,30 +694,8 @@ void AnimatedTexture::LoadFrame(int frame) {
     char file[512] = "white.bmp";
     char alp[512] = "white.bmp";
     char opt[512] = "";
-    std::istringstream iss(temp);
-    std::string file_str, alp_str, opt_str;
-    int num_gets = 0;
-    if (iss >> file_str) {
-        ++num_gets;
-        if (iss >> alp_str) {
-            ++num_gets;
-            std::getline(iss, opt_str);
-            // Trim leading whitespace from opt_str (getline picks up the space before the rest)
-            auto first_non_space = opt_str.find_first_not_of(" \t\r\n");
-            if (first_non_space != std::string::npos) {
-                opt_str = opt_str.substr(first_non_space);
-                ++num_gets;
-            }
-        }
-    }
-    // Safely copy parsed strings into fixed-size buffers with bounds checking
-    strncpy(file, file_str.c_str(), sizeof(file) - 1);
-    file[sizeof(file) - 1] = '\0';
-    strncpy(alp, alp_str.c_str(), sizeof(alp) - 1);
-    alp[sizeof(alp) - 1] = '\0';
-    strncpy(opt, opt_str.c_str(), sizeof(opt) - 1);
-    opt[sizeof(opt) - 1] = '\0';
-    if ((num_gets < 2) || IsNoAlphamapToken(alp)) {
+    int num_gets = parseAniLine(temp, file, sizeof(file), alp, sizeof(alp), opt, sizeof(opt));
+    if ((num_gets < 2) || isNoAlphamapToken(alp)) {
         alp[0] = '\0';
     }
     string addr_mode_str = XMLSupport::parse_option_value(opt, "addressMode", "");
