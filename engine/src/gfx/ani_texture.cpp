@@ -712,8 +712,29 @@ void AnimatedTexture::LoadFrame(int frame) {
     char file[512] = "white.bmp";
     char alp[512] = "white.bmp";
     char opt[512] = "";
+    std::istringstream iss(temp);
+    std::string fileStr, alpStr, optStr;
     int numgets = 0;
-    numgets = sscanf(temp, "%s %s %[^\r\n]", file, alp, opt);
+    if (iss >> fileStr) {
+        ++numgets;
+        if (iss >> alpStr) {
+            ++numgets;
+            std::getline(iss, optStr);
+            // Trim leading whitespace from optStr (getline picks up the space before the rest)
+            auto firstNonSpace = optStr.find_first_not_of(" \t\r\n");
+            if (firstNonSpace != std::string::npos) {
+                optStr = optStr.substr(firstNonSpace);
+                ++numgets;
+            }
+        }
+    }
+    // Safely copy parsed strings into fixed-size buffers with bounds checking
+    strncpy(file, fileStr.c_str(), sizeof(file) - 1);
+    file[sizeof(file) - 1] = '\0';
+    strncpy(alp, alpStr.c_str(), sizeof(alp) - 1);
+    alp[sizeof(alp) - 1] = '\0';
+    strncpy(opt, optStr.c_str(), sizeof(opt) - 1);
+    opt[sizeof(opt) - 1] = '\0';
     if ((numgets < 2) || IsNoAlphamapToken(alp)) {
         alp[0] = '\0';
     }
