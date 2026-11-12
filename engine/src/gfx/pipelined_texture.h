@@ -35,6 +35,9 @@ class PipelinedTexture : public Texture {
 //clone==2 means both current and last are clones 1 means last is a clone
     char clone;
 public:
+    using Texture::MakeActive;
+    using Texture::Original;
+
     bool operator==(const Texture &b) {
         return false;
     }
