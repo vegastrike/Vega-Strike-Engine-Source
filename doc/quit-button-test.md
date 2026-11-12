@@ -53,14 +53,16 @@ screen_x = WX + (50 + 177 * 0.9) * sx
 screen_y = WY + (580 + 43 / 2) * sy
 ```
 
-## Why Other Methods Failed
+## Input Method Notes
 
-| Method | Result | Reason |
-|--------|--------|--------|
-| `xdotool click` | Failed | xdotool cannot reliably interact with SDL windows under Xwayland |
+| Method | Result | Notes |
+|--------|--------|-------|
+| `xdotool mousemove --window` + `click` | **Worked** | Window-relative coordinates are reliable for menu buttons when using the `--window` flag |
 | `xdotool key` (Escape/Return/Down) | Failed | Keyboard navigation doesn't trigger Quit from main menu |
 | `wtype` (Wayland virtual keyboard) | Failed | Compositor doesn't support virtual keyboard protocol |
-| **PyAutoGUI** | **Success** | Works at the X11 input level, bypassing window focus issues |
+| PyAutoGUI | **Worked** | Works at the X11 input level |
+
+Both `xdotool` (with `--window` flag for window-relative coords) and PyAutoGUI can click menu buttons successfully. The key is ensuring the window is focused before sending input. PyAutoGUI was historically preferred, but `xdotool mousemove --window` was later confirmed to work reliably for menu buttons during the campaign launch test.
 
 ## PyAutoGUI Setup
 
