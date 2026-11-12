@@ -54,11 +54,11 @@ implying that you did.
 - install: `sudo script/bootstrap`                  # install build dependencies
 - build: `script/build --preset-name=<preset-name>` # configure, build, copy the results into bin/
 - test: `script/test --preset-name=<preset-name>`   # run the GoogleTest suite
-- lint: `clang-tidy -p build/<preset-name> <file>`
-- format: `clang-format -i <filename>`; prefer version 20 or 21
+- lint: `clang-tidy -p build/<preset-name> <file>`  # check one file against tidy rules
+- format: `clang-format -i <filename>`              # format in place; prefer version 20 or 21
 
-`script/install`, `script/package`, `script/clean` and `script/setup` cover the remaining tasks, and `script/cibuild` is
-the CI entry point. PowerShell equivalents live alongside as `*.ps1`.
+`script/install`, `script/package`, `script/clean` and `script/setup` cover the remaining tasks, and
+`script/cibuild` is the CI entry point. PowerShell equivalents live alongside as `*.ps1`.
 
 ## Critical Rules
 
@@ -89,7 +89,7 @@ the CI entry point. PowerShell equivalents live alongside as `*.ps1`.
 14. **Clean up only where you are working.** Dead configuration and stale comments in your area may
     go, in a commit separate from the functional change. Do not sweep the wider tree.
 15. **Leave no debug output behind**: no stray `printf`/`fprintf`/`std::cout`, no commented-out
-    experiments, no temporary files.
+    experiments, no temporary files. This is a merge-blocking invariant, not just debugging advice.
 16. **One logical change per commit**, with a message that says what changed and why. Keep a feature
     and a cleanup in separate commits.
 17. **Licensing is GPLv3-or-later.** Keep existing file headers intact. Under the AI policy in
