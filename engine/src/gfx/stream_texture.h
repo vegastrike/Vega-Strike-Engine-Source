@@ -33,6 +33,8 @@ class StreamTexture : public Texture {
     FILTER filtertype;
     int handle;
 public:
+    using Texture::MakeActive;
+
     StreamTexture(int width, int height, enum FILTER filtertype, unsigned char *origdata);
     ~StreamTexture() override;
     unsigned char *Map();
