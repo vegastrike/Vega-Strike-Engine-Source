@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
     const boost::filesystem::path program_name{program_path.filename()};  //canonical_program_path.filename();
     const boost::filesystem::path program_directory_path{program_path.parent_path()};
 
-    VSFileSystem::programdir = program_directory_path.string();
+    VSFileSystem::programdir = program_directory_path.generic_string();
 
     // This will be set later
     boost::filesystem::path home_subdir_path{};
@@ -265,7 +265,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "Legacy Mode: " << (legacy_data_dir_mode ? "TRUE" : "FALSE") << std::endl;
 
     if (legacy_data_dir_mode) {
-        VSFileSystem::datadir = boost::filesystem::current_path().string();
+        VSFileSystem::datadir = boost::filesystem::current_path().generic_string();
         std::cerr << "Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR" << std::endl;
     }
 
@@ -333,7 +333,7 @@ int main(int argc, char *argv[]) {
     // Ugly hack until we can find a way to redo all the directory initialization stuff properly.
     // Use the subdirectory "logs" under the Vega Strike home directory. Make sure we don't duplicate the ".vegastrike/" or ".pu/", etc. part.
     const boost::filesystem::path home_path{boost::filesystem::absolute(VSFileSystem::homedir)};
-    if (home_path.string().find(VSFileSystem::HOMESUBDIR) == std::string::npos) {
+    if (home_path.generic_string().find(VSFileSystem::HOMESUBDIR) == std::string::npos) {
         const boost::filesystem::path home_subdir(VSFileSystem::HOMESUBDIR);
         home_subdir_path = boost::filesystem::absolute(home_subdir, home_path);
     } else {
@@ -466,7 +466,7 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
         }
     }
 
-    static const ImGuiWindowFlags window_flags = 
+    static const ImGuiWindowFlags window_flags =
         ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoMove |
@@ -489,13 +489,14 @@ void bootstrap_draw(const std::string &message, Animation *newSplashScreen) {
     ImGui::Begin("main_window", nullptr, window_flags);
 
 
-    bs_tp->Draw(configuration().graphics.default_boot_message.length() > 0 ?
-            configuration().graphics.default_boot_message : message.length() > 0 ?
+    bs_tp->Draw(!configuration().graphics.default_boot_message.empty() ?
+            configuration().graphics.default_boot_message : !message.empty() ?
                     message : configuration().graphics.initial_boot_message);
 
     // ImGui End Frame
     ImGui::End();
-    // Rendering
+
+    // Always render the frame
     ImGui::Render();
 
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

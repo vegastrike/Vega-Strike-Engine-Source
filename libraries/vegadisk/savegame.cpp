@@ -288,7 +288,7 @@ bool isUtf8SaveGame(std::string filename) {
     boost::filesystem::path filename_path{filename};
     boost::filesystem::path save_dir_path{GetSaveDir()};
     boost::filesystem::path complete_path{boost::filesystem::absolute(filename_path, save_dir_path)};
-    std::string path{complete_path.string()};
+    std::string path{complete_path.generic_string()};
     std::vector<BYTE> savegame = readFile(path);
     Utf8Checker check;
     if (check.validUtf8(savegame)) {
@@ -1180,7 +1180,7 @@ string SetCurrentSaveGame(string newname) {
 }
 
 const string &GetSaveDir() {
-    static string ret_val{VSFileSystem::GetSavePath().string()};
+    static string ret_val{VSFileSystem::GetSavePath().generic_string()};
     if (ret_val.back() != '/') {
         ret_val += '/';
     }
@@ -1190,4 +1190,3 @@ const string &GetSaveDir() {
     // static string rv = VSFileSystem::homedir+"/save/";
     // return rv;
 }
-
