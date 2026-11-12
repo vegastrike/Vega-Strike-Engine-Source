@@ -32,8 +32,8 @@ one canonical way of being done, and they are what CI calls:
 
 ```bash
 sudo script/bootstrap                    # install build dependencies
-script/build --preset_name=<preset-name> # configure, build, copy the results into bin/
-script/test  --preset_name=<preset-name> # run the GoogleTest suite
+script/build --preset-name=<preset-name> # configure, build, copy the results into bin/
+script/test  --preset-name=<preset-name> # run the GoogleTest suite
 ```
 
 `script/install`, `script/package`, `script/clean` and `script/setup` cover the remaining tasks, and `script/cibuild` is
@@ -57,9 +57,9 @@ closed, so if you cannot playtest the change, say so plainly instead of implying
 ## Commands
 
 - install: `sudo script/bootstrap`
-- build: `script/build --preset_name=<preset-name>`
-- test: `script/test --preset_name=<preset-name>`
-- lint: `clang-tidy`
+- build: `script/build --preset-name=<preset-name>`
+- test: `script/test --preset-name=<preset-name>`
+- lint: `clang-tidy -p build/<preset-name> <file>`
 - format: `clang-format -i <filename>`; prefer version 20 or 21
 
 ## Critical Rules
