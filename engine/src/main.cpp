@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
     const boost::filesystem::path program_name{program_path.filename()};  //canonical_program_path.filename();
     const boost::filesystem::path program_directory_path{program_path.parent_path()};
 
-    VSFileSystem::programdir = program_directory_path.string();
+    VSFileSystem::programdir = program_directory_path.generic_string();
 
     // This will be set later
     boost::filesystem::path home_subdir_path{};
@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "Legacy Mode: " << (legacy_data_dir_mode ? "TRUE" : "FALSE") << std::endl;
 
     if (legacy_data_dir_mode) {
-        VSFileSystem::datadir = boost::filesystem::current_path().string();
+        VSFileSystem::datadir = boost::filesystem::current_path().generic_string();
         std::cerr << "Saving current directory (" << VSFileSystem::datadir << ") as DATA_DIR" << std::endl;
     }
 
@@ -337,7 +337,7 @@ int main(int argc, char *argv[]) {
     // Ugly hack until we can find a way to redo all the directory initialization stuff properly.
     // Use the subdirectory "logs" under the Vega Strike home directory. Make sure we don't duplicate the ".vegastrike/" or ".pu/", etc. part.
     const boost::filesystem::path home_path{boost::filesystem::absolute(VSFileSystem::homedir)};
-    if (home_path.string().find(VSFileSystem::HOMESUBDIR) == std::string::npos) {
+    if (home_path.generic_string().find(VSFileSystem::HOMESUBDIR) == std::string::npos) {
         const boost::filesystem::path home_subdir(VSFileSystem::HOMESUBDIR);
         home_subdir_path = boost::filesystem::absolute(home_subdir, home_path);
     } else {
@@ -606,7 +606,7 @@ void bootstrap_main_loop() {
     static bool LoadMission = true;
     // InitTime();
 
-    // TODO: refactor this. 
+    // TODO: refactor this.
     // This code runs once but is called from above 4 times.
     if (LoadMission) {
         LoadMission = false;
@@ -674,7 +674,7 @@ void bootstrap_main_loop() {
             }
         }
         vector<SavedUnits> saved;
-        
+
 
         if (configuration().general.load_last_savegame) {
             vector<string> packedInfo;
@@ -689,7 +689,7 @@ void bootstrap_main_loop() {
         } else {
             _Universe->AccessCockpit(k)->savegame->SetOutputFileName(savegamefile);
         }
-        
+
         // Pushes the dummy ship unless loading something from the command line
         std::string ship_name = "Dummy";
         try {
