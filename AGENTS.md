@@ -86,16 +86,11 @@ closed, so if you cannot playtest the change, say so plainly instead of implying
     reviewer on GitHub cannot open.
 14. **Clean up only where you are working.** Dead configuration and stale comments in your area may go, in a commit
     separate from the functional change. Do not sweep the wider tree.
-15. **Logging is `VS_LOG(level, message)`** with levels `trace`, `debug`, `info`, `important_info`, `warning`,
-    `serious_warning`, `error`, `fatal`. Everything below `important_info` is filtered at the default verbosity, so a
-    missing log line is usually filtered rather than absent. Raise the level with the `--debug` option (0–3) instead of
-    changing the level in code. `--debug=1` allows `info` messages through; `--debug=2` allows `debug` messages through;
-    and `--debug=3` allows `trace` messages (all messages, really) through the filter.
-16. **Leave no debug output behind**: no stray `printf`/`fprintf`/`std::cout`, no commented-out experiments, no
+15. **Leave no debug output behind**: no stray `printf`/`fprintf`/`std::cout`, no commented-out experiments, no
     temporary files.
-17. **One logical change per commit**, with a message that says what changed and why. Keep a feature and a cleanup in
+16. **One logical change per commit**, with a message that says what changed and why. Keep a feature and a cleanup in
     separate commits.
-18. **Licensing is GPLv3-or-later.** Keep existing file headers intact. Under the AI policy in `CONTRIBUTING.rst`, an AI
+17. **Licensing is GPLv3-or-later.** Keep existing file headers intact. Under the AI policy in `CONTRIBUTING.rst`, an AI
     agent is never added to a file's copyright or licence statement — only the human submitting the work.
 
 ## Code layout
@@ -141,6 +136,11 @@ which path you are in before you edit it.
 - **Running it** needs a data set (from `Assets-Production`, or an installed package). Then:
   `vegastrike-engine -D/path/to/data`. Useful switches: `-m <mod>`, `-j <system>`,
   `-l <location>`, `--debug 0-3`, `--test-audio`, `--benchmark`, `--help`.
+- **Logging is `VS_LOG(level, message)`** with levels `trace`, `debug`, `info`, `important_info`, `warning`,
+  `serious_warning`, `error`, `fatal`. Everything below `important_info` is filtered at the default verbosity, so a
+  missing log line is usually filtered rather than absent. Raise the level with the `--debug` option (0–3) instead of
+  changing the level in code. `--debug=1` allows `info` messages through; `--debug=2` allows `debug` messages through;
+  and `--debug=3` allows `trace` messages (all messages, really) through the filter.
 - **Logs** are written to `~/.vegastrike/logs/` alongside the per-user config and saves.
 - **Asset tooling** lives in `engine/objconv/` (`vega-meshtool`, `vs-buildenv-trisort`, `vs-buildenv-asteroidgen`,
   `vs-buildenv-replace`) and `engine/tools/`; it converts the art pipeline's output into what the engine loads, so
