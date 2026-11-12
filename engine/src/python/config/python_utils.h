@@ -54,7 +54,7 @@ struct PyObjectDeleter {
 // A clean C++14 smart pointer alias for Python objects
 using UniquePyRef = std::unique_ptr<PyObject, PyObjectDeleter>;
 
-[[deprecated("This was always a kludge. It also uses a wide string returned from Python after Py_Finalize() has been called, which isn't safe.")]]
+[[deprecated("This was always a kludge. Use InitPython() and GetMethodFromPython() instead.")]]
 std::string GetPythonPath();
 
 #ifdef _WIN32
