@@ -95,7 +95,7 @@ closed, so if you cannot playtest the change, say so plainly instead of implying
     temporary files.
 17. **One logical change per commit**, with a message that says what changed and why. Keep a feature and a cleanup in
     separate commits.
-18. **Licensing is GPLv3-or-later.** Keep existing file headers intact. Under the AI policy in CONTRIBUTING.rst`, an AI
+18. **Licensing is GPLv3-or-later.** Keep existing file headers intact. Under the AI policy in `CONTRIBUTING.rst`, an AI
     agent is never added to a file's copyright or licence statement — only the human submitting the work.
 
 ## Code layout
