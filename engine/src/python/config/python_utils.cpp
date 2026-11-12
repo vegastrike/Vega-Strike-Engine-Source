@@ -29,19 +29,23 @@
 
 #define PY_SSIZE_T_CLEAN
 
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 #include <boost/filesystem.hpp>
 #include <boost/python.hpp>
+
+#include <cstdlib>
+#include <deque>
 #include <iostream>
 #include <utility>
 
 #include "python_utils.h"
 
 #include <boost/format.hpp>
-
-#include <boost/algorithm/string/join.hpp>
-#include <boost/filesystem.hpp>
-
-#include <deque>
 
 using namespace boost::python;
 namespace fs = boost::filesystem;
@@ -50,11 +54,6 @@ namespace fs = boost::filesystem;
 #define QUOTE(x) Q(x)
 
 #ifdef _WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-
 namespace {
 /// Reusable Windows helper to pull the default Python install path from the registry
 std::wstring GetPythonPathFromRegistry() {
@@ -159,18 +158,43 @@ std::wstring FindPythonPath() {
 
 // This is a kludge. It runs python before
 // just to get the python paths.
-[[deprecated("This was always a kludge. It also uses a wide string returned from Python after Py_Finalize() has been called, which isn't safe.")]]
+[[deprecated("This was always a kludge. Use InitPython() and GetMethodFromPython() instead.")]]
 std::string GetPythonPath() {
-#if ((PY_VERSION_HEX) < 0x030E0000)
+#if ((PY_VERSION_HEX) < 0x030F0000)
+    // For Python < 3.15, use Py_GetPath(). Must copy the wide string before Py_Finalize().
     Py_Initialize();
     wchar_t const* w_path_ptr = Py_GetPath();
+    // Copy the wide string while Python is still initialized to avoid use-after-free.
+    std::wstring w_path_w(w_path_ptr);
     Py_Finalize();
 
-    std::wstring w_path_w(w_path_ptr);
-    std::string  path(w_path_w.begin(), w_path_w.end());
+    // Convert wide string to narrow using a locale-aware method.
+    // The naive std::string(wstr.begin(), wstr.end()) only works for ASCII.
+    std::string path;
+    if (!w_path_w.empty()) {
+        // Use the length of the wide string to determine the output buffer size.
+        // wcstombs is locale-aware and handles non-ASCII characters correctly.
+        size_t const max_bytes = w_path_w.size() * 4 + 1;  // UTF-8 max 4 bytes per code point
+        path.resize(max_bytes);
+        size_t const converted = wcstombs(&path[0], w_path_w.c_str(), max_bytes);
+        if (converted == static_cast<size_t>(-1)) {
+            // Fallback: if conversion fails, use a simple byte-by-byte approach for ASCII paths.
+            path.clear();
+            path.reserve(w_path_w.size());
+            for (wchar_t wc : w_path_w) {
+                if (wc < 0x80) {
+                    path.push_back(static_cast<char>(wc));
+                }
+            }
+        } else {
+            path.resize(converted);
+        }
+    }
 
     return path;
 #else
+    // For Python >= 3.15, Py_GetPath() was removed. Use PyConfig_Get("module_search_paths") instead.
+    // Must copy all data before Py_Finalize().
     Py_Initialize();
 
     std::deque<std::wstring> python_path_py_deque_wide{};
@@ -184,13 +208,30 @@ std::string GetPythonPath() {
 
     Py_Finalize();
 
+    // Convert wide strings to narrow strings using locale-aware conversion.
     std::deque<std::string> python_path_py_deque_narrow{};
-    for (auto wstr : python_path_py_deque_wide) {
-        std::string const path(wstr.begin(), wstr.end());
-        python_path_py_deque_narrow.push_back(path);
+    for (auto const& wstr : python_path_py_deque_wide) {
+        std::string path;
+        if (!wstr.empty()) {
+            size_t const max_bytes = wstr.size() * 4 + 1;
+            path.resize(max_bytes);
+            size_t const converted = wcstombs(&path[0], wstr.c_str(), max_bytes);
+            if (converted == static_cast<size_t>(-1)) {
+                path.clear();
+                path.reserve(wstr.size());
+                for (wchar_t wc : wstr) {
+                    if (wc < 0x80) {
+                        path.push_back(static_cast<char>(wc));
+                    }
+                }
+            } else {
+                path.resize(converted);
+            }
+        }
+        python_path_py_deque_narrow.push_back(std::move(path));
     }
 
-    return boost::join(python_path_py_deque_narrow, ":");
+    return boost::algorithm::join(python_path_py_deque_narrow, ":");
 #endif
 }
 
