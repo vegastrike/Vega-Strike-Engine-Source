@@ -162,8 +162,8 @@ std::wstring FindPythonPath() {
 // just to get the python paths.
 [[deprecated("This was always a kludge. Use InitPython() and GetMethodFromPython() instead.")]]
 std::string GetPythonPath() {
-#if ((PY_VERSION_HEX) < 0x030F0000)
-    // For Python < 3.15, use Py_GetPath(). Must copy the wide string before Py_Finalize().
+#if ((PY_VERSION_HEX) < 0x030E0000)
+    // For Python < 3.14, use Py_GetPath(). Must copy the wide string before Py_Finalize().
     Py_Initialize();
     wchar_t const* w_path_ptr = Py_GetPath();
     // Copy the wide string while Python is still initialized to avoid use-after-free.
@@ -195,7 +195,7 @@ std::string GetPythonPath() {
 
     return path;
 #else
-    // For Python >= 3.15, Py_GetPath() was removed. Use PyConfig_Get("module_search_paths") instead.
+    // For Python >= 3.14, use PyConfig_Get("module_search_paths") instead of the deprecated Py_GetPath().
     // Must copy all data before Py_Finalize().
     Py_Initialize();
 
