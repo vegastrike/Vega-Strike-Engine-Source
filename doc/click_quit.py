@@ -199,8 +199,8 @@ def main():
     if args.target is None:
         # Try common locations
         candidates = [
-            os.path.expand('../Assets-Production/'),
-            os.path.expand('~/Projects/Assets-Production/'),
+            os.path.expanduser('../Assets-Production/'),
+            os.path.expanduser('~/Projects/Assets-Production/'),
         ]
         for candidate in candidates:
             if os.path.isdir(candidate):
