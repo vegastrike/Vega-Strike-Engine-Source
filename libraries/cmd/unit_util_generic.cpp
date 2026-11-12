@@ -802,6 +802,10 @@ void performDockingOperations(Unit *un, Unit *unitToDockWith, int actually_dock)
     }
 }
 
+float PercentOperational(Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull) {
+    return PercentOperational(GetCargo(un, name), un, name, category, countHullAndArmorAsFull);
+}
+
 float PercentOperational(const Cargo item, Unit *un, std::string name, std::string category, bool countHullAndArmorAsFull) {
     if (!un) {
         return 0;
@@ -871,11 +875,11 @@ float PercentOperational(const Cargo item, Unit *un, std::string name, std::stri
         return un->radar.PercentOperational();
     }
     if(upgrade_category == "ECM") {
-        return un->ftl_drive.PercentOperational();
+        return un->ecm.PercentOperational();
     }
 
     if(upgrade_category == "Repair_Bot") {
-        return un->cloak.PercentOperational();
+        return un->repair_bot.PercentOperational();
     }
 
 

@@ -29,7 +29,6 @@ MESSAGE(STATUS "PROCESSING DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 # One version header generator to rule them all
 CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/src/version.h)
-CONFIGURE_FILE(src/version.h.in ${Vega_Strike_BINARY_DIR}/setup/src/include/version.h)
 
 SET(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 INCLUDE(InstallRequiredSystemLibraries)
@@ -783,6 +782,9 @@ IF (WIN32)
     INSTALL(
             TARGETS vegastrike-engine
             RUNTIME_DEPENDENCIES
+            DIRECTORIES $ENV{PATH}
+            PRE_EXCLUDE_REGEXES "api-ms-" "ext-ms-"
+            POST_EXCLUDE_REGEXES ".*system32/.*\\.dll"
             DESTINATION bin)
 ELSE ()
     INSTALL(
@@ -790,8 +792,6 @@ ELSE ()
             DESTINATION bin)
 ENDIF()
 
-
-ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/doc" "./doc")
 
 IF (USE_GTEST)
     SET(TEST_NAME ${PROJECT_NAME}_tests)
@@ -895,20 +895,30 @@ IF (USE_GTEST)
         TARGET_COMPILE_DEFINITIONS(${TEST_NAME} PUBLIC "$<$<CONFIG:Debug>:Py_DEBUG>")
     ENDIF()
 
-    FILE(
-        COPY "src/configuration/tests/vegastrike.config"
-        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
+    # 1. Map each source file to its final destination name
+    SET(ASSET_MAPPING
+            "${PROJECT_SOURCE_DIR}/engine/src/configuration/tests/python_tests.py" "${CMAKE_BINARY_DIR}/test_assets/python_tests.py"
+            "${PROJECT_SOURCE_DIR}/engine/src/configuration/tests/vegastrike.config" "${CMAKE_BINARY_DIR}/test_assets/vegastrike.config"
+            "${PROJECT_SOURCE_DIR}/engine/src/cmd/tests/units.json"               "${CMAKE_BINARY_DIR}/test_assets/units.json"
     )
 
-    FILE(
-        COPY "src/cmd/tests/units.json"
-        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
-    )
+    # 2. Copy the files during the CMake configuration phase
+    WHILE(ASSET_MAPPING)
+        # Pop the first source and destination from the list pairs
+        LIST(POP_FRONT ASSET_MAPPING src_file dest_file)
 
-    FILE(
-        COPY "src/configuration/tests/python_tests.py"
-        DESTINATION ${CMAKE_BINARY_DIR}/test_assets
-    )
+        CONFIGURE_FILE("${src_file}" "${dest_file}" COPYONLY)
+
+        # 3. Tie to the test target to ensure ctest updates the files if they change before execution
+        IF(TARGET Vega_Strike_tests)
+            GET_FILENAME_COMPONENT(filename "${src_file}" NAME)
+            ADD_CUSTOM_COMMAND(
+                    TARGET Vega_Strike_tests POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy "${src_file}" "${dest_file}"
+                    COMMENT "Syncing test asset: ${filename}"
+            )
+        ENDIF()
+    ENDWHILE()
 
     INCLUDE(GoogleTest)
     gtest_discover_tests(${TEST_NAME} PROPERTIES DISCOVERY_TIMEOUT 30)

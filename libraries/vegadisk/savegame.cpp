@@ -233,7 +233,7 @@ bool isUtf8SaveGame(std::string filename) {
     boost::filesystem::path filename_path{filename};
     boost::filesystem::path save_dir_path{GetSaveDir()};
     boost::filesystem::path complete_path{boost::filesystem::absolute(filename_path, save_dir_path)};
-    std::string path{complete_path.string()};
+    std::string path{complete_path.generic_string()};
     std::vector<BYTE> savegame = readFile(path);
     Utf8Checker check;
     if (check.validUtf8(savegame)) {
@@ -363,7 +363,7 @@ void WriteUnits(const std::string& slot) {
     const std::string savegame_root_dir = homedir + "/";
     const std::string save_dir = savegame_root_dir + VSFileSystem::savedunitpath + "/" + slot;
     const std::string file_path = save_dir + "/player_fleet.json";
-    
+
     if(boost::filesystem::exists(save_dir)) {
         boost::uintmax_t count = boost::filesystem::remove_all(save_dir);
         std::cout << "Directory and its contents removed: " << save_dir << std::endl;
@@ -382,7 +382,7 @@ void WriteUnits(const std::string& slot) {
     }
 
     std::string json_text = boost::json::serialize(json_root_array);
-    
+
     std::ofstream output_file(file_path);
 
     if (!output_file.is_open()) {
@@ -391,7 +391,7 @@ void WriteUnits(const std::string& slot) {
     }
 
     output_file << json_text;
-    output_file.close(); 
+    output_file.close();
 }
 
 void WriteSaveGame(Cockpit *cp, bool auto_save) {
@@ -1125,9 +1125,9 @@ float SaveGame::ParseSaveGame(const string &filename_p,
     const std::string savegame_root_dir = homedir + "/";
     const std::string save_dir = savegame_root_dir + VSFileSystem::savedunitpath + "/" + save_game_name;
     const std::string file_path = save_dir + "/player_fleet.json";
-    
+
     std::ifstream file(file_path);
-    
+
     if (!file.is_open()) {
         VS_LOG(debug, (boost::format("Failed to open player fleet file %1%. Legacy save game format.") % file_path));
     } else {
@@ -1145,7 +1145,7 @@ float SaveGame::ParseSaveGame(const string &filename_p,
 
 
 const string &GetSaveDir() {
-    static string ret_val{VSFileSystem::GetSavePath().string()};
+    static string ret_val{VSFileSystem::GetSavePath().generic_string()};
     if (ret_val.back() != '/') {
         ret_val += '/';
     }
@@ -1155,4 +1155,3 @@ const string &GetSaveDir() {
     // static string rv = VSFileSystem::homedir+"/save/";
     // return rv;
 }
-

@@ -40,9 +40,32 @@
 #include "root_generic/vega_random.h"
 #include "gldrv/gl_globals.h"
 #include <set>
+#include <cctype>
 #include <cmath>
 
 using std::set;
+namespace {
+
+/// True for the tokens that stand in for "no alphamap" on a sprite's image line.
+/// The format puts a flag there - `-` for none, `true`/`false` for whether the image
+/// carries its own alpha - but the line was being read as "image alphamapfile", so a
+/// flag became a filename to open, the alphamap load failed, and the frame never
+/// became a usable texture. Animated sprites drew nothing, silently.
+bool TokenIs(const char *token, const char *word) {
+    for (; *word != '\0'; ++word, ++token) {
+        if (tolower(static_cast<unsigned char>(*token)) != *word) {
+            return false;
+        }
+    }
+    return *token == '\0';
+}
+
+bool IsNoAlphamapToken(const char *token) {
+    return token[0] == '\0' || strcmp(token, "-") == 0 || TokenIs(token, "true") || TokenIs(token, "false");
+}
+
+} // anonymous namespace
+
 static set<AnimatedTexture *> anis;
 
 static inline unsigned int intmin(unsigned int a, unsigned int b) {
@@ -595,7 +618,7 @@ void AnimatedTexture::LoadAni(VSFileSystem::VSFile &f, int stage, enum FILTER is
                     opt[1] = '\0';
 
                     numgets = sscanf(temp, "%s %s %[^\r\n]", file, alp, opt);
-                    if ((numgets < 2) || (strcmp(alp, "-") == 0)) {
+                    if ((numgets < 2) || IsNoAlphamapToken(alp)) {
                         alp[0] = '\0';
                     }
                     alltrim(opt);
@@ -689,7 +712,7 @@ void AnimatedTexture::LoadFrame(int frame) {
     char opt[512] = "";
     int numgets = 0;
     numgets = sscanf(temp, "%s %s %[^\r\n]", file, alp, opt);
-    if ((numgets < 2) || (strcmp(alp, "-") == 0)) {
+    if ((numgets < 2) || IsNoAlphamapToken(alp)) {
         alp[0] = '\0';
     }
     string addrmodestr = XMLSupport::parse_option_value(opt, "addressMode", "");

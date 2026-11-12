@@ -88,6 +88,8 @@ float maxSpeed(const Unit *un);
 float maxAfterburnerSpeed(const Unit *un);
 void performDockingOperations(Unit *un, Unit *unitToDockWith, int actuallyDockP);
 float PercentOperational(const Cargo item, Unit *un, string, string category, bool countHullAndArmorAsFull);
+// For Python: looks the item up in the unit's cargo
+float PercentOperational(Unit *un, string name, string category, bool countHullAndArmorAsFull);
 }
 
 #endif //VEGA_STRIKE_ENGINE_CMD_UNIT_UTIL_H
