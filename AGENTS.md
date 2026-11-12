@@ -28,16 +28,7 @@ Branches:
 ## Build and test
 
 Use the scripts in `script/`. They exist so that bootstrapping, building, testing, installing and packaging each have
-one canonical way of being done, and they are what CI calls:
-
-```bash
-sudo script/bootstrap                    # install build dependencies
-script/build --preset-name=<preset-name> # configure, build, copy the results into bin/
-script/test  --preset-name=<preset-name> # run the GoogleTest suite
-```
-
-`script/install`, `script/package`, `script/clean` and `script/setup` cover the remaining tasks, and `script/cibuild` is
-the CI entry point. PowerShell equivalents live alongside as `*.ps1`.
+one canonical way of being done, and they are what CI calls. See the `Commands` section for the exact commands to run.
 
 Preset names follow `[platform]-[generator]-[pie]-[gl]-[build-type]`; `CMakePresets.json` is the source of truth, and
 both `script/build` and `script/test` pick their preset by that name. Build trees go under `build/<preset-name>/`. If no
@@ -56,11 +47,14 @@ closed, so if you cannot playtest the change, say so plainly instead of implying
 
 ## Commands
 
-- install: `sudo script/bootstrap`
-- build: `script/build --preset-name=<preset-name>`
-- test: `script/test --preset-name=<preset-name>`
+- install: `sudo script/bootstrap`                  # install build dependencies
+- build: `script/build --preset-name=<preset-name>` # configure, build, copy the results into bin/
+- test: `script/test --preset-name=<preset-name>`   # run the GoogleTest suite
 - lint: `clang-tidy -p build/<preset-name> <file>`
 - format: `clang-format -i <filename>`; prefer version 20 or 21
+
+`script/install`, `script/package`, `script/clean` and `script/setup` cover the remaining tasks, and `script/cibuild` is
+the CI entry point. PowerShell equivalents live alongside as `*.ps1`.
 
 ## Critical Rules
 
