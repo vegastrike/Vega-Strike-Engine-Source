@@ -39,8 +39,17 @@
 #include "gfx/quadsquare.h"
 #include "resource/random_utils.h"
 #include "root_generic/lin_time.h"
-// #include "src/resizable.h"
 #include "gfx_generic/tvector.h"
+#include <boost/filesystem.hpp>
+#include <memory>
+#include <vector>
+
+// 1. Fixes the three 'Cannot resolve symbol fs' errors
+namespace fs = boost::filesystem;
+
+// 2. Fixes the 'Cannot resolve symbol GetTestPaths' error
+// This tells the compiler that the function exists elsewhere in your project
+std::shared_ptr<std::vector<std::shared_ptr<fs::path>>> GetTestPaths();
 
 constexpr int kIterations = 100000;
 
@@ -172,8 +181,22 @@ TEST(LoadConfig, Sanity) {
     EXPECT_EQ(default_string, "World");
     EXPECT_EQ(default_escaped_string, "#00FF00Hi\r\nthere!#000000");
 
+    // 1. Fetch the cached, absolute paths (O(1) pointer copy)
+    auto paths = GetTestPaths();
+    ASSERT_NE(paths, nullptr) << "Failed to resolve test paths.";
+
+    // Index 1 is your verified 'test_assets' directory
+    const fs::path& test_assets_dir = *(paths->at(1));
+
+    // 2. Build a robust, absolute path to the file
+    fs::path config_file = test_assets_dir / "vegastrike.config";
+
+    // 3. Proceed with the test safely
+    ASSERT_TRUE(fs::exists(config_file)) << "Config missing at: " << config_file;
+    // ... rest of your test
+
     // Read the configuration from the config file
-    const std::string filename = "../test_assets/vegastrike.config";
+    const std::string filename = config_file.generic_string();
     vega_config::GetGameConfig().LoadGameConfig(filename);
 
     // Test again

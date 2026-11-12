@@ -52,7 +52,7 @@ vega_config::Configuration::Configuration(const boost::filesystem::path& config_
 
 void vega_config::Configuration::load_config(const boost::filesystem::path& config_file_path) {
     try {
-        std::ifstream config_file(config_file_path.string());
+        std::ifstream config_file(config_file_path.generic_string());
         std::string str;
         std::string file_contents;
         while (std::getline(config_file, str)) {
