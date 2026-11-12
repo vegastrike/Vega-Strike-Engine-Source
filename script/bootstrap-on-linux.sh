@@ -453,7 +453,11 @@ function bootstrapOnFedora() {
       libtool-ltdl-devel
 
       # The Python site-packages directory doesn't get created automatically on modern Fedora. Create it manually.
-      pythonVersion="3.14"
+      if [ ${fedoraVersion} -eq 45 ]; then
+        pythonVersion="3.15"
+      else
+        pythonVersion="3.14"
+      fi
       mkdir -p /usr/local/lib/python${pythonVersion}/site-packages
   else
     echo "Sorry, Fedora ${LINUX_VERSION_ID} is no longer supported"
