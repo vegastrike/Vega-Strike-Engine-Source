@@ -160,13 +160,18 @@ std::wstring FindPythonPath() {
 // just to get the python paths.
 [[deprecated("This was always a kludge. Use InitPython() and GetMethodFromPython() instead.")]]
 std::string GetPythonPath() {
-#if ((PY_VERSION_HEX) < 0x030F0000)
-    // For Python < 3.15, use Py_GetPath(). Must copy the wide string before Py_Finalize().
-    Py_Initialize();
+#if ((PY_VERSION_HEX) < 0x030E0000)
+    // For Python < 3.14, use Py_GetPath(). Must copy the wide string before Py_Finalize().
+    bool const was_initialized = Py_IsInitialized() != 0;
+    if (!was_initialized) {
+        Py_Initialize();
+    }
     wchar_t const* w_path_ptr = Py_GetPath();
     // Copy the wide string while Python is still initialized to avoid use-after-free.
     std::wstring w_path_w(w_path_ptr);
-    Py_Finalize();
+    if (!was_initialized) {
+        Py_Finalize();
+    }
 
     // Convert wide string to narrow using a locale-aware method.
     // The naive std::string(wstr.begin(), wstr.end()) only works for ASCII.
@@ -195,7 +200,10 @@ std::string GetPythonPath() {
 #else
     // For Python >= 3.15, Py_GetPath() was removed. Use PyConfig_Get("module_search_paths") instead.
     // Must copy all data before Py_Finalize().
-    Py_Initialize();
+    bool const was_initialized = Py_IsInitialized() != 0;
+    if (!was_initialized) {
+        Py_Initialize();
+    }
 
     std::deque<std::wstring> python_path_py_deque_wide{};
     boost::python::list const py_path_list = boost::python::extract<boost::python::list>(PyConfig_Get("module_search_paths"));
@@ -206,7 +214,9 @@ std::string GetPythonPath() {
         }
     }
 
-    Py_Finalize();
+    if (!was_initialized) {
+        Py_Finalize();
+    }
 
     // Convert wide strings to narrow strings using locale-aware conversion.
     std::deque<std::string> python_path_py_deque_narrow{};
