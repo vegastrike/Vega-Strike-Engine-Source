@@ -45,6 +45,7 @@
 
 #include "python_utils.h"
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/format.hpp>
 
 using namespace boost::python;
