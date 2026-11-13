@@ -709,7 +709,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     // Hull
     hull.Load(unit_key);
-    armor.Load(unit_key);
+    armor.Load(unit_key, mass, hull.AverageMaxLayerValue());
     shield.Load(unit_key);
 
 

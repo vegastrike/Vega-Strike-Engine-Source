@@ -28,6 +28,8 @@
 #include "components/armor.h"
 #include "damage/damage.h"
 #include "cmd/unit_csv_factory.h"
+#include "configuration/configuration.h"
+
 
 int Armor::front = 0;
 int Armor::back = 1;
@@ -44,8 +46,11 @@ Armor::Armor() :
 
 
 // Component Methods
-void Armor::Load(std::string unit_key) {
+void Armor::Load(std::string unit_key, int mass, int hull) {
     Component::Load(unit_key);
+
+    this->mass = mass;
+    this->hull = hull;
 
     facets.clear();
 
@@ -144,13 +149,29 @@ bool Armor::Upgrade(const std::string upgrade_key) {
 
     // We only support single value armor
     facets.clear();
-    const double armor_single_value = UnitCSVFactory::GetVariable(upgrade_key, "armor", 0.0);
+    double armor_single_value = UnitCSVFactory::GetVariable(upgrade_key, "armor", 0.0);
 
-    if(armor_single_value > 0.0) {
-        for (unsigned int i = 0; i < number_of_facets; i++) {
-            facets.push_back(Resource<double>(armor_single_value,0,armor_single_value));
-        }
+    if(armor_single_value == 0.0) {
+        return true;
     }
+    
+
+    int multiplier = 1;
+    
+    if(configuration().components.armor.use_size_based_armor_modifier) {
+        if(configuration().components.armor.use_mass) {
+            multiplier = mass;
+        } else {
+            multiplier = hull;
+        }
+
+        armor_single_value *= multiplier / 4;
+    }
+
+    for (unsigned int i = 0; i < number_of_facets; i++) {
+        facets.push_back(Resource<double>(armor_single_value,0,armor_single_value));
+    }
+    
 
     return true;
 }
