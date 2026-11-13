@@ -131,7 +131,11 @@ bool Armor::Downgrade() {
     // Component
     Component::Downgrade();
 
-    facets.clear();
+    for(Resource<double>& facet :facets) {
+        facet.SetMaxValue(0);
+        std::cerr << facet.MaxValue() << std::endl;
+    }
+
     return true;
 }
 
