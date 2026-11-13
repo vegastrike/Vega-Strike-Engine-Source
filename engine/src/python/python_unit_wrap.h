@@ -282,6 +282,7 @@ EXPORT_UTIL5(float,
         force,
         bool,
         loop_through_mounts)
+EXPORT_UTIL1(bool, downgrade, std::string, upgrade_name)
 EXPORT_UTIL1(int, addCargo, Cargo, carg)
 EXPORT_UTIL1(int, forceAddCargo, Cargo, carg)
 EXPORT_UTIL1(float, getDistance, UnitWrapper, un)
