@@ -195,6 +195,8 @@ public:
     virtual                                        ~AABBTreeOfAABBsBuilder() {
     }
 
+    using AABBTreeBuilder::GetSplittingValue;
+
     override(AABBTreeBuilder) bool ComputeGlobalBox(const uint32_t *primitives,
             uint32_t nb_prims,
             AABB &global_box) const;

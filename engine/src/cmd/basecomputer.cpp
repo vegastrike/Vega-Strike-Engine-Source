@@ -2006,7 +2006,7 @@ void BaseComputer::loadLoadSaveControls() {
         std::multimap<std::time_t, std::string, std::greater<std::time_t>> save_files{};
         for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(save_dir_path)) {
             const boost::filesystem::path& filename = entry.path().filename();
-            const std::string filename_string = filename.string();
+            const std::string filename_string = filename.generic_string();
             if (is_regular_file(entry.status())) {
                 const boost::filesystem::path& full_file_path{boost::filesystem::absolute(filename, save_dir_path)};
                 std::time_t last_write_time = boost::filesystem::last_write_time(full_file_path);
