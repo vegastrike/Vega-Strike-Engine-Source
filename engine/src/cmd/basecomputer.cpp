@@ -40,10 +40,12 @@ using VSFileSystem::SaveFile;
 #include "src/universe_util.h"
 #include "src/save_util.h"
 #include <algorithm>                //For std::sort.
+#include <cmath>                    //For std::fabs.
 #include <set>
 #include "root_generic/load_mission.h"
 #include "cmd/planet.h"
 #include "cmd/unit_util.h"
+#include "cmd/unit_csv_factory.h"
 #include "cmd/music.h"
 #include "cmd/unit_const_cache.h"
 #include "gui/modaldialog.h"
@@ -400,9 +402,264 @@ static double usedValue(double originalValue) {
 }
 
 
-static double basicRepairPrice(void) {
-    const double price = configuration().economics.repair_price_dbl;
-    return price * g_game.difficulty;
+// One family of parts the shops sell in a ranked ladder: the units.json key prefix, how many
+// tiers it has, and the column the ladder is ranked by.
+struct ComponentLadder {
+    const char *prefix;     // units.json key prefix: <prefix>01__upgrades, <prefix>02__upgrades ...
+    int tiers;
+    const char *figure;
+};
+
+// The families a component type is sold in. The sensors are sold in five, which is why this is a
+// list: a component is priced at the nearest tier of any family that applies to it.
+struct ComponentLadders {
+    ComponentType type;
+    const ComponentLadder *families;
+    int count;
+};
+
+static const ComponentLadder kReactorLadders[] = {
+        {"reactor", 15, "Reactor_Recharge"},
+};
+static const ComponentLadder kShieldLadders[] = {
+        {"quadshield", 15, "Shield_Recharge"},
+        {"dualshield", 15, "Shield_Recharge"},
+};
+static const ComponentLadder kArmorLadders[] = {
+        {"armor", 6, "armor"},
+};
+static const ComponentLadder kCapacitorLadders[] = {
+        {"capacitor", 15, "Primary_Capacitor"},
+};
+static const ComponentLadder kRadarLadders[] = {
+        {"skyscope", 3, "Radar_Range"},
+        {"starscanner", 4, "Radar_Range"},
+        {"hawkeye", 4, "Radar_Range"},
+        {"surveyor", 2, "Radar_Range"},
+        {"rlaantracker", 1, "Radar_Range"},
+};
+static const ComponentLadder kEcmLadders[] = {
+        {"ecm_package", 3, "ecm"},
+};
+static const ComponentLadder kRepairBotLadders[] = {
+        {"repair_droid", 5, "repair"},
+};
+static const ComponentLadder kJumpDriveLadders[] = {
+        {"jump_drive", 1, "Jump_Drive_Present"},
+};
+
+static const ComponentLadders kComponentLadders[] = {
+        {ComponentType::Reactor, kReactorLadders, 1},
+        {ComponentType::Shield, kShieldLadders, 2},
+        {ComponentType::Armor, kArmorLadders, 1},
+        {ComponentType::Capacitor, kCapacitorLadders, 1},
+        {ComponentType::Radar, kRadarLadders, 5},
+        {ComponentType::ECM, kEcmLadders, 1},
+        {ComponentType::RepairBot, kRepairBotLadders, 1},
+        {ComponentType::JumpDrive, kJumpDriveLadders, 1},
+};
+
+// The figure a component's ladder is ranked by - the rated recharge of a reactor or a shield, the
+// rating of an armour facet, a capacitor's capacity, a radar's range, the strength of an ECM or a
+// repair system. Zero when the component has no figure to be ranked by, and so no tier to be
+// priced at.
+static double ComponentFigure(const Component *component) {
+    switch (component->type) {
+        case ComponentType::Reactor:
+            return vega_dynamic_cast_ptr<const Reactor>(component)->MaxCapacity();
+        case ComponentType::Shield:
+            return vega_dynamic_cast_ptr<const Shield>(component)->MaxRegeneration();
+        case ComponentType::Armor:
+            return vega_dynamic_cast_ptr<const DamageableLayer>(component)->AverageMaxLayerValue();
+        case ComponentType::Capacitor:
+            return vega_dynamic_cast_ptr<const EnergyContainer>(component)->MaxLevel();
+        case ComponentType::Radar:
+            return vega_dynamic_cast_ptr<const CRadar>(component)->GetMaxRange();
+        case ComponentType::ECM:
+            return vega_dynamic_cast_ptr<const ECM>(component)->Get();
+        case ComponentType::RepairBot:
+            return vega_dynamic_cast_ptr<const RepairBot>(component)->Get();
+        case ComponentType::JumpDrive:
+            // Presence is the figure: the shops sell one jump drive.
+            return 1.0;
+        default:
+            return 0.0;
+    }
+}
+
+// The families this component's type is sold in, or nullptr when its type is not sold in one.
+static const ComponentLadders *ComponentLaddersFor(const Component *component) {
+    for (const ComponentLadders &candidate : kComponentLadders) {
+        if (candidate.type == component->type) {
+            return &candidate;
+        }
+    }
+    return nullptr;
+}
+
+// A shield is sold as a two-facet or a four-facet part, ranked the same way either way, so it is
+// priced against the ladder matching its facets. Every other type has one ladder.
+static bool LadderApplies(const Component *component, const ComponentLadder &ladder) {
+    if (component->type != ComponentType::Shield) {
+        return true;
+    }
+
+    const int facets = vega_dynamic_cast_ptr<const DamageableLayer>(component)->NumberOfFacets();
+    const std::string prefix = ladder.prefix;
+    return facets <= 2 ? prefix == "dualshield" : prefix == "quadshield";
+}
+
+// The price lists, and a base's own inventory, name a part without the units.json suffix:
+// armor03, not armor03__upgrades. Manifest::GetCargoByName() tolerates the suffix but HasCargo()
+// does not, so PriceCargo() silently falls back to the space junk price for a suffixed key. That
+// is how every component came to be worth 10 credits.
+static std::string PartPriceKey(const std::string &key) {
+    const std::string suffix = "__upgrades";
+    if (key.length() > suffix.length()
+            && key.compare(key.length() - suffix.length(), suffix.length(), suffix) == 0) {
+        return key.substr(0, key.length() - suffix.length());
+    }
+    return key;
+}
+
+// Whether the shops list a part at all. A name they do not know is not a price.
+static bool PartIsListed(const std::string &key) {
+    return Manifest::MPL().HasCargo(PartPriceKey(key));
+}
+
+// What a new part costs, which is what putting a part right is priced against. A name the shops
+// do not list has no new price of its own.
+static double NewPartPrice(const std::string &name) {
+    if (!PartIsListed(name)) {
+        return 0.0;
+    }
+    return Manifest::MPL().GetCargoByName(PartPriceKey(name)).GetPrice();
+}
+
+// The price of the tier nearest this component's figure, or zero when its type is not sold in a
+// ladder, it has no figure to rank, or its figure is beyond the ladder - which is the capital
+// ship case, and is priced against the ship instead.
+static double NearestTierPrice(Unit *base_unit, const Component *component) {
+    const ComponentLadders *ladders = ComponentLaddersFor(component);
+    const double figure = ComponentFigure(component);
+    if (ladders == nullptr || figure <= 0.0) {
+        return 0.0;
+    }
+
+    double nearest_tier_price = 0.0;
+    double nearest_distance = -1.0;
+    double lowest_figure = -1.0;
+    double highest_figure = -1.0;
+    for (int family = 0; family < ladders->count; ++family) {
+        const ComponentLadder &ladder = ladders->families[family];
+        if (!LadderApplies(component, ladder)) {
+            continue;
+        }
+
+        for (int tier = 1; tier <= ladder.tiers; ++tier) {
+            const std::string tier_key = (boost::format("%1%%2$02d__upgrades") % ladder.prefix % tier).str();
+            const double tier_figure = UnitCSVFactory::GetVariable(tier_key, ladder.figure, 0.0);
+            if (tier_figure <= 0.0 || !PartIsListed(tier_key)) {
+                continue;
+            }
+            if (lowest_figure < 0.0 || tier_figure < lowest_figure) {
+                lowest_figure = tier_figure;
+            }
+            if (tier_figure > highest_figure) {
+                highest_figure = tier_figure;
+            }
+            const double distance = std::fabs(tier_figure - figure);
+            if (nearest_distance < 0.0 || distance < nearest_distance) {
+                nearest_distance = distance;
+                nearest_tier_price = base_unit->PriceCargo(PartPriceKey(tier_key));
+            }
+        }
+    }
+
+    if (lowest_figure < 0.0 || figure < lowest_figure || figure > highest_figure) {
+        return 0.0;
+    }
+    return nearest_tier_price;
+}
+
+// What a component is worth. A component the ship bought is worth its own part. One with no part
+// of its own - the hull, the armour, the shields, and the rest of what the ship came with - is
+// worth the part the ship carries for it, else the nearest tier the shops would sell, and where
+// there is neither, a share of the ship's own price: capital ships mount equipment the shops
+// never stock.
+static double ComponentPrice(Unit *player_unit, Unit *base_unit, const Component *component, double ship_price) {
+    const std::string part_key = component->GetUpgradeKey();
+    if (!part_key.empty() && PartIsListed(part_key)) {
+        return base_unit->PriceCargo(PartPriceKey(part_key));
+    }
+
+    // The part the ship carries for this component is the part that would replace it, so it is
+    // what the component is worth - and it is exact, where a tier or a share is a guess.
+    if (player_unit != nullptr) {
+        const std::string carried_key = player_unit->CarriedPartKey(component);
+        if (!carried_key.empty()) {
+            const double carried_price = NewPartPrice(carried_key);
+            if (carried_price > 0.0) {
+                return carried_price;
+            }
+        }
+    }
+
+    const double tier_price = NearestTierPrice(base_unit, component);
+    if (tier_price > 0.0) {
+        return tier_price;
+    }
+
+    return configuration().economics.component_share_dbl * ship_price;
+}
+
+// What putting a component right takes: repairing it, or replacing it when Repair() cannot - a
+// destroyed one. The decision and the price are made in one place, or the price on the row and
+// the base's charge come out different.
+struct ServiceQuote {
+    double price;
+    bool replacement;
+};
+
+// A base charges more for its work on a harder difficulty, as it always has. This is the charge
+// for the work, not for the hardware: a replacement part costs what it costs whatever the
+// difficulty, as it would if the player bought it from the shop.
+static double ServiceCharge(double value) {
+    return value * g_game.difficulty;
+}
+
+// What putting a component right costs. A damaged one is repaired, costing its value in
+// proportion to its damage; a destroyed one is replaced whole, which costs its value in full.
+// Nothing caps the bill: a wreck can cost more to put right than the ship is worth, as a car can.
+static ServiceQuote ServiceQuoteFor(Unit *player_unit, Unit *base_unit, const Component *component, double ship_price) {
+    const double value = ComponentPrice(player_unit, base_unit, component, ship_price);
+    // Nothing left of it: Resource::RepairFully() refuses a destroyed component, so a base
+    // replaces one rather than repairing it.
+    if (component->PercentOperational() <= 0.0) {
+        return ServiceQuote{value, true};
+    }
+    return ServiceQuote{ServiceCharge(value * ComponentDamage(component)), false};
+}
+
+// The price of the ship the player is flying, which is what a component with no price of its own
+// is valued against.
+static double PlayerShipPrice(void) {
+    try {
+        return PlayerShip::GetActiveShip().ShipPrice();
+    } catch (const NoActiveShipNotFoundException &) {
+        return 0.0;
+    }
+}
+
+// What one round of Basic Repair costs: every damaged component put right, at the price the base
+// will charge for it.
+static double BasicRepairPrice(Unit *player_unit, Unit *base_unit) {
+    const double ship_price = PlayerShipPrice();
+    double price = 0.0;
+    for (const HudText &component : player_unit->DamagedComponents()) {
+        price += ServiceQuoteFor(player_unit, base_unit, component.component, ship_price).price;
+    }
+    return price;
 }
 
 static double GetOperational(Unit *playerUnit, const Cargo *item) {
@@ -416,18 +673,24 @@ static double GetOperational(Unit *playerUnit, const Cargo *item) {
     return 0.0;
 }
 
+// What a new part costs, which is what putting a part right is priced against. A name the shops
+// do not list has no new price of its own.
+// What the base charges to put a part right: what a new one costs, in proportion to how much of
+// this one is damaged. What the player paid for this part does not come into it - a cheap
+// second-hand part costs as much to mend as a new one - and the difficulty scales the work, as
+// it does for a component.
 static double RepairPrice(Unit *playerUnit, const Cargo *item) {
-    // TODO: * configuration()->general.difficulty;
-
-    // TODO: add this to configuration
-    constexpr double kRepairPriceCoefficient = 0.8;
-
-    return kRepairPriceCoefficient * (1-GetOperational(playerUnit, item)) * item->GetPrice();
+    Component *component = playerUnit->GetComponentByType(GetComponentTypeFromName(item->GetName()));
+    const double damage = component != nullptr ? ComponentDamage(component) : 0.0;
+    return ServiceCharge(NewPartPrice(item->GetName()) * damage);
 }
 
 
 static float SellPrice(Unit *playerUnit, const Cargo *item) {
-    return usedValue(item->GetPrice()) - RepairPrice(playerUnit, item);
+    //A destroyed part is worth less than nothing once its repair cost is taken off, so a dealer
+    //never offers less than what the part weighs in scrap.
+    const double used_price = usedValue(item->GetPrice()) - RepairPrice(playerUnit, item);
+    return static_cast<float>(std::max(used_price, ScrapValue(item->GetPrice(), item->GetMass())));
 }
 
 
@@ -977,7 +1240,8 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
         NewButton *commitButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("Commit"));
         assert(commitButton != NULL);
         commitButton->setHidden(false);
-        commitButton->setLabel("Buy");
+        //The only row on this list that fixes rather than buys is the repair.
+        commitButton->setLabel(item.GetName() == BASIC_REPAIR_NAME ? "Fix" : "Buy");
         commitButton->setCommand("BuyUpgrade");
 
         NewButton *commitFixButton = vega_dynamic_cast_ptr<NewButton>(window()->findControlById("CommitFix"));
@@ -1188,13 +1452,11 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                     //Basic repair is implemented entirely in this module.
                     //PriceCargo() doesn't know about it.
                     Unit *playerUnit = m_player.GetUnit();
-                    int multiplier = 1;
+                    double repair_price = 0.0;
                     if (playerUnit) {
-                        multiplier = playerUnit->RepairCost();
+                        repair_price = BasicRepairPrice(playerUnit, baseUnit);
                     }
-                    tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#")
-                            % (basicRepairPrice() * multiplier))
-                            .str();
+                    tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#") % repair_price).str();
                 } else {
                     tempString = (boost::format("Price: #b#%1$.2f#-b#n1.5#") % baseUnit->PriceCargo(item.GetName()))
                             .str();
@@ -1267,6 +1529,30 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
 
                 //********************************************************************************************
             {
+                //A part of the ship itself was not bought, so it has no purchase price of its
+                //own; it is worth what the shops would charge for the nearest thing they sell.
+                Component *ship_component = m_player.GetUnit()->ComponentByName(item.GetName());
+                if (ship_component != nullptr) {
+                    const double ship_price = PlayerShipPrice();
+                    const ServiceQuote quote = ServiceQuoteFor(m_player.GetUnit(), baseUnit, ship_component, ship_price);
+                    descString += "#b#Integral Component, not for sale#-b#n1.5#";
+                    descString += (boost::format("Percent Working: #b#%1$.2f#-b, Value: %2$.2f#n1.5#")
+                            % (ship_component->PercentOperational() * 100.0)
+                            % ComponentPrice(m_player.GetUnit(), baseUnit, ship_component, ship_price))
+                            .str();
+                    descString += (boost::format(quote.replacement ? "Replace Cost: #b#%1$.2f#-b#n1.5#"
+                                                                   : "Repair Cost: #b#%1$.2f#-b#n1.5#")
+                            % quote.price)
+                            .str();
+                    descString += ship_component->GetDescription();
+                    //Say what the fitted part is, when the ship is carrying one.
+                    const std::string part_key = ship_component->GetUpgradeKey();
+                    if (!part_key.empty()) {
+                        descString += Manifest::MPL().GetCargoByName(part_key).GetDescription();
+                    }
+                    break;
+                }
+
                 double percent_working = GetOperational(m_player.GetUnit(), &item);
                 if (percent_working < 1) {
                     //IF DAMAGED
@@ -1473,8 +1759,11 @@ bool BaseComputer::isTransactionOK(const Cargo &original_item, const Transaction
 
         case BUY_UPGRADE:
             have_money = item.GetPrice() * quantity <= ComponentsManager::credits;
-            have_space = (player_unit->upgrade_space.CanAddCargo(item) || item.IsWeapon());
-            upgrade_already_installed = player_unit->UpgradeAlreadyInstalled(item);
+            //A repair installs nothing, so it needs no room in the upgrade space.
+            have_space = item.GetName() == BASIC_REPAIR_NAME
+                    || player_unit->upgrade_space.CanAddCargo(item) || item.IsWeapon();
+            upgrade_already_installed = item.GetName() != BASIC_REPAIR_NAME
+                    && player_unit->UpgradeAlreadyInstalled(item);
 
             // Simply not allowed
             if (!UpgradeAllowed(item, player_unit)) {
@@ -1609,6 +1898,23 @@ void BaseComputer::loadListPicker(TransactionList &transaction_list,
         if (itemName == "") {
             itemName = beautify(item.GetName());
         }
+
+        //How much of this works, which is what the row says and is coloured by, and what the repair
+        //bill charges against. A component of the ship itself is not a part, so it has no part entry
+        //to look up: ask the component, or every one of them reads as undamaged.
+        double percent_working = 1.0;
+        if (transaction_type == SELL_UPGRADE && m_player.GetUnit()) {
+            const Component *ship_component = m_player.GetUnit()->ComponentByName(item.GetName());
+            percent_working = ship_component != nullptr
+                    ? ship_component->PercentOperational()
+                    : UnitUtil::PercentOperational(item, m_player.GetUnit(), item.GetName(), item.GetCategory(), false);
+            if (percent_working < 1.0) {
+                //A tenth of a percent, so a row that is charged for never reads as though it works
+                //perfectly: 99.7% working rounds to "100% working" at whole numbers.
+                itemName += (boost::format(" (%1$.1f%% working)") % (percent_working * 100.0)).str();
+            }
+        }
+
         if (item.GetQuantity() > 1) {
             //If there is more than one item, show the number of items.
             itemName += " (" + tostring(item.GetQuantity()) + ")";
@@ -1618,9 +1924,6 @@ void BaseComputer::loadListPicker(TransactionList &transaction_list,
         GFXColor final_color;
         if (transaction_type == SELL_UPGRADE && m_player.GetUnit()) {
             //Adjust the base color if the item is 'damaged'
-            double percent_working =
-                    UnitUtil::PercentOperational(item, m_player.GetUnit(), item.GetName(), item.GetCategory(), false);
-
             final_color = GFXColor(
                     (1.0 * percent_working) + (1.0 * (1.0 - percent_working)),
                     (1.0 * percent_working) + (0.0 * (1.0 - percent_working)),
@@ -2242,7 +2545,7 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     //Add Basic Repair.
     CargoColor repair;
     repair.cargo.SetName(BASIC_REPAIR_NAME);
-    repair.cargo.SetPrice(basicRepairPrice() * playerUnit->RepairCost());
+    repair.cargo.SetPrice(BasicRepairPrice(playerUnit, baseUnit));
     repair.cargo.SetDescription(BASIC_REPAIR_DESC);
     tlist.masterList.push_back(repair);
 
@@ -2251,13 +2554,14 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     assert(basePicker != nullptr);
     loadListPicker(tlist, *basePicker, BUY_UPGRADE, true);
 
-    //Fix the Basic Repair color.
+    //Colour the Basic Repair row, which is not base inventory, so it stands out from the
+    //upgrades the base is selling.
     SimplePickerCells *baseCells = vega_dynamic_cast_ptr<SimplePickerCells> ( basePicker->cells());
-    SimplePickerCell *repairCell = vega_dynamic_cast_ptr<SimplePickerCell> ( baseCells->cellAt(baseCells->count() - 1));
-    assert(repairCell->text() == BASIC_REPAIR_NAME);
-    if (isClear(repairCell->textColor())) {
-        //Have repair cell, and its color is normal.
-        repairCell->setTextColor(BASIC_REPAIR_TEXT_COLOR());
+    for (int i = 0; i < baseCells->count(); ++i) {
+        SimplePickerCell *cell = vega_dynamic_cast_ptr<SimplePickerCell> ( baseCells->cellAt(i));
+        if (cell->text() == BASIC_REPAIR_NAME && isClear(cell->textColor())) {
+            cell->setTextColor(BASIC_REPAIR_TEXT_COLOR());
+        }
     }
 }
 
@@ -2298,6 +2602,14 @@ void BaseComputer::loadSellUpgradeControls(void) {
     player_filter_vec.push_back("upgrades");
     loadMasterList(playerUnit, playerUnit->upgrade_space, player_filter_vec, inverse_player_filter_vec, false, tlist);     //Get upgrades, but not weapons.
 
+    //Add the ship's own parts, which are not items it carries: what the hull came with,
+    //and the parts it is never without. They are listed, and not for sale.
+    for (const Cargo &component_item : playerUnit->IntegralComponentItems()) {
+        CargoColor component_row;
+        component_row.cargo = component_item;
+        tlist.masterList.push_back(component_row);
+    }
+
     //Sort the tlist.  Better for display, easier to compile into categories, etc.
     std::sort(tlist.masterList.begin(), tlist.masterList.end(), CargoColorSort());
 
@@ -2322,9 +2634,56 @@ bool BaseComputer::changeToUpgradeMode(const EventCommandId &command, Control *c
 }
 
 
-static void BasicRepair(Unit *parent) {
-    // This function does nothing. Kept for compatibility with python API.
-    // TODO: remove
+//Puts one of the ship's own components right, repairing it if it can be and replacing it
+//if it cannot, and charges what that took: the value of the component in proportion to its
+//damage when it is repaired, and in full when it is replaced.
+//Returns the price charged, or nothing when it could not be afforded or did not need it.
+static double RepairShipComponent(Unit *player_unit, Unit *base_unit, const std::string &name) {
+    Component *component = player_unit->ComponentByName(name);
+    if (component == nullptr) {
+        return 0.0;
+    }
+
+    //What the base charges is what it quoted, which is what the row showed.
+    const ServiceQuote quote = ServiceQuoteFor(player_unit, base_unit, component, PlayerShipPrice());
+    if (ComponentsManager::credits.Value() < quote.price) {
+        return 0.0;
+    }
+
+    const ComponentService service = player_unit->ServiceComponent(name);
+    if (service == ComponentService::None) {
+        return 0.0;
+    }
+
+    ComponentsManager::credits -= quote.price;
+    return quote.price;
+}
+
+static void BasicRepair(Unit *parent, Unit *base_unit) {
+    if (parent == nullptr || base_unit == nullptr) {
+        return;
+    }
+
+    const std::vector<HudText> damaged_components = parent->DamagedComponents();
+    if (damaged_components.empty()) {
+        showAlert("Your ship has no damage.  No charge.");
+        return;
+    }
+
+    //Put right as much of it as the player can pay for, one component at a time.
+    double spent = 0.0;
+    for (const HudText &component : damaged_components) {
+        const double paid = RepairShipComponent(parent, base_unit, component.name);
+        if (paid == 0.0) {
+            break;
+        }
+        spent += paid;
+    }
+
+    if (spent == 0.0) {
+        showAlert("You don't have enough credits to repair your ship.");
+        return;
+    }
 }
 
 //The "Operation" classes deal with upgrades.
@@ -2870,7 +3229,7 @@ bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control) {
         Unit *player_unit = m_player.GetUnit();
         if (item->GetName() == BASIC_REPAIR_NAME) {
             if (player_unit) {
-                BasicRepair(player_unit);
+                BasicRepair(player_unit, m_base.GetUnit());
                 if (m_selectedList == nullptr) {
                     return true;
                 }
@@ -2879,6 +3238,7 @@ bool BaseComputer::buyUpgrade(const EventCommandId &command, Control *control) {
             }
             return true;
         }
+
         if (!item->IsWeapon()) {
             if (player_unit) {
                 Unit *base_unit = m_base.GetUnit();
@@ -2930,6 +3290,16 @@ bool BaseComputer::fixUpgrade(const EventCommandId &command, Control *control) {
     Unit *baseUnit = m_base.GetUnit();
 
     if (baseUnit && playerUnit && item) {
+        //One of the ship's own components is put right here, since it is not an upgrade
+        //that can be re-applied - see ServiceComponent.
+        if (playerUnit->ComponentByName(item->GetName()) != nullptr) {
+            if (RepairShipComponent(playerUnit, baseUnit, item->GetName()) == 0.0) {
+                showAlert("You don't have enough credits to repair that.");
+            }
+            refresh();
+            return true;
+        }
+
         if (playerUnit->RepairUpgradeCargo(item, baseUnit, RepairPrice(playerUnit, item))) {
             if (UnitUtil::PercentOperational(*item, playerUnit, item->GetName(), "upgrades/", false) < 1.0) {
                 emergency_downgrade_mode = "EMERGENCY MODE ";
@@ -3413,15 +3783,12 @@ void BaseComputer::loadShipDealerControls(void) {
 // TODO: move this to ComponentsManager
 bool sellShip(Unit *baseUnit, Unit *playerUnit, Cargo* item, BaseComputer *bcomputer) {
     PlayerShip& ship = PlayerShip::GetShipByIndex(item->index);
-    const double purchase_price = ship.cargo.GetPrice();
+
+    //Selling the ship is the dealer paying for it and charging for getting it here, and never
+    //taking money off the player for a ship that is worth less than the trip to the dealer.
+    const double sale_price = ship.SalePrice();
     const double shipping_price = ship.transfer_price;
-
-    // Transfer the ship to the dealer
-    ComponentsManager::credits -= shipping_price; //transportation cost
-
-    // Sell the ship
-    const double ship_sellback_factor = configuration().economics.ship_sellback_price_dbl;
-    ComponentsManager::credits += ship_sellback_factor * purchase_price; //sellback cost
+    ComponentsManager::credits += std::max(0.0, sale_price - shipping_price);
 
     // Remove the ship and add to base
     // This will strip the ship of any modifications including damage and upgrades.

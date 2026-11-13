@@ -28,8 +28,10 @@
 #include "player_ship.h"
 #include "components_manager.h"
 #include "configuration/configuration.h"
+#include "resource/manifest.h"
 #include "vs_logging.h"
 
+#include <algorithm>
 #include <boost/format.hpp>
 
 ShipNotFoundException::ShipNotFoundException(int index): 
@@ -97,13 +99,64 @@ std::string PlayerShip::GetPurchaseHeader() {
     }
     
     return_value += (boost::format("#b#Purchased for: %1$.2f#-b#n1.5#") % cargo.GetPrice()).str();
-    // TODO: this is clearly wrong
-    // Sale price should reflect ship condition, age, etc.
-    // Sale price should not reflect purchase price - did I buy at a discount or salvage it using a tractor beam
-    const float ship_sellback_factor = configuration().economics.ship_sellback_price_flt;
-    const float sellback_price = ship_sellback_factor * cargo.GetPrice();
-    return_value += (boost::format("#b#Current resale value: %1$.2f#-b#n1.5#") % sellback_price).str();
+    // TODO: the resale value is still derived from what was paid for the ship, so a ship bought
+    // at a discount is resold at a discount.
+    return_value += (boost::format("#b#Current resale value: %1$.2f#-b#n1.5#") % SalePrice()).str();
+    const double damage_percent = DamagePercent();
+    if (damage_percent > 0.0) {
+        return_value += (boost::format("#b#Damage: %1$.0f%%#-b#n1.5#") % (damage_percent * 100.0)).str();
+    }
     return return_value;
+}
+
+double PlayerShip::DamagePercent() {
+    if (unit == nullptr) {
+        return 0.0;
+    }
+    return unit->DamagePercent();
+}
+
+// One credit is the price list's way of saying a ship is not for sale, which is what the
+// campaign's inherited starter ship and some variants are listed at. It is not what the ship is
+// worth, so those fall back to what the same ship actually sells for.
+static const double kPlaceholderPrice = 1.0;
+
+double PlayerShip::ShipPrice() {
+    const double own_price = cargo.GetPrice();
+    if (own_price > kPlaceholderPrice) {
+        return own_price;
+    }
+
+    // "Llama.begin" is a Llama, and "Plowshare__pirates" is a Plowshare.
+    std::string base_name = cargo.GetName();
+    const std::string::size_type variant = base_name.find_last_of("._");
+    if (variant != std::string::npos) {
+        base_name = base_name.substr(0, variant);
+    }
+
+    const std::string candidates[] = {base_name + ".stock", base_name};
+    for (const std::string &candidate : candidates) {
+        if (Manifest::MPL().HasCargo(candidate)) {
+            const double price = Manifest::MPL().GetCargoByName(candidate).GetPrice();
+            if (price > kPlaceholderPrice) {
+                return price;
+            }
+        }
+    }
+
+    return own_price;
+}
+
+double PlayerShip::SalePrice() {
+    const double price = ShipPrice();
+    const double resale = configuration().economics.ship_sellback_price_dbl * price * (1.0 - DamagePercent());
+    const double mass = unit != nullptr ? unit->GetBaseMass() : 0.0;
+    return std::max(resale, ScrapValue(price, mass));
+}
+
+double ScrapValue(double price, double mass) {
+    const double by_weight = mass * configuration().economics.scrap_price_per_mass_dbl;
+    return std::min(configuration().economics.scrap_price_fraction_dbl * price, by_weight);
 }
 
 PlayerShip& PlayerShip::GetShipByIndex(int index) {

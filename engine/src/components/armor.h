@@ -62,6 +62,7 @@ public:
 
     bool Damaged() const override;
     void Repair() override;
+    void Replace() override;
 
     ~Armor() override;
 };

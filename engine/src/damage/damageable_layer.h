@@ -81,6 +81,8 @@ public:
     double Percent(int facet) const;
 
     int Layer() const;
+
+    int NumberOfFacets() const;
 };
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_LAYER_H

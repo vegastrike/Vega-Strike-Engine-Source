@@ -214,3 +214,7 @@ double DamageableLayer::Percent(int facet) const {
 int DamageableLayer::Layer() const {
     return layer;
 }
+
+int DamageableLayer::NumberOfFacets() const {
+    return number_of_facets;
+}

@@ -1224,7 +1224,7 @@ void VDU::DrawDamage(Unit *parent) {
         tp->background_color = static_cast<ImU32>(temp_background_color);
     }
 
-    std::string retval = parent->GetHudText();
+    std::string retval = parent->GetHudText(getDamageColor);
     tp->Draw(MangleString(retval,
                     _Universe->AccessCamera()->GetNebula() != NULL ? .4 : 0),
             scrolloffset,
