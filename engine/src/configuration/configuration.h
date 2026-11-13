@@ -1696,6 +1696,9 @@ namespace vega_config {
         bool ext_clamp_to_border = true;
         bool ext_clamp_to_edge = true;
         bool faction_dependent_textures = true;
+        double far_stars_brightness_exponent_dbl = 1.0;
+        float far_stars_brightness_exponent_flt = 1.0;
+        bool far_stars_size_by_brightness = false;
         double far_stars_sprite_size_dbl = 2.0;
         float far_stars_sprite_size_flt = 2.0;
         std::string far_stars_sprite_texture = "";

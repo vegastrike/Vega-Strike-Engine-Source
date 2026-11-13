@@ -30,7 +30,7 @@
 #include <string>
 #include "gfx/background.h"
 
-Background::Background(const char *, int, float, const std::string &, const GFXColor &, bool) {
+Background::Background(const char *, float, const std::string &, const BackgroundSettings &) {
 
 }
 
