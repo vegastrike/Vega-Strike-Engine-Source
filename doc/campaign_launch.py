@@ -37,21 +37,25 @@ import sys
 import os
 import argparse
 
+
 # Block mouseinfo import to suppress tkinter warning
 class BlockImporter:
     def find_module(self, name, path=None):
         if name == 'mouseinfo' or name.startswith('mouseinfo.'):
             return self
+
     def load_module(self, name):
         import types
         m = types.ModuleType(name)
         sys.modules[name] = m
         return m
+
+
 sys.meta_path.insert(0, BlockImporter())
 
 import pyautogui
-pyautogui.FAILSAFE = False
 
+pyautogui.FAILSAFE = False
 
 # === Main Menu button definitions (from bases/main_menu.py) ===
 # Design resolution: 1280x1024
@@ -177,10 +181,10 @@ def get_window_geometry(window_id, verbose=False):
 
 
 def calculate_main_menu_button_position(wx, wy, ww, wh, btn_x, btn_y, btn_w, btn_h,
-                                         text_offset_x=MAIN_MENU_TEXT_OFFSET_X,
-                                         design_w=MAIN_MENU_DESIGN_W,
-                                         design_h=MAIN_MENU_DESIGN_H,
-                                         verbose=False):
+                                        text_offset_x=MAIN_MENU_TEXT_OFFSET_X,
+                                        design_w=MAIN_MENU_DESIGN_W,
+                                        design_h=MAIN_MENU_DESIGN_H,
+                                        verbose=False):
     """
     Calculate the screen position of a main menu button's text.
 
@@ -205,10 +209,10 @@ def calculate_main_menu_button_position(wx, wy, ww, wh, btn_x, btn_y, btn_w, btn
 
 
 def calculate_intro_button_position(wx, wy, ww, wh, btn_x, btn_y, btn_w, btn_h,
-                                     text_offset_x=INTRO_TEXT_OFFSET_X,
-                                     design_w=INTRO_DESIGN_W,
-                                     design_h=INTRO_DESIGN_H,
-                                     verbose=False):
+                                    text_offset_x=INTRO_TEXT_OFFSET_X,
+                                    design_w=INTRO_DESIGN_W,
+                                    design_h=INTRO_DESIGN_H,
+                                    verbose=False):
     """
     Calculate the screen position of an intro monologue button's text.
 
@@ -282,6 +286,87 @@ def press_key(key, verbose=False):
         print(f"Pressing '{key}'...")
     pyautogui.press(key)
     time.sleep(0.5)
+
+
+def take_screenshot(window_id, filename="screenshot.png", verbose=False):
+    """Take a screenshot of the game window using import (ImageMagick).
+
+    Saves the screenshot to the specified filename.
+    Returns the filename if successful, None otherwise.
+    """
+    try:
+        cmd = f'import -window {window_id} -delay 10 {filename} 2>/dev/null'
+        _, rc = run_cmd(cmd)
+        if rc == 0:
+            if verbose:
+                print(f"Screenshot saved: {filename}")
+            return filename
+        else:
+            if verbose:
+                print(f"Warning: Screenshot failed (rc={rc})")
+            return None
+    except Exception as e:
+        if verbose:
+            print(f"Warning: Screenshot error: {e}")
+        return None
+
+
+def ocr_text(filename, verbose=False):
+    """Run Tesseract OCR on a screenshot and return the detected text.
+
+    Returns the detected text as a string, or empty string on failure.
+    """
+    try:
+        cmd = f'tesseract {filename} stdout 2>/dev/null'
+        text, rc = run_cmd(cmd)
+        if rc == 0 and text:
+            if verbose:
+                print(f"OCR detected text: {text[:200]}")
+            return text
+        else:
+            if verbose:
+                print(f"Warning: OCR failed or returned empty text")
+            return ""
+    except Exception as e:
+        if verbose:
+            print(f"Warning: OCR error: {e}")
+        return ""
+
+
+def verify_screen(window_id, expected_text, step_label="", filename=None, verbose=False):
+    """Take a screenshot and verify expected text is visible via OCR.
+
+    Args:
+        window_id: X11 window ID to screenshot
+        expected_text: Text phrase to look for in the OCR output
+        step_label: Human-readable label for log messages
+        filename: Screenshot filename (auto-generated if None)
+        verbose: Print detailed progress
+
+    Returns:
+        True if expected text was found, False otherwise
+    """
+    if filename is None:
+        filename = f"screenshot_{step_label.lower().replace(' ', '_')}.png"
+
+    if verbose:
+        print(f"Taking screenshot to verify {step_label}...")
+
+    screenshot = take_screenshot(window_id, filename, verbose=verbose)
+    if not screenshot:
+        if verbose:
+            print(f"Warning: Could not take screenshot for {step_label}")
+        return False
+
+    text = ocr_text(screenshot, verbose=verbose)
+    if expected_text.lower() in text.lower():
+        if verbose:
+            print(f"✓ Verified '{step_label}': found '{expected_text}'")
+        return True
+    else:
+        if verbose:
+            print(f"✗ Verification failed for '{step_label}': expected '{expected_text}' not found")
+        return False
 
 
 def main():
@@ -373,6 +458,9 @@ def main():
         return 1
     wx, wy, ww, wh = geom
 
+    # Verify we're on the Main Menu screen by looking for "Campaign" text
+    verify_screen(window_id, "Campaign", "Main Menu", verbose=args.verbose)
+
     campaign_x, campaign_y = calculate_main_menu_button_position(
         wx, wy, ww, wh, CAMPAIGN_X, CAMPAIGN_Y, CAMPAIGN_W, CAMPAIGN_H,
         verbose=args.verbose
@@ -392,6 +480,9 @@ def main():
         game_proc.wait()
         return 1
     wx, wy, ww, wh = geom
+
+    # Verify we're on the Intro Monologue screen
+    verify_screen(window_id, "Intro Monologue", "Intro Monologue", verbose=args.verbose)
 
     continue_x, continue_y = calculate_intro_button_position(
         wx, wy, ww, wh, CONTINUE_X, CONTINUE_Y, CONTINUE_W, CONTINUE_H,
@@ -416,6 +507,14 @@ def main():
         return 1
     wx, wy, ww, wh = geom
 
+    # Verify we're on the Hangar screen - OCR may not detect "Launch" reliably,
+    # so we also look for common hangar text like "Landing Center"
+    hangar_verified = verify_screen(window_id, "Launch", "Hangar", verbose=args.verbose)
+    if not hangar_verified:
+        if args.verbose:
+            print("Trying alternative verification for Hangar screen...")
+        verify_screen(window_id, "Landing Center", "Hangar (alt)", verbose=args.verbose)
+
     launch_x, launch_y = calculate_launch_hotspot_position(wx, wy, ww, wh, args.verbose)
     click_at(launch_x, launch_y, "Launch", args.verbose)
 
@@ -423,6 +522,12 @@ def main():
     if args.verbose:
         print("\n=== Step 6: Waiting for launch, pressing Esc then Q ===")
     time.sleep(5)  # Wait for launch animation
+
+    # Take a screenshot to confirm the ship has launched into space
+    if args.verbose:
+        print("Taking screenshot after launch...")
+    take_screenshot(window_id, "screenshot_space.png", verbose=args.verbose)
+
     press_key('escape', args.verbose)
     time.sleep(1)
     press_key('q', args.verbose)
