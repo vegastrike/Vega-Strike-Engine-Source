@@ -286,7 +286,7 @@ void QuitNow() {
 void SkipMusicTrack(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         VS_LOG(info, "skipping");
-        muzak->Skip();
+        Muzak::Skip();
     }
 }
 
@@ -973,7 +973,7 @@ void createObjects(std::vector<std::string> &fighter0name,
 
     delete[] tmptarget;
     for (int m_i = 0; m_i < muzak_count; m_i++) {
-        muzak[m_i].SetParent(fighters[0]);
+        muzak_collection[m_i].SetParent(fighters[0]);
     }
     FactionUtil::LoadFactionPlaylists();
     AUDListenerSize(fighters[0]->rSize() * 4);

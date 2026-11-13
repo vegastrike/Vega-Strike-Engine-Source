@@ -158,12 +158,18 @@ std::wstring FindPythonPath() {
 // just to get the python paths.
 [[deprecated("This was always a kludge. It also uses a wide string returned from Python after Py_Finalize() has been called, which isn't safe.")]]
 std::string GetPythonPath() {
-    Py_Initialize();
-    wchar_t const* w_path_ptr = Py_GetPath();
-    Py_Finalize();
+    bool py_was_already_initialized = Py_IsInitialized();
+    if (!py_was_already_initialized) {
+        Py_Initialize();
+    }
 
+    wchar_t const* w_path_ptr = Py_GetPath();
     std::wstring w_path_w( w_path_ptr );
     std::string path( w_path_w.begin(), w_path_w.end() );
+
+    if (!py_was_already_initialized) {
+        Py_Finalize();
+    }
 
     return path;
 }
@@ -200,11 +206,13 @@ void InitPython(bool &was_already_initialized) {
     }
 #endif
 
-    status = Py_InitializeFromConfig(&config);
-    PyConfig_Clear(&config); // Free configuration memory
-    if (PyStatus_Exception(status) != 0) {
-        PyErr_Print();
-        Py_ExitStatusException(status);
+    if (!was_already_initialized) {
+        status = Py_InitializeFromConfig(&config);
+        PyConfig_Clear(&config); // Free configuration memory
+        if (PyStatus_Exception(status) != 0) {
+            PyErr_Print();
+            Py_ExitStatusException(status);
+        }
     }
 }
 

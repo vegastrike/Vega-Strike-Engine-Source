@@ -65,7 +65,7 @@ public:
     class StarSystem *Init(string systemfile,
             const Vector &centroid = Vector(0, 0, 0),
             const string planetname = string()); // Should load the Universe data file. Now just inits system with test.xml
-    friend void bootstrap_main_loop(); //so it can get all cockpits
+    friend void BootstrapMainLoop(); //so it can get all cockpits
     friend class Faction;
 
     // Methods

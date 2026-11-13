@@ -40,7 +40,9 @@
 
 
 #include <cmath>
+#include <cstdlib>
 #include <assert.h>
+#include <mutex>
 #include <sstream>
 
 #include <boost/filesystem.hpp>
@@ -387,7 +389,7 @@ static bool get_screen_measurements() {
     usable_logical_window_size.w = 0;
     usable_logical_window_size.h = 0;
 
-    std:string screen_name = "";
+    std::string screen_name = "";
     SDL_DisplayID instance_ID;
     SDL_DisplayMode mode_for_ID;
     int configured_width = configuration().graphics.resolution_x;
@@ -481,7 +483,7 @@ static bool setup_sdl_video_mode() {
     Uint32 video_flags = 0;
     int bpp = 0;
     SDL_Rect display_bounds;
-    std:string screen_name = "";
+    std::string screen_name = "";
     SDL_DisplayID instance_ID;
     SDL_DisplayMode* mode_for_ID = static_cast<SDL_DisplayMode*>(std::calloc(sizeof(SDL_DisplayMode), 1));
     if (mode_for_ID == nullptr) {
@@ -681,6 +683,28 @@ static bool setup_sdl_video_mode() {
 
 /*---------------------------------------------------------------------------*/
 /*!
+ *  Deallocates resources in preparation for program termination
+ *  \author  jfpatry
+ *  \date    Created:  2000-10-19
+ *  \date    Modified: 2000-10-19
+ */
+static std::once_flag winsys_cleanup_flag;
+
+static void DoCleanup() {
+    // Revert resolution by exiting fullscreen
+    SDL_SetWindowFullscreen(window, false);
+
+    CleanupGui();
+    freeMouseCursors();
+    SDL_Quit();
+}
+
+void winsys_cleanup() {
+    std::call_once(winsys_cleanup_flag, DoCleanup);
+}
+
+/*---------------------------------------------------------------------------*/
+/*!
  *  Initializes the OpenGL rendering context, and creates a window (or
  *  sets up fullscreen mode if selected)
  *  \author  jfpatry
@@ -689,6 +713,8 @@ static bool setup_sdl_video_mode() {
 
 void winsys_init(int *argc, char **argv, char const *window_title, char const *icon_title) {
     keepRunning = true;
+
+    std::atexit(winsys_cleanup);
 
 #if defined(NO_SDL_JOYSTICK)
     constexpr Uint32 sdl_flags = SDL_INIT_VIDEO;
@@ -731,23 +757,6 @@ void winsys_init(int *argc, char **argv, char const *window_title, char const *i
         winsys_init(argc, argv, window_title, icon_title);
     } else {
         glutInit(argc, argv);
-    }
-}
-
-/*---------------------------------------------------------------------------*/
-/*!
- *  Deallocates resources in preparation for program termination
- *  \author  jfpatry
- *  \date    Created:  2000-10-19
- *  \date    Modified: 2000-10-19
- */
-void winsys_cleanup() {
-    static bool cleanup = false;
-    if (!cleanup) {
-        CleanupGui();
-        cleanup = true;
-        freeMouseCursors();
-        SDL_Quit();
     }
 }
 
@@ -1075,9 +1084,6 @@ void winsys_atexit(winsys_atexit_func_t func) {
  *  \date    Modified: 2000-10-20
  */
 void winsys_exit(int code) {
-    // Reverting resolution by exiting fullscreen
-    SDL_SetWindowFullscreen(window, false);
-
     winsys_shutdown();
     if (atexit_func) {
         (*atexit_func)();

@@ -35,7 +35,7 @@
 #include <pthread.h>
 #endif
 
-namespace Muzak {
+namespace muzak {
 #ifndef _WIN32
 extern void *readerThread(void *input);
 #else
@@ -107,7 +107,8 @@ class Music {
     std::vector<PlayList> playlist;
 public:
     enum Playlist { NOLIST = -1, BATTLELIST = 0, PEACELIST, PANICLIST, VICTORYLIST, LOSSLIST, MAXLIST };
-    Music(Unit *parent = NULL);
+
+    explicit Music(Unit *parent = nullptr);
     int loopsleft;
     void Listen();
     ~Music();
@@ -149,9 +150,9 @@ private:
     int SelectTracks(int layer = -1);
 
 #ifndef _WIN32
-    friend void *Muzak::readerThread(void *input);
+    friend void *muzak::readerThread(void *input);
 #else
-    friend DWORD WINAPI Muzak::readerThread( PVOID input );
+    friend DWORD WINAPI muzak::readerThread( PVOID input );
 #endif
 
 #ifdef _WIN32
@@ -176,7 +177,42 @@ private:
 
     std::string cur_song_file;
 };
-extern Music *muzak;
+extern std::vector<Music> muzak_collection;
 extern int muzak_count;
+
+class Muzak {
+public:
+    static inline void GotoSong(const int which_list, const int which_song, const bool skip, const int layer = -1) {
+        muzak_collection.front().GotoSong(which_list, which_song, skip, layer);
+    }
+
+    static inline void GotoSong(const std::string &mus, const int layer = -1) {
+        Music::GotoSong(mus, layer);
+    }
+
+    static inline int Addlist(const std::string &listfile) {
+        return Music::Addlist(listfile);
+    }
+
+    static inline void Skip(int layer = -1) {
+        Music::Skip(layer);
+    }
+
+    static inline void Stop(const int layer = -1) {
+        Music::Stop(layer);
+    }
+
+    static inline void SkipRandSong(const int which_list, const int layer = -1) {
+        Music::SkipRandSong(which_list, layer);
+    }
+
+    static inline void SetLoops(const int num_loops, const int layer = -1) {
+        Music::SetLoops(num_loops, layer);
+    }
+
+    static inline void Mute(bool mute = true, int layer = -1) {
+        Music::Mute(mute, layer);
+    }
+};
 
 #endif //VEGA_STRIKE_ENGINE_CMD_MUSIC_H

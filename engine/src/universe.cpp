@@ -94,7 +94,7 @@ using std::find;
 // externs
 extern void CacheJumpStar(bool);
 extern void SortStarSystems(vector<StarSystem *> &ss, StarSystem *drawn);
-extern void bootstrap_first_loop();
+extern void BootstrapFirstLoop();
 extern bool RefreshGUI();
 extern int timecount;
 extern StarSystem *GetLoadedStarSystem(const char *system);
@@ -338,7 +338,7 @@ Universe::Universe(int argc, char **argv, const char *galaxy_str) {
     hud_camera = Camera();
 
     //Hasten splash screen loading, to cover up lengthy universe initialization
-    bootstrap_first_loop();
+    BootstrapFirstLoop();
 
     ROLES::getAllRolePriorities();
     WeaponFactory wf = WeaponFactory(VSFileSystem::weapon_list);

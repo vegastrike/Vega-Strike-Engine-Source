@@ -346,6 +346,8 @@ SET(LIBCMDSERVER_SOURCES
 
 SET(LIBGFXCLIENT_SOURCES
     src/gfx/ani_texture.cpp
+    src/gfx/ani_texture_utils.cpp
+    src/gfx/ani_texture_utils.h
     src/gfx/animation.cpp
     src/gfx/aux_logo.cpp
     src/gfx/aux_palette.cpp
@@ -817,6 +819,10 @@ IF (USE_GTEST)
         src/components/tests/jump_drive_tests.cpp
         src/components/tests/utils_tests.cpp
         src/components/tests/operational_tests.cpp
+        src/components/tests/ship_functions_tests.cpp
+        src/cmd/tests/unit_transfer_tests.cpp
+        src/gfx/tests/ani_texture_tests.cpp
+        src/gfx/ani_texture_utils.cpp
     )
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} SYSTEM PRIVATE ${VSE_TST_INCLUDES})
     TARGET_INCLUDE_DIRECTORIES(${TEST_NAME} PRIVATE
