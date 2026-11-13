@@ -299,7 +299,8 @@ void Shield::Repair() {
         facet.RepairFully();
     }
 
-    operational = 1.0;
+    // RepairFully doesn't restore destroyed resources, so the shield may still be damaged
+    CalculatePercentOperational();
 }
 
 bool Shield::Damaged() const {
