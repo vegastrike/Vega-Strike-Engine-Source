@@ -214,6 +214,7 @@ void InitPython(bool &was_already_initialized) {
             Py_ExitStatusException(status);
         }
     }
+}
 
 UniquePyRef GetMethodFromPython(std::string module_name, std::string function_name
                                    , const std::list<fs::path> &search_paths) {
