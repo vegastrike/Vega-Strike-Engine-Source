@@ -179,7 +179,8 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
         if (!excludes.empty()) {
             std::string::size_type pos = 0, epos = 0;
             while (epos != std::string::npos) {
-                std::string xx(excludes.substr(pos, epos = excludes.find(' ', pos)));
+                epos = excludes.find(' ', pos);
+                std::string xx(excludes.substr(pos, epos - pos));
                 autoLandingExcludeList.insert(xx);
                 pos = epos + 1;
             }
@@ -188,7 +189,8 @@ void GameCockpit::DoAutoLanding(Unit *un, Unit *target) {
         if (!excludes.empty()) {
             std::string::size_type pos = 0, epos = 0;
             while (epos != std::string::npos) {
-                std::string yy(excludes.substr(pos, epos = excludes.find(' ', pos)));
+                epos = excludes.find(' ', pos);
+                std::string yy(excludes.substr(pos, epos - pos));
                 autoLandingExcludeWarningList.insert(yy);
                 pos = epos + 1;
             }
