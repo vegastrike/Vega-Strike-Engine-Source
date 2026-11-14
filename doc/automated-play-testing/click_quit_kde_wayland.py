@@ -400,7 +400,8 @@ def get_display_bounds(verbose: bool = False) -> tuple[int, int]:
     return 3840, 2160
 
 
-def click_at_position(screen_x: SupportsInt, screen_y: SupportsInt, verbose: bool = False) -> None:
+def click_at_position(screen_x: SupportsInt, screen_y: SupportsInt, screen_width: SupportsInt, screen_height: SupportsInt,
+                      verbose: bool = False) -> None:
     """
     Click at the specified screen position using ydotool.
 
@@ -408,31 +409,32 @@ def click_at_position(screen_x: SupportsInt, screen_y: SupportsInt, verbose: boo
     kernel level, bypassing Wayland's restrictions on cross-process input.
     ydotool mousemove --absolute uses actual screen pixel coordinates.
 
+    :param screen_width: The width of the screen in pixels
+    :param screen_height: The height of the screen in pixels
     :rtype: None
     :param screen_x: Target click position X coordinate in screen pixel coordinates
     :param screen_y: Target click position Y coordinate in screen pixel coordinates
     :param verbose: Print debug info
     """
-    # ydotool uses actual screen pixel coordinates for --absolute mode
-    ix = int(screen_x)
-    iy = int(screen_y)
+    screen_x_fraction = screen_x / screen_width
+    screen_y_fraction = screen_y / screen_height
 
     if verbose:
-        print(f"Moving mouse to screen pixel ({ix}, {iy})...")
+        print(f"Moving mouse to screen percentage ({screen_x_fraction}, {screen_y_fraction})...")
 
-    # Move mouse using ydotool
+    # Move mouse
     out, rc = run_cmd(
-        f'ydotool mousemove --absolute {ix} {iy} 2>/dev/null')
+        f'echo "mouseto {screen_x_fraction} {screen_y_fraction}" | dotool 2>/dev/null')
     if rc != 0 and verbose:
-        print(f"ydotool mousemove failed: {out}")
+        print(f"dotool mousemove failed: {out}")
     time.sleep(0.3)
 
-    # Click left button (0x00 = left button in ydotool)
+    # Click left button
     if verbose:
         print("Clicking...")
-    out, rc = run_cmd('ydotool click 0x00 2>/dev/null')
+    out, rc = run_cmd('echo "click left" | dotool 2>/dev/null')
     if rc != 0 and verbose:
-        print(f"ydotool click failed: {out}")
+        print(f"dotool click failed: {out}")
 
     if verbose:
         print("Click sent!")
@@ -481,7 +483,8 @@ def main():
 
     if args.verbose:
         print("Getting screen geometry...")
-        screen_width, screen_height = get_display_bounds(verbose=args.verbose)
+    screen_width, screen_height = get_display_bounds(verbose=args.verbose)
+    if args.verbose:
         print(f"Screen bounds: {screen_width, screen_height}")
 
     # Start the game
@@ -560,7 +563,7 @@ def main():
             print(f"Quit button screen position: ({screen_x}, {screen_y})")
 
         # Click the Quit button
-        click_at_position(screen_x, screen_y, args.verbose)
+        click_at_position(screen_x, screen_y, screen_width, screen_height, args.verbose)
 
         # After clicking Quit, the game may show a confirmation dialog.
         # Wait a moment, then check if the game is still running.
@@ -578,7 +581,7 @@ def main():
                     if confirm_pos is not None:
                         if args.verbose:
                             print(f"Clicking confirmation button at {confirm_pos}")
-                        click_at_position(confirm_pos[0], confirm_pos[1], args.verbose)
+                        click_at_position(confirm_pos[0], confirm_pos[1], screen_width, screen_height, args.verbose)
             finally:
                 if os.path.exists(confirm_screenshot):
                     os.unlink(confirm_screenshot)
