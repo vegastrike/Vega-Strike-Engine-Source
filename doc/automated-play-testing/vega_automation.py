@@ -416,6 +416,64 @@ def click_at_position(screen_x: SupportsInt, screen_y: SupportsInt, screen_width
         print("Click sent!")
 
 
+# === Letterbox calculation ===
+# The Main Menu, Intro Monologue, and base/hangar views are letterboxed to a 1.33:1
+# aspect ratio within the window.  When the window is wider (e.g. 16:9), black bars
+# appear on the left and right.  When the window is taller, black bars appear on
+# the top and bottom.  Button design coordinates are relative to the letterboxed
+# area, not the full window.
+LETTERBOX_ASPECT_RATIO = 4.0 / 3.0  # 1.33:1
+
+
+def calculate_letterbox_region(wx: int, wy: int, ww: int, wh: int) -> tuple[int, int, int, int]:
+    """
+    Calculate the letterboxed region within the window.
+
+    The game renders at a 1.33:1 aspect ratio.  When the window aspect ratio
+    differs, black bars are added.  This function returns the position and size
+    of the actual rendered area within the window, fitting the 4:3 content
+    while maintaining the aspect ratio.
+
+    :param wx: Window X position on screen
+    :param wy: Window Y position on screen
+    :param ww: Window width in pixels
+    :param wh: Window height in pixels
+    :return: Tuple of (letterbox_x, letterbox_y, letterbox_w, letterbox_h) in screen coords
+    """
+    window_aspect = ww / wh
+
+    if window_aspect > LETTERBOX_ASPECT_RATIO:
+        # Window is wider than 4:3 — letterbox horizontally (black bars left/right).
+        # The letterbox fills the window height, and width is derived from the aspect.
+        lb_h = wh
+        lb_w = int(wh * LETTERBOX_ASPECT_RATIO)
+        if lb_w > ww:
+            # Defensive: letterbox width exceeds window width, fill width instead.
+            lb_w = ww
+            lb_h = int(ww / LETTERBOX_ASPECT_RATIO)
+            lb_x = wx
+            lb_y = wy + (wh - lb_h) // 2
+        else:
+            lb_x = wx + (ww - lb_w) // 2
+            lb_y = wy
+    else:
+        # Window is taller (or equal) than 4:3 — letterbox vertically (black bars top/bottom).
+        # The letterbox fills the window width, and height is derived from the aspect.
+        lb_w = ww
+        lb_h = int(ww / LETTERBOX_ASPECT_RATIO)
+        if lb_h > wh:
+            # Defensive: letterbox height exceeds window height, fill height instead.
+            lb_h = wh
+            lb_w = int(wh * LETTERBOX_ASPECT_RATIO)
+            lb_x = wx + (ww - lb_w) // 2
+            lb_y = wy
+        else:
+            lb_x = wx
+            lb_y = wy + (wh - lb_h) // 2
+
+    return lb_x, lb_y, lb_w, lb_h
+
+
 # === Button position calculation helpers ===
 # Main menu buttons use design resolution 1280x1024
 # Button text is typically at 90% into the button width (not centered).
@@ -435,12 +493,13 @@ def calculate_button_position(wx: int, wy: int, ww: int, wh: int,
                               text_offset_x: float = MAIN_MENU_TEXT_OFFSET_X,
                               design_w: int = MAIN_MENU_DESIGN_W,
                               design_h: int = MAIN_MENU_DESIGN_H,
+                              letterboxed: bool = True,
                               verbose: bool = False) -> tuple[int, int]:
     """
     Calculate the screen position of a button's text based on design-resolution coordinates.
 
     Converts design-space button coordinates to actual screen pixel coordinates
-    by scaling for the current window size relative to the design resolution,
+    by scaling for the letterboxed region size relative to the design resolution,
     then offsetting to the text position within the button.
 
     :param wx: Window X position on screen
@@ -454,17 +513,27 @@ def calculate_button_position(wx: int, wy: int, ww: int, wh: int,
     :param text_offset_x: Horizontal offset fraction (0-1) into button width where text sits
     :param design_w: Design resolution width
     :param design_h: Design resolution height
+    :param letterboxed: If True, account for the letterboxed region (default True for menus)
     :param verbose: Print debug info
     :return: Tuple of (screen_x, screen_y) — center of the button text
     """
-    sx = ww / design_w
-    sy = wh / design_h
+    if letterboxed:
+        lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(wx, wy, ww, wh)
+        if verbose:
+            print(f"Letterbox region: ({lb_x}, {lb_y}), size: {lb_w}x{lb_h}")
+        sx = lb_w / design_w
+        sy = lb_h / design_h
+    else:
+        lb_x = wx
+        lb_y = wy
+        sx = ww / design_w
+        sy = wh / design_h
 
     text_x = btn_x + btn_w * text_offset_x
     text_y = btn_y + btn_h / 2
 
-    screen_x = int(wx + text_x * sx)
-    screen_y = int(wy + text_y * sy)
+    screen_x = int(lb_x + text_x * sx)
+    screen_y = int(lb_y + text_y * sy)
 
     if verbose:
         print(f"Scale: sx={sx:.4f}, sy={sy:.4f}")
@@ -481,6 +550,7 @@ def calculate_main_menu_button_position(wx: int, wy: int, ww: int, wh: int,
     Calculate the screen position of a main menu button's text.
 
     Main menu buttons use design resolution 1280x1024 with text at 90% into button width.
+    The main menu is letterboxed to 1.33:1.
 
     :return: Tuple of (screen_x, screen_y) — center of the button text
     :param wx: Window X position on screen
@@ -498,6 +568,7 @@ def calculate_main_menu_button_position(wx: int, wy: int, ww: int, wh: int,
         text_offset_x=MAIN_MENU_TEXT_OFFSET_X,
         design_w=MAIN_MENU_DESIGN_W,
         design_h=MAIN_MENU_DESIGN_H,
+        letterboxed=True,
         verbose=verbose
     )
 
@@ -509,6 +580,7 @@ def calculate_intro_button_position(wx: int, wy: int, ww: int, wh: int,
     Calculate the screen position of an intro monologue button's text.
 
     Intro monologue uses design resolution 1024x768 with centered text (50% offset).
+    The intro monologue is letterboxed to 1.33:1.
 
     :return: Tuple of (screen_x, screen_y) — center of the button text
     :param wx: Window X position on screen
@@ -526,6 +598,7 @@ def calculate_intro_button_position(wx: int, wy: int, ww: int, wh: int,
         text_offset_x=INTRO_TEXT_OFFSET_X,
         design_w=INTRO_DESIGN_W,
         design_h=INTRO_DESIGN_H,
+        letterboxed=True,
         verbose=verbose
     )
 
@@ -620,6 +693,70 @@ def find_text_in_region_via_ocr(screenshot_path: str,
         window_y=window_y,
         crop_x_starting_percent=region_x_percent,
         crop_y_starting_percent=region_y_percent,
+        crop_x_ending_percent=crop_x_end,
+        crop_y_ending_percent=crop_y_end,
+        verbose=verbose
+    )
+
+
+def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
+                                          text: str,
+                                          window_x: int,
+                                          window_y: int,
+                                          window_width: int,
+                                          window_height: int,
+                                          region_x_percent: float = 0.0,
+                                          region_y_percent: float = 0.0,
+                                          region_w_percent: float = 100.0,
+                                          region_h_percent: float = 100.0,
+                                          verbose: bool = False) -> tuple[int, int] | None:
+    """
+    Find text in a designated region of the letterboxed area of a screenshot using OCR.
+
+    Unlike ``find_text_in_region_via_ocr``, the region percentages are relative to the
+    letterboxed (rendered) area, not the full window.  This function calculates the
+    letterbox region first, then maps the relative percentages to window-relative
+    crop percentages for the OCR search.
+
+    :param screenshot_path: Path to the screenshot image file
+    :param text: The text/caption to find
+    :param window_x: Window X position on screen
+    :param window_y: Window Y position on screen
+    :param window_width: Window width in pixels
+    :param window_height: Window height in pixels
+    :param region_x_percent: Starting X within letterbox as a percentage (0-100)
+    :param region_y_percent: Starting Y within letterbox as a percentage (0-100)
+    :param region_w_percent: Width of search region within letterbox as a percentage (0-100)
+    :param region_h_percent: Height of search region within letterbox as a percentage (0-100)
+    :param verbose: Print debug info
+    :return: Tuple of (screen_x, screen_y) — center of the found text, or None
+    """
+    lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(window_x, window_y, window_width, window_height)
+
+    # Map letterbox-relative percentages to window-relative percentages
+    # The letterbox origin (lb_x, lb_y) is in screen coords; window origin is (window_x, window_y)
+    # So the letterbox starts at (lb_x - window_x, lb_y - window_y) within the window
+    lb_rel_x = lb_x - window_x  # Letterbox X relative to window
+    lb_rel_y = lb_y - window_y  # Letterbox Y relative to window
+
+    # Convert to window-relative percentages
+    crop_x_start = (lb_rel_x + lb_w * region_x_percent / 100) / window_width * 100
+    crop_y_start = (lb_rel_y + lb_h * region_y_percent / 100) / window_height * 100
+    crop_x_end = (lb_rel_x + lb_w * (region_x_percent + region_w_percent) / 100) / window_width * 100
+    crop_y_end = (lb_rel_y + lb_h * (region_y_percent + region_h_percent) / 100) / window_height * 100
+
+    if verbose:
+        print(f"Letterbox: ({lb_x}, {lb_y}), size {lb_w}x{lb_h}")
+        print(f"Letterbox-relative region: ({region_x_percent}%, {region_y_percent}%), size {region_w_percent}%x{region_h_percent}%")
+        print(f"Window-relative crop: ({crop_x_start:.1f}%, {crop_y_start:.1f}%) to ({crop_x_end:.1f}%, {crop_y_end:.1f}%)")
+
+    return find_button_via_ocr_single(
+        screenshot_path=screenshot_path,
+        button_text=text,
+        window_x=window_x,
+        window_y=window_y,
+        crop_x_starting_percent=crop_x_start,
+        crop_y_starting_percent=crop_y_start,
         crop_x_ending_percent=crop_x_end,
         crop_y_ending_percent=crop_y_end,
         verbose=verbose

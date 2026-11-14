@@ -56,6 +56,7 @@ from vega_automation import (
     press_key,
     verify_screen,
     find_text_in_region_via_ocr,
+    find_text_in_letterbox_region_via_ocr,
     find_hotspot_via_pixel_search,
     get_hotspot_hint_position,
     calculate_main_menu_button_position,
@@ -207,12 +208,13 @@ def main():
         # Verify we're on the Main Menu screen by looking for "Campaign" text
         verify_screen(screenshot_path, "Campaign", "Main Menu", verbose=args.verbose)
 
-        # Find the Campaign button via OCR in the lower portion of the screen
-        # (main menu buttons are in the bottom area)
-        campaign_pos = find_text_in_region_via_ocr(
-            screenshot_path, "Campaign", wx, wy,
-            region_x_percent=0, region_y_percent=45,
-            region_w_percent=100, region_h_percent=55,
+        # Find the Campaign button via OCR in the upper portion of the letterboxed area.
+        # The Main Menu is letterboxed to 1.33:1. The Campaign button is in the upper
+        # third of the letterboxed area, in the left half.
+        campaign_pos = find_text_in_letterbox_region_via_ocr(
+            screenshot_path, "Campaign", wx, wy, ww, wh,
+            region_x_percent=0, region_y_percent=0,
+            region_w_percent=50, region_h_percent=33,
             verbose=args.verbose
         )
         if campaign_pos is not None:
@@ -262,11 +264,13 @@ def main():
         # Verify we're on the Intro Monologue screen
         verify_screen(screenshot_path, "Continue", "Intro Monologue", verbose=args.verbose)
 
-        # Find the Continue button via OCR in the lower portion of the screen
-        continue_pos = find_text_in_region_via_ocr(
-            screenshot_path, "Continue", wx, wy,
-            region_x_percent=0, region_y_percent=50,
-            region_w_percent=100, region_h_percent=50,
+        # Find the Continue button via OCR in the bottom 10% of the letterboxed area.
+        # The Intro Monologue screen is letterboxed to 1.33:1. The Continue button
+        # is in the bottom 10% of the letterboxed area, in the left half.
+        continue_pos = find_text_in_letterbox_region_via_ocr(
+            screenshot_path, "Continue", wx, wy, ww, wh,
+            region_x_percent=0, region_y_percent=90,
+            region_w_percent=50, region_h_percent=10,
             verbose=args.verbose
         )
         if continue_pos is not None:
