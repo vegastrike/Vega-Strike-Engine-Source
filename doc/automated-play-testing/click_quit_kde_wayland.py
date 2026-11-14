@@ -42,6 +42,8 @@ import pytesseract
 from PIL import Image
 from PIL.ImageFile import ImageFile
 
+SCREEN_X_ADJUST = 30
+
 POSITION_RE: Pattern[str] = re.compile(r'^ {2}Position: (\d+)(?:\.\d+)?,(\d+)(?:\.\d+)?$')
 GEOMETRY_RE: Pattern[str] = re.compile(r'^ {2}Geometry: (\d+)(?:\.\d+)?x(\d+)(?:\.\d+)?$')
 MODE_RE: Pattern[str] = re.compile(r'^[ \t]+mode:\r?\n[ \t]+width: (\d+) px, height: (\d+) px, refresh: \d+(?:\.\d+)? Hz,\r?\n[ \t]+flags: current$')
@@ -505,11 +507,11 @@ def main():
     # Wait for the game to start and load
     if args.verbose:
         print("Waiting for game to start...")
-    time.sleep(10)
+    time.sleep(5)
 
     if args.verbose:
         print("Waiting for game to fully load...")
-    time.sleep(30)
+    time.sleep(15)
 
     # Take a screenshot and use OCR to find the Quit button
     with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
@@ -559,7 +561,7 @@ def main():
             return 1
 
         screen_x, screen_y = quit_pos
-        screen_x += 30
+        screen_x += SCREEN_X_ADJUST
         if args.verbose:
             print(f"Quit button screen position: ({screen_x}, {screen_y})")
 
