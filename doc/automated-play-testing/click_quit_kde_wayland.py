@@ -219,10 +219,11 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
         print(f"Starting screenshot dimensions: {img_w}x{img_h}")
 
     # Crop to specified percentages
-    crop_x_start: int = int(img_w * crop_x_starting_percent)
-    crop_y_start: int = int(img_h * crop_y_starting_percent)
-    crop_x_ending: int = int(img_w * crop_x_ending_percent)
-    crop_y_ending: int = int(img_h * crop_y_ending_percent)
+    crop_x_start: int = int(img_w * crop_x_starting_percent / 100)
+    crop_y_start: int = int(img_h * crop_y_starting_percent / 100)
+    crop_x_ending: int = int(img_w * crop_x_ending_percent / 100)
+    crop_y_ending: int = int(img_h * crop_y_ending_percent / 100)
+
     if verbose:
         print(f"crop_x_start: {crop_x_start}")
         print(f"crop_y_start: {crop_y_start}")
