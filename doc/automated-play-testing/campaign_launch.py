@@ -18,9 +18,12 @@ Options:
     --target DIR        Path to Assets-Production directory (default: auto-detect)
     --binary PATH       Path to vegastrike-engine binary (default: ./bin/vegastrike-engine)
     --debug LEVEL       Debug level 0-3 (default: 2)
-    --display NUM       X11 display number (default: 1)
+    --display NUM       X11 display number (default: 0)
     --timeout SECS      Max seconds to wait for game exit (default: 120)
     --verbose           Print detailed progress
+    --kdotool-path      Path to folder containing kdotool, if not installed at the system level
+    --x-adjust          Number of pixels by which to adjust button X coordinates (default: 0)
+    --y-adjust          Number of pixels by which to adjust button Y coordinates (default: 0)
 
 Dependencies:
     - pyautogui (install: pip install pyautogui)
@@ -36,6 +39,17 @@ import time
 import sys
 import os
 import argparse
+
+from vega_automation import (
+    take_screenshot,
+    find_vega_strike_window,
+    activate_window,
+    get_window_geometry,
+    find_quit_button_via_ocr,
+    find_confirmation_button_via_ocr,
+    get_display_bounds,
+    click_at_position,
+)
 
 
 # Block mouseinfo import to suppress tkinter warning
@@ -379,12 +393,18 @@ def main():
                         help='Path to vegastrike-engine binary')
     parser.add_argument('--debug', type=int, default=2,
                         help='Debug level 0-3 (default: 2)')
-    parser.add_argument('--display', type=int, default=1,
+    parser.add_argument('--display', type=int, default=0,
                         help='X11 display number (default: 1)')
     parser.add_argument('--timeout', type=int, default=120,
                         help='Max seconds to wait for game exit (default: 120)')
     parser.add_argument('--verbose', action='store_true',
                         help='Print detailed progress')
+    parser.add_argument('--kdotool-path', default=None,
+                        help='Path to kdotool')
+    parser.add_argument('--x-adjust', type=int, default=0,
+                        help='Number of pixels by which to adjust button X coordinates (default: 0)')
+    parser.add_argument('--y-adjust', type=int, default=0,
+                        help='Number of pixels by which to adjust button Y coordinates (default: 0)')
     args = parser.parse_args()
 
     os.environ['DISPLAY'] = f':{args.display}'
@@ -392,7 +412,6 @@ def main():
     # Default target path if not specified
     if args.target is None:
         candidates = [
-            os.path.expanduser('../Assets-Production/'),
             os.path.expanduser('~/Projects/Assets-Production/'),
         ]
         for candidate in candidates:
@@ -401,16 +420,32 @@ def main():
                 break
         else:
             print("ERROR: --target not specified and Assets-Production not found")
+            print("Please specify --target /path/to/Assets-Production/")
             return 1
 
     if not os.path.isfile(args.binary):
         print(f"ERROR: Binary not found: {args.binary}")
         return 1
 
+    if args.kdotool_path is not None:
+        if not os.path.isdir(args.kdotool_path):
+            print(f"ERROR: kdotool path not valid: {args.kdotool_path}")
+            return 1
+        os.environ['PATH'] = f"{args.kdotool_path}:{os.environ['PATH']}"
+        if args.verbose:
+            print(f"Modified PATH: {os.environ['PATH']}")
+
     if args.verbose:
         print(f"Binary: {args.binary}")
         print(f"Target: {args.target}")
         print(f"Display: :{args.display}")
+
+    # Step 0: Get the screen geometry
+    if args.verbose:
+        print("Getting screen geometry...")
+    screen_width, screen_height = get_display_bounds(verbose=args.verbose)
+    if args.verbose:
+        print(f"Screen bounds: {screen_width, screen_height}")
 
     # Step 1: Start the game
     if args.verbose:
