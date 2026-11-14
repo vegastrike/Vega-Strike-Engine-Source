@@ -559,6 +559,7 @@ def main():
             return 1
 
         screen_x, screen_y = quit_pos
+        screen_x += 30
         if args.verbose:
             print(f"Quit button screen position: ({screen_x}, {screen_y})")
 
