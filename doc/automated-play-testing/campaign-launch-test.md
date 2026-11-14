@@ -78,7 +78,7 @@ The coordinates are **normalized** (-1 to +1), where:
 - X: -1 (left edge) to +1 (right edge)
 - Y: -1 (bottom edge) to +1 (top edge)
 
-The engine converts screen pixels to normalized coords in `engine/src/cmd/base_interface.cpp`:
+The engine converts screen pixels to normalized coords in `../../engine/src/cmd/base_interface.cpp`:
 ```cpp
 nx = 2.0f * (mx - vx) / vw - 1.0f;
 ny = 1.0f - 2.0f * (my - vy) / vh;
