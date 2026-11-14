@@ -36,7 +36,6 @@ import argparse
 import tempfile
 
 from vega_automation import (
-    SCREEN_X_ADJUST,
     take_screenshot,
     find_vega_strike_window,
     activate_window,
@@ -64,6 +63,12 @@ def main():
                         help='Max seconds to wait for game exit (default: 120)')
     parser.add_argument('--verbose', action='store_true',
                         help='Print detailed progress')
+    parser.add_argument('--kdotool-path', default=None,
+                        help='Path to kdotool')
+    parser.add_argument('--x-adjust', type=int, default=0,
+                        help='Number of pixels by which to adjust button X coordinates (default: 0)')
+    parser.add_argument('--y-adjust', type=int, default=0,
+                        help='Number of pixels by which to adjust button Y coordinates (default: 0)')
     args = parser.parse_args()
 
     # Default target path if not specified
@@ -84,6 +89,14 @@ def main():
     if not os.path.isfile(args.binary):
         print(f"ERROR: Binary not found: {args.binary}")
         return 1
+
+    if args.kdotool_path is not None:
+        if not os.path.isdir(args.kdotool_path):
+            print(f"ERROR: kdotool path not valid: {args.kdotool_path}")
+            return 1
+        os.environ['PATH'] = f"{args.kdotool_path}:{os.environ['PATH']}"
+        if args.verbose:
+            print(f"Modified PATH: {os.environ['PATH']}")
 
     if args.verbose:
         print(f"Binary: {args.binary}")
@@ -167,7 +180,8 @@ def main():
             return 1
 
         screen_x, screen_y = quit_pos
-        screen_x += SCREEN_X_ADJUST
+        screen_x += args.x_adjust
+        screen_y += args.y_adjust
         if args.verbose:
             print(f"Quit button screen position: ({screen_x}, {screen_y})")
 

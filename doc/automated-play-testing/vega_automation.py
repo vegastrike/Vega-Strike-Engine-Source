@@ -8,14 +8,13 @@ OCR-based button finding (Tesseract/pytesseract), and input simulation (dotool).
 import re
 import subprocess
 import time
+import os
 from re import Pattern, Match
 from typing import SupportsInt, Any
 
 import pytesseract
 from PIL import Image
 from PIL.ImageFile import ImageFile
-
-SCREEN_X_ADJUST = 30
 
 POSITION_RE: Pattern[str] = re.compile(r'^ {2}Position: (\d+)(?:\.\d+)?,(\d+)(?:\.\d+)?$')
 GEOMETRY_RE: Pattern[str] = re.compile(r'^ {2}Geometry: (\d+)(?:\.\d+)?x(\d+)(?:\.\d+)?$')
@@ -30,7 +29,8 @@ def run_cmd(cmd: str, shell: bool = True) -> tuple[str, int]:
     :param shell: Whether to execute the specified command through the shell
     :return: A tuple containing the stdout and return code
     """
-    result = subprocess.run(cmd, shell=shell, capture_output=True, text=True)
+    env = os.environ.copy()
+    result = subprocess.run(cmd, shell=shell, capture_output=True, text=True, env=env)
     return result.stdout.strip(), result.returncode
 
 
