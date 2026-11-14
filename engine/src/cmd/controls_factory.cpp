@@ -276,11 +276,15 @@ Control* getControl(std::map<std::string, std::string> attributes) {
     // Font
     if(attributes.count("font")) {
         std::vector<double> font_array = splitAndConvert(attributes["font"], ',');
-        if (font_array.size() < 2) {
-            VS_LOG(error, "controls_factory getControl(): font_array doesn't have enough elements");
-        } else {
+        if (font_array.size() == 1) {
+            // Size only: the weight falls back to the Font default (NORMAL_STROKE).
+            Font font(font_array.at(0));
+            c->setFont(font);
+        } else if (font_array.size() >= 2) {
             Font font(font_array.at(0), font_array.at(1));
             c->setFont(font);
+        } else {
+            VS_LOG(error, "controls_factory getControl(): 'font' requires at least one value");
         }
     }
 
