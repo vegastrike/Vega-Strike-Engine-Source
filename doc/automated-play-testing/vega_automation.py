@@ -623,3 +623,148 @@ def find_text_in_region_via_ocr(screenshot_path: str,
         crop_y_ending_percent=crop_y_end,
         verbose=verbose
     )
+
+
+# === Hotspot pixel-based detection ===
+# Hotspots in the hangar/base view are marked by bright blue dots on the screen.
+# When hovering, the cursor turns orange and the hotspot name appears in orange
+# near the bottom-left of the screen. OCR alone often misses small hotspot labels,
+# so we search for the blue indicator first, then optionally verify the caption.
+
+
+def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 128, red_max: int = 100, green_max: int = 150) -> bool:
+    """
+    Check whether a pixel is a bright blue color (hotspot indicator).
+
+    Hotspot markers are bright blue dots. The blue channel dominates,
+    while red and green are relatively low.
+
+    :param r: Red channel value (0-255)
+    :param g: Green channel value (0-255)
+    :param b: Blue channel value (0-255)
+    :param blue_threshold: Minimum blue channel value to consider the pixel blue
+    :param red_max: Maximum red channel value for a blue pixel
+    :param green_max: Maximum green channel value for a blue pixel
+    :return: True if the pixel is bright blue
+    """
+    return b >= blue_threshold and r <= red_max and g <= green_max
+
+
+def _is_orange_pixel(r: int, g: int, b: int, orange_red_min: int = 150, orange_green_min: int = 80, orange_green_max: int = 200, orange_blue_max: int = 80) -> bool:
+    """
+    Check whether a pixel is an orange color (hotspot caption text).
+
+    Orange text has high red, moderate green, and low blue.
+
+    :param r: Red channel value (0-255)
+    :param g: Green channel value (0-255)
+    :param b: Blue channel value (0-255)
+    :param orange_red_min: Minimum red channel for orange
+    :param orange_green_min: Minimum green channel for orange
+    :param orange_green_max: Maximum green channel for orange
+    :param orange_blue_max: Maximum blue channel for orange
+    :return: True if the pixel is orange
+    """
+    return r >= orange_red_min and orange_green_min <= g <= orange_green_max and b <= orange_blue_max
+
+
+def find_hotspot_via_pixel_search(screenshot_path: str,
+                                   window_x: int,
+                                   window_y: int,
+                                   caption_text: str = "",
+                                   search_x_percent: float = 0.0,
+                                   search_y_percent: float = 0.0,
+                                   search_w_percent: float = 100.0,
+                                   search_h_percent: float = 100.0,
+                                   verbose: bool = False) -> tuple[int, int] | None:
+    """
+    Find a clickable hotspot by searching for bright blue pixels (the hotspot marker)
+    and optionally verifying the orange caption text near the bottom of the window.
+
+    This method is more reliable than OCR alone for hotspots, which often have small
+    or dim labels that Tesseract misses. The blue dot indicator is a strong visual signal.
+
+    The algorithm:
+    1. Crop to the search region
+    2. Scan for bright blue pixels (the hotspot marker)
+    3. Find the center of the largest cluster of blue pixels
+    4. If caption_text is provided, verify orange text exists near the bottom
+    5. Return the screen coordinates of the hotspot center
+
+    :param screenshot_path: Path to the screenshot image file
+    :param window_x: Window X position on screen
+    :param window_y: Window Y position on screen
+    :param caption_text: Expected hotspot caption (e.g. "Launch") for verification
+    :param search_x_percent: Starting X of search region as a percentage (0-100)
+    :param search_y_percent: Starting Y of search region as a percentage (0-100)
+    :param search_w_percent: Width of search region as a percentage (0-100)
+    :param search_h_percent: Height of search region as a percentage (0-100)
+    :param verbose: Print debug info
+    :return: Tuple of (screen_x, screen_y) — center of the hotspot, or None
+    """
+    img: ImageFile = Image.open(screenshot_path)
+    img_w, img_h = img.size
+    pixels = img.load()
+
+    # Calculate crop region
+    crop_x1 = int(img_w * search_x_percent / 100)
+    crop_y1 = int(img_h * search_y_percent / 100)
+    crop_x2 = int(img_w * (search_x_percent + search_w_percent) / 100)
+    crop_y2 = int(img_h * (search_y_percent + search_h_percent) / 100)
+
+    if verbose:
+        print(f"Searching for blue hotspot pixels in region: ({crop_x1}, {crop_y1}) to ({crop_x2}, {crop_y2})")
+
+    # Find all bright blue pixels in the search region
+    blue_pixels: list[tuple[int, int]] = []
+    for y in range(crop_y1, crop_y2):
+        for x in range(crop_x1, crop_x2):
+            pixel = pixels[x, y]
+            if len(pixel) >= 3:
+                r, g, b = pixel[0], pixel[1], pixel[2]
+                if _is_bright_blue_pixel(r, g, b):
+                    blue_pixels.append((x, y))
+
+    if not blue_pixels:
+        if verbose:
+            print("No bright blue pixels found in search region")
+        return None
+
+    if verbose:
+        print(f"Found {len(blue_pixels)} bright blue pixels")
+
+    # Find the center of the blue pixel cluster
+    avg_x = sum(p[0] for p in blue_pixels) / len(blue_pixels)
+    avg_y = sum(p[1] for p in blue_pixels) / len(blue_pixels)
+
+    if verbose:
+        print(f"Blue pixel cluster center (window coords): ({avg_x:.1f}, {avg_y:.1f})")
+
+    # If caption_text is provided, verify by checking for orange pixels near the bottom
+    if caption_text:
+        # Search for orange pixels in the bottom 15% of the window (where captions appear)
+        orange_search_y1 = int(img_h * 0.85)
+        orange_pixels_found = 0
+        for y in range(orange_search_y1, img_h):
+            for x in range(0, int(img_w * 0.5)):  # Left half of screen
+                pixel = pixels[x, y]
+                if len(pixel) >= 3:
+                    r, g, b = pixel[0], pixel[1], pixel[2]
+                    if _is_orange_pixel(r, g, b):
+                        orange_pixels_found += 1
+
+        if orange_pixels_found < 5:
+            if verbose:
+                print(f"Warning: Only {orange_pixels_found} orange pixels found near bottom; caption verification weak")
+        else:
+            if verbose:
+                print(f"Found {orange_pixels_found} orange pixels near bottom — caption area looks correct")
+
+    # Convert window coordinates to screen coordinates
+    screen_x = int(window_x + avg_x)
+    screen_y = int(window_y + avg_y)
+
+    if verbose:
+        print(f"Hotspot screen position: ({screen_x}, {screen_y})")
+
+    return screen_x, screen_y

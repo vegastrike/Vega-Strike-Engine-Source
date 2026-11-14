@@ -56,6 +56,7 @@ from vega_automation import (
     press_key,
     verify_screen,
     find_text_in_region_via_ocr,
+    find_hotspot_via_pixel_search,
     calculate_main_menu_button_position,
     calculate_intro_button_position,
 )
@@ -319,24 +320,38 @@ def main():
                 print("Trying alternative verification for Hangar screen...")
             verify_screen(screenshot_path, "Landing Center", "Hangar (alt)", verbose=args.verbose)
 
-        # Find the Launch hotspot via OCR - the "Launch" caption appears near the bottom-left
-        # of the screen when hovering the hotspot area
-        launch_pos = find_text_in_region_via_ocr(
-            screenshot_path, "Launch", wx, wy,
-            region_x_percent=0, region_y_percent=0,
-            region_w_percent=100, region_h_percent=100,
+        # Find the Launch hotspot using pixel-based search first (more reliable than OCR).
+        # Hotspots are marked by bright blue dots on the screen. The pixel search
+        # finds the blue indicator, then verifies orange caption text near the bottom.
+        launch_pos = find_hotspot_via_pixel_search(
+            screenshot_path, wx, wy,
+            caption_text="Launch",
+            search_x_percent=0, search_y_percent=0,
+            search_w_percent=100, search_h_percent=100,
             verbose=args.verbose
         )
         if launch_pos is not None:
             launch_x, launch_y = launch_pos
             if args.verbose:
-                print(f"Found Launch hotspot via OCR at ({launch_x}, {launch_y})")
+                print(f"Found Launch hotspot via pixel search at ({launch_x}, {launch_y})")
         else:
+            # Fallback: try OCR to find the "Launch" text
             if args.verbose:
-                print("OCR did not find Launch hotspot; skipping click")
-            # Without a reliable fallback for launch hotspots (they vary by base),
-            # we just continue — the user can verify manually
-            launch_x = launch_y = None
+                print("Pixel search did not find Launch hotspot; trying OCR...")
+            launch_pos = find_text_in_region_via_ocr(
+                screenshot_path, "Launch", wx, wy,
+                region_x_percent=0, region_y_percent=0,
+                region_w_percent=100, region_h_percent=100,
+                verbose=args.verbose
+            )
+            if launch_pos is not None:
+                launch_x, launch_y = launch_pos
+                if args.verbose:
+                    print(f"Found Launch hotspot via OCR at ({launch_x}, {launch_y})")
+            else:
+                if args.verbose:
+                    print("Could not find Launch hotspot; skipping click")
+                launch_x = launch_y = None
 
         if launch_x is not None:
             launch_x += args.x_adjust
