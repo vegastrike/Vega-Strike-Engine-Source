@@ -629,7 +629,7 @@ def find_text_in_region_via_ocr(screenshot_path: str,
 # Hotspots in the hangar/base view are marked by bright blue dots on the screen.
 # When hovering, the cursor turns orange and the hotspot name appears in orange
 # near the bottom-left of the screen. OCR alone often misses small hotspot labels,
-# so we search for the blue indicator first, then optionally verify the caption.
+# so we search for the blue indicator first, then verify the caption via OCR.
 
 
 def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 128, red_max: int = 100, green_max: int = 150) -> bool:
@@ -650,28 +650,128 @@ def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 128, red
     return b >= blue_threshold and r <= red_max and g <= green_max
 
 
-def _is_orange_pixel(r: int, g: int, b: int, orange_red_min: int = 150, orange_green_min: int = 80, orange_green_max: int = 200, orange_blue_max: int = 80) -> bool:
+def _cluster_blue_pixels(pixels_list: list[tuple[int, int]], cluster_distance: int = 30) -> list[list[tuple[int, int]]]:
     """
-    Check whether a pixel is an orange color (hotspot caption text).
+    Group blue pixels into clusters based on proximity.
 
-    Orange text has high red, moderate green, and low blue.
+    Pixels within `cluster_distance` of each other belong to the same cluster.
+    Uses a simple single-pass greedy clustering algorithm.
 
-    :param r: Red channel value (0-255)
-    :param g: Green channel value (0-255)
-    :param b: Blue channel value (0-255)
-    :param orange_red_min: Minimum red channel for orange
-    :param orange_green_min: Minimum green channel for orange
-    :param orange_green_max: Maximum green channel for orange
-    :param orange_blue_max: Maximum blue channel for orange
-    :return: True if the pixel is orange
+    :param pixels_list: List of (x, y) tuples of blue pixels
+    :param cluster_distance: Maximum distance between pixels to be in the same cluster
+    :return: List of clusters, each cluster is a list of (x, y) tuples
     """
-    return r >= orange_red_min and orange_green_min <= g <= orange_green_max and b <= orange_blue_max
+    if not pixels_list:
+        return []
+
+    clusters: list[list[tuple[int, int]]] = []
+    cluster_centers: list[tuple[float, float]] = []
+    dist_sq = cluster_distance * cluster_distance
+
+    for px, py in pixels_list:
+        best_cluster = -1
+        best_dist_sq = dist_sq
+
+        for i, (cx, cy) in enumerate(cluster_centers):
+            d_sq = (px - cx) ** 2 + (py - cy) ** 2
+            if d_sq < best_dist_sq:
+                best_dist_sq = d_sq
+                best_cluster = i
+
+        if best_cluster >= 0:
+            clusters[best_cluster].append((px, py))
+            # Update cluster center incrementally
+            cluster = clusters[best_cluster]
+            n = len(cluster)
+            new_cx = (cluster_centers[best_cluster][0] * (n - 1) + px) / n
+            new_cy = (cluster_centers[best_cluster][1] * (n - 1) + py) / n
+            cluster_centers[best_cluster] = (new_cx, new_cy)
+        else:
+            clusters.append([(px, py)])
+            cluster_centers.append((float(px), float(py)))
+
+    return clusters
+
+
+def _cluster_center(cluster: list[tuple[int, int]]) -> tuple[float, float]:
+    """
+    Calculate the center of a pixel cluster.
+
+    :param cluster: List of (x, y) tuples
+    :return: Tuple of (center_x, center_y)
+    """
+    if not cluster:
+        return (0.0, 0.0)
+    cx = sum(p[0] for p in cluster) / len(cluster)
+    cy = sum(p[1] for p in cluster) / len(cluster)
+    return (cx, cy)
+
+
+def _distance_to_hint(cx: float, cy: float, hint_x: float, hint_y: float) -> float:
+    """
+    Calculate the Euclidean distance from a cluster center to a hint point.
+
+    :param cx: Cluster center X
+    :param cy: Cluster center Y
+    :param hint_x: Hint point X
+    :param hint_y: Hint point Y
+    :return: Euclidean distance
+    """
+    return ((cx - hint_x) ** 2 + (cy - hint_y) ** 2) ** 0.5
+
+
+def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bool = False) -> bool:
+    """
+    Verify that the expected caption text appears in the bottom portion of the screenshot
+    using OCR. The caption area is where hotspot labels appear when hovering.
+
+    :param screenshot_path: Path to the screenshot image file
+    :param caption_text: Expected caption text (e.g. "Launch")
+    :param verbose: Print debug info
+    :return: True if the caption text was found via OCR
+    """
+    try:
+        img: ImageFile = Image.open(screenshot_path)
+        img_w, img_h = img.size
+
+        # Crop to the bottom 15% of the image where hotspot captions appear
+        caption_y1 = int(img_h * 0.85)
+        cropped = img.crop((0, caption_y1, img_w, img_h))
+        cropped = cropped.convert('L')
+
+        # Use Tesseract to find word-level bounding boxes
+        data = pytesseract.image_to_data(cropped, output_type=pytesseract.Output.DICT)
+
+        if verbose:
+            all_words = []
+            for i, text in enumerate(data['text']):
+                t = text.strip()
+                if t:
+                    all_words.append(t)
+            print(f"OCR words in caption region: {all_words}")
+
+        target = caption_text.lower()
+        for i, text in enumerate(data['text']):
+            if text.strip().lower() == target:
+                if verbose:
+                    print(f"Caption verification passed: found '{target}' in caption region")
+                return True
+
+        if verbose:
+            print(f"Caption verification failed: '{target}' not found in caption region")
+        return False
+    except Exception as e:
+        if verbose:
+            print(f"Caption OCR error: {e}")
+        return False
 
 
 def find_hotspot_via_pixel_search(screenshot_path: str,
                                    window_x: int,
                                    window_y: int,
-                                   caption_text: str = "",
+                                   caption_text: str,
+                                   hint_window_x: float | None = None,
+                                   hint_window_y: float | None = None,
                                    search_x_percent: float = 0.0,
                                    search_y_percent: float = 0.0,
                                    search_w_percent: float = 100.0,
@@ -679,22 +779,24 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
                                    verbose: bool = False) -> tuple[int, int] | None:
     """
     Find a clickable hotspot by searching for bright blue pixels (the hotspot marker)
-    and optionally verifying the orange caption text near the bottom of the window.
+    and verifying the caption text via OCR.
 
     This method is more reliable than OCR alone for hotspots, which often have small
     or dim labels that Tesseract misses. The blue dot indicator is a strong visual signal.
 
     The algorithm:
-    1. Crop to the search region
-    2. Scan for bright blue pixels (the hotspot marker)
-    3. Find the center of the largest cluster of blue pixels
-    4. If caption_text is provided, verify orange text exists near the bottom
-    5. Return the screen coordinates of the hotspot center
+    1. Scan the search region for bright blue pixels (the hotspot markers)
+    2. Cluster nearby blue pixels together
+    3. If a hint position is provided, pick the cluster closest to it; otherwise pick the largest
+    4. Verify the expected caption text appears in the bottom caption area via OCR (mandatory)
+    5. Return the screen coordinates of the chosen hotspot center, or None if verification fails
 
     :param screenshot_path: Path to the screenshot image file
     :param window_x: Window X position on screen
     :param window_y: Window Y position on screen
-    :param caption_text: Expected hotspot caption (e.g. "Launch") for verification
+    :param caption_text: Expected hotspot caption (e.g. "Launch") — mandatory for verification
+    :param hint_window_x: Hint X in window coordinates to guide cluster selection (from design coords)
+    :param hint_window_y: Hint Y in window coordinates to guide cluster selection (from design coords)
     :param search_x_percent: Starting X of search region as a percentage (0-100)
     :param search_y_percent: Starting Y of search region as a percentage (0-100)
     :param search_w_percent: Width of search region as a percentage (0-100)
@@ -706,7 +808,7 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     img_w, img_h = img.size
     pixels = img.load()
 
-    # Calculate crop region
+    # Calculate search region
     crop_x1 = int(img_w * search_x_percent / 100)
     crop_y1 = int(img_h * search_y_percent / 100)
     crop_x2 = int(img_w * (search_x_percent + search_w_percent) / 100)
@@ -733,32 +835,44 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     if verbose:
         print(f"Found {len(blue_pixels)} bright blue pixels")
 
-    # Find the center of the blue pixel cluster
-    avg_x = sum(p[0] for p in blue_pixels) / len(blue_pixels)
-    avg_y = sum(p[1] for p in blue_pixels) / len(blue_pixels)
-
+    # Cluster blue pixels by proximity
+    clusters = _cluster_blue_pixels(blue_pixels)
     if verbose:
-        print(f"Blue pixel cluster center (window coords): ({avg_x:.1f}, {avg_y:.1f})")
+        print(f"Found {len(clusters)} blue pixel cluster(s)")
+        for i, cluster in enumerate(clusters):
+            cx, cy = _cluster_center(cluster)
+            print(f"  Cluster {i}: {len(cluster)} pixels, center ({cx:.1f}, {cy:.1f})")
 
-    # If caption_text is provided, verify by checking for orange pixels near the bottom
-    if caption_text:
-        # Search for orange pixels in the bottom 15% of the window (where captions appear)
-        orange_search_y1 = int(img_h * 0.85)
-        orange_pixels_found = 0
-        for y in range(orange_search_y1, img_h):
-            for x in range(0, int(img_w * 0.5)):  # Left half of screen
-                pixel = pixels[x, y]
-                if len(pixel) >= 3:
-                    r, g, b = pixel[0], pixel[1], pixel[2]
-                    if _is_orange_pixel(r, g, b):
-                        orange_pixels_found += 1
+    # Select the best cluster: prefer the one closest to the hint, or the largest if no hint
+    if hint_window_x is not None and hint_window_y is not None:
+        best_cluster = None
+        best_distance = float('inf')
+        for cluster in clusters:
+            cx, cy = _cluster_center(cluster)
+            dist = _distance_to_hint(cx, cy, hint_window_x, hint_window_y)
+            if verbose:
+                print(f"  Cluster center ({cx:.1f}, {cy:.1f}) distance to hint: {dist:.1f}")
+            if dist < best_distance:
+                best_distance = dist
+                best_cluster = cluster
+    else:
+        # No hint provided; pick the largest cluster
+        best_cluster = max(clusters, key=len) if clusters else None
 
-        if orange_pixels_found < 5:
-            if verbose:
-                print(f"Warning: Only {orange_pixels_found} orange pixels found near bottom; caption verification weak")
-        else:
-            if verbose:
-                print(f"Found {orange_pixels_found} orange pixels near bottom — caption area looks correct")
+    if best_cluster is None:
+        if verbose:
+            print("No suitable cluster found")
+        return None
+
+    avg_x, avg_y = _cluster_center(best_cluster)
+    if verbose:
+        print(f"Selected cluster center (window coords): ({avg_x:.1f}, {avg_y:.1f})")
+
+    # Mandatory: verify the caption text via OCR in the bottom caption area
+    if not _verify_caption_via_ocr(screenshot_path, caption_text, verbose=verbose):
+        if verbose:
+            print(f"Caption verification failed for '{caption_text}'; rejecting this hotspot")
+        return None
 
     # Convert window coordinates to screen coordinates
     screen_x = int(window_x + avg_x)
