@@ -9,6 +9,7 @@ import re
 import subprocess
 import time
 import os
+from collections import namedtuple
 from re import Pattern, Match
 from typing import SupportsInt, Any
 
@@ -630,6 +631,67 @@ def find_text_in_region_via_ocr(screenshot_path: str,
 # When hovering, the cursor turns orange and the hotspot name appears in orange
 # near the bottom-left of the screen. OCR alone often misses small hotspot labels,
 # so we search for the blue indicator first, then verify the caption via OCR.
+
+# === Hotspot geometry per base type ===
+# Different base types (ocean, desert, space station, etc.) display their clickable
+# hotspots at different positions on the screen.  The geometry is stored as
+# percentages of the letterboxed base area (1.33:1 aspect ratio):
+#   (horizontal_min%, horizontal_max%, vertical_min%, vertical_max%)
+# The center of that rectangle guides the pixel search to the correct blue cluster.
+
+
+HotspotGeometry = namedtuple('HotspotGeometry', ['h_min', 'h_max', 'v_min', 'v_max'])
+
+
+def _hotspot_center(geometry: HotspotGeometry) -> tuple[float, float]:
+    """
+    Calculate the center of a hotspot geometry as percentages.
+
+    :param geometry: HotspotGeometry namedtuple
+    :return: Tuple of (center_x_percent, center_y_percent)
+    """
+    cx = (geometry.h_min + geometry.h_max) / 2
+    cy = (geometry.v_min + geometry.v_max) / 2
+    return (cx, cy)
+
+
+# Known hotspot geometries, keyed by (base_type, hotspot_name).
+# Base types follow the naming used in the game's base definition files.
+# Hotspot names are the caption text shown when hovering (e.g. "Launch").
+HOTSPOT_GEOMETRY: dict[tuple[str, str], HotspotGeometry] = {
+    # Ocean-type bases (e.g. Atlantis) — the starting base.
+    # Design geometry relative to the letterboxed base area (1.33:1 aspect ratio).
+    ("ocean", "Launch"): HotspotGeometry(
+        h_min=19.53125, h_max=85.64455,
+        v_min=24.8698, v_max=82.8125
+    ),
+}
+
+
+def get_hotspot_hint_position(
+    base_type: str,
+    hotspot_name: str,
+    window_width: int,
+    window_height: int,
+) -> tuple[float, float] | None:
+    """
+    Calculate the hint position for a hotspot on a given base type.
+
+    Looks up the design geometry for the (base_type, hotspot_name) pair and
+    returns the center as window coordinates.  Returns None if the combination
+    is not known.
+
+    :param base_type: Base type string (e.g. "ocean", "desert", "space_station")
+    :param hotspot_name: Hotspot caption text (e.g. "Launch")
+    :param window_width: Current window width in pixels
+    :param window_height: Current window height in pixels
+    :return: Tuple of (hint_x, hint_y) in window coordinates, or None
+    """
+    geometry = HOTSPOT_GEOMETRY.get((base_type, hotspot_name))
+    if geometry is None:
+        return None
+    cx_pct, cy_pct = _hotspot_center(geometry)
+    return (window_width * cx_pct / 100, window_height * cy_pct / 100)
 
 
 def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 128, red_max: int = 100, green_max: int = 150) -> bool:

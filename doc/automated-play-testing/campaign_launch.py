@@ -57,6 +57,7 @@ from vega_automation import (
     verify_screen,
     find_text_in_region_via_ocr,
     find_hotspot_via_pixel_search,
+    get_hotspot_hint_position,
     calculate_main_menu_button_position,
     calculate_intro_button_position,
 )
@@ -325,18 +326,19 @@ def main():
         # finds the blue indicator cluster closest to the expected design position,
         # then verifies the caption text via OCR in the bottom caption area.
         #
-        # Calculate the expected window position of the Launch hotspot from design
-        # coordinates so the pixel search knows which blue cluster to pick.
-        #
-        # Design geometry for the Launch hotspot on ocean-type bases (e.g. Atlantis),
-        # relative to the letterboxed base area (1.33:1 aspect ratio):
-        #   Horizontal: 19.53125% to 85.64455%
-        #   Vertical: 24.8698% to 82.8125%
-        # The center of that range guides the pixel search to the correct blue cluster.
-        launch_hint_x = ww * (19.53125 + 85.64455) / 2 / 100  # ~52.59%
-        launch_hint_y = wh * (24.8698 + 82.8125) / 2 / 100     # ~53.84%
-        if args.verbose:
-            print(f"Launch hotspot hint position (window coords): ({launch_hint_x:.1f}, {launch_hint_y:.1f})")
+        # Look up the expected window position from the per-base-type geometry table
+        # so the pixel search knows which blue cluster to pick.
+        # The starting base, Atlantis, is an "ocean" type base.
+        base_type = "ocean"
+        launch_hint = get_hotspot_hint_position(base_type, "Launch", ww, wh)
+        if launch_hint is not None:
+            launch_hint_x, launch_hint_y = launch_hint
+            if args.verbose:
+                print(f"Launch hotspot hint position (window coords): ({launch_hint_x:.1f}, {launch_hint_y:.1f})")
+        else:
+            launch_hint_x = launch_hint_y = None
+            if args.verbose:
+                print(f"Unknown hotspot geometry for base type '{base_type}', 'Launch' — no hint")
 
         launch_pos = find_hotspot_via_pixel_search(
             screenshot_path, wx, wy,
