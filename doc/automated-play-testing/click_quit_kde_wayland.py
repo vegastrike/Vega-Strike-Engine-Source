@@ -14,8 +14,12 @@ Options:
     --target DIR        Path to Assets-Production directory (default: auto-detect)
     --binary PATH       Path to vegastrike-engine binary (default: ./bin/vegastrike-engine)
     --debug LEVEL       Debug level 0-3 (default: 2)
+    --display NUMBER    X11 display number (default: 0)
     --timeout SECS      Max seconds to wait for game exit (default: 120)
     --verbose           Print detailed progress
+    --kdotool-path      Path to folder containing kdotool, if not installed at the system level
+    --x-adjust          Number of pixels by which to adjust button X coordinates (default: 0)
+    --y-adjust          Number of pixels by which to adjust button Y coordinates (default: 0)
 
 Dependencies:
     - dotool (install: sudo dnf install dotool) — for mouse movement and clicking
