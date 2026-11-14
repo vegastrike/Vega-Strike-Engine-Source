@@ -378,11 +378,11 @@ def get_display_bounds(verbose: bool = False) -> tuple[int, int]:
 def click_at_position(screen_x: SupportsInt, screen_y: SupportsInt, screen_width: SupportsInt, screen_height: SupportsInt,
                       verbose: bool = False) -> None:
     """
-    Click at the specified screen position using ydotool.
+    Click at the specified screen position using dotool.
 
-    ydotool uses the Linux uinput device to simulate input events at the
+    dotool uses the Linux uinput device to simulate input events at the
     kernel level, bypassing Wayland's restrictions on cross-process input.
-    ydotool mousemove --absolute uses actual screen pixel coordinates.
+    dotool mouseto uses screen pixel coordinates.
 
     :param screen_width: The width of the screen in pixels
     :param screen_height: The height of the screen in pixels
@@ -413,3 +413,213 @@ def click_at_position(screen_x: SupportsInt, screen_y: SupportsInt, screen_width
 
     if verbose:
         print("Click sent!")
+
+
+# === Button position calculation helpers ===
+# Main menu buttons use design resolution 1280x1024
+# Button text is typically at 90% into the button width (not centered).
+MAIN_MENU_DESIGN_W = 1280
+MAIN_MENU_DESIGN_H = 1024
+MAIN_MENU_TEXT_OFFSET_X = 0.9
+
+# Intro monologue buttons use design resolution 1024x768
+# Button text is centered (50% offset).
+INTRO_DESIGN_W = 1024
+INTRO_DESIGN_H = 768
+INTRO_TEXT_OFFSET_X = 0.5
+
+
+def calculate_button_position(wx: int, wy: int, ww: int, wh: int,
+                              btn_x: int, btn_y: int, btn_w: int, btn_h: int,
+                              text_offset_x: float = MAIN_MENU_TEXT_OFFSET_X,
+                              design_w: int = MAIN_MENU_DESIGN_W,
+                              design_h: int = MAIN_MENU_DESIGN_H,
+                              verbose: bool = False) -> tuple[int, int]:
+    """
+    Calculate the screen position of a button's text based on design-resolution coordinates.
+
+    Converts design-space button coordinates to actual screen pixel coordinates
+    by scaling for the current window size relative to the design resolution,
+    then offsetting to the text position within the button.
+
+    :param wx: Window X position on screen
+    :param wy: Window Y position on screen
+    :param ww: Window width in pixels
+    :param wh: Window height in pixels
+    :param btn_x: Button X in design coordinates
+    :param btn_y: Button Y in design coordinates
+    :param btn_w: Button width in design coordinates
+    :param btn_h: Button height in design coordinates
+    :param text_offset_x: Horizontal offset fraction (0-1) into button width where text sits
+    :param design_w: Design resolution width
+    :param design_h: Design resolution height
+    :param verbose: Print debug info
+    :return: Tuple of (screen_x, screen_y) — center of the button text
+    """
+    sx = ww / design_w
+    sy = wh / design_h
+
+    text_x = btn_x + btn_w * text_offset_x
+    text_y = btn_y + btn_h / 2
+
+    screen_x = int(wx + text_x * sx)
+    screen_y = int(wy + text_y * sy)
+
+    if verbose:
+        print(f"Scale: sx={sx:.4f}, sy={sy:.4f}")
+        print(f"Design text pos: ({text_x:.1f}, {text_y:.1f})")
+        print(f"Screen click pos: ({screen_x}, {screen_y})")
+
+    return screen_x, screen_y
+
+
+def calculate_main_menu_button_position(wx: int, wy: int, ww: int, wh: int,
+                                        btn_x: int, btn_y: int, btn_w: int, btn_h: int,
+                                        verbose: bool = False) -> tuple[int, int]:
+    """
+    Calculate the screen position of a main menu button's text.
+
+    Main menu buttons use design resolution 1280x1024 with text at 90% into button width.
+
+    :return: Tuple of (screen_x, screen_y) — center of the button text
+    :param wx: Window X position on screen
+    :param wy: Window Y position on screen
+    :param ww: Window width in pixels
+    :param wh: Window height in pixels
+    :param btn_x: Button X in design coordinates
+    :param btn_y: Button Y in design coordinates
+    :param btn_w: Button width in design coordinates
+    :param btn_h: Button height in design coordinates
+    :param verbose: Print debug info
+    """
+    return calculate_button_position(
+        wx, wy, ww, wh, btn_x, btn_y, btn_w, btn_h,
+        text_offset_x=MAIN_MENU_TEXT_OFFSET_X,
+        design_w=MAIN_MENU_DESIGN_W,
+        design_h=MAIN_MENU_DESIGN_H,
+        verbose=verbose
+    )
+
+
+def calculate_intro_button_position(wx: int, wy: int, ww: int, wh: int,
+                                    btn_x: int, btn_y: int, btn_w: int, btn_h: int,
+                                    verbose: bool = False) -> tuple[int, int]:
+    """
+    Calculate the screen position of an intro monologue button's text.
+
+    Intro monologue uses design resolution 1024x768 with centered text (50% offset).
+
+    :return: Tuple of (screen_x, screen_y) — center of the button text
+    :param wx: Window X position on screen
+    :param wy: Window Y position on screen
+    :param ww: Window width in pixels
+    :param wh: Window height in pixels
+    :param btn_x: Button X in design coordinates
+    :param btn_y: Button Y in design coordinates
+    :param btn_w: Button width in design coordinates
+    :param btn_h: Button height in design coordinates
+    :param verbose: Print debug info
+    """
+    return calculate_button_position(
+        wx, wy, ww, wh, btn_x, btn_y, btn_w, btn_h,
+        text_offset_x=INTRO_TEXT_OFFSET_X,
+        design_w=INTRO_DESIGN_W,
+        design_h=INTRO_DESIGN_H,
+        verbose=verbose
+    )
+
+
+def refresh_window_geometry(window_id: str, verbose: bool = False) -> tuple[int, int, int, int] | None:
+    """
+    Re-query the window geometry in case the user moved the window.
+
+    :rtype: tuple[int, int, int, int] | None
+    :param window_id: The window ID whose geometry to refresh
+    :param verbose: Print debug info
+    :return: The window geometry (x, y, width, height) or None on failure
+    """
+    geom = get_window_geometry(window_id, verbose)
+    if verbose and geom:
+        print(f"Refreshed window geometry: {geom}")
+    return geom
+
+
+def press_key(key: str, verbose: bool = False) -> None:
+    """
+    Press a key using dotool.
+
+    :param key: The key name to press (e.g. 'escape', 'q')
+    :param verbose: Print debug info
+    """
+    if verbose:
+        print(f"Pressing '{key}'...")
+    out, rc = run_cmd(f'echo "key {key}" | dotool 2>/dev/null')
+    if rc != 0 and verbose:
+        print(f"dotool key press failed: {out}")
+    time.sleep(0.5)
+
+
+def verify_screen(screenshot_path: str, expected_text: str, step_label: str = "", verbose: bool = False) -> bool:
+    """
+    Run OCR on a screenshot and verify expected text is visible.
+
+    :param screenshot_path: Path to the screenshot image file
+    :param expected_text: Text phrase to look for in the OCR output
+    :param step_label: Human-readable label for log messages
+    :param verbose: Print detailed progress
+    :return: True if expected text was found, False otherwise
+    """
+    if verbose:
+        print(f"Running OCR to verify {step_label}...")
+
+    text = ocr_text_via_command_lina(screenshot_path, verbose=verbose)
+    if expected_text.lower() in text.lower():
+        if verbose:
+            print(f"Verified '{step_label}': found '{expected_text}'")
+        return True
+    else:
+        if verbose:
+            print(f"Verification failed for '{step_label}': expected '{expected_text}' not found")
+        return False
+
+
+def find_text_in_region_via_ocr(screenshot_path: str,
+                                text: str,
+                                window_x: int,
+                                window_y: int,
+                                region_x_percent: float = 0.0,
+                                region_y_percent: float = 0.0,
+                                region_w_percent: float = 100.0,
+                                region_h_percent: float = 100.0,
+                                verbose: bool = False) -> tuple[int, int] | None:
+    """
+    Find text (such as a button label or hotspot caption) in a designated region of a screenshot
+    using OCR and return the center screen coordinates.
+
+    General purpose wrapper around ``find_button_via_ocr_single`` for finding any labeled
+    clickable region — buttons, hotspots, etc.
+
+    :param screenshot_path: Path to the screenshot image file
+    :param text: The text/caption to find
+    :param window_x: Window X position on screen
+    :param window_y: Window Y position on screen
+    :param region_x_percent: Starting X of search region as a percentage (0-100)
+    :param region_y_percent: Starting Y of search region as a percentage (0-100)
+    :param region_w_percent: Width of search region as a percentage (0-100)
+    :param region_h_percent: Height of search region as a percentage (0-100)
+    :param verbose: Print debug info
+    :return: Tuple of (screen_x, screen_y) — center of the found text, or None
+    """
+    crop_x_end = region_x_percent + region_w_percent
+    crop_y_end = region_y_percent + region_h_percent
+    return find_button_via_ocr_single(
+        screenshot_path=screenshot_path,
+        button_text=text,
+        window_x=window_x,
+        window_y=window_y,
+        crop_x_starting_percent=region_x_percent,
+        crop_y_starting_percent=region_y_percent,
+        crop_x_ending_percent=crop_x_end,
+        crop_y_ending_percent=crop_y_end,
+        verbose=verbose
+    )
