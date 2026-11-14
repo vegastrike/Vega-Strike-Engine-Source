@@ -1279,6 +1279,12 @@ namespace vega_config {
         } afterburner;
 
         struct {
+            // Ships apply armor based on their mass (or hull)
+            bool use_size_based_armor_modifier = true;
+            bool use_mass = true; // False is hull
+        } armor;
+
+        struct {
             std::string energy_source = "energy";
 
         } cloak;

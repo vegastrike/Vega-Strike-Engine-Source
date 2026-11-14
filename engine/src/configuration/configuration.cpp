@@ -3487,6 +3487,20 @@ void vega_config::Configuration::load_config(const std::string& json_text) {
 
         }
 
+        const boost::json::value * armor_value_ptr = components_object.if_contains("armor");
+        if (armor_value_ptr != nullptr) {
+            boost::json::object armor_object = armor_value_ptr->get_object();
+            const boost::json::value * use_size_based_armor_modifier_value_ptr = armor_object.if_contains("use_size_based_armor_modifier");
+            if (use_size_based_armor_modifier_value_ptr != nullptr) {
+                components.armor.use_size_based_armor_modifier = boost::json::value_to<int>(*use_size_based_armor_modifier_value_ptr);
+            }
+
+            const boost::json::value * use_mass_value_ptr = armor_object.if_contains("use_mass");
+            if (use_mass_value_ptr != nullptr) {
+                components.armor.use_mass = boost::json::value_to<int>(*use_mass_value_ptr);
+            }
+        }
+
         const boost::json::value * cloak_value_ptr = components_object.if_contains("cloak");
         if (cloak_value_ptr != nullptr) {
             boost::json::object cloak_object = cloak_value_ptr->get_object();
