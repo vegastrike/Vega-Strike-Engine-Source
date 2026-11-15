@@ -391,15 +391,15 @@ def find_confirmation_button_via_ocr(screenshot_path: str, window_x: int = 0, wi
 
 def get_display_bounds(verbose: bool = False) -> tuple[int, int]:
     """
-    Get the total display resolution in logical (scaled) pixels.
+    Get the total display resolution in native pixels.
 
-    On Wayland with HiDPI scaling, tools like xdotool and wayland-info report
-    the logical resolution, not the native pixel resolution.  For example, a
-    3840x2160 physical display with 1.5x scaling reports 2560x1440.
+    Tools like xdotool and wayland-info report the native pixel resolution,
+    not the logical (scaled) resolution.  For example, a 3840x2160 physical
+    display reports 3840x2160 even with 1.5x scaling applied.
 
     :rtype: tuple[int, int]
     :param verbose: Print debug info
-    :return: Tuple of (display_width, display_height) in logical pixels
+    :return: Tuple of (display_width, display_height) in native pixels
     """
     # Try xdotool first (works on X11 fallback)
     out, _ = run_cmd('xdotool getdisplaygeometry 2>/dev/null')
