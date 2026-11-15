@@ -1304,13 +1304,16 @@ def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bo
         if verbose:
             print(f"Orange pixels in caption region: {orange_count}")
 
-        # Crop to the bottom-left caption area.
-        # Keep the image in color mode so Tesseract can see the orange caption text.
-        # Converting to grayscale was losing the orange text contrast.
-        cropped = img.crop((0, caption_y1, caption_x2, img_h))
+        # Crop to the bottom-left caption area (color image used above for orange pixel detection).
+        cropped_color = img.crop((0, caption_y1, caption_x2, img_h))
+
+        # Convert to grayscale for OCR. Tesseract often performs better on grayscale images
+        # because it focuses on luminance contrast rather than color channels. The orange
+        # caption text on a dark background has strong luminance contrast preserved in grayscale.
+        cropped_gray = cropped_color.convert('L')
 
         # Use Tesseract to find word-level bounding boxes
-        data = pytesseract.image_to_data(cropped, output_type=pytesseract.Output.DICT)
+        data = pytesseract.image_to_data(cropped_gray, output_type=pytesseract.Output.DICT)
 
         if verbose:
             all_words = []

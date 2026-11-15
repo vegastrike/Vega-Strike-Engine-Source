@@ -335,7 +335,7 @@ def main():
         try:
             if take_screenshot(check_screenshot_path, active_window_only=True, verbose=args.verbose):
                 # Check if "---Intro" text is still visible (same search term as above).
-                still_intro = verify_screen(check_screenshot_path, "---Intro", "Intro check", verbose=args.verbose)
+                still_intro = verify_screen(check_screenshot_path, "---Intro", "Intro check", verbose=False)
                 if not still_intro:
                     if args.verbose:
                         print(f"Intro Monologue screen gone after {waited}s")
