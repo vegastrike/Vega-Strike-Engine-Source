@@ -262,17 +262,23 @@ def main():
             return 1
 
         # Verify we're on the Intro Monologue screen by checking for the title text
-        # near the top of the letterboxed area.
-        intro_verified = verify_screen(screenshot_path, "Intro Monologue", "Intro Monologue (title)", verbose=args.verbose)
+        # near the top of the letterboxed area. Tesseract reads "---Intro Monologue---"
+        # as two separate words: "---Intro" and "Monolaque---", so we only search for
+        # the first part.
+        intro_verified = verify_screen(screenshot_path, "---Intro", "Intro Monologue (title)", verbose=args.verbose)
         if not intro_verified:
-            if args.verbose:
-                print("WARNING: Could not verify 'Intro Monologue' title via OCR")
+            print("ERROR: Could not verify we are on the Intro Monologue screen")
+            game_proc.kill()
+            game_proc.wait()
+            return 1
 
-        # Also check for the Continue button text as a secondary confirmation
-        intro_verified = verify_screen(screenshot_path, "Continue", "Intro Monologue (button)", verbose=args.verbose)
-        if not intro_verified:
-            if args.verbose:
-                print("WARNING: Could not verify 'Continue button' via OCR")
+        # Also check for the Continue button text as a secondary confirmation.
+        continue_verified = verify_screen(screenshot_path, "Continue", "Intro Monologue (button)", verbose=args.verbose)
+        if not continue_verified:
+            print("ERROR: Could not verify 'Continue' button is visible on Intro Monologue screen")
+            game_proc.kill()
+            game_proc.wait()
+            return 1
 
         # Find the Continue button via OCR in the bottom 10% of the letterboxed area.
         # The Intro Monologue screen is letterboxed to 1.33:1. The Continue button
@@ -319,8 +325,8 @@ def main():
 
         try:
             if take_screenshot(check_screenshot_path, active_window_only=True, verbose=args.verbose):
-                # Check if "Intro Monologue" text is still visible
-                still_intro = verify_screen(check_screenshot_path, "Intro Monologue", "Intro check", verbose=args.verbose)
+                # Check if "---Intro" text is still visible (same search term as above).
+                still_intro = verify_screen(check_screenshot_path, "---Intro", "Intro check", verbose=args.verbose)
                 if not still_intro:
                     if args.verbose:
                         print(f"Intro Monologue screen gone after {waited}s")
