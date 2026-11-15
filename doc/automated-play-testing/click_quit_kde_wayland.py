@@ -46,7 +46,7 @@ from vega_automation import (
     get_window_geometry,
     find_quit_button_via_ocr,
     find_confirmation_button_via_ocr,
-    get_display_bounds,
+    get_display_bounds_logical,
     click_at_position,
 )
 
@@ -106,11 +106,10 @@ def main():
         print(f"Binary: {args.binary}")
         print(f"Target: {args.target}")
 
-    if args.verbose:
-        print("Getting screen geometry...")
-    screen_width, screen_height = get_display_bounds(verbose=args.verbose)
-    if args.verbose:
-        print(f"Screen bounds: {screen_width, screen_height}")
+    # Screen geometry will be computed after the first screenshot is taken,
+    # so that the HiDPI scale factor can be derived from the screenshot vs window size.
+    screen_width: int = 0
+    screen_height: int = 0
 
     # Start the game
     if args.verbose:
@@ -175,6 +174,16 @@ def main():
             game_proc.kill()
             game_proc.wait()
             return 1
+
+        # Compute the logical screen geometry now that we have a screenshot and window size.
+        from PIL import Image
+        img = Image.open(screenshot_path)
+        img_w, img_h = img.size
+        screen_width, screen_height = get_display_bounds_logical(
+            img_w, img_h, window_width, window_height, verbose=args.verbose
+        )
+        if args.verbose:
+            print(f"Screen bounds (logical): {screen_width}, {screen_height}")
 
         quit_pos = find_quit_button_via_ocr(screenshot_path, window_x=window_x, window_y=window_y,
                                              window_width=window_width, window_height=window_height,

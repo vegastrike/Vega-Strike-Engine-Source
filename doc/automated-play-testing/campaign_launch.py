@@ -51,7 +51,7 @@ from vega_automation import (
     activate_window,
     get_window_geometry,
     refresh_window_geometry,
-    get_display_bounds,
+    get_display_bounds_logical,
     click_at_position,
     press_key,
     verify_screen,
@@ -135,12 +135,10 @@ def main():
         print(f"Binary: {args.binary}")
         print(f"Target: {args.target}")
 
-    # Step 0: Get the screen geometry
-    if args.verbose:
-        print("Getting screen geometry...")
-    screen_width, screen_height = get_display_bounds(verbose=args.verbose)
-    if args.verbose:
-        print(f"Screen bounds: {screen_width}, {screen_height}")
+    # Step 0: Screen geometry will be computed after the first screenshot is taken,
+    # so that the HiDPI scale factor can be derived from the screenshot vs window size.
+    screen_width: int = 0
+    screen_height: int = 0
 
     # Step 1: Start the game
     if args.verbose:
@@ -204,6 +202,17 @@ def main():
             game_proc.kill()
             game_proc.wait()
             return 1
+
+        # Compute the logical screen geometry now that we have a screenshot and window size.
+        # The scale factor is derived from the ratio of screenshot pixels to logical window pixels.
+        from PIL import Image
+        img = Image.open(screenshot_path)
+        img_w, img_h = img.size
+        screen_width, screen_height = get_display_bounds_logical(
+            img_w, img_h, ww, wh, verbose=args.verbose
+        )
+        if args.verbose:
+            print(f"Screen bounds (logical): {screen_width}, {screen_height}")
 
         # Verify we're on the Main Menu screen by looking for "Campaign" text
         verify_screen(screenshot_path, "Campaign", "Main Menu", verbose=args.verbose)

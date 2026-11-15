@@ -408,7 +408,7 @@ def get_display_bounds(verbose: bool = False) -> tuple[int, int]:
         if len(parts) >= 2:
             dw, dh = int(parts[0]), int(parts[1])
             if verbose:
-                print(f"Display geometry: {dw}x{dh} (found using xdotool)")
+                print(f"Display geometry (native): {dw}x{dh} (found using xdotool)")
             return dw, dh
 
     out, _ = run_cmd('wayland-info 2>/dev/null | grep -A 10 "interface: \'wl_output\'" | grep "mode:" -A 3')
@@ -417,11 +417,51 @@ def get_display_bounds(verbose: bool = False) -> tuple[int, int]:
         if mode_match:
             dw, dh = int(mode_match.group(1)), int(mode_match.group(2))
             if verbose:
-                print(f"Display geometry: {dw}x{dh} (found using wayland-info)")
+                print(f"Display geometry (native): {dw}x{dh} (found using wayland-info)")
             return dw, dh
     if verbose:
         print("No display geometry found; falling back to default geometry")
     return 3840, 2160
+
+
+def get_display_bounds_logical(screenshot_w: int = 0, screenshot_h: int = 0,
+                               window_w: int = 0, window_h: int = 0,
+                               verbose: bool = False) -> tuple[int, int]:
+    """
+    Get the total display resolution in logical (scaled) pixels.
+
+    dotool's mouseto command uses percentages (0.0 to 1.0) that map to logical
+    screen coordinates, not native pixel coordinates.  For example, on a 3840x2160
+    display with ~1.45x HiDPI scaling, mouseto 1.0 1.0 moves the mouse to logical
+    coordinates around (2647, 1489), not (3840, 2160).
+
+    The logical display size is computed by dividing the native display size by the
+    HiDPI scale factor, which is derived from the ratio of screenshot pixels to
+    logical window pixels.
+
+    :rtype: tuple[int, int]
+    :param screenshot_w: Width of a captured screenshot in native pixels (for scale calc).
+        If 0, no scaling is applied and native display bounds are returned.
+    :param screenshot_h: Height of a captured screenshot in native pixels (for scale calc).
+    :param window_w: Logical window width from kdotool (for scale calc).
+    :param window_h: Logical window height from kdotool (for scale calc).
+    :param verbose: Print debug info
+    :return: Tuple of (display_width, display_height) in logical pixels
+    """
+    native_w, native_h = get_display_bounds(verbose=False)
+
+    if screenshot_w > 0 and screenshot_h > 0 and window_w > 0 and window_h > 0:
+        scale_x, scale_y = calculate_scale_factor(screenshot_w, screenshot_h, window_w, window_h, verbose)
+        logical_w = int(native_w / scale_x)
+        logical_h = int(native_h / scale_y)
+        if verbose:
+            print(f"Display geometry (logical): {logical_w}x{logical_h} "
+                  f"(native {native_w}x{native_h} / scale {scale_x:.3f}x{scale_y:.3f})")
+        return logical_w, logical_h
+    else:
+        if verbose:
+            print(f"Display geometry (logical): {native_w}x{native_h} (no scale info, using native)")
+        return native_w, native_h
 
 
 def calculate_scale_factor(screenshot_w: int, screenshot_h: int,
