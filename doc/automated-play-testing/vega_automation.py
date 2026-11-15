@@ -261,29 +261,8 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
             # Convert screenshot-space pixels to logical screen coordinates.
             # Divide by the HiDPI scale factor to get logical window-relative coords,
             # then add the window's screen position.
-            #
-            # kdotool reports the outer window position (including title bar and borders),
-            # but spectacle --activewindow captures only the client area.  The screenshot's
-            # origin (0, 0) corresponds to the client area top-left, which is offset from
-            # the window's outer top-left by the decoration size.  Compute the decoration
-            # offset so that screen coordinates are correct.
-            if window_width > 0 and window_height > 0:
-                # The screenshot is in native pixels; the window geometry is in logical pixels.
-                # The decoration offset (in logical pixels) is the difference between the
-                # kdotool-reported window size and the screenshot size (scaled to logical),
-                # which represents the title bar and borders.
-                client_logical_w = img_w / scale_x
-                client_logical_h = img_h / scale_y
-                deco_x = window_x + (window_width - client_logical_w) / 2
-                deco_y = window_y + (window_height - client_logical_h)
-                if verbose:
-                    print(f"Client area (logical): {client_logical_w:.1f}x{client_logical_h:.1f}")
-                    print(f"Decoration offset: ({deco_x - window_x:.1f}, {deco_y - window_y:.1f})")
-                screen_x: int = int(deco_x + button_center_x_in_screenshot / scale_x)
-                screen_y: int = int(deco_y + button_center_y_in_screenshot / scale_y)
-            else:
-                screen_x: int = int(window_x + button_center_x_in_screenshot)
-                screen_y: int = int(window_y + button_center_y_in_screenshot)
+            screen_x: int = int(window_x + button_center_x_in_screenshot / scale_x)
+            screen_y: int = int(window_y + button_center_y_in_screenshot / scale_y)
 
             if verbose:
                 print(f"Found '{text_stripped}' at: ({word_x}, {word_y}), size: {word_w}x{word_h}")
