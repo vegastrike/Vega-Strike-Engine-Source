@@ -172,7 +172,7 @@ def ocr_text_via_command_lina(screenshot_path: str, verbose: bool = False) -> st
         return ""
 
 
-def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x: int = 0, window_y: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
+def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x: int = 0, window_y: int = 0, screenshot_width: int | None = None, screenshot_height: int | None = None, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
     """
     Find a button with any of the specified text strings in the specified area of the screenshot and return its absolute screen coordinates.
     Searches for each text string in the order provided; returns the first match found.
@@ -180,8 +180,12 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
     :rtype: tuple[int, int] | None
     :param screenshot_path: The path to the screenshot file to read
     :param button_texts: List of possible button captions to search for (first match wins)
-    :param window_x: The window X coordinate
-    :param window_y: The window Y coordinate
+    :param window_x: The window X coordinate on screen
+    :param window_y: The window Y coordinate on screen
+    :param screenshot_width: Actual screenshot width (for coordinate scaling when screenshot != window size).
+        If None, defaults to the image width from the file.
+    :param screenshot_height: Actual screenshot height (for coordinate scaling).
+        If None, defaults to the image height from the file.
     :param crop_x_starting_percent: The starting horizontal percentage of the screenshot to crop to
     :param crop_y_starting_percent: The starting vertical percentage of the screenshot to crop to
     :param crop_x_ending_percent: The ending horizontal percentage of the screenshot to crop to
@@ -191,10 +195,16 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
     """
     img: ImageFile = Image.open(screenshot_path)
     img_w, img_h = img.size
+    if screenshot_width is None:
+        screenshot_width = img_w
+    if screenshot_height is None:
+        screenshot_height = img_h
     if verbose:
         print(f"Starting screenshot dimensions: {img_w}x{img_h}")
+        if screenshot_width != img_w or screenshot_height != img_h:
+            print(f"Screenshot is from a {screenshot_width}x{screenshot_height} window (scaled)")
 
-    # Crop to specified percentages
+    # Crop to specified percentages of the actual screenshot image
     crop_x_start: int = int(img_w * crop_x_starting_percent / 100)
     crop_y_start: int = int(img_h * crop_y_starting_percent / 100)
     crop_x_ending: int = int(img_w * crop_x_ending_percent / 100)
@@ -227,6 +237,22 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
     # Build a set of lowercased target texts for quick lookup
     target_texts: set[str] = {t.lower() for t in button_texts}
 
+    # Compute the screen origin of the screenshot's top-left corner.
+    # When the screenshot is a window-only capture (active_window_only=True),
+    # the window manager geometry may include decorations (title bar, borders)
+    # that are not in the screenshot.  The difference gives the decoration offset.
+    # The screenshot's (0,0) maps to (window_x + dec_x, window_y + dec_y) on screen.
+    dec_x = (screenshot_width - img_w) // 2 if screenshot_width != img_w else 0
+    dec_y = screenshot_height - img_h if screenshot_height != img_h else 0
+    # If the width differs symmetrically, the horizontal offset is half the difference.
+    # If the height differs, the vertical offset is the full difference (title bar on top).
+    screenshot_screen_x = window_x + dec_x
+    screenshot_screen_y = window_y + dec_y
+
+    if verbose:
+        if dec_x != 0 or dec_y != 0:
+            print(f"Decoration offset: ({dec_x}, {dec_y}), screenshot screen origin: ({screenshot_screen_x}, {screenshot_screen_y})")
+
     # Look for any of the specified button texts in the detected text
     for i, text in enumerate(data['text']):
         text_stripped: str = text.strip()
@@ -236,15 +262,16 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
             word_w: int = int(data['width'][i])
             word_h: int = int(data['height'][i])
 
-            button_center_x_inside_window: int = crop_x_start + word_x + word_w // 2
-            button_center_y_inside_window: int = crop_y_start + word_y + word_h // 2
+            # Map crop-relative OCR position to screenshot-space, then to screen coords
+            button_center_x_in_screenshot: int = crop_x_start + word_x + word_w // 2
+            button_center_y_in_screenshot: int = crop_y_start + word_y + word_h // 2
 
-            screen_x: int = window_x + button_center_x_inside_window
-            screen_y: int = window_y + button_center_y_inside_window
+            screen_x: int = screenshot_screen_x + button_center_x_in_screenshot
+            screen_y: int = screenshot_screen_y + button_center_y_in_screenshot
 
             if verbose:
                 print(f"Found '{text_stripped}' at: ({word_x}, {word_y}), size: {word_w}x{word_h}")
-                print(f"Position in full window: ({button_center_x_inside_window}, {button_center_y_inside_window})")
+                print(f"Position in screenshot: ({button_center_x_in_screenshot}, {button_center_y_in_screenshot})")
                 print(f"Position on screen: ({screen_x}, {screen_y})")
 
             return screen_x, screen_y
@@ -254,7 +281,7 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
     return None
 
 
-def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x: int = 0, window_y: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
+def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x: int = 0, window_y: int = 0, screenshot_width: int | None = None, screenshot_height: int | None = None, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
     """
     Find the button with the specified text in the specified area of the screenshot and return its absolute screen coordinates.
     Thin wrapper around the list-based ``find_button_via_ocr``.
@@ -262,8 +289,12 @@ def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x:
     :rtype: tuple[int, int] | None
     :param screenshot_path: The path to the screenshot file to read
     :param button_text: The button text to find
-    :param window_x: The window X coordinate
-    :param window_y: The window Y coordinate
+    :param window_x: The window X coordinate on screen
+    :param window_y: The window Y coordinate on screen
+    :param screenshot_width: Actual screenshot width (for coordinate scaling).
+        If None, defaults to the image width from the file.
+    :param screenshot_height: Actual screenshot height (for coordinate scaling).
+        If None, defaults to the image height from the file.
     :param crop_x_starting_percent: The starting horizontal percentage of the screenshot to crop to
     :param crop_y_starting_percent: The starting vertical percentage of the screenshot to crop to
     :param crop_x_ending_percent: The ending horizontal percentage of the screenshot to crop to
@@ -276,6 +307,8 @@ def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x:
         button_texts=[button_text],
         window_x=window_x,
         window_y=window_y,
+        screenshot_width=screenshot_width,
+        screenshot_height=screenshot_height,
         crop_x_starting_percent=crop_x_starting_percent,
         crop_y_starting_percent=crop_y_starting_percent,
         crop_x_ending_percent=crop_x_ending_percent,
@@ -376,6 +409,34 @@ def get_display_bounds(verbose: bool = False) -> tuple[int, int]:
     return 3840, 2160
 
 
+def move_mouse_to_position(screen_x: SupportsInt, screen_y: SupportsInt, screen_width: SupportsInt, screen_height: SupportsInt,
+                           verbose: bool = False) -> None:
+    """
+    Move the mouse to the specified screen position using dotool (without clicking).
+
+    dotool uses the Linux uinput device to simulate input events at the
+    kernel level, bypassing Wayland's restrictions on cross-process input.
+    dotool mouseto uses screen percentages (0.0 to 1.0).
+
+    :param screen_x: Target position X coordinate in screen pixel coordinates
+    :param screen_y: Target position Y coordinate in screen pixel coordinates
+    :param screen_width: The width of the screen in pixels
+    :param screen_height: The height of the screen in pixels
+    :param verbose: Print debug info
+    """
+    screen_x_fraction = screen_x / screen_width
+    screen_y_fraction = screen_y / screen_height
+
+    if verbose:
+        print(f"Moving mouse to screen percentage ({screen_x_fraction}, {screen_y_fraction})...")
+
+    out, rc = run_cmd(
+        f'echo "mouseto {screen_x_fraction} {screen_y_fraction}" | dotool 2>/dev/null')
+    if rc != 0 and verbose:
+        print(f"dotool mousemove failed: {out}")
+    time.sleep(0.3)
+
+
 def click_at_position(screen_x: SupportsInt, screen_y: SupportsInt, screen_width: SupportsInt, screen_height: SupportsInt,
                       verbose: bool = False) -> None:
     """
@@ -385,25 +446,13 @@ def click_at_position(screen_x: SupportsInt, screen_y: SupportsInt, screen_width
     kernel level, bypassing Wayland's restrictions on cross-process input.
     dotool mouseto uses screen pixel coordinates.
 
-    :param screen_width: The width of the screen in pixels
-    :param screen_height: The height of the screen in pixels
-    :rtype: None
     :param screen_x: Target click position X coordinate in screen pixel coordinates
     :param screen_y: Target click position Y coordinate in screen pixel coordinates
+    :param screen_width: The width of the screen in pixels
+    :param screen_height: The height of the screen in pixels
     :param verbose: Print debug info
     """
-    screen_x_fraction = screen_x / screen_width
-    screen_y_fraction = screen_y / screen_height
-
-    if verbose:
-        print(f"Moving mouse to screen percentage ({screen_x_fraction}, {screen_y_fraction})...")
-
-    # Move mouse
-    out, rc = run_cmd(
-        f'echo "mouseto {screen_x_fraction} {screen_y_fraction}" | dotool 2>/dev/null')
-    if rc != 0 and verbose:
-        print(f"dotool mousemove failed: {out}")
-    time.sleep(0.3)
+    move_mouse_to_position(screen_x, screen_y, screen_width, screen_height, verbose)
 
     # Click left button
     if verbose:
@@ -580,7 +629,7 @@ def calculate_intro_button_position(wx: int, wy: int, ww: int, wh: int,
     Calculate the screen position of an intro monologue button's text.
 
     Intro monologue uses design resolution 1024x768 with centered text (50% offset).
-    The intro monologue is letterboxed to 1.33:1.
+    The intro monologue is letterboxed to 1.33:1, just like the main menu.
 
     :return: Tuple of (screen_x, screen_y) — center of the button text
     :param wx: Window X position on screen
@@ -665,6 +714,8 @@ def find_text_in_region_via_ocr(screenshot_path: str,
                                 region_y_percent: float = 0.0,
                                 region_w_percent: float = 100.0,
                                 region_h_percent: float = 100.0,
+                                screenshot_width: int | None = None,
+                                screenshot_height: int | None = None,
                                 verbose: bool = False) -> tuple[int, int] | None:
     """
     Find text (such as a button label or hotspot caption) in a designated region of a screenshot
@@ -681,6 +732,10 @@ def find_text_in_region_via_ocr(screenshot_path: str,
     :param region_y_percent: Starting Y of search region as a percentage (0-100)
     :param region_w_percent: Width of search region as a percentage (0-100)
     :param region_h_percent: Height of search region as a percentage (0-100)
+    :param screenshot_width: Actual screenshot width (for coordinate scaling).
+        If None, defaults to the image width from the file.
+    :param screenshot_height: Actual screenshot height (for coordinate scaling).
+        If None, defaults to the image height from the file.
     :param verbose: Print debug info
     :return: Tuple of (screen_x, screen_y) — center of the found text, or None
     """
@@ -691,6 +746,8 @@ def find_text_in_region_via_ocr(screenshot_path: str,
         button_text=text,
         window_x=window_x,
         window_y=window_y,
+        screenshot_width=screenshot_width,
+        screenshot_height=screenshot_height,
         crop_x_starting_percent=region_x_percent,
         crop_y_starting_percent=region_y_percent,
         crop_x_ending_percent=crop_x_end,
@@ -709,58 +766,108 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
                                           region_y_percent: float = 0.0,
                                           region_w_percent: float = 100.0,
                                           region_h_percent: float = 100.0,
+                                          active_window_only: bool = True,
                                           verbose: bool = False) -> tuple[int, int] | None:
     """
     Find text in a designated region of the letterboxed area of a screenshot using OCR.
 
     Unlike ``find_text_in_region_via_ocr``, the region percentages are relative to the
     letterboxed (rendered) area, not the full window.  This function calculates the
-    letterbox region first, then maps the relative percentages to window-relative
+    letterbox region first, then maps the relative percentages to screenshot-relative
     crop percentages for the OCR search.
+
+    When ``active_window_only`` is True (the default), the screenshot contains only the
+    active window's client area.  The letterbox black bars are rendered within the
+    client area, so they appear in the screenshot.  The letterbox calculation uses the
+    actual screenshot dimensions (read from the image file), not the window geometry
+    from the window manager, because window manager geometry may include decorations
+    (title bar, borders) that are not part of the screenshot.
+
+    When ``active_window_only`` is False, the screenshot contains the full screen, and
+    the letterbox is mapped relative to the window position within the screen.
 
     :param screenshot_path: Path to the screenshot image file
     :param text: The text/caption to find
-    :param window_x: Window X position on screen
-    :param window_y: Window Y position on screen
-    :param window_width: Window width in pixels
-    :param window_height: Window height in pixels
+    :param window_x: Window X position on screen (for screen coordinate output)
+    :param window_y: Window Y position on screen (for screen coordinate output)
+    :param window_width: Window width in pixels (from window manager, may include decorations)
+    :param window_height: Window height in pixels (from window manager, may include decorations)
     :param region_x_percent: Starting X within letterbox as a percentage (0-100)
     :param region_y_percent: Starting Y within letterbox as a percentage (0-100)
     :param region_w_percent: Width of search region within letterbox as a percentage (0-100)
     :param region_h_percent: Height of search region within letterbox as a percentage (0-100)
+    :param active_window_only: If True, the screenshot is window-only (no desktop background).
+        The letterbox calculation uses the actual screenshot dimensions. Default True.
     :param verbose: Print debug info
     :return: Tuple of (screen_x, screen_y) — center of the found text, or None
     """
-    lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(window_x, window_y, window_width, window_height)
+    # Read actual screenshot dimensions — these are what matter for cropping.
+    # When active_window_only=True, the screenshot may be smaller than the window
+    # geometry reported by the window manager (which includes title bar and borders).
+    img: ImageFile = Image.open(screenshot_path)
+    img_w, img_h = img.size
+    img.close()
 
-    # Map letterbox-relative percentages to window-relative percentages
-    # The letterbox origin (lb_x, lb_y) is in screen coords; window origin is (window_x, window_y)
-    # So the letterbox starts at (lb_x - window_x, lb_y - window_y) within the window
-    lb_rel_x = lb_x - window_x  # Letterbox X relative to window
-    lb_rel_y = lb_y - window_y  # Letterbox Y relative to window
+    if active_window_only:
+        # Use the actual screenshot dimensions for the letterbox calculation.
+        # The screenshot IS the client area, so the letterbox is relative to it.
+        # We treat the screenshot origin as (0, 0) for letterbox purposes, then
+        # add the window offset when returning screen coordinates.
+        lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(0, 0, img_w, img_h)
 
-    # Convert to window-relative percentages
-    crop_x_start = (lb_rel_x + lb_w * region_x_percent / 100) / window_width * 100
-    crop_y_start = (lb_rel_y + lb_h * region_y_percent / 100) / window_height * 100
-    crop_x_end = (lb_rel_x + lb_w * (region_x_percent + region_w_percent) / 100) / window_width * 100
-    crop_y_end = (lb_rel_y + lb_h * (region_y_percent + region_h_percent) / 100) / window_height * 100
+        # lb_x and lb_y are now relative to the screenshot origin (0, 0)
+        lb_rel_x = lb_x  # Letterbox X relative to screenshot
+        lb_rel_y = lb_y  # Letterbox Y relative to screenshot
 
-    if verbose:
-        print(f"Letterbox: ({lb_x}, {lb_y}), size {lb_w}x{lb_h}")
-        print(f"Letterbox-relative region: ({region_x_percent}%, {region_y_percent}%), size {region_w_percent}%x{region_h_percent}%")
-        print(f"Window-relative crop: ({crop_x_start:.1f}%, {crop_y_start:.1f}%) to ({crop_x_end:.1f}%, {crop_y_end:.1f}%)")
+        # Convert to screenshot-relative percentages
+        crop_x_start = (lb_rel_x + lb_w * region_x_percent / 100) / img_w * 100
+        crop_y_start = (lb_rel_y + lb_h * region_y_percent / 100) / img_h * 100
+        crop_x_end = (lb_rel_x + lb_w * (region_x_percent + region_w_percent) / 100) / img_w * 100
+        crop_y_end = (lb_rel_y + lb_h * (region_y_percent + region_h_percent) / 100) / img_h * 100
 
-    return find_button_via_ocr_single(
-        screenshot_path=screenshot_path,
-        button_text=text,
-        window_x=window_x,
-        window_y=window_y,
-        crop_x_starting_percent=crop_x_start,
-        crop_y_starting_percent=crop_y_start,
-        crop_x_ending_percent=crop_x_end,
-        crop_y_ending_percent=crop_y_end,
-        verbose=verbose
-    )
+        if verbose:
+            print(f"Screenshot dimensions: {img_w}x{img_h}")
+            print(f"Window geometry (may include decorations): {window_width}x{window_height}")
+            print(f"Letterbox: ({lb_x}, {lb_y}), size {lb_w}x{lb_h}")
+            print(f"Letterbox-relative region: ({region_x_percent}%, {region_y_percent}%), size {region_w_percent}%x{region_h_percent}%")
+            print(f"Screenshot-relative crop: ({crop_x_start:.1f}%, {crop_y_start:.1f}%) to ({crop_x_end:.1f}%, {crop_y_end:.1f}%)")
+
+        # Pass the actual screenshot dimensions so find_button_via_ocr can scale
+        # OCR positions from screenshot space to window space for screen coordinates.
+        return find_button_via_ocr_single(
+            screenshot_path=screenshot_path,
+            button_text=text,
+            window_x=window_x,
+            window_y=window_y,
+            screenshot_width=img_w,
+            screenshot_height=img_h,
+            crop_x_starting_percent=crop_x_start,
+            crop_y_starting_percent=crop_y_start,
+            crop_x_ending_percent=crop_x_end,
+            crop_y_ending_percent=crop_y_end,
+            verbose=verbose
+        )
+    else:
+        # Full-screen screenshot: use window geometry for letterbox calculation.
+        lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(window_x, window_y, window_width, window_height)
+        lb_rel_x = lb_x - window_x
+        lb_rel_y = lb_y - window_y
+        crop_x_start = (lb_rel_x + lb_w * region_x_percent / 100) / window_width * 100
+        crop_y_start = (lb_rel_y + lb_h * region_y_percent / 100) / window_height * 100
+        crop_x_end = (lb_rel_x + lb_w * (region_x_percent + region_w_percent) / 100) / window_width * 100
+        crop_y_end = (lb_rel_y + lb_h * (region_y_percent + region_h_percent) / 100) / window_height * 100
+
+        return find_button_via_ocr_single(
+            screenshot_path=screenshot_path,
+            button_text=text,
+            window_x=window_x,
+            window_y=window_y,
+            crop_x_starting_percent=crop_x_start,
+            crop_y_starting_percent=crop_y_start,
+            crop_x_ending_percent=crop_x_end,
+            crop_y_ending_percent=crop_y_end,
+            verbose=verbose
+        )
 
 
 # === Hotspot pixel-based detection ===
@@ -919,10 +1026,32 @@ def _distance_to_hint(cx: float, cy: float, hint_x: float, hint_y: float) -> flo
     return ((cx - hint_x) ** 2 + (cy - hint_y) ** 2) ** 0.5
 
 
+def _is_orange_pixel(r: int, g: int, b: int,
+                      red_min: int = 150, green_min: int = 80, green_max: int = 200,
+                      blue_max: int = 80) -> bool:
+    """
+    Check whether an RGB pixel looks orange (warm color with dominant red).
+
+    :param r: Red channel value (0-255)
+    :param g: Green channel value (0-255)
+    :param b: Blue channel value (0-255)
+    :param red_min: Minimum red channel value for orange
+    :param green_min: Minimum green channel value for orange
+    :param green_max: Maximum green channel value for orange
+    :param blue_max: Maximum blue channel value for orange
+    :return: True if the pixel is orange
+    """
+    return r >= red_min and green_min <= g <= green_max and b <= blue_max
+
+
 def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bool = False) -> bool:
     """
-    Verify that the expected caption text appears in the bottom portion of the screenshot
-    using OCR. The caption area is where hotspot labels appear when hovering.
+    Verify that the expected caption text appears in the bottom-left portion of the screenshot
+    using OCR.  Hotspot captions appear in orange near the bottom-left of the screen when
+    the mouse is hovering over the hotspot.
+
+    The function first checks for orange-colored pixels in the bottom-left caption region,
+    then runs OCR on that region to find the expected text.
 
     :param screenshot_path: Path to the screenshot image file
     :param caption_text: Expected caption text (e.g. "Launch")
@@ -932,10 +1061,27 @@ def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bo
     try:
         img: ImageFile = Image.open(screenshot_path)
         img_w, img_h = img.size
+        pixels = img.load()
 
-        # Crop to the bottom 15% of the image where hotspot captions appear
+        # The caption area is the bottom-left: left 40% of width, bottom 15% of height
+        caption_x2 = int(img_w * 0.40)
         caption_y1 = int(img_h * 0.85)
-        cropped = img.crop((0, caption_y1, img_w, img_h))
+
+        # Check for orange pixels in the caption region to confirm a caption is visible
+        orange_count = 0
+        for y in range(caption_y1, img_h):
+            for x in range(0, caption_x2):
+                pixel = pixels[x, y]
+                if len(pixel) >= 3:
+                    r, g, b = pixel[0], pixel[1], pixel[2]
+                    if _is_orange_pixel(r, g, b):
+                        orange_count += 1
+
+        if verbose:
+            print(f"Orange pixels in caption region: {orange_count}")
+
+        # Crop to the bottom-left caption area and convert to grayscale for OCR
+        cropped = img.crop((0, caption_y1, caption_x2, img_h))
         cropped = cropped.convert('L')
 
         # Use Tesseract to find word-level bounding boxes
@@ -947,7 +1093,7 @@ def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bo
                 t = text.strip()
                 if t:
                     all_words.append(t)
-            print(f"OCR words in caption region: {all_words}")
+            print(f"OCR words in caption region (bottom-left): {all_words}")
 
         target = caption_text.lower()
         for i, text in enumerate(data['text']):
@@ -975,34 +1121,88 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
                                    search_y_percent: float = 0.0,
                                    search_w_percent: float = 100.0,
                                    search_h_percent: float = 100.0,
+                                   screen_width: int = 3840,
+                                   screen_height: int = 2160,
                                    verbose: bool = False) -> tuple[int, int] | None:
     """
-    Find a clickable hotspot by searching for bright blue pixels (the hotspot marker)
-    and verifying the caption text via OCR.
+    Find a clickable hotspot by moving the mouse to the expected design position,
+    then verifying the caption text appears in orange at the bottom-left.
 
-    This method is more reliable than OCR alone for hotspots, which often have small
-    or dim labels that Tesseract misses. The blue dot indicator is a strong visual signal.
+    Hotspot blue pixels dim when the mouse is far away and brighten as it moves closer.
+    Instead of scanning the entire window for dim blue pixels, this function uses the
+    calculated design coordinates (hint position) to move the mouse close first, then
+    confirms the correct hotspot by checking the orange caption text.
 
-    The algorithm:
-    1. Scan the search region for bright blue pixels (the hotspot markers)
+    If no hint position is provided, falls back to scanning for bright blue pixel clusters
+    and trying each one until the caption matches.
+
+    The algorithm (with hint):
+    1. Move the mouse to the hint position to brighten the blue pixels and reveal the caption
+    2. Wait briefly for the caption to appear
+    3. Take a screenshot
+    4. Verify the expected caption text appears in orange at the bottom-left via OCR
+    5. Return the hint position as screen coordinates if verified
+
+    The algorithm (without hint, fallback):
+    1. Scan the search region for bright blue pixels
     2. Cluster nearby blue pixels together
-    3. If a hint position is provided, pick the cluster closest to it; otherwise pick the largest
-    4. Verify the expected caption text appears in the bottom caption area via OCR (mandatory)
-    5. Return the screen coordinates of the chosen hotspot center, or None if verification fails
+    3. For each cluster: hover, screenshot, verify caption
+    4. Return the first matching cluster's center, or None
 
-    :param screenshot_path: Path to the screenshot image file
+    :param screenshot_path: Path to the screenshot image file (used for fallback scanning)
     :param window_x: Window X position on screen
     :param window_y: Window Y position on screen
     :param caption_text: Expected hotspot caption (e.g. "Launch") — mandatory for verification
-    :param hint_window_x: Hint X in window coordinates to guide cluster selection (from design coords)
-    :param hint_window_y: Hint Y in window coordinates to guide cluster selection (from design coords)
+    :param hint_window_x: Hint X in window coordinates (from design coords)
+    :param hint_window_y: Hint Y in window coordinates (from design coords)
     :param search_x_percent: Starting X of search region as a percentage (0-100)
     :param search_y_percent: Starting Y of search region as a percentage (0-100)
     :param search_w_percent: Width of search region as a percentage (0-100)
     :param search_h_percent: Height of search region as a percentage (0-100)
+    :param screen_width: Screen width in pixels (for mouse movement)
+    :param screen_height: Screen height in pixels (for mouse movement)
     :param verbose: Print debug info
     :return: Tuple of (screen_x, screen_y) — center of the hotspot, or None
     """
+    import tempfile
+
+    # Primary strategy: use the hint position to move the mouse close, then verify caption
+    if hint_window_x is not None and hint_window_y is not None:
+        hint_screen_x = int(window_x + hint_window_x)
+        hint_screen_y = int(window_y + hint_window_y)
+
+        if verbose:
+            print(f"Moving mouse to hint position ({hint_screen_x}, {hint_screen_y}) to brighten hotspot...")
+
+        # Move mouse to the hint position to trigger the hotspot caption
+        move_mouse_to_position(hint_screen_x, hint_screen_y, screen_width, screen_height, verbose)
+        time.sleep(1.0)  # Wait for caption to appear and blue pixels to brighten
+
+        # Take a screenshot to capture the caption
+        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
+            hover_screenshot_path = f.name
+
+        try:
+            if not take_screenshot(hover_screenshot_path, active_window_only=True, verbose=verbose):
+                if verbose:
+                    print("Failed to take hover screenshot")
+            else:
+                # Verify the caption text via OCR in the bottom-left area
+                if _verify_caption_via_ocr(hover_screenshot_path, caption_text, verbose=verbose):
+                    if verbose:
+                        print(f"Found hotspot at hint position ({hint_screen_x}, {hint_screen_y})")
+                    return hint_screen_x, hint_screen_y
+                else:
+                    if verbose:
+                        print(f"Caption verification failed at hint position, trying fallback...")
+        finally:
+            if os.path.exists(hover_screenshot_path):
+                os.unlink(hover_screenshot_path)
+
+    # Fallback strategy: scan for blue pixel clusters and try each one
+    if verbose:
+        print("Scanning for blue pixel clusters (fallback)...")
+
     img: ImageFile = Image.open(screenshot_path)
     img_w, img_h = img.size
     pixels = img.load()
@@ -1042,42 +1242,57 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
             cx, cy = _cluster_center(cluster)
             print(f"  Cluster {i}: {len(cluster)} pixels, center ({cx:.1f}, {cy:.1f})")
 
-    # Select the best cluster: prefer the one closest to the hint, or the largest if no hint
+    # Sort clusters: by distance to hint (if hint provided) or by size (largest first)
     if hint_window_x is not None and hint_window_y is not None:
-        best_cluster = None
-        best_distance = float('inf')
+        clusters_with_dist = []
         for cluster in clusters:
             cx, cy = _cluster_center(cluster)
             dist = _distance_to_hint(cx, cy, hint_window_x, hint_window_y)
+            clusters_with_dist.append((dist, cluster))
             if verbose:
                 print(f"  Cluster center ({cx:.1f}, {cy:.1f}) distance to hint: {dist:.1f}")
-            if dist < best_distance:
-                best_distance = dist
-                best_cluster = cluster
+        clusters_with_dist.sort(key=lambda x: x[0])
+        sorted_clusters = [cluster for _, cluster in clusters_with_dist]
     else:
-        # No hint provided; pick the largest cluster
-        best_cluster = max(clusters, key=len) if clusters else None
+        sorted_clusters = sorted(clusters, key=len, reverse=True)
 
-    if best_cluster is None:
+    if not sorted_clusters:
         if verbose:
             print("No suitable cluster found")
         return None
 
-    avg_x, avg_y = _cluster_center(best_cluster)
-    if verbose:
-        print(f"Selected cluster center (window coords): ({avg_x:.1f}, {avg_y:.1f})")
+    # Try each cluster: hover, screenshot, verify caption
+    for i, cluster in enumerate(sorted_clusters):
+        avg_x, avg_y = _cluster_center(cluster)
+        screen_x = int(window_x + avg_x)
+        screen_y = int(window_y + avg_y)
 
-    # Mandatory: verify the caption text via OCR in the bottom caption area
-    if not _verify_caption_via_ocr(screenshot_path, caption_text, verbose=verbose):
         if verbose:
-            print(f"Caption verification failed for '{caption_text}'; rejecting this hotspot")
-        return None
+            print(f"Trying cluster {i} at ({screen_x}, {screen_y})...")
 
-    # Convert window coordinates to screen coordinates
-    screen_x = int(window_x + avg_x)
-    screen_y = int(window_y + avg_y)
+        move_mouse_to_position(screen_x, screen_y, screen_width, screen_height, verbose)
+        time.sleep(0.5)  # Wait for caption to appear
+
+        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
+            hover_screenshot_path = f.name
+
+        try:
+            if not take_screenshot(hover_screenshot_path, active_window_only=True, verbose=verbose):
+                if verbose:
+                    print("Failed to take hover screenshot")
+                continue
+
+            if _verify_caption_via_ocr(hover_screenshot_path, caption_text, verbose=verbose):
+                if verbose:
+                    print(f"Found hotspot via cluster {i} at ({screen_x}, {screen_y})")
+                return screen_x, screen_y
+            else:
+                if verbose:
+                    print(f"Caption verification failed for cluster {i}, trying next...")
+        finally:
+            if os.path.exists(hover_screenshot_path):
+                os.unlink(hover_screenshot_path)
 
     if verbose:
-        print(f"Hotspot screen position: ({screen_x}, {screen_y})")
-
-    return screen_x, screen_y
+        print(f"Could not find hotspot with caption '{caption_text}'")
+    return None

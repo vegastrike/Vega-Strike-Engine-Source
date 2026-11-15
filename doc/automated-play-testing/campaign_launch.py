@@ -261,8 +261,18 @@ def main():
             game_proc.wait()
             return 1
 
-        # Verify we're on the Intro Monologue screen
-        verify_screen(screenshot_path, "Continue", "Intro Monologue", verbose=args.verbose)
+        # Verify we're on the Intro Monologue screen by checking for the title text
+        # near the top of the letterboxed area.
+        intro_verified = verify_screen(screenshot_path, "Intro Monologue", "Intro Monologue (title)", verbose=args.verbose)
+        if not intro_verified:
+            if args.verbose:
+                print("WARNING: Could not verify 'Intro Monologue' title via OCR")
+
+        # Also check for the Continue button text as a secondary confirmation
+        intro_verified = verify_screen(screenshot_path, "Continue", "Intro Monologue (button)", verbose=args.verbose)
+        if not intro_verified:
+            if args.verbose:
+                print("WARNING: Could not verify 'Continue button' via OCR")
 
         # Find the Continue button via OCR in the bottom 10% of the letterboxed area.
         # The Intro Monologue screen is letterboxed to 1.33:1. The Continue button
@@ -294,6 +304,41 @@ def main():
         if os.path.exists(screenshot_path):
             os.unlink(screenshot_path)
 
+    # Wait and verify we've moved past the Intro Monologue screen
+    if args.verbose:
+        print("Waiting for Intro Monologue to disappear...")
+    max_wait = 30  # seconds
+    waited = 0
+    intro_gone = False
+    while waited < max_wait:
+        time.sleep(2)
+        waited += 2
+
+        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
+            check_screenshot_path = f.name
+
+        try:
+            if take_screenshot(check_screenshot_path, active_window_only=True, verbose=args.verbose):
+                # Check if "Intro Monologue" text is still visible
+                still_intro = verify_screen(check_screenshot_path, "Intro Monologue", "Intro check", verbose=args.verbose)
+                if not still_intro:
+                    if args.verbose:
+                        print(f"Intro Monologue screen gone after {waited}s")
+                    intro_gone = True
+                    break
+                else:
+                    if args.verbose:
+                        print(f"Still on Intro Monologue after {waited}s, waiting...")
+        finally:
+            if os.path.exists(check_screenshot_path):
+                os.unlink(check_screenshot_path)
+
+    if not intro_gone:
+        print(f"ERROR: Intro Monologue screen still visible after {max_wait}s")
+        game_proc.kill()
+        game_proc.wait()
+        return 1
+
     # Step 5: Wait for Hangar view, click Launch
     # The Launch hotspot is on the Atlantis ocean base.
     if args.verbose:
@@ -318,12 +363,12 @@ def main():
             game_proc.wait()
             return 1
 
-        # Verify we're on the Hangar screen - look for "Launch" text
-        hangar_verified = verify_screen(screenshot_path, "Launch", "Hangar", verbose=args.verbose)
+        # Verify we're on the Hangar screen - look for "Landing Center" text which is large
+        # and reliable for OCR. The "Launch" caption only appears when hovering the hotspot.
+        hangar_verified = verify_screen(screenshot_path, "Landing Center", "Hangar", verbose=args.verbose)
         if not hangar_verified:
             if args.verbose:
-                print("Trying alternative verification for Hangar screen...")
-            verify_screen(screenshot_path, "Landing Center", "Hangar (alt)", verbose=args.verbose)
+                print("WARNING: Could not verify Hangar screen via OCR, proceeding anyway...")
 
         # Find the Launch hotspot using pixel-based search (more reliable than OCR).
         # Hotspots are marked by bright blue dots on the screen. The pixel search
@@ -351,6 +396,8 @@ def main():
             hint_window_y=launch_hint_y,
             search_x_percent=0, search_y_percent=0,
             search_w_percent=100, search_h_percent=100,
+            screen_width=screen_width,
+            screen_height=screen_height,
             verbose=args.verbose
         )
         if launch_pos is not None:
