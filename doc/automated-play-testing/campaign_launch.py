@@ -358,15 +358,54 @@ def main():
     # The Launch hotspot is on the Atlantis ocean base.
     if args.verbose:
         print("\n=== Step 5: Waiting for Hangar view, clicking Launch ===")
-    time.sleep(10)  # Wait for hangar to load
 
-    geom = refresh_window_geometry(window_id, args.verbose)
-    if not geom:
-        print("ERROR: Could not refresh window geometry")
+    # Wait for the Hangar view to load by checking for "Landing Center" text.
+    # The loading splash screen has many blue pixels that confuse the hotspot
+    # detector, so we must wait until the splash screen is gone.
+    max_hangar_wait = 60
+    hangar_loaded = False
+    for waited in range(0, max_hangar_wait + 5, 5):
+        time.sleep(5 if waited == 0 else 5)
+        geom = refresh_window_geometry(window_id, args.verbose)
+        if not geom:
+            print("ERROR: Could not refresh window geometry")
+            game_proc.kill()
+            game_proc.wait()
+            return 1
+        wx, wy, ww, wh = geom
+
+        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
+            hangar_check_path = f.name
+        try:
+            if not take_screenshot(hangar_check_path, active_window_only=True, verbose=args.verbose):
+                if args.verbose:
+                    print(f"Failed to take screenshot after {waited}s")
+                continue
+            # The bottom-left caption may say "Landing Center" (green, no hotspot
+            # hovered) or "Launch" (orange, mouse over the Launch hotspot).
+            # Check for either text to confirm the Hangar view is loaded.
+            hangar_loaded = verify_screen(hangar_check_path, "Landing Center",
+                                          "Hangar", verbose=args.verbose)
+            if not hangar_loaded:
+                hangar_loaded = verify_screen(hangar_check_path, "Launch",
+                                              "Hangar (Launch caption)",
+                                              verbose=args.verbose)
+            if hangar_loaded:
+                if args.verbose:
+                    print(f"Hangar view loaded after {waited}s")
+                break
+            else:
+                if args.verbose:
+                    print(f"Hangar not ready after {waited}s, waiting...")
+        finally:
+            if os.path.exists(hangar_check_path):
+                os.unlink(hangar_check_path)
+
+    if not hangar_loaded:
+        print(f"ERROR: Hangar view not loaded after {max_hangar_wait}s")
         game_proc.kill()
         game_proc.wait()
         return 1
-    wx, wy, ww, wh = geom
 
     with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as f:
         screenshot_path = f.name
@@ -377,13 +416,6 @@ def main():
             game_proc.kill()
             game_proc.wait()
             return 1
-
-        # Verify we're on the Hangar screen - look for "Landing Center" text which is large
-        # and reliable for OCR. The "Launch" caption only appears when hovering the hotspot.
-        hangar_verified = verify_screen(screenshot_path, "Landing Center", "Hangar", verbose=args.verbose)
-        if not hangar_verified:
-            if args.verbose:
-                print("WARNING: Could not verify Hangar screen via OCR, proceeding anyway...")
 
         # Find the Launch hotspot using pixel-based search (more reliable than OCR).
         # Hotspots are marked by bright blue dots on the screen. The pixel search
@@ -404,13 +436,27 @@ def main():
             if args.verbose:
                 print(f"Unknown hotspot geometry for base type '{base_type}', 'Launch' — no hint")
 
+        # Narrow the fallback search region to the letterboxed area around the hint
+        # position, so the splash-screen blue pixels are not scanned.
+        if launch_hint_x is not None and launch_hint_y is not None:
+            search_radius_pct = 25.0  # Search +/-25% around the hint in the letterbox
+            search_x_pct = max(0, (launch_hint_x / ww * 100) - search_radius_pct)
+            search_y_pct = max(0, (launch_hint_y / wh * 100) - search_radius_pct)
+            search_w_pct = min(100 - search_x_pct, search_radius_pct * 2)
+            search_h_pct = min(100 - search_y_pct, search_radius_pct * 2)
+        else:
+            search_x_pct, search_y_pct = 0.0, 0.0
+            search_w_pct, search_h_pct = 100.0, 100.0
+
         launch_pos = find_hotspot_via_pixel_search(
             screenshot_path, wx, wy, ww, wh,
             caption_text="Launch",
             hint_window_x=launch_hint_x,
             hint_window_y=launch_hint_y,
-            search_x_percent=0, search_y_percent=0,
-            search_w_percent=100, search_h_percent=100,
+            search_x_percent=search_x_pct,
+            search_y_percent=search_y_pct,
+            search_w_percent=search_w_pct,
+            search_h_percent=search_h_pct,
             screen_width=screen_width,
             screen_height=screen_height,
             verbose=args.verbose

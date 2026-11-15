@@ -259,10 +259,22 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
             button_center_y_in_screenshot: int = crop_y_start + word_y + word_h // 2
 
             # Convert screenshot-space pixels to logical screen coordinates.
-            # Divide by the HiDPI scale factor to get logical window-relative coords,
-            # then add the window's screen position.
-            screen_x: int = int(window_x + button_center_x_in_screenshot / scale_x)
-            screen_y: int = int(window_y + button_center_y_in_screenshot / scale_y)
+            # The screenshot may include window decorations (title bar, borders).
+            # Subtract the decoration offsets to get the client-area-relative position,
+            # then divide by the display scale to get logical screen coordinates.
+            if window_width > 0 and window_height > 0:
+                left_border, top_border = estimate_decoration_offsets(
+                    img_w, img_h, window_width, window_height, verbose)
+                button_center_x_in_client = button_center_x_in_screenshot - left_border
+                button_center_y_in_client = button_center_y_in_screenshot - top_border
+                display_scale = get_display_scale(verbose=False)
+                if display_scale <= 0:
+                    display_scale = 1.0
+                screen_x: int = int(window_x + button_center_x_in_client / display_scale)
+                screen_y: int = int(window_y + button_center_y_in_client / display_scale)
+            else:
+                screen_x: int = int(window_x + button_center_x_in_screenshot)
+                screen_y: int = int(window_y + button_center_y_in_screenshot)
 
             if verbose:
                 print(f"Found '{text_stripped}' at: ({word_x}, {word_y}), size: {word_w}x{word_h}")
@@ -389,6 +401,58 @@ def find_confirmation_button_via_ocr(screenshot_path: str, window_x: int = 0, wi
     )
 
 
+def get_display_scale(verbose: bool = False) -> float:
+    """
+    Get the fractional display scale factor from the system.
+
+    On KDE Plasma with Wayland, the fractional scale is stored in kwinrc.
+    Falls back to 1.0 if the scale cannot be determined.
+
+    :rtype: float
+    :param verbose: Print debug info
+    :return: The display scale factor (e.g., 1.45 for 145% scaling)
+    """
+    # Try to read from KDE kwinrc
+    kwinrc_path = os.path.expanduser('~/.config/kwinrc')
+    try:
+        with open(kwinrc_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith('Scale='):
+                    scale = float(line.split('=', 1)[1])
+                    if verbose:
+                        print(f"Display scale from kwinrc: {scale}")
+                    return scale
+    except (FileNotFoundError, ValueError):
+        pass
+
+    # Try GDK_SCALE environment variable
+    gdk_scale = os.environ.get('GDK_SCALE')
+    if gdk_scale:
+        try:
+            scale = float(gdk_scale)
+            if verbose:
+                print(f"Display scale from GDK_SCALE: {scale}")
+            return scale
+        except ValueError:
+            pass
+
+    # Try QT_SCALE_FACTOR environment variable
+    qt_scale = os.environ.get('QT_SCALE_FACTOR')
+    if qt_scale:
+        try:
+            scale = float(qt_scale)
+            if verbose:
+                print(f"Display scale from QT_SCALE_FACTOR: {scale}")
+            return scale
+        except ValueError:
+            pass
+
+    if verbose:
+        print("Could not determine display scale, using 1.0")
+    return 1.0
+
+
 def get_display_bounds(verbose: bool = False) -> tuple[int, int]:
     """
     Get the total display resolution in native pixels.
@@ -436,32 +500,91 @@ def get_display_bounds_logical(screenshot_w: int = 0, screenshot_h: int = 0,
     coordinates around (2647, 1489), not (3840, 2160).
 
     The logical display size is computed by dividing the native display size by the
-    HiDPI scale factor, which is derived from the ratio of screenshot pixels to
-    logical window pixels.
+    fractional display scale, which is read from the system configuration (e.g.,
+    KDE's kwinrc).
 
     :rtype: tuple[int, int]
-    :param screenshot_w: Width of a captured screenshot in native pixels (for scale calc).
-        If 0, no scaling is applied and native display bounds are returned.
-    :param screenshot_h: Height of a captured screenshot in native pixels (for scale calc).
-    :param window_w: Logical window width from kdotool (for scale calc).
-    :param window_h: Logical window height from kdotool (for scale calc).
+    :param screenshot_w: Unused (kept for backward compatibility)
+    :param screenshot_h: Unused (kept for backward compatibility)
+    :param window_w: Unused (kept for backward compatibility)
+    :param window_h: Unused (kept for backward compatibility)
     :param verbose: Print debug info
     :return: Tuple of (display_width, display_height) in logical pixels
     """
     native_w, native_h = get_display_bounds(verbose=False)
+    display_scale = get_display_scale(verbose=verbose)
+    logical_w = int(native_w / display_scale)
+    logical_h = int(native_h / display_scale)
+    if verbose:
+        print(f"Display geometry (logical): {logical_w}x{logical_h} "
+              f"(native {native_w}x{native_h} / display scale {display_scale:.3f})")
+    return logical_w, logical_h
 
-    if screenshot_w > 0 and screenshot_h > 0 and window_w > 0 and window_h > 0:
-        scale_x, scale_y = calculate_scale_factor(screenshot_w, screenshot_h, window_w, window_h, verbose)
-        logical_w = int(native_w / scale_x)
-        logical_h = int(native_h / scale_y)
-        if verbose:
-            print(f"Display geometry (logical): {logical_w}x{logical_h} "
-                  f"(native {native_w}x{native_h} / scale {scale_x:.3f}x{scale_y:.3f})")
-        return logical_w, logical_h
-    else:
-        if verbose:
-            print(f"Display geometry (logical): {native_w}x{native_h} (no scale info, using native)")
-        return native_w, native_h
+
+def estimate_decoration_offsets(screenshot_w: int, screenshot_h: int,
+                                 window_w: int, window_h: int,
+                                 verbose: bool = False) -> tuple[float, float]:
+    """
+    Estimate the window decoration offsets in native screenshot pixels.
+
+    On Wayland, ``spectacle --activewindow`` may capture the window including
+    decorations (title bar, borders, shadows).  The decoration offsets are
+    estimated from the difference between the screenshot size and the expected
+    client area size at the display scale.
+
+    :param screenshot_w: Width of the captured screenshot in native pixels
+    :param screenshot_h: Height of the captured screenshot in native pixels
+    :param window_w: Logical window width from kdotool
+    :param window_h: Logical window height from kdotool
+    :param verbose: Print debug info
+    :return: Tuple of (left_border_native, top_border_native) in screenshot pixels
+    """
+    display_scale = get_display_scale(verbose=False)
+    if display_scale <= 0:
+        display_scale = 1.0
+
+    # Expected client area size at the display scale
+    expected_client_w = window_w * display_scale
+    expected_client_h = window_h * display_scale
+
+    # Extra pixels beyond the expected client area
+    extra_w = max(0, screenshot_w - expected_client_w)
+    extra_h = max(0, screenshot_h - expected_client_h)
+
+    # Assume symmetric left/right borders
+    left_border = extra_w / 2
+    # The title bar is at the top; the rest of the extra height is shadow at the bottom.
+    # KDE Plasma default title bar is about 30 logical pixels.
+    title_bar_logical = 30.0
+    top_border = title_bar_logical * display_scale
+
+    if verbose:
+        print(f"Decoration offsets: left={left_border:.1f}px, top={top_border:.1f}px "
+              f"(screenshot {screenshot_w}x{screenshot_h}, "
+              f"expected client {expected_client_w:.0f}x{expected_client_h:.0f})")
+    return left_border, top_border
+
+
+def estimate_title_bar_height(screenshot_w: int, screenshot_h: int,
+                               window_w: int, window_h: int,
+                               verbose: bool = False) -> float:
+    """
+    Estimate the window title bar height in native screenshot pixels.
+
+    On Wayland, ``spectacle --activewindow`` may capture the window including the
+    title bar area.  The title bar height is estimated from the difference between
+    the screenshot height and the expected client area height at the display scale.
+
+    :param screenshot_w: Width of the captured screenshot in native pixels
+    :param screenshot_h: Height of the captured screenshot in native pixels
+    :param window_w: Logical window width from kdotool
+    :param window_h: Logical window height from kdotool
+    :param verbose: Print debug info
+    :return: Estimated title bar height in native screenshot pixels
+    """
+    _, top_border = estimate_decoration_offsets(
+        screenshot_w, screenshot_h, window_w, window_h, verbose)
+    return top_border
 
 
 def calculate_scale_factor(screenshot_w: int, screenshot_h: int,
@@ -474,18 +597,20 @@ def calculate_scale_factor(screenshot_w: int, screenshot_h: int,
     the logical window size reported by kdotool.  For example, a 1920x1080 logical
     window may produce a 2973x1796 screenshot on a 1.5x scaled display.
 
-    The scaling factor is computed as screenshot_size / window_size.  A value of 1.0
-    means no scaling; 1.5 means the screenshot is 1.5x the logical size.
+    The X scale factor is used for both dimensions, since the X dimension is not
+    affected by the title bar.  The Y dimension may include the title bar area in
+    the screenshot, which would inflate the Y scale factor if computed independently.
 
     :param screenshot_w: Width of the captured screenshot in pixels
     :param screenshot_h: Height of the captured screenshot in pixels
     :param window_w: Logical window width from kdotool
     :param window_h: Logical window height from kdotool
     :param verbose: Print debug info
-    :return: Tuple of (scale_x, scale_y)
+    :return: Tuple of (scale_x, scale_y) — both set to the X-derived scale
     """
     scale_x = screenshot_w / window_w if window_w > 0 else 1.0
-    scale_y = screenshot_h / window_h if window_h > 0 else 1.0
+    # Use the X scale for both dimensions to avoid title bar inflation on Y.
+    scale_y = scale_x
     if verbose:
         print(f"HiDPI scale factor: {scale_x:.3f}x{scale_y:.3f} "
               f"(screenshot {screenshot_w}x{screenshot_h}, window {window_w}x{window_h})")
@@ -887,15 +1012,26 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
     img.close()
 
     if active_window_only:
-        # Use the actual screenshot dimensions for the letterbox calculation.
-        # The screenshot IS the client area, so the letterbox is relative to it.
-        # We treat the screenshot origin as (0, 0) for letterbox purposes, then
-        # add the window offset when returning screen coordinates.
-        lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(0, 0, img_w, img_h)
+        # The screenshot may include window decorations.  Use the expected client
+        # area size at the display scale for the letterbox calculation, rather than
+        # deriving it from the screenshot (which may include title bar, borders,
+        # and shadows).
+        display_scale = get_display_scale(verbose=False)
+        if display_scale <= 0:
+            display_scale = 1.0
+        client_w = window_width * display_scale
+        client_h = window_height * display_scale
 
-        # lb_x and lb_y are now relative to the screenshot origin (0, 0)
-        lb_rel_x = lb_x  # Letterbox X relative to screenshot
-        lb_rel_y = lb_y  # Letterbox Y relative to screenshot
+        left_border, top_border = estimate_decoration_offsets(
+            img_w, img_h, window_width, window_height, verbose)
+
+        # Letterbox within the client area
+        lb_x_client, lb_y_client, lb_w, lb_h = calculate_letterbox_region(
+            0, 0, int(client_w), int(client_h))
+
+        # Map client-area letterbox to screenshot space
+        lb_rel_x = left_border + lb_x_client
+        lb_rel_y = top_border + lb_y_client
 
         # Convert to screenshot-relative percentages
         crop_x_start = (lb_rel_x + lb_w * region_x_percent / 100) / img_w * 100
@@ -906,7 +1042,9 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
         if verbose:
             print(f"Screenshot dimensions: {img_w}x{img_h}")
             print(f"Window geometry (logical): {window_width}x{window_height}")
-            print(f"Letterbox: ({lb_x}, {lb_y}), size {lb_w}x{lb_h}")
+            print(f"Client area (estimated): {client_w:.0f}x{client_h:.0f}")
+            print(f"Letterbox in client area: ({lb_x_client:.0f}, {lb_y_client:.0f}), size {lb_w}x{lb_h}")
+            print(f"Letterbox in screenshot: ({lb_rel_x:.0f}, {lb_rel_y:.0f}), size {lb_w}x{lb_h}")
             print(f"Letterbox-relative region: ({region_x_percent}%, {region_y_percent}%), size {region_w_percent}%x{region_h_percent}%")
             print(f"Screenshot-relative crop: ({crop_x_start:.1f}%, {crop_y_start:.1f}%) to ({crop_x_end:.1f}%, {crop_y_end:.1f}%)")
 
@@ -1166,9 +1304,10 @@ def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bo
         if verbose:
             print(f"Orange pixels in caption region: {orange_count}")
 
-        # Crop to the bottom-left caption area and convert to grayscale for OCR
+        # Crop to the bottom-left caption area.
+        # Keep the image in color mode so Tesseract can see the orange caption text.
+        # Converting to grayscale was losing the orange text contrast.
         cropped = img.crop((0, caption_y1, caption_x2, img_h))
-        cropped = cropped.convert('L')
 
         # Use Tesseract to find word-level bounding boxes
         data = pytesseract.image_to_data(cropped, output_type=pytesseract.Output.DICT)
@@ -1363,8 +1502,10 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
             print("No suitable cluster found")
         return None
 
-    # Try each cluster: hover, screenshot, verify caption
-    for i, cluster in enumerate(sorted_clusters):
+    # Try each cluster: hover, screenshot, verify caption.
+    # Limit to 10 clusters to avoid spending minutes on splash-screen noise.
+    max_clusters_to_try = 10
+    for i, cluster in enumerate(sorted_clusters[:max_clusters_to_try]):
         avg_x, avg_y = _cluster_center(cluster)
         # Convert screenshot-space pixel position to logical screen coordinates
         screen_x = int(window_x + avg_x / scale_x)
