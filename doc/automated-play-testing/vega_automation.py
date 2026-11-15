@@ -1248,19 +1248,23 @@ def _distance_to_hint(cx: float, cy: float, hint_x: float, hint_y: float) -> flo
 
 
 def _is_orange_pixel(r: int, g: int, b: int,
-                      red_min: int = 150, green_min: int = 80, green_max: int = 200,
-                      blue_max: int = 80) -> bool:
+                      red_min: int = 120, green_min: int = 50, green_max: int = 220,
+                      blue_max: int = 100) -> bool:
     """
-    Check whether an RGB pixel looks orange (warm color with dominant red).
+    Check whether an RGB pixel looks orange or golden-yellow (warm color with dominant red).
+
+    The caption text in Vega Strike hotspots ranges from bright orange to golden-yellow.
+    These broader thresholds catch both: orange (high R, medium G, low B) and
+    golden-yellow (high R, high G, low B).
 
     :param r: Red channel value (0-255)
     :param g: Green channel value (0-255)
     :param b: Blue channel value (0-255)
-    :param red_min: Minimum red channel value for orange
-    :param green_min: Minimum green channel value for orange
-    :param green_max: Maximum green channel value for orange
-    :param blue_max: Maximum blue channel value for orange
-    :return: True if the pixel is orange
+    :param red_min: Minimum red channel value (default 120 for golden-yellow)
+    :param green_min: Minimum green channel value (default 50)
+    :param green_max: Maximum green channel value (default 220 for yellow)
+    :param blue_max: Maximum blue channel value (default 100)
+    :return: True if the pixel is orange or golden-yellow
     """
     return r >= red_min and green_min <= g <= green_max and b <= blue_max
 
