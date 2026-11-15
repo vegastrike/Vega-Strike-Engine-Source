@@ -1404,8 +1404,19 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     img_w, img_h = img.size
     scale_x, scale_y = calculate_scale_factor(img_w, img_h, window_width, window_height, verbose)
 
+    # Get display scale and decoration offsets for coordinate conversion
+    display_scale = get_display_scale(verbose=False)
+    if display_scale <= 0:
+        display_scale = 1.0
+    left_border, top_border = estimate_decoration_offsets(
+        img_w, img_h, window_width, window_height, verbose)
+
     # Primary strategy: use the hint position to move the mouse close, then verify caption
     if hint_window_x is not None and hint_window_y is not None:
+        # The hint is in logical window coords.  Convert to screenshot-space by multiplying
+        # by the display scale and adding the decoration offsets, then map to screen coords.
+        hint_screenshot_x = hint_window_x * display_scale + left_border
+        hint_screenshot_y = hint_window_y * display_scale + top_border
         hint_screen_x = int(window_x + hint_window_x)
         hint_screen_y = int(window_y + hint_window_y)
 
@@ -1479,9 +1490,9 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
             print(f"  Cluster {i}: {len(cluster)} pixels, center ({cx:.1f}, {cy:.1f})")
 
     # Convert hint to screenshot-space for distance comparison (if provided).
-    # The hint is in logical window coords; multiply by scale to get screenshot coords.
-    hint_screenshot_x = hint_window_x * scale_x if hint_window_x is not None else None
-    hint_screenshot_y = hint_window_y * scale_y if hint_window_y is not None else None
+    # The hint is in logical window coords; multiply by display scale and add decoration offsets.
+    hint_screenshot_x = hint_window_x * display_scale + left_border if hint_window_x is not None else None
+    hint_screenshot_y = hint_window_y * display_scale + top_border if hint_window_y is not None else None
 
     # Sort clusters: by distance to hint (if hint provided) or by size (largest first)
     if hint_screenshot_x is not None and hint_screenshot_y is not None:
@@ -1507,9 +1518,14 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     max_clusters_to_try = 10
     for i, cluster in enumerate(sorted_clusters[:max_clusters_to_try]):
         avg_x, avg_y = _cluster_center(cluster)
-        # Convert screenshot-space pixel position to logical screen coordinates
-        screen_x = int(window_x + avg_x / scale_x)
-        screen_y = int(window_y + avg_y / scale_y)
+        # Convert screenshot-space pixel position to logical screen coordinates.
+        # Subtract decoration offsets to get client-area-relative position,
+        # then divide by display scale to get logical window coords,
+        # then add window screen position.
+        client_x = avg_x - left_border
+        client_y = avg_y - top_border
+        screen_x = int(window_x + client_x / display_scale)
+        screen_y = int(window_y + client_y / display_scale)
 
         if verbose:
             print(f"Trying cluster {i} at ({screen_x}, {screen_y})...")
