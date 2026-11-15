@@ -396,7 +396,7 @@ def main():
                 print(f"Unknown hotspot geometry for base type '{base_type}', 'Launch' — no hint")
 
         launch_pos = find_hotspot_via_pixel_search(
-            screenshot_path, wx, wy,
+            screenshot_path, wx, wy, ww, wh,
             caption_text="Launch",
             hint_window_x=launch_hint_x,
             hint_window_y=launch_hint_y,
@@ -415,7 +415,7 @@ def main():
             if args.verbose:
                 print("Pixel search did not find Launch hotspot; trying OCR...")
             launch_pos = find_text_in_region_via_ocr(
-                screenshot_path, "Launch", wx, wy,
+                screenshot_path, "Launch", wx, wy, ww, wh,
                 region_x_percent=0, region_y_percent=0,
                 region_w_percent=100, region_h_percent=100,
                 verbose=args.verbose
@@ -468,14 +468,14 @@ def main():
         try:
             if take_screenshot(confirm_screenshot, active_window_only=True, verbose=args.verbose):
                 confirm_pos = find_text_in_region_via_ocr(
-                    confirm_screenshot, "Yes", wx, wy,
+                    confirm_screenshot, "Yes", wx, wy, ww, wh,
                     region_x_percent=20, region_y_percent=20,
                     region_w_percent=60, region_h_percent=60,
                     verbose=args.verbose
                 )
                 if confirm_pos is None:
                     confirm_pos = find_text_in_region_via_ocr(
-                        confirm_screenshot, "Ok", wx, wy,
+                        confirm_screenshot, "Ok", wx, wy, ww, wh,
                         region_x_percent=20, region_y_percent=20,
                         region_w_percent=60, region_h_percent=60,
                         verbose=args.verbose

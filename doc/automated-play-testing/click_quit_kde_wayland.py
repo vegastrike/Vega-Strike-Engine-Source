@@ -176,7 +176,9 @@ def main():
             game_proc.wait()
             return 1
 
-        quit_pos = find_quit_button_via_ocr(screenshot_path, window_x=window_x, window_y=window_y, verbose=args.verbose)
+        quit_pos = find_quit_button_via_ocr(screenshot_path, window_x=window_x, window_y=window_y,
+                                             window_width=window_width, window_height=window_height,
+                                             verbose=args.verbose)
         if quit_pos is None:
             print("ERROR: Could not find Quit button via OCR")
             game_proc.kill()
@@ -204,7 +206,8 @@ def main():
             try:
                 if take_screenshot(confirm_screenshot, active_window_only=True, verbose=args.verbose):
                     confirm_pos = find_confirmation_button_via_ocr(
-                        confirm_screenshot, window_x=window_x, window_y=window_y, verbose=args.verbose)
+                        confirm_screenshot, window_x=window_x, window_y=window_y,
+                        window_width=window_width, window_height=window_height, verbose=args.verbose)
                     if confirm_pos is not None:
                         if args.verbose:
                             print(f"Clicking confirmation button at {confirm_pos}")

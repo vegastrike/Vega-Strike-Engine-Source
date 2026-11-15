@@ -172,37 +172,45 @@ def ocr_text_via_command_lina(screenshot_path: str, verbose: bool = False) -> st
         return ""
 
 
-def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x: int = 0, window_y: int = 0, screenshot_width: int | None = None, screenshot_height: int | None = None, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
+def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x: int = 0, window_y: int = 0, window_width: int = 0, window_height: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
     """
     Find a button with any of the specified text strings in the specified area of the screenshot and return its absolute screen coordinates.
     Searches for each text string in the order provided; returns the first match found.
 
+    On Wayland with HiDPI scaling, the screenshot may be at a different resolution than
+    the logical window size.  This function calculates the scale factor and uses it to
+    convert screenshot-space OCR positions to logical screen coordinates.
+
     :rtype: tuple[int, int] | None
     :param screenshot_path: The path to the screenshot file to read
     :param button_texts: List of possible button captions to search for (first match wins)
-    :param window_x: The window X coordinate on screen
-    :param window_y: The window Y coordinate on screen
-    :param screenshot_width: Actual screenshot width (for coordinate scaling when screenshot != window size).
-        If None, defaults to the image width from the file.
-    :param screenshot_height: Actual screenshot height (for coordinate scaling).
-        If None, defaults to the image height from the file.
+    :param window_x: The window X coordinate on screen (logical pixels)
+    :param window_y: The window Y coordinate on screen (logical pixels)
+    :param window_width: The logical window width from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
+    :param window_height: The logical window height from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
     :param crop_x_starting_percent: The starting horizontal percentage of the screenshot to crop to
     :param crop_y_starting_percent: The starting vertical percentage of the screenshot to crop to
     :param crop_x_ending_percent: The ending horizontal percentage of the screenshot to crop to
     :param crop_y_ending_percent: The ending vertical percentage of the screenshot to crop to
     :param verbose: Print debug info
-    :return: The absolute coordinates of the center of the button text, or None on failure
+    :return: The absolute coordinates of the center of the button text (logical screen pixels), or None on failure
     """
     img: ImageFile = Image.open(screenshot_path)
     img_w, img_h = img.size
-    if screenshot_width is None:
-        screenshot_width = img_w
-    if screenshot_height is None:
-        screenshot_height = img_h
     if verbose:
-        print(f"Starting screenshot dimensions: {img_w}x{img_h}")
-        if screenshot_width != img_w or screenshot_height != img_h:
-            print(f"Screenshot is from a {screenshot_width}x{screenshot_height} window (scaled)")
+        print(f"Screenshot dimensions: {img_w}x{img_h}")
+        if window_width > 0 and window_height > 0:
+            print(f"Window geometry (logical): {window_width}x{window_height}")
+
+    # Calculate HiDPI scaling factor if window geometry is provided.
+    # On Wayland, spectacle captures at native pixels while kdotool reports logical pixels.
+    # The scale factor converts screenshot-space positions to logical screen coordinates.
+    scale_x: float = 1.0
+    scale_y: float = 1.0
+    if window_width > 0 and window_height > 0:
+        scale_x, scale_y = calculate_scale_factor(img_w, img_h, window_width, window_height, verbose)
 
     # Crop to specified percentages of the actual screenshot image
     crop_x_start: int = int(img_w * crop_x_starting_percent / 100)
@@ -237,22 +245,6 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
     # Build a set of lowercased target texts for quick lookup
     target_texts: set[str] = {t.lower() for t in button_texts}
 
-    # Compute the screen origin of the screenshot's top-left corner.
-    # When the screenshot is a window-only capture (active_window_only=True),
-    # the window manager geometry may include decorations (title bar, borders)
-    # that are not in the screenshot.  The difference gives the decoration offset.
-    # The screenshot's (0,0) maps to (window_x + dec_x, window_y + dec_y) on screen.
-    dec_x = (screenshot_width - img_w) // 2 if screenshot_width != img_w else 0
-    dec_y = screenshot_height - img_h if screenshot_height != img_h else 0
-    # If the width differs symmetrically, the horizontal offset is half the difference.
-    # If the height differs, the vertical offset is the full difference (title bar on top).
-    screenshot_screen_x = window_x + dec_x
-    screenshot_screen_y = window_y + dec_y
-
-    if verbose:
-        if dec_x != 0 or dec_y != 0:
-            print(f"Decoration offset: ({dec_x}, {dec_y}), screenshot screen origin: ({screenshot_screen_x}, {screenshot_screen_y})")
-
     # Look for any of the specified button texts in the detected text
     for i, text in enumerate(data['text']):
         text_stripped: str = text.strip()
@@ -262,17 +254,20 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
             word_w: int = int(data['width'][i])
             word_h: int = int(data['height'][i])
 
-            # Map crop-relative OCR position to screenshot-space, then to screen coords
+            # Map crop-relative OCR position to screenshot-space pixel coordinates
             button_center_x_in_screenshot: int = crop_x_start + word_x + word_w // 2
             button_center_y_in_screenshot: int = crop_y_start + word_y + word_h // 2
 
-            screen_x: int = screenshot_screen_x + button_center_x_in_screenshot
-            screen_y: int = screenshot_screen_y + button_center_y_in_screenshot
+            # Convert screenshot-space pixels to logical screen coordinates.
+            # Divide by the HiDPI scale factor to get logical window-relative coords,
+            # then add the window's screen position.
+            screen_x: int = int(window_x + button_center_x_in_screenshot / scale_x)
+            screen_y: int = int(window_y + button_center_y_in_screenshot / scale_y)
 
             if verbose:
                 print(f"Found '{text_stripped}' at: ({word_x}, {word_y}), size: {word_w}x{word_h}")
                 print(f"Position in screenshot: ({button_center_x_in_screenshot}, {button_center_y_in_screenshot})")
-                print(f"Position on screen: ({screen_x}, {screen_y})")
+                print(f"Position on screen (logical): ({screen_x}, {screen_y})")
 
             return screen_x, screen_y
 
@@ -281,7 +276,7 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
     return None
 
 
-def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x: int = 0, window_y: int = 0, screenshot_width: int | None = None, screenshot_height: int | None = None, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
+def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x: int = 0, window_y: int = 0, window_width: int = 0, window_height: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
     """
     Find the button with the specified text in the specified area of the screenshot and return its absolute screen coordinates.
     Thin wrapper around the list-based ``find_button_via_ocr``.
@@ -289,26 +284,26 @@ def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x:
     :rtype: tuple[int, int] | None
     :param screenshot_path: The path to the screenshot file to read
     :param button_text: The button text to find
-    :param window_x: The window X coordinate on screen
-    :param window_y: The window Y coordinate on screen
-    :param screenshot_width: Actual screenshot width (for coordinate scaling).
-        If None, defaults to the image width from the file.
-    :param screenshot_height: Actual screenshot height (for coordinate scaling).
-        If None, defaults to the image height from the file.
+    :param window_x: The window X coordinate on screen (logical pixels)
+    :param window_y: The window Y coordinate on screen (logical pixels)
+    :param window_width: The logical window width from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
+    :param window_height: The logical window height from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
     :param crop_x_starting_percent: The starting horizontal percentage of the screenshot to crop to
     :param crop_y_starting_percent: The starting vertical percentage of the screenshot to crop to
     :param crop_x_ending_percent: The ending horizontal percentage of the screenshot to crop to
     :param crop_y_ending_percent: The ending vertical percentage of the screenshot to crop to
     :param verbose: Print debug info
-    :return: The absolute coordinates of the center of the button text, or None on failure
+    :return: The absolute coordinates of the center of the button text (logical screen pixels), or None on failure
     """
     return find_button_via_ocr(
         screenshot_path=screenshot_path,
         button_texts=[button_text],
         window_x=window_x,
         window_y=window_y,
-        screenshot_width=screenshot_width,
-        screenshot_height=screenshot_height,
+        window_width=window_width,
+        window_height=window_height,
         crop_x_starting_percent=crop_x_starting_percent,
         crop_y_starting_percent=crop_y_starting_percent,
         crop_x_ending_percent=crop_x_ending_percent,
@@ -317,7 +312,9 @@ def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x:
     )
 
 
-def find_quit_button_via_ocr(screenshot_path: str, window_x: int = 0, window_y: int = 0, verbose: bool = False) -> tuple[int, int] | None:
+def find_quit_button_via_ocr(screenshot_path: str, window_x: int = 0, window_y: int = 0,
+                              window_width: int = 0, window_height: int = 0,
+                              verbose: bool = False) -> tuple[int, int] | None:
     """
     Use OCR on a screenshot of the active window to find the Quit button.
 
@@ -327,10 +324,14 @@ def find_quit_button_via_ocr(screenshot_path: str, window_x: int = 0, window_y: 
 
     :rtype: tuple[int, int] | None
     :param screenshot_path: Path to the screenshot image
-    :param window_x: The window's X position on the screen
-    :param window_y: The window's Y position on the screen
+    :param window_x: The window's X position on the screen (logical pixels)
+    :param window_y: The window's Y position on the screen (logical pixels)
+    :param window_width: Logical window width from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
+    :param window_height: Logical window height from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
     :param verbose:  Print debug info
-    :return: Tuple of (screen_x, screen_y) — center of the Quit button, or None
+    :return: Tuple of (screen_x, screen_y) — center of the Quit button (logical pixels), or None
     """
     # Crop to the bottom 55% (starting at 45% from the top) to focus on the
     # button area and avoid matching "Quit" in the game logo at the top.
@@ -339,6 +340,8 @@ def find_quit_button_via_ocr(screenshot_path: str, window_x: int = 0, window_y: 
         button_texts=["Quit"],
         window_x=window_x,
         window_y=window_y,
+        window_width=window_width,
+        window_height=window_height,
         crop_x_starting_percent=0,
         crop_y_starting_percent=45,
         crop_x_ending_percent=100,
@@ -347,7 +350,9 @@ def find_quit_button_via_ocr(screenshot_path: str, window_x: int = 0, window_y: 
     )
 
 
-def find_confirmation_button_via_ocr(screenshot_path: str, window_x: int = 0, window_y: int = 0, verbose: bool = False) -> tuple[int, int] | None:
+def find_confirmation_button_via_ocr(screenshot_path: str, window_x: int = 0, window_y: int = 0,
+                                     window_width: int = 0, window_height: int = 0,
+                                     verbose: bool = False) -> tuple[int, int] | None:
     """
     Use OCR on a screenshot to find a confirmation dialog button.
 
@@ -358,10 +363,14 @@ def find_confirmation_button_via_ocr(screenshot_path: str, window_x: int = 0, wi
 
     :rtype: tuple[int, int] | None
     :param screenshot_path: Path to the screenshot image
-    :param window_x: The window's X position on the screen
-    :param window_y: The window's Y position on the screen
+    :param window_x: The window's X position on the screen (logical pixels)
+    :param window_y: The window's Y position on the screen (logical pixels)
+    :param window_width: Logical window width from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
+    :param window_height: Logical window height from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
     :param verbose: Print debug info
-    :return: Tuple of (screen_x, screen_y) — center of the confirmation button, or None
+    :return: Tuple of (screen_x, screen_y) — center of the confirmation button (logical pixels), or None
     """
     # Crop to the center 60% (20% margins on all sides) to focus on the
     # confirmation dialog area and avoid false matches elsewhere.
@@ -370,6 +379,8 @@ def find_confirmation_button_via_ocr(screenshot_path: str, window_x: int = 0, wi
         button_texts=["yes", "ok", "confirm"],
         window_x=window_x,
         window_y=window_y,
+        window_width=window_width,
+        window_height=window_height,
         crop_x_starting_percent=20,
         crop_y_starting_percent=20,
         crop_x_ending_percent=80,
@@ -380,11 +391,15 @@ def find_confirmation_button_via_ocr(screenshot_path: str, window_x: int = 0, wi
 
 def get_display_bounds(verbose: bool = False) -> tuple[int, int]:
     """
-    Get the total display resolution.
+    Get the total display resolution in logical (scaled) pixels.
+
+    On Wayland with HiDPI scaling, tools like xdotool and wayland-info report
+    the logical resolution, not the native pixel resolution.  For example, a
+    3840x2160 physical display with 1.5x scaling reports 2560x1440.
 
     :rtype: tuple[int, int]
     :param verbose: Print debug info
-    :return: Tuple of (display_width, display_height)
+    :return: Tuple of (display_width, display_height) in logical pixels
     """
     # Try xdotool first (works on X11 fallback)
     out, _ = run_cmd('xdotool getdisplaygeometry 2>/dev/null')
@@ -407,6 +422,34 @@ def get_display_bounds(verbose: bool = False) -> tuple[int, int]:
     if verbose:
         print("No display geometry found; falling back to default geometry")
     return 3840, 2160
+
+
+def calculate_scale_factor(screenshot_w: int, screenshot_h: int,
+                           window_w: int, window_h: int,
+                           verbose: bool = False) -> tuple[float, float]:
+    """
+    Calculate the HiDPI scaling factor between a screenshot and the window geometry.
+
+    On Wayland with HiDPI scaling, spectacle captures at a higher resolution than
+    the logical window size reported by kdotool.  For example, a 1920x1080 logical
+    window may produce a 2973x1796 screenshot on a 1.5x scaled display.
+
+    The scaling factor is computed as screenshot_size / window_size.  A value of 1.0
+    means no scaling; 1.5 means the screenshot is 1.5x the logical size.
+
+    :param screenshot_w: Width of the captured screenshot in pixels
+    :param screenshot_h: Height of the captured screenshot in pixels
+    :param window_w: Logical window width from kdotool
+    :param window_h: Logical window height from kdotool
+    :param verbose: Print debug info
+    :return: Tuple of (scale_x, scale_y)
+    """
+    scale_x = screenshot_w / window_w if window_w > 0 else 1.0
+    scale_y = screenshot_h / window_h if window_h > 0 else 1.0
+    if verbose:
+        print(f"HiDPI scale factor: {scale_x:.3f}x{scale_y:.3f} "
+              f"(screenshot {screenshot_w}x{screenshot_h}, window {window_w}x{window_h})")
+    return scale_x, scale_y
 
 
 def move_mouse_to_position(screen_x: SupportsInt, screen_y: SupportsInt, screen_width: SupportsInt, screen_height: SupportsInt,
@@ -710,12 +753,12 @@ def find_text_in_region_via_ocr(screenshot_path: str,
                                 text: str,
                                 window_x: int,
                                 window_y: int,
+                                window_width: int = 0,
+                                window_height: int = 0,
                                 region_x_percent: float = 0.0,
                                 region_y_percent: float = 0.0,
                                 region_w_percent: float = 100.0,
                                 region_h_percent: float = 100.0,
-                                screenshot_width: int | None = None,
-                                screenshot_height: int | None = None,
                                 verbose: bool = False) -> tuple[int, int] | None:
     """
     Find text (such as a button label or hotspot caption) in a designated region of a screenshot
@@ -726,18 +769,18 @@ def find_text_in_region_via_ocr(screenshot_path: str,
 
     :param screenshot_path: Path to the screenshot image file
     :param text: The text/caption to find
-    :param window_x: Window X position on screen
-    :param window_y: Window Y position on screen
+    :param window_x: Window X position on screen (logical pixels)
+    :param window_y: Window Y position on screen (logical pixels)
+    :param window_width: Logical window width from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
+    :param window_height: Logical window height from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
     :param region_x_percent: Starting X of search region as a percentage (0-100)
     :param region_y_percent: Starting Y of search region as a percentage (0-100)
     :param region_w_percent: Width of search region as a percentage (0-100)
     :param region_h_percent: Height of search region as a percentage (0-100)
-    :param screenshot_width: Actual screenshot width (for coordinate scaling).
-        If None, defaults to the image width from the file.
-    :param screenshot_height: Actual screenshot height (for coordinate scaling).
-        If None, defaults to the image height from the file.
     :param verbose: Print debug info
-    :return: Tuple of (screen_x, screen_y) — center of the found text, or None
+    :return: Tuple of (screen_x, screen_y) — center of the found text (logical pixels), or None
     """
     crop_x_end = region_x_percent + region_w_percent
     crop_y_end = region_y_percent + region_h_percent
@@ -746,8 +789,8 @@ def find_text_in_region_via_ocr(screenshot_path: str,
         button_text=text,
         window_x=window_x,
         window_y=window_y,
-        screenshot_width=screenshot_width,
-        screenshot_height=screenshot_height,
+        window_width=window_width,
+        window_height=window_height,
         crop_x_starting_percent=region_x_percent,
         crop_y_starting_percent=region_y_percent,
         crop_x_ending_percent=crop_x_end,
@@ -776,22 +819,17 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
     letterbox region first, then maps the relative percentages to screenshot-relative
     crop percentages for the OCR search.
 
-    When ``active_window_only`` is True (the default), the screenshot contains only the
-    active window's client area.  The letterbox black bars are rendered within the
-    client area, so they appear in the screenshot.  The letterbox calculation uses the
-    actual screenshot dimensions (read from the image file), not the window geometry
-    from the window manager, because window manager geometry may include decorations
-    (title bar, borders) that are not part of the screenshot.
-
-    When ``active_window_only`` is False, the screenshot contains the full screen, and
-    the letterbox is mapped relative to the window position within the screen.
+    On Wayland with HiDPI scaling, the screenshot may be at a higher resolution than
+    the logical window size.  The letterbox calculation uses the actual screenshot
+    dimensions, and the HiDPI scale factor is applied when converting OCR positions
+    to logical screen coordinates.
 
     :param screenshot_path: Path to the screenshot image file
     :param text: The text/caption to find
-    :param window_x: Window X position on screen (for screen coordinate output)
-    :param window_y: Window Y position on screen (for screen coordinate output)
-    :param window_width: Window width in pixels (from window manager, may include decorations)
-    :param window_height: Window height in pixels (from window manager, may include decorations)
+    :param window_x: Window X position on screen (logical pixels)
+    :param window_y: Window Y position on screen (logical pixels)
+    :param window_width: Logical window width from kdotool
+    :param window_height: Logical window height from kdotool
     :param region_x_percent: Starting X within letterbox as a percentage (0-100)
     :param region_y_percent: Starting Y within letterbox as a percentage (0-100)
     :param region_w_percent: Width of search region within letterbox as a percentage (0-100)
@@ -799,11 +837,11 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
     :param active_window_only: If True, the screenshot is window-only (no desktop background).
         The letterbox calculation uses the actual screenshot dimensions. Default True.
     :param verbose: Print debug info
-    :return: Tuple of (screen_x, screen_y) — center of the found text, or None
+    :return: Tuple of (screen_x, screen_y) — center of the found text (logical pixels), or None
     """
     # Read actual screenshot dimensions — these are what matter for cropping.
-    # When active_window_only=True, the screenshot may be smaller than the window
-    # geometry reported by the window manager (which includes title bar and borders).
+    # On Wayland with HiDPI, the screenshot is at native pixel resolution while
+    # window_width/window_height are in logical pixels.
     img: ImageFile = Image.open(screenshot_path)
     img_w, img_h = img.size
     img.close()
@@ -827,20 +865,21 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
 
         if verbose:
             print(f"Screenshot dimensions: {img_w}x{img_h}")
-            print(f"Window geometry (may include decorations): {window_width}x{window_height}")
+            print(f"Window geometry (logical): {window_width}x{window_height}")
             print(f"Letterbox: ({lb_x}, {lb_y}), size {lb_w}x{lb_h}")
             print(f"Letterbox-relative region: ({region_x_percent}%, {region_y_percent}%), size {region_w_percent}%x{region_h_percent}%")
             print(f"Screenshot-relative crop: ({crop_x_start:.1f}%, {crop_y_start:.1f}%) to ({crop_x_end:.1f}%, {crop_y_end:.1f}%)")
 
-        # Pass the actual screenshot dimensions so find_button_via_ocr can scale
-        # OCR positions from screenshot space to window space for screen coordinates.
+        # Pass the logical window dimensions so find_button_via_ocr_single can
+        # calculate the HiDPI scale factor and convert screenshot-space OCR
+        # positions to logical screen coordinates.
         return find_button_via_ocr_single(
             screenshot_path=screenshot_path,
             button_text=text,
             window_x=window_x,
             window_y=window_y,
-            screenshot_width=img_w,
-            screenshot_height=img_h,
+            window_width=window_width,
+            window_height=window_height,
             crop_x_starting_percent=crop_x_start,
             crop_y_starting_percent=crop_y_start,
             crop_x_ending_percent=crop_x_end,
@@ -862,6 +901,8 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
             button_text=text,
             window_x=window_x,
             window_y=window_y,
+            window_width=window_width,
+            window_height=window_height,
             crop_x_starting_percent=crop_x_start,
             crop_y_starting_percent=crop_y_start,
             crop_x_ending_percent=crop_x_end,
@@ -922,8 +963,11 @@ def get_hotspot_hint_position(
     Calculate the hint position for a hotspot on a given base type.
 
     Looks up the design geometry for the (base_type, hotspot_name) pair and
-    returns the center as window coordinates.  Returns None if the combination
-    is not known.
+    returns the center as window coordinates.  The hotspot geometry percentages
+    are relative to the letterboxed (4:3) rendering area, so the letterbox
+    region is calculated first.
+
+    Returns None if the combination is not known.
 
     :param base_type: Base type string (e.g. "ocean", "desert", "space_station")
     :param hotspot_name: Hotspot caption text (e.g. "Launch")
@@ -935,7 +979,9 @@ def get_hotspot_hint_position(
     if geometry is None:
         return None
     cx_pct, cy_pct = _hotspot_center(geometry)
-    return (window_width * cx_pct / 100, window_height * cy_pct / 100)
+    # Hotspot geometry is relative to the letterboxed area, not the full window.
+    lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(0, 0, window_width, window_height)
+    return (lb_x + lb_w * cx_pct / 100, lb_y + lb_h * cy_pct / 100)
 
 
 def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 128, red_max: int = 100, green_max: int = 150) -> bool:
@@ -1114,6 +1160,8 @@ def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bo
 def find_hotspot_via_pixel_search(screenshot_path: str,
                                    window_x: int,
                                    window_y: int,
+                                   window_width: int,
+                                   window_height: int,
                                    caption_text: str,
                                    hint_window_x: float | None = None,
                                    hint_window_y: float | None = None,
@@ -1133,6 +1181,10 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     calculated design coordinates (hint position) to move the mouse close first, then
     confirms the correct hotspot by checking the orange caption text.
 
+    On Wayland with HiDPI scaling, the screenshot is at native pixel resolution while
+    window coordinates are logical.  The scale factor is computed from the screenshot
+    and window dimensions, and applied when converting pixel positions to screen coords.
+
     If no hint position is provided, falls back to scanning for bright blue pixel clusters
     and trying each one until the caption matches.
 
@@ -1150,21 +1202,28 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     4. Return the first matching cluster's center, or None
 
     :param screenshot_path: Path to the screenshot image file (used for fallback scanning)
-    :param window_x: Window X position on screen
-    :param window_y: Window Y position on screen
+    :param window_x: Window X position on screen (logical pixels)
+    :param window_y: Window Y position on screen (logical pixels)
+    :param window_width: Logical window width from kdotool
+    :param window_height: Logical window height from kdotool
     :param caption_text: Expected hotspot caption (e.g. "Launch") — mandatory for verification
-    :param hint_window_x: Hint X in window coordinates (from design coords)
-    :param hint_window_y: Hint Y in window coordinates (from design coords)
+    :param hint_window_x: Hint X in logical window coordinates (from design coords)
+    :param hint_window_y: Hint Y in logical window coordinates (from design coords)
     :param search_x_percent: Starting X of search region as a percentage (0-100)
     :param search_y_percent: Starting Y of search region as a percentage (0-100)
     :param search_w_percent: Width of search region as a percentage (0-100)
     :param search_h_percent: Height of search region as a percentage (0-100)
-    :param screen_width: Screen width in pixels (for mouse movement)
-    :param screen_height: Screen height in pixels (for mouse movement)
+    :param screen_width: Screen width in logical pixels (for mouse movement)
+    :param screen_height: Screen height in logical pixels (for mouse movement)
     :param verbose: Print debug info
-    :return: Tuple of (screen_x, screen_y) — center of the hotspot, or None
+    :return: Tuple of (screen_x, screen_y) — center of the hotspot (logical pixels), or None
     """
     import tempfile
+
+    # Read screenshot dimensions to compute HiDPI scale factor.
+    img: ImageFile = Image.open(screenshot_path)
+    img_w, img_h = img.size
+    scale_x, scale_y = calculate_scale_factor(img_w, img_h, window_width, window_height, verbose)
 
     # Primary strategy: use the hint position to move the mouse close, then verify caption
     if hint_window_x is not None and hint_window_y is not None:
@@ -1203,11 +1262,9 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     if verbose:
         print("Scanning for blue pixel clusters (fallback)...")
 
-    img: ImageFile = Image.open(screenshot_path)
-    img_w, img_h = img.size
     pixels = img.load()
 
-    # Calculate search region
+    # Calculate search region (in screenshot pixel space)
     crop_x1 = int(img_w * search_x_percent / 100)
     crop_y1 = int(img_h * search_y_percent / 100)
     crop_x2 = int(img_w * (search_x_percent + search_w_percent) / 100)
@@ -1242,12 +1299,17 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
             cx, cy = _cluster_center(cluster)
             print(f"  Cluster {i}: {len(cluster)} pixels, center ({cx:.1f}, {cy:.1f})")
 
+    # Convert hint to screenshot-space for distance comparison (if provided).
+    # The hint is in logical window coords; multiply by scale to get screenshot coords.
+    hint_screenshot_x = hint_window_x * scale_x if hint_window_x is not None else None
+    hint_screenshot_y = hint_window_y * scale_y if hint_window_y is not None else None
+
     # Sort clusters: by distance to hint (if hint provided) or by size (largest first)
-    if hint_window_x is not None and hint_window_y is not None:
+    if hint_screenshot_x is not None and hint_screenshot_y is not None:
         clusters_with_dist = []
         for cluster in clusters:
             cx, cy = _cluster_center(cluster)
-            dist = _distance_to_hint(cx, cy, hint_window_x, hint_window_y)
+            dist = _distance_to_hint(cx, cy, hint_screenshot_x, hint_screenshot_y)
             clusters_with_dist.append((dist, cluster))
             if verbose:
                 print(f"  Cluster center ({cx:.1f}, {cy:.1f}) distance to hint: {dist:.1f}")
@@ -1264,8 +1326,9 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     # Try each cluster: hover, screenshot, verify caption
     for i, cluster in enumerate(sorted_clusters):
         avg_x, avg_y = _cluster_center(cluster)
-        screen_x = int(window_x + avg_x)
-        screen_y = int(window_y + avg_y)
+        # Convert screenshot-space pixel position to logical screen coordinates
+        screen_x = int(window_x + avg_x / scale_x)
+        screen_y = int(window_y + avg_y / scale_y)
 
         if verbose:
             print(f"Trying cluster {i} at ({screen_x}, {screen_y})...")
