@@ -1265,7 +1265,11 @@ def _is_orange_pixel(r: int, g: int, b: int,
     return r >= red_min and green_min <= g <= green_max and b <= blue_max
 
 
-def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bool = False) -> bool:
+def _verify_caption_via_ocr(screenshot_path: str,
+                            caption_text: str,
+                            verbose: bool = False,
+                            letterbox_x: int | None = None,
+                            letterbox_width: int | None = None) -> bool:
     """
     Verify that the expected caption text appears in the bottom-left portion of the screenshot
     using OCR.  Hotspot captions appear in orange near the bottom-left of the screen when
@@ -1277,6 +1281,10 @@ def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bo
     :param screenshot_path: Path to the screenshot image file
     :param caption_text: Expected caption text (e.g. "Launch")
     :param verbose: Print debug info
+    :param letterbox_x: Optional letterbox region X position in screenshot pixels. If provided,
+        the OCR search is narrowed to the area between 50px left of the letterbox and 50%
+        across the letterbox width.
+    :param letterbox_width: Optional letterbox region width in screenshot pixels.
     :return: True if the caption text was found via OCR
     """
     try:
@@ -1284,17 +1292,24 @@ def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bo
         img_w, img_h = img.size
         pixels = img.load()
 
-        # The caption area is the bottom portion of the screen.  The text area
-        # extends slightly to the left of the letterboxed base area, so use the full
-        # screenshot width to avoid missing the caption.  The caption sits in the
-        # bottom 15% of the window.
-        caption_x2 = img_w
+        # The caption sits in the bottom 15% of the window.
         caption_y1 = int(img_h * 0.85)
+
+        # Determine the horizontal bounds for the caption search region.
+        # If letterbox info is available, narrow the search to the area where the
+        # caption actually appears: 50px left of the letterbox to 50% across the letterbox.
+        # Otherwise, fall back to the full screenshot width.
+        if letterbox_x is not None and letterbox_width is not None:
+            caption_x1 = max(0, letterbox_x - 50)
+            caption_x2 = int(letterbox_x + letterbox_width * 0.5)
+        else:
+            caption_x1 = 0
+            caption_x2 = img_w
 
         # Check for orange pixels in the caption region to confirm a caption is visible
         orange_count = 0
         for y in range(caption_y1, img_h):
-            for x in range(0, caption_x2):
+            for x in range(caption_x1, caption_x2):
                 pixel = pixels[x, y]
                 if len(pixel) >= 3:
                     r, g, b = pixel[0], pixel[1], pixel[2]
@@ -1304,8 +1319,8 @@ def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bo
         if verbose:
             print(f"Orange pixels in caption region: {orange_count}")
 
-        # Crop to the bottom-left caption area (color image used above for orange pixel detection).
-        cropped_color = img.crop((0, caption_y1, caption_x2, img_h))
+        # Crop to the caption area (color image used above for orange pixel detection).
+        cropped_color = img.crop((caption_x1, caption_y1, caption_x2, img_h))
 
         # Convert to grayscale for OCR. Tesseract often performs better on grayscale images
         # because it focuses on luminance contrast rather than color channels. The orange
@@ -1321,7 +1336,7 @@ def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bo
                 t = text.strip()
                 if t:
                     all_words.append(t)
-            print(f"OCR words in caption region (bottom-left): {all_words}")
+            print(f"OCR words in caption region: {all_words}")
 
         target = caption_text.lower()
         for i, text in enumerate(data['text']):
@@ -1413,6 +1428,19 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     left_border, top_border = estimate_decoration_offsets(
         img_w, img_h, window_width, window_height, verbose)
 
+    # Compute the letterbox region in screenshot-space for caption OCR narrowing.
+    # The letterbox is calculated from the client area (window * display_scale),
+    # then mapped to screenshot-space by adding decoration offsets.
+    client_w = int(window_width * display_scale)
+    client_h = int(window_height * display_scale)
+    lb = calculate_letterbox_region(0, 0, client_w, client_h)
+    letterbox_x_screenshot = int(lb[0] + left_border)
+    letterbox_width_screenshot = int(lb[2])
+
+    if verbose:
+        print(f"Letterbox in screenshot: ({letterbox_x_screenshot}, {top_border}), "
+              f"size {letterbox_width_screenshot}x{lb[3]}")
+
     # Primary strategy: use the hint position to move the mouse close, then verify caption
     if hint_window_x is not None and hint_window_y is not None:
         # The hint is in logical window coords.  Convert to screenshot-space by multiplying
@@ -1438,8 +1466,11 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
                 if verbose:
                     print("Failed to take hover screenshot")
             else:
-                # Verify the caption text via OCR in the bottom-left area
-                if _verify_caption_via_ocr(hover_screenshot_path, caption_text, verbose=verbose):
+                # Verify the caption text via OCR in the bottom-left area, narrowed to the
+                # letterbox region so Tesseract doesn't get confused by other UI elements.
+                if _verify_caption_via_ocr(hover_screenshot_path, caption_text, verbose=verbose,
+                                           letterbox_x=letterbox_x_screenshot,
+                                           letterbox_width=letterbox_width_screenshot):
                     if verbose:
                         print(f"Found hotspot at hint position ({hint_screen_x}, {hint_screen_y})")
                     return hint_screen_x, hint_screen_y
@@ -1544,7 +1575,9 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
                     print("Failed to take hover screenshot")
                 continue
 
-            if _verify_caption_via_ocr(hover_screenshot_path, caption_text, verbose=verbose):
+            if _verify_caption_via_ocr(hover_screenshot_path, caption_text, verbose=verbose,
+                                       letterbox_x=letterbox_x_screenshot,
+                                       letterbox_width=letterbox_width_screenshot):
                 if verbose:
                     print(f"Found hotspot via cluster {i} at ({screen_x}, {screen_y})")
                 return screen_x, screen_y

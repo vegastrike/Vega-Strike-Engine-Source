@@ -382,13 +382,18 @@ def main():
                     print(f"Failed to take screenshot after {waited}s")
                 continue
             # The bottom-left caption may say "Landing Center" (green, no hotspot
-            # hovered) or "Launch" (orange, mouse over the Launch hotspot).
-            # Check for either text to confirm the Hangar view is loaded.
+            # hovered), "Launch" (orange, mouse over the Launch hotspot), or
+            # "Main Concourse" (orange, mouse over the Main Concourse hotspot).
+            # Check for any of these texts to confirm the Hangar view is loaded.
             hangar_loaded = verify_screen(hangar_check_path, "Landing Center",
                                           "Hangar", verbose=args.verbose)
             if not hangar_loaded:
                 hangar_loaded = verify_screen(hangar_check_path, "Launch",
                                               "Hangar (Launch caption)",
+                                              verbose=args.verbose)
+            if not hangar_loaded:
+                hangar_loaded = verify_screen(hangar_check_path, "Main Concourse",
+                                              "Hangar (Main Concourse caption)",
                                               verbose=args.verbose)
             if hangar_loaded:
                 if args.verbose:
