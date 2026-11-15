@@ -1269,22 +1269,24 @@ def _verify_caption_via_ocr(screenshot_path: str,
                             caption_text: str,
                             verbose: bool = False,
                             letterbox_x: int | None = None,
-                            letterbox_width: int | None = None) -> bool:
+                            letterbox_width: int | None = None,
+                            letterbox_y: int | None = None,
+                            letterbox_height: int | None = None) -> bool:
     """
     Verify that the expected caption text appears in the bottom-left portion of the screenshot
     using OCR.  Hotspot captions appear in orange near the bottom-left of the screen when
     the mouse is hovering over the hotspot.
 
-    The function first checks for orange-colored pixels in the bottom-left caption region,
-    then runs OCR on that region to find the expected text.
+    The function first checks for orange-colored pixels in the caption region,
+    then runs OCR on a tightly cropped area to find the expected text.
 
     :param screenshot_path: Path to the screenshot image file
     :param caption_text: Expected caption text (e.g. "Launch")
     :param verbose: Print debug info
-    :param letterbox_x: Optional letterbox region X position in screenshot pixels. If provided,
-        the OCR search is narrowed to the area between 50px left of the letterbox and 50%
-        across the letterbox width.
+    :param letterbox_x: Optional letterbox region X position in screenshot pixels.
     :param letterbox_width: Optional letterbox region width in screenshot pixels.
+    :param letterbox_y: Optional letterbox region Y position in screenshot pixels.
+    :param letterbox_height: Optional letterbox region height in screenshot pixels.
     :return: True if the caption text was found via OCR
     """
     try:
@@ -1292,23 +1294,26 @@ def _verify_caption_via_ocr(screenshot_path: str,
         img_w, img_h = img.size
         pixels = img.load()
 
-        # The caption sits in the bottom 15% of the window.
-        caption_y1 = int(img_h * 0.85)
-
-        # Determine the horizontal bounds for the caption search region.
-        # If letterbox info is available, narrow the search to the area where the
-        # caption actually appears: 50px left of the letterbox to 50% across the letterbox.
-        # Otherwise, fall back to the full screenshot width.
-        if letterbox_x is not None and letterbox_width is not None:
-            caption_x1 = max(0, letterbox_x - 50)
-            caption_x2 = int(letterbox_x + letterbox_width * 0.5)
+        # Determine the caption search region bounds.
+        # The caption sits near the bottom of the letterbox area, slightly to the left.
+        # Horizontal: 20px left of the letterbox to 15% across the letterbox width.
+        # Vertical: 95% down the letterbox height to the bottom of the letterbox.
+        if (letterbox_x is not None and letterbox_width is not None and
+                letterbox_y is not None and letterbox_height is not None):
+            caption_x1 = max(0, letterbox_x - 20)
+            caption_x2 = int(letterbox_x + letterbox_width * 0.15)
+            caption_y1 = int(letterbox_y + letterbox_height * 0.95)
+            caption_y2 = int(letterbox_y + letterbox_height)
         else:
+            # Fallback: use the bottom 15% of the full screenshot.
             caption_x1 = 0
             caption_x2 = img_w
+            caption_y1 = int(img_h * 0.85)
+            caption_y2 = img_h
 
         # Check for orange pixels in the caption region to confirm a caption is visible
         orange_count = 0
-        for y in range(caption_y1, img_h):
+        for y in range(caption_y1, caption_y2):
             for x in range(caption_x1, caption_x2):
                 pixel = pixels[x, y]
                 if len(pixel) >= 3:
@@ -1320,12 +1325,133 @@ def _verify_caption_via_ocr(screenshot_path: str,
             print(f"Orange pixels in caption region: {orange_count}")
 
         # Crop to the caption area (color image used above for orange pixel detection).
-        cropped_color = img.crop((caption_x1, caption_y1, caption_x2, img_h))
+        cropped_color = img.crop((caption_x1, caption_y1, caption_x2, caption_y2))
 
-        # Convert to grayscale for OCR. Tesseract often performs better on grayscale images
-        # because it focuses on luminance contrast rather than color channels. The orange
-        # caption text on a dark background has strong luminance contrast preserved in grayscale.
+        # Shrink the crop to the black-background area containing the caption text.
+        # The caption text (in orange) sits on a small black background that is clearly
+        # distinct from the surrounding hangar graphics. We find the black-background
+        # bounds by starting from the orange caption pixels and tracing outward.
         cropped_gray = cropped_color.convert('L')
+        cropped_w, cropped_h = cropped_color.size
+        cropped_pixels = cropped_color.load()
+
+        # Find all orange pixels in the cropped area to locate the caption text.
+        orange_pixels: list[tuple[int, int]] = []
+        for y in range(cropped_h):
+            for x in range(cropped_w):
+                pixel = cropped_pixels[x, y]
+                if len(pixel) >= 3:
+                    r, g, b = pixel[0], pixel[1], pixel[2]
+                    if _is_orange_pixel(r, g, b):
+                        orange_pixels.append((x, y))
+
+        if not orange_pixels:
+            if verbose:
+                print("No orange pixels found in cropped caption area")
+            # Fall back to the full crop
+            cropped_gray = cropped_color.convert('L')
+        else:
+            # Find the upper-right-most orange pixel (max X, then min Y among those).
+            max_orange_x = max(p[0] for p in orange_pixels)
+            upper_right_orange = min(
+                (p[1] for p in orange_pixels if p[0] == max_orange_x)
+            )
+            anchor_x = max_orange_x
+            anchor_y = upper_right_orange
+
+            # Helper: check if a pixel is black (dark background of the caption area).
+            # The black background is very dark (all channels < 20), while the hangar
+            # graphics outside are darker gray or have color variation.
+            def _is_black_pixel(px: int, py: int) -> bool:
+                if px < 0 or px >= cropped_w or py < 0 or py >= cropped_h:
+                    return False  # out of bounds = not black (boundary reached)
+                p = cropped_pixels[px, py]
+                if len(p) >= 3:
+                    return p[0] < 20 and p[1] < 20 and p[2] < 20
+                return p[0] < 20
+
+            # Find the upper-right corner of the black-background area.
+            # Start from the upper-right-most orange pixel, move right until we find
+            # the first non-black pixel, then step back left. Then move up until we
+            # find the first non-black pixel, then step back down.
+            # Step 1: move right from anchor to find the right edge of the black background
+            right_edge_x = anchor_x
+            while right_edge_x + 1 < cropped_w and _is_black_pixel(right_edge_x + 1, anchor_y):
+                right_edge_x += 1
+            # Step 2: from the right edge, move up to find the top edge
+            top_edge_y = anchor_y
+            while top_edge_y - 1 >= 0 and _is_black_pixel(right_edge_x, top_edge_y - 1):
+                top_edge_y -= 1
+            # Upper-right corner of black background: (right_edge_x, top_edge_y)
+            bbox_max_x = right_edge_x
+            bbox_min_y = top_edge_y
+
+            # Find the upper-left corner of the black-background area.
+            # Start from the upper-left-most orange pixel (min X, then min Y among those).
+            # Note: bbox_min_y comes from the top-right corner above, not here.
+            # The top-left corner may extend to the very top of the cropped area.
+            min_orange_x = min(p[0] for p in orange_pixels)
+            upper_left_orange = min(
+                (p[1] for p in orange_pixels if p[0] == min_orange_x)
+            )
+            anchor_x = min_orange_x
+            anchor_y = upper_left_orange
+
+            # Move left from anchor to find the left edge of the black background
+            left_edge_x = anchor_x
+            while left_edge_x - 1 >= 0 and _is_black_pixel(left_edge_x - 1, anchor_y):
+                left_edge_x -= 1
+            bbox_min_x = left_edge_x
+
+            # Find the lower-left corner of the black-background area.
+            # Start from the lower-left-most orange pixel (min X, then max Y among those).
+            lower_left_orange = max(
+                (p[1] for p in orange_pixels if p[0] == min_orange_x)
+            )
+            anchor_x = min_orange_x
+            anchor_y = lower_left_orange
+
+            # Move left from anchor to find the left edge
+            left_edge_x_bottom = anchor_x
+            while left_edge_x_bottom - 1 >= 0 and _is_black_pixel(left_edge_x_bottom - 1, anchor_y):
+                left_edge_x_bottom -= 1
+            # From the left edge, move down to find the bottom edge
+            bottom_edge_y_left = anchor_y
+            while bottom_edge_y_left + 1 < cropped_h and _is_black_pixel(left_edge_x_bottom, bottom_edge_y_left + 1):
+                bottom_edge_y_left += 1
+            bbox_min_x = min(bbox_min_x, left_edge_x_bottom)
+            bbox_max_y = bottom_edge_y_left
+
+            # Find the lower-right corner of the black-background area.
+            # Start from the lower-right-most orange pixel (max X, then max Y among those).
+            # Note: bbox_max_x comes from the top-right corner above, not here.
+            # The bottom-right corner may extend to the very right edge of the cropped area.
+            lower_right_orange = max(
+                (p[1] for p in orange_pixels if p[0] == max_orange_x)
+            )
+            anchor_x = max_orange_x
+            anchor_y = lower_right_orange
+
+            # Move down from anchor to find the bottom edge
+            bottom_edge_y_right = anchor_y
+            while bottom_edge_y_right + 1 < cropped_h and _is_black_pixel(anchor_x, bottom_edge_y_right + 1):
+                bottom_edge_y_right += 1
+            bbox_max_y = max(bbox_max_y, bottom_edge_y_right)
+
+            # Clamp bounds
+            bbox_min_x = max(0, bbox_min_x)
+            bbox_min_y = max(0, bbox_min_y)
+            bbox_max_x = min(cropped_w - 1, bbox_max_x)
+            bbox_max_y = min(cropped_h - 1, bbox_max_y)
+
+            if verbose:
+                print(f"Caption black-background bounding box: "
+                      f"({bbox_min_x}, {bbox_min_y}) to ({bbox_max_x}, {bbox_max_y}), "
+                      f"size {bbox_max_x - bbox_min_x + 1}x{bbox_max_y - bbox_min_y + 1}")
+
+            # Re-crop to the tight black-background area
+            cropped_color = cropped_color.crop((bbox_min_x, bbox_min_y, bbox_max_x + 1, bbox_max_y + 1))
+            cropped_gray = cropped_color.convert('L')
 
         # Use Tesseract to find word-level bounding boxes
         data = pytesseract.image_to_data(cropped_gray, output_type=pytesseract.Output.DICT)
@@ -1435,11 +1561,13 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     client_h = int(window_height * display_scale)
     lb = calculate_letterbox_region(0, 0, client_w, client_h)
     letterbox_x_screenshot = int(lb[0] + left_border)
+    letterbox_y_screenshot = int(lb[1] + top_border)
     letterbox_width_screenshot = int(lb[2])
+    letterbox_height_screenshot = int(lb[3])
 
     if verbose:
-        print(f"Letterbox in screenshot: ({letterbox_x_screenshot}, {top_border}), "
-              f"size {letterbox_width_screenshot}x{lb[3]}")
+        print(f"Letterbox in screenshot: ({letterbox_x_screenshot}, {letterbox_y_screenshot}), "
+              f"size {letterbox_width_screenshot}x{letterbox_height_screenshot}")
 
     # Primary strategy: use the hint position to move the mouse close, then verify caption
     if hint_window_x is not None and hint_window_y is not None:
@@ -1470,7 +1598,9 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
                 # letterbox region so Tesseract doesn't get confused by other UI elements.
                 if _verify_caption_via_ocr(hover_screenshot_path, caption_text, verbose=verbose,
                                            letterbox_x=letterbox_x_screenshot,
-                                           letterbox_width=letterbox_width_screenshot):
+                                           letterbox_y=letterbox_y_screenshot,
+                                           letterbox_width=letterbox_width_screenshot,
+                                           letterbox_height=letterbox_height_screenshot):
                     if verbose:
                         print(f"Found hotspot at hint position ({hint_screen_x}, {hint_screen_y})")
                     return hint_screen_x, hint_screen_y
@@ -1577,7 +1707,9 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
 
             if _verify_caption_via_ocr(hover_screenshot_path, caption_text, verbose=verbose,
                                        letterbox_x=letterbox_x_screenshot,
-                                       letterbox_width=letterbox_width_screenshot):
+                                       letterbox_y=letterbox_y_screenshot,
+                                       letterbox_width=letterbox_width_screenshot,
+                                       letterbox_height=letterbox_height_screenshot):
                 if verbose:
                     print(f"Found hotspot via cluster {i} at ({screen_x}, {screen_y})")
                 return screen_x, screen_y
