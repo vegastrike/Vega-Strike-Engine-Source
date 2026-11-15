@@ -466,6 +466,20 @@ def main():
             screen_height=screen_height,
             verbose=args.verbose
         )
+        if launch_pos is None:
+            launch_pos = find_hotspot_via_pixel_search(
+                screenshot_path, wx, wy, ww, wh,
+                caption_text="Paunch",
+                hint_window_x=launch_hint_x,
+                hint_window_y=launch_hint_y,
+                search_x_percent=search_x_pct,
+                search_y_percent=search_y_pct,
+                search_w_percent=search_w_pct,
+                search_h_percent=search_h_pct,
+                screen_width=screen_width,
+                screen_height=screen_height,
+                verbose=args.verbose
+            )
         if launch_pos is not None:
             launch_x, launch_y = launch_pos
             if args.verbose:
@@ -480,6 +494,13 @@ def main():
                 region_w_percent=100, region_h_percent=100,
                 verbose=args.verbose
             )
+            if launch_pos is None:
+                launch_pos = find_text_in_region_via_ocr(
+                    screenshot_path, "Paunch", wx, wy, ww, wh,
+                    region_x_percent=0, region_y_percent=0,
+                    region_w_percent=100, region_h_percent=100,
+                    verbose=args.verbose
+                )
             if launch_pos is not None:
                 launch_x, launch_y = launch_pos
                 if args.verbose:
@@ -515,7 +536,7 @@ def main():
         if os.path.exists(space_screenshot):
             os.unlink(space_screenshot)
 
-    press_key('escape', args.verbose)
+    press_key('Esc', args.verbose)
     time.sleep(1)
     press_key('q', args.verbose)
 

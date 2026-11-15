@@ -732,8 +732,8 @@ def calculate_letterbox_region(wx: int, wy: int, ww: int, wh: int) -> tuple[int,
 # Main menu buttons use design resolution 1280x1024
 # Button text is typically at 90% into the button width (not centered).
 MAIN_MENU_DESIGN_W = 1280
-MAIN_MENU_DESIGN_H = 1024
-MAIN_MENU_TEXT_OFFSET_X = 0.9
+MAIN_MENU_DESIGN_H = 960
+MAIN_MENU_TEXT_OFFSET_X = 0.6
 
 # Intro monologue buttons use design resolution 1024x768
 # Button text is centered (50% offset).
@@ -1159,7 +1159,7 @@ def get_hotspot_hint_position(
     return (lb_x + lb_w * cx_pct / 100, lb_y + lb_h * cy_pct / 100)
 
 
-def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 128, red_max: int = 100, green_max: int = 150) -> bool:
+def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 70, red_max: int = 50, green_max: int = 50) -> bool:
     """
     Check whether a pixel is a bright blue color (hotspot indicator).
 
@@ -1249,7 +1249,7 @@ def _distance_to_hint(cx: float, cy: float, hint_x: float, hint_y: float) -> flo
 
 def _is_orange_pixel(r: int, g: int, b: int,
                       red_min: int = 120, green_min: int = 50, green_max: int = 220,
-                      blue_max: int = 100) -> bool:
+                      blue_max: int = 10) -> bool:
     """
     Check whether an RGB pixel looks orange or golden-yellow (warm color with dominant red).
 
@@ -1299,21 +1299,22 @@ def _verify_caption_via_ocr(screenshot_path: str,
         pixels = img.load()
 
         # Determine the caption search region bounds.
-        # The caption sits near the bottom of the letterbox area, slightly to the left.
+        # The caption sits near the bottom of the rendered game area, slightly to the left.
         # Horizontal: 20px left of the letterbox to 15% across the letterbox width.
-        # Vertical: 95% down the letterbox height to the bottom of the letterbox.
-        if (letterbox_x is not None and letterbox_width is not None and
-                letterbox_y is not None and letterbox_height is not None):
+        # Vertical: use the bottom 15% of the screenshot (the caption is always near
+        # the bottom edge of the captured image, regardless of letterbox calculation).
+        if (letterbox_x is not None and letterbox_width is not None):
             caption_x1 = max(0, letterbox_x - 20)
             caption_x2 = int(letterbox_x + letterbox_width * 0.15)
-            caption_y1 = int(letterbox_y + letterbox_height * 0.95)
-            caption_y2 = int(letterbox_y + letterbox_height)
         else:
-            # Fallback: use the bottom 15% of the full screenshot.
+            # Fallback: use the full screenshot width.
             caption_x1 = 0
             caption_x2 = img_w
-            caption_y1 = int(img_h * 0.85)
-            caption_y2 = img_h
+        # Vertical bounds: always use the bottom portion of the screenshot.
+        # The caption text is rendered near the bottom edge of the game window,
+        # which corresponds to the bottom of the screenshot.
+        caption_y1 = int(img_h * 0.85)
+        caption_y2 = img_h
 
         # Check for orange pixels in the caption region to confirm a caption is visible
         orange_count = 0
@@ -1371,15 +1372,15 @@ def _verify_caption_via_ocr(screenshot_path: str,
                     return False  # out of bounds = not black (boundary reached)
                 p = cropped_pixels[px, py]
                 if len(p) >= 3:
-                    return p[0] < 20 and p[1] < 20 and p[2] < 20
-                return p[0] < 20
+                    return p[0] < 8 and p[1] < 8 and p[2] < 8
+                return p[0] < 8
 
             # Find the upper-right corner of the black-background area.
             # Start from the upper-right-most orange pixel, move right until we find
             # the first non-black pixel, then step back left. Then move up until we
             # find the first non-black pixel, then step back down.
             # Step 1: move right from anchor to find the right edge of the black background
-            right_edge_x = anchor_x
+            right_edge_x = anchor_x + 1
             while right_edge_x + 1 < cropped_w and _is_black_pixel(right_edge_x + 1, anchor_y):
                 right_edge_x += 1
             # Step 2: from the right edge, move up to find the top edge
