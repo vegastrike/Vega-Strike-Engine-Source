@@ -480,9 +480,10 @@ def main():
                 if args.verbose:
                     print(f"Found Launch hotspot via OCR at ({launch_x}, {launch_y})")
             else:
-                if args.verbose:
-                    print("Could not find Launch hotspot; skipping click")
-                launch_x = launch_y = None
+                print("ERROR: Could not find Launch hotspot — giving up")
+                game_proc.kill()
+                game_proc.wait()
+                return 1
 
         if launch_x is not None:
             launch_x += args.x_adjust

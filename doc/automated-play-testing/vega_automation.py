@@ -204,14 +204,6 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
         if window_width > 0 and window_height > 0:
             print(f"Window geometry (logical): {window_width}x{window_height}")
 
-    # Calculate HiDPI scaling factor if window geometry is provided.
-    # On Wayland, spectacle captures at native pixels while kdotool reports logical pixels.
-    # The scale factor converts screenshot-space positions to logical screen coordinates.
-    scale_x: float = 1.0
-    scale_y: float = 1.0
-    if window_width > 0 and window_height > 0:
-        scale_x, scale_y = calculate_scale_factor(img_w, img_h, window_width, window_height, verbose)
-
     # Crop to specified percentages of the actual screenshot image
     crop_x_start: int = int(img_w * crop_x_starting_percent / 100)
     crop_y_start: int = int(img_h * crop_y_starting_percent / 100)
@@ -592,6 +584,11 @@ def calculate_scale_factor(screenshot_w: int, screenshot_h: int,
                            verbose: bool = False) -> tuple[float, float]:
     """
     Calculate the HiDPI scaling factor between a screenshot and the window geometry.
+
+    .. deprecated:: Use :func:`get_display_scale` instead.  This function estimates
+        the scale from screenshot/window ratios, which is unreliable (title bar
+        inflates Y, decorations affect both).  ``get_display_scale`` reads the
+        actual fractional scale from the system config (e.g., KDE's kwinrc).
 
     On Wayland with HiDPI scaling, spectacle captures at a higher resolution than
     the logical window size reported by kdotool.  For example, a 1920x1080 logical
@@ -1287,8 +1284,11 @@ def _verify_caption_via_ocr(screenshot_path: str, caption_text: str, verbose: bo
         img_w, img_h = img.size
         pixels = img.load()
 
-        # The caption area is the bottom-left: left 40% of width, bottom 15% of height
-        caption_x2 = int(img_w * 0.40)
+        # The caption area is the bottom portion of the screen.  The text area
+        # extends slightly to the left of the letterboxed base area, so use the full
+        # screenshot width to avoid missing the caption.  The caption sits in the
+        # bottom 15% of the window.
+        caption_x2 = img_w
         caption_y1 = int(img_h * 0.85)
 
         # Check for orange pixels in the caption region to confirm a caption is visible
@@ -1399,13 +1399,12 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     """
     import tempfile
 
-    # Read screenshot dimensions to compute HiDPI scale factor.
+    # Read screenshot dimensions.
     img: ImageFile = Image.open(screenshot_path)
     img_w, img_h = img.size
-    scale_x, scale_y = calculate_scale_factor(img_w, img_h, window_width, window_height, verbose)
 
-    # Get display scale and decoration offsets for coordinate conversion
-    display_scale = get_display_scale(verbose=False)
+    # Use the display scale from system config (kwinrc), not the estimated ratio.
+    display_scale = get_display_scale(verbose=verbose)
     if display_scale <= 0:
         display_scale = 1.0
     left_border, top_border = estimate_decoration_offsets(
