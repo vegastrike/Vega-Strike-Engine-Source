@@ -671,54 +671,59 @@ def click_at_position(screen_x: SupportsInt, screen_y: SupportsInt, screen_width
 
 
 # === Letterbox calculation ===
-# The Main Menu, Intro Monologue, and base/hangar views are letterboxed to a 1.33:1
-# aspect ratio within the window.  When the window is wider (e.g. 16:9), black bars
-# appear on the left and right.  When the window is taller, black bars appear on
-# the top and bottom.  Button design coordinates are relative to the letterboxed
-# area, not the full window.
-LETTERBOX_ASPECT_RATIO = 4.0 / 3.0  # 1.33:1
+# The Main Menu, Intro Monologue, and base/hangar views are letterboxed to an aspect
+# ratio derived from their design resolution.  When the window is wider than the
+# design aspect, black bars appear on the left and right.  When the window is taller,
+# black bars appear on the top and bottom.  Button design coordinates are relative
+# to the letterboxed area, not the full window.
+# Main Menu: 1280/1024 = 1.25:1
+# Intro Monologue: 1024/768 = 1.33:1 (4:3)
+# Base/Hangar: varies by config
 
 
-def calculate_letterbox_region(wx: int, wy: int, ww: int, wh: int) -> tuple[int, int, int, int]:
+def calculate_letterbox_region(wx: int, wy: int, ww: int, wh: int,
+                                aspect_ratio: float = 1280 / 1024) -> tuple[int, int, int, int]:
     """
     Calculate the letterboxed region within the window.
 
-    The game renders at a 1.33:1 aspect ratio.  When the window aspect ratio
-    differs, black bars are added.  This function returns the position and size
-    of the actual rendered area within the window, fitting the 4:3 content
-    while maintaining the aspect ratio.
+    The game renders at a fixed aspect ratio derived from the design resolution.
+    When the window aspect ratio differs, black bars are added.  This function
+    returns the position and size of the actual rendered area within the window,
+    fitting the content while maintaining the aspect ratio.
 
     :param wx: Window X position on screen
     :param wy: Window Y position on screen
     :param ww: Window width in pixels
     :param wh: Window height in pixels
+    :param aspect_ratio: The design aspect ratio (width/height). Defaults to 1280/1024 (1.25:1)
+        for the Main Menu. Use 1024/768 (1.33:1) for the Intro Monologue screen.
     :return: Tuple of (letterbox_x, letterbox_y, letterbox_w, letterbox_h) in screen coords
     """
     window_aspect = ww / wh
 
-    if window_aspect > LETTERBOX_ASPECT_RATIO:
-        # Window is wider than 4:3 — letterbox horizontally (black bars left/right).
+    if window_aspect > aspect_ratio:
+        # Window is wider than the design aspect — letterbox horizontally (black bars left/right).
         # The letterbox fills the window height, and width is derived from the aspect.
         lb_h = wh
-        lb_w = int(wh * LETTERBOX_ASPECT_RATIO)
+        lb_w = int(wh * aspect_ratio)
         if lb_w > ww:
             # Defensive: letterbox width exceeds window width, fill width instead.
             lb_w = ww
-            lb_h = int(ww / LETTERBOX_ASPECT_RATIO)
+            lb_h = int(ww / aspect_ratio)
             lb_x = wx
             lb_y = wy + (wh - lb_h) // 2
         else:
             lb_x = wx + (ww - lb_w) // 2
             lb_y = wy
     else:
-        # Window is taller (or equal) than 4:3 — letterbox vertically (black bars top/bottom).
+        # Window is taller (or equal) than the design aspect — letterbox vertically (black bars top/bottom).
         # The letterbox fills the window width, and height is derived from the aspect.
         lb_w = ww
-        lb_h = int(ww / LETTERBOX_ASPECT_RATIO)
+        lb_h = int(ww / aspect_ratio)
         if lb_h > wh:
             # Defensive: letterbox height exceeds window height, fill height instead.
             lb_h = wh
-            lb_w = int(wh * LETTERBOX_ASPECT_RATIO)
+            lb_w = int(wh * aspect_ratio)
             lb_x = wx + (ww - lb_w) // 2
             lb_y = wy
         else:
@@ -729,17 +734,19 @@ def calculate_letterbox_region(wx: int, wy: int, ww: int, wh: int) -> tuple[int,
 
 
 # === Button position calculation helpers ===
-# Main menu buttons use design resolution 1280x1024
-# Button text is typically at 90% into the button width (not centered).
+# Main menu buttons use design resolution 1280x1024 (from bases/main_menu.py)
+# Button text is typically at 60% into the button width (not centered).
 MAIN_MENU_DESIGN_W = 1280
-MAIN_MENU_DESIGN_H = 960
+MAIN_MENU_DESIGN_H = 1024
 MAIN_MENU_TEXT_OFFSET_X = 0.6
+MAIN_MENU_ASPECT_RATIO = MAIN_MENU_DESIGN_W / MAIN_MENU_DESIGN_H  # 1.25:1
 
-# Intro monologue buttons use design resolution 1024x768
+# Intro monologue buttons use design resolution 1024x768 (from bases/main_menu.py)
 # Button text is centered (50% offset).
 INTRO_DESIGN_W = 1024
 INTRO_DESIGN_H = 768
 INTRO_TEXT_OFFSET_X = 0.5
+INTRO_ASPECT_RATIO = INTRO_DESIGN_W / INTRO_DESIGN_H  # 1.33:1 (4:3)
 
 
 def calculate_button_position(wx: int, wy: int, ww: int, wh: int,
@@ -772,9 +779,10 @@ def calculate_button_position(wx: int, wy: int, ww: int, wh: int,
     :return: Tuple of (screen_x, screen_y) — center of the button text
     """
     if letterboxed:
-        lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(wx, wy, ww, wh)
+        aspect = design_w / design_h
+        lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(wx, wy, ww, wh, aspect_ratio=aspect)
         if verbose:
-            print(f"Letterbox region: ({lb_x}, {lb_y}), size: {lb_w}x{lb_h}")
+            print(f"Letterbox region: ({lb_x}, {lb_y}), size: {lb_w}x{lb_h} (aspect {aspect:.3f})")
         sx = lb_w / design_w
         sy = lb_h / design_h
     else:
@@ -803,8 +811,8 @@ def calculate_main_menu_button_position(wx: int, wy: int, ww: int, wh: int,
     """
     Calculate the screen position of a main menu button's text.
 
-    Main menu buttons use design resolution 1280x1024 with text at 90% into button width.
-    The main menu is letterboxed to 1.33:1.
+    Main menu buttons use design resolution 1280x1024 with text at 60% into button width.
+    The main menu is letterboxed to 1.25:1 (1280/1024).
 
     :return: Tuple of (screen_x, screen_y) — center of the button text
     :param wx: Window X position on screen
@@ -834,7 +842,7 @@ def calculate_intro_button_position(wx: int, wy: int, ww: int, wh: int,
     Calculate the screen position of an intro monologue button's text.
 
     Intro monologue uses design resolution 1024x768 with centered text (50% offset).
-    The intro monologue is letterboxed to 1.33:1, just like the main menu.
+    The intro monologue is letterboxed to 1.33:1 (4:3).
 
     :return: Tuple of (screen_x, screen_y) — center of the button text
     :param wx: Window X position on screen
@@ -999,6 +1007,7 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
                                           region_w_percent: float = 100.0,
                                           region_h_percent: float = 100.0,
                                           active_window_only: bool = True,
+                                          aspect_ratio: float = 1280 / 1024,
                                           verbose: bool = False) -> tuple[int, int] | None:
     """
     Find text in a designated region of the letterboxed area of a screenshot using OCR.
@@ -1025,6 +1034,8 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
     :param region_h_percent: Height of search region within letterbox as a percentage (0-100)
     :param active_window_only: If True, the screenshot is window-only (no desktop background).
         The letterbox calculation uses the actual screenshot dimensions. Default True.
+    :param aspect_ratio: The design aspect ratio (width/height) for the letterbox calculation.
+        Defaults to 1280/1024 (1.25:1) for the Main Menu. Use 1024/768 (1.33:1) for Intro Monologue.
     :param verbose: Print debug info
     :return: Tuple of (screen_x, screen_y) — center of the found text (logical pixels), or None
     """
@@ -1051,7 +1062,7 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
 
         # Letterbox within the client area
         lb_x_client, lb_y_client, lb_w, lb_h = calculate_letterbox_region(
-            0, 0, int(client_w), int(client_h))
+            0, 0, int(client_w), int(client_h), aspect_ratio=aspect_ratio)
 
         # Map client-area letterbox to screenshot space
         lb_rel_x = left_border + lb_x_client
@@ -1090,7 +1101,8 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
         )
     else:
         # Full-screen screenshot: use window geometry for letterbox calculation.
-        lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(window_x, window_y, window_width, window_height)
+        lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(
+            window_x, window_y, window_width, window_height, aspect_ratio=aspect_ratio)
         lb_rel_x = lb_x - window_x
         lb_rel_y = lb_y - window_y
         crop_x_start = (lb_rel_x + lb_w * region_x_percent / 100) / window_width * 100
@@ -1122,7 +1134,7 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
 # === Hotspot geometry per base type ===
 # Different base types (ocean, desert, space station, etc.) display their clickable
 # hotspots at different positions on the screen.  The geometry is stored as
-# percentages of the letterboxed base area (1.33:1 aspect ratio):
+# percentages of the letterboxed base area (aspect ratio varies by config):
 #   (horizontal_min%, horizontal_max%, vertical_min%, vertical_max%)
 # The center of that rectangle guides the pixel search to the correct blue cluster.
 
@@ -1147,7 +1159,7 @@ def _hotspot_center(geometry: HotspotGeometry) -> tuple[float, float]:
 # Hotspot names are the caption text shown when hovering (e.g. "Launch").
 HOTSPOT_GEOMETRY: dict[tuple[str, str], HotspotGeometry] = {
     # Ocean-type bases (e.g. Atlantis) — the starting base.
-    # Design geometry relative to the letterboxed base area (1.33:1 aspect ratio).
+    # Design geometry relative to the letterboxed base area.
     ("ocean", "Launch"): HotspotGeometry(
         h_min=19.53125, h_max=85.64455,
         v_min=24.8698, v_max=82.8125
@@ -1160,13 +1172,14 @@ def get_hotspot_hint_position(
     hotspot_name: str,
     window_width: int,
     window_height: int,
+    aspect_ratio: float = 1280 / 1024,
 ) -> tuple[float, float] | None:
     """
     Calculate the hint position for a hotspot on a given base type.
 
     Looks up the design geometry for the (base_type, hotspot_name) pair and
     returns the center as window coordinates.  The hotspot geometry percentages
-    are relative to the letterboxed (4:3) rendering area, so the letterbox
+    are relative to the letterboxed rendering area, so the letterbox
     region is calculated first.
 
     Returns None if the combination is not known.
@@ -1175,6 +1188,8 @@ def get_hotspot_hint_position(
     :param hotspot_name: Hotspot caption text (e.g. "Launch")
     :param window_width: Current window width in pixels
     :param window_height: Current window height in pixels
+    :param aspect_ratio: The design aspect ratio (width/height) for the letterbox
+        calculation. Defaults to 1280/1024 (1.25:1).
     :return: Tuple of (hint_x, hint_y) in window coordinates, or None
     """
     geometry = HOTSPOT_GEOMETRY.get((base_type, hotspot_name))
@@ -1182,7 +1197,8 @@ def get_hotspot_hint_position(
         return None
     cx_pct, cy_pct = _hotspot_center(geometry)
     # Hotspot geometry is relative to the letterboxed area, not the full window.
-    lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(0, 0, window_width, window_height)
+    lb_x, lb_y, lb_w, lb_h = calculate_letterbox_region(
+        0, 0, window_width, window_height, aspect_ratio=aspect_ratio)
     return (lb_x + lb_w * cx_pct / 100, lb_y + lb_h * cy_pct / 100)
 
 
