@@ -887,7 +887,7 @@ def press_key(key: str, verbose: bool = False) -> None:
     time.sleep(0.5)
 
 
-def verify_screen(screenshot_path: str, expected_text: str, step_label: str = "", verbose: bool = False) -> bool:
+def verify_screen_single(screenshot_path: str, expected_text: str, step_label: str = "", verbose: bool = False) -> bool:
     """
     Run OCR on a screenshot and verify expected text is visible.
 
@@ -909,6 +909,33 @@ def verify_screen(screenshot_path: str, expected_text: str, step_label: str = ""
         if verbose:
             print(f"Verification failed for '{step_label}': expected '{expected_text}' not found")
         return False
+
+
+def verify_screen(screenshot_path: str, expected_text: set[str], step_label: str = "", verbose: bool = False) -> bool:
+    """
+    Run OCR on a screenshot and verify any of the expected texts are visible.
+
+    Searches for each string in the set until a match is found.
+
+    :param screenshot_path: Path to the screenshot image file
+    :param expected_text: Set of text phrases to look for in the OCR output
+    :param step_label: Human-readable label for log messages
+    :param verbose: Print detailed progress
+    :return: True if any expected text was found, False otherwise
+    """
+    if verbose:
+        print(f"Running OCR to verify {step_label}...")
+
+    text = ocr_text_via_command_lina(screenshot_path, verbose=verbose)
+    text_lower = text.lower()
+    for phrase in expected_text:
+        if phrase.lower() in text_lower:
+            if verbose:
+                print(f"Verified '{step_label}': found '{phrase}'")
+            return True
+    if verbose:
+        print(f"Verification failed for '{step_label}': none of {expected_text} found")
+    return False
 
 
 def find_text_in_region_via_ocr(screenshot_path: str,

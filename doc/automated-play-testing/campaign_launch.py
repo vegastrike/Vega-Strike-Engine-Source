@@ -55,6 +55,7 @@ from vega_automation import (
     click_at_position,
     press_key,
     verify_screen,
+    verify_screen_single,
     find_text_in_region_via_ocr,
     find_text_in_letterbox_region_via_ocr,
     find_hotspot_via_pixel_search,
@@ -215,7 +216,7 @@ def main():
             print(f"Screen bounds (logical): {screen_width}, {screen_height}")
 
         # Verify we're on the Main Menu screen by looking for "Campaign" text
-        verify_screen(screenshot_path, "Campaign", "Main Menu", verbose=args.verbose)
+        verify_screen_single(screenshot_path, "Campaign", "Main Menu", verbose=args.verbose)
 
         # Find the Campaign button via OCR in the upper portion of the letterboxed area.
         # The Main Menu is letterboxed to 1.33:1. The Campaign button is in the upper
@@ -273,8 +274,13 @@ def main():
         # Verify we're on the Intro Monologue screen by checking for the title text
         # near the top of the letterboxed area. Tesseract reads "---Intro Monologue---"
         # as two separate words: "---Intro" and "Monolaque---", so we only search for
-        # the first part.
-        intro_verified = verify_screen(screenshot_path, "---Intro", "Intro Monologue (title)", verbose=args.verbose)
+        # the first part. The title may appear as "---Intro", "--Intro", or "~-Intro"
+        # depending on how Tesseract parses the dashes.
+        intro_verified = verify_screen(
+            screenshot_path,
+            {"---Intro", "--Intro", "~-Intro"},
+            "Intro Monologue (title)", verbose=args.verbose
+        )
         if not intro_verified:
             print("ERROR: Could not verify we are on the Intro Monologue screen")
             game_proc.kill()
@@ -282,7 +288,7 @@ def main():
             return 1
 
         # Also check for the Continue button text as a secondary confirmation.
-        continue_verified = verify_screen(screenshot_path, "Continue", "Intro Monologue (button)", verbose=args.verbose)
+        continue_verified = verify_screen_single(screenshot_path, "Continue", "Intro Monologue (button)", verbose=args.verbose)
         if not continue_verified:
             print("ERROR: Could not verify 'Continue' button is visible on Intro Monologue screen")
             game_proc.kill()
@@ -334,8 +340,12 @@ def main():
 
         try:
             if take_screenshot(check_screenshot_path, active_window_only=True, verbose=args.verbose):
-                # Check if "---Intro" text is still visible (same search term as above).
-                still_intro = verify_screen(check_screenshot_path, "---Intro", "Intro check", verbose=False)
+                # Check if we are still on the Intro Monologue screen
+                still_intro = verify_screen(
+                    screenshot_path,
+                    {"---Intro", "--Intro", "~-Intro"},
+                    "Intro Monologue (title)", verbose=args.verbose
+                )
                 if not still_intro:
                     if args.verbose:
                         print(f"Intro Monologue screen gone after {waited}s")
@@ -385,16 +395,11 @@ def main():
             # hovered), "Launch" (orange, mouse over the Launch hotspot), or
             # "Main Concourse" (orange, mouse over the Main Concourse hotspot).
             # Check for any of these texts to confirm the Hangar view is loaded.
-            hangar_loaded = verify_screen(hangar_check_path, "Landing Center",
-                                          "Hangar", verbose=args.verbose)
-            if not hangar_loaded:
-                hangar_loaded = verify_screen(hangar_check_path, "Launch",
-                                              "Hangar (Launch caption)",
-                                              verbose=args.verbose)
-            if not hangar_loaded:
-                hangar_loaded = verify_screen(hangar_check_path, "Main Concourse",
-                                              "Hangar (Main Concourse caption)",
-                                              verbose=args.verbose)
+            hangar_loaded = verify_screen(
+                hangar_check_path,
+                {"Landing Center", "Launch", "Main Concourse"},
+                "Hangar", verbose=args.verbose
+            )
             if hangar_loaded:
                 if args.verbose:
                     print(f"Hangar view loaded after {waited}s")
