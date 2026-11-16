@@ -12,7 +12,7 @@ Steps:
 7. Confirm the game exits with return code 0
 
 Usage:
-    python3 doc/campaign_launch.py [options]
+    python3 doc/campaign_launch_kde_wayland.py [options]
 
 Options:
     --target DIR        Path to Assets-Production directory (default: auto-detect)
