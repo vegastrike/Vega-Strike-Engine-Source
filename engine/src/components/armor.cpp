@@ -146,13 +146,10 @@ bool Armor::Upgrade(const std::string upgrade_key) {
     Component::Upgrade(upgrade_key);
 
     // We only support single value armor
-    facets.clear();
     const double armor_single_value = UnitCSVFactory::GetVariable(upgrade_key, "armor", 0.0);
 
-    if(armor_single_value > 0.0) {
-        for (unsigned int i = 0; i < number_of_facets; i++) {
-            facets.push_back(Resource<double>(armor_single_value,0,armor_single_value));
-        }
+    for (Resource<double>& facet :facets) {
+        facet.SetMaxValue(armor_single_value);
     }
 
     return true;
