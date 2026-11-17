@@ -95,7 +95,7 @@ implying that you did.
 17. **Licensing is GPLv3-or-later.** Keep existing file headers intact. Under the AI policy in
     `CONTRIBUTING.rst`, an AI agent is never added to a file's copyright or licence statement — only
     the human submitting the work.
-18. **Do not create .pyc python cache files** if you can avoid it. If you must create .pyc files as part of compilation to check syntax, make sure you delete the .pyc files before you run anything.
+18. **Do not create .pyc python cache files.** When running Python commands (such as syntax checks), always set `PYTHONDONTWRITEBYTECODE=1` to prevent cache file creation. If .pyc files or `__pycache__` directories are accidentally created, delete them immediately.
 
 ## Code layout
 
