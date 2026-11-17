@@ -44,6 +44,9 @@ Resource<double> ComponentsManager::credits = Resource<double>(0.0, 0.0);
 
 static const std::string empty_string;
 
+// Returns a static empty string by default. A bare ComponentsManager will never
+// match the ".milspec" suffix check in UpgradeAlreadyInstalled. Unit overrides
+// this method to return the actual unit key, enabling Milspec ship detection.
 const std::string& ComponentsManager::GetUnitKey() const {
     return empty_string;
 }

@@ -131,7 +131,7 @@ bool Armor::Downgrade() {
     // Component
     Component::Downgrade();
 
-    for(Resource<double>& facet :facets) {
+    for(Resource<double>& facet : facets) {
         facet.SetMaxValue(0);
     }
 
@@ -148,7 +148,7 @@ bool Armor::Upgrade(const std::string upgrade_key) {
     // We only support single value armor
     const double armor_single_value = UnitCSVFactory::GetVariable(upgrade_key, "armor", 0.0);
 
-    for (Resource<double>& facet :facets) {
+    for(Resource<double>& facet : facets) {
         facet.SetMaxValue(armor_single_value);
     }
 
