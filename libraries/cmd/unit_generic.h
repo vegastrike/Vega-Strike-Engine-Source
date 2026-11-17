@@ -921,6 +921,11 @@ public:
         return filename.get();
     }
 
+    // Override ComponentsManager::GetUnitKey() to return the actual unit key
+    const std::string& GetUnitKey() const override {
+        return unit_key;
+    }
+
 private:
     void setUnitKey(const std::string& key) {
         unit_key = key;
@@ -930,10 +935,6 @@ private:
         } else {
             unit_type = Vega_UnitType::unit;
         }
-    }
-
-    const std::string &getUnitKey() const {
-        return unit_key;
     }
 
 public:
