@@ -34,127 +34,594 @@
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
 #include <iostream>
+#include <list>
+#include <memory>
+#include <mutex>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "src/python/config/python_utils.h"
 
 using namespace boost::python;
+namespace fs = boost::filesystem;
 
+struct World {
+    World(std::string msg) : msg(msg) {
+    }
 
-struct World
-{
-    World(std::string msg) : msg(msg) {}
-    void set(std::string msg) { this->msg = msg; }
-    std::string greet() { return msg; }
+    void set(std::string msg) {
+        this->msg = msg;
+    }
+
+    std::string greet() {
+        return msg;
+    }
+
     std::string msg;
 };
 
-BOOST_PYTHON_MODULE(python_sanity)
-{
+BOOST_PYTHON_MODULE(python_sanity) {
     class_<World>("World", init<std::string>())
-        .def("greet", &World::greet)
-        .def("set", &World::set)
-    ;
+            .def("greet", &World::greet)
+            .def("set", &World::set);
 }
 
-const std::string hello_world = "Hello World\n";
+const std::string kHelloWorldPascalCase = "Hello World\n";
+const std::string kHelloWorldLowercase = "hello world";
 
+namespace {
+std::shared_ptr<fs::path> FindTestPath(const fs::path &starting_path, std::string const &relative_path) {
+    boost::system::error_code ec;
+    fs::path dir = fs::canonical(starting_path, ec);
 
-TEST(Python, Sanity) {
-    World world(hello_world);
+    // Fallback if starting_path doesn't exist
+    if (ec) {
+        dir = fs::absolute(starting_path);
+    }
 
-    EXPECT_EQ(world.greet(), hello_world);
+    // Keep moving up until the path becomes empty (past the root)
+    while (!dir.empty()) {
+        fs::path candidate = dir / relative_path;
+
+        if (fs::is_directory(candidate)) {
+            fs::path canonical_candidate = fs::canonical(candidate, ec);
+            if (!ec) {
+                auto result = std::make_shared<fs::path>(std::move(canonical_candidate));
+                std::cout << "Found path: '" << relative_path << "' at '" << result->generic_string() << "'\n";
+                return result;
+            }
+        }
+
+        // Break early if we just checked the root directory, preventing it from turning into ""
+        if (dir == dir.root_path()) {
+            break;
+        }
+
+        dir = dir.parent_path();
+    }
+
+    std::cout << "Did not find path: '" << relative_path << "' starting from '" << starting_path << "'\n";
+    return nullptr;
 }
 
-TEST(Python, Call_Function) {
-    boost::filesystem::path full_path(boost::filesystem::current_path());
-    std::cout << full_path << std::endl;
-
-    bool exists = boost::filesystem::exists("../test_assets/python_tests.py");
-    std::cout << "python_tests.py exists " << exists << std::endl;
-
-    boost::filesystem::current_path(full_path.concat("/../test_assets"));
-    full_path = boost::filesystem::current_path();
-    std::cout << full_path << std::endl;
-
-    exists = boost::filesystem::exists("python_tests.py");
-    std::cout << "python_tests.py exists in current folder " << exists << std::endl;
-
-    PyPreConfig py_pre_config;
-    PyPreConfig_InitPythonConfig(&py_pre_config);
-
-    py_pre_config.coerce_c_locale = 1;
-
-    PyStatus status;
-
-    status = Py_PreInitialize(&py_pre_config);
-    if (PyStatus_Exception(status)) {
-        Py_ExitStatusException(status);
+// Helper to safely extract a C++ string from a UniquePyRef inside tests
+std::string SafeExtractString(const UniquePyRef& py_obj) {
+    if (!py_obj) {
+        ADD_FAILURE() << "SafeExtractString received a null UniquePyRef!";
+        return "";
     }
 
-    const std::string python_path = GetPythonPath();
-    const std::wstring python_path_w(python_path.begin(), python_path.end());
-
-    PyWideStringList python_path_py_wide_string_list{};
-    status = PyWideStringList_Append(&python_path_py_wide_string_list, python_path_w.c_str());
-    if (PyStatus_Exception(status)) {
-        Py_ExitStatusException(status);
+    const char* utf8_str = PyUnicode_AsUTF8(py_obj.get());
+    if (!utf8_str) {
+        // Clear the active Python error if one was set by the failed conversion
+        if (PyErr_Occurred()) {
+            PyErr_Clear();
+        }
+        ADD_FAILURE() << "PyUnicode_AsUTF8 returned nullptr! Python object is not a valid string.";
+        return "";
     }
 
-    PyConfig config;
-    PyConfig_InitPythonConfig(&config);
+    return std::string(utf8_str);
+}
+}
 
-    config.module_search_paths = python_path_py_wide_string_list;
-    config.isolated = 0;
+std::shared_ptr<std::vector<std::shared_ptr<fs::path>>> GetTestPaths() {
+    // Global cache variables with internal linkage
+    static std::shared_ptr<std::vector<std::shared_ptr<fs::path>>> cached_paths = nullptr;
+    static std::once_flag cache_flag;
 
-    status = Py_InitializeFromConfig(&config);
-    if (PyStatus_Exception(status)) {
-        PyConfig_Clear(&config);
-        Py_ExitStatusException(status);
+    // 1. Compute the paths exactly ONCE across the entire application lifetime
+    std::call_once(cache_flag, []() {
+        boost::system::error_code ec;
+        const fs::path start = fs::canonical(fs::current_path(), ec);
+        // Fail early if current_path is invalid
+        if (ec) {
+            return;
+        }
+
+        const auto test_assets = FindTestPath(start, "test_assets");
+        if (!test_assets) return;
+
+        auto data = FindTestPath(start, "Assets-Production");
+        if (!data) {
+            data = test_assets;
+        }
+
+        const auto build = std::make_shared<fs::path>(start.parent_path());
+
+        // Construct the global vector cache
+        cached_paths = std::make_shared<std::vector<std::shared_ptr<fs::path>>>(
+            std::vector<std::shared_ptr<fs::path>>{build, test_assets, data}
+        );
+    });
+
+    // 2. Handle the case where path resolution failed during initialization
+    if (!cached_paths) {
+        return nullptr;
     }
 
-    PyObject* module = PyImport_ImportModule("python_tests");
-    std::cout << "PyImport_ImportModule did not crash\n" << std::flush;
-    if(!module) {
-        std::cout << "PyImport_ImportModule is null\n" << std::flush;
-        PyErr_Print();
-        Py_Finalize();
-        return;
-    } else {
-        std::cout << "PyImport_ImportModule is not null\n" << std::flush;
+    return cached_paths;
+}
+
+class TestEnvironment : public ::testing::Environment {
+public:
+    ~TestEnvironment() override {}
+
+    // Override SetUp to run before any test suites execute
+    void SetUp() override {
+        const auto paths = GetTestPaths();
+        if (paths && paths->size() >= 2) {
+            const fs::path& test_assets = *(paths->at(1)); // 'test_assets'
+
+            boost::system::error_code ec;
+            fs::current_path(test_assets, ec);
+            if (ec) {
+                std::cerr << "CRITICAL: Failed to set global working directory to: "
+                          << test_assets << "\n";
+            } else {
+                std::cout << "Global working directory set to: " << test_assets << "\n";
+            }
+        }
     }
 
-    PyObject* function = PyObject_GetAttrString(module,"append");
-    std::cout << "PyObject_GetAttrString did not crash\n" << std::flush;
-    if(function == nullptr) {
-        std::cout << "PyObject_GetAttrString is null\n" << std::flush;
-        //PyErr_Print();
-        Py_Finalize();
-        return;
-    } else {
-        std::cout << "PyObject_GetAttrString is not null\n" << std::flush;
+    // Override TearDown if you need to clean up global state (optional)
+    void TearDown() override {}
+};
+
+// This static variable registers the environment automatically before main() runs!
+static ::testing::Environment* const g_gtest_env = ::testing::AddGlobalTestEnvironment(new TestEnvironment);
+
+class PythonTests : public ::testing::Test {
+protected:
+    static bool python_was_initialized_;
+
+    static void SetUpTestSuite() {
+        std::cout << "Initializing Python..." << std::endl;
+        InitPython(python_was_initialized_);
     }
 
-    PyObject* args = PyTuple_Pack(2,
-                                  PyUnicode_FromString("Hello "),
-                                  PyUnicode_FromString("World\n"));
-    std::cout << "PyTuple_Pack did not crash\n" << std::flush;
-    if(args == nullptr) {
-        std::cout << "PyTuple_Pack is null\n" << std::flush;
-        PyErr_Print();
-        Py_Finalize();
-        return;
-    } else {
-        std::cout << "PyTuple_Pack is not null\n" << std::flush;
+    static void TearDownTestSuite() {
+        if (!python_was_initialized_) {
+            std::cout << "Tearing down Python..." << std::endl;
+            Py_Finalize();
+        }
+    }
+};
+
+bool PythonTests::python_was_initialized_ = false;
+
+TEST_F(PythonTests, Sanity) {
+    World world(kHelloWorldPascalCase);
+
+    EXPECT_EQ(world.greet(), kHelloWorldPascalCase);
+}
+
+TEST_F(PythonTests, FindTestPath_failure_case) {
+    fs::path const current_dir = fs::canonical(fs::current_path());
+    std::shared_ptr<fs::path> should_be_null{};
+    ASSERT_NO_THROW(should_be_null = FindTestPath(current_dir, "nonexistent"));
+    ASSERT_EQ(should_be_null, nullptr) << "FindTestPath should return nullptr\n";
+}
+
+TEST_F(PythonTests, FindTestPath_success_case) {
+    fs::path const current_dir = fs::canonical(fs::current_path());
+    std::shared_ptr<fs::path> should_not_be_null{};
+    ASSERT_NO_THROW(should_not_be_null = FindTestPath(current_dir, "test_assets"));
+    ASSERT_NE(should_not_be_null, nullptr) << "FindTestPath should not return nullptr\n";
+}
+
+// TEST_F(PythonTests, Call_Function) {
+//     std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+//     ASSERT_NE(search_paths_vec_ptr, nullptr);
+//     const fs::path& assets_path = *search_paths_vec_ptr->at(1);
+//     ASSERT_TRUE(fs::exists(assets_path / "python_tests.py")) << "python_tests.py exists locally";
+//
+//     PyPreConfig py_pre_config;
+//     PyPreConfig_InitPythonConfig(&py_pre_config);
+//     py_pre_config.coerce_c_locale = 1;
+//
+//     PyStatus status = Py_PreInitialize(&py_pre_config);
+//     if (PyStatus_Exception(status) != 0) {
+//         PyErr_Print();
+//         Py_ExitStatusException(status);
+//     }
+//
+//     PyConfig config;
+//     PyConfig_InitPythonConfig(&config);
+//     config.isolated = 0;
+//     config.site_import = 1;
+//
+//     status = Py_InitializeFromConfig(&config);
+//     PyConfig_Clear(&config); // Free configuration memory
+//     if (PyStatus_Exception(status) != 0) {
+//         PyErr_Print();
+//         Py_ExitStatusException(status);
+//     }
+//
+//     // Convert path cleanly
+//     std::wstring const test_assets_str = assets_path.generic_wstring();
+//
+//     // Grab the live sys.path list object
+//     PyObject *sys_path = PySys_GetObject("path");
+//     ASSERT_NE(sys_path, nullptr) << "Failed to access Python sys.path!";
+//
+//     // Create a Python string element matching our path type
+//     PyObject *path_element = PyUnicode_FromWideChar(test_assets_str.c_str(), test_assets_str.length());
+//     ASSERT_NE(path_element, nullptr) << "Failed to allocate Unicode path string.";
+//
+//     // Safely append directly into Python's runtime search paths array
+//     int const append_status = PyList_Append(sys_path, path_element);
+//     Py_DECREF(path_element); // Clean up temporary reference allocation
+//     ASSERT_EQ(append_status, 0) << "Failed to append test directory to sys.path.";
+//
+//     // Test execution (Fail early and loudly if things go missing)
+//     PyObject *module = PyImport_ImportModule("python_tests");
+//     ASSERT_NE(module, nullptr) << "Failed to import python_tests module! Check module paths.";
+//
+//     PyObject *function = PyObject_GetAttrString(module, "append");
+//     ASSERT_NE(function, nullptr) << "Failed to load 'append' attribute from Python script.";
+//
+//     PyObject *args = PyTuple_Pack(2,
+//                                   PyUnicode_FromString("Hello "),
+//                                   PyUnicode_FromString("World\n"));
+//     ASSERT_NE(args, nullptr) << "Failed to create parameter tuple pack.";
+//
+//     PyObject *py_result = PyObject_CallObject(function, args);
+//     ASSERT_NE(py_result, nullptr) << "Python function call returned a null pointer evaluation result.";
+//
+//     std::string const result = PyUnicode_AsUTF8(py_result);
+//
+//     EXPECT_EQ(result, kHelloWorldPascalCase);
+// }
+
+TEST_F(PythonTests, InitPython) {
+    bool python_was_initialized{};
+    // This function will be called even though Python was already init'ed at the global level. But that's OK,
+    // because InitPython checks to see if Python was already init'ed before initializing it again.
+    InitPython(python_was_initialized);
+}
+
+TEST_F(PythonTests, GetClassFromPython) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::shared_ptr<fs::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    ASSERT_NE(build_path_ptr, nullptr) << "Test build path should not be null!";
+    std::shared_ptr<fs::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    ASSERT_NE(test_assets_path_ptr, nullptr) << "test_assets path should not be null!";
+    std::shared_ptr<fs::path> data_path_ptr = search_paths_vec_ptr->at(2);
+    ASSERT_NE(data_path_ptr, nullptr) << "data path should not be null!";
+
+    bool const exists = fs::exists("python_tests.py");
+    ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
+
+    UniquePyRef py_result = GetClassFromPython(build_path_ptr->generic_string()
+                                                  , test_assets_path_ptr->generic_wstring()
+                                                  , data_path_ptr->generic_string(), "python_tests", "append_no_args");
+    ASSERT_NE(py_result, nullptr) << "Python result is null";
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST_F(PythonTests, GetClassFromPythonPathRefs) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::shared_ptr<fs::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    ASSERT_NE(build_path_ptr, nullptr) << "Test build path should not be null!";
+    std::shared_ptr<fs::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    ASSERT_NE(test_assets_path_ptr, nullptr) << "test_assets path should not be null!";
+    std::shared_ptr<fs::path> data_path_ptr = search_paths_vec_ptr->at(2);
+    ASSERT_NE(data_path_ptr, nullptr) << "data path should not be null!";
+
+    bool const exists = fs::exists("python_tests.py");
+    ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
+
+    UniquePyRef py_result = GetClassFromPython(build_path_ptr->generic_string()
+                                                  , test_assets_path_ptr->generic_wstring()
+                                                  , data_path_ptr->generic_string(), "python_tests", "append_no_args");
+    ASSERT_NE(py_result, nullptr) << "Python result is null";
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST_F(PythonTests, GetMethodFromPython_with_list_of_boost_filesystem_paths) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::shared_ptr<fs::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    ASSERT_NE(build_path_ptr, nullptr) << "Test build path should not be null!";
+    std::shared_ptr<fs::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    ASSERT_NE(test_assets_path_ptr, nullptr) << "test_assets path should not be null!";
+    std::shared_ptr<fs::path> data_path_ptr = search_paths_vec_ptr->at(2);
+    ASSERT_NE(data_path_ptr, nullptr) << "data path should not be null!";
+
+    bool const exists = fs::exists("python_tests.py");
+    ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
+
+    std::list<fs::path> search_path_list{*test_assets_path_ptr, *build_path_ptr, *data_path_ptr};
+
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    UniquePyRef py_result = CallPythonFnNullArgs(std::move(py_method));
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST_F(PythonTests, GetMethodFromPython_with_list_of_strings) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<std::string> search_path_strings{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_strings.emplace_back(search_path_ptr->generic_string());
     }
 
-    PyObject* pyResult = PyObject_CallObject(function, args);
-    std::cout << "PyObject_CallObject\n";
-    std::string result = PyUnicode_AsUTF8(pyResult);
-    std::cout << result << std::endl << std::flush;
-    Py_Finalize();
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_strings);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
 
-    EXPECT_EQ(result, hello_world);
+    UniquePyRef py_result = CallPythonFnNullArgs(std::move(py_method));
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
 
-    // Uncomment to see prints
-    //EXPECT_FALSE(true);
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST_F(PythonTests, GetMethodFromPython_with_list_of_wstrings) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<std::wstring> search_path_strings{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_strings.emplace_back(search_path_ptr->generic_wstring());
+    }
+
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_strings);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    UniquePyRef py_result = CallPythonFnNullArgs(std::move(py_method));
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST_F(PythonTests, GetMethodFromPython_with_individual_paths) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::shared_ptr<fs::path> build_path_ptr = search_paths_vec_ptr->at(0);
+    ASSERT_NE(build_path_ptr, nullptr) << "Test build path should not be null!";
+    std::shared_ptr<fs::path> test_assets_path_ptr = search_paths_vec_ptr->at(1);
+    ASSERT_NE(test_assets_path_ptr, nullptr) << "test_assets path should not be null!";
+    std::shared_ptr<fs::path> data_path_ptr = search_paths_vec_ptr->at(2);
+    ASSERT_NE(data_path_ptr, nullptr) << "data path should not be null!";
+
+    bool const exists = fs::exists("python_tests.py");
+    ASSERT_TRUE(exists) << "python_tests.py exists locally: " << exists << '\n';
+
+    UniquePyRef py_method = GetMethodFromPython(build_path_ptr->generic_string(), test_assets_path_ptr->generic_wstring()
+                                              , data_path_ptr->generic_string(), "python_tests", "append_no_args");
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    UniquePyRef py_result = CallPythonFnNullArgs(std::move(py_method));
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST_F(PythonTests, PrepareStringArgsForPython) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<fs::path> search_path_list{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_list.emplace_back(*search_path_ptr);
+    }
+
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    const std::list<std::string> arg_string_list{"Hello", " World\n"};
+    UniquePyRef py_args = PrepareStringArgsForPython(arg_string_list);
+    ASSERT_NE(py_args, nullptr) << "PrepareStringArgsForPython returned a null pointer" << '\n';
+
+    UniquePyRef py_result = CallPythonFnPyArgs(std::move(py_method), std::move(py_args));
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST_F(PythonTests, PrepareWStringArgsForPython) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<fs::path> search_path_list{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_list.emplace_back(*search_path_ptr);
+    }
+
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer evaluation result." << '\n';
+
+    const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
+    UniquePyRef py_args = PrepareWStringArgsForPython(arg_wstring_list);
+    ASSERT_NE(py_args, nullptr) << "PrepareWStringArgsForPython returned a null pointer" << '\n';
+
+    UniquePyRef py_result = CallPythonFnPyArgs(std::move(py_method), std::move(py_args));
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST_F(PythonTests, CallPythonFnNullArgs_with_module_name_fn_name_and_search_paths) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<fs::path> search_path_list{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_list.emplace_back(*search_path_ptr);
+    }
+
+    UniquePyRef py_result = CallPythonFnNullArgs("python_tests", "append_no_args", search_path_list);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST_F(PythonTests, CallPythonFnNullArgs_with_fn_pointer) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<fs::path> search_path_list{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_list.emplace_back(*search_path_ptr);
+    }
+
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append_no_args", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
+
+    UniquePyRef py_result = CallPythonFnNullArgs(std::move(py_method));
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnNullArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldLowercase);
+}
+
+TEST_F(PythonTests, CallPythonFnStringArgs_with_module_name_fn_name_and_search_paths) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<fs::path> search_path_list{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_list.emplace_back(*search_path_ptr);
+    }
+
+    const std::list<std::string> arg_string_list{"Hello", " World\n"};
+    UniquePyRef py_result = CallPythonFnStringArgs("python_tests", "append", search_path_list, arg_string_list);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnStringArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST_F(PythonTests, CallPythonFnStringArgs_with_fn_pointer) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<fs::path> search_path_list{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_list.emplace_back(*search_path_ptr);
+    }
+
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
+
+    const std::list<std::string> arg_string_list{"Hello", " World\n"};
+    UniquePyRef py_result = CallPythonFnStringArgs(std::move(py_method), arg_string_list);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnStringArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST_F(PythonTests, CallPythonFnWstringArgs_with_module_name_fn_name_and_search_paths) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<fs::path> search_path_list{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_list.emplace_back(*search_path_ptr);
+    }
+
+    const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
+    UniquePyRef py_result = CallPythonFnWStringArgs("python_tests", "append", search_path_list, arg_wstring_list);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnWStringArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST_F(PythonTests, CallPythonFnWstringArgs_with_fn_pointer) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<fs::path> search_path_list{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_list.emplace_back(*search_path_ptr);
+    }
+
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
+
+    const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
+    UniquePyRef py_result = CallPythonFnWStringArgs(std::move(py_method), arg_wstring_list);
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnWStringArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldPascalCase);
+}
+
+TEST_F(PythonTests, CallPythonFnPyArgs) {
+    std::shared_ptr<std::vector<std::shared_ptr<fs::path> > > search_paths_vec_ptr = GetTestPaths();
+    ASSERT_NE(search_paths_vec_ptr, nullptr) << "Test search paths should not be null!";
+    ASSERT_GE(search_paths_vec_ptr->size(), 3) << "At least 3 search paths should be added to the list!";
+    std::list<fs::path> search_path_list{};
+    for (auto search_path_ptr : *search_paths_vec_ptr) {
+        ASSERT_NE(search_path_ptr, nullptr) << "search_path should not be null!";
+        search_path_list.emplace_back(*search_path_ptr);
+    }
+
+    UniquePyRef py_method = GetMethodFromPython("python_tests", "append", search_path_list);
+    ASSERT_NE(py_method, nullptr) << "GetMethodFromPython returned a null pointer" << '\n';
+
+    const std::list<std::wstring> arg_wstring_list{L"Hello", L" World\n"};
+    UniquePyRef py_args = PrepareWStringArgsForPython(arg_wstring_list);
+    ASSERT_NE(py_args, nullptr) << "PrepareWStringArgsForPython returned a null pointer" << '\n';
+
+    UniquePyRef py_result = CallPythonFnPyArgs(std::move(py_method), std::move(py_args));
+    ASSERT_NE(py_result, nullptr) << "CallPythonFnPyArgs returned a null pointer" << '\n';
+
+    std::string const result = SafeExtractString(py_result);
+    EXPECT_EQ(result, kHelloWorldPascalCase);
 }

@@ -1020,7 +1020,7 @@ bool BaseComputer::configureUpgradeCommitControls(const Cargo &item, Transaction
                         unhidden = false;
                     }
                 }
-            } 
+            }
         } else if(item.IsWeapon()) {
             if(canReload(m_player.GetUnit(), item.GetName())) {
                 if (commitFixButton) {
@@ -1299,7 +1299,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
                         descString += getReloadDescription(m_player.GetUnit(), item.GetPrice(), item.GetName());
                     }
                 }
-                
+
                 //********************************************************************************************
                 if (item.GetDescription() == "" || item.GetDescription()[0] != '#') {
                     std::map<std::string, std::string> ship_map = m_player.GetUnit()->UnitToMap();
@@ -1321,7 +1321,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList *tlist)
     string::size_type pic = descString.find('@');
     StaticImageDisplay
             *desc_image = vega_dynamic_cast_ptr<StaticImageDisplay>(window()->findControlById("DescriptionImage"), true);
-    
+
     if (pic != string::npos) {
         std::string texture = descString.substr(pic + 1);
         descString = descString.substr(0, pic);
@@ -2006,7 +2006,7 @@ void BaseComputer::loadLoadSaveControls() {
         std::multimap<std::time_t, std::string, std::greater<std::time_t>> save_files{};
         for (boost::filesystem::directory_entry& entry : boost::filesystem::directory_iterator(save_dir_path)) {
             const boost::filesystem::path& filename = entry.path().filename();
-            const std::string filename_string = filename.string();
+            const std::string filename_string = filename.generic_string();
             if (is_regular_file(entry.status())) {
                 const boost::filesystem::path& full_file_path{boost::filesystem::absolute(filename, save_dir_path)};
                 std::time_t last_write_time = boost::filesystem::last_write_time(full_file_path);
@@ -2647,14 +2647,14 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
         finish();
         return;
     }
-    
+
     int quantity = 1; // By default, we buy one unit
     if(m_newPart->mounts[0].IsMissileMount()) {
         int mount_size = playerUnit->mounts[m_selectedMount].size;
         const Mount mount = m_newPart->mounts[0];
         const WeaponInfo* info = mount.type;
         int missile_size = as_integer(info->size);
-        
+
         // This is not as clear as it looks.
         // Light missile size is 64. Medium is 128. Light and medium is 192.
         // This hack produces inconsistent but plausible results.
@@ -2665,7 +2665,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
 
     if(playerUnit->BuyUpgrade(baseUnit, &m_part, quantity)) {
         double percent = 0;
-        
+
         //Upgrade the ship.
         playerUnit->Upgrade(m_newPart, m_selectedMount, m_selectedTurret, 0, true, percent);
         const bool allow_special_with_weapons = configuration().physics.allow_special_and_normal_gun_combo;
@@ -2675,7 +2675,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
         }
     }
     updateUI();
-    
+
     finish();
 }
 
@@ -2950,10 +2950,10 @@ bool BaseComputer::reloadUpgrade(const EventCommandId &command, Control *control
         return false;
     }
 
-    
+
     // Mount name is the name of the weapon as a unit in units.json
     const Unit *weapon = getUnitFromUpgradeName(item->GetName(), FactionUtil::GetUpgradeFaction());
-    
+
     // Something went wrong
     if(!weapon) {
         return false;
@@ -2979,7 +2979,7 @@ bool BaseComputer::reloadUpgrade(const EventCommandId &command, Control *control
             continue;
         }
 
-        // Full reload price is 5% of gun. 
+        // Full reload price is 5% of gun.
         // TODO: make it configurable
         double reload_price = static_cast<double>(ammo_to_reload)/max_ammo * 0.05 * item->GetPrice();
         if(reload_price < playerUnit->credits) {
@@ -3416,19 +3416,29 @@ bool sellShip(Unit *baseUnit, Unit *playerUnit, Cargo* item, BaseComputer *bcomp
     const double purchase_price = ship.cargo.GetPrice();
     const double shipping_price = ship.transfer_price;
 
-    // Transfer the ship to the dealer
+    // Remove the ship from the player's fleet and transfer ownership to the base.
+    // The ship remains in the star system with the base's faction, but its AI is
+    // disabled so it does not participate in combat or navigation.
+    Unit *sold_unit = vega_dynamic_cast_ptr<Unit>(ship.unit);
+    if (!sold_unit) {
+        VS_LOG(error, "Error in sellShip: Ship to be sold is null!");
+        return false;
+    }
+    Cargo ship_as_cargo = PlayerShip::RemoveShip(item->index);
+    sold_unit->TransferOwnership(baseUnit);
+
+    // Transfer the ship to the dealer (credits modified only after successful validation)
     ComponentsManager::credits -= shipping_price; //transportation cost
 
     // Sell the ship
     const double ship_sellback_factor = configuration().economics.ship_sellback_price_dbl;
     ComponentsManager::credits += ship_sellback_factor * purchase_price; //sellback cost
 
-    // Remove the ship and add to base
-    // This will strip the ship of any modifications including damage and upgrades.
-    // It will revert to blank or template, depending on the cargo name.
-    Cargo ship_as_cargo = PlayerShip::RemoveShip(item->index);
     ship_as_cargo.index = 0; // So it won't be considered a player ship anymore.
     baseUnit->cargo_hold.AddCargo(baseUnit, ship_as_cargo);
+    // Remove the sold ship from collision maps: it's conceptually stored in the base's cargo
+    // hold and should not collide with other objects in the star system.
+    sold_unit->RemoveFromSystem();
 
     if (bcomputer) {
         bcomputer->loadShipDealerControls();
@@ -3441,7 +3451,7 @@ bool BaseComputer::sellShip(const EventCommandId &command, Control *control) {
     Unit *player_unit = m_player.GetUnit();
     Unit *base_unit = m_base.GetUnit();
     Cargo *item = selectedItem();
-    
+
     // Some sanity checks
     if (!(player_unit && base_unit && item && player_unit->IsPlayerShip())) {
         return true;

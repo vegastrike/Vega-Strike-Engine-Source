@@ -586,6 +586,18 @@ public:
     virtual void ActivateCloak(bool cloak);
 //deletes
     void Kill(bool eraseFromSave = true, bool quitting = false);
+// Releases the unit's references and has it deleted once nothing refers to it;
+// Kill does this too, but call it directly for a unit leaving the game without dying
+    void ScheduleDeletion();
+
+// Clear autonomous behaviour: AI state, flight-group, sounds, and combat mode.
+// Called when a unit is permanently removed (ucref==0) or transferred to a new owner.
+    void ClearAutonomousBehavior();
+
+// Transfers ownership of the unit to another unit (eg when selling a ship to a dealer).
+// The unit remains alive in the star system with the new owner's faction, but its AI is
+// disabled so it does not participate in combat or physics. Sub-units are preserved.
+    void TransferOwnership(Unit *new_owner);
 
 //Is dead yet?
     inline bool Killed() const {
