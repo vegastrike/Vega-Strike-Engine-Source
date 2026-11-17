@@ -466,19 +466,19 @@ static const ComponentLadders kComponentLadders[] = {
 static double ComponentFigure(const Component *component) {
     switch (component->type) {
         case ComponentType::Reactor:
-            return vega_dynamic_cast_ptr<const Reactor>(component)->MaxCapacity();
+            return vega_dynamic_const_cast_ptr<const Reactor>(component)->MaxCapacity();
         case ComponentType::Shield:
-            return vega_dynamic_cast_ptr<const Shield>(component)->MaxRegeneration();
+            return vega_dynamic_const_cast_ptr<const Shield>(component)->MaxRegeneration();
         case ComponentType::Armor:
-            return vega_dynamic_cast_ptr<const DamageableLayer>(component)->AverageMaxLayerValue();
+            return vega_dynamic_const_cast_ptr<const DamageableLayer>(component)->AverageMaxLayerValue();
         case ComponentType::Capacitor:
-            return vega_dynamic_cast_ptr<const EnergyContainer>(component)->MaxLevel();
+            return vega_dynamic_const_cast_ptr<const EnergyContainer>(component)->MaxLevel();
         case ComponentType::Radar:
-            return vega_dynamic_cast_ptr<const CRadar>(component)->GetMaxRange();
+            return vega_dynamic_const_cast_ptr<const CRadar>(component)->GetMaxRange();
         case ComponentType::ECM:
-            return vega_dynamic_cast_ptr<const ECM>(component)->Get();
+            return vega_dynamic_const_cast_ptr<const ECM>(component)->Get();
         case ComponentType::RepairBot:
-            return vega_dynamic_cast_ptr<const RepairBot>(component)->Get();
+            return vega_dynamic_const_cast_ptr<const RepairBot>(component)->Get();
         case ComponentType::JumpDrive:
             // Presence is the figure: the shops sell one jump drive.
             return 1.0;
@@ -504,7 +504,7 @@ static bool LadderApplies(const Component *component, const ComponentLadder &lad
         return true;
     }
 
-    const int facets = vega_dynamic_cast_ptr<const DamageableLayer>(component)->NumberOfFacets();
+    const int facets = vega_dynamic_const_cast_ptr<const DamageableLayer>(component)->NumberOfFacets();
     const std::string prefix = ladder.prefix;
     return facets <= 2 ? prefix == "dualshield" : prefix == "quadshield";
 }
