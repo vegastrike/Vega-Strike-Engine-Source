@@ -70,7 +70,7 @@ The script waits for the Hangar view to load by repeatedly taking screenshots an
 
 Once the Hangar is loaded, the Launch hotspot is found using a three-tier strategy:
 
-1. **Pixel-based search** (`find_hotspot_via_pixel_search`) — hotspots are marked by bright blue dots on screen. The search uses a hint position from the per-base-type geometry table (for "ocean" type, the Launch hotspot's expected window position) to narrow the search region to ±25% around the hint within the letterboxed area. This avoids scanning the splash-screen blue bars. The caption text "Launch" is verified via OCR in the bottom caption area. Tesseract may misread "Launch" as "Paunch", so both are tried.
+1. **Pixel-based search** (`find_hotspot_via_pixel_search`) — hotspots are marked by blue-purple starburst shapes with a bright white/gray center. The detector collects both blue-dominant ring pixels (where blue > red and blue > green) and bright center pixels (where all RGB channels are high). A hint position from the per-base-type geometry table (for "ocean" type, the Launch hotspot's expected window position) narrows the search region to ±25% around the hint within the letterboxed area. This avoids scanning the splash-screen blue bars. The caption text "Launch" is verified via OCR in the bottom caption area. Tesseract may misread "Launch" as "Paunch", so both are tried.
 
 2. **OCR fallback** — if pixel search fails, the script tries `find_text_in_region_via_ocr()` for "Launch" (and "Paunch") across the full screen.
 
@@ -128,7 +128,7 @@ All input is handled by `dotool` (mouse movement and clicking) and `kdotool` (wi
 
 1. **OCR is the primary button-finding method** — Tesseract reliably detects button labels ("Campaign", "Continue", "Quit") in the letterboxed menu area. Calculated design coordinates serve as a fallback.
 
-2. **Pixel-based hotspot detection** — the blue dot indicator on base hotspots is more reliable than OCR for finding the Launch hotspot. A hint position from the per-base-type geometry table narrows the search region.
+2. **Pixel-based hotspot detection** — hotspot markers are blue-purple starburst shapes with a bright white/gray center. The detector collects both blue-dominant ring pixels (where blue > red and blue > green) and bright center pixels (where all RGB channels ≥ 150). This is more reliable than OCR for finding the Launch hotspot. A hint position from the per-base-type geometry table narrows the search region.
 
 3. **Tesseract misreads "Launch" as "Paunch"** — the OCR fallback tries both spellings.
 
