@@ -1202,22 +1202,38 @@ def get_hotspot_hint_position(
     return (lb_x + lb_w * cx_pct / 100, lb_y + lb_h * cy_pct / 100)
 
 
-def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 70, red_max: int = 50, green_max: int = 50) -> bool:
+def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 80) -> bool:
     """
-    Check whether a pixel is a bright blue color (hotspot indicator).
+    Check whether a pixel is a blue-dominant color (hotspot indicator).
 
-    Hotspot markers are bright blue dots. The blue channel dominates,
-    while red and green are relatively low.
+    Hotspot markers are blue-purple starburst shapes with a bright center.
+    The blue channel dominates the color, but red and green may be present
+    in the purple-tinged outer ring.  This test catches the full range of
+    blue-to-purple tones in the starburst glow.
 
     :param r: Red channel value (0-255)
     :param g: Green channel value (0-255)
     :param b: Blue channel value (0-255)
-    :param blue_threshold: Minimum blue channel value to consider the pixel blue
-    :param red_max: Maximum red channel value for a blue pixel
-    :param green_max: Maximum green channel value for a blue pixel
-    :return: True if the pixel is bright blue
+    :param blue_threshold: Minimum blue channel value for a hotspot pixel
+    :return: True if the pixel is blue-dominant
     """
-    return b >= blue_threshold and r <= red_max and g <= green_max
+    return b > r and b > g and b >= blue_threshold
+
+
+def _is_hotspot_center_pixel(r: int, g: int, b: int, brightness_threshold: int = 150) -> bool:
+    """
+    Check whether a pixel is a bright hotspot center.
+
+    The center of the hotspot marker is a small white/gray circle surrounded
+    by the blue-purple ring.  All three channels are high.
+
+    :param r: Red channel value (0-255)
+    :param g: Green channel value (0-255)
+    :param b: Blue channel value (0-255)
+    :param brightness_threshold: Minimum value for each channel
+    :return: True if the pixel is a bright center pixel
+    """
+    return r >= brightness_threshold and g >= brightness_threshold and b >= brightness_threshold
 
 
 def _cluster_blue_pixels(pixels_list: list[tuple[int, int]], cluster_distance: int = 30) -> list[list[tuple[int, int]]]:
@@ -1674,26 +1690,29 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     if verbose:
         print(f"Searching for blue hotspot pixels in region: ({crop_x1}, {crop_y1}) to ({crop_x2}, {crop_y2})")
 
-    # Find all bright blue pixels in the search region
-    blue_pixels: list[tuple[int, int]] = []
+    # Find all hotspot indicator pixels in the search region.
+    # Hotspot markers are blue-purple starbursts with a bright white/gray center.
+    # We collect both the blue-dominant ring pixels and the bright center pixels
+    # so the clustering algorithm captures the full marker shape.
+    hotspot_pixels: list[tuple[int, int]] = []
     for y in range(crop_y1, crop_y2):
         for x in range(crop_x1, crop_x2):
             pixel = pixels[x, y]
             if len(pixel) >= 3:
                 r, g, b = pixel[0], pixel[1], pixel[2]
-                if _is_bright_blue_pixel(r, g, b):
-                    blue_pixels.append((x, y))
+                if _is_bright_blue_pixel(r, g, b) or _is_hotspot_center_pixel(r, g, b):
+                    hotspot_pixels.append((x, y))
 
-    if not blue_pixels:
+    if not hotspot_pixels:
         if verbose:
-            print("No bright blue pixels found in search region")
+            print("No hotspot indicator pixels found in search region")
         return None
 
     if verbose:
-        print(f"Found {len(blue_pixels)} bright blue pixels")
+        print(f"Found {len(hotspot_pixels)} hotspot indicator pixels")
 
-    # Cluster blue pixels by proximity
-    clusters = _cluster_blue_pixels(blue_pixels)
+    # Cluster hotspot pixels by proximity
+    clusters = _cluster_blue_pixels(hotspot_pixels)
     if verbose:
         print(f"Found {len(clusters)} blue pixel cluster(s)")
         for i, cluster in enumerate(clusters):
