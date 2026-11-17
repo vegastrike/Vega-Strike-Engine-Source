@@ -105,8 +105,8 @@ public:
     void initializeQVector(Object object, string key_prefix, QVector &vector,
             double multiplier = 1.0);
     void initializeMaterial(Object object, GFXMaterial &material);
-    void initializeAlpha(Object object, BLENDFUNC blend_source,
-            BLENDFUNC blend_destination);
+    void initializeAlpha(Object object, BLENDFUNC &blend_source,
+            BLENDFUNC &blend_destination);
     GFXColor initializeColor(Object object);
 };
 

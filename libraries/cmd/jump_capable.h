@@ -47,7 +47,7 @@ public:
     bool AutoPilotToErrorMessage(const Unit *un, bool automaticenergyrealloc,
             std::string &failuremessage, int recursive_level = 2);
     float CalculateNearestWarpUnit(float minmultiplier, Unit **nearest_unit,
-            bool count_negative_warp_units) const;
+            bool count_negative_warp_units, double *nearest_distance = nullptr) const;
     float CourseDeviation(const Vector &OriginalCourse, const Vector &FinalCourse) const;
     void DeactivateJumpDrive();
     const std::vector<std::string> &GetDestinations() const;

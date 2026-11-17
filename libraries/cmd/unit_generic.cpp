@@ -478,7 +478,7 @@ void Unit::Init(const char *filename,
         unit_key = filename;
         std::cout << "Reverted unit_key to " << filename;
     }
-    
+
 
     if (unit_key.empty()) {
         // This is actually used for upgrade checks.
@@ -540,7 +540,7 @@ void Unit::Derelict() {
     fuel.Downgrade();
     energy.Downgrade();
     ftl_energy.Downgrade();
-    
+
     afterburner.Downgrade();
     afterburner_upgrade.Downgrade();
     armor.Downgrade();
@@ -1326,13 +1326,6 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 }
 
 void Unit::Kill(bool erasefromsave, bool quitting) {
-    if (this->colTrees) {
-        this->colTrees->Dec();
-    }           //might delete
-    this->colTrees = nullptr;
-    killSounds();
-    ClearMounts();
-
     if (docked & (DOCKING_UNITS)) {
         const float survival = configuration().physics.survival_chance_on_base_death_flt;
         const float player_survival = configuration().physics.player_survival_chance_on_base_death_flt;
@@ -1356,6 +1349,17 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
             dockedun.pop_back();
         }
     }
+    ScheduleDeletion();
+}
+
+void Unit::ScheduleDeletion() {
+    if (this->colTrees) {
+        this->colTrees->Dec();
+    }           //might delete
+    this->colTrees = nullptr;
+    killSounds();
+    ClearMounts();
+
     //eradicate everything. naturally (see previous line) we won't eradicate beams eradicated above
     if (!isSubUnit()) {
         RemoveFromSystem();
@@ -1376,7 +1380,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     killed = true;
     Unit *un;
     for (un_iter iter = getSubUnits(); (un = *iter); ++iter) {
-        un->Kill();
+        un->ScheduleDeletion();
     }
 
     //if (getUnitType() != Vega_UnitType::missile) {
@@ -1387,11 +1391,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
         VS_LOG(trace, (boost::format("UNIT DELETION QUEUED: %1$s %2$s (file %3$s, addr 0x%4$08x)")
                 % name.get().c_str() % fullname.c_str() % filename.get().c_str() % this));
         unit_delete_queue.push_back(this);
-        if (flightgroup) {
-            if (flightgroup->leader.GetUnit() == this) {
-                flightgroup->leader.SetUnit(nullptr);
-            }
-        }
+        ClearAutonomousBehavior();
 
         if (_Universe && _Universe->AccessCockpit() && _Universe->AccessCockpit()->GetParent() && _Universe->AccessCockpit()->GetParent()->Target() == this) {
             VS_LOG_AND_FLUSH(info, "Killing player's target");
@@ -1402,6 +1402,48 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
 //        VS_LOG(trace, (boost::format("%s 0x%x - %d") % name.get().c_str() % this % Unit_delete_queue.size()));
 //#endif
     }
+}
+
+void Unit::ClearAutonomousBehavior() {
+    // Clear flight-group association
+    if (flightgroup) {
+        if (flightgroup->leader.GetUnit() == this) {
+            flightgroup->leader.SetUnit(nullptr);
+        }
+        flightgroup = nullptr;
+        flightgroup_subnumber = 0;
+    }
+
+    // Stop any playing sounds (engine, etc.)
+    killSounds();
+
+    // Clear combat mode
+    computer.combat_mode = false;
+}
+
+void Unit::TransferOwnership(Unit *new_owner) {
+    if (!new_owner) {
+        return;
+    }
+
+    // Change faction to the new owner's faction (propagates to sub-units)
+    SetFaction(new_owner->faction);
+
+    // Set the new owner so the unit won't collide with it
+    SetRecursiveOwner(new_owner);
+
+    // Clear AI state so the sold ship doesn't participate in combat or navigation
+    computer.target = nullptr;
+    computer.threat = nullptr;
+    computer.velocity_reference = nullptr;
+    computer.force_velocity_ref = true;
+    if (aistate) {
+        aistate->ClearMessages();
+        aistate->Destroy();
+    }
+    aistate = nullptr;
+
+    ClearAutonomousBehavior();
 }
 
 void Unit::UnRef() {
@@ -2089,6 +2131,30 @@ bool Unit::isDocked(const Unit *d) const {
 
 extern vector<int> switchunit;
 
+//Put a ship that is leaving a docking port back where that port is now. While docked the
+//docked-to unit carries the ship along with its own movement, but it can only do that from
+//frame to frame: a correction to the docked-to unit's position, or simply a long stretch
+//docked, can leave the ship sitting at a stale offset - and then it launches from there.
+static void LaunchFromDockingPort(Unit *ship, Unit *base, unsigned int port) {
+    //Sit at the distance the body counts as dockable at, so leaving it puts us where we could
+    //dock with it again - and never inside its hull. Docking measures a planet to its surface, so
+    //a planet's radius goes back on to get the distance from its centre.
+    const double dock_distance = DockingDistance(base) + (base->isPlanet() ? base->rSize() : 0.0);
+    const double launch_distance =
+            std::max(dock_distance, static_cast<double>(base->rSize() + ship->rSize()));
+    QVector outward = ship->LocalPosition() - base->LocalPosition();
+    if (outward.MagnitudeSquared() < 1.0f && port < base->DockingPortLocations().size()) {
+        //Docked dead centre - a planet can be docked to anywhere on its surface - so fall
+        //back to the direction of the port the ship was occupying.
+        outward = base->DockingPortLocations()[port].GetPosition().Cast();
+    }
+    if (outward.MagnitudeSquared() < 1.0f) {
+        outward = QVector(0, 1, 0);
+    }
+    outward.Normalize();
+    ship->SetCurPosition(base->LocalPosition() + (outward * launch_distance));
+}
+
 bool Unit::UnDock(Unit *utdw) {
     unsigned int i = 0;
     if (this->name == "return_to_cockpit") {
@@ -2101,6 +2167,7 @@ bool Unit::UnDock(Unit *utdw) {
     VS_LOG(trace, "Asking to undock");
     for (i = 0; i < utdw->pImage->dockedunits.size(); ++i) {
         if (utdw->pImage->dockedunits[i]->uc.GetUnit() == this) {
+            LaunchFromDockingPort(this, utdw, utdw->pImage->dockedunits[i]->whichdock);
             utdw->FreeDockingPort(i);
             i--;
             SetVisible(true);
@@ -2131,7 +2198,7 @@ bool Unit::UnDock(Unit *utdw) {
                     }
                 }
             }
-           
+
             // Send notification that a ship has undocked from a station
             _Universe->AccessCockpit()->OnDockEnd(utdw, this);
 

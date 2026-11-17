@@ -186,6 +186,7 @@ class AutoLongHaul : public ChangeHeading {
     void MakeLinearVelocityOrder();
     bool InsideLandingPort(const Unit *obstacle) const;
     QVector NewDestination(const QVector &curnewdestination, double magnitude);
+    float TurnSpeedCap(const QVector &aim);
 public:
     AutoLongHaul(bool fini = false, int accuracy = 1);
     virtual void Execute();

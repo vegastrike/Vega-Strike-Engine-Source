@@ -38,7 +38,7 @@
 set -e
 
 echo "------------------------------------------"
-echo "--- bootstrap-on-linux.sh | 2026-10-01 ---"
+echo "--- bootstrap-on-linux.sh | 2026-10-25 ---"
 echo "------------------------------------------"
 
 UPDATE_ALL_SYSTEM_PACKAGES="$1"
@@ -373,6 +373,11 @@ function bootstrapOnOpenSuseLeap() {
         Mesa-devel \
         libtool \
         libltdl7
+
+        # The Python site-packages directories do not get created automatically on openSUSE. Create them manually.
+        pythonVersion="3.13"
+        mkdir -p /usr/local/lib/python${pythonVersion}/site-packages
+        mkdir -p /usr/lib/python${pythonVersion}/site-packages
       ;;
     *)
       echo "Sorry, this version of openSUSE Leap is unsupported"
@@ -446,6 +451,10 @@ function bootstrapOnFedora() {
       SDL3-devel \
       SDL3_image-devel \
       libtool-ltdl-devel
+
+      # The Python site-packages directory doesn't get created automatically on modern Fedora. Create it manually.
+      pythonVersion="3.14"
+      mkdir -p /usr/local/lib/python${pythonVersion}/site-packages
   else
     echo "Sorry, Fedora ${LINUX_VERSION_ID} is no longer supported"
     exit 2
@@ -515,6 +524,10 @@ function bootstrapOnRedHat() {
         fribidi-devel \
         mesa-libGLU-devel \
         libtool-ltdl-devel
+
+        # The Python site-packages directory doesn't get created automatically. Create it manually.
+        pythonVersion="3.12"
+        mkdir -p /usr/local/lib/python${pythonVersion}/site-packages
       ;;
     *)
       echo "Sorry, this version of Red Hat is unsupported"
@@ -586,6 +599,10 @@ function bootstrapOnRockyLinux() {
         fribidi-devel \
         mesa-libGLU-devel \
         libtool-ltdl-devel
+
+        # The Python site-packages directory doesn't get created automatically. Create it manually.
+        pythonVersion="3.12"
+        mkdir -p /usr/local/lib/python${pythonVersion}/site-packages
       ;;
     *)
       echo "Sorry, this version of Rocky Linux is unsupported"

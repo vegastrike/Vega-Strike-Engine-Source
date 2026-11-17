@@ -75,6 +75,7 @@ void InitGui(SDL_Window *window, const SDL_GLContext *context, const float fontS
     io.Fonts->Clear();
     ImFontConfig cfg;
     cfg.SizePixels = fontSize;
+    cfg.Flags |= ImFontFlags_NoLoadError;   // an unreadable file returns nullptr instead of asserting
     // Load the configured .ttf font file if provided; otherwise use the embedded
     // Roboto TrueType. With the synced OpenGL3 backend the atlas is dynamic: each
     // glyph size is baked crisp on demand.
@@ -114,6 +115,7 @@ void ImGui_ApplyPendingFontSize() {
         io.Fonts->Clear();
         ImFontConfig cfg;
         cfg.SizePixels = ImGui::GetStyle().FontSizeBase;
+        cfg.Flags |= ImFontFlags_NoLoadError;   // an unreadable file returns nullptr instead of asserting
         ImFont *f = (!s_pending_font_file.empty())
                 ? io.Fonts->AddFontFromFileTTF(s_pending_font_file.c_str(), cfg.SizePixels, &cfg)
                 : nullptr;

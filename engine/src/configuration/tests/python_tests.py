@@ -28,3 +28,6 @@
 
 def append(first, second):
     return first+second
+
+def append_no_args():
+    return "hello" + " world"

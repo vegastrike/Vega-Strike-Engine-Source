@@ -37,6 +37,7 @@
 #include "src/vs_exit.h"
 #include "src/vega_cast_utils.h"
 #include "root_generic/configxml.h"
+#include <algorithm>
 
 // TODO: once implementation is refactored, deal with this too
 extern QVector RealPosition(const Unit *un);
@@ -153,7 +154,6 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
     if (Guaranteed == Mission::AUTO_OFF) {
         return false;
     }
-    const float atd_no_enemies = configuration().physics.auto_pilot_termination_distance_no_enemies_flt;
     const float autopilot_no_enemies_multiplier = configuration().physics.auto_pilot_no_enemies_distance_multiplier_flt;
     if (unit->isSubUnit()) {
         static std::string err = "Return To Cockpit for Auto";
@@ -181,13 +181,22 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
     float totpercent = 1;
     if (totallength > 1) {
-        // The arrival is the docking distance itself, and aptne is the no-enemies one, which stands
-        // off further when nothing is watching. percent / percentne turn them into the point along
-        // the path the ship flies to.
-        float apt = static_cast<float>(DockingDistance(target));
-        float aptne = atd_no_enemies + static_cast<float>(DockingDistance(target));
-        float percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
-        float percentne = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
+        const double termination_distance = configuration().physics.auto_pilot_termination_distance_dbl;
+        const double no_enemies_termination_distance =
+                configuration().physics.auto_pilot_termination_distance_no_enemies_dbl;
+        // The part of a planet's radius the autopilot counts as its surface.
+        const double planet_radius_percent = (target->getUnitType() == Vega_UnitType::planet)
+                ? static_cast<double>(target->rSize()) * UniverseUtil::getPlanetRadiusPercent() : 0.0;
+        const double docking_distance = DockingDistance(target);
+        // Where the autopilot hands over: the configured distance, off a planet's surface, but never
+        // short of dockable.
+        const double apt = std::max(termination_distance + planet_radius_percent, docking_distance);
+        // The same when nothing is watching, which stands off further.
+        const double aptne = std::max(no_enemies_termination_distance + planet_radius_percent, docking_distance);
+        // The fraction of the approach each of those trims off the end, so the ship flies to that point.
+        const double percent = (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + apt) / totallength;
+        const double percentne =
+                (getAutoRSize(unit, unit) + unit->rSize() + target->rSize() + aptne) / totallength;
         if (percentne > 1) {
             endne = start;
         } else {
@@ -372,7 +381,8 @@ bool JumpCapable::AutoPilotToErrorMessage(const Unit *target,
 
 float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
         Unit **nearest_unit,
-        bool count_negative_warp_units) const {
+        bool count_negative_warp_units,
+        double *nearest_distance) const {
     const Unit *unit = vega_dynamic_cast_ptr<const Unit>(this);
 
     const float smallwarphack = configuration().physics.min_warp_effect_size_flt;
@@ -397,6 +407,11 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
                 unit->location[Unit::UNIT_ONLY],
                 &locatespec);
         testthis = locatespec.retval.unit;
+        if (nearest_distance != nullptr) {
+            // The surface-to-surface gap to the closest unit anywhere in the system, which is what
+            // the caller needs to keep an atom from crossing it. 0 when there is nothing to report.
+            *nearest_distance = (testthis != nullptr) ? locatespec.NearestDistance() : 0.0;
+        }
     }
     for (un_fiter iter = _Universe->activeStarSystem()->gravitationalUnits().fastIterator();
             (planet = *iter) || testthis;
@@ -429,7 +444,7 @@ float JumpCapable::CalculateNearestWarpUnit(float minmultiplier,
             if (effectiverad > bigwarphack) {
                 effectiverad = bigwarphack;
             }
-            QVector dir = unit->Position() - planet->Position();
+            QVector dir = unit->LocalPosition() - planet->LocalPosition();
             double udist = dir.Magnitude();
             float sigdist = UnitUtil::getSignificantDistance(unit, planet);
             if (planet->isPlanet() && udist < (1 << 28)) {

@@ -266,6 +266,10 @@ public:
 #define NO_MOUNT_STAR
     bool inertialmode = false;
     bool autopilotactive = false;
+    // The speed the autopilot may hold and still turn onto what it is steering for, in the units the
+    // ship moves in; 0 means no cap. Set by AutoLongHaul, applied by Movable, which is where the
+    // ship's own speed -- and so the warp multiplier that speed implies -- is known.
+    float autopilot_speed_cap = 0.0F;
 
     bool isSubUnit() const {
         return graphicOptions.SubUnit ? true : false;
@@ -571,6 +575,18 @@ public:
     virtual void ActivateCloak(bool cloak);
 //deletes
     void Kill(bool eraseFromSave = true, bool quitting = false);
+// Releases the unit's references and has it deleted once nothing refers to it;
+// Kill does this too, but call it directly for a unit leaving the game without dying
+    void ScheduleDeletion();
+
+// Clear autonomous behaviour: AI state, flight-group, sounds, and combat mode.
+// Called when a unit is permanently removed (ucref==0) or transferred to a new owner.
+    void ClearAutonomousBehavior();
+
+// Transfers ownership of the unit to another unit (eg when selling a ship to a dealer).
+// The unit remains alive in the star system with the new owner's faction, but its AI is
+// disabled so it does not participate in combat or physics. Sub-units are preserved.
+    void TransferOwnership(Unit *new_owner);
 
 //Is dead yet?
     inline bool Killed() const {
