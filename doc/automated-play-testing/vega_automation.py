@@ -172,10 +172,10 @@ def ocr_text_via_command_lina(screenshot_path: str, verbose: bool = False) -> st
         return ""
 
 
-def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x: int = 0, window_y: int = 0, window_width: int = 0, window_height: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
+def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: int = 0, window_y: int = 0, window_width: int = 0, window_height: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
     """
     Find a button with any of the specified text strings in the specified area of the screenshot and return its absolute screen coordinates.
-    Searches for each text string in the order provided; returns the first match found.
+    Searches for each text string; returns the first match found.
 
     On Wayland with HiDPI scaling, the screenshot may be at a different resolution than
     the logical window size.  This function calculates the scale factor and uses it to
@@ -183,7 +183,7 @@ def find_button_via_ocr(screenshot_path: str, button_texts: list[str], window_x:
 
     :rtype: tuple[int, int] | None
     :param screenshot_path: The path to the screenshot file to read
-    :param button_texts: List of possible button captions to search for (first match wins)
+    :param button_texts: Set of possible button captions to search for (first match wins)
     :param window_x: The window X coordinate on screen (logical pixels)
     :param window_y: The window Y coordinate on screen (logical pixels)
     :param window_width: The logical window width from kdotool (for HiDPI scale calculation).
@@ -303,7 +303,7 @@ def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x:
     """
     return find_button_via_ocr(
         screenshot_path=screenshot_path,
-        button_texts=[button_text],
+        button_texts={button_text},
         window_x=window_x,
         window_y=window_y,
         window_width=window_width,
@@ -341,7 +341,7 @@ def find_quit_button_via_ocr(screenshot_path: str, window_x: int = 0, window_y: 
     # button area and avoid matching "Quit" in the game logo at the top.
     return find_button_via_ocr(
         screenshot_path=screenshot_path,
-        button_texts=["Quit"],
+        button_texts={"Quit"},
         window_x=window_x,
         window_y=window_y,
         window_width=window_width,
@@ -380,7 +380,7 @@ def find_confirmation_button_via_ocr(screenshot_path: str, window_x: int = 0, wi
     # confirmation dialog area and avoid false matches elsewhere.
     return find_button_via_ocr(
         screenshot_path=screenshot_path,
-        button_texts=["yes", "ok", "confirm"],
+        button_texts={"yes", "ok", "confirm"},
         window_x=window_x,
         window_y=window_y,
         window_width=window_width,
