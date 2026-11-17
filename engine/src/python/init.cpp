@@ -27,15 +27,26 @@
 
 
 #define PY_SSIZE_T_CLEAN
+
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 #include <boost/version.hpp>
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #define Vector Vactor
 #endif
 #include <boost/python.hpp>
 #include <boost/python/converter/from_python.hpp>
+#include <boost/filesystem/path.hpp>
 #if defined (_MSC_VER) && _MSC_VER <= 1200
 #undef Vector
 #endif
+
+#include "config/python_utils.h"
 
 #include <Python.h>
 #include <pyerrors.h>
@@ -75,6 +86,8 @@ class Unit;
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)
+
+namespace fs = boost::filesystem;
 
 void Python::initpaths() {
     /*
@@ -172,23 +185,23 @@ void Python::init() {
     }
     isinit = true;
 
+    bool was_already_initialized = Py_IsInitialized() != 0;
+    if (was_already_initialized) {
+        return;
+    }
+
     // initialize python library
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
-
     py_pre_config.coerce_c_locale = 1;
 
-    PyStatus status;
-
-    status = Py_PreInitialize(&py_pre_config);
-    if (PyStatus_Exception(status)) {
+    PyStatus status = Py_PreInitialize(&py_pre_config);
+    if (PyStatus_Exception(status) != 0) {
         VS_LOG_AND_FLUSH(fatal, "Python::init(): PyPreInitialize failed");
         PyErr_Print();
         VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
         Py_ExitStatusException(status);
     }
-
-    Py_NoSiteFlag = 1;
 
     // These functions add these modules to the builtin package
     InitVS();
@@ -199,21 +212,33 @@ void Python::init() {
 
     PyConfig config;
     PyConfig_InitPythonConfig(&config);
+    config.isolated = 0;
+    config.site_import = 1;
 
-    config.isolated = 1;
+#ifdef _WIN32
+    std::wstring resolved_home = FindPythonPath();
+
+    // Assign the determined fallback explicitly to the PyConfig structure
+    status = PyConfig_SetString(&config, &config.home, resolved_home.c_str());
+    if (PyStatus_Exception(status) != 0) {
+        PyConfig_Clear(&config);
+        VS_LOG_AND_FLUSH(fatal, "Python::init(): PyConfig_SetString failed");
+        VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
+        Py_ExitStatusException(status);
+    }
+#endif
 
     // Now we can do python things about them and initialize them
-    Py_Initialize();
     status = Py_InitializeFromConfig(&config);
-    if (PyStatus_Exception(status)) {
+    PyConfig_Clear(&config);
+    if (PyStatus_Exception(status) != 0) {
         VS_LOG_AND_FLUSH(fatal, "Python::init(): Py_InitializeFromConfig failed");
         PyErr_Print();
         VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
-        PyConfig_Clear(&config);
         Py_ExitStatusException(status);
     }
 
-    boost::python::import("base_computer"); // REQUIRED 
+    boost::python::import("base_computer"); // REQUIRED
     initpaths();
 
 #if BOOST_VERSION != 102800
