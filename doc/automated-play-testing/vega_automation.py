@@ -13,9 +13,15 @@ from collections import namedtuple
 from re import Pattern, Match
 from typing import SupportsInt, Any
 
+import levenshtein_distance
 import pytesseract
 from PIL import Image
 from PIL.ImageFile import ImageFile
+
+# Maximum Levenshtein distance for OCR fuzzy matching.
+# OCR may misread characters (e.g., "Launch" → "Paunch"); a distance of 2
+# allows for two character substitutions, insertions, or deletions.
+OCR_LEVENSHTEIN_THRESHOLD: int = 2
 
 POSITION_RE: Pattern[str] = re.compile(r'^ {2}Position: (\d+)(?:\.\d+)?,(\d+)(?:\.\d+)?$')
 GEOMETRY_RE: Pattern[str] = re.compile(r'^ {2}Geometry: (\d+)(?:\.\d+)?x(\d+)(?:\.\d+)?$')
@@ -180,8 +186,9 @@ def ocr_text_via_command_lina(screenshot_path: str, verbose: bool = False) -> st
 
 def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: int = 0, window_y: int = 0, window_width: int = 0, window_height: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, main_menu: bool = False, verbose: bool = False) -> tuple[int, int] | None:
     """
-    Find a button with any of the specified text strings in the specified area of the screenshot and return its absolute screen coordinates.
-    Searches for each text string; returns the first match found.
+    Find a button with any of the specified texts in the specified area of the screenshot and
+    return its absolute screen coordinates.  Uses Levenshtein distance (≤{OCR_LEVENSHTEIN_THRESHOLD})
+    per target so that OCR misreads (e.g., "Launch" read as "Paunch") still match.
 
     On Wayland with HiDPI scaling, the screenshot may be at a different resolution than
     the logical window size.  This function calculates the scale factor and uses it to
@@ -242,13 +249,22 @@ def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: 
                 all_words.append(f"{t}@({data['left'][i]},{data['top'][i]})")
         print(f"OCR words in cropped region: {all_words}")
 
-    # Build a set of lowercased target texts for quick lookup
-    target_texts: set[str] = {t.lower() for t in button_texts}
+    # Build a list of lowercased target texts for iteration
+    target_texts: list[str] = [t.lower() for t in button_texts]
 
-    # Look for any of the specified button texts in the detected text
+    # Look for any of the specified button texts in the detected words using
+    # Levenshtein distance.  OCR may misread characters (e.g., "Launch" → "Paunch"),
+    # so we accept any detected word whose edit distance from any target is ≤ the threshold.
     for i, text in enumerate(data['text']):
         text_stripped: str = text.strip()
-        if text_stripped.lower() in target_texts:
+        if not text_stripped:
+            continue
+        matched_target = None
+        for target in target_texts:
+            if levenshtein_distance.Levenshtein(target, text_stripped.lower()).distance() <= OCR_LEVENSHTEIN_THRESHOLD:
+                matched_target = target
+                break
+        if matched_target is not None:
             word_x: int = int(data['left'][i])
             word_y: int = int(data['top'][i])
             word_w: int = int(data['width'][i])
@@ -296,7 +312,7 @@ def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: 
 def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x: int = 0, window_y: int = 0, window_width: int = 0, window_height: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, main_menu: bool = False, verbose: bool = False) -> tuple[int, int] | None:
     """
     Find the button with the specified text in the specified area of the screenshot and return its absolute screen coordinates.
-    Thin wrapper around the list-based ``find_button_via_ocr``.
+    Thin wrapper around ``find_button_via_ocr``.
 
     :rtype: tuple[int, int] | None
     :param screenshot_path: The path to the screenshot file to read
@@ -394,9 +410,11 @@ def find_confirmation_button_via_ocr(screenshot_path: str, window_x: int = 0, wi
     """
     # Crop to the center 60% (20% margins on all sides) to focus on the
     # confirmation dialog area and avoid false matches elsewhere.
+    # These are semantically different words, so we need the set — Levenshtein
+    # distance alone cannot bridge "Yes" vs "Ok" vs "Confirm".
     return find_button_via_ocr(
         screenshot_path=screenshot_path,
-        button_texts={"yes", "ok", "confirm"},
+        button_texts={"Yes", "Ok", "Confirm"},
         window_x=window_x,
         window_y=window_y,
         window_width=window_width,
@@ -923,6 +941,7 @@ def press_key(key: str, verbose: bool = False) -> None:
 def verify_screen_single(screenshot_path: str, expected_text: str, step_label: str = "", verbose: bool = False) -> bool:
     """
     Run OCR on a screenshot and verify expected text is visible.
+    Thin wrapper around ``verify_screen``.
 
     :param screenshot_path: Path to the screenshot image file
     :param expected_text: Text phrase to look for in the OCR output
@@ -930,23 +949,14 @@ def verify_screen_single(screenshot_path: str, expected_text: str, step_label: s
     :param verbose: Print detailed progress
     :return: True if expected text was found, False otherwise
     """
-    if verbose:
-        print(f"Running OCR to verify {step_label}...")
-
-    text = ocr_text_via_command_lina(screenshot_path, verbose=verbose)
-    if expected_text.lower() in text.lower():
-        if verbose:
-            print(f"Verified '{step_label}': found '{expected_text}'")
-        return True
-    else:
-        if verbose:
-            print(f"Verification failed for '{step_label}': expected '{expected_text}' not found")
-        return False
+    return verify_screen(screenshot_path, {expected_text}, step_label, verbose)
 
 
 def verify_screen(screenshot_path: str, expected_text: set[str], step_label: str = "", verbose: bool = False) -> bool:
     """
     Run OCR on a screenshot and verify any of the expected texts are visible.
+    Uses Levenshtein distance (≤{OCR_LEVENSHTEIN_THRESHOLD}) against each word
+    returned by OCR, so that misreads (e.g., "---Intro" read as "--Intro") still match.
 
     Searches for each string in the set until a match is found.
 
@@ -960,12 +970,16 @@ def verify_screen(screenshot_path: str, expected_text: set[str], step_label: str
         print(f"Running OCR to verify {step_label}...")
 
     text = ocr_text_via_command_lina(screenshot_path, verbose=verbose)
-    text_lower = text.lower()
-    for phrase in expected_text:
-        if phrase.lower() in text_lower:
-            if verbose:
-                print(f"Verified '{step_label}': found '{phrase}'")
-            return True
+    target_texts: list[str] = [t.lower() for t in expected_text]
+    # Split the full OCR output into words and check each one against all targets.
+    for word in text.split():
+        # Strip punctuation for a fairer comparison
+        clean_word = word.strip('.,;:!?()[]{}"\'\'-')
+        for target in target_texts:
+            if levenshtein_distance.Levenshtein(target, clean_word.lower()).distance() <= OCR_LEVENSHTEIN_THRESHOLD:
+                if verbose:
+                    print(f"Verified '{step_label}': found '{target}' (matched '{word}')")
+                return True
     if verbose:
         print(f"Verification failed for '{step_label}': none of {expected_text} found")
     return False
@@ -1019,62 +1033,6 @@ def find_text_in_region_via_ocr(screenshot_path: str,
         crop_y_ending_percent=crop_y_end,
         verbose=verbose
     )
-
-
-def find_text_in_region_via_ocr_multi(screenshot_path: str,
-                                      text_set: set[str],
-                                      window_x: int,
-                                      window_y: int,
-                                      window_width: int = 0,
-                                      window_height: int = 0,
-                                      region_x_percent: float = 0.0,
-                                      region_y_percent: float = 0.0,
-                                      region_w_percent: float = 100.0,
-                                      region_h_percent: float = 100.0,
-                                      verbose: bool = False) -> tuple[int, int] | None:
-    """
-    Find any one of several text strings in a designated region of a screenshot using OCR,
-    and return the center screen coordinates of the first match.
-
-    Convenience wrapper around ``find_text_in_region_via_ocr`` for cases where OCR may
-    misread a word (e.g., "Launch" read as "Paunch").  Texts are tried in sorted order
-    for deterministic results.
-
-    :param screenshot_path: Path to the screenshot image file
-    :param text_set: Set of text strings to search for
-    :param window_x: Window X position on screen (logical pixels)
-    :param window_y: Window Y position on screen (logical pixels)
-    :param window_width: Logical window width from kdotool (for HiDPI scale calculation).
-        If 0, no scaling is applied.
-    :param window_height: Logical window height from kdotool (for HiDPI scale calculation).
-        If 0, no scaling is applied.
-    :param region_x_percent: Starting X of search region as a percentage (0-100)
-    :param region_y_percent: Starting Y of search region as a percentage (0-100)
-    :param region_w_percent: Width of search region as a percentage (0-100)
-    :param region_h_percent: Height of search region as a percentage (0-100)
-    :param verbose: Print debug info
-    :return: Tuple of (screen_x, screen_y) — center of the first found text (logical pixels),
-        or None if none of the texts are found
-    """
-    for text in sorted(text_set):
-        pos = find_text_in_region_via_ocr(
-            screenshot_path=screenshot_path,
-            text=text,
-            window_x=window_x,
-            window_y=window_y,
-            window_width=window_width,
-            window_height=window_height,
-            region_x_percent=region_x_percent,
-            region_y_percent=region_y_percent,
-            region_w_percent=region_w_percent,
-            region_h_percent=region_h_percent,
-            verbose=verbose
-        )
-        if pos is not None:
-            if verbose:
-                print(f"Found '{text}' via OCR at {pos}")
-            return pos
-    return None
 
 
 def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
@@ -1765,9 +1723,10 @@ def _verify_caption_via_ocr(screenshot_path: str,
 
         target = caption_text.lower()
         for i, text in enumerate(data['text']):
-            if text.strip().lower() == target:
+            text_stripped = text.strip().lower()
+            if levenshtein_distance.Levenshtein(target, text_stripped).distance() <= OCR_LEVENSHTEIN_THRESHOLD:
                 if verbose:
-                    print(f"Caption verification passed: found '{target}' in caption region")
+                    print(f"Caption verification passed: found '{target}' (matched '{text.strip()}') in caption region")
                 return True
 
         if verbose:
