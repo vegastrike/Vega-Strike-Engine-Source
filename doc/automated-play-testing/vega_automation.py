@@ -4,6 +4,9 @@ Shared utilities for automated Vega Strike play testing on KDE/Wayland.
 
 Provides helpers for window management (kdotool), screenshots (spectacle),
 OCR-based button finding (Tesseract/pytesseract), and input simulation (dotool).
+
+Python package dependencies can be installed with:
+    pip install -r doc/automated-play-testing/requirements.txt
 """
 import re
 import subprocess
@@ -27,10 +30,10 @@ POSITION_RE: Pattern[str] = re.compile(r'^ {2}Position: (\d+)(?:\.\d+)?,(\d+)(?:
 GEOMETRY_RE: Pattern[str] = re.compile(r'^ {2}Geometry: (\d+)(?:\.\d+)?x(\d+)(?:\.\d+)?$')
 MODE_RE: Pattern[str] = re.compile(r'^[ \t]+mode:\r?\n[ \t]+width: (\d+) px, height: (\d+) px, refresh: \d+(?:\.\d+)? Hz,\r?\n[ \t]+flags: current$')
 
-# Y-coordinate adjustment factor for Main Menu buttons on KDE/Wayland.
-# OCR-detected button text positions are systematically biased downward on this
-# platform; multiplying the word's top offset by this factor shifts the click
-# point upward so it lands on the button rather than below it.
+# Y-coordinate scaling factor for the Main Menu on KDE/Wayland.
+# The Main Menu viewport Y positions are systematically biased downward on this
+# platform; multiplying the word's top offset by this factor (0.95) shifts the
+# computed position upward so clicks land on the intended button.
 MAIN_MENU_BUTTON_Y_ADJUSTMENT: float = 0.95
 
 
@@ -273,8 +276,7 @@ def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: 
             # Map crop-relative OCR position to screenshot-space pixel coordinates.
             button_center_x_in_screenshot: int = crop_x_start + word_x + word_w // 2
             if main_menu:
-                # Only for Main Menu buttons: adjust the Y coordinate upward to compensate
-                # for the systematic downward bias observed on KDE/Wayland.
+                # The Main Menu viewport Y positions need scaling on KDE/Wayland.
                 button_center_y_in_screenshot: int = crop_y_start + int(word_y * MAIN_MENU_BUTTON_Y_ADJUSTMENT) + word_h // 2
             else:
                 button_center_y_in_screenshot = crop_y_start + word_y + word_h // 2
@@ -830,8 +832,7 @@ def calculate_button_position(wx: int, wy: int, ww: int, wh: int,
 
     text_x = btn_x + btn_w * text_offset_x
     if main_menu:
-        # Only for Main Menu buttons: adjust the Y coordinate upward to compensate
-        # for the systematic downward bias observed on KDE/Wayland.
+        # The Main Menu viewport Y positions need scaling on KDE/Wayland.
         text_y = int(btn_y * MAIN_MENU_BUTTON_Y_ADJUSTMENT) + btn_h // 2
     else:
         text_y = btn_y + btn_h // 2

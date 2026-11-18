@@ -19,8 +19,7 @@ The automation script is `click_quit_kde_wayland.py` in this directory, which re
 - `kdotool` — for window management on Wayland (`sudo dnf install kdotool`)
 - `spectacle` — KDE screenshot tool for Wayland screenshots
 - Tesseract OCR (`sudo dnf install tesseract`) — for finding button text
-- `pytesseract` (`pip install pytesseract`) — Python Tesseract wrapper
-- `Pillow` (`pip install Pillow`) — image processing
+- Python packages: `pip install -r doc/automated-play-testing/requirements.txt` (includes pytesseract, Pillow, levenshtein-distance, and others)
 - `vegastrike-engine` built binary
 - Assets-Production data directory
 
@@ -43,7 +42,7 @@ The script uses OCR (Tesseract) as the primary method to locate the Quit button,
 GUI.GUIRect(50, 580, 177, 43, "pixel", (1280, 1024))
 ```
 
-The OCR function searches in the lower portion of the letterboxed area where the Quit button appears. The Y-coordinate of the found text is adjusted by the `MAIN_MENU_BUTTON_Y_ADJUSTMENT` factor (0.95) to account for the button text not being vertically centered within the button sprite. The function returns the center screen coordinates of the found text.
+The OCR function searches in the lower portion of the letterboxed area where the Quit button appears. The Y-coordinate of the found text is scaled by the `MAIN_MENU_BUTTON_Y_ADJUSTMENT` factor (0.95) to account for the Main Menu viewport Y positions being systematically biased downward on KDE/Wayland. The function returns the center screen coordinates of the found text.
 
 5. **Click the Quit button** — `click_at_position()` translates logical coordinates to the physical screen and invokes `dotool` to perform the click.
 
@@ -80,7 +79,7 @@ Previous approaches that were abandoned:
 
 2. **Levenshtein fuzzy matching for OCR** — instead of exact string comparison, all OCR-based text matching uses Levenshtein (edit) distance with a threshold of ≤2 (`OCR_LEVENSHTEIN_THRESHOLD`). This means OCR misreads are handled automatically without needing explicit fallback strings. The `levenshtein_distance` package (available in the project virtualenv) provides the `Levenshtein(target, actual).distance()` call.
 
-3. **Main Menu button Y-coordinate adjustment** — the Main Menu buttons (Campaign, Quit, etc.) need a vertical offset correction because the button text is not vertically centered within the button sprite. The constant `MAIN_MENU_BUTTON_Y_ADJUSTMENT = 0.95` scales the Y position of detected text to land on the clickable area. This adjustment is applied only to Main Menu buttons (via the `main_menu=True` parameter) and does not affect buttons on other screens. Both the OCR path and the calculated fallback path respect this flag.
+3. **Main Menu Y-coordinate adjustment** — the Main Menu viewport Y positions are systematically biased downward on KDE/Wayland. The constant `MAIN_MENU_BUTTON_Y_ADJUSTMENT = 0.95` scales the Y position of detected text to compensate for this bias. This adjustment is applied only to the Main Menu as a whole (via the `main_menu=True` parameter) and does not affect buttons on other screens. Both the OCR path and the calculated fallback path respect this flag.
 
 4. **Confirmation dialog after quit** — the current version of the game does not display a confirmation dialog when quitting, but the script includes a check for any of `{"Yes", "Ok", "Confirm"}` buttons using Levenshtein fuzzy matching in case this behavior is added in a future release.
 

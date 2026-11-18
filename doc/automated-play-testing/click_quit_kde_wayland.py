@@ -27,8 +27,8 @@ Dependencies:
     - kdotool (install: sudo dnf install kdotool) —
     - spectacle (KDE screenshot tool) — for screenshots on Wayland
     - Tesseract OCR (install: sudo dnf install tesseract) — for finding button text
-    - pytesseract (install: pip install pytesseract) — Python Tesseract wrapper
-    - Pillow (install: pip install Pillow) — image processing
+    - Python packages: pip install -r doc/automated-play-testing/requirements.txt
+      (includes pytesseract, Pillow, levenshtein-distance, and others)
     - vegastrike-engine built binary
     - Assets-Production data directory
 """

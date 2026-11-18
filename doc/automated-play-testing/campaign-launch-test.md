@@ -19,8 +19,7 @@ The automation script is `campaign_launch_kde_wayland.py` in this directory, whi
 - `kdotool` — for window management on Wayland (`sudo dnf install kdotool`)
 - `spectacle` — KDE screenshot tool for Wayland screenshots
 - Tesseract OCR (`sudo dnf install tesseract`) — for finding button text
-- `pytesseract` (`pip install pytesseract`) — Python Tesseract wrapper
-- `Pillow` (`pip install Pillow`) — image processing
+- Python packages: `pip install -r doc/automated-play-testing/requirements.txt` (includes pytesseract, Pillow, levenshtein-distance, and others)
 - `vegastrike-engine` built binary
 - Assets-Production data directory
 
@@ -38,7 +37,7 @@ Window detection uses `kdotool` to search for a window with class `vegastrike-en
 
 A screenshot is taken using `spectacle` (active window only). The HiDPI scale factor is read from the KDE configuration (`kwinrc`) via `get_display_scale()`, and the native display resolution is obtained from `wayland-info` or `xdotool` via `get_display_bounds()`. Together these produce the logical display size through `get_display_bounds_logical()`.
 
-The script first verifies the Main Menu is displayed by running OCR and checking for "Campaign" text using Levenshtein fuzzy matching (threshold ≤2). Then it attempts to find the Campaign button via OCR in the upper-left portion of the letterboxed area (the Main Menu is letterboxed to 1.25:1, derived from the design resolution 1280×1024). The Y-coordinate of the found text is adjusted by the `MAIN_MENU_BUTTON_Y_ADJUSTMENT` factor (0.95) to account for the button text not being vertically centered within the button sprite. If OCR fails, it falls back to calculating the position from the design coordinates defined in `bases/main_menu.py`:
+The script first verifies the Main Menu is displayed by running OCR and checking for "Campaign" text using Levenshtein fuzzy matching (threshold ≤2). Then it attempts to find the Campaign button via OCR in the upper-left portion of the letterboxed area (the Main Menu is letterboxed to 1.25:1, derived from the design resolution 1280×1024). The Y-coordinate of the found text is scaled by the `MAIN_MENU_BUTTON_Y_ADJUSTMENT` factor (0.95) to account for the Main Menu viewport Y positions being systematically biased downward on KDE/Wayland. If OCR fails, it falls back to calculating the position from the design coordinates defined in `bases/main_menu.py`:
 
 ```python
 # Design resolution: 1280x1024
@@ -134,7 +133,7 @@ All input is handled by `dotool` (mouse movement and clicking) and `kdotool` (wi
 
 4. **Multi-word phrase matching via sliding window** — `verify_screen()` handles multi-word targets (e.g., "Main Concourse") by splitting both the target and OCR output into words, then sliding a window over consecutive OCR words. Each word pair is compared via Levenshtein distance, so "main" matches "main" and "concourse" matches "concourse" as a consecutive pair. Single-word targets are checked against each OCR word individually.
 
-5. **Main Menu button Y-coordinate adjustment** — the Main Menu buttons (Campaign, Quit, etc.) need a vertical offset correction because the button text is not vertically centered within the button sprite. The constant `MAIN_MENU_BUTTON_Y_ADJUSTMENT = 0.95` scales the Y position of detected text to land on the clickable area. This adjustment is applied only to Main Menu buttons (via the `main_menu=True` parameter) and does not affect buttons on other screens (Intro Monologue "Continue", Hangar hotspots, confirmation dialogs). Both the OCR path (`find_button_via_ocr()`) and the calculated fallback path (`calculate_button_position()`) respect this flag.
+5. **Main Menu Y-coordinate adjustment** — the Main Menu viewport Y positions are systematically biased downward on KDE/Wayland. The constant `MAIN_MENU_BUTTON_Y_ADJUSTMENT = 0.95` scales the Y position of detected text to compensate for this bias. This adjustment is applied only to the Main Menu as a whole (via the `main_menu=True` parameter) and does not affect buttons on other screens (Intro Monologue "Continue", Hangar hotspots, confirmation dialogs). Both the OCR path (`find_button_via_ocr()`) and the calculated fallback path (`calculate_button_position()`) respect this flag.
 
 6. **Pixel-based hotspot detection with structure validation** — hotspot markers are blue-purple starburst shapes with a bright white/gray center. The detector enforces the visual structure observed in reference screenshots:
    - **Bright center**: at least 3 pixels where all RGB channels are ≥ 180 and within 40 of each other (white/gray, not colored). Center diameter is between 4–19 pixels (±25% tolerance around the 5–15 pixel reference size).
