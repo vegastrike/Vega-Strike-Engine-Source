@@ -955,8 +955,11 @@ def verify_screen_single(screenshot_path: str, expected_text: str, step_label: s
 def verify_screen(screenshot_path: str, expected_text: set[str], step_label: str = "", verbose: bool = False) -> bool:
     """
     Run OCR on a screenshot and verify any of the expected texts are visible.
-    Uses Levenshtein distance (≤{OCR_LEVENSHTEIN_THRESHOLD}) against each word
-    returned by OCR, so that misreads (e.g., "---Intro" read as "--Intro") still match.
+    Uses Levenshtein distance (≤{OCR_LEVENSHTEIN_THRESHOLD}) per word, so that
+    misreads (e.g., "---Intro" read as "--Intro") still match.
+
+    Each target phrase may be one or more words.  For multi-word targets, the
+    function checks whether the corresponding OCR words appear consecutively.
 
     Searches for each string in the set until a match is found.
 
@@ -971,15 +974,37 @@ def verify_screen(screenshot_path: str, expected_text: set[str], step_label: str
 
     text = ocr_text_via_command_lina(screenshot_path, verbose=verbose)
     target_texts: list[str] = [t.lower() for t in expected_text]
-    # Split the full OCR output into words and check each one against all targets.
+
+    # Split the full OCR output into clean words (punctuation stripped).
+    ocr_words: list[str] = []
     for word in text.split():
-        # Strip punctuation for a fairer comparison
         clean_word = word.strip('.,;:!?()[]{}"\'\'-')
-        for target in target_texts:
-            if levenshtein_distance.Levenshtein(target, clean_word.lower()).distance() <= OCR_LEVENSHTEIN_THRESHOLD:
-                if verbose:
-                    print(f"Verified '{step_label}': found '{target}' (matched '{word}')")
-                return True
+        if clean_word:
+            ocr_words.append(clean_word.lower())
+
+    # For each target, check whether its words appear consecutively in the OCR
+    # word list, allowing Levenshtein fuzzy matching per word.
+    for target in target_texts:
+        target_words = target.split()
+        if len(target_words) == 1:
+            # Single-word target: check against each OCR word.
+            for ocr_w in ocr_words:
+                if levenshtein_distance.Levenshtein(target_words[0], ocr_w).distance() <= OCR_LEVENSHTEIN_THRESHOLD:
+                    if verbose:
+                        print(f"Verified '{step_label}': found '{target}' (matched '{ocr_w}')")
+                    return True
+        else:
+            # Multi-word target: slide a window over consecutive OCR words.
+            for start in range(len(ocr_words) - len(target_words) + 1):
+                window = ocr_words[start:start + len(target_words)]
+                if all(
+                    levenshtein_distance.Levenshtein(tw, ow).distance() <= OCR_LEVENSHTEIN_THRESHOLD
+                    for tw, ow in zip(target_words, window)
+                ):
+                    if verbose:
+                        print(f"Verified '{step_label}': found '{target}' (matched '{' '.join(window)}')")
+                    return True
+
     if verbose:
         print(f"Verification failed for '{step_label}': none of {expected_text} found")
     return False
@@ -1521,6 +1546,26 @@ def _is_orange_pixel(r: int, g: int, b: int,
     return r >= red_min and green_min <= g <= green_max and b <= blue_max
 
 
+def _is_green_pixel(r: int, g: int, b: int,
+                     green_min: int = 120, red_max: int = 100,
+                     blue_max: int = 100) -> bool:
+    """
+    Check whether an RGB pixel looks green (dominant green channel).
+
+    The caption text in the hangar view can be green when no hotspot is hovered
+    (e.g., "Landing Center").  Green has a high G value with lower R and B.
+
+    :param r: Red channel value (0-255)
+    :param g: Green channel value (0-255)
+    :param b: Blue channel value (0-255)
+    :param green_min: Minimum green channel value (default 120)
+    :param red_max: Maximum red channel value (default 100)
+    :param blue_max: Maximum blue channel value (default 100)
+    :return: True if the pixel is green
+    """
+    return g >= green_min and r <= red_max and b <= blue_max
+
+
 def _verify_caption_via_ocr(screenshot_path: str,
                             caption_text: str,
                             verbose: bool = False,
@@ -1568,8 +1613,11 @@ def _verify_caption_via_ocr(screenshot_path: str,
         caption_y1 = int(img_h * 0.85)
         caption_y2 = img_h
 
-        # Check for orange pixels in the caption region to confirm a caption is visible
+        # Check for caption-colored pixels (orange or green) in the caption region
+        # to confirm a caption is visible.  Orange appears when hovering a hotspot
+        # (e.g., "Launch"), green appears when no hotspot is hovered (e.g., "Landing Center").
         orange_count = 0
+        green_count = 0
         for y in range(caption_y1, caption_y2):
             for x in range(caption_x1, caption_x2):
                 pixel = pixels[x, y]
@@ -1577,44 +1625,47 @@ def _verify_caption_via_ocr(screenshot_path: str,
                     r, g, b = pixel[0], pixel[1], pixel[2]
                     if _is_orange_pixel(r, g, b):
                         orange_count += 1
+                    elif _is_green_pixel(r, g, b):
+                        green_count += 1
 
         if verbose:
-            print(f"Orange pixels in caption region: {orange_count}")
+            print(f"Orange pixels in caption region: {orange_count}, green pixels: {green_count}")
 
-        # Crop to the caption area (color image used above for orange pixel detection).
+        # Crop to the caption area (color image used above for caption pixel detection).
         cropped_color = img.crop((caption_x1, caption_y1, caption_x2, caption_y2))
 
         # Shrink the crop to the black-background area containing the caption text.
-        # The caption text (in orange) sits on a small black background that is clearly
-        # distinct from the surrounding hangar graphics. We find the black-background
-        # bounds by starting from the orange caption pixels and tracing outward.
+        # The caption text (in orange or green) sits on a small black background that is
+        # clearly distinct from the surrounding hangar graphics. We find the black-background
+        # bounds by starting from the caption-colored pixels and tracing outward.
         cropped_gray = cropped_color.convert('L')
         cropped_w, cropped_h = cropped_color.size
         cropped_pixels = cropped_color.load()
 
-        # Find all orange pixels in the cropped area to locate the caption text.
-        orange_pixels: list[tuple[int, int]] = []
+        # Find all caption-colored pixels (orange or green) in the cropped area to locate
+        # the caption text.
+        caption_pixels: list[tuple[int, int]] = []
         for y in range(cropped_h):
             for x in range(cropped_w):
                 pixel = cropped_pixels[x, y]
                 if len(pixel) >= 3:
                     r, g, b = pixel[0], pixel[1], pixel[2]
-                    if _is_orange_pixel(r, g, b):
-                        orange_pixels.append((x, y))
+                    if _is_orange_pixel(r, g, b) or _is_green_pixel(r, g, b):
+                        caption_pixels.append((x, y))
 
-        if not orange_pixels:
+        if not caption_pixels:
             if verbose:
-                print("No orange pixels found in cropped caption area")
+                print("No caption-colored pixels found in cropped caption area")
             # Fall back to the full crop
             cropped_gray = cropped_color.convert('L')
         else:
-            # Find the upper-right-most orange pixel (max X, then min Y among those).
-            max_orange_x = max(p[0] for p in orange_pixels)
-            upper_right_orange = min(
-                (p[1] for p in orange_pixels if p[0] == max_orange_x)
+            # Find the upper-right-most caption pixel (max X, then min Y among those).
+            max_caption_x = max(p[0] for p in caption_pixels)
+            upper_right_caption = min(
+                (p[1] for p in caption_pixels if p[0] == max_caption_x)
             )
-            anchor_x = max_orange_x
-            anchor_y = upper_right_orange
+            anchor_x = max_caption_x
+            anchor_y = upper_right_caption
 
             # Helper: check if a pixel is black (dark background of the caption area).
             # The black background is very dark (all channels < 20), while the hangar
@@ -1644,15 +1695,15 @@ def _verify_caption_via_ocr(screenshot_path: str,
             bbox_min_y = top_edge_y
 
             # Find the upper-left corner of the black-background area.
-            # Start from the upper-left-most orange pixel (min X, then min Y among those).
+            # Start from the upper-left-most caption pixel (min X, then min Y among those).
             # Note: bbox_min_y comes from the top-right corner above, not here.
             # The top-left corner may extend to the very top of the cropped area.
-            min_orange_x = min(p[0] for p in orange_pixels)
-            upper_left_orange = min(
-                (p[1] for p in orange_pixels if p[0] == min_orange_x)
+            min_caption_x = min(p[0] for p in caption_pixels)
+            upper_left_caption = min(
+                (p[1] for p in caption_pixels if p[0] == min_caption_x)
             )
-            anchor_x = min_orange_x
-            anchor_y = upper_left_orange
+            anchor_x = min_caption_x
+            anchor_y = upper_left_caption
 
             # Move left from anchor to find the left edge of the black background
             left_edge_x = anchor_x
@@ -1661,12 +1712,12 @@ def _verify_caption_via_ocr(screenshot_path: str,
             bbox_min_x = left_edge_x
 
             # Find the lower-left corner of the black-background area.
-            # Start from the lower-left-most orange pixel (min X, then max Y among those).
-            lower_left_orange = max(
-                (p[1] for p in orange_pixels if p[0] == min_orange_x)
+            # Start from the lower-left-most caption pixel (min X, then max Y among those).
+            lower_left_caption = max(
+                (p[1] for p in caption_pixels if p[0] == min_caption_x)
             )
-            anchor_x = min_orange_x
-            anchor_y = lower_left_orange
+            anchor_x = min_caption_x
+            anchor_y = lower_left_caption
 
             # Move left from anchor to find the left edge
             left_edge_x_bottom = anchor_x
@@ -1680,14 +1731,14 @@ def _verify_caption_via_ocr(screenshot_path: str,
             bbox_max_y = bottom_edge_y_left
 
             # Find the lower-right corner of the black-background area.
-            # Start from the lower-right-most orange pixel (max X, then max Y among those).
+            # Start from the lower-right-most caption pixel (max X, then max Y among those).
             # Note: bbox_max_x comes from the top-right corner above, not here.
             # The bottom-right corner may extend to the very right edge of the cropped area.
-            lower_right_orange = max(
-                (p[1] for p in orange_pixels if p[0] == max_orange_x)
+            lower_right_caption = max(
+                (p[1] for p in caption_pixels if p[0] == max_caption_x)
             )
-            anchor_x = max_orange_x
-            anchor_y = lower_right_orange
+            anchor_x = max_caption_x
+            anchor_y = lower_right_caption
 
             # Move down from anchor to find the bottom edge
             bottom_edge_y_right = anchor_y
