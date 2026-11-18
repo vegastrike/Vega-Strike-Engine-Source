@@ -402,11 +402,11 @@ static double usedValue(double originalValue) {
 }
 
 
-// One family of parts the shops sell in a ranked ladder: the units.json key prefix, how many
-// tiers it has, and the column the ladder is ranked by.
+// One family of parts the shops sell in a ranked ladder: the units.json key prefix and the
+// column the ladder is ranked by. The tiers are found by asking the manifest, so a ladder the
+// assets extend needs no change here.
 struct ComponentLadder {
-    const char *prefix;     // units.json key prefix: <prefix>01__upgrades, <prefix>02__upgrades ...
-    int tiers;
+    const char *prefix;
     const char *figure;
 };
 
@@ -419,33 +419,33 @@ struct ComponentLadders {
 };
 
 static const ComponentLadder kReactorLadders[] = {
-        {"reactor", 15, "Reactor_Recharge"},
+        {"reactor", "Reactor_Recharge"},
 };
 static const ComponentLadder kShieldLadders[] = {
-        {"quadshield", 15, "Shield_Recharge"},
-        {"dualshield", 15, "Shield_Recharge"},
+        {"quadshield", "Shield_Recharge"},
+        {"dualshield", "Shield_Recharge"},
 };
 static const ComponentLadder kArmorLadders[] = {
-        {"armor", 6, "armor"},
+        {"armor", "armor"},
 };
 static const ComponentLadder kCapacitorLadders[] = {
-        {"capacitor", 15, "Primary_Capacitor"},
+        {"capacitor", "Primary_Capacitor"},
 };
 static const ComponentLadder kRadarLadders[] = {
-        {"skyscope", 3, "Radar_Range"},
-        {"starscanner", 4, "Radar_Range"},
-        {"hawkeye", 4, "Radar_Range"},
-        {"surveyor", 2, "Radar_Range"},
-        {"rlaantracker", 1, "Radar_Range"},
+        {"skyscope", "Radar_Range"},
+        {"starscanner", "Radar_Range"},
+        {"hawkeye", "Radar_Range"},
+        {"surveyor", "Radar_Range"},
+        {"rlaantracker", "Radar_Range"},
 };
 static const ComponentLadder kEcmLadders[] = {
-        {"ecm_package", 3, "ecm"},
+        {"ecm_package", "ecm"},
 };
 static const ComponentLadder kRepairBotLadders[] = {
-        {"repair_droid", 5, "repair"},
+        {"repair_droid", "repair"},
 };
 static const ComponentLadder kJumpDriveLadders[] = {
-        {"jump_drive", 1, "Jump_Drive_Present"},
+        {"jump_drive", "Jump_Drive_Present"},
 };
 
 static const ComponentLadders kComponentLadders[] = {
@@ -509,22 +509,10 @@ static bool LadderApplies(const Component *component, const ComponentLadder &lad
     return facets <= 2 ? prefix == "dualshield" : prefix == "quadshield";
 }
 
-// The price lists, and a base's own inventory, name a part without the units.json suffix:
-// armor03, not armor03__upgrades. Manifest::GetCargoByName() tolerates the suffix but HasCargo()
-// does not, so PriceCargo() silently falls back to the space junk price for a suffixed key. That
-// is how every component came to be worth 10 credits.
-static std::string PartPriceKey(const std::string &key) {
-    const std::string suffix = "__upgrades";
-    if (key.length() > suffix.length()
-            && key.compare(key.length() - suffix.length(), suffix.length(), suffix) == 0) {
-        return key.substr(0, key.length() - suffix.length());
-    }
-    return key;
-}
-
 // Whether the shops list a part at all. A name they do not know is not a price.
+// Manifest::HasCargo() accepts a units.json key with or without its __upgrades suffix.
 static bool PartIsListed(const std::string &key) {
-    return Manifest::MPL().HasCargo(PartPriceKey(key));
+    return Manifest::MPL().HasCargo(key);
 }
 
 // What a new part costs, which is what putting a part right is priced against. A name the shops
@@ -533,7 +521,27 @@ static double NewPartPrice(const std::string &name) {
     if (!PartIsListed(name)) {
         return 0.0;
     }
-    return Manifest::MPL().GetCargoByName(PartPriceKey(name)).GetPrice();
+    return Manifest::MPL().GetCargoByName(name).GetPrice();
+}
+
+// The shops write a ladder's tier in one of three ways: <prefix>01__upgrades for most families,
+// <prefix>1__upgrades for the sensors, and bare <prefix>__upgrades for the one-tier jump drive.
+// Ask the manifest rather than format a guess into it: two of the three spellings were wrong when
+// this was built from a format string.
+static std::string LadderTierKey(const std::string &prefix, int tier) {
+    const std::string padded = (boost::format("%1%%2$02d__upgrades") % prefix % tier).str();
+    if (Manifest::MPL().HasCargo(padded)) {
+        return padded;
+    }
+
+    const std::string plain = (boost::format("%1%%2$d__upgrades") % prefix % tier).str();
+    if (Manifest::MPL().HasCargo(plain)) {
+        return plain;
+    }
+
+    // A one-tier family carries no number at all, and has nothing above it to find.
+    const std::string bare = prefix + "__upgrades";
+    return tier == 1 && Manifest::MPL().HasCargo(bare) ? bare : std::string();
 }
 
 // The price of the tier nearest this component's figure, or zero when its type is not sold in a
@@ -556,10 +564,16 @@ static double NearestTierPrice(Unit *base_unit, const Component *component) {
             continue;
         }
 
-        for (int tier = 1; tier <= ladder.tiers; ++tier) {
-            const std::string tier_key = (boost::format("%1%%2$02d__upgrades") % ladder.prefix % tier).str();
+        // Tiers are numbered from one with no gaps, so the first one the shops do not list is the
+        // end of the ladder.
+        for (int tier = 1; ; ++tier) {
+            const std::string tier_key = LadderTierKey(ladder.prefix, tier);
+            if (tier_key.empty()) {
+                break;
+            }
+
             const double tier_figure = UnitCSVFactory::GetVariable(tier_key, ladder.figure, 0.0);
-            if (tier_figure <= 0.0 || !PartIsListed(tier_key)) {
+            if (tier_figure <= 0.0) {
                 continue;
             }
             if (lowest_figure < 0.0 || tier_figure < lowest_figure) {
@@ -571,7 +585,7 @@ static double NearestTierPrice(Unit *base_unit, const Component *component) {
             const double distance = std::fabs(tier_figure - figure);
             if (nearest_distance < 0.0 || distance < nearest_distance) {
                 nearest_distance = distance;
-                nearest_tier_price = base_unit->PriceCargo(PartPriceKey(tier_key));
+                nearest_tier_price = base_unit->PriceCargo(tier_key);
             }
         }
     }
@@ -590,7 +604,7 @@ static double NearestTierPrice(Unit *base_unit, const Component *component) {
 static double ComponentPrice(Unit *player_unit, Unit *base_unit, const Component *component, double ship_price) {
     const std::string part_key = component->GetUpgradeKey();
     if (!part_key.empty() && PartIsListed(part_key)) {
-        return base_unit->PriceCargo(PartPriceKey(part_key));
+        return base_unit->PriceCargo(part_key);
     }
 
     // The part the ship carries for this component is the part that would replace it, so it is
