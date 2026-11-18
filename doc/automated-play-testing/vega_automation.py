@@ -246,9 +246,13 @@ def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: 
             word_w: int = int(data['width'][i])
             word_h: int = int(data['height'][i])
 
-            # Map crop-relative OCR position to screenshot-space pixel coordinates
+            # Map crop-relative OCR position to screenshot-space pixel coordinates.
+            # Use 0.45 instead of 0.5 for the vertical offset so the click lands
+            # slightly above the text center, compensating for the systematic
+            # downward bias observed on KDE/Wayland (see click_quit_kde_wayland.py
+            # and campaign_launch_kde_wayland.py).
             button_center_x_in_screenshot: int = crop_x_start + word_x + word_w // 2
-            button_center_y_in_screenshot: int = crop_y_start + word_y + word_h // 2
+            button_center_y_in_screenshot: int = crop_y_start + word_y + int(word_h * 0.45)
 
             # Convert screenshot-space pixels to logical screen coordinates.
             # The screenshot may include window decorations (title bar, borders).
@@ -792,7 +796,10 @@ def calculate_button_position(wx: int, wy: int, ww: int, wh: int,
         sy = wh / design_h
 
     text_x = btn_x + btn_w * text_offset_x
-    text_y = btn_y + btn_h / 2
+    # Use 0.45 instead of 0.5 for the vertical offset so the click lands slightly
+    # above the text center, compensating for the systematic downward bias observed
+    # on KDE/Wayland.
+    text_y = btn_y + btn_h * 0.45
 
     screen_x = int(lb_x + text_x * sx)
     screen_y = int(lb_y + text_y * sy)
