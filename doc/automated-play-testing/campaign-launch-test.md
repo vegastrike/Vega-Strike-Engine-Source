@@ -38,7 +38,7 @@ Window detection uses `kdotool` to search for a window with class `vegastrike-en
 
 A screenshot is taken using `spectacle` (active window only). The HiDPI scale factor is read from the KDE configuration (`kwinrc`) via `get_display_scale()`, and the native display resolution is obtained from `wayland-info` or `xdotool` via `get_display_bounds()`. Together these produce the logical display size through `get_display_bounds_logical()`.
 
-The script first verifies the Main Menu is displayed by running OCR and checking for "Campaign" text. Then it attempts to find the Campaign button via OCR in the upper-left portion of the letterboxed area (the Main Menu is letterboxed to 1.25:1, derived from the design resolution 1280×1024). If OCR fails, it falls back to calculating the position from the design coordinates defined in `bases/main_menu.py`:
+The script first verifies the Main Menu is displayed by running OCR and checking for "Campaign" text using Levenshtein fuzzy matching (threshold ≤2). Then it attempts to find the Campaign button via OCR in the upper-left portion of the letterboxed area (the Main Menu is letterboxed to 1.25:1, derived from the design resolution 1280×1024). The Y-coordinate of the found text is adjusted by the `MAIN_MENU_BUTTON_Y_ADJUSTMENT` factor (0.95) to account for the button text not being vertically centered within the button sprite. If OCR fails, it falls back to calculating the position from the design coordinates defined in `bases/main_menu.py`:
 
 ```python
 # Design resolution: 1280x1024
@@ -51,16 +51,16 @@ The `calculate_main_menu_button_position()` helper scales these design coordinat
 
 After clicking Campaign, the Intro Monologue screen appears. The script waits 5 seconds, refreshes the window geometry, and takes another screenshot.
 
-Verification is done by checking for the title text. Tesseract reads "---Intro Monologue---" as separate fragments, so the script searches for any of `{"---Intro", "--Intro", "~-Intro"}` using the `verify_screen()` function (which runs OCR once and checks against the set). The "Continue" button text is also verified as a secondary confirmation.
+Verification is done by checking for the title text. Tesseract reads "---Intro Monologue---" as separate fragments, so the script searches for any of `{"---Intro", "--Intro", "~-Intro"}` using the `verify_screen()` function (which runs OCR once and checks each target via Levenshtein distance). The "Continue" button text is also verified as a secondary confirmation.
 
-The Continue button is found via OCR in the bottom 10% of the letterboxed area, left half. The Intro Monologue screen is letterboxed to 1.33:1 (4:3), derived from the design resolution 1024×768. If OCR fails, the fallback uses design coordinates from `bases/main_menu.py`:
+The Continue button is found via OCR in the bottom 10% of the letterboxed area, left half. The Intro Monologue screen is letterboxed to 1.33:1 (4:3), derived from the design resolution 1024×768. The Continue button does NOT use the Main Menu Y-coordinate adjustment — only Main Menu buttons (Campaign, Quit) apply the `MAIN_MENU_BUTTON_Y_ADJUSTMENT` factor. If OCR fails, the fallback uses design coordinates from `bases/main_menu.py`:
 
 ```python
 # Design resolution: 1024x768
 GUI.GUIRect(8, 697, 420, 47, "pixel", (1024, 768))
 ```
 
-After clicking Continue, the script polls every 2 seconds (up to 30s) to confirm the Intro Monologue screen has disappeared.
+After clicking Continue, the script polls every 2 seconds (up to 30s) to confirm the Intro Monologue screen has disappeared. The Continue button uses the standard Y-coordinate calculation (no Main Menu adjustment), as the `main_menu` flag is not set for non-main-menu screens.
 
 ### Step 5: Wait for Hangar view, click "Launch" hotspot
 
@@ -70,9 +70,9 @@ The script waits for the Hangar view to load by repeatedly taking screenshots an
 
 Once the Hangar is loaded, the Launch hotspot is found using a three-tier strategy:
 
-1. **Pixel-based search** (`find_hotspot_via_pixel_search`) — hotspots are marked by blue-purple starburst shapes with a bright white/gray center. The detector collects both blue-dominant ring pixels (where blue > red and blue > green) and bright center pixels (where all RGB channels are high). A hint position from the per-base-type geometry table (for "ocean" type, the Launch hotspot's expected window position) narrows the search region to ±25% around the hint within the letterboxed area. This avoids scanning the splash-screen blue bars. The caption text "Launch" is verified via OCR in the bottom caption area. Tesseract may misread "Launch" as "Paunch", so both are tried.
+1. **Pixel-based search** (`find_hotspot_via_pixel_search`) — hotspots are marked by blue-purple starburst shapes with a bright white/gray center. The detector enforces the visual structure: a bright center (≥3 pixels, all RGB channels ≥ 180, within 40 of each other) surrounded by a blue/purple ring (≥5 pixels, blue dominant). A hint position from the per-base-type geometry table (for "ocean" type, the Launch hotspot's expected window position) narrows the search region to ±25% around the hint within the letterboxed area. This avoids scanning the splash-screen blue bars. The caption text "Launch" is verified via OCR in the bottom caption area using Levenshtein fuzzy matching (threshold ≤2), so misreads like "Paunch" are handled automatically.
 
-2. **OCR fallback** — if pixel search fails, the script tries `find_text_in_region_via_ocr()` for "Launch" (and "Paunch") across the full screen.
+2. **OCR fallback** — if pixel search fails, the script tries `find_text_in_region_via_ocr()` for "Launch" across the full screen. Levenshtein fuzzy matching handles any OCR misreads.
 
 3. **Error** — if neither method finds the hotspot, the script aborts.
 
@@ -86,7 +86,7 @@ Base.LaunchPython(room0, 'my_launch_id', 'bases/launch_music.py',
 
 After clicking Launch, the script waits 5 seconds for the launch animation, takes a screenshot to confirm the ship has launched into space, then presses Escape followed by Q to quit.
 
-After pressing Q, the game may show a confirmation dialog. The script checks if the game is still running, takes a screenshot, and looks for "Yes" or "Ok" buttons via OCR in the center region. If found, the confirmation button is clicked. (Note: the current version of the game does not display a confirmation dialog when quitting, but this check is left in place in case it is added in a future release.)
+After pressing Q, the game may show a confirmation dialog. The script checks if the game is still running, takes a screenshot, and looks for any of `{"Yes", "Ok", "Confirm"}` buttons via OCR in the center region using Levenshtein fuzzy matching. If found, the confirmation button is clicked. (Note: the current version of the game does not display a confirmation dialog when quitting, but this check is left in place in case it is added in a future release.)
 
 ### Step 7: Verify exit code 0
 
@@ -128,23 +128,35 @@ All input is handled by `dotool` (mouse movement and clicking) and `kdotool` (wi
 
 1. **OCR is the primary button-finding method** — Tesseract reliably detects button labels ("Campaign", "Continue", "Quit") in the letterboxed menu area. Calculated design coordinates serve as a fallback.
 
-2. **Pixel-based hotspot detection** — hotspot markers are blue-purple starburst shapes with a bright white/gray center. The detector collects both blue-dominant ring pixels (where blue > red and blue > green) and bright center pixels (where all RGB channels ≥ 150). This is more reliable than OCR for finding the Launch hotspot. A hint position from the per-base-type geometry table narrows the search region.
+2. **Levenshtein fuzzy matching for OCR** — instead of exact string comparison, all OCR-based text matching uses Levenshtein (edit) distance with a threshold of ≤2 (`OCR_LEVENSHTEIN_THRESHOLD`). This means OCR misreads like "Launch" → "Paunch" or "---Intro" → "--Intro" are handled automatically without needing explicit fallback strings. The `levenshtein_distance` package (available in the project virtualenv) provides the `Levenshtein(target, actual).distance()` call.
 
-3. **Tesseract misreads "Launch" as "Paunch"** — the OCR fallback tries both spellings.
+3. **Multi-string OCR search** — functions like `find_button_via_ocr()` and `verify_screen()` accept a `set[str]` of target texts. Each target is checked independently via Levenshtein distance, so semantically different words (e.g., "Yes" vs "Ok" vs "Confirm" in confirmation dialogs) and context-dependent phrases (e.g., "Landing Center" vs "Launch" vs "Main Concourse" in the hangar) are all matched in one OCR pass.
 
-4. **Intro Monologue title varies** — Tesseract may parse "---Intro Monologue---" as "---Intro", "--Intro", or "~-Intro". The `verify_screen()` function checks all variants in one OCR pass.
+4. **Multi-word phrase matching via sliding window** — `verify_screen()` handles multi-word targets (e.g., "Main Concourse") by splitting both the target and OCR output into words, then sliding a window over consecutive OCR words. Each word pair is compared via Levenshtein distance, so "main" matches "main" and "concourse" matches "concourse" as a consecutive pair. Single-word targets are checked against each OCR word individually.
 
-5. **Hangar verification texts** — the bottom-left caption may say "Landing Center" (green, no hotspot hovered), "Launch" (orange, mouse over Launch), or "Main Concourse" (orange, mouse over Main Concourse).
+5. **Main Menu button Y-coordinate adjustment** — the Main Menu buttons (Campaign, Quit, etc.) need a vertical offset correction because the button text is not vertically centered within the button sprite. The constant `MAIN_MENU_BUTTON_Y_ADJUSTMENT = 0.95` scales the Y position of detected text to land on the clickable area. This adjustment is applied only to Main Menu buttons (via the `main_menu=True` parameter) and does not affect buttons on other screens (Intro Monologue "Continue", Hangar hotspots, confirmation dialogs). Both the OCR path (`find_button_via_ocr()`) and the calculated fallback path (`calculate_button_position()`) respect this flag.
 
-6. **Confirmation dialog after quit** — the current version of the game does not display a confirmation dialog when quitting, but the script includes a check for "Yes" or "Ok" buttons in case this behavior is added in a future release.
+6. **Pixel-based hotspot detection with structure validation** — hotspot markers are blue-purple starburst shapes with a bright white/gray center. The detector enforces the visual structure observed in reference screenshots:
+   - **Bright center**: at least 3 pixels where all RGB channels are ≥ 180 and within 40 of each other (white/gray, not colored). Center diameter is between 4–19 pixels (±25% tolerance around the 5–15 pixel reference size).
+   - **Blue/purple ring**: at least 5 pixels where blue dominates over green, minimum blue value of 60, and bright neutral pixels (the center) are excluded.
+   - **Spatial validation**: center pixels are near the cluster center, and ring pixels surround the center on average.
+   Clusters that don't meet these criteria are rejected, reducing false positives from the loading splash screen or other blue elements.
 
-7. **Window geometry must be refreshed** — the window may be moved or resized between steps. `refresh_window_geometry()` is called before each screenshot.
+7. **Tesseract misreads "Launch" as "Paunch"** — handled automatically by Levenshtein fuzzy matching (finding "Launch" matches "Paunch" at distance 1). No explicit dual-string fallback is needed.
 
-8. **Loading splash screen interferes** — the splash screen's blue pixels confuse the hotspot detector, so the Hangar must be verified via OCR before searching for hotspots.
+8. **Intro Monologue title varies** — Tesseract may parse "---Intro Monologue---" as "---Intro", "--Intro", or "~-Intro". The `verify_screen()` function checks all variants in one OCR pass using a set of target strings.
 
-9. **Letterboxed viewport** — the Main Menu is letterboxed to 1.25:1 (1280/1024), and the Intro Monologue screen is letterboxed to 1.33:1 (1024/768). OCR search regions are defined as percentages of the letterboxed area.
+9. **Hangar verification with green caption support** — the bottom-left caption may say "Landing Center" (green, no hotspot hovered), "Launch" (orange, mouse over Launch), or "Main Concourse" (orange, mouse over Main Concourse). The caption OCR function (`_verify_caption_via_ocr()`) recognizes both orange AND green text when tracing the black-background bounding box for OCR cropping. Green is detected as dominant green channel (G ≥ 120, R ≤ 100, B ≤ 100).
 
-10. **Game exit code** — the game process exits after Esc+Q, but a wrapper bash script may return non-zero. Check the actual `vegastrike-engine` process.
+10. **Confirmation dialog after quit** — the current version of the game does not display a confirmation dialog when quitting, but the script includes a check for any of `{"Yes", "Ok", "Confirm"}` buttons in case this behavior is added in a future release.
+
+11. **Window geometry must be refreshed** — the window may be moved or resized between steps. `refresh_window_geometry()` is called before each screenshot.
+
+12. **Loading splash screen interferes** — the splash screen's blue pixels confuse the hotspot detector, so the Hangar must be verified via OCR before searching for hotspots.
+
+13. **Letterboxed viewport** — the Main Menu is letterboxed to 1.25:1 (1280/1024), and the Intro Monologue screen is letterboxed to 1.33:1 (1024/768). OCR search regions are defined as percentages of the letterboxed area.
+
+14. **Game exit code** — the game process exits after Esc+Q, but a wrapper bash script may return non-zero. Check the actual `vegastrike-engine` process.
 
 ## Usage
 

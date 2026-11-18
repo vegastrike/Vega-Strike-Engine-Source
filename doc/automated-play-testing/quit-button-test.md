@@ -36,18 +36,18 @@ The script uses OCR (Tesseract) as the primary method to locate the Quit button,
 
 3. **Take a screenshot** — `spectacle` captures the active window. The HiDPI scale factor is read from the KDE configuration (`kwinrc`) via `get_display_scale()`, and the native display resolution is obtained from `wayland-info` or `xdotool` via `get_display_bounds()`. Together these produce the logical display size through `get_display_bounds_logical()`.
 
-4. **Find the Quit button via OCR** — `find_quit_button_via_ocr()` searches the screenshot for "Quit" text. The Quit button is defined in `bases/main_menu.py`:
+4. **Find the Quit button via OCR** — `find_quit_button_via_ocr()` searches the screenshot for "Quit" text using Levenshtein fuzzy matching (threshold ≤2), so minor OCR misreads still match. The Quit button is defined in `bases/main_menu.py`:
 
 ```python
 # Design resolution: 1280x1024
 GUI.GUIRect(50, 580, 177, 43, "pixel", (1280, 1024))
 ```
 
-The OCR function searches in the lower portion of the letterboxed area where the Quit button appears. The function returns the center screen coordinates of the found text.
+The OCR function searches in the lower portion of the letterboxed area where the Quit button appears. The Y-coordinate of the found text is adjusted by the `MAIN_MENU_BUTTON_Y_ADJUSTMENT` factor (0.95) to account for the button text not being vertically centered within the button sprite. The function returns the center screen coordinates of the found text.
 
 5. **Click the Quit button** — `click_at_position()` translates logical coordinates to the physical screen and invokes `dotool` to perform the click.
 
-6. **Handle confirmation dialog** — after clicking Quit, the game may show a confirmation dialog. The script waits 2 seconds, checks if the game is still running, and if so takes another screenshot to look for "Yes" or "Ok" buttons via OCR using `find_confirmation_button_via_ocr()`. If found, the confirmation button is clicked. (Note: the current version of the game does not display a confirmation dialog when quitting, but this check is left in place in case it is added in a future release.)
+6. **Handle confirmation dialog** — after clicking Quit, the game may show a confirmation dialog. The script waits 2 seconds, checks if the game is still running, and if so takes another screenshot to look for any of `{"Yes", "Ok", "Confirm"}` buttons via OCR using `find_confirmation_button_via_ocr()` with Levenshtein fuzzy matching. If found, the confirmation button is clicked. (Note: the current version of the game does not display a confirmation dialog when quitting, but this check is left in place in case it is added in a future release.)
 
 7. **Verify exit code** — the script waits for the game process to exit (default timeout: 120 seconds) and prints the return code.
 
@@ -78,11 +78,15 @@ Previous approaches that were abandoned:
 
 1. **OCR is the primary button-finding method** — Tesseract reliably detects the "Quit" button label in the letterboxed menu area. This is more robust than hardcoded coordinates across different window sizes and HiDPI displays.
 
-2. **Confirmation dialog after quit** — the current version of the game does not display a confirmation dialog when quitting, but the script includes a check for "Yes" or "Ok" buttons in case this behavior is added in a future release.
+2. **Levenshtein fuzzy matching for OCR** — instead of exact string comparison, all OCR-based text matching uses Levenshtein (edit) distance with a threshold of ≤2 (`OCR_LEVENSHTEIN_THRESHOLD`). This means OCR misreads are handled automatically without needing explicit fallback strings. The `levenshtein_distance` package (available in the project virtualenv) provides the `Levenshtein(target, actual).distance()` call.
 
-3. **HiDPI scaling** — the HiDPI scale factor is read from the KDE configuration (`kwinrc`) via `get_display_scale()`. The native display resolution is obtained from `wayland-info` or `xdotool` via `get_display_bounds()`. Together these produce the logical display size through `get_display_bounds_logical()`. This scale factor ensures clicks land correctly on HiDPI displays.
+3. **Main Menu button Y-coordinate adjustment** — the Main Menu buttons (Campaign, Quit, etc.) need a vertical offset correction because the button text is not vertically centered within the button sprite. The constant `MAIN_MENU_BUTTON_Y_ADJUSTMENT = 0.95` scales the Y position of detected text to land on the clickable area. This adjustment is applied only to Main Menu buttons (via the `main_menu=True` parameter) and does not affect buttons on other screens. Both the OCR path and the calculated fallback path respect this flag.
 
-4. **Window geometry must be queried** — the window position and size are obtained via `kdotool` before each operation, as the user may have moved or resized the window.
+4. **Confirmation dialog after quit** — the current version of the game does not display a confirmation dialog when quitting, but the script includes a check for any of `{"Yes", "Ok", "Confirm"}` buttons using Levenshtein fuzzy matching in case this behavior is added in a future release.
+
+5. **HiDPI scaling** — the HiDPI scale factor is read from the KDE configuration (`kwinrc`) via `get_display_scale()`. The native display resolution is obtained from `wayland-info` or `xdotool` via `get_display_bounds()`. Together these produce the logical display size through `get_display_bounds_logical()`. This scale factor ensures clicks land correctly on HiDPI displays.
+
+6. **Window geometry must be queried** — the window position and size are obtained via `kdotool` before each operation, as the user may have moved or resized the window.
 
 ## Usage
 
