@@ -28,48 +28,14 @@
 #include <gtest/gtest.h>
 #include <map>
 
-#include "components/components_manager.h"
+#include "components/armor.h"
+#include "components/shield.h"
 #include "components/energy_container.h"
 #include "components/ftl_drive.h"
 #include "components/cloak.h"
 #include "cmd/unit_csv_factory.h"
-#include "resource/cargo.h"
 
 static const std::string upgrades_suffix = "__upgrades";
-
-// Helper: create a Cargo that represents an armor upgrade
-static Cargo makeArmorCargo(const std::string &name) {
-    // Cargo(name, description, quantity, price, category, mass, volume, ...)
-    Cargo cargo;
-    cargo.SetName(name);
-    cargo.SetCategory("Armor");
-    cargo.SetPrice(100000);
-    cargo.SetQuantity(1);
-    cargo.SetMass(10.0);
-    return cargo;
-}
-
-// Helper: create a Cargo that represents a shield upgrade
-static Cargo makeShieldCargo(const std::string &name) {
-    Cargo cargo;
-    cargo.SetName(name);
-    cargo.SetCategory("Shield");
-    cargo.SetPrice(100000);
-    cargo.SetQuantity(1);
-    cargo.SetMass(10.0);
-    return cargo;
-}
-
-// Helper: create a Cargo that represents an unknown upgrade type
-static Cargo makeUnknownCargo(const std::string &name) {
-    Cargo cargo;
-    cargo.SetName(name);
-    cargo.SetCategory("Unknown");
-    cargo.SetPrice(100000);
-    cargo.SetQuantity(1);
-    cargo.SetMass(10.0);
-    return cargo;
-}
 
 // Set up UnitCSVFactory entries so GetComponentTypeFromName returns the right type
 static void registerUpgradeType(const std::string &name, const std::string &type) {
@@ -79,74 +45,74 @@ static void registerUpgradeType(const std::string &name, const std::string &type
     UnitCSVFactory::LoadUnit(name + upgrades_suffix, data);
 }
 
-// Test: ship-default armor with meaningful values (above 10.0 threshold) is recognized as installed
+// -------------------------------------------------------------------
+// Armor tests: verify the conditions UpgradeAlreadyInstalled checks
+// -------------------------------------------------------------------
+
+// Ship-default armor with meaningful values (above 10.0 threshold) should
+// have Installed()=true and TotalMaxLayerValue() > 10.0, so the base
+// should NOT offer to sell a replacement.
 TEST(UpgradeAlreadyInstalled, ShipDefaultArmorRecognized) {
-    // Register the upgrade type so GetComponentTypeFromName returns Armor
     registerUpgradeType("armor01", "Armor");
 
-    // Ship has default armor with values above the 10.0 meaningful threshold
+    // "15/15/15" means value=15, adjusted_max=15, max=15 per facet.
+    // 4 facets × 15 = 60.0 total, well above the 10.0 threshold.
     std::map<std::string, std::string> ship_data = {
         {"armor", "15/15/15"}
     };
     UnitCSVFactory::LoadUnit("test_ship_armor", ship_data);
 
-    ComponentsManager cm;
-    cm.armor.Load("test_ship_armor");
+    Armor armor;
+    armor.Load("test_ship_armor");
 
-    // Armor is installed from ship definition, but upgrade_key is empty
-    EXPECT_TRUE(cm.armor.Installed());
-    EXPECT_TRUE(cm.armor.GetUpgradeKey().empty());
-    EXPECT_GT(cm.armor.TotalMaxLayerValue(), 10.0);
-
-    // UpgradeAlreadyInstalled should return true — the base should NOT offer to sell this armor
-    Cargo cargo = makeArmorCargo("armor01");
-    EXPECT_TRUE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_TRUE(armor.Installed());
+    EXPECT_TRUE(armor.GetUpgradeKey().empty());
+    EXPECT_GT(armor.TotalMaxLayerValue(), 10.0);
 }
 
-// Test: ship-default armor with negligible values (below 10.0 threshold) is NOT recognized
+// Ship-default armor with negligible values (below 10.0 threshold) should
+// have Installed()=true but TotalMaxLayerValue() < 10.0, so the base
+// WILL offer to sell armor.
 TEST(UpgradeAlreadyInstalled, NegligibleArmorNotRecognized) {
     registerUpgradeType("armor01b", "Armor");
 
-    // Ship has default armor with minimal values typical of built-in armor (total 6.0)
+    // "2/2/2" means value=2, adjusted_max=2, max=2 per facet.
+    // 4 facets × 2 = 8.0 total, below the 10.0 threshold.
     std::map<std::string, std::string> ship_data = {
         {"armor", "2/2/2"}
     };
     UnitCSVFactory::LoadUnit("test_ship_armor_negligible", ship_data);
 
-    ComponentsManager cm;
-    cm.armor.Load("test_ship_armor_negligible");
+    Armor armor;
+    armor.Load("test_ship_armor_negligible");
 
-    EXPECT_TRUE(cm.armor.Installed());
-    EXPECT_TRUE(cm.armor.GetUpgradeKey().empty());
-    EXPECT_LT(cm.armor.TotalMaxLayerValue(), 10.0);
-
-    // Values below 10.0 are treated as negligible, so the base WILL offer to sell armor
-    Cargo cargo = makeArmorCargo("armor01b");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_TRUE(armor.Installed());
+    EXPECT_TRUE(armor.GetUpgradeKey().empty());
+    EXPECT_LT(armor.TotalMaxLayerValue(), 10.0);
 }
 
-// Test: armor at exactly the threshold (10.0) is NOT recognized (threshold is exclusive)
+// Armor at exactly the threshold (total 10.0) is NOT recognized since
+// the check is > 10.0 (exclusive).
 TEST(UpgradeAlreadyInstalled, ArmorAtThresholdNotRecognized) {
     registerUpgradeType("armor01c", "Armor");
 
-    // TotalMaxLayerValue will be exactly 10.0
+    // "2.5/2.5/2.5" means max=2.5 per facet.
+    // 4 facets × 2.5 = 10.0 total, exactly at the threshold.
     std::map<std::string, std::string> ship_data = {
-        {"armor", "10/0/0"}
+        {"armor", "2.5/2.5/2.5"}
     };
     UnitCSVFactory::LoadUnit("test_ship_armor_threshold", ship_data);
 
-    ComponentsManager cm;
-    cm.armor.Load("test_ship_armor_threshold");
+    Armor armor;
+    armor.Load("test_ship_armor_threshold");
 
-    EXPECT_TRUE(cm.armor.Installed());
-    EXPECT_EQ(cm.armor.TotalMaxLayerValue(), 10.0);
-
+    EXPECT_TRUE(armor.Installed());
+    EXPECT_EQ(armor.TotalMaxLayerValue(), 10.0);
     // The threshold check is > 10.0, so exactly 10.0 is not recognized
-    Cargo cargo = makeArmorCargo("armor01c");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
 }
 
-// Test: purchased armor (upgrade_key set) is recognized as installed
+// Purchased armor (via Upgrade) sets upgrade_key, so it is recognized
+// regardless of TotalMaxLayerValue.
 TEST(UpgradeAlreadyInstalled, PurchasedArmorRecognized) {
     registerUpgradeType("armor02", "Armor");
 
@@ -155,18 +121,15 @@ TEST(UpgradeAlreadyInstalled, PurchasedArmorRecognized) {
     };
     UnitCSVFactory::LoadUnit("armor02" + upgrades_suffix, armor_data);
 
-    ComponentsManager cm;
-    // Simulate purchasing and installing armor
-    cm.armor.Upgrade("armor02" + upgrades_suffix);
+    Armor armor;
+    armor.Upgrade("armor02" + upgrades_suffix);
 
-    EXPECT_TRUE(cm.armor.Installed());
-    EXPECT_FALSE(cm.armor.GetUpgradeKey().empty());
-
-    Cargo cargo = makeArmorCargo("armor02");
-    EXPECT_TRUE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_TRUE(armor.Installed());
+    EXPECT_FALSE(armor.GetUpgradeKey().empty());
 }
 
-// Test: downgraded armor (not installed, zero values) is NOT recognized as installed
+// Downgraded armor has Installed()=false and zero values, so it is NOT
+// recognized as already installed.
 TEST(UpgradeAlreadyInstalled, DowngradedArmorNotRecognized) {
     registerUpgradeType("armor03", "Armor");
 
@@ -175,18 +138,15 @@ TEST(UpgradeAlreadyInstalled, DowngradedArmorNotRecognized) {
     };
     UnitCSVFactory::LoadUnit("armor03" + upgrades_suffix, armor_data);
 
-    ComponentsManager cm;
-    cm.armor.Upgrade("armor03" + upgrades_suffix);
-    cm.armor.Downgrade();
+    Armor armor;
+    armor.Upgrade("armor03" + upgrades_suffix);
+    armor.Downgrade();
 
-    EXPECT_FALSE(cm.armor.Installed());
-    EXPECT_EQ(cm.armor.TotalMaxLayerValue(), 0.0);
-
-    Cargo cargo = makeArmorCargo("armor03");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(armor.Installed());
+    EXPECT_EQ(armor.TotalMaxLayerValue(), 0.0);
 }
 
-// Test: ship with no armor can buy armor
+// Ship with no armor has Installed()=false, so the base WILL offer armor.
 TEST(UpgradeAlreadyInstalled, NoArmorCanBuy) {
     registerUpgradeType("armor04", "Armor");
 
@@ -195,21 +155,24 @@ TEST(UpgradeAlreadyInstalled, NoArmorCanBuy) {
     };
     UnitCSVFactory::LoadUnit("test_no_armor_ship", no_armor_data);
 
-    ComponentsManager cm;
-    cm.armor.Load("test_no_armor_ship");
+    Armor armor;
+    armor.Load("test_no_armor_ship");
 
-    EXPECT_FALSE(cm.armor.Installed());
-    EXPECT_EQ(cm.armor.TotalMaxLayerValue(), 0.0);
-
-    Cargo cargo = makeArmorCargo("armor04");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(armor.Installed());
+    EXPECT_EQ(armor.TotalMaxLayerValue(), 0.0);
 }
 
-// Test: ship-default shield with meaningful values (above 10.0 threshold) is recognized as installed
+// -------------------------------------------------------------------
+// Shield tests: verify the conditions UpgradeAlreadyInstalled checks
+// -------------------------------------------------------------------
+
+// Ship-default shield with meaningful values (above 10.0 threshold) should
+// have Installed()=true and TotalMaxLayerValue() > 10.0.
 TEST(UpgradeAlreadyInstalled, ShipDefaultShieldRecognized) {
     registerUpgradeType("shield01", "Shield");
 
-    // Ship has default shield with values above the 10.0 meaningful threshold
+    // "10/10/10" means value=10, adjusted_max=10, max=10 per facet.
+    // 4 facets × 10 = 40.0 total, well above the 10.0 threshold.
     std::map<std::string, std::string> ship_data = {
         {"shield", "10/10/10"},
         {"shield_facets", "4"},
@@ -217,22 +180,24 @@ TEST(UpgradeAlreadyInstalled, ShipDefaultShieldRecognized) {
     };
     UnitCSVFactory::LoadUnit("test_ship_shield", ship_data);
 
-    ComponentsManager cm;
-    cm.shield.Load("test_ship_shield");
+    EnergyContainer container(ComponentType::Capacitor);
+    FtlDrive ftl;
+    Cloak cloak;
+    Shield shield(&container, &ftl, &cloak);
+    shield.Load("test_ship_shield");
 
-    EXPECT_TRUE(cm.shield.Installed());
-    EXPECT_TRUE(cm.shield.GetUpgradeKey().empty());
-    EXPECT_GT(cm.shield.TotalMaxLayerValue(), 10.0);
-
-    Cargo cargo = makeShieldCargo("shield01");
-    EXPECT_TRUE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_TRUE(shield.Installed());
+    EXPECT_TRUE(shield.GetUpgradeKey().empty());
+    EXPECT_GT(shield.TotalMaxLayerValue(), 10.0);
 }
 
-// Test: ship-default shield with negligible values (below 10.0 threshold) is NOT recognized
+// Ship-default shield with negligible values (below 10.0 threshold) should
+// have Installed()=true but TotalMaxLayerValue() < 10.0.
 TEST(UpgradeAlreadyInstalled, NegligibleShieldNotRecognized) {
     registerUpgradeType("shield01b", "Shield");
 
-    // Ship has default shield with minimal values (total 6.0, below threshold)
+    // "2/2/2" means max=2 per facet.
+    // 4 facets × 2 = 8.0 total, below the 10.0 threshold.
     std::map<std::string, std::string> ship_data = {
         {"shield", "2/2/2"},
         {"shield_facets", "4"},
@@ -240,42 +205,43 @@ TEST(UpgradeAlreadyInstalled, NegligibleShieldNotRecognized) {
     };
     UnitCSVFactory::LoadUnit("test_ship_shield_negligible", ship_data);
 
-    ComponentsManager cm;
-    cm.shield.Load("test_ship_shield_negligible");
+    EnergyContainer container(ComponentType::Capacitor);
+    FtlDrive ftl;
+    Cloak cloak;
+    Shield shield(&container, &ftl, &cloak);
+    shield.Load("test_ship_shield_negligible");
 
-    EXPECT_TRUE(cm.shield.Installed());
-    EXPECT_TRUE(cm.shield.GetUpgradeKey().empty());
-    EXPECT_LT(cm.shield.TotalMaxLayerValue(), 10.0);
-
-    // Values below 10.0 are treated as negligible, so the base WILL offer to sell shield
-    Cargo cargo = makeShieldCargo("shield01b");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_TRUE(shield.Installed());
+    EXPECT_TRUE(shield.GetUpgradeKey().empty());
+    EXPECT_LT(shield.TotalMaxLayerValue(), 10.0);
 }
 
-// Test: shield at exactly the threshold (10.0) is NOT recognized (threshold is exclusive)
+// Shield at exactly the threshold (total 10.0) is NOT recognized since
+// the check is > 10.0 (exclusive).
 TEST(UpgradeAlreadyInstalled, ShieldAtThresholdNotRecognized) {
     registerUpgradeType("shield01c", "Shield");
 
-    // TotalMaxLayerValue will be exactly 10.0
+    // "2.5/2.5/2.5" means max=2.5 per facet.
+    // 4 facets × 2.5 = 10.0 total, exactly at the threshold.
     std::map<std::string, std::string> ship_data = {
-        {"shield", "10/0/0"},
+        {"shield", "2.5/2.5/2.5"},
         {"shield_facets", "4"},
         {"Shield_Recharge", "1/1/1"}
     };
     UnitCSVFactory::LoadUnit("test_ship_shield_threshold", ship_data);
 
-    ComponentsManager cm;
-    cm.shield.Load("test_ship_shield_threshold");
+    EnergyContainer container(ComponentType::Capacitor);
+    FtlDrive ftl;
+    Cloak cloak;
+    Shield shield(&container, &ftl, &cloak);
+    shield.Load("test_ship_shield_threshold");
 
-    EXPECT_TRUE(cm.shield.Installed());
-    EXPECT_EQ(cm.shield.TotalMaxLayerValue(), 10.0);
-
+    EXPECT_TRUE(shield.Installed());
+    EXPECT_EQ(shield.TotalMaxLayerValue(), 10.0);
     // The threshold check is > 10.0, so exactly 10.0 is not recognized
-    Cargo cargo = makeShieldCargo("shield01c");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
 }
 
-// Test: purchased shield (upgrade_key set) is recognized as installed
+// Purchased shield (via Upgrade) sets upgrade_key, so it is recognized.
 TEST(UpgradeAlreadyInstalled, PurchasedShieldRecognized) {
     registerUpgradeType("shield02", "Shield");
 
@@ -286,17 +252,17 @@ TEST(UpgradeAlreadyInstalled, PurchasedShieldRecognized) {
     };
     UnitCSVFactory::LoadUnit("shield02" + upgrades_suffix, shield_data);
 
-    ComponentsManager cm;
-    cm.shield.Upgrade("shield02" + upgrades_suffix);
+    EnergyContainer container(ComponentType::Capacitor);
+    FtlDrive ftl;
+    Cloak cloak;
+    Shield shield(&container, &ftl, &cloak);
+    shield.Upgrade("shield02" + upgrades_suffix);
 
-    EXPECT_TRUE(cm.shield.Installed());
-    EXPECT_FALSE(cm.shield.GetUpgradeKey().empty());
-
-    Cargo cargo = makeShieldCargo("shield02");
-    EXPECT_TRUE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_TRUE(shield.Installed());
+    EXPECT_FALSE(shield.GetUpgradeKey().empty());
 }
 
-// Test: downgraded shield (not installed, zero values) is NOT recognized as installed
+// Downgraded shield has Installed()=false and zero values.
 TEST(UpgradeAlreadyInstalled, DowngradedShieldNotRecognized) {
     registerUpgradeType("shield03", "Shield");
 
@@ -307,18 +273,18 @@ TEST(UpgradeAlreadyInstalled, DowngradedShieldNotRecognized) {
     };
     UnitCSVFactory::LoadUnit("shield03" + upgrades_suffix, shield_data);
 
-    ComponentsManager cm;
-    cm.shield.Upgrade("shield03" + upgrades_suffix);
-    cm.shield.Downgrade();
+    EnergyContainer container(ComponentType::Capacitor);
+    FtlDrive ftl;
+    Cloak cloak;
+    Shield shield(&container, &ftl, &cloak);
+    shield.Upgrade("shield03" + upgrades_suffix);
+    shield.Downgrade();
 
-    EXPECT_FALSE(cm.shield.Installed());
-    EXPECT_EQ(cm.shield.TotalMaxLayerValue(), 0.0);
-
-    Cargo cargo = makeShieldCargo("shield03");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(shield.Installed());
+    EXPECT_EQ(shield.TotalMaxLayerValue(), 0.0);
 }
 
-// Test: ship with no shield can buy shield
+// Ship with no shield has Installed()=false.
 TEST(UpgradeAlreadyInstalled, NoShieldCanBuy) {
     registerUpgradeType("shield04", "Shield");
 
@@ -327,22 +293,12 @@ TEST(UpgradeAlreadyInstalled, NoShieldCanBuy) {
     };
     UnitCSVFactory::LoadUnit("test_no_shield_ship", no_shield_data);
 
-    ComponentsManager cm;
-    cm.shield.Load("test_no_shield_ship");
+    EnergyContainer container(ComponentType::Capacitor);
+    FtlDrive ftl;
+    Cloak cloak;
+    Shield shield(&container, &ftl, &cloak);
+    shield.Load("test_no_shield_ship");
 
-    EXPECT_FALSE(cm.shield.Installed());
-    EXPECT_EQ(cm.shield.TotalMaxLayerValue(), 0.0);
-
-    Cargo cargo = makeShieldCargo("shield04");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
-}
-
-// Test: unknown component type returns true (err on the side of caution)
-TEST(UpgradeAlreadyInstalled, UnknownTypeReturnsTrue) {
-    registerUpgradeType("unknown01", "None");
-
-    ComponentsManager cm;
-    Cargo cargo = makeUnknownCargo("unknown01");
-    // GetComponentByType returns nullptr for unknown types, so UpgradeAlreadyInstalled returns true
-    EXPECT_TRUE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(shield.Installed());
+    EXPECT_EQ(shield.TotalMaxLayerValue(), 0.0);
 }
