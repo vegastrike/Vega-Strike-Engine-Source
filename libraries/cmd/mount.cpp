@@ -293,6 +293,14 @@ bool Mount::PhysicsAlignedFire(Unit *caller,
             }
         }
         time_to_lock = type->lock_time;
+        // A shot is going out: play the player's weapon effect. This is the
+        // place every shot passes through, including the repeat shots of a
+        // held trigger (Mount::Fire only runs when the trigger is pressed).
+        // Beams have their own continuous effect, see Beam::UpdatePhysics.
+        if (type->type != WEAPON_TYPE::BEAM && forcefeedback != nullptr
+                && caller == _Universe->AccessCockpit()->GetParent()) {
+            forcefeedback->playWeaponFire(type->name, type->isMissile());
+        }
         switch (type->type) {
             case WEAPON_TYPE::UNKNOWN:
                 break;
@@ -529,10 +537,6 @@ bool Mount::Fire(Unit *firer, void *owner, bool Missile, bool listen_to_owner) {
         return true;
     } else if (ref.refire >= type->Refire()) {
         processed = FIRED;
-        if (owner == _Universe->AccessCockpit()->GetParent()) {
-            forcefeedback->playLaser();
-        };
-
         return true;
     }
     return false;
