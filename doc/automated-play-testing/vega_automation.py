@@ -1003,6 +1003,62 @@ def find_text_in_region_via_ocr(screenshot_path: str,
     )
 
 
+def find_text_in_region_via_ocr_multi(screenshot_path: str,
+                                      text_set: set[str],
+                                      window_x: int,
+                                      window_y: int,
+                                      window_width: int = 0,
+                                      window_height: int = 0,
+                                      region_x_percent: float = 0.0,
+                                      region_y_percent: float = 0.0,
+                                      region_w_percent: float = 100.0,
+                                      region_h_percent: float = 100.0,
+                                      verbose: bool = False) -> tuple[int, int] | None:
+    """
+    Find any one of several text strings in a designated region of a screenshot using OCR,
+    and return the center screen coordinates of the first match.
+
+    Convenience wrapper around ``find_text_in_region_via_ocr`` for cases where OCR may
+    misread a word (e.g., "Launch" read as "Paunch").  Texts are tried in sorted order
+    for deterministic results.
+
+    :param screenshot_path: Path to the screenshot image file
+    :param text_set: Set of text strings to search for
+    :param window_x: Window X position on screen (logical pixels)
+    :param window_y: Window Y position on screen (logical pixels)
+    :param window_width: Logical window width from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
+    :param window_height: Logical window height from kdotool (for HiDPI scale calculation).
+        If 0, no scaling is applied.
+    :param region_x_percent: Starting X of search region as a percentage (0-100)
+    :param region_y_percent: Starting Y of search region as a percentage (0-100)
+    :param region_w_percent: Width of search region as a percentage (0-100)
+    :param region_h_percent: Height of search region as a percentage (0-100)
+    :param verbose: Print debug info
+    :return: Tuple of (screen_x, screen_y) — center of the first found text (logical pixels),
+        or None if none of the texts are found
+    """
+    for text in sorted(text_set):
+        pos = find_text_in_region_via_ocr(
+            screenshot_path=screenshot_path,
+            text=text,
+            window_x=window_x,
+            window_y=window_y,
+            window_width=window_width,
+            window_height=window_height,
+            region_x_percent=region_x_percent,
+            region_y_percent=region_y_percent,
+            region_w_percent=region_w_percent,
+            region_h_percent=region_h_percent,
+            verbose=verbose
+        )
+        if pos is not None:
+            if verbose:
+                print(f"Found '{text}' via OCR at {pos}")
+            return pos
+    return None
+
+
 def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
                                           text: str,
                                           window_x: int,

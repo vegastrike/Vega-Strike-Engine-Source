@@ -57,6 +57,7 @@ from vega_automation import (
     verify_screen,
     verify_screen_single,
     find_text_in_region_via_ocr,
+    find_text_in_region_via_ocr_multi,
     find_text_in_letterbox_region_via_ocr,
     find_hotspot_via_pixel_search,
     get_hotspot_hint_position,
@@ -493,19 +494,12 @@ def main():
             # Fallback: try OCR to find the "Launch" text
             if args.verbose:
                 print("Pixel search did not find Launch hotspot; trying OCR...")
-            launch_pos = find_text_in_region_via_ocr(
-                screenshot_path, "Launch", wx, wy, ww, wh,
+            launch_pos = find_text_in_region_via_ocr_multi(
+                screenshot_path, {"Launch", "Paunch"}, wx, wy, ww, wh,
                 region_x_percent=0, region_y_percent=0,
                 region_w_percent=100, region_h_percent=100,
                 verbose=args.verbose
             )
-            if launch_pos is None:
-                launch_pos = find_text_in_region_via_ocr(
-                    screenshot_path, "Paunch", wx, wy, ww, wh,
-                    region_x_percent=0, region_y_percent=0,
-                    region_w_percent=100, region_h_percent=100,
-                    verbose=args.verbose
-                )
             if launch_pos is not None:
                 launch_x, launch_y = launch_pos
                 if args.verbose:
