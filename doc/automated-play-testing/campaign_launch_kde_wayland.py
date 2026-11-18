@@ -226,6 +226,7 @@ def main():
             screenshot_path, "Campaign", wx, wy, ww, wh,
             region_x_percent=0, region_y_percent=0,
             region_w_percent=50, region_h_percent=33,
+            main_menu=True,
             verbose=args.verbose
         )
         if campaign_pos is not None:

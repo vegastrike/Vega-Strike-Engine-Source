@@ -21,6 +21,12 @@ POSITION_RE: Pattern[str] = re.compile(r'^ {2}Position: (\d+)(?:\.\d+)?,(\d+)(?:
 GEOMETRY_RE: Pattern[str] = re.compile(r'^ {2}Geometry: (\d+)(?:\.\d+)?x(\d+)(?:\.\d+)?$')
 MODE_RE: Pattern[str] = re.compile(r'^[ \t]+mode:\r?\n[ \t]+width: (\d+) px, height: (\d+) px, refresh: \d+(?:\.\d+)? Hz,\r?\n[ \t]+flags: current$')
 
+# Y-coordinate adjustment factor for Main Menu buttons on KDE/Wayland.
+# OCR-detected button text positions are systematically biased downward on this
+# platform; multiplying the word's top offset by this factor shifts the click
+# point upward so it lands on the button rather than below it.
+MAIN_MENU_BUTTON_Y_ADJUSTMENT: float = 0.95
+
 
 def run_cmd(cmd: str, shell: bool = True) -> tuple[str, int]:
     """Run a shell command and return (stdout, returncode).
@@ -172,7 +178,7 @@ def ocr_text_via_command_lina(screenshot_path: str, verbose: bool = False) -> st
         return ""
 
 
-def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: int = 0, window_y: int = 0, window_width: int = 0, window_height: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
+def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: int = 0, window_y: int = 0, window_width: int = 0, window_height: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, main_menu: bool = False, verbose: bool = False) -> tuple[int, int] | None:
     """
     Find a button with any of the specified text strings in the specified area of the screenshot and return its absolute screen coordinates.
     Searches for each text string; returns the first match found.
@@ -194,6 +200,8 @@ def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: 
     :param crop_y_starting_percent: The starting vertical percentage of the screenshot to crop to
     :param crop_x_ending_percent: The ending horizontal percentage of the screenshot to crop to
     :param crop_y_ending_percent: The ending vertical percentage of the screenshot to crop to
+    :param main_menu: If True, apply the Main Menu button Y-coordinate adjustment
+        (compensates for systematic downward bias on KDE/Wayland).
     :param verbose: Print debug info
     :return: The absolute coordinates of the center of the button text (logical screen pixels), or None on failure
     """
@@ -247,12 +255,13 @@ def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: 
             word_h: int = int(data['height'][i])
 
             # Map crop-relative OCR position to screenshot-space pixel coordinates.
-            # Use 0.45 instead of 0.5 for the vertical offset so the click lands
-            # slightly above the text center, compensating for the systematic
-            # downward bias observed on KDE/Wayland (see click_quit_kde_wayland.py
-            # and campaign_launch_kde_wayland.py).
             button_center_x_in_screenshot: int = crop_x_start + word_x + word_w // 2
-            button_center_y_in_screenshot: int = crop_y_start + word_y + int(word_h * 0.45)
+            if main_menu:
+                # Only for Main Menu buttons: adjust the Y coordinate upward to compensate
+                # for the systematic downward bias observed on KDE/Wayland.
+                button_center_y_in_screenshot: int = crop_y_start + int(word_y * MAIN_MENU_BUTTON_Y_ADJUSTMENT) + word_h // 2
+            else:
+                button_center_y_in_screenshot = crop_y_start + word_y + word_h // 2
 
             # Convert screenshot-space pixels to logical screen coordinates.
             # The screenshot may include window decorations (title bar, borders).
@@ -284,7 +293,7 @@ def find_button_via_ocr(screenshot_path: str, button_texts: set[str], window_x: 
     return None
 
 
-def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x: int = 0, window_y: int = 0, window_width: int = 0, window_height: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, verbose: bool = False) -> tuple[int, int] | None:
+def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x: int = 0, window_y: int = 0, window_width: int = 0, window_height: int = 0, crop_x_starting_percent: float | int = 0, crop_y_starting_percent: float | int = 0, crop_x_ending_percent: float | int = 100, crop_y_ending_percent: float | int = 100, main_menu: bool = False, verbose: bool = False) -> tuple[int, int] | None:
     """
     Find the button with the specified text in the specified area of the screenshot and return its absolute screen coordinates.
     Thin wrapper around the list-based ``find_button_via_ocr``.
@@ -302,6 +311,7 @@ def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x:
     :param crop_y_starting_percent: The starting vertical percentage of the screenshot to crop to
     :param crop_x_ending_percent: The ending horizontal percentage of the screenshot to crop to
     :param crop_y_ending_percent: The ending vertical percentage of the screenshot to crop to
+    :param main_menu: If True, apply the Main Menu button Y-coordinate adjustment.
     :param verbose: Print debug info
     :return: The absolute coordinates of the center of the button text (logical screen pixels), or None on failure
     """
@@ -316,6 +326,7 @@ def find_button_via_ocr_single(screenshot_path: str, button_text: str, window_x:
         crop_y_starting_percent=crop_y_starting_percent,
         crop_x_ending_percent=crop_x_ending_percent,
         crop_y_ending_percent=crop_y_ending_percent,
+        main_menu=main_menu,
         verbose=verbose
     )
 
@@ -354,6 +365,7 @@ def find_quit_button_via_ocr(screenshot_path: str, window_x: int = 0, window_y: 
         crop_y_starting_percent=45,
         crop_x_ending_percent=100,
         crop_y_ending_percent=100,
+        main_menu=True,
         verbose=verbose
     )
 
@@ -759,6 +771,7 @@ def calculate_button_position(wx: int, wy: int, ww: int, wh: int,
                               design_w: int = MAIN_MENU_DESIGN_W,
                               design_h: int = MAIN_MENU_DESIGN_H,
                               letterboxed: bool = True,
+                              main_menu: bool = False,
                               verbose: bool = False) -> tuple[int, int]:
     """
     Calculate the screen position of a button's text based on design-resolution coordinates.
@@ -779,6 +792,8 @@ def calculate_button_position(wx: int, wy: int, ww: int, wh: int,
     :param design_w: Design resolution width
     :param design_h: Design resolution height
     :param letterboxed: If True, account for the letterboxed region (default True for menus)
+    :param main_menu: If True, apply the Main Menu button Y-coordinate adjustment
+        (compensates for systematic downward bias on KDE/Wayland).
     :param verbose: Print debug info
     :return: Tuple of (screen_x, screen_y) — center of the button text
     """
@@ -796,10 +811,12 @@ def calculate_button_position(wx: int, wy: int, ww: int, wh: int,
         sy = wh / design_h
 
     text_x = btn_x + btn_w * text_offset_x
-    # Use 0.45 instead of 0.5 for the vertical offset so the click lands slightly
-    # above the text center, compensating for the systematic downward bias observed
-    # on KDE/Wayland.
-    text_y = btn_y + btn_h * 0.45
+    if main_menu:
+        # Only for Main Menu buttons: adjust the Y coordinate upward to compensate
+        # for the systematic downward bias observed on KDE/Wayland.
+        text_y = int(btn_y * MAIN_MENU_BUTTON_Y_ADJUSTMENT) + btn_h // 2
+    else:
+        text_y = btn_y + btn_h // 2
 
     screen_x = int(lb_x + text_x * sx)
     screen_y = int(lb_y + text_y * sy)
@@ -838,6 +855,7 @@ def calculate_main_menu_button_position(wx: int, wy: int, ww: int, wh: int,
         design_w=MAIN_MENU_DESIGN_W,
         design_h=MAIN_MENU_DESIGN_H,
         letterboxed=True,
+        main_menu=True,
         verbose=verbose
     )
 
@@ -1071,6 +1089,7 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
                                           region_h_percent: float = 100.0,
                                           active_window_only: bool = True,
                                           aspect_ratio: float = 1280 / 1024,
+                                          main_menu: bool = False,
                                           verbose: bool = False) -> tuple[int, int] | None:
     """
     Find text in a designated region of the letterboxed area of a screenshot using OCR.
@@ -1099,6 +1118,7 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
         The letterbox calculation uses the actual screenshot dimensions. Default True.
     :param aspect_ratio: The design aspect ratio (width/height) for the letterbox calculation.
         Defaults to 1280/1024 (1.25:1) for the Main Menu. Use 1024/768 (1.33:1) for Intro Monologue.
+    :param main_menu: If True, apply the Main Menu button Y-coordinate adjustment.
     :param verbose: Print debug info
     :return: Tuple of (screen_x, screen_y) — center of the found text (logical pixels), or None
     """
@@ -1160,6 +1180,7 @@ def find_text_in_letterbox_region_via_ocr(screenshot_path: str,
             crop_y_starting_percent=crop_y_start,
             crop_x_ending_percent=crop_x_end,
             crop_y_ending_percent=crop_y_end,
+            main_menu=main_menu,
             verbose=verbose
         )
     else:
