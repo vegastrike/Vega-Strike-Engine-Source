@@ -86,6 +86,17 @@ TEST(Manifest, HasCargo) {
     ASSERT_FALSE(manifest.HasCargo("Diamond"));
 }
 
+TEST(Manifest, HasCargoAcceptsTheUnitsJsonKeySuffix) {
+    // units.json names a part <part>__upgrades, the price lists and the shops name it <part>.
+    // GetCargoByName() has always accepted either; HasCargo() used to reject the suffixed form,
+    // so every part the shops sell fell through to the space junk price.
+    Manifest manifest = createManifest();
+    ASSERT_TRUE(manifest.HasCargo("armor06__upgrades"));
+    ASSERT_TRUE(manifest.HasCargo("hawkeye4__upgrades"));
+    ASSERT_FALSE(manifest.HasCargo("armor07__upgrades"));
+    ASSERT_EQ(manifest.GetCargoByName("armor06__upgrades").GetName(), "armor06");
+}
+
 TEST(Manifest, GetRandomCargo) {
     Manifest manifest = createManifest();
     Cargo c = manifest.GetRandomCargo();

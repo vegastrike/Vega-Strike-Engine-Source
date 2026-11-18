@@ -218,8 +218,16 @@ int Manifest::GetIndex(const std::string& name, const std::string& category) con
 
 // Consider deleting this. It's almost exactly the same as GetIndex
 bool Manifest::HasCargo(const std::string& name) const {
+    // A part is listed without the units.json suffix: armor03, not armor03__upgrades.
+    // GetCargoByName() already accepts either, and the two disagreeing made PriceCargo()
+    // fall through to the space junk price for every part the shops sell.
+    const std::string upgrades_suffix = "__upgrades";
+    const std::string cargo_name = boost::algorithm::ends_with(name, upgrades_suffix)
+            ? name.substr(0, name.length() - upgrades_suffix.length())
+            : name;
+
     for(const Cargo& c : _items) {
-        if(c.name == name) {
+        if(c.name == cargo_name) {
             return true;
         }
     }
