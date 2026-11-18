@@ -495,7 +495,7 @@ def main():
             if args.verbose:
                 print("Pixel search did not find Launch hotspot; trying OCR...")
             launch_pos = find_text_in_region_via_ocr_multi(
-                screenshot_path, {"Launch", "Paunch"}, wx, wy, ww, wh,
+                screenshot_path, {"Launch", "Paunch", "sunch"}, wx, wy, ww, wh,
                 region_x_percent=0, region_y_percent=0,
                 region_w_percent=100, region_h_percent=100,
                 verbose=args.verbose
