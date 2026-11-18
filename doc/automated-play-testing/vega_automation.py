@@ -1211,7 +1211,7 @@ def get_hotspot_hint_position(
 
 def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 80) -> bool:
     """
-    Check whether a pixel is a blue-dominant color (hotspot indicator).
+    Check whether a pixel is a blue-dominant color (hotspot indicator ring).
 
     Hotspot markers are blue-purple starburst shapes with a bright center.
     The blue channel dominates the color, but red and green may be present
@@ -1227,20 +1227,55 @@ def _is_bright_blue_pixel(r: int, g: int, b: int, blue_threshold: int = 80) -> b
     return b > r and b > g and b >= blue_threshold
 
 
-def _is_hotspot_center_pixel(r: int, g: int, b: int, brightness_threshold: int = 150) -> bool:
+def _is_hotspot_ring_pixel(r: int, g: int, b: int) -> bool:
     """
-    Check whether a pixel is a bright hotspot center.
+    Check whether a pixel belongs to the blue/purple ring surrounding a hotspot center.
 
-    The center of the hotspot marker is a small white/gray circle surrounded
-    by the blue-purple ring.  All three channels are high.
+    The ring is blue-purple: blue dominates, and red may be present (purple tint),
+    but green is suppressed relative to blue.  The pixel must not be so bright
+    that it looks like the center itself.
 
     :param r: Red channel value (0-255)
     :param g: Green channel value (0-255)
     :param b: Blue channel value (0-255)
-    :param brightness_threshold: Minimum value for each channel
-    :return: True if the pixel is a bright center pixel
+    :return: True if the pixel looks like a blue/purple ring pixel
     """
-    return r >= brightness_threshold and g >= brightness_threshold and b >= brightness_threshold
+    # Blue must dominate and be significant.
+    if b <= 60:
+        return False
+    # Blue > green ensures blue/purple rather than white/gray/green.
+    if b <= g:
+        return False
+    # The pixel should not be a bright center pixel (all channels high and similar).
+    # If all three channels are high and close together, it's the center, not the ring.
+    brightness = (r + g + b) / 3
+    if brightness >= 180 and abs(r - g) <= 30 and abs(g - b) <= 30 and abs(r - b) <= 30:
+        return False
+    return True
+
+
+def _is_hotspot_center_pixel(r: int, g: int, b: int, brightness_threshold: int = 180) -> bool:
+    """
+    Check whether a pixel is a bright hotspot center (white/gray).
+
+    The center of the hotspot marker is a small white/gray circle surrounded
+    by the blue-purple ring.  All three channels are high and close together
+    (neutral gray/white, not colored).
+
+    :param r: Red channel value (0-255)
+    :param g: Green channel value (0-255)
+    :param b: Blue channel value (0-255)
+    :param brightness_threshold: Minimum value for each channel (raised to 180
+        to require a truly bright center, matching the reference screenshots)
+    :return: True if the pixel is a bright neutral center pixel
+    """
+    if r < brightness_threshold or g < brightness_threshold or b < brightness_threshold:
+        return False
+    # The center must be neutral (gray/white), not strongly colored.
+    # Channels should be within 40 of each other to rule out colored bright pixels.
+    if abs(r - g) > 40 or abs(g - b) > 40 or abs(r - b) > 40:
+        return False
+    return True
 
 
 def _cluster_blue_pixels(pixels_list: list[tuple[int, int]], cluster_distance: int = 30) -> list[list[tuple[int, int]]]:
@@ -1298,6 +1333,122 @@ def _cluster_center(cluster: list[tuple[int, int]]) -> tuple[float, float]:
     cx = sum(p[0] for p in cluster) / len(cluster)
     cy = sum(p[1] for p in cluster) / len(cluster)
     return (cx, cy)
+
+
+def _validate_hotspot_structure(pixels: Any,
+                                 cluster: list[tuple[int, int]],
+                                 center_x: float,
+                                 center_y: float,
+                                 verbose: bool = False) -> bool:
+    """
+    Validate that a cluster has the proper hotspot structure: a bright white/gray
+    center surrounded by a blue/purple ring.
+
+    Based on the reference screenshots, the hotspot has:
+    - A bright white/gray center circle (~5-15 pixels in diameter)
+    - A blue/purple ring surrounding the center
+    - Optionally more blue/purple glow beyond the ring
+
+    This function checks that the cluster contains both center pixels and ring pixels,
+    and that the center is roughly in the middle of the cluster.
+
+    :param pixels: Loaded pixel array from PIL Image (img.load())
+    :param cluster: List of (x, y) tuples of detected hotspot pixels
+    :param center_x: Cluster center X coordinate
+    :param center_y: Cluster center Y coordinate
+    :param verbose: Print debug info
+    :return: True if the cluster has a valid hotspot structure
+    """
+    if not cluster:
+        return False
+
+    # Classify each pixel in the cluster as center or ring.
+    center_count = 0
+    ring_count = 0
+    center_positions: list[tuple[int, int]] = []
+    ring_positions: list[tuple[int, int]] = []
+
+    for px, py in cluster:
+        pixel = pixels[px, py]
+        if len(pixel) >= 3:
+            r, g, b = pixel[0], pixel[1], pixel[2]
+            if _is_hotspot_center_pixel(r, g, b):
+                center_count += 1
+                center_positions.append((px, py))
+            elif _is_hotspot_ring_pixel(r, g, b):
+                ring_count += 1
+                ring_positions.append((px, py))
+
+    if verbose:
+        print(f"  Structure check: {center_count} center pixels, {ring_count} ring pixels "
+              f"(total cluster: {len(cluster)})")
+
+    # Must have both a center and a ring.
+    if center_count < 3:
+        if verbose:
+            print("  Rejected: not enough bright center pixels (need at least 3)")
+        return False
+
+    if ring_count < 5:
+        if verbose:
+            print("  Rejected: not enough ring pixels (need at least 5)")
+        return False
+
+    # The center pixels should be clustered near the cluster center.
+    # Calculate the center of the center pixels.
+    if center_positions:
+        center_cx = sum(p[0] for p in center_positions) / len(center_positions)
+        center_cy = sum(p[1] for p in center_positions) / len(center_positions)
+        # The center of center pixels should be within 10 pixels of the cluster center.
+        center_dist = ((center_cx - center_x) ** 2 + (center_cy - center_y) ** 2) ** 0.5
+        if center_dist > 10:
+            if verbose:
+                print(f"  Rejected: center pixels too far from cluster center ({center_dist:.1f}px)")
+            return False
+
+    # Check the size of the center region. Based on reference screenshots, the center
+    # circle is roughly 5-15 pixels in diameter. We estimate the diameter from the
+    # spread of center pixels.
+    if len(center_positions) >= 2:
+        max_x = max(p[0] for p in center_positions)
+        min_x = min(p[0] for p in center_positions)
+        max_y = max(p[1] for p in center_positions)
+        min_y = min(p[1] for p in center_positions)
+        center_diameter = max(max_x - min_x, max_y - min_y) + 1  # +1 for inclusive count
+
+        # Allow ±25% tolerance around the expected size range (5-15 pixels).
+        # Acceptable range: ~4 to ~19 pixels.
+        if center_diameter < 4 or center_diameter > 19:
+            if verbose:
+                print(f"  Rejected: center diameter {center_diameter}px outside acceptable range (4-19)")
+            return False
+
+    # Check that the ring surrounds the center. We do this by checking that ring pixels
+    # are, on average, further from the center pixel cluster than the center pixels themselves.
+    if center_positions and ring_positions:
+        center_cx = sum(p[0] for p in center_positions) / len(center_positions)
+        center_cy = sum(p[1] for p in center_positions) / len(center_positions)
+
+        avg_center_dist = sum(
+            ((p[0] - center_cx) ** 2 + (p[1] - center_cy) ** 2) ** 0.5
+            for p in center_positions
+        ) / len(center_positions)
+
+        avg_ring_dist = sum(
+            ((p[0] - center_cx) ** 2 + (p[1] - center_cy) ** 2) ** 0.5
+            for p in ring_positions
+        ) / len(ring_positions)
+
+        if verbose:
+            print(f"  Avg center distance: {avg_center_dist:.1f}, avg ring distance: {avg_ring_dist:.1f}")
+
+        # Ring pixels should be further from the center than center pixels on average.
+        if avg_ring_dist <= avg_center_dist:
+            if verbose:
+                print("  Rejected: ring pixels not surrounding center")
+            return False
+
+    return True
 
 
 def _distance_to_hint(cx: float, cy: float, hint_x: float, hint_y: float) -> float:
@@ -1707,7 +1858,7 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
             pixel = pixels[x, y]
             if len(pixel) >= 3:
                 r, g, b = pixel[0], pixel[1], pixel[2]
-                if _is_bright_blue_pixel(r, g, b) or _is_hotspot_center_pixel(r, g, b):
+                if _is_hotspot_ring_pixel(r, g, b) or _is_hotspot_center_pixel(r, g, b):
                     hotspot_pixels.append((x, y))
 
     if not hotspot_pixels:
@@ -1726,6 +1877,25 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
             cx, cy = _cluster_center(cluster)
             print(f"  Cluster {i}: {len(cluster)} pixels, center ({cx:.1f}, {cy:.1f})")
 
+    # Validate each cluster has the proper hotspot structure: bright center surrounded
+    # by a blue/purple ring.  Reject clusters that are just random blue noise.
+    valid_clusters = []
+    for cluster in clusters:
+        cx, cy = _cluster_center(cluster)
+        if _validate_hotspot_structure(pixels, cluster, cx, cy, verbose=verbose):
+            valid_clusters.append(cluster)
+        else:
+            if verbose:
+                print(f"  Cluster ({cx:.1f}, {cy:.1f}) failed structure validation, skipping")
+
+    if not valid_clusters:
+        if verbose:
+            print("No clusters passed structure validation")
+        return None
+
+    if verbose:
+        print(f"{len(valid_clusters)} cluster(s) passed structure validation")
+
     # Convert hint to screenshot-space for distance comparison (if provided).
     # The hint is in logical window coords; multiply by display scale and add decoration offsets.
     hint_screenshot_x = hint_window_x * display_scale + left_border if hint_window_x is not None else None
@@ -1734,7 +1904,7 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
     # Sort clusters: by distance to hint (if hint provided) or by size (largest first)
     if hint_screenshot_x is not None and hint_screenshot_y is not None:
         clusters_with_dist = []
-        for cluster in clusters:
+        for cluster in valid_clusters:
             cx, cy = _cluster_center(cluster)
             dist = _distance_to_hint(cx, cy, hint_screenshot_x, hint_screenshot_y)
             clusters_with_dist.append((dist, cluster))
@@ -1743,7 +1913,7 @@ def find_hotspot_via_pixel_search(screenshot_path: str,
         clusters_with_dist.sort(key=lambda x: x[0])
         sorted_clusters = [cluster for _, cluster in clusters_with_dist]
     else:
-        sorted_clusters = sorted(clusters, key=len, reverse=True)
+        sorted_clusters = sorted(valid_clusters, key=len, reverse=True)
 
     if not sorted_clusters:
         if verbose:
