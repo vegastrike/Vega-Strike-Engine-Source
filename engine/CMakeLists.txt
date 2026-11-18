@@ -593,6 +593,7 @@ SET(VEGASTRIKE_SOURCES
     src/cmd/base_write_xml.cpp
     src/cmd/base_xml.cpp
     src/cmd/basecomputer.cpp
+    src/cmd/component_pricing.cpp
     src/cmd/beam.cpp
     src/cmd/bolt.cpp
     src/cmd/briefing.cpp
