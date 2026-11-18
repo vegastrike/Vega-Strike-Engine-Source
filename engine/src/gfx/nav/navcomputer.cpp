@@ -49,6 +49,8 @@
 #include "gui/simplepicker.h"
 #include "gui/groupcontrol.h"
 #include "gui/scroller.h"
+#include "src/force_feedback.h"
+#include "root_generic/vs_globals.h"
 
 vector<unsigned int> nav_keyboard_queue;
 
@@ -980,6 +982,9 @@ void NavComputer::run(void) {
 }
 
 void nav_main_loop() {
+    if (forcefeedback != nullptr) {
+        forcefeedback->update();  // the game is paused, so beam effects stop
+    }
     GFXBeginScene();
     globalWindowManager().draw();
     GFXEndScene();

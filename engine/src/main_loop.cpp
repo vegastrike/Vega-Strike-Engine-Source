@@ -1054,6 +1054,10 @@ void main_loop() {
     //Execute DJ script
     Music::MuzakCycle();
 
+    if (forcefeedback != nullptr) {
+        forcefeedback->update();
+    }
+
     _Universe->StartDraw();
     if (myterrain) {
         myterrain->AdjustTerrain(_Universe->activeStarSystem());

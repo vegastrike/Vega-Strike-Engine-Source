@@ -37,6 +37,7 @@
 #include "src/config_xml.h"
 #include "src/universe.h"
 #include "src/vs_logging.h"
+#include "src/force_feedback.h"
 
 #define VELTHRESHOLD .1
 #define ANGVELTHRESHOLD .01
@@ -248,10 +249,10 @@ void FlyByWire::Afterburn(float per) {
     } else if (inertial_flight_model) {
         DirectThrust += Vector(0, 0, parent->afterburner.thrust * per);
     }
-    if (parent == _Universe->AccessCockpit()->GetParent()) {
-        //printf("afterburn is %d\n",afterburn); // DELETEME WTF all this force feedback code and its unused.
-        //COMMENTED BECAUSE OF SERVER -- NEED TO REINTEGRATE IT IN ANOTHER WAY
-        //forcefeedback->playAfterburner(afterburn);
+    // isPlayerStarship() checks every cockpit without assuming one exists,
+    // unlike AccessCockpit()->GetParent().
+    if (forcefeedback != nullptr && _Universe->isPlayerStarship(parent) != nullptr) {
+        forcefeedback->playAfterburner(afterburn);
     }
 }
 
