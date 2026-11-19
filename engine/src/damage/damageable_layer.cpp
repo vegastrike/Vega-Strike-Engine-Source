@@ -91,7 +91,7 @@ void DamageableLayer::DealDamageComponent(int impacted_facet_index, int type,
     const double adjusted_damage = std::min(damage * vulnerability, facets[impacted_facet_index].Value());
 
     // Damage the current health
-    facets[impacted_facet_index].DamageByValue(adjusted_damage);
+    facets[impacted_facet_index] -= adjusted_damage;
 
     // Adjust damage left to pass on to the next layer
     damage -= adjusted_damage;

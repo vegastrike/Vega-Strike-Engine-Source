@@ -54,3 +54,28 @@ TEST(Layer, Sanity) {
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(-2, 0, -1)), 1);
 
 }
+
+// Gives tests access to a layer's facets
+class InspectableLayer : public DamageableLayer {
+public:
+    using DamageableLayer::DamageableLayer;
+
+    const Resource<double> &Facet(int index) const {
+        return facets[index];
+    }
+};
+
+// A hit lowers a facet's current value, not its maximum, so shields can
+// recharge to full and armor can be repaired to full afterwards
+TEST(Layer, DamageKeepsMaximum) {
+    InspectableLayer layer(2, FacetConfiguration::four, 200, Damage(1.0, 1.0), false);
+    InflictedDamage inflicted_damage(3);
+    double damage = 50;
+
+    layer.DealDamageComponent(0, 0, damage, 1.0, inflicted_damage);
+
+    EXPECT_EQ(damage, 0);
+    EXPECT_EQ(layer.Facet(0).Value(), 150);
+    EXPECT_EQ(layer.Facet(0).AdjustedValue(), 200);
+    EXPECT_EQ(layer.Facet(0).MaxValue(), 200);
+}
