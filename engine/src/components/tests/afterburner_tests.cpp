@@ -121,3 +121,27 @@ TEST(Afterburner, UpgradeDowngrade) {
     EXPECT_EQ(upgrade.speed, 1.0);
     EXPECT_EQ(upgrade.consumption, 1.0);
 }
+
+TEST(Afterburner, SaveKeepsUsageCost) {
+    UnitCSVFactory::LoadUnit(afterburner_string + upgrades_suffix_string, afterburner_map);
+    UnitCSVFactory::LoadUnit(upgrade_string + upgrades_suffix_string, afterburner_upgrade_map);
+
+    Afterburner afterburner;
+    AfterburnerUpgrade upgrade(&afterburner);
+
+    afterburner.Load(afterburner_string + upgrades_suffix_string);
+    upgrade.Upgrade(upgrade_string + upgrades_suffix_string);
+    EXPECT_EQ(afterburner.GetConsumption(), 3.0);
+
+    std::map<std::string, std::string> saved = afterburner_map;
+    afterburner.SaveToCSV(saved);
+    EXPECT_EQ(std::stod(saved["Afterburner_Usage_Cost"]), 3.0);
+
+    // Load the saved values back, as loading a saved game does
+    const std::string saved_string = "saved";
+    UnitCSVFactory::LoadUnit(saved_string + upgrades_suffix_string, saved);
+
+    Afterburner reloaded;
+    reloaded.Load(saved_string + upgrades_suffix_string);
+    EXPECT_EQ(reloaded.GetConsumption(), 3.0);
+}
