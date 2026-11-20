@@ -788,11 +788,11 @@ void SpriteStarVlist::EndDrawState(bool stretch, int whichTex) {
     GFXColorMaterial(0);
 }
 
-extern bool isVista;
+extern bool is_vista;
 
 void SpriteStarVlist::Draw(bool strertch, int whichTexture) {
     const bool force_draw = configuration().graphics.vista_draw_stars;
-    if (force_draw || !isVista) {
+    if (force_draw || !is_vista) {
         vlist[whichTexture]->Draw();
     }
 }

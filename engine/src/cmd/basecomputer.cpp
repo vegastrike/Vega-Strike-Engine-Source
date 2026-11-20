@@ -484,7 +484,7 @@ BaseComputer::~BaseComputer(void) {
     }
     //If we are playing muzak, stop it.
     if (m_playingMuzak) {
-        muzak->Skip();
+        Muzak::Skip();
     }
 }
 
@@ -627,7 +627,7 @@ void BaseComputer::switchToControls(DisplayMode mode) {
             m_modeGroups[RAW_DISPLAY_MODE(m_currentDisplay)] = oldControls;
             //Stop playing muzak for the old mode.
             if (m_playingMuzak) {
-                muzak->Skip();
+                Muzak::Skip();
                 m_playingMuzak = false;
             }
         }
@@ -1927,7 +1927,7 @@ bool BaseComputer::newsPickerChangedSelection(const EventCommandId &command, Con
     }
     //Turn on some cool music.
     const std::string news_song = configuration().audio.news_song;
-    muzak->GotoSong(news_song);
+    Muzak::GotoSong(news_song);
     m_playingMuzak = true;
     return true;
 }

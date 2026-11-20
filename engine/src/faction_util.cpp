@@ -143,9 +143,9 @@ Animation *FactionUtil::GetRandExplosionAnimation(int whichfaction, std::string 
 
 void FactionUtil::LoadFactionPlaylists() {
     for (unsigned int i = 0; i < factions.size(); i++) {
-        string fac = FactionUtil::GetFaction(i);
+        std::string fac = FactionUtil::GetFaction(i);
         fac += ".m3u";
-        factions[i]->playlist = muzak->Addlist(fac.c_str());
+        factions[i]->playlist = Muzak::Addlist(fac);
     }
 }
 
@@ -168,4 +168,3 @@ Texture *FactionUtil::createTexture(const char *tex, const char *tmp, bool force
         return new Texture(tex, tmp, 0, MIPMAP, TEXTURE2D, TEXTURE_2D, 1, 0, GFXFALSE);
     }
 }
-
