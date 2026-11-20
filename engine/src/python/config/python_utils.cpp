@@ -50,6 +50,11 @@ namespace fs = boost::filesystem;
 #define QUOTE(x) Q(x)
 
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+
 namespace {
 /// Reusable Windows helper to pull the default Python install path from the registry
 std::wstring GetPythonPathFromRegistry() {
