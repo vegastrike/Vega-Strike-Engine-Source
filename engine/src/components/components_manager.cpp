@@ -228,6 +228,17 @@ bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
     return true;
 }
 
+// UpgradeAlreadyInstalled answers "is this component fitted on the ship?"
+// It uses a threshold-based approach for armor/shield to distinguish between
+// ship-default components with meaningful values and negligible built-in ones.
+// A component is considered installed if:
+// 1. It was purchased (upgrade_key is non-empty), OR
+// 2. It is a ship-default armor/shield with TotalMaxLayerValue > 10.0.
+// Ship-default components are loaded via Component::Load() which sets
+// upgrade_key to "", but they have real facet values from the ship definition.
+// Ship-default armor/shield typically has minimal values (like 1.0 or 2.0 per facet),
+// while purchased upgrades have values of 100.0 or higher. A total below 10.0
+// is treated as negligible (downgraded or empty component).
 bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
     const ComponentType component_type = GetComponentTypeFromName(upgrade.GetName());
     const Component *component = GetComponentByType(component_type);
@@ -245,14 +256,7 @@ bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
             return true;
         }
 
-        // For non-Milspec ships, a component is considered already installed if:
-        // 1. It was purchased (upgrade_key is non-empty), OR
-        // 2. It is a ship-default armor/shield with meaningful TotalMaxLayerValue.
-        // Ship-default components are loaded via Component::Load() which sets
-        // upgrade_key to "", but they have real facet values from the ship definition.
-        // Ship-default armor/shield typically has minimal values (like 1.0 or 2.0 per facet),
-        // while purchased upgrades have values of 100.0 or higher. A total below 10.0
-        // is treated as negligible (downgraded or empty component).
+        // Purchased components always have a non-empty upgrade_key.
         if(!component->GetUpgradeKey().empty()) {
             return true;
         }
@@ -279,6 +283,19 @@ bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
     // Note that this method returns true for error, so we err on the side of caution
     // and not install an upgrade.
     return true;
+}
+
+// UpgradeAlreadyBought answers "was this component purchased at a base?"
+// It uses the upgrade_key approach: a component was bought if it is installed
+// and has a non-empty upgrade_key (set by Component::Upgrade()).
+// Ship-default components have upgrade_key = "", so they return false.
+bool ComponentsManager::UpgradeAlreadyBought(const Cargo& upgrade) const {
+    const ComponentType component_type = GetComponentTypeFromName(upgrade.GetName());
+    const Component *component = GetComponentByType(component_type);
+    if(component) {
+        return component->Installed() && !component->GetUpgradeKey().empty();
+    }
+    return false;
 }
 
 /** A convenience struct to hold the data used below */

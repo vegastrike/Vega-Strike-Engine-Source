@@ -119,6 +119,7 @@ public:
     bool        ShipDamaged() const;
     bool        AllowedUpgrade(const Cargo &upgrade) const;
     bool        UpgradeAlreadyInstalled(const Cargo &upgrade) const;
+    bool        UpgradeAlreadyBought(const Cargo &upgrade) const;
     void        DamageRandomSystem();
     void        GenerateHudText(std::string getDamageColor(double));
     std::string GetHudText();
