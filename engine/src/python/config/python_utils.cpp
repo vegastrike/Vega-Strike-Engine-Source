@@ -162,15 +162,40 @@ std::wstring FindPythonPath() {
 // just to get the python paths.
 [[deprecated("This was always a kludge. Use InitPython() and GetMethodFromPython() instead.")]]
 std::string GetPythonPath() {
-    Py_Initialize();
+#if ((PY_VERSION_HEX) < 0x030E0000)
+    // For Python < 3.14, use Py_GetPath(). Must copy the wide string before Py_Finalize().
+    bool const was_initialized = Py_IsInitialized() != 0;
+    if (!was_initialized) {
+        Py_Initialize();
+    }
     wchar_t const* w_path_ptr = Py_GetPath();
-    Py_Finalize();
-
-    std::wstring w_path_w( w_path_ptr );
-    std::string path( w_path_w.begin(), w_path_w.end() );
-
-    if (!py_was_already_initialized) {
+    // Copy the wide string while Python is still initialized to avoid use-after-free.
+    std::wstring w_path_w(w_path_ptr);
+    if (!was_initialized) {
         Py_Finalize();
+    }
+
+    // Convert wide string to narrow using a locale-aware method.
+    // The naive std::string(wstr.begin(), wstr.end()) only works for ASCII.
+    std::string path;
+    if (!w_path_w.empty()) {
+        // Use the length of the wide string to determine the output buffer size.
+        // wcstombs is locale-aware and handles non-ASCII characters correctly.
+        size_t const max_bytes = w_path_w.size() * 4 + 1;  // UTF-8 max 4 bytes per code point
+        path.resize(max_bytes);
+        size_t const converted = wcstombs(&path[0], w_path_w.c_str(), max_bytes);
+        if (converted == static_cast<size_t>(-1)) {
+            // Fallback: if conversion fails, use a simple byte-by-byte approach for ASCII paths.
+            path.clear();
+            path.reserve(w_path_w.size());
+            for (wchar_t wc : w_path_w) {
+                if (wc < 0x80) {
+                    path.push_back(static_cast<char>(wc));
+                }
+            }
+        } else {
+            path.resize(converted);
+        }
     }
 
     return path;
@@ -254,13 +279,11 @@ void InitPython(bool &was_already_initialized) {
     }
 #endif
 
-    if (!was_already_initialized) {
-        status = Py_InitializeFromConfig(&config);
-        PyConfig_Clear(&config); // Free configuration memory
-        if (PyStatus_Exception(status) != 0) {
-            PyErr_Print();
-            Py_ExitStatusException(status);
-        }
+    status = Py_InitializeFromConfig(&config);
+    PyConfig_Clear(&config); // Free configuration memory
+    if (PyStatus_Exception(status) != 0) {
+        PyErr_Print();
+        Py_ExitStatusException(status);
     }
 }
 
