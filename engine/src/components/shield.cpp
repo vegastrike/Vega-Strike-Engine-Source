@@ -293,14 +293,15 @@ void Shield::DamageByPercent(double percent) {
 }
 
 void Shield::Repair() {
-    regeneration.RepairFully();
+    // A repair at a base replaces destroyed parts too, as milspec and integral
+    // shields can't be swapped out. RepairFully would skip destroyed resources.
+    regeneration.SetToMax();
 
     for (Resource<double> &facet : facets) {
-        facet.RepairFully();
+        facet.SetToMax();
     }
 
-    // RepairFully doesn't restore destroyed resources, so the shield may still be damaged
-    CalculatePercentOperational();
+    operational = 1.0;
 }
 
 bool Shield::Damaged() const {

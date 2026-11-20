@@ -59,8 +59,8 @@ TEST(Shield, RepairDamaged) {
     EXPECT_EQ(shield.PercentOperational(), 1.0);
 }
 
-// Damage over 95% destroys the facets and the regeneration, which repair
-// doesn't restore, so the shield still reports itself damaged
+// Damage over 95% destroys the facets and the regeneration; repair replaces
+// them, so the shield comes back fully working
 TEST(Shield, RepairDestroyed) {
     UnitCSVFactory::LoadUnit(shield_key, shield_map);
 
@@ -69,9 +69,10 @@ TEST(Shield, RepairDestroyed) {
 
     shield.DamageByPercent(0.96);
     EXPECT_EQ(shield.TotalLayerValue(), 0.0);
+    EXPECT_TRUE(shield.Damaged());
 
     shield.Repair();
-    EXPECT_EQ(shield.TotalLayerValue(), 0.0);
-    EXPECT_TRUE(shield.Damaged());
-    EXPECT_EQ(shield.PercentOperational(), 0.0);
+    EXPECT_EQ(shield.TotalLayerValue(), 400.0);
+    EXPECT_FALSE(shield.Damaged());
+    EXPECT_EQ(shield.PercentOperational(), 1.0);
 }
