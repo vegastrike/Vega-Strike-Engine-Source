@@ -198,7 +198,7 @@ std::string GetPythonPath() {
 
     return path;
 #else
-    // For Python >= 3.15, Py_GetPath() was removed. Use PyConfig_Get("module_search_paths") instead.
+    // For Python >= 3.14, use PyConfig_Get("module_search_paths") instead of the deprecated Py_GetPath().
     // Must copy all data before Py_Finalize().
     bool const was_initialized = Py_IsInitialized() != 0;
     if (!was_initialized) {
