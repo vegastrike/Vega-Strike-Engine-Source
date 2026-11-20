@@ -32,9 +32,11 @@ Use the scripts in `script/`. They exist so that bootstrapping, building, testin
 packaging each have one canonical way of being done, and they are what CI calls. See the `Commands`
 section for the exact commands to run.
 
-Preset names follow `[platform]-[generator]-[pie]-[gl]-[build-type]`; `CMakePresets.json` is the
-source of truth, and both `script/build` and `script/test` pick their preset by that name. Build
-trees go under `build/<preset-name>/`. If no script fits the task, the underlying commands are
+Preset names follow `[platform]-[generator]-[pie]-[gl]-[build-type]` on Linux (where `[gl]`
+is `glvnd` or `legacy-gl`); on macOS and Windows the pattern is
+`[platform]-[generator]-[pie]-[build-type]`. `CMakePresets.json` is the source of truth, and
+both `script/build` and `script/test` pick their preset by that name. Build trees go under
+`build/<preset-name>/`. If no script fits the task, the underlying commands are
 `cmake --preset <preset-name>` and `cmake --build build/<preset-name>` — but prefer the script.
 
 The engine binary is `vegastrike-engine` — older scripts and documentation may still call it
@@ -109,7 +111,7 @@ implying that you did.
 | `engine/src/python/` | Python bindings and initialisation |
 | `engine/src/resource/` | asset loading: cargo, manifest, JSON, RNG |
 | `engine/src/configuration/` | `config.json` parsing and the game-configuration model |
-| `engine/src/in_*.cpp`, `engine/src/ai/` | input: mouse, keyboard, joystick to bindings and commands |
+| `engine/src/in_*.cpp`, `engine/src/cmd/ai/` | input: mouse, keyboard, joystick to bindings and commands |
 | `engine/tools/`, `engine/objconv/`, `engine/launcher/` | asset converters, model tools, launcher |
 | `libraries/` | in-tree libraries; `libraries/cmd/` holds the portable object model (see below) |
 
