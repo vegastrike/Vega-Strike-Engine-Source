@@ -32,14 +32,29 @@
 #include "cmd/unit_csv_factory.h"
 #include "resource/cargo.h"
 
-static const std::string upgrades_suffix = "__upgrades";
+static const std::string kUpgradesSuffix = "__upgrades";
+
+// Minimal mock of Unit that inherits from ComponentsManager.
+// Unit is a massive class with dozens of base classes and heavy dependencies,
+// so we mock only what UpgradeAlreadyInstalled/UpgradeAlreadyBought need:
+// the ComponentsManager base and an overridable GetUnitKey().
+class MockUnit : public ComponentsManager {
+    std::string unit_key_;
+
+public:
+    explicit MockUnit(const std::string &key) : unit_key_(key) {}
+
+    const std::string &GetUnitKey() const override {
+        return unit_key_;
+    }
+};
 
 // Set up UnitCSVFactory entries so GetComponentTypeFromName returns the right type
 static void registerUpgradeType(const std::string &name, const std::string &type) {
     std::map<std::string, std::string> data = {
         {"Upgrade_Type", type}
     };
-    UnitCSVFactory::LoadUnit(name + upgrades_suffix, data);
+    UnitCSVFactory::LoadUnit(name + kUpgradesSuffix, data);
 }
 
 // Helper: create a Cargo that represents an armor upgrade
@@ -79,11 +94,11 @@ TEST(UpgradeAlreadyInstalled, ShipDefaultArmorRecognized) {
     };
     UnitCSVFactory::LoadUnit("test_ship_armor", ship_data);
 
-    ComponentsManager cm;
-    cm.armor.Load("test_ship_armor");
+    MockUnit mock_unit("test_ship_armor");
+    mock_unit.armor.Load("test_ship_armor");
 
     Cargo cargo = makeArmorCargo("armor01");
-    EXPECT_TRUE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_TRUE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Ship-default armor with negligible values is NOT recognized as fitted.
@@ -97,11 +112,11 @@ TEST(UpgradeAlreadyInstalled, NegligibleArmorNotRecognized) {
     };
     UnitCSVFactory::LoadUnit("test_ship_armor_negligible", ship_data);
 
-    ComponentsManager cm;
-    cm.armor.Load("test_ship_armor_negligible");
+    MockUnit mock_unit("test_ship_armor_negligible");
+    mock_unit.armor.Load("test_ship_armor_negligible");
 
     Cargo cargo = makeArmorCargo("armor01b");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Armor at exactly the threshold (total 10.0) is NOT recognized.
@@ -115,11 +130,11 @@ TEST(UpgradeAlreadyInstalled, ArmorAtThresholdNotRecognized) {
     };
     UnitCSVFactory::LoadUnit("test_ship_armor_threshold", ship_data);
 
-    ComponentsManager cm;
-    cm.armor.Load("test_ship_armor_threshold");
+    MockUnit mock_unit("test_ship_armor_threshold");
+    mock_unit.armor.Load("test_ship_armor_threshold");
 
     Cargo cargo = makeArmorCargo("armor01c");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Purchased armor is recognized as fitted.
@@ -129,13 +144,13 @@ TEST(UpgradeAlreadyInstalled, PurchasedArmorRecognized) {
     std::map<std::string, std::string> armor_data = {
         {"armor", "100/100/100"}
     };
-    UnitCSVFactory::LoadUnit("armor02" + upgrades_suffix, armor_data);
+    UnitCSVFactory::LoadUnit("armor02" + kUpgradesSuffix, armor_data);
 
-    ComponentsManager cm;
-    cm.armor.Upgrade("armor02" + upgrades_suffix);
+    MockUnit mock_unit("test_ship_purchased_armor");
+    mock_unit.armor.Upgrade("armor02" + kUpgradesSuffix);
 
     Cargo cargo = makeArmorCargo("armor02");
-    EXPECT_TRUE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_TRUE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Downgraded armor is NOT recognized as fitted.
@@ -145,14 +160,14 @@ TEST(UpgradeAlreadyInstalled, DowngradedArmorNotRecognized) {
     std::map<std::string, std::string> armor_data = {
         {"armor", "100/100/100"}
     };
-    UnitCSVFactory::LoadUnit("armor03" + upgrades_suffix, armor_data);
+    UnitCSVFactory::LoadUnit("armor03" + kUpgradesSuffix, armor_data);
 
-    ComponentsManager cm;
-    cm.armor.Upgrade("armor03" + upgrades_suffix);
-    cm.armor.Downgrade();
+    MockUnit mock_unit("test_ship_downgraded_armor");
+    mock_unit.armor.Upgrade("armor03" + kUpgradesSuffix);
+    mock_unit.armor.Downgrade();
 
     Cargo cargo = makeArmorCargo("armor03");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Ship with no armor can buy armor.
@@ -164,11 +179,11 @@ TEST(UpgradeAlreadyInstalled, NoArmorCanBuy) {
     };
     UnitCSVFactory::LoadUnit("test_no_armor_ship", no_armor_data);
 
-    ComponentsManager cm;
-    cm.armor.Load("test_no_armor_ship");
+    MockUnit mock_unit("test_no_armor_ship");
+    mock_unit.armor.Load("test_no_armor_ship");
 
     Cargo cargo = makeArmorCargo("armor04");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // -------------------------------------------------------------------
@@ -188,11 +203,11 @@ TEST(UpgradeAlreadyInstalled, ShipDefaultShieldRecognized) {
     };
     UnitCSVFactory::LoadUnit("test_ship_shield", ship_data);
 
-    ComponentsManager cm;
-    cm.shield.Load("test_ship_shield");
+    MockUnit mock_unit("test_ship_shield");
+    mock_unit.shield.Load("test_ship_shield");
 
     Cargo cargo = makeShieldCargo("shield01");
-    EXPECT_TRUE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_TRUE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Ship-default shield with negligible values is NOT recognized as fitted.
@@ -208,11 +223,11 @@ TEST(UpgradeAlreadyInstalled, NegligibleShieldNotRecognized) {
     };
     UnitCSVFactory::LoadUnit("test_ship_shield_negligible", ship_data);
 
-    ComponentsManager cm;
-    cm.shield.Load("test_ship_shield_negligible");
+    MockUnit mock_unit("test_ship_shield_negligible");
+    mock_unit.shield.Load("test_ship_shield_negligible");
 
     Cargo cargo = makeShieldCargo("shield01b");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Shield at exactly the threshold (total 10.0) is NOT recognized.
@@ -228,11 +243,11 @@ TEST(UpgradeAlreadyInstalled, ShieldAtThresholdNotRecognized) {
     };
     UnitCSVFactory::LoadUnit("test_ship_shield_threshold", ship_data);
 
-    ComponentsManager cm;
-    cm.shield.Load("test_ship_shield_threshold");
+    MockUnit mock_unit("test_ship_shield_threshold");
+    mock_unit.shield.Load("test_ship_shield_threshold");
 
     Cargo cargo = makeShieldCargo("shield01c");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Purchased shield is recognized as fitted.
@@ -244,13 +259,13 @@ TEST(UpgradeAlreadyInstalled, PurchasedShieldRecognized) {
         {"shield_facets", "4"},
         {"Shield_Recharge", "10/10/10"}
     };
-    UnitCSVFactory::LoadUnit("shield02" + upgrades_suffix, shield_data);
+    UnitCSVFactory::LoadUnit("shield02" + kUpgradesSuffix, shield_data);
 
-    ComponentsManager cm;
-    cm.shield.Upgrade("shield02" + upgrades_suffix);
+    MockUnit mock_unit("test_ship_purchased_shield");
+    mock_unit.shield.Upgrade("shield02" + kUpgradesSuffix);
 
     Cargo cargo = makeShieldCargo("shield02");
-    EXPECT_TRUE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_TRUE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Downgraded shield is NOT recognized as fitted.
@@ -262,14 +277,14 @@ TEST(UpgradeAlreadyInstalled, DowngradedShieldNotRecognized) {
         {"shield_facets", "4"},
         {"Shield_Recharge", "10/10/10"}
     };
-    UnitCSVFactory::LoadUnit("shield03" + upgrades_suffix, shield_data);
+    UnitCSVFactory::LoadUnit("shield03" + kUpgradesSuffix, shield_data);
 
-    ComponentsManager cm;
-    cm.shield.Upgrade("shield03" + upgrades_suffix);
-    cm.shield.Downgrade();
+    MockUnit mock_unit("test_ship_downgraded_shield");
+    mock_unit.shield.Upgrade("shield03" + kUpgradesSuffix);
+    mock_unit.shield.Downgrade();
 
     Cargo cargo = makeShieldCargo("shield03");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Ship with no shield can buy shield.
@@ -281,11 +296,11 @@ TEST(UpgradeAlreadyInstalled, NoShieldCanBuy) {
     };
     UnitCSVFactory::LoadUnit("test_no_shield_ship", no_shield_data);
 
-    ComponentsManager cm;
-    cm.shield.Load("test_no_shield_ship");
+    MockUnit mock_unit("test_no_shield_ship");
+    mock_unit.shield.Load("test_no_shield_ship");
 
     Cargo cargo = makeShieldCargo("shield04");
-    EXPECT_FALSE(cm.UpgradeAlreadyInstalled(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // -------------------------------------------------------------------
@@ -301,11 +316,11 @@ TEST(UpgradeAlreadyBought, ShipDefaultArmorNotBought) {
     };
     UnitCSVFactory::LoadUnit("test_ship_armor_bought", ship_data);
 
-    ComponentsManager cm;
-    cm.armor.Load("test_ship_armor_bought");
+    MockUnit mock_unit("test_ship_armor_bought");
+    mock_unit.armor.Load("test_ship_armor_bought");
 
     Cargo cargo = makeArmorCargo("armor10");
-    EXPECT_FALSE(cm.UpgradeAlreadyBought(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Purchased armor WAS bought (upgrade_key is set).
@@ -315,13 +330,13 @@ TEST(UpgradeAlreadyBought, PurchasedArmorBought) {
     std::map<std::string, std::string> armor_data = {
         {"armor", "100/100/100"}
     };
-    UnitCSVFactory::LoadUnit("armor11" + upgrades_suffix, armor_data);
+    UnitCSVFactory::LoadUnit("armor11" + kUpgradesSuffix, armor_data);
 
-    ComponentsManager cm;
-    cm.armor.Upgrade("armor11" + upgrades_suffix);
+    MockUnit mock_unit("test_ship_purchased_armor_bought");
+    mock_unit.armor.Upgrade("armor11" + kUpgradesSuffix);
 
     Cargo cargo = makeArmorCargo("armor11");
-    EXPECT_TRUE(cm.UpgradeAlreadyBought(cargo));
+    EXPECT_TRUE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Downgraded armor was NOT bought (not installed).
@@ -331,14 +346,14 @@ TEST(UpgradeAlreadyBought, DowngradedArmorNotBought) {
     std::map<std::string, std::string> armor_data = {
         {"armor", "100/100/100"}
     };
-    UnitCSVFactory::LoadUnit("armor12" + upgrades_suffix, armor_data);
+    UnitCSVFactory::LoadUnit("armor12" + kUpgradesSuffix, armor_data);
 
-    ComponentsManager cm;
-    cm.armor.Upgrade("armor12" + upgrades_suffix);
-    cm.armor.Downgrade();
+    MockUnit mock_unit("test_ship_downgraded_armor_bought");
+    mock_unit.armor.Upgrade("armor12" + kUpgradesSuffix);
+    mock_unit.armor.Downgrade();
 
     Cargo cargo = makeArmorCargo("armor12");
-    EXPECT_FALSE(cm.UpgradeAlreadyBought(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Ship with no armor was NOT bought.
@@ -350,11 +365,11 @@ TEST(UpgradeAlreadyBought, NoArmorNotBought) {
     };
     UnitCSVFactory::LoadUnit("test_no_armor_ship_bought", no_armor_data);
 
-    ComponentsManager cm;
-    cm.armor.Load("test_no_armor_ship_bought");
+    MockUnit mock_unit("test_no_armor_ship_bought");
+    mock_unit.armor.Load("test_no_armor_ship_bought");
 
     Cargo cargo = makeArmorCargo("armor13");
-    EXPECT_FALSE(cm.UpgradeAlreadyBought(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // -------------------------------------------------------------------
@@ -372,11 +387,11 @@ TEST(UpgradeAlreadyBought, ShipDefaultShieldNotBought) {
     };
     UnitCSVFactory::LoadUnit("test_ship_shield_bought", ship_data);
 
-    ComponentsManager cm;
-    cm.shield.Load("test_ship_shield_bought");
+    MockUnit mock_unit("test_ship_shield_bought");
+    mock_unit.shield.Load("test_ship_shield_bought");
 
     Cargo cargo = makeShieldCargo("shield10");
-    EXPECT_FALSE(cm.UpgradeAlreadyBought(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Purchased shield WAS bought (upgrade_key is set).
@@ -388,13 +403,13 @@ TEST(UpgradeAlreadyBought, PurchasedShieldBought) {
         {"shield_facets", "4"},
         {"Shield_Recharge", "10/10/10"}
     };
-    UnitCSVFactory::LoadUnit("shield11" + upgrades_suffix, shield_data);
+    UnitCSVFactory::LoadUnit("shield11" + kUpgradesSuffix, shield_data);
 
-    ComponentsManager cm;
-    cm.shield.Upgrade("shield11" + upgrades_suffix);
+    MockUnit mock_unit("test_ship_purchased_shield_bought");
+    mock_unit.shield.Upgrade("shield11" + kUpgradesSuffix);
 
     Cargo cargo = makeShieldCargo("shield11");
-    EXPECT_TRUE(cm.UpgradeAlreadyBought(cargo));
+    EXPECT_TRUE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Downgraded shield was NOT bought (not installed).
@@ -406,14 +421,14 @@ TEST(UpgradeAlreadyBought, DowngradedShieldNotBought) {
         {"shield_facets", "4"},
         {"Shield_Recharge", "10/10/10"}
     };
-    UnitCSVFactory::LoadUnit("shield12" + upgrades_suffix, shield_data);
+    UnitCSVFactory::LoadUnit("shield12" + kUpgradesSuffix, shield_data);
 
-    ComponentsManager cm;
-    cm.shield.Upgrade("shield12" + upgrades_suffix);
-    cm.shield.Downgrade();
+    MockUnit mock_unit("test_ship_downgraded_shield_bought");
+    mock_unit.shield.Upgrade("shield12" + kUpgradesSuffix);
+    mock_unit.shield.Downgrade();
 
     Cargo cargo = makeShieldCargo("shield12");
-    EXPECT_FALSE(cm.UpgradeAlreadyBought(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Ship with no shield was NOT bought.
@@ -425,9 +440,9 @@ TEST(UpgradeAlreadyBought, NoShieldNotBought) {
     };
     UnitCSVFactory::LoadUnit("test_no_shield_ship_bought", no_shield_data);
 
-    ComponentsManager cm;
-    cm.shield.Load("test_no_shield_ship_bought");
+    MockUnit mock_unit("test_no_shield_ship_bought");
+    mock_unit.shield.Load("test_no_shield_ship_bought");
 
     Cargo cargo = makeShieldCargo("shield13");
-    EXPECT_FALSE(cm.UpgradeAlreadyBought(cargo));
+    EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }

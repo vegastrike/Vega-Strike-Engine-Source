@@ -31,16 +31,16 @@
 #include "components/armor.h"
 #include "cmd/unit_csv_factory.h"
 
-static const std::string upgrades_suffix = "__upgrades";
+static const std::string kUpgradesSuffix = "__upgrades";
 
 TEST(Armor, LoadSingleValue) {
     std::map<std::string, std::string> armor_data = {
         {"armor", "100/100/100"}
     };
-    UnitCSVFactory::LoadUnit("test_armor_single" + upgrades_suffix, armor_data);
+    UnitCSVFactory::LoadUnit("test_armor_single" + kUpgradesSuffix, armor_data);
 
     Armor armor;
-    armor.Load("test_armor_single" + upgrades_suffix);
+    armor.Load("test_armor_single" + kUpgradesSuffix);
 
     EXPECT_TRUE(armor.Installed());
     EXPECT_EQ(armor.TotalMaxLayerValue(), 400.0);  // 4 facets × 100
@@ -69,16 +69,16 @@ TEST(Armor, UpgradeThenUpgradeDoesNotStack) {
     std::map<std::string, std::string> armor2_data = {
         {"armor", "100/100/100"}
     };
-    UnitCSVFactory::LoadUnit("test_armor1" + upgrades_suffix, armor1_data);
-    UnitCSVFactory::LoadUnit("test_armor2" + upgrades_suffix, armor2_data);
+    UnitCSVFactory::LoadUnit("test_armor1" + kUpgradesSuffix, armor1_data);
+    UnitCSVFactory::LoadUnit("test_armor2" + kUpgradesSuffix, armor2_data);
 
     Armor armor;
-    armor.Load("test_armor1" + upgrades_suffix);
+    armor.Load("test_armor1" + kUpgradesSuffix);
 
     EXPECT_EQ(armor.TotalMaxLayerValue(), 200.0);  // 4 facets × 50
 
     // Upgrade to armor2
-    armor.Upgrade("test_armor2" + upgrades_suffix);
+    armor.Upgrade("test_armor2" + kUpgradesSuffix);
 
     // Should still be 4 facets, each with max 100 = 400 total
     // Bug would produce 8 facets with total 600 (4×50 + 4×100)
@@ -89,10 +89,10 @@ TEST(Armor, DowngradeZerosOut) {
     std::map<std::string, std::string> armor_data = {
         {"armor", "100/100/100"}
     };
-    UnitCSVFactory::LoadUnit("test_armor_downgrade" + upgrades_suffix, armor_data);
+    UnitCSVFactory::LoadUnit("test_armor_downgrade" + kUpgradesSuffix, armor_data);
 
     Armor armor;
-    armor.Load("test_armor_downgrade" + upgrades_suffix);
+    armor.Load("test_armor_downgrade" + kUpgradesSuffix);
     EXPECT_TRUE(armor.Installed());
 
     armor.Downgrade();
@@ -110,11 +110,11 @@ TEST(Armor, CanUpgradeAfterLoadWithNoArmor) {
         {"armor", "50/50/50"}
     };
     UnitCSVFactory::LoadUnit("test_no_armor_ship", no_armor_data);
-    UnitCSVFactory::LoadUnit("test_armor_upgrade" + upgrades_suffix, armor_upgrade_data);
+    UnitCSVFactory::LoadUnit("test_armor_upgrade" + kUpgradesSuffix, armor_upgrade_data);
 
     Armor armor;
     armor.Load("test_no_armor_ship");
 
     EXPECT_FALSE(armor.Installed());
-    EXPECT_TRUE(armor.CanUpgrade("test_armor_upgrade" + upgrades_suffix));
+    EXPECT_TRUE(armor.CanUpgrade("test_armor_upgrade" + kUpgradesSuffix));
 }

@@ -34,7 +34,7 @@
 #include "components/cloak.h"
 #include "cmd/unit_csv_factory.h"
 
-static const std::string upgrades_suffix = "__upgrades";
+static const std::string kUpgradesSuffix = "__upgrades";
 
 TEST(Shield, LoadSingleValue) {
     std::map<std::string, std::string> shield_data = {
@@ -42,13 +42,13 @@ TEST(Shield, LoadSingleValue) {
         {"shield_facets", "4"},
         {"Shield_Recharge", "10/10/10"}
     };
-    UnitCSVFactory::LoadUnit("test_shield_single" + upgrades_suffix, shield_data);
+    UnitCSVFactory::LoadUnit("test_shield_single" + kUpgradesSuffix, shield_data);
 
     EnergyContainer container(ComponentType::Capacitor);
     FtlDrive ftl;
     Cloak cloak;
     Shield shield(&container, &ftl, &cloak);
-    shield.Load("test_shield_single" + upgrades_suffix);
+    shield.Load("test_shield_single" + kUpgradesSuffix);
 
     EXPECT_TRUE(shield.Installed());
     EXPECT_EQ(shield.TotalMaxLayerValue(), 400.0);  // 4 facets × 100
@@ -84,19 +84,19 @@ TEST(Shield, UpgradeThenUpgradeDoesNotStack) {
         {"shield_facets", "4"},
         {"Shield_Recharge", "20/20/20"}
     };
-    UnitCSVFactory::LoadUnit("test_shield1" + upgrades_suffix, shield1_data);
-    UnitCSVFactory::LoadUnit("test_shield2" + upgrades_suffix, shield2_data);
+    UnitCSVFactory::LoadUnit("test_shield1" + kUpgradesSuffix, shield1_data);
+    UnitCSVFactory::LoadUnit("test_shield2" + kUpgradesSuffix, shield2_data);
 
     EnergyContainer container(ComponentType::Capacitor);
     FtlDrive ftl;
     Cloak cloak;
     Shield shield(&container, &ftl, &cloak);
-    shield.Load("test_shield1" + upgrades_suffix);
+    shield.Load("test_shield1" + kUpgradesSuffix);
 
     EXPECT_EQ(shield.TotalMaxLayerValue(), 200.0);  // 4 facets × 50
 
     // Upgrade to shield2
-    shield.Upgrade("test_shield2" + upgrades_suffix);
+    shield.Upgrade("test_shield2" + kUpgradesSuffix);
 
     // Should still be 4 facets, each with max 100 = 400 total
     // Bug would produce 8 facets with total 600 (4×50 + 4×100)
@@ -109,13 +109,13 @@ TEST(Shield, DowngradeZerosOut) {
         {"shield_facets", "4"},
         {"Shield_Recharge", "10/10/10"}
     };
-    UnitCSVFactory::LoadUnit("test_shield_downgrade" + upgrades_suffix, shield_data);
+    UnitCSVFactory::LoadUnit("test_shield_downgrade" + kUpgradesSuffix, shield_data);
 
     EnergyContainer container(ComponentType::Capacitor);
     FtlDrive ftl;
     Cloak cloak;
     Shield shield(&container, &ftl, &cloak);
-    shield.Load("test_shield_downgrade" + upgrades_suffix);
+    shield.Load("test_shield_downgrade" + kUpgradesSuffix);
     EXPECT_TRUE(shield.Installed());
 
     shield.Downgrade();
@@ -137,7 +137,7 @@ TEST(Shield, CanUpgradeAfterLoadWithNoShield) {
         {"Shield_Recharge", "10/10/10"}
     };
     UnitCSVFactory::LoadUnit("test_no_shield_ship", no_shield_data);
-    UnitCSVFactory::LoadUnit("test_shield_upgrade" + upgrades_suffix, shield_upgrade_data);
+    UnitCSVFactory::LoadUnit("test_shield_upgrade" + kUpgradesSuffix, shield_upgrade_data);
 
     EnergyContainer container(ComponentType::Capacitor);
     FtlDrive ftl;
@@ -146,5 +146,5 @@ TEST(Shield, CanUpgradeAfterLoadWithNoShield) {
     shield.Load("test_no_shield_ship");
 
     EXPECT_FALSE(shield.Installed());
-    EXPECT_TRUE(shield.CanUpgrade("test_shield_upgrade" + upgrades_suffix));
+    EXPECT_TRUE(shield.CanUpgrade("test_shield_upgrade" + kUpgradesSuffix));
 }
