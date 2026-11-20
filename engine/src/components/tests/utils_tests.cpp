@@ -31,7 +31,7 @@
 #include "components/component_utils.h"
 #include "cmd/unit_csv_factory.h"
 
-std::string dummy_color(double percent) {
+std::string DummyColor(const double percent) {
     if(percent == 1.0) {
         return "white:";
     } else if(percent == 0.0) {
@@ -42,7 +42,7 @@ std::string dummy_color(double percent) {
         return "orange:";
     } else {
         return "red:";
-    } 
+    }
 }
 
 
@@ -58,7 +58,7 @@ TEST(UtilsTests, PrintFormattedComponentInHud) {
                                       "red:Dummy (10%)white:\n"};
 
     for(int i=0;i<7;i++) {
-        std::string output = PrintFormattedComponentInHud(percents[i], "Dummy", true, dummy_color);
+        std::string output = PrintFormattedComponentInHud(percents[i], "Dummy", true, DummyColor);
         EXPECT_EQ(output, expected_outputs[i]);
     }
 }

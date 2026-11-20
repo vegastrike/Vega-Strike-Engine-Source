@@ -50,7 +50,7 @@ public:
 };
 
 // Set up UnitCSVFactory entries so GetComponentTypeFromName returns the right type
-static void registerUpgradeType(const std::string &name, const std::string &type) {
+static void RegisterUpgradeType(const std::string &name, const std::string &type) {
     std::map<std::string, std::string> data = {
         {"Upgrade_Type", type}
     };
@@ -58,7 +58,7 @@ static void registerUpgradeType(const std::string &name, const std::string &type
 }
 
 // Helper: create a Cargo that represents an armor upgrade
-static Cargo makeArmorCargo(const std::string &name) {
+static Cargo MakeArmorCargo(const std::string &name) {
     Cargo cargo;
     cargo.SetName(name);
     cargo.SetCategory("Armor");
@@ -69,7 +69,7 @@ static Cargo makeArmorCargo(const std::string &name) {
 }
 
 // Helper: create a Cargo that represents a shield upgrade
-static Cargo makeShieldCargo(const std::string &name) {
+static Cargo MakeShieldCargo(const std::string &name) {
     Cargo cargo;
     cargo.SetName(name);
     cargo.SetCategory("Shield");
@@ -85,7 +85,7 @@ static Cargo makeShieldCargo(const std::string &name) {
 
 // Ship-default armor with meaningful values is recognized as fitted.
 TEST(UpgradeAlreadyInstalled, ShipDefaultArmorRecognized) {
-    registerUpgradeType("armor01", "Armor");
+    RegisterUpgradeType("armor01", "Armor");
 
     // "15/15/15" means value=15, adjusted_max=15, max=15 per facet.
     // 4 facets × 15 = 60.0 total, well above the 10.0 threshold.
@@ -97,13 +97,13 @@ TEST(UpgradeAlreadyInstalled, ShipDefaultArmorRecognized) {
     MockUnit mock_unit("test_ship_armor");
     mock_unit.armor.Load("test_ship_armor");
 
-    Cargo cargo = makeArmorCargo("armor01");
+    Cargo cargo = MakeArmorCargo("armor01");
     EXPECT_TRUE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Ship-default armor with negligible values is NOT recognized as fitted.
 TEST(UpgradeAlreadyInstalled, NegligibleArmorNotRecognized) {
-    registerUpgradeType("armor01b", "Armor");
+    RegisterUpgradeType("armor01b", "Armor");
 
     // "2/2/2" means max=2 per facet.
     // 4 facets × 2 = 8.0 total, below the 10.0 threshold.
@@ -115,13 +115,13 @@ TEST(UpgradeAlreadyInstalled, NegligibleArmorNotRecognized) {
     MockUnit mock_unit("test_ship_armor_negligible");
     mock_unit.armor.Load("test_ship_armor_negligible");
 
-    Cargo cargo = makeArmorCargo("armor01b");
+    Cargo cargo = MakeArmorCargo("armor01b");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Armor at exactly the threshold (total 10.0) is NOT recognized.
 TEST(UpgradeAlreadyInstalled, ArmorAtThresholdNotRecognized) {
-    registerUpgradeType("armor01c", "Armor");
+    RegisterUpgradeType("armor01c", "Armor");
 
     // "2.5/2.5/2.5" means max=2.5 per facet.
     // 4 facets × 2.5 = 10.0 total, exactly at the threshold.
@@ -133,13 +133,13 @@ TEST(UpgradeAlreadyInstalled, ArmorAtThresholdNotRecognized) {
     MockUnit mock_unit("test_ship_armor_threshold");
     mock_unit.armor.Load("test_ship_armor_threshold");
 
-    Cargo cargo = makeArmorCargo("armor01c");
+    Cargo cargo = MakeArmorCargo("armor01c");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Purchased armor is recognized as fitted.
 TEST(UpgradeAlreadyInstalled, PurchasedArmorRecognized) {
-    registerUpgradeType("armor02", "Armor");
+    RegisterUpgradeType("armor02", "Armor");
 
     std::map<std::string, std::string> armor_data = {
         {"armor", "100/100/100"}
@@ -149,13 +149,13 @@ TEST(UpgradeAlreadyInstalled, PurchasedArmorRecognized) {
     MockUnit mock_unit("test_ship_purchased_armor");
     mock_unit.armor.Upgrade("armor02" + kUpgradesSuffix);
 
-    Cargo cargo = makeArmorCargo("armor02");
+    Cargo cargo = MakeArmorCargo("armor02");
     EXPECT_TRUE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Downgraded armor is NOT recognized as fitted.
 TEST(UpgradeAlreadyInstalled, DowngradedArmorNotRecognized) {
-    registerUpgradeType("armor03", "Armor");
+    RegisterUpgradeType("armor03", "Armor");
 
     std::map<std::string, std::string> armor_data = {
         {"armor", "100/100/100"}
@@ -166,13 +166,13 @@ TEST(UpgradeAlreadyInstalled, DowngradedArmorNotRecognized) {
     mock_unit.armor.Upgrade("armor03" + kUpgradesSuffix);
     mock_unit.armor.Downgrade();
 
-    Cargo cargo = makeArmorCargo("armor03");
+    Cargo cargo = MakeArmorCargo("armor03");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Ship with no armor can buy armor.
 TEST(UpgradeAlreadyInstalled, NoArmorCanBuy) {
-    registerUpgradeType("armor04", "Armor");
+    RegisterUpgradeType("armor04", "Armor");
 
     std::map<std::string, std::string> no_armor_data = {
         {"Name", "NoArmorShip"}
@@ -182,7 +182,7 @@ TEST(UpgradeAlreadyInstalled, NoArmorCanBuy) {
     MockUnit mock_unit("test_no_armor_ship");
     mock_unit.armor.Load("test_no_armor_ship");
 
-    Cargo cargo = makeArmorCargo("armor04");
+    Cargo cargo = MakeArmorCargo("armor04");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
@@ -192,7 +192,7 @@ TEST(UpgradeAlreadyInstalled, NoArmorCanBuy) {
 
 // Ship-default shield with meaningful values is recognized as fitted.
 TEST(UpgradeAlreadyInstalled, ShipDefaultShieldRecognized) {
-    registerUpgradeType("shield01", "Shield");
+    RegisterUpgradeType("shield01", "Shield");
 
     // "10/10/10" means max=10 per facet.
     // 4 facets × 10 = 40.0 total, well above the 10.0 threshold.
@@ -206,13 +206,13 @@ TEST(UpgradeAlreadyInstalled, ShipDefaultShieldRecognized) {
     MockUnit mock_unit("test_ship_shield");
     mock_unit.shield.Load("test_ship_shield");
 
-    Cargo cargo = makeShieldCargo("shield01");
+    Cargo cargo = MakeShieldCargo("shield01");
     EXPECT_TRUE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Ship-default shield with negligible values is NOT recognized as fitted.
 TEST(UpgradeAlreadyInstalled, NegligibleShieldNotRecognized) {
-    registerUpgradeType("shield01b", "Shield");
+    RegisterUpgradeType("shield01b", "Shield");
 
     // "2/2/2" means max=2 per facet.
     // 4 facets × 2 = 8.0 total, below the 10.0 threshold.
@@ -226,13 +226,13 @@ TEST(UpgradeAlreadyInstalled, NegligibleShieldNotRecognized) {
     MockUnit mock_unit("test_ship_shield_negligible");
     mock_unit.shield.Load("test_ship_shield_negligible");
 
-    Cargo cargo = makeShieldCargo("shield01b");
+    Cargo cargo = MakeShieldCargo("shield01b");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Shield at exactly the threshold (total 10.0) is NOT recognized.
 TEST(UpgradeAlreadyInstalled, ShieldAtThresholdNotRecognized) {
-    registerUpgradeType("shield01c", "Shield");
+    RegisterUpgradeType("shield01c", "Shield");
 
     // "2.5/2.5/2.5" means max=2.5 per facet.
     // 4 facets × 2.5 = 10.0 total, exactly at the threshold.
@@ -246,13 +246,13 @@ TEST(UpgradeAlreadyInstalled, ShieldAtThresholdNotRecognized) {
     MockUnit mock_unit("test_ship_shield_threshold");
     mock_unit.shield.Load("test_ship_shield_threshold");
 
-    Cargo cargo = makeShieldCargo("shield01c");
+    Cargo cargo = MakeShieldCargo("shield01c");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Purchased shield is recognized as fitted.
 TEST(UpgradeAlreadyInstalled, PurchasedShieldRecognized) {
-    registerUpgradeType("shield02", "Shield");
+    RegisterUpgradeType("shield02", "Shield");
 
     std::map<std::string, std::string> shield_data = {
         {"shield", "100/100/100"},
@@ -264,13 +264,13 @@ TEST(UpgradeAlreadyInstalled, PurchasedShieldRecognized) {
     MockUnit mock_unit("test_ship_purchased_shield");
     mock_unit.shield.Upgrade("shield02" + kUpgradesSuffix);
 
-    Cargo cargo = makeShieldCargo("shield02");
+    Cargo cargo = MakeShieldCargo("shield02");
     EXPECT_TRUE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Downgraded shield is NOT recognized as fitted.
 TEST(UpgradeAlreadyInstalled, DowngradedShieldNotRecognized) {
-    registerUpgradeType("shield03", "Shield");
+    RegisterUpgradeType("shield03", "Shield");
 
     std::map<std::string, std::string> shield_data = {
         {"shield", "100/100/100"},
@@ -283,13 +283,13 @@ TEST(UpgradeAlreadyInstalled, DowngradedShieldNotRecognized) {
     mock_unit.shield.Upgrade("shield03" + kUpgradesSuffix);
     mock_unit.shield.Downgrade();
 
-    Cargo cargo = makeShieldCargo("shield03");
+    Cargo cargo = MakeShieldCargo("shield03");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
 // Ship with no shield can buy shield.
 TEST(UpgradeAlreadyInstalled, NoShieldCanBuy) {
-    registerUpgradeType("shield04", "Shield");
+    RegisterUpgradeType("shield04", "Shield");
 
     std::map<std::string, std::string> no_shield_data = {
         {"Name", "NoShieldShip"}
@@ -299,7 +299,7 @@ TEST(UpgradeAlreadyInstalled, NoShieldCanBuy) {
     MockUnit mock_unit("test_no_shield_ship");
     mock_unit.shield.Load("test_no_shield_ship");
 
-    Cargo cargo = makeShieldCargo("shield04");
+    Cargo cargo = MakeShieldCargo("shield04");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyInstalled(cargo));
 }
 
@@ -309,7 +309,7 @@ TEST(UpgradeAlreadyInstalled, NoShieldCanBuy) {
 
 // Ship-default armor was NOT bought (upgrade_key is empty).
 TEST(UpgradeAlreadyBought, ShipDefaultArmorNotBought) {
-    registerUpgradeType("armor10", "Armor");
+    RegisterUpgradeType("armor10", "Armor");
 
     std::map<std::string, std::string> ship_data = {
         {"armor", "15/15/15"}
@@ -319,13 +319,13 @@ TEST(UpgradeAlreadyBought, ShipDefaultArmorNotBought) {
     MockUnit mock_unit("test_ship_armor_bought");
     mock_unit.armor.Load("test_ship_armor_bought");
 
-    Cargo cargo = makeArmorCargo("armor10");
+    Cargo cargo = MakeArmorCargo("armor10");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Purchased armor WAS bought (upgrade_key is set).
 TEST(UpgradeAlreadyBought, PurchasedArmorBought) {
-    registerUpgradeType("armor11", "Armor");
+    RegisterUpgradeType("armor11", "Armor");
 
     std::map<std::string, std::string> armor_data = {
         {"armor", "100/100/100"}
@@ -335,13 +335,13 @@ TEST(UpgradeAlreadyBought, PurchasedArmorBought) {
     MockUnit mock_unit("test_ship_purchased_armor_bought");
     mock_unit.armor.Upgrade("armor11" + kUpgradesSuffix);
 
-    Cargo cargo = makeArmorCargo("armor11");
+    Cargo cargo = MakeArmorCargo("armor11");
     EXPECT_TRUE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Downgraded armor was NOT bought (not installed).
 TEST(UpgradeAlreadyBought, DowngradedArmorNotBought) {
-    registerUpgradeType("armor12", "Armor");
+    RegisterUpgradeType("armor12", "Armor");
 
     std::map<std::string, std::string> armor_data = {
         {"armor", "100/100/100"}
@@ -352,13 +352,13 @@ TEST(UpgradeAlreadyBought, DowngradedArmorNotBought) {
     mock_unit.armor.Upgrade("armor12" + kUpgradesSuffix);
     mock_unit.armor.Downgrade();
 
-    Cargo cargo = makeArmorCargo("armor12");
+    Cargo cargo = MakeArmorCargo("armor12");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Ship with no armor was NOT bought.
 TEST(UpgradeAlreadyBought, NoArmorNotBought) {
-    registerUpgradeType("armor13", "Armor");
+    RegisterUpgradeType("armor13", "Armor");
 
     std::map<std::string, std::string> no_armor_data = {
         {"Name", "NoArmorShipBought"}
@@ -368,7 +368,7 @@ TEST(UpgradeAlreadyBought, NoArmorNotBought) {
     MockUnit mock_unit("test_no_armor_ship_bought");
     mock_unit.armor.Load("test_no_armor_ship_bought");
 
-    Cargo cargo = makeArmorCargo("armor13");
+    Cargo cargo = MakeArmorCargo("armor13");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
@@ -378,7 +378,7 @@ TEST(UpgradeAlreadyBought, NoArmorNotBought) {
 
 // Ship-default shield was NOT bought (upgrade_key is empty).
 TEST(UpgradeAlreadyBought, ShipDefaultShieldNotBought) {
-    registerUpgradeType("shield10", "Shield");
+    RegisterUpgradeType("shield10", "Shield");
 
     std::map<std::string, std::string> ship_data = {
         {"shield", "10/10/10"},
@@ -390,13 +390,13 @@ TEST(UpgradeAlreadyBought, ShipDefaultShieldNotBought) {
     MockUnit mock_unit("test_ship_shield_bought");
     mock_unit.shield.Load("test_ship_shield_bought");
 
-    Cargo cargo = makeShieldCargo("shield10");
+    Cargo cargo = MakeShieldCargo("shield10");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Purchased shield WAS bought (upgrade_key is set).
 TEST(UpgradeAlreadyBought, PurchasedShieldBought) {
-    registerUpgradeType("shield11", "Shield");
+    RegisterUpgradeType("shield11", "Shield");
 
     std::map<std::string, std::string> shield_data = {
         {"shield", "100/100/100"},
@@ -408,13 +408,13 @@ TEST(UpgradeAlreadyBought, PurchasedShieldBought) {
     MockUnit mock_unit("test_ship_purchased_shield_bought");
     mock_unit.shield.Upgrade("shield11" + kUpgradesSuffix);
 
-    Cargo cargo = makeShieldCargo("shield11");
+    Cargo cargo = MakeShieldCargo("shield11");
     EXPECT_TRUE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Downgraded shield was NOT bought (not installed).
 TEST(UpgradeAlreadyBought, DowngradedShieldNotBought) {
-    registerUpgradeType("shield12", "Shield");
+    RegisterUpgradeType("shield12", "Shield");
 
     std::map<std::string, std::string> shield_data = {
         {"shield", "100/100/100"},
@@ -427,13 +427,13 @@ TEST(UpgradeAlreadyBought, DowngradedShieldNotBought) {
     mock_unit.shield.Upgrade("shield12" + kUpgradesSuffix);
     mock_unit.shield.Downgrade();
 
-    Cargo cargo = makeShieldCargo("shield12");
+    Cargo cargo = MakeShieldCargo("shield12");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
 
 // Ship with no shield was NOT bought.
 TEST(UpgradeAlreadyBought, NoShieldNotBought) {
-    registerUpgradeType("shield13", "Shield");
+    RegisterUpgradeType("shield13", "Shield");
 
     std::map<std::string, std::string> no_shield_data = {
         {"Name", "NoShieldShipBought"}
@@ -443,6 +443,6 @@ TEST(UpgradeAlreadyBought, NoShieldNotBought) {
     MockUnit mock_unit("test_no_shield_ship_bought");
     mock_unit.shield.Load("test_no_shield_ship_bought");
 
-    Cargo cargo = makeShieldCargo("shield13");
+    Cargo cargo = MakeShieldCargo("shield13");
     EXPECT_FALSE(mock_unit.UpgradeAlreadyBought(cargo));
 }
