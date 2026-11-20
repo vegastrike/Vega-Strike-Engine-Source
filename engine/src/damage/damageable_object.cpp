@@ -28,6 +28,8 @@
 
 #include "damage/damageable_object.h"
 #include "damage/core_vector.h"
+#include "damage/damage.h"
+#include "cmd/mount_size.h"
 #include <boost/range/adaptor/reversed.hpp>
 #include <iostream>
 
@@ -79,7 +81,7 @@ InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Da
 }
 
 void DamageableObject::Destroy() {
-    layers[0]->facets[0] = 0;
+    layers[as_integer(DamageLayer::hull)]->facets[0] = 0;
 }
 
 // We make a lot of assumptions here:
@@ -91,7 +93,7 @@ bool DamageableObject::Destroyed() {
         return true;
     }
 
-    return layers[0]->facets[0] == 0;
+    return layers[as_integer(DamageLayer::hull)]->facets[0] == 0;
 }
 
 void DamageableObject::SetInvulnerable(bool invulnerable) {

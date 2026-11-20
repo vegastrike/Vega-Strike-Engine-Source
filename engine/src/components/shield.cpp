@@ -32,6 +32,7 @@
 #include "configuration/configuration.h"
 #include "src/vs_logging.h"
 #include "damage/damage.h"
+#include "cmd/mount_size.h"
 #include "src/vega_cast_utils.h"
 
 #include <boost/format.hpp>
@@ -46,7 +47,7 @@ static const Damage normal_damage = Damage(1.0,0.0);
 Shield::Shield(EnergyContainer *source, FtlDrive *ftl_drive, Cloak *cloak, FacetConfiguration configuration) :
     Component(),
     EnergyConsumer(source, true, 0),
-    DamageableLayer(2, configuration, 0.0, normal_damage, false),
+    DamageableLayer(as_integer(DamageLayer::shield), configuration, 0.0, normal_damage, false),
     ftl_drive(ftl_drive), cloak(cloak),
     regeneration(Resource<double>(0.0,0.0,0.0)),
     max_power(Resource<double>(1.0,0.0,1.0)) {

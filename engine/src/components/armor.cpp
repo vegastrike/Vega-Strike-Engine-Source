@@ -27,6 +27,7 @@
 
 #include "components/armor.h"
 #include "damage/damage.h"
+#include "cmd/mount_size.h"
 #include "cmd/unit_csv_factory.h"
 
 int Armor::front = 0;
@@ -38,7 +39,7 @@ static const Damage normal_and_phase_damage = Damage(1.0,1.0);
 
 Armor::Armor() :
     Component(),
-    DamageableLayer(1, FacetConfiguration::four, 1.0, normal_and_phase_damage, false) {
+    DamageableLayer(as_integer(DamageLayer::armor), FacetConfiguration::four, 1.0, normal_and_phase_damage, false) {
     type = ComponentType::Armor;
 }
 

@@ -56,15 +56,26 @@ struct Damage {
     //blast_effect(blast_effect),
 };
 
+/**
+ * @brief The DamageLayer enum names the index of each layer,
+ * both in DamageableObject::layers and in InflictedDamage::inflicted_damage_by_layer.
+ * Use as_integer() to convert it to an index.
+ */
+enum class DamageLayer {
+    hull = 0,
+    armor = 1,
+    shield = 2,
+};
+
 struct InflictedDamage {
     double total_damage;         // Total inflicted damage
     double normal_damage;        // Go through shield, armor and finally hull and subsystems
     double phase_damage;         // Bypass shields
     double propulsion_damage;    // Disables the ship's drive
 
-    // This array stores the damage inflicted to each layer
-    // By default, it is  hard-coded to three layers:
-    // shield, armor and hull. But this makes this implementation inflexible.
+    // This array stores the damage inflicted to each layer, indexed by DamageLayer
+    // By default, it is hard-coded to three layers:
+    // hull, armor and shield. But this makes this implementation inflexible.
     std::vector<double> inflicted_damage_by_layer;
 
     InflictedDamage(int number_of_layers = 3) {
