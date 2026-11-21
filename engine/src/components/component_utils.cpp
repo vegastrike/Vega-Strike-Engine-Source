@@ -93,7 +93,104 @@ const ComponentType GetComponentTypeFromName(const std::string name) {
         return ComponentType::ECM;
     } else if(upgrade_category == "Repair_Bot") {
         return ComponentType::RepairBot;
-    } else {
+    } else if(upgrade_category.empty()) {
+        // Fallback: detect component type from fields present in the upgrade data.
+        // This handles legacy upgrade data files that don't have the Upgrade_Type field.
+        const std::string armor_val = UnitCSVFactory::GetVariable(upgrade_key, "armor", std::string());
+        if(!armor_val.empty()) {
+            return ComponentType::Armor;
+        }
+
+        const std::string shield_val = UnitCSVFactory::GetVariable(upgrade_key, "shield", std::string());
+        if(!shield_val.empty()) {
+            return ComponentType::Shield;
+        }
+
+        const std::string hull_val = UnitCSVFactory::GetVariable(upgrade_key, "Hull", std::string());
+        if(!hull_val.empty()) {
+            return ComponentType::Hull;
+        }
+
+        const std::string reactor_val = UnitCSVFactory::GetVariable(upgrade_key, "Reactor_Recharge", std::string());
+        if(!reactor_val.empty()) {
+            return ComponentType::Reactor;
+        }
+
+        const std::string fuel_val = UnitCSVFactory::GetVariable(upgrade_key, "Fuel_Capacity", std::string());
+        if(!fuel_val.empty()) {
+            return ComponentType::Fuel;
+        }
+
+        const std::string capacitor_val = UnitCSVFactory::GetVariable(upgrade_key, "Primary_Capacitor", std::string());
+        if(!capacitor_val.empty()) {
+            return ComponentType::Capacitor;
+        }
+
+        const std::string ftl_capacitor_val = UnitCSVFactory::GetVariable(upgrade_key, "Warp_Capacitor", std::string());
+        if(!ftl_capacitor_val.empty()) {
+            return ComponentType::FtlCapacitor;
+        }
+
+        const std::string warp_cost_val = UnitCSVFactory::GetVariable(upgrade_key, "Warp_Usage_Cost", std::string());
+        if(!warp_cost_val.empty()) {
+            return ComponentType::FtlDrive;
+        }
+
+        const std::string jump_present_val = UnitCSVFactory::GetVariable(upgrade_key, "Jump_Drive_Present", std::string());
+        if(!jump_present_val.empty()) {
+            return ComponentType::JumpDrive;
+        }
+
+        const std::string cloak_energy_val = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Energy", std::string());
+        const std::string can_cloak_val = UnitCSVFactory::GetVariable(upgrade_key, "Can_Cloak", std::string());
+        const std::string cloak_rate_val = UnitCSVFactory::GetVariable(upgrade_key, "Cloak_Rate", std::string());
+        if(!cloak_energy_val.empty() || !can_cloak_val.empty() || !cloak_rate_val.empty()) {
+            return ComponentType::Cloak;
+        }
+
+        const std::string radar_range_val = UnitCSVFactory::GetVariable(upgrade_key, "Radar_Range", std::string());
+        if(!radar_range_val.empty()) {
+            return ComponentType::Radar;
+        }
+
+        const std::string ecm_val = UnitCSVFactory::GetVariable(upgrade_key, "ecm", std::string());
+        if(!ecm_val.empty()) {
+            return ComponentType::ECM;
+        }
+
+        const std::string repair_val = UnitCSVFactory::GetVariable(upgrade_key, "repair", std::string());
+        if(!repair_val.empty()) {
+            return ComponentType::RepairBot;
+        }
+
+        // Drive vs. DriveUpgrade: distinguish using Object_Type.
+        // Upgrade_Improvement indicates multiplier-based upgrades (DriveUpgrade),
+        // while other Object_Type values (or empty) indicate base Drive components.
+        const std::string drive_object_type = UnitCSVFactory::GetVariable(upgrade_key, "Object_Type", std::string());
+        const double maneuver_yaw = UnitCSVFactory::GetVariable(upgrade_key, "Maneuver_Yaw", 0.0);
+        const double forward_accel = UnitCSVFactory::GetVariable(upgrade_key, "Forward_Accel", 0.0);
+        if(maneuver_yaw != 0.0 || forward_accel != 0.0) {
+            if(drive_object_type == "Upgrade_Improvement") {
+                return ComponentType::DriveUpgrade;
+            }
+            return ComponentType::Drive;
+        }
+
+        // Afterburner vs. AfterburnerUpgrade: similar logic using Object_Type.
+        const std::string afterburner_object_type = UnitCSVFactory::GetVariable(upgrade_key, "Object_Type", std::string());
+        const double afterburner_accel = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Accel", 0.0);
+        const double afterburner_speed = UnitCSVFactory::GetVariable(upgrade_key, "Afterburner_Speed_Governor", 0.0);
+        if(afterburner_accel != 0.0 || afterburner_speed != 0.0) {
+            if(afterburner_object_type == "Upgrade_Improvement") {
+                return ComponentType::AfterburnerUpgrade;
+            }
+            return ComponentType::Afterburner;
+        }
+
+        return ComponentType::NoComponent;
+    }
+    else {
+        // Unknown Upgrade_Type value — treat as NoComponent.
         return ComponentType::NoComponent;
     }
 }

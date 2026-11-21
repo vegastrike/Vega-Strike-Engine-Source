@@ -36,10 +36,20 @@
 #include "vs_logging.h"
 #include "resource/manifest.h"
 #include "src/vega_cast_utils.h"
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 #include <iostream>
 
 Resource<double> ComponentsManager::credits = Resource<double>(0.0, 0.0);
+
+static const std::string empty_string;
+
+// Returns a static empty string by default. A bare ComponentsManager will never
+// match the ".milspec" suffix check in UpgradeAlreadyInstalled. Unit overrides
+// this method to return the actual unit key, enabling Milspec ship detection.
+const std::string& ComponentsManager::GetUnitKey() const {
+    return empty_string;
+}
 
 void ComponentsManager::Load(std::string unit_key) {
     mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
@@ -222,7 +232,16 @@ bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
     const ComponentType component_type = GetComponentTypeFromName(upgrade.GetName());
     const Component *component = GetComponentByType(component_type);
     if(component) {
-        return component->Installed();
+        // For Milspec ships (unit key ends with ".milspec"), the Milspec package
+        // is pre-installed, not purchased as an upgrade, so upgrade_key won't be set.
+        // For these ships, we only check the installed flag.
+        // For non-Milspec ships, we also check that upgrade_key is non-empty to avoid
+        // false positives from default DamageableLayer values that get saved and restored.
+        const bool is_milspec_ship = boost::algorithm::ends_with(GetUnitKey(), ".milspec");
+        if(is_milspec_ship) {
+            return component->Installed();
+        }
+        return component->Installed() && !component->GetUpgradeKey().empty();
     }
 
     // Note that this method returns true for error, so we err on the side of caution

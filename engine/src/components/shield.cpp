@@ -170,9 +170,12 @@ void Shield::Load(std::string unit_key) {
         VS_LOG(error, (boost::format("%1%: %2% Unable to parse shield facets for %3%") % __FUNCTION__ % ex.what() % unit_key));
     }
 
-    // This should already be set, but good practice to do it anyway.
-    number_of_facets = 0;
-    facets.clear();
+    // No shield data found: keep the ship's facet count (from the constructor or
+    // previous load) and zero out the values. This ensures Shield::CanUpgrade and
+    // Shield::Upgrade still work correctly, matching the behavior of Armor::Load.
+    for(Resource<double>& facet : facets) {
+        facet.SetMaxValue(0);
+    }
     operational = 0.0;
 }
 
@@ -212,7 +215,9 @@ bool Shield::Downgrade() {
     // Component
     Component::Downgrade();
 
-    facets.clear();
+    for(Resource<double>& facet : facets) {
+        facet.SetMaxValue(0);
+    }
     return true;
 }
 
@@ -232,13 +237,10 @@ bool Shield::Upgrade(const std::string upgrade_key) {
         return false;
     }
 
-    facets.clear();
     const double shield_single_value = UnitCSVFactory::GetVariable(upgrade_key, "shield", 0.0);
 
-    if(shield_single_value > 0.0) {
-        for (unsigned int i = 0; i < number_of_facets; i++) {
-            facets.push_back(Resource<double>(shield_single_value,0,shield_single_value));
-        }
+    for(Resource<double>& facet : facets) {
+        facet.SetMaxValue(shield_single_value);
     }
 
     return true;

@@ -133,6 +133,11 @@ public:
     Component       *GetComponentByType(const ComponentType type);
     const Component *GetComponentByType(const ComponentType type) const;
 
+protected:
+    // Returns the unit key for the ship. Overridden by Unit to return the actual key.
+    // Used by UpgradeAlreadyInstalled to check for Milspec ships.
+    virtual const std::string& GetUnitKey() const;
+
 private:
     bool _Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity);
     bool _Sell(CargoHold *hold, ComponentsManager *buyer, Cargo *item, int quantity);
