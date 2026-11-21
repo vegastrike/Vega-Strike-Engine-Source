@@ -62,6 +62,8 @@ public:
 
     void Repair() override;
 
+    using Component::Damage;
+
     // Ship Function Methods
     double Value(Function function) const;
     double Max(Function function) const;
