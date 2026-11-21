@@ -34,7 +34,7 @@ static const Damage normal_and_phase_damage = Damage(1.0,1.0);
 
 Hull::Hull() :
     Component(0.0, 0.0, true, true),
-    DamageableLayer(0, FacetConfiguration::one, 0.0, normal_and_phase_damage, true) {
+    DamageableLayer(DamageLayer::hull, FacetConfiguration::one, 0.0, normal_and_phase_damage, true) {
     type = ComponentType::Hull;
     upgrade_name = "Hull";
     installed = true;

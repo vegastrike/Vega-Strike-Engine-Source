@@ -39,7 +39,7 @@
 
 
 
-DamageableLayer::DamageableLayer(int layer,
+DamageableLayer::DamageableLayer(DamageLayer layer,
         FacetConfiguration configuration,
         double health_template,
         Damage vulnerabilities,
@@ -211,6 +211,12 @@ double DamageableLayer::Percent(int facet) const {
 }
 
 
-int DamageableLayer::Layer() const {
+DamageLayer DamageableLayer::Layer() const {
     return layer;
+}
+
+void DamageableLayer::Destroy() {
+    for (Resource<double> &facet : facets) {
+        facet = 0;
+    }
 }

@@ -41,7 +41,7 @@
  */
 class DamageableLayer {
 protected:
-    int layer; // The layer we're in, for recording damage
+    DamageLayer layer; // The layer we're in, for recording damage
 
     Damage vulnerabilities;
     // TODO: implement "shield leaks"
@@ -56,7 +56,7 @@ protected:
     friend struct DamageableObject;
 
 public:
-    DamageableLayer(int layer,
+    DamageableLayer(DamageLayer layer,
             FacetConfiguration configuration,
             double health_template,
             Damage vulnerabilities = Damage(1.0,1.0),
@@ -80,7 +80,10 @@ public:
     virtual double Percent() const;
     double Percent(int facet) const;
 
-    int Layer() const;
+    DamageLayer Layer() const;
+
+    // Reduce every facet to zero
+    virtual void Destroy();
 };
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_LAYER_H

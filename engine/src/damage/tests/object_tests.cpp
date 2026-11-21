@@ -36,13 +36,13 @@ TEST(DamageableObject, Sanity) {
 
     DamageableObject object;
 
-    DamageableLayer hull = DamageableLayer(0, FacetConfiguration::one, 50, Damage(1.0,1.0), true);
-    DamageableLayer armor = DamageableLayer(1, FacetConfiguration::four, 100, Damage(1.0,1.0), false);
-    DamageableLayer shield = DamageableLayer(2, FacetConfiguration::four, 200, Damage(1.0,0.0), false);
+    DamageableLayer hull = DamageableLayer(DamageLayer::hull, FacetConfiguration::one, 50, Damage(1.0,1.0), true);
+    DamageableLayer armor = DamageableLayer(DamageLayer::armor, FacetConfiguration::four, 100, Damage(1.0,1.0), false);
+    DamageableLayer shield = DamageableLayer(DamageLayer::shield, FacetConfiguration::four, 200, Damage(1.0,0.0), false);
 
-    EXPECT_EQ(hull.Layer(), 0);
-    EXPECT_EQ(armor.Layer(), 1);
-    EXPECT_EQ(shield.Layer(), 2);
+    EXPECT_EQ(hull.Layer(), DamageLayer::hull);
+    EXPECT_EQ(armor.Layer(), DamageLayer::armor);
+    EXPECT_EQ(shield.Layer(), DamageLayer::shield);
 
     object.AddLayer(&hull);
     object.AddLayer(&armor);
@@ -53,14 +53,35 @@ TEST(DamageableObject, Sanity) {
     damage.phase_damage = 0;
 
     InflictedDamage inflicted_damage = object.DealDamage(core_vector, damage);
-    EXPECT_EQ(object.layers[0]->Percent(0), 1.0);
-    EXPECT_EQ(object.layers[1]->Percent(0), 1.0);
-    EXPECT_EQ(object.layers[2]->Percent(0), 0.95);
+    EXPECT_EQ(object.GetLayer(DamageLayer::hull)->Percent(0), 1.0);
+    EXPECT_EQ(object.GetLayer(DamageLayer::armor)->Percent(0), 1.0);
+    EXPECT_EQ(object.GetLayer(DamageLayer::shield)->Percent(0), 0.95);
     EXPECT_EQ(damage.normal_damage, 0);
     EXPECT_EQ(inflicted_damage.total_damage, 10);
     EXPECT_EQ(inflicted_damage.normal_damage, 10);
     EXPECT_EQ(inflicted_damage.phase_damage, 0);
-    EXPECT_EQ(inflicted_damage.inflicted_damage_by_layer[0], 0);
-    EXPECT_EQ(inflicted_damage.inflicted_damage_by_layer[1], 0);
-    EXPECT_EQ(inflicted_damage.inflicted_damage_by_layer[2], 10);
+    EXPECT_EQ(inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::hull), 0);
+    EXPECT_EQ(inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::armor), 0);
+    EXPECT_EQ(inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::shield), 10);
+}
+
+TEST(DamageableObject, Destroy) {
+    DamageableObject object;
+
+    DamageableLayer hull = DamageableLayer(DamageLayer::hull, FacetConfiguration::one, 50, Damage(1.0,1.0), true);
+    DamageableLayer armor = DamageableLayer(DamageLayer::armor, FacetConfiguration::four, 100, Damage(1.0,1.0), false);
+    DamageableLayer shield = DamageableLayer(DamageLayer::shield, FacetConfiguration::four, 200, Damage(1.0,0.0), false);
+
+    object.AddLayer(&hull);
+    object.AddLayer(&armor);
+    object.AddLayer(&shield);
+
+    EXPECT_FALSE(object.Destroyed());
+
+    object.Destroy();
+
+    EXPECT_TRUE(object.Destroyed());
+    EXPECT_EQ(object.GetLayer(DamageLayer::hull)->Percent(0), 0);
+    EXPECT_EQ(object.GetLayer(DamageLayer::armor)->Percent(0), 1.0);
+    EXPECT_EQ(object.GetLayer(DamageLayer::shield)->Percent(0), 1.0);
 }
