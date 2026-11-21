@@ -214,3 +214,9 @@ double DamageableLayer::Percent(int facet) const {
 DamageLayer DamageableLayer::Layer() const {
     return layer;
 }
+
+void DamageableLayer::Destroy() {
+    for (Resource<double> &facet : facets) {
+        facet = 0;
+    }
+}

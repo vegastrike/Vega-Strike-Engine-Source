@@ -81,6 +81,9 @@ public:
     double Percent(int facet) const;
 
     DamageLayer Layer() const;
+
+    // Reduce every facet to zero
+    virtual void Destroy();
 };
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGEABLE_LAYER_H

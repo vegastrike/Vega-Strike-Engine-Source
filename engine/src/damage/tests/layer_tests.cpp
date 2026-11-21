@@ -54,3 +54,14 @@ TEST(Layer, Sanity) {
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(-2, 0, -1)), 1);
 
 }
+
+TEST(Layer, Destroy) {
+    DamageableLayer layer = DamageableLayer(DamageLayer::armor, FacetConfiguration::four, 10, Damage(1.0,1.0), false);
+
+    layer.Destroy();
+
+    for (int i = 0; i < 4; i++) {
+        EXPECT_EQ(layer.Percent(i), 0);
+    }
+    EXPECT_EQ(layer.TotalLayerValue(), 0);
+}

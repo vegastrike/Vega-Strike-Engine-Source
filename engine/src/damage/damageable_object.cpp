@@ -91,7 +91,7 @@ InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Da
 void DamageableObject::Destroy() {
     DamageableLayer* hull = GetLayer(DamageLayer::hull);
     if (hull) {
-        hull->facets[0] = 0;
+        hull->Destroy();
     }
 }
 
