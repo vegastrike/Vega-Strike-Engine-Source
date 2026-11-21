@@ -79,7 +79,7 @@ mkdir -pv "${BUILD_DIR}"
 
 cmake --preset "$preset_name"
 
-MAX_THREADS_TO_BUILD_WITH=8
+MAX_THREADS_TO_BUILD_WITH=6
 if [ -f ./script/num_cpus ] && [ -x ./script/num_cpus ]
 then
   num_threads_to_build_with=$(./script/num_cpus)
@@ -91,12 +91,14 @@ else
   exit 3
 fi
 
-echo "Number of threads to build with before capping: $num_threads_to_build_with"
+echo "Number of logical processors currently online and available: ${num_threads_to_build_with}"
+num_threads_to_build_with = $((${num_threads_to_build_with} \* 3 / 4))
+echo "Number of threads to build with after adjusting by 3/4, and before capping: ${num_threads_to_build_with}"
 if [ ${num_threads_to_build_with} -gt ${MAX_THREADS_TO_BUILD_WITH} ]
 then
   num_threads_to_build_with=${MAX_THREADS_TO_BUILD_WITH}
 fi
-echo "Number of threads to build with after capping: $num_threads_to_build_with"
+echo "Number of threads to build with after capping: ${num_threads_to_build_with}"
 
 cmake --build --preset="build-${preset_name}" -j ${num_threads_to_build_with}
 
