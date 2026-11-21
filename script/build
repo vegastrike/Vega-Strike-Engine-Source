@@ -92,7 +92,7 @@ else
 fi
 
 echo "Number of logical processors currently online and available: ${num_threads_to_build_with}"
-num_threads_to_build_with = $((${num_threads_to_build_with} \* 3 / 4))
+num_threads_to_build_with=$((num_threads_to_build_with * 3 / 4))
 echo "Number of threads to build with after adjusting by 3/4, and before capping: ${num_threads_to_build_with}"
 if [ ${num_threads_to_build_with} -gt ${MAX_THREADS_TO_BUILD_WITH} ]
 then
