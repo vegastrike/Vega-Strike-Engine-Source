@@ -33,7 +33,7 @@
 
 // Demonstrate some basic assertions.
 TEST(Layer, Sanity) {
-    DamageableLayer layer = DamageableLayer(0, FacetConfiguration::four, 10, Damage(1.0,1.0), true);
+    DamageableLayer layer = DamageableLayer(DamageLayer::hull, FacetConfiguration::four, 10, Damage(1.0,1.0), true);
 
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(0, 0, 0)), 0);
 
