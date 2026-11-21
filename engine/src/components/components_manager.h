@@ -119,6 +119,7 @@ public:
     bool        ShipDamaged() const;
     bool        AllowedUpgrade(const Cargo &upgrade) const;
     bool        UpgradeAlreadyInstalled(const Cargo &upgrade) const;
+    bool        UpgradeAlreadyBought(const Cargo &upgrade) const;
     void        DamageRandomSystem();
     void        GenerateHudText(std::string getDamageColor(double));
     std::string GetHudText();
@@ -132,6 +133,11 @@ public:
 
     Component       *GetComponentByType(const ComponentType type);
     const Component *GetComponentByType(const ComponentType type) const;
+
+protected:
+    // Returns the unit key for the ship. Overridden by Unit to return the actual key.
+    // Used by UpgradeAlreadyInstalled to check for Milspec ships.
+    virtual const std::string& GetUnitKey() const;
 
 private:
     bool _Buy(CargoHold *hold, ComponentsManager *seller, Cargo *item, int quantity);

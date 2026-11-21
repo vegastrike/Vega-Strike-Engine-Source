@@ -51,6 +51,14 @@ std::string GetUnitKeyFromNameAndFaction(const std::string unit_name, const std:
         return unit_name;
     }
 
+    // Fallback: try the __upgrades suffix for upgrade items.
+    // Upgrade data in units.json uses keys like "armor01__upgrades",
+    // but the Unit constructor is called with just "armor01".
+    std::string upgrades_key = unit_name + "__upgrades";
+    if(UnitCSVFactory::HasUnit(upgrades_key)) {
+        return upgrades_key;
+    }
+
     return std::string();
 }
 

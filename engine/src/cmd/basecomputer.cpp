@@ -1468,7 +1468,12 @@ bool BaseComputer::isTransactionOK(const Cargo &original_item, const Transaction
             }
             break;
         case SELL_UPGRADE:
-            // Change this code if you want to consider shop cargo space or money.
+            // Only allow selling upgrades that were actually purchased.
+            // Ship-default components (armor, shield, etc.) should not be sellable.
+            if(!player_unit->UpgradeAlreadyBought(item)) {
+                transaction_color = getColor(Color::incompatible);
+                return false;
+            }
             return true;
 
         case BUY_UPGRADE:
