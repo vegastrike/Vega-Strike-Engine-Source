@@ -43,10 +43,13 @@ public:
     static int left;
     static int right;
 
+    int mass;
+    int hull;
+
     Armor();
 
     // Component Methods
-    void Load(std::string unit_key) override;
+    void Load(std::string unit_key, int mass, int hull);
 
     void SaveToCSV(std::map<std::string, std::string>& unit) const override;
 
