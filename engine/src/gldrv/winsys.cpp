@@ -766,7 +766,8 @@ static void handle_window_resize(int new_w, int new_h) {
 
 void winsys_process_events() {
     SDL_Event event;
-    int x, y;
+    int x{};
+    int y{};
     bool state;
 
     static unsigned int keysym_to_unicode[256];
