@@ -23,13 +23,13 @@ jobs:
           - os:              windows-2022
             triplet:         x64-win10
             preset-name:     VS2022Win64-pie-enabled-RelWithDebInfo
-            python-version:  3.14.9
+            python-version:  3.14
             is-release:      1
             install-nsis:    0
           - os:              windows-2025
             triplet:         x64-win10
             preset-name:     VS2026Win64-pie-enabled-RelWithDebInfo
-            python-version:  3.14.9
+            python-version:  3.14
             is-release:      1
             install-nsis:    1
 
@@ -42,6 +42,7 @@ jobs:
       X_VCPKG_ASSET_SOURCES: clear;x-azurl,file:///${{ github.workspace }}/vcpkgAssets,,readwrite
       VCPKG_BINARY_SOURCES: clear;files,${{ github.workspace }}/vcpkgBin,readwrite
       VCPKG_BUILD_TREES: "${{ github.workspace }}/vcpkgBuild"
+      VCPKG_INSTALLED_DIR: "${{ github.workspace }}/vcpkgBuild"
       VCPKG_INSTALL_OPTIONS: "--x-buildtrees-root=${{ github.workspace }}/vcpkgBuild"
       VCPKG_DEFAULT_TRIPLET: ${{ matrix.triplet }}
       VCPKG_DEFAULT_HOST_TRIPLET: ${{ matrix.triplet }}
@@ -100,7 +101,7 @@ jobs:
           update-environment: false
 
       - name: Install CMake
-        uses: lukka/get-cmake@f86dd60acae0d132056913e248bdabf0e0580b7a # v4.4.5
+        uses: lukka/get-cmake@16e8153a8b4918849d92aad131befe67a3705daa # v4.5.0
 
       - name: Install NSIS
         if: ${{ matrix.install-nsis }}
