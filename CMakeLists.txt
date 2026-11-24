@@ -149,6 +149,15 @@ ADD_LINK_OPTIONS(
         "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/DEBUG>"
         "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:RelWithDebInfo>>:/DEBUG>"
 )
+IF (WIN32)
+    ADD_LINK_OPTIONS(
+            # Increase Windows stack size to 8 MB (matching Linux default) to prevent stack overflow
+            # during deep call chains in game initialization. The reserve is virtual address space;
+            # only touched pages are committed to physical memory, so the cost is minimal.
+            "$<$<CXX_COMPILER_ID:MSVC>:/STACK:8388608,1024>"
+            "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wl,--stack,8388608>"
+    )
+ENDIF ()
 ADD_COMPILE_OPTIONS("$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-pipe>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wall>"
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-fvisibility=hidden>"
@@ -335,7 +344,7 @@ ENDIF (Python3_FOUND)
 # Note: we now use Cmake 3.21 and Boost 1.75.
 MESSAGE(STATUS "From now on, always using System Boost (ver. 1.75 or higher)")
 SET(BOOST_PYTHON_COMPONENT "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
-FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time filesystem thread chrono atomic program_options REQUIRED)
+FIND_PACKAGE(Boost COMPONENTS ${BOOST_PYTHON_COMPONENT} json log log_setup date_time filesystem thread chrono atomic program_options REQUIRED OPTIONAL_COMPONENTS exception)
 MESSAGE(STATUS "Found System Boost version ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
 SET(BOOST_PYTHON_NO_PY_SIGNATURES 1)
 
