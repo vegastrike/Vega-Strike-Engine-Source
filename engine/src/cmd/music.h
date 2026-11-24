@@ -28,10 +28,10 @@
 #define VEGA_STRIKE_ENGINE_CMD_MUSIC_H
 
 #include "cmd/container.h"
-#include <vector>
-#include <string>
 #include <list>
-#if defined(__HAIKU__)
+#include <string>
+#include <vector>
+#ifdef __HAIKU__
 #include <pthread.h>
 #endif
 
