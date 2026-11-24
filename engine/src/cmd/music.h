@@ -35,7 +35,7 @@
 #include <pthread.h>
 #endif
 
-namespace muzak {
+namespace vega_music {
 #ifndef _WIN32
 extern void *readerThread(void *input);
 #else
@@ -150,9 +150,9 @@ private:
     int SelectTracks(int layer = -1);
 
 #ifndef _WIN32
-    friend void *muzak::readerThread(void *input);
+    friend void *vega_music::readerThread(void *input);
 #else
-    friend DWORD WINAPI muzak::readerThread( PVOID input );
+    friend DWORD WINAPI vega_music::readerThread( PVOID input );
 #endif
 
 #ifdef _WIN32

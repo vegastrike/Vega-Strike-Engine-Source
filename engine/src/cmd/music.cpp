@@ -270,7 +270,7 @@ int Music::SelectTracks(int layer) {
     return 0;
 }
 
-namespace muzak {
+namespace vega_music {
 std::map<std::string, AUDSoundProperties> cachedSongs;
 
 #ifndef _WIN32
@@ -356,8 +356,8 @@ void Music::_LoadLastSongAsync() {
     }
     std::string song = music_load_list.back();
 
-    std::map<std::string, AUDSoundProperties>::iterator where = muzak::cachedSongs.find(song);
-    if (where != muzak::cachedSongs.end()) {
+    std::map<std::string, AUDSoundProperties>::iterator where = vega_music::cachedSongs.find(song);
+    if (where != vega_music::cachedSongs.end()) {
         if (where->second.wave != nullptr) {
             int source = AUDBufferSound(&where->second, true);
             AUDStreamingSound(source);
@@ -500,14 +500,14 @@ void Music::_GotoSong(std::string mus) {
         music_load_list = rsplit(mus, "|");         //reverse order.
         if (!thread_initialized) {
 #ifdef _WIN32
-            a_thread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE) muzak::readerThread, (PVOID) this, 0, NULL );
+            a_thread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE) vega_music::readerThread, (PVOID) this, 0, NULL );
             if (a_thread){
                 thread_initialized = true;
             } else {
                 VS_LOG(error, (boost::format("Error creating music load thread: %1$d\n") % GetLastError()));
             }
 #else
-            int thread_create_ret = pthread_create(&a_thread, nullptr, muzak::readerThread, this);
+            int thread_create_ret = pthread_create(&a_thread, nullptr, vega_music::readerThread, this);
             if (thread_create_ret == 0) {
                 thread_initialized = true;
             } else {
