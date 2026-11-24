@@ -466,6 +466,8 @@ public:
  */
 
 public:
+    using JumpCapable::TransferUnitToSystem;
+
     bool TransferUnitToSystem(unsigned int which_jump_queue,
             StarSystem *&previously_active_star_system,
             bool do_sight_and_sound) override;
