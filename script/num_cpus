@@ -1,0 +1,23 @@
+##
+# num_cpus - A cross-platform shell script to determine the number of logical processors currently online and available
+#
+# Written in 2026 by Stephen G. Tuggy <sgt@stephengtuggy.com>
+#
+# Based in part on the following:
+# https://stackoverflow.com/a/23378780
+# https://stackoverflow.com/a/23569003
+# https://stackoverflow.com/a/73686274
+# https://stackoverflow.com/a/68273982
+# https://stackoverflow.com/a/47594483
+# https://stackoverflow.com/a/64853379
+#
+# All retrieved 2026-03-12. All licensed under CC BY-SA 3.0
+#
+# To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this
+# software to the public domain worldwide. This software is distributed without any warranty.
+#
+# You should have received a copy of the CC0 Public Domain Dedication along with this software. If not, see
+# <http://creativecommons.org/publicdomain/zero/1.0/>.
+#
+
+grep -c 'cpu[0-9]' /proc/stat 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null || getconf NPROCESSORS_ONLN 2>/dev/null || $env:NUMBER_OF_PROCESSORS || echo 1

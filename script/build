@@ -36,7 +36,7 @@
 set -e
 
 echo "--------------------------"
-echo "--- build | 2026-07-12 ---"
+echo "--- build | 2026-11-21 ---"
 echo "--------------------------"
 
 #----------------------------------
@@ -79,12 +79,26 @@ mkdir -pv "${BUILD_DIR}"
 
 cmake --preset "$preset_name"
 
-MAX_THREADS_TO_BUILD_WITH=8
-num_threads_to_build_with=$(getconf _NPROCESSORS_ONLN)
+MAX_THREADS_TO_BUILD_WITH=6
+if [ -f ./script/num_cpus ] && [ -x ./script/num_cpus ]
+then
+  num_threads_to_build_with=$(./script/num_cpus)
+elif [ -f ./num_cpus ] && [ -x ./num_cpus ]
+then
+  num_threads_to_build_with=$(./num_cpus)
+else
+  echo "Error locating num_cpus script"
+  exit 3
+fi
+
+echo "Number of logical processors currently online and available: ${num_threads_to_build_with}"
+num_threads_to_build_with=$((num_threads_to_build_with * 3 / 4))
+echo "Number of threads to build with after adjusting by 3/4, and before capping: ${num_threads_to_build_with}"
 if [ ${num_threads_to_build_with} -gt ${MAX_THREADS_TO_BUILD_WITH} ]
 then
-    num_threads_to_build_with=${MAX_THREADS_TO_BUILD_WITH}
+  num_threads_to_build_with=${MAX_THREADS_TO_BUILD_WITH}
 fi
+echo "Number of threads to build with after capping: ${num_threads_to_build_with}"
 
 cmake --build --preset="build-${preset_name}" -j ${num_threads_to_build_with}
 
@@ -92,21 +106,21 @@ cd "${ROOT_DIR}"
 
 mkdir -pv "${BIN_DIR}"
 
-declare -a files_to_copy_if_they_exist=("${BUILD_DIR}/vegastrike-engine" "${BUILD_DIR}/setup/vegasettings" "${BUILD_DIR}/objconv/vega-meshtool")
-declare -a directories_to_copy_if_they_exist=("${BUILD_DIR}/vegastrike-engine.app" "${BUILD_DIR}/setup/vegasettings.app")
+declare -a files_to_copy_if_they_exist=("${BUILD_DIR}/vegastrike-engine" "${BUILD_DIR}/objconv/vega-meshtool")
+declare -a directories_to_copy_if_they_exist=("${BUILD_DIR}/vegastrike-engine.app")
 
 for i in "${files_to_copy_if_they_exist[@]}"
 do
-    if [ -f "$i" ]
-    then
-        cp -v "$i" "${BIN_DIR}"/
-    fi
+  if [ -f "$i" ]
+  then
+    cp -v "$i" "${BIN_DIR}"/
+  fi
 done
 
 for i in "${directories_to_copy_if_they_exist[@]}"
 do
-    if [ -d "$i" ]
-    then
-        cp -rv "$i" "${BIN_DIR}"/
-    fi
+  if [ -d "$i" ]
+  then
+    cp -rv "$i" "${BIN_DIR}"/
+  fi
 done
