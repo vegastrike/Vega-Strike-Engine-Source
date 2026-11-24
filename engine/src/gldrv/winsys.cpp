@@ -888,9 +888,8 @@ extern int shiftup(int);
 
 void winsys_process_events() {
     SDL_Event event;
-    float     x;
-    float     y;
-    bool      state;
+    float     x{};
+    float     y{};
 
     static unsigned int keysym_to_unicode[256];
     static bool keysym_to_unicode_init = false;
@@ -919,10 +918,8 @@ void winsys_process_events() {
             }
 
             // now the VS processing of events
-            state = false;
             switch (event.type) {
                 case SDL_EVENT_KEY_UP:
-                    state = true;
                     //does same thing as KEYDOWN, but with different state.
                 case SDL_EVENT_KEY_DOWN:
                     // Global (always-active) actions fire in any context (e.g. ConfigKey/Alt+C).
