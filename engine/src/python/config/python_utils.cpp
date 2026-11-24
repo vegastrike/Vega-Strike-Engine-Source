@@ -247,29 +247,42 @@ std::string GetPythonPath() {
 }
 
 void InitPython(bool &was_already_initialized) {
+    was_already_initialized = Py_IsInitialized() != 0;
+    if (was_already_initialized) {
+        return;
+    }
+
     PyPreConfig py_pre_config;
     PyPreConfig_InitPythonConfig(&py_pre_config);
     py_pre_config.coerce_c_locale = 1;
-    was_already_initialized = Py_IsInitialized() != 0;
 
-    if (!was_already_initialized) {
-        PyStatus status = Py_PreInitialize(&py_pre_config);
-        if (PyStatus_Exception(status) != 0) {
-            PyErr_Print();
-            Py_ExitStatusException(status);
-        }
+    PyStatus status = Py_PreInitialize(&py_pre_config);
+    if (PyStatus_Exception(status) != 0) {
+        PyErr_Print();
+        Py_ExitStatusException(status);
+    }
 
-        PyConfig config;
-        PyConfig_InitPythonConfig(&config);
-        config.isolated = 0;
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+    config.isolated = 0;
     config.site_import = 1;
 
-        status = Py_InitializeFromConfig(&config);
-        PyConfig_Clear(&config); // Free configuration memory
-        if (PyStatus_Exception(status) != 0) {
-            PyErr_Print();
-            Py_ExitStatusException(status);
-        }
+#ifdef _WIN32
+    std::wstring resolved_home = FindPythonPath();
+
+    // Assign the determined fallback explicitly to the PyConfig structure
+    status = PyConfig_SetString(&config, &config.home, resolved_home.c_str());
+    if (PyStatus_Exception(status) != 0) {
+        PyConfig_Clear(&config);
+        Py_ExitStatusException(status);
+    }
+#endif
+
+    status = Py_InitializeFromConfig(&config);
+    PyConfig_Clear(&config); // Free configuration memory
+    if (PyStatus_Exception(status) != 0) {
+        PyErr_Print();
+        Py_ExitStatusException(status);
     }
 }
 
