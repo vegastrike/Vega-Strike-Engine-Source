@@ -142,8 +142,8 @@ ADD_COMPILE_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/engi
                     "$<$<CXX_COMPILER_ID:MSVC>:/wd4244>"
                     "$<$<CXX_COMPILER_ID:MSVC>:/wd4267>"
                     "$<$<CXX_COMPILER_ID:MSVC>:/wd4305>"
-                    "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Z7>"
 )
+SET(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
 # for DEBUG remove all optimizations
 ADD_LINK_OPTIONS(
         "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/DEBUG>"
