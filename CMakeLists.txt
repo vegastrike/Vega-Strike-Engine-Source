@@ -146,8 +146,7 @@ ADD_COMPILE_OPTIONS("$<$<CXX_COMPILER_ID:MSVC>:/FI${Vega_Strike_BINARY_DIR}/engi
 SET(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:Embedded>")
 # for DEBUG remove all optimizations
 ADD_LINK_OPTIONS(
-        "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/DEBUG>"
-        "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:RelWithDebInfo>>:/DEBUG>"
+        "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug,RelWithDebInfo>>:/DEBUG>"
 )
 IF (WIN32)
     ADD_LINK_OPTIONS(
