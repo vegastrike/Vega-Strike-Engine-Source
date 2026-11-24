@@ -109,6 +109,8 @@ public:
 //Load the controls for this dialog.
     virtual void initControls(void) = 0;
 
+    using ModalDialog::init;
+
 //Set up the window and get everything ready.
     virtual void init(const std::string &title);
 

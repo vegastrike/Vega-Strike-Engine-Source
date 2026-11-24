@@ -1774,10 +1774,10 @@ bool Unit::Explode(bool drawit, float timeit) {
                             //No victory for missiles or spawned explosions
                             if (rel > configuration().audio.victory_relationship_flt) {
                                 lasttime = newtime;
-                                muzak->SkipRandSong(Music::LOSSLIST);
+                                Muzak::SkipRandSong(Music::LOSSLIST);
                             } else if (rel < configuration().audio.loss_relationship_flt) {
                                 lasttime = newtime;
-                                muzak->SkipRandSong(Music::VICTORYLIST);
+                                Muzak::SkipRandSong(Music::VICTORYLIST);
                             }
                         }
                     }

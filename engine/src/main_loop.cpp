@@ -267,18 +267,6 @@ void TextMessageKey(const KBData &, KBSTATE newState) {
 void QuitNow() {
     if (!cleanexit) {
         cleanexit = true;
-        if (configuration().general.write_savegame_on_exit) {
-            _Universe->WriteSaveGame(true);              //gotta do important stuff first
-        }
-        for (size_t i = 0; i < active_missions.size(); ++i) {
-            if (active_missions[i]) {
-                active_missions[i]->DirectorEnd();
-            }
-        }
-        if (forcefeedback != nullptr) {
-            delete forcefeedback;
-            forcefeedback = nullptr;
-        }
         VSExit(0);
     }
 }
@@ -286,7 +274,7 @@ void QuitNow() {
 void SkipMusicTrack(const KBData &, KBSTATE newState) {
     if (newState == PRESS) {
         VS_LOG(info, "skipping");
-        muzak->Skip();
+        Muzak::Skip();
     }
 }
 
@@ -973,7 +961,7 @@ void createObjects(std::vector<std::string> &fighter0name,
 
     delete[] tmptarget;
     for (int m_i = 0; m_i < muzak_count; m_i++) {
-        muzak[m_i].SetParent(fighters[0]);
+        muzak_collection[m_i].SetParent(fighters[0]);
     }
     FactionUtil::LoadFactionPlaylists();
     AUDListenerSize(fighters[0]->rSize() * 4);

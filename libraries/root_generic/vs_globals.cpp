@@ -52,31 +52,29 @@ Mission * mission             = nullptr;
 
 double benchmark = -1.0;
 
-std::locale & GetGlobalLocale() {
-    const auto kLocaleNames = {"C.UTF-8", "C.UTF8", "C.utf8", "C", "POSIX", "en_US.UTF-8", "en_US.UTF8", "en_US.utf8"};
-    static std::locale * our_locale = nullptr;
-    if (our_locale == nullptr) {
-        for (const auto & kLocaleName : kLocaleNames) {
-            try {
-                our_locale = new std::locale(kLocaleName);
-                // If we get to this line, that means success! Found a locale we can use
-                break;
-            } catch (const std::bad_alloc &) {
-                std::cerr << "Locale memory allocation failed. Exiting..." << std::endl;
-                exit(-1);
-            } catch (const std::runtime_error &) {
-                // This locale didn't work. Try the next one
-                continue;
-            }
-        }
-        if (our_locale == nullptr) {
-            std::cerr << "Unable to find a compatible locale. Exiting..." << std::endl;
+constexpr auto kLocaleNames = {"C.UTF-8", "C.UTF8", "C.utf8", "C", "POSIX", "en_US.UTF-8", "en_US.UTF8", "en_US.utf8"};
+
+static std::locale InitGlobalLocale() {
+    for (const auto & kLocaleName : kLocaleNames) {
+        try {
+            std::locale return_value(kLocaleName);
+            std::cout << "Found a compatible locale: " << return_value.name() << std::endl;
+            return return_value;
+        } catch (const std::bad_alloc &) {
+            std::cerr << "Locale memory allocation failed. Exiting..." << std::endl;
             exit(-1);
-        } else {
-            std::cout << "Found a compatible locale: " << our_locale->name() << std::endl;
+        } catch (const std::runtime_error &) {
+            // This locale didn't work. Try the next one
+            continue;
         }
     }
-    return *our_locale;
+    std::cerr << "Unable to find a compatible locale. Exiting..." << std::endl;
+    exit(-1);
+}
+
+std::locale & GetGlobalLocale() {
+    static std::locale our_locale = InitGlobalLocale();
+    return our_locale;
 }
 
 bool STATIC_VARS_DESTROYED = false;

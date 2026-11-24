@@ -45,7 +45,7 @@ extern Universe *_Universe;
 #define RESTRICT __restrict__
 #endif
 
-extern void cleanup();
+extern void cleanup(bool should_be_clean_exit = true);
 extern bool STATIC_VARS_DESTROYED;
 extern int loop_count;
 extern double avg_loop;
@@ -89,7 +89,7 @@ typedef struct {
 
 extern game_data_t g_game;
 class Music;
-extern Music *muzak;
+extern std::vector<Music> muzak_collection;
 extern int muzak_count;
 class VegaConfig;
 extern VegaConfig *vs_config;
