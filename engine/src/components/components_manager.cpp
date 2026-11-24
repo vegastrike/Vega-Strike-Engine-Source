@@ -36,10 +36,20 @@
 #include "vs_logging.h"
 #include "resource/manifest.h"
 #include "src/vega_cast_utils.h"
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
 #include <iostream>
 
 Resource<double> ComponentsManager::credits = Resource<double>(0.0, 0.0);
+
+static const std::string empty_string;
+
+// Returns a static empty string by default. A bare ComponentsManager will never
+// match the ".milspec" suffix check in UpgradeAlreadyInstalled. Unit overrides
+// this method to return the actual unit key, enabling Milspec ship detection.
+const std::string& ComponentsManager::GetUnitKey() const {
+    return empty_string;
+}
 
 void ComponentsManager::Load(std::string unit_key) {
     mass = base_mass = UnitCSVFactory::GetVariable(unit_key, "Mass", 0.0);
@@ -218,16 +228,74 @@ bool ComponentsManager::AllowedUpgrade(const Cargo& upgrade) const {
     return true;
 }
 
+// UpgradeAlreadyInstalled answers "is this component fitted on the ship?"
+// It uses a threshold-based approach for armor/shield to distinguish between
+// ship-default components with meaningful values and negligible built-in ones.
+// A component is considered installed if:
+// 1. It was purchased (upgrade_key is non-empty), OR
+// 2. It is a ship-default armor/shield with TotalMaxLayerValue > 10.0.
+// Ship-default components are loaded via Component::Load() which sets
+// upgrade_key to "", but they have real facet values from the ship definition.
+// Ship-default armor/shield typically has minimal values (like 1.0 or 2.0 per facet),
+// while purchased upgrades have values of 100.0 or higher. A total below 10.0
+// is treated as negligible (downgraded or empty component).
 bool ComponentsManager::UpgradeAlreadyInstalled(const Cargo& upgrade) const {
     const ComponentType component_type = GetComponentTypeFromName(upgrade.GetName());
     const Component *component = GetComponentByType(component_type);
     if(component) {
-        return component->Installed();
+        // If the component is not installed, it is not already installed.
+        if(!component->Installed()) {
+            return false;
+        }
+
+        // For Milspec ships (unit key ends with ".milspec"), the Milspec package
+        // is pre-installed, not purchased as an upgrade, so upgrade_key won't be set.
+        // For these ships, we only check the installed flag.
+        const bool is_milspec_ship = boost::algorithm::ends_with(GetUnitKey(), ".milspec");
+        if(is_milspec_ship) {
+            return true;
+        }
+
+        // Purchased components always have a non-empty upgrade_key.
+        if(!component->GetUpgradeKey().empty()) {
+            return true;
+        }
+
+        // Check for ship-default armor or shield with meaningful data.
+        // The threshold of 10.0 distinguishes between negligible built-in values and
+        // components that are meaningfully fitted.
+        static const double meaningful_threshold = 10.0;
+        if(component_type == ComponentType::Armor) {
+            const Armor *armor_comp = vega_dynamic_const_cast_ptr<const Armor>(component);
+            if(armor_comp && armor_comp->TotalMaxLayerValue() > meaningful_threshold) {
+                return true;
+            }
+        } else if(component_type == ComponentType::Shield) {
+            const Shield *shield_comp = vega_dynamic_const_cast_ptr<const Shield>(component);
+            if(shield_comp && shield_comp->TotalMaxLayerValue() > meaningful_threshold) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // Note that this method returns true for error, so we err on the side of caution
     // and not install an upgrade.
     return true;
+}
+
+// UpgradeAlreadyBought answers "was this component purchased at a base?"
+// It uses the upgrade_key approach: a component was bought if it is installed
+// and has a non-empty upgrade_key (set by Component::Upgrade()).
+// Ship-default components have upgrade_key = "", so they return false.
+bool ComponentsManager::UpgradeAlreadyBought(const Cargo& upgrade) const {
+    const ComponentType component_type = GetComponentTypeFromName(upgrade.GetName());
+    const Component *component = GetComponentByType(component_type);
+    if(component) {
+        return component->Installed() && !component->GetUpgradeKey().empty();
+    }
+    return false;
 }
 
 /** A convenience struct to hold the data used below */
