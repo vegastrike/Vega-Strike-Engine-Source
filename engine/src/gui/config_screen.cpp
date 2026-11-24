@@ -2177,6 +2177,7 @@ void DrawConfigScreen() {
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.80f, 0.25f, 0.25f, 1.0f));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.90f, 0.35f, 0.35f, 1.0f));
     if (ImGui::Button("Exit VegaStrike", ImVec2(btnw, 0))) {
+        cleanexit = true;
         VSExit(0);
     }
     ImGui::PopStyleColor(2);

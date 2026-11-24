@@ -159,16 +159,22 @@ static void DoGameCleanup(const bool should_be_clean_exit) {
         VS_LOG(info, "Thank you for playing!");
     }
     VegaStrikeLogging::VegaStrikeLogger::instance().FlushLogsProgramExiting();
-    STATIC_VARS_DESTROYED = true;
     if (should_be_clean_exit && _Universe != nullptr) {
         _Universe->WriteSaveGame(true);
     }
+    for (size_t i = 0; i < active_missions.size(); ++i) {
+        if (active_missions[i] != nullptr) {
+            active_missions[i]->DirectorEnd();
+        }
+    }
+    STATIC_VARS_DESTROYED = true;
+
 #ifdef _WIN32
 #if defined (_MSC_VER) && defined (_DEBUG)
     if (should_be_clean_exit && !cleanexit) {
         _RPT0( _CRT_ERROR, "WARNING: Vega Strike exit not clean\n" );
     }
-    return;
+    // return;
 #endif
 #else
     if (should_be_clean_exit) {
@@ -178,9 +184,13 @@ static void DoGameCleanup(const bool should_be_clean_exit) {
     }
 #endif
 
-#if defined (CG_SUPPORT)
-    if (cloak_cg->vertexProgram) cgDestroyProgram( cloak_cg->vertexProgram );
-    if (cloak_cg->shaderContext) cgDestroyContext( cloak_cg->shaderContext );
+#ifdef CG_SUPPORT
+    if (cloak_cg->vertexProgram) {
+        cgDestroyProgram(cloak_cg->vertexProgram);
+    }
+    if (cloak_cg->shaderContext) {
+        cgDestroyContext(cloak_cg->shaderContext);
+    }
 #endif
 
     Music::CleanupMuzak();
