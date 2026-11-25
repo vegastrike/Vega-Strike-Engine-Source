@@ -45,6 +45,7 @@ struct DamageableObject {
     DamageableObject(std::vector<DamageableLayer*> layers);
 
     void AddLayer(DamageableLayer* layer);
+    DamageableLayer* GetLayer(DamageLayer layer) const;
     InflictedDamage DealDamage(const CoreVector &attack_vector, Damage &damage);
 
     virtual void Destroy();

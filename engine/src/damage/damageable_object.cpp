@@ -48,8 +48,18 @@ void DamageableObject::AddLayer(DamageableLayer* layer) {
     assert(number_of_layers<=3);
 }
 
+DamageableLayer* DamageableObject::GetLayer(DamageLayer layer) const {
+    for (DamageableLayer* candidate : layers) {
+        if (candidate && candidate->Layer() == layer) {
+            return candidate;
+        }
+    }
+
+    return nullptr;
+}
+
 InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Damage &damage) {
-    InflictedDamage inflicted_damage(3); // Currently hard-coded default is 3!
+    InflictedDamage inflicted_damage;
 
     if(invulnerable) {
         return inflicted_damage;
@@ -79,19 +89,23 @@ InflictedDamage DamageableObject::DealDamage(const CoreVector &attack_vector, Da
 }
 
 void DamageableObject::Destroy() {
-    layers[0]->facets[0] = 0;
+    DamageableLayer* hull = GetLayer(DamageLayer::hull);
+    if (hull) {
+        hull->Destroy();
+    }
 }
 
 // We make a lot of assumptions here:
-// 1. The last layer is THE layer
-// 2. There's only one facet in the last layer
+// 1. The hull layer is THE layer
+// 2. There's only one facet in the hull layer
 // 3. Destroying it destroys the unit
 bool DamageableObject::Destroyed() {
-    if (layers.empty()) {
+    DamageableLayer* hull = GetLayer(DamageLayer::hull);
+    if (!hull) {
         return true;
     }
 
-    return layers[0]->facets[0] == 0;
+    return hull->facets[0] == 0;
 }
 
 void DamageableObject::SetInvulnerable(bool invulnerable) {

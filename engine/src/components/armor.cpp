@@ -38,7 +38,7 @@ static const Damage normal_and_phase_damage = Damage(1.0,1.0);
 
 Armor::Armor() :
     Component(),
-    DamageableLayer(1, FacetConfiguration::four, 1.0, normal_and_phase_damage, false) {
+    DamageableLayer(DamageLayer::armor, FacetConfiguration::four, 1.0, normal_and_phase_damage, false) {
     type = ComponentType::Armor;
 }
 

@@ -27,7 +27,7 @@
 #ifndef VEGA_STRIKE_ENGINE_DAMAGE_DAMAGE_H
 #define VEGA_STRIKE_ENGINE_DAMAGE_DAMAGE_H
 
-#include <vector>
+#include <map>
 
 /**
  * @brief The Damage struct provides a cleaner way for a weapon to deliver multiple effects. e.g. both damage and a torque, or damage to specific sub-systems.
@@ -56,29 +56,35 @@ struct Damage {
     //blast_effect(blast_effect),
 };
 
+/**
+ * @brief The DamageLayer enum names each layer of a DamageableObject,
+ * for DamageableObject::GetLayer and InflictedDamage::inflicted_damage_by_layer.
+ */
+enum class DamageLayer {
+    hull,
+    armor,
+    shield,
+};
+
 struct InflictedDamage {
     double total_damage;         // Total inflicted damage
     double normal_damage;        // Go through shield, armor and finally hull and subsystems
     double phase_damage;         // Bypass shields
     double propulsion_damage;    // Disables the ship's drive
 
-    // This array stores the damage inflicted to each layer
-    // By default, it is  hard-coded to three layers:
-    // shield, armor and hull. But this makes this implementation inflexible.
-    std::vector<double> inflicted_damage_by_layer;
+    // This map stores the damage inflicted to each layer
+    std::map<DamageLayer, double> inflicted_damage_by_layer;
 
-    InflictedDamage(int number_of_layers = 3) {
+    InflictedDamage() {
         total_damage = 0.0;
         normal_damage = 0.0;
         phase_damage = 0.0;
         propulsion_damage = 0.0;
 
-        for (int i = 0; i < number_of_layers; i++) {
-            inflicted_damage_by_layer.push_back(0.0f);
-        }
+        inflicted_damage_by_layer[DamageLayer::hull] = 0.0;
+        inflicted_damage_by_layer[DamageLayer::armor] = 0.0;
+        inflicted_damage_by_layer[DamageLayer::shield] = 0.0;
     }
-
-    InflictedDamage() = delete;
 };
 
 #endif //VEGA_STRIKE_ENGINE_DAMAGE_DAMAGE_H

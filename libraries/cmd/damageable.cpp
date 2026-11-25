@@ -55,7 +55,7 @@ float Damageable::DealDamageToHull(const Vector &pnt, float damage) {
 
     Damage dmg(0, damage); // Bypass shield with phase damage
     CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
-    InflictedDamage inflicted_damage(3);
+    InflictedDamage inflicted_damage;
     unit->armor.DealDamage(attack_vector, dmg, inflicted_damage);
     unit->hull.DealDamage(attack_vector, dmg, inflicted_damage);
     int facet_index = unit->armor.GetFacetIndex(attack_vector);
@@ -75,7 +75,7 @@ float Damageable::DealDamageToShield(const Vector &pnt, float &damage) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
     Damage dmg(damage);
     CoreVector attack_vector(pnt.i, pnt.j, pnt.k);
-    InflictedDamage inflicted_damage(3);
+    InflictedDamage inflicted_damage;
     unit->shield.DealDamage(attack_vector, dmg, inflicted_damage);
     int facet_index = unit->shield.GetFacetIndex(attack_vector);
 
@@ -99,7 +99,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
         void *ownerDoNotDereference) {
     Unit *unit = vega_dynamic_cast_ptr<Unit>(this);
 
-    InflictedDamage inflicted_damage(3);
+    InflictedDamage inflicted_damage;
 
     //We also do the following lock on client side in order not to display shield hits
     const bool no_dock_damage = configuration().physics.no_damage_to_docked_ships;
@@ -140,7 +140,7 @@ void Damageable::ApplyDamage(const Vector &pnt,
         }
 
         // Anger Management
-        float inflicted_armor_damage = inflicted_damage.inflicted_damage_by_layer[1];
+        float inflicted_armor_damage = inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::armor);
         int anger = inflicted_armor_damage ? configuration().ai.hull_damage_anger : configuration().ai.shield_damage_anger;
 
         // If we damage the armor, we do this 10 times by default
@@ -239,14 +239,14 @@ void Damageable::ApplyDamage(const Vector &pnt,
     }
 
     // Light shields if hit
-    if (inflicted_damage.inflicted_damage_by_layer[2] > 0) {
+    if (inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::shield) > 0) {
         unit->LightShields(pnt, normal, unit->shield.Percent(), color);
     }
 
     // Apply damage to meshes
     // TODO: move to drawable as a function
-    if (inflicted_damage.inflicted_damage_by_layer[0] > 0 ||
-            inflicted_damage.inflicted_damage_by_layer[1] > 0) {
+    if (inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::hull) > 0 ||
+            inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::armor) > 0) {
 
         for (unsigned int i = 0; i < unit->nummesh(); ++i) {
             // TODO: figure out how to adjust looks for armor damage
@@ -261,12 +261,12 @@ void Damageable::ApplyDamage(const Vector &pnt,
 
     // The second condition should always be met, but if not, at least we won't crash
     if (shot_at_is_player && shot_at_cockpit) {
-        if (inflicted_damage.inflicted_damage_by_layer[0] > 0) {
+        if (inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::hull) > 0) {
             // Hull is hit - shake hardest
             shot_at_cockpit->Shake(inflicted_damage.total_damage, 2);
 
             unit->playHullDamageSound(pnt);
-        } else if (inflicted_damage.inflicted_damage_by_layer[1] > 0) {
+        } else if (inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::armor) > 0) {
             // Armor is hit - shake harder
             shot_at_cockpit->Shake(inflicted_damage.total_damage, 1);
 
@@ -352,8 +352,8 @@ void Damageable::DamageRandomSystem(InflictedDamage inflicted_damage, bool playe
         return;
     }
 
-    bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
-    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+    bool hull_damage = inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::hull) > 0;
+    bool armor_damage = inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::armor) > 0;
 
     // It's actually easier to read this condition than the equivalent form
     if (!(hull_damage || (configuration().physics.system_damage_on_armor && armor_damage))) {
@@ -401,8 +401,8 @@ void Damageable::DamageCargo(InflictedDamage inflicted_damage) {
           pImage->LifeSupportFunctionalityMax = 0;
       }*/
 
-    bool hull_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
-    bool armor_damage = inflicted_damage.inflicted_damage_by_layer[0] > 0;
+    bool hull_damage = inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::hull) > 0;
+    bool armor_damage = inflicted_damage.inflicted_damage_by_layer.at(DamageLayer::armor) > 0;
 
     // TODO: Same condition as DamageRandomSystem - move up and merge
     if (!(hull_damage || (configuration().physics.system_damage_on_armor && armor_damage))) {

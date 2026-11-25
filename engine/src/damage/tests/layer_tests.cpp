@@ -33,7 +33,7 @@
 
 // Demonstrate some basic assertions.
 TEST(Layer, Sanity) {
-    DamageableLayer layer = DamageableLayer(0, FacetConfiguration::four, 10, Damage(1.0,1.0), true);
+    DamageableLayer layer = DamageableLayer(DamageLayer::hull, FacetConfiguration::four, 10, Damage(1.0,1.0), true);
 
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(0, 0, 0)), 0);
 
@@ -53,4 +53,15 @@ TEST(Layer, Sanity) {
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(-1, 0, -2)), 3);
     EXPECT_EQ(layer.GetFacetIndex(CoreVector(-2, 0, -1)), 1);
 
+}
+
+TEST(Layer, Destroy) {
+    DamageableLayer layer = DamageableLayer(DamageLayer::armor, FacetConfiguration::four, 10, Damage(1.0,1.0), false);
+
+    layer.Destroy();
+
+    for (int i = 0; i < 4; i++) {
+        EXPECT_EQ(layer.Percent(i), 0);
+    }
+    EXPECT_EQ(layer.TotalLayerValue(), 0);
 }
