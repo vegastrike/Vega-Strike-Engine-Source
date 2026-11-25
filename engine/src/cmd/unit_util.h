@@ -59,6 +59,7 @@ int removeCargo(Unit *my_unit, string s, int quantity, bool erasezero);
 bool repair(Unit *my_unit);
 int removeWeapon(Unit *my_unit, string weapon, int mountoffset, bool loop_through_mounts); // -1 tells no weapon removed
 float upgrade(Unit *my_unit, string file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
+bool downgrade(Unit *my_unit, string upgrade_name); // removes an upgrade's effect, eg when it is sold
 int addCargo(Unit *my_unit, Cargo carg);
 int forceAddCargo(Unit *my_unit, Cargo carg);
 float getDistance(const Unit *my_unit, const Unit *un);
