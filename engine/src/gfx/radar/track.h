@@ -74,6 +74,9 @@ public:
     // Get the absolute size of the track
     float GetSize() const;
     Type::Value GetType() const;
+    // The unit this track was built from, for callers that need its geometry. nullptr when the
+    // track was registered by position alone.
+    const Unit *GetUnit() const;
 
     // Track is exploding
     bool IsExploding() const;
