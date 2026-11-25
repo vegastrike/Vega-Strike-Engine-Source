@@ -226,6 +226,11 @@ void EnergyContainer::Repair() {
     operational = 1.0;
 }
 
+void EnergyContainer::Replace() {
+    level.ReplaceFully();
+    operational = 1.0;
+}
+
 bool EnergyContainer::Damaged() const {
     return level.Damaged();
 }
