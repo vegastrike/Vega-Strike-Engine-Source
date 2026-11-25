@@ -81,7 +81,7 @@ class PointStarVlist : public StarVlist {
     GFXVertexList *vlist;
     GFXVertexList *nonstretchvlist;
 public:
-    PointStarVlist(int num, float spread, const std::string &our_system_name);
+    PointStarVlist(int num, float spread, const std::string &our_system_name, float brightness_exponent = 1);
     ~PointStarVlist();
     bool BeginDrawState(const QVector &center,
             const Vector &vel,
@@ -99,7 +99,10 @@ class SpriteStarVlist : public StarVlist {
     GFXVertexList *vlist[NUM_ACTIVE_ANIMATIONS];
     class Texture *decal[NUM_ACTIVE_ANIMATIONS];
 public:
-    SpriteStarVlist(int num, float spread, std::string our_system_name, std::string texturename, float size);
+    // face_center: each star is one quad facing the centre, sized by its brightness
+    // (for the background starfield, which is only seen from the centre).
+    SpriteStarVlist(int num, float spread, std::string our_system_name, std::string texturename, float size,
+            float brightness_exponent = 1, bool face_center = false);
     ~SpriteStarVlist();
     int NumTextures();
     bool BeginDrawState(const QVector &center,
