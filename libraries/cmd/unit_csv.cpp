@@ -709,7 +709,7 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
 
     // Hull
     hull.Load(unit_key);
-    armor.Load(unit_key);
+    armor.Load(unit_key, mass, hull.AverageMaxLayerValue());
     shield.Load(unit_key);
 
 
@@ -874,16 +874,17 @@ void Unit::LoadRow(std::string unit_identifier, string modification, bool saved_
     this->num_chunks = UnitCSVFactory::GetVariable(unit_key, "Num_Chunks", 0);
 
     // Add integral components
-    // Make this a factor of unit price
-    if(!saved_game) {
-        const std::string integral_components =
-        "{hull;upgrades/integral;12000;1;0.1;0.1;1;1;@cargo/hull_patches.image@The ship's hull.;0;1}\
-        {afterburner;upgrades/integral;2000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency.;0;1}\
-        {drive;upgrades/integral;6000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@The ship's engine.;0;1}\
-        {ftl_drive;upgrades/integral;4500;1;0.1;0.1;1;1;@upgrades/jump_drive.image@The ship's faster than light engine.;0;1}";
+    std::string upgrades = UnitCSVFactory::GetVariable(unit_key, "Upgrades", std::string());
 
-        AddCarg(this, integral_components);
+    if(upgrades.empty()) {
+        upgrades = "{hull;upgrades/integral;12000;1;0.1;0.1;1;1;@cargo/hull_patches.image@The ship's hull.;0;1}\
+                    {afterburner;upgrades/integral;2000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@Engine overdrive. Increases thrust at the expense of decreased fuel efficiency.;0;1}\
+                    {drive;upgrades/integral;6000;1;0.1;0.1;1;1;@upgrades/afterburner_generic.image@The ship's engine.;0;1}\
+                    {ftl_drive;upgrades/integral;4500;1;0.1;0.1;1;1;@upgrades/jump_drive.image@The ship's faster than light engine.;0;1}";
     }
+        
+    AddCarg(this, upgrades);
+    
 
     GenerateHudText(getDamageColor);
 }
